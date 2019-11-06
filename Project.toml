@@ -1,0 +1,22 @@
+name = "ManifoldsBase"
+uuid = "3362f125-f0bb-47a3-aa74-596ffd7ef2fb"
+authors = ["Seth Axen <seth.axen@gmail.com>", "Ronny Bergmann <manopt@ronnybergmann.net>", "Mateusz Baran <mateuszbaran89@gmail.com>", "Antoine Levitt <antoine.levitt@gmail.com>"]
+version = "0.1.0"
+
+[deps]
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+Markdown = "d6f4376e-aef5-505a-96c1-9c027394607a"
+
+[compat]
+DoubleFloats = ">= 0.9.2"
+julia = "1.0"
+
+[extras]
+DoubleFloats = "497a8b3b-efae-58df-a0af-a86822472b78"
+ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
+OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed"
+ReverseDiff = "37e2e3b7-166d-5795-8a7a-e32c996b4267"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test", "DoubleFloats", "ForwardDiff", "OrdinaryDiffEq", "ReverseDiff"]
