@@ -232,7 +232,8 @@ is *not* required to return the closest point.
 """
 function project_point(M::Manifold, x)
     y = similar_result(M, project_point, x)
-    project_tangent!(M, y, x)
+    copyto!(y, x)
+    project_point!(M, y)
     return y
 end
 
@@ -444,7 +445,7 @@ Vector transport of vector `v` at point `x` along the curve `c` such that
 `c(0)` is equal to `x` to point `c(1)`.
 """
 function vector_transport_along(M::Manifold, x, v, c)
-    vto = similar_result(M, vector_transport_along, v, x, c)
+    vto = similar_result(M, vector_transport_along, x, v)
     vector_transport_along!(M, vto, x, v, c)
     return vto
 end
