@@ -91,6 +91,13 @@ using Test
                 @test v ≈ 3*tv1
             end
 
+            @testset "project_point test" begin
+                @test isapprox(M, pts[1], project_point(M, pts[1]))
+                pt = similar(pts[1])
+                project_point!(M, pt, pts[1])
+                @test isapprox(M, pt, pts[1])
+            end
+
             @testset "project_tangent test" begin
                 @test isapprox(M, pts[1], tv1, project_tangent(M, pts[1], tv1))
                 tv = similar(tv1)

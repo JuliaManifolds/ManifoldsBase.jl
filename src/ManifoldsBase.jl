@@ -215,13 +215,14 @@ function inverse_retract(M::Manifold, x, y)
 end
 
 """
-    project_point!(M::Manifold, x)
+    project_point!(M::Manifold, y, x)
 
-Project point from the ambient space onto the manifold `M`. The point `x`
-is modified. The function works only for selected embedded manifolds and
+Project point `x` from the ambient space onto the manifold `M`.
+The point `y` is overwritten by the projection.
+The function works only for selected embedded manifolds and
 is *not* required to return the closest point.
 """
-project_point!(M::Manifold, x) = error("project_point! not implemented for a $(typeof(M)) and point $(typeof(x)).")
+project_point!(M::Manifold, y, x) = error("project_point! not implemented for a $(typeof(M)) and points $(typeof(y)) and $(typeof(x)).")
 
 """
     project_point(M::Manifold, x)
@@ -232,8 +233,7 @@ is *not* required to return the closest point.
 """
 function project_point(M::Manifold, x)
     y = similar_result(M, project_point, x)
-    copyto!(y, x)
-    project_point!(M, y)
+    project_point!(M, y, x)
     return y
 end
 
