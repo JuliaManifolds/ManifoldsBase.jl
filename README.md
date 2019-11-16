@@ -4,4 +4,8 @@
 
 Basic interface for manifolds in Julia.
 
-The main part of the project is [`Manifolds.jl`](https://github.com/JuliaNLSolvers/Manifolds.jl).
+This interface includes an easy `DefaultManifold`, which is a reduced version
+of the `Eucliean` manifold from [`Manifolds.jl`](https://github.com/JuliaNLSolvers/Manifolds.jl) such that the interface functions can be tested.
+
+The project [`Manifolds.jl`](https://github.com/JuliaNLSolvers/Manifolds.jl)
+is based on this interface and provides a variety of manifolds.
