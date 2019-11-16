@@ -396,13 +396,13 @@ Specify to use parallel transport as vector transport method within
 struct ParallelTransport <: AbstractVectorTransportMethod end
 
 """
-    ProjectTangent <: AbstractVectorTransportMethod
+    ProjectionTransport <: AbstractVectorTransportMethod
 
 Specify to use projection onto tangent space as vector transport method within
 [`vector_transport_to`](@ref), [`vector_transport_direction`](@ref) or
 [`vector_transport_along`](@ref). See [`project_tangent`](@ref) for details.
 """
-struct ProjectTangent <: AbstractVectorTransportMethod end
+struct ProjectionTransport <: AbstractVectorTransportMethod end
 """
     vector_transport_to!(M::Manifold, vto, x, v, y, m::AbstractVectorTransportMethod=ParallelTransport())
 
@@ -412,13 +412,13 @@ to `vto`. By default, the method `m` is [`ParallelTransport`](@ref).
 vector_transport_to!(M::Manifold, vto, x, v, y) = vector_transport_to!(M,vto,x,v,y,ParallelTransport())
 
 """
-    vector_transport_to!(M::Manifold, vto, x, v, y, ProjectTangent())
+    vector_transport_to!(M::Manifold, vto, x, v, y, ProjectionTransport())
 
 Implements a default projection based vector transport, that projects a tangent
 vector `v` at `x` on a [`Manifold`](@ref) `M` onto the tangent space at `y` by
 interperting `v` as an element of the embedding and projecting back.
 """
-vector_transport_to!(M::Manifold, vto, x, v, y, m::ProjectTangent) = project_tangent!(M, vto, y, v)
+vector_transport_to!(M::Manifold, vto, x, v, y, m::ProjectionTransport) = project_tangent!(M, vto, y, v)
 
 function vector_transport_to!(M::Manifold, vto, x, v, y, m::AbstractVectorTransportMethod)
     error("vector transport from a point of type $(typeof(x)) to a type $(typeof(y)) on a $(typeof(M)) for a vector of type $(v) and the $(typeof(m)) not yet implemented.")
