@@ -1,4 +1,33 @@
+"""
+    DefaultManifold <: Manifold
+
+This default manifold illustrates the main features of the interface and provides
+a good starting point for an own manifold. It is a simplified/shortened variant
+of `Euclidean` from `Manifolds.jl`.
+
+this manifold further illustrates, how to type your manifold points
+and tangent vectors. Note that the interface does not require this, but it
+might be handy in debugging and educative situations to verify correctness of
+involved variabes.
+"""
 struct DefaultManifold{T<:Tuple} <: Manifold where {T} end
+
+struct DefaultMPoint{T} <: MPoint where {T}
+    data::Array{T}
+end
+struct DefaultTVector{T} <: TVector where {T}
+    data::Array{T}
+end
+struct DefaultCoTVector{T} <: CoTVector where {T}
+    data::Array{T}
+end
+for T in [DefaultMPoint,DefaultTVector,DefaultCoTVector]
+    Base.eltype(p::T) = eltype(p.data)
+    Base.similar(p::T, ::Type{EltypeNew}) where EltypeNew = T(similar(p.data, EltypeNew))
+    Base.similar(p::T) = T(similar(p.data))
+    Base.copy(p::T) = T(copy(p.data))
+end
+
 DefaultManifold(n::Vararg{Int,N}) where N = DefaultManifold{Tuple{n...}}()
 @generated representation_size(::DefaultManifold{T}) where {T} = Tuple(T.parameters...)
 @generated manifold_dimension(::DefaultManifold{T}) where {T} = *(T.parameters...)
