@@ -43,7 +43,10 @@ function zero_tangent_vector!(M::Euclidean, v, x)
     return v
 end
 
-project_point!(M::Euclidean, x) = x
+function project_point!(M::Euclidean, y, x)
+    copyto!(y, x)
+    return y
+end
 
 function project_tangent!(M::Euclidean, w, x, v)
     w .= v

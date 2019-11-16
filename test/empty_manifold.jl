@@ -39,7 +39,7 @@ struct NonManifold <: Manifold end
     @test_throws ErrorException inverse_retract(m, [0], [0])
     @test_throws ErrorException inverse_retract(m, [0], [0], log_invretr)
 
-    @test_throws ErrorException project_point!(m, [0])
+    @test_throws ErrorException project_point!(m, [0], [0])
     @test_throws ErrorException project_point(m, [0])
 
     @test_throws ErrorException project_tangent!(m, [0], [0], [0])
