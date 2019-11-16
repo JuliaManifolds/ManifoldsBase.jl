@@ -650,7 +650,9 @@ include("DefaultManifold.jl")
 export Manifold,
     MPoint,
     TVector,
-    CoTVector
+    CoTVector,
+    ParallelTransport,
+    ProjectionTransport
 
 export base_manifold,
     check_manifold_point,
