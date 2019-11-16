@@ -604,10 +604,12 @@ function check_tangent_vector(M::Manifold, x, v; kwargs...)
 end
 
 
-include("euclidean.jl")
+include("DefaultManifold.jl")
 
 export Manifold,
-    Euclidean
+    MPoint,
+    TVector,
+    CoTVector
 
 export base_manifold,
     check_manifold_point,

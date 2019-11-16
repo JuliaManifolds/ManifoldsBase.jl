@@ -7,8 +7,8 @@ using ReverseDiff
 using StaticArrays
 using Test
 
-@testset "Euclidean" begin
-    M = ManifoldsBase.Euclidean(3)
+@testset "Testting Default (Euclidean)" begin
+    M = ManifoldsBase.DefaultManifold(3)
     types = [Vector{Float64},
              SizedVector{3, Float64},
              MVector{3, Float64},
@@ -34,7 +34,6 @@ using Test
             pts = [convert(T, [1.0, 0.0, 0.0]),
                    convert(T, [0.0, 1.0, 0.0]),
                    convert(T, [0.0, 0.0, 1.0])]
-
             @test injectivity_radius(M, pts[1]) == Inf
             @test injectivity_radius(M, pts[1], rm) == Inf
 
@@ -74,6 +73,24 @@ using Test
 
             @test distance(M, pts[1], pts[2]) ≈ norm(M, pts[1], tv1)
 
+            @testset "Geodesic Interface Test" begin
+                @test isapprox(M, geodesic(M, pts[1], tv1)(0.), pts[1])
+                @test isapprox(M, geodesic(M, pts[1], tv1)(1.), pts[2])
+                @test isapprox(M, geodesic(M, pts[1],tv1, 1.), pts[2])
+                @test isapprox(M, geodesic(M, pts[1],tv1, 1. /2), (pts[1]+pts[2])/2)
+                @test isapprox(M, shortest_geodesic(M, pts[1], pts[2])(0.), pts[1])
+                @test isapprox(M, shortest_geodesic(M, pts[1], pts[2])(1.), pts[2])
+                @test isapprox(M, shortest_geodesic(M, pts[1], pts[2], 0.), pts[1])
+                @test isapprox(M, shortest_geodesic(M, pts[1], pts[2], 1.), pts[2])
+                @test all(
+                    isapprox.(Ref(M), geodesic(M, pts[1], tv1, [0., 1. /2, 1.]),
+                        [pts[1], (pts[1]+pts[2])/2, pts[2]] )
+                    )
+                @test all(
+                    isapprox.(Ref(M), shortest_geodesic(M, pts[1], pts[2], [0., 1. /2, 1.]),
+                        [pts[1], (pts[1]+pts[2])/2, pts[2]] )
+                    )
+            end
 
             @testset "basic linear algebra in tangent space" begin
                 @test isapprox(M, pts[1], 0*tv1, zero_tangent_vector(M, pts[1]); atol = eps(eltype(pts[1])))
