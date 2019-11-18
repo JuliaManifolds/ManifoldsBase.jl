@@ -13,22 +13,6 @@ involved variabes.
 struct DefaultManifold{T<:Tuple} <: Manifold where {T} end
 DefaultManifold(n::Vararg{Int,N}) where N = DefaultManifold{Tuple{n...}}()
 
-struct DefaultMPoint{T} <: MPoint where {T}
-    data::T
-end
-struct DefaultTVector{T} <: TVector where {T}
-    data::T
-end
-struct DefaultCoTVector{T} <: CoTVector where {T}
-    data::T
-end
-for T in [DefaultMPoint,DefaultTVector,DefaultCoTVector]
-    Base.eltype(p::T) = eltype(p.data)
-    Base.similar(p::T, ::Type{EltypeNew}) where EltypeNew = T(similar(p.data, EltypeNew))
-    Base.similar(p::T) = T(similar(p.data))
-    Base.copy(p::T) = T(copy(p.data))
-end
-
 @generated representation_size(::DefaultManifold{T}) where {T} = Tuple(T.parameters...)
 @generated manifold_dimension(::DefaultManifold{T}) where {T} = *(T.parameters...)
 @inline inner(::DefaultManifold, x, v, w) = dot(v, w)

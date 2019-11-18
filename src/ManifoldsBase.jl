@@ -644,14 +644,19 @@ function check_tangent_vector(M::Manifold, x, v; kwargs...)
     end
 end
 
-
+include("ArrayManifold.jl")
 include("DefaultManifold.jl")
 
 export Manifold,
     MPoint,
     TVector,
     CoTVector,
-    ParallelTransport,
+    ArrayManifold,
+    ArrayMPoint,
+    ArrayTVector,
+    ArrayCoTVector
+
+export ParallelTransport,
     ProjectionTransport
 
 export base_manifold,
