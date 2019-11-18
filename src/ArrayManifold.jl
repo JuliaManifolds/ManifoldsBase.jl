@@ -176,19 +176,22 @@ function zero_tangent_vector(M::ArrayManifold, x; kwargs...)
     return w
 end
 
-function vector_transport_to(M::ArrayManifold, x, v, y)
-    return vector_transport_to(M.manifold,
-                               array_value(x),
-                               array_value(v),
-                               array_value(y))
-end
-
-function vector_transport_to!(M::ArrayManifold, vto, x, v, y)
+function vector_transport_to!(M::ArrayManifold, vto, x, v, y, m::AbstractVectorTransportMethod)
     return vector_transport_to!(M.manifold,
                                 array_value(vto),
                                 array_value(x),
                                 array_value(v),
-                                array_value(y))
+                                array_value(y),
+                                m)
+end
+
+function vector_transport_along!(M::ArrayManifold, vto, x, v, c, m::AbstractVectorTransportMethod)
+    return vector_transport_along!(M.manifold,
+                                array_value(vto),
+                                array_value(x),
+                                array_value(v),
+                                c,
+                                m)
 end
 
 function is_manifold_point(M::ArrayManifold, x::MPoint; kwargs...)
