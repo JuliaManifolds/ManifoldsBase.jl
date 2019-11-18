@@ -22,6 +22,7 @@ using LinearAlgebra
             p = T(x)
             @test convert(typeof(x),p) == x
             @test convert(typeof(p),y) == T(y)
+            @test eltype(typeof(p)) == eltype(x)
             @test eltype(p) == eltype(x)
             @test typeof(similar(p)) == typeof(p)
             @test typeof(similar(p,eltype(x))) == typeof(p)
