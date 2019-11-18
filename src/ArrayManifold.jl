@@ -10,7 +10,7 @@ struct ArrayManifold{M <: Manifold} <: Manifold
     manifold::M
 end
 convert(::Type{M},m::ArrayManifold{M}) where M <: Manifold = m.manifold
-convert(::Type{ArrayManifold{M}},m::M) where M <: Manifold = ArrayManifold(M)
+convert(::Type{ArrayManifold{M}},m::M) where M <: Manifold = ArrayManifold(m)
 
 manifold_dimension(M::ArrayManifold) = manifold_dimension(M.manifold)
 
@@ -25,7 +25,7 @@ struct ArrayMPoint{V <: AbstractArray{<:Number}} <: MPoint
     value::V
 end
 convert(::Type{V},x::ArrayMPoint{V}) where V <: AbstractArray{<:Number} = x.value
-convert(::Type{ArrayMPoint{V}},x::V) where V <: AbstractArray{<:Number} = ArrayPoint{V}(x)
+convert(::Type{ArrayMPoint{V}},x::V) where V <: AbstractArray{<:Number} = ArrayMPoint{V}(x)
 eltype(::Type{ArrayMPoint{V}}) where V = eltype(V)
 similar(x::ArrayMPoint) = ArrayMPoint(similar(x.value))
 similar(x::ArrayMPoint, ::Type{T}) where T = ArrayMPoint(similar(x.value, T))
