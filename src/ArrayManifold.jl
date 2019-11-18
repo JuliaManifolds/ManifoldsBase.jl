@@ -4,7 +4,7 @@
 A manifold to encapsulate manifolds working on array representations of
 `MPoints` and `TVectors` in a transparent way, such that for these manifolds its
 not necessary to introduce explicit types for the points and tangent vectors,
-but they are encapusalted/stripped automatically when needed.
+but they are encapsulated/stripped automatically when needed.
 """
 struct ArrayManifold{M <: Manifold} <: Manifold
     manifold::M
@@ -14,6 +14,13 @@ convert(::Type{ArrayManifold{M}},m::M) where M <: Manifold = ArrayManifold(M)
 
 manifold_dimension(M::ArrayManifold) = manifold_dimension(M.manifold)
 
+"""
+    ArrayMPoint <: MPoint
+
+represent a point on an [`ArrayManfold`](@ref), i.e. on a manifold where data
+can be represented by arrays. The array is stored internally and semantically
+this distinguished the value from [`ArrayTVector`](@ref)s and [`ArrayCoTVector`](@ref)s
+"""
 struct ArrayMPoint{V <: AbstractArray{<:Number}} <: MPoint
     value::V
 end
@@ -27,6 +34,13 @@ function copyto!(x::ArrayMPoint, y::ArrayMPoint)
     return x
 end
 
+"""
+    ArrayTVector <: TVector
+    
+represent a tangent vector an [`ArrayManfold`](@ref), i.e. on a manifold where data
+can be represented by arrays. The array is stored internally and semantically
+this distinguished the value from [`ArrayMPoint`](@ref)s and [`ArrayCoTVector`](@ref)s
+"""
 struct ArrayTVector{V <: AbstractArray{<:Number}} <: TVector
     value::V
 end
@@ -45,6 +59,13 @@ end
 (-)(v::ArrayTVector) = ArrayTVector(-v.value)
 (*)(a::Number, v::ArrayTVector) = ArrayTVector(a*v.value)
 
+"""
+    ArrayCoTVector <: CoTVector
+    
+represent a cotangent vector an [`ArrayManfold`](@ref), i.e. on a manifold where data
+can be represented by arrays. The array is stored internally and semantically
+this distinguished the value from [`ArrayMPoint`](@ref)s and [`ArrayTVector`](@ref)s
+"""
 struct ArrayCoTVector{V <: AbstractArray{<:Number}} <: TVector
     value::V
 end
@@ -63,6 +84,13 @@ end
 (-)(v::ArrayCoTVector) = ArrayCoTVector(-v.value)
 (*)(a::Number, v::ArrayCoTVector) = ArrayCoTVector(a*v.value)
 
+"""
+    array_value(x)
+
+returns the internal array value of a [`ArrayMPoint`](@ref), [`ArrayTVector`](@ref)
+or [`ArrayCoTVector`](@ref) if the value `x` is encapsulated as such, otherwise
+if `x` is already an array, it just returns `x`
+"""
 array_value(x::AbstractArray) = x
 array_value(x::ArrayMPoint) = x.value
 array_value(v::ArrayTVector) = v.value

@@ -158,10 +158,6 @@ using Test
                     @test ReverseDiff.gradient(retract_f, [t])[1] ≥ 0
                 end
             end
-
-            @testset "Typed tests" begin
-                ptsP = ManifoldsBase.DefaultMPoint.(pts)
-            end
         end
     end
 end
