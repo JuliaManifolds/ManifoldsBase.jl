@@ -7,8 +7,8 @@ using ReverseDiff
 using StaticArrays
 using Test
 
-@testset "Euclidean" begin
-    M = ManifoldsBase.Euclidean(3)
+@testset "Testting Default (Euclidean)" begin
+    M = ManifoldsBase.DefaultManifold(3)
     types = [Vector{Float64},
              SizedVector{3, Float64},
              MVector{3, Float64},
@@ -31,9 +31,7 @@ using Test
 
     for T in types
         @testset "Type $T" begin
-            pts = [convert(T, [1.0, 0.0, 0.0]),
-                   convert(T, [0.0, 1.0, 0.0]),
-                   convert(T, [0.0, 0.0, 1.0])]
+            pts = convert.(Ref(T), [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
 
             @test injectivity_radius(M, pts[1]) == Inf
             @test injectivity_radius(M, pts[1], rm) == Inf
@@ -74,6 +72,24 @@ using Test
 
             @test distance(M, pts[1], pts[2]) ≈ norm(M, pts[1], tv1)
 
+            @testset "Geodesic interface test" begin
+                @test isapprox(M, geodesic(M, pts[1], tv1)(0.), pts[1])
+                @test isapprox(M, geodesic(M, pts[1], tv1)(1.), pts[2])
+                @test isapprox(M, geodesic(M, pts[1],tv1, 1.), pts[2])
+                @test isapprox(M, geodesic(M, pts[1],tv1, 1. /2), (pts[1]+pts[2])/2)
+                @test isapprox(M, shortest_geodesic(M, pts[1], pts[2])(0.), pts[1])
+                @test isapprox(M, shortest_geodesic(M, pts[1], pts[2])(1.), pts[2])
+                @test isapprox(M, shortest_geodesic(M, pts[1], pts[2], 0.), pts[1])
+                @test isapprox(M, shortest_geodesic(M, pts[1], pts[2], 1.), pts[2])
+                @test all(
+                    isapprox.(Ref(M), geodesic(M, pts[1], tv1, [0., 1. /2, 1.]),
+                        [pts[1], (pts[1]+pts[2])/2, pts[2]] )
+                    )
+                @test all(
+                    isapprox.(Ref(M), shortest_geodesic(M, pts[1], pts[2], [0., 1. /2, 1.]),
+                        [pts[1], (pts[1]+pts[2])/2, pts[2]] )
+                    )
+            end
 
             @testset "basic linear algebra in tangent space" begin
                 @test isapprox(M, pts[1], 0*tv1, zero_tangent_vector(M, pts[1]); atol = eps(eltype(pts[1])))
@@ -109,10 +125,12 @@ using Test
                 v1 = log(M, pts[1], pts[2])
                 v2 = log(M, pts[1], pts[3])
                 v1t1 = vector_transport_to(M, pts[1], v1, pts[3])
-                v1t2 = vector_transport_direction(M, pts[1], v1, v2)
+                v1t2 = zero(v1t1)
+                vector_transport_to!(M, v1t2, pts[1], v1, v2, ProjectionTransport())
+                v1t3 = vector_transport_direction(M, pts[1], v1, v2)
                 @test is_tangent_vector(M, pts[3], v1t1)
-                @test is_tangent_vector(M, pts[3], v1t2)
-                @test isapprox(M, pts[3], v1t1, v1t2)
+                @test is_tangent_vector(M, pts[3], v1t3)
+                @test isapprox(M, pts[3], v1t1, v1t3)
             end
 
             @testset "ForwardDiff support" begin
