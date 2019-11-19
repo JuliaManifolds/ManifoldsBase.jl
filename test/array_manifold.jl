@@ -19,8 +19,11 @@ using LinearAlgebra
         @test convert(typeof(A),M) == A
         @test is_decorator_manifold(A) == Val(true)
         @test base_manifold(A) == M
+        @test base_manifold(base_manifold(A)) == base_manifold(A)
         @test ManifoldsBase.representation_size(A) == ManifoldsBase.representation_size(M)
+        @test ManifoldsBase.representation_size(A) == (3,)
         @test manifold_dimension(A) == manifold_dimension(M)
+        @test manifold_dimension(A) == 3
         for T in [ArrayMPoint, ArrayTVector, ArrayCoTVector]
             p = T(x)
             @test convert(typeof(x),p) == x

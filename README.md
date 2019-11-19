@@ -7,8 +7,6 @@ Basic interface for manifolds in Julia.
 The project [`Manifolds.jl`](https://github.com/JuliaNLSolvers/Manifolds.jl)
 is based on this interface and provides a variety of manifolds.
 
-## Functions on a Manifold
-
 ## DefaultManifold
 
 This interface includes a simple `DefaultManifold`, which is a reduced version
