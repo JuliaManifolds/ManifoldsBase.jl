@@ -21,7 +21,8 @@ using Test
 
     @test isa(manifold_dimension(M), Integer)
     @test manifold_dimension(M) ≥ 0
-
+    @test is_decorator_manifold(M) == Val(false)
+    @test base_manifold(M) == M
     @test ManifoldsBase.representation_size(M) == (3,)
 
     @test injectivity_radius(M) == Inf

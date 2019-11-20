@@ -5,6 +5,9 @@ A manifold to encapsulate manifolds working on array representations of
 `MPoints` and `TVectors` in a transparent way, such that for these manifolds its
 not necessary to introduce explicit types for the points and tangent vectors,
 but they are encapsulated/stripped automatically when needed.
+
+This manifold is a decorator for a manifold, i.e. it decorates a manifold `M`
+with types points, vectors, and covectors.
 """
 struct ArrayManifold{M <: Manifold} <: Manifold
     manifold::M
@@ -12,7 +15,7 @@ end
 convert(::Type{M},m::ArrayManifold{M}) where M <: Manifold = m.manifold
 convert(::Type{ArrayManifold{M}},m::M) where M <: Manifold = ArrayManifold(m)
 
-manifold_dimension(M::ArrayManifold) = manifold_dimension(M.manifold)
+is_decorator_manifold(::ArrayManifold) = Val(true)
 
 """
     ArrayMPoint <: MPoint

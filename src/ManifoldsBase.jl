@@ -64,37 +64,52 @@ representations of cotangent vectors and their types on a manifold.
 abstract type CoTVector end
 
 """
+    is_decorator_manifold(M)
+
+indicate whether a manifold is a decorator manifold, i.e. whether it encapsulates
+a [`Manifold`](@ref) with additional features, and stores internally the original
+manifold instance. An example is the [`ArrayManifold`](@ref).
+
+Using Tim Holys Traits Trick (THTT), certain functions are just calling themselves
+on the internal manifold, and hence have not to be implemented for decorators
+again, for example [`manifold_dimension`](@ref) and especially [`base_manifold`](@ref).
+This also assumes, that the undecoratord (base) manifold is stored in `M.manifold`.
+
+"""
+is_decorator_manifold(::T) where {T <: Manifold} = Val(false)
+
+"""
     base_manifold(M::Manifold)
 
-Strip all decorators on `M`, returning the underlying topological manifold.
-Also used for vector bundles.
+returns the internally stored manifold for decorated manifolds and the
+base manifold for vector bundles or power manifolds.
+For decorator manifolds it returns the dimension of the internally stored manifold.
 """
-function base_manifold end
+base_manifold(M::Manifold) = base_manifold(M, is_decorator_manifold(M))
+base_manifold(M::Manifold, ::Val{true}) = base_manifold(M.manifold)
+base_manifold(M::Manifold, ::Val{false}) = M
+
+@doc doc"""
+    representation_size(M::Manifold)
+
+The size of array representing a point on manifold `M`.
+For decorator manifolds it returns the dimension of the internally stored manifold.
+"""
+representation_size(M::Manifold) = representation_size(M, is_decorator_manifold(M))
+representation_size(M::Manifold, ::Val{true}) = representation_size(base_manifold(M))
+representation_size(M::Manifold, ::Val{false}) = error("representation_size not implemented for manifold $(typeof(M)).")
+
 
 @doc doc"""
     manifold_dimension(M::Manifold)
 
 The dimension $n$ of real space $\mathbb R^n$ to which the neighborhood
 of each point of the manifold is homeomorphic.
+For decorator manifolds it returns the dimension of the internally stored manifold.
 """
-function manifold_dimension end
-
-@doc doc"""
-    representation_size(M::Manifold, [VS::VectorSpaceType])
-
-The size of array representing a point on manifold `M`,
-Representation sizes of tangent vectors can be obtained by calling the method
-with the second argument.
-"""
-function representation_size end
-
-function representation_size(M::Manifold)
-    error("representation_size not implemented for manifold $(typeof(M)).")
-end
-
-function manifold_dimension(M::Manifold)
-    error("manifold_dimension not implemented for a $(typeof(M)).")
-end
+manifold_dimension(M::Manifold) = manifold_dimension(M, is_decorator_manifold(M))
+manifold_dimension(M::Manifold, ::Val{true}) = manifold_dimension(base_manifold(M))
+manifold_dimension(M::Manifold, ::Val{false}) = error("manifold_dimension not implemented for manifold $(typeof(M)).")
 
 """
     isapprox(M::Manifold, x, y; kwargs...)
@@ -676,6 +691,7 @@ export base_manifold,
     isapprox,
     is_manifold_point,
     is_tangent_vector,
+    is_decorator_manifold,
     log,
     log!,
     manifold_dimension,
