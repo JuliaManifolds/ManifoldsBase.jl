@@ -1,6 +1,8 @@
 # ManifoldsBase.jl
 
 [![Build Status](https://travis-ci.org/JuliaNLSolvers/ManifoldsBase.jl.svg?branch=master)](https://travis-ci.org/JuliaNLSolvers/ManifoldsBase.jl/) [![codecov.io](http://codecov.io/github/JuliaNLSolvers/ManifoldsBase.jl/coverage.svg?branch=master)](https://codecov.io/gh/JuliaNLSolvers/ManifoldsBase.jl/)
+[![](https://img.shields.io/badge/docs-dev-blue.svg)](https://julianlsolvers.github.io/Manifolds.jl/latest/)
+
 
 Basic interface for manifolds in Julia.
 
