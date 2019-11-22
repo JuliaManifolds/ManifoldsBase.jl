@@ -408,7 +408,7 @@ abstract type AbstractVectorTransportMethod end
 
 Specify to use parallel transport as vector transport method within
 [`vector_transport_to`](@ref), [`vector_transport_direction`](@ref) or
-[`vector_transport_along`](@ref). 
+[`vector_transport_along`](@ref).
 """
 struct ParallelTransport <: AbstractVectorTransportMethod end
 
@@ -701,6 +701,7 @@ export base_manifold,
     project_point!,
     project_tangent,
     project_tangent!,
+    representation_size,
     retract,
     retract!,
     tangent_vector_error,
