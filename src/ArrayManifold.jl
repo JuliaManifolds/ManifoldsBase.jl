@@ -197,10 +197,10 @@ function vector_transport_along!(M::ArrayManifold, vto, x, v, c, m::AbstractVect
                                 m)
 end
 
-function is_manifold_point(M::ArrayManifold, x::MPoint; kwargs...)
-    return is_manifold_point(M.manifold, array_value(x); kwargs...)
+function manifold_point_error(M::ArrayManifold, x::MPoint; kwargs...)
+    return manifold_point_error(M.manifold, array_value(x); kwargs...)
 end
 
-function is_tangent_vector(M::ArrayManifold, x::MPoint, v::TVector; kwargs...)
-    return is_tangent_vector(M.manifold, array_value(x), array_value(v); kwargs...)
+function tangent_vector_error(M::ArrayManifold, x::MPoint, v::TVector; kwargs...)
+    return tangent_vector_error(M.manifold, array_value(x), array_value(v); kwargs...)
 end

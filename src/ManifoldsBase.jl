@@ -606,7 +606,7 @@ the assumption is to be optimistic.
 function check_manifold_point(M::Manifold, x; kwargs...)
     mpe = manifold_point_error(M, x; kwargs...)
     if mpe !== nothing
-        error(mpe)
+        throw(mpe)
     end
 end
 
@@ -657,7 +657,7 @@ the assumption is to be optimistic.
 function check_tangent_vector(M::Manifold, x, v; kwargs...)
     tve = tangent_vector_error(M, x, v; kwargs...)
     if tve !== nothing
-        error(tve)
+        throw(tve)
     end
 end
 

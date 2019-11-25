@@ -107,7 +107,7 @@ struct NonCoTVector <: CoTVector end
 
     @test_throws ErrorException zero_tangent_vector!(m, [0], [0])
     @test_throws ErrorException zero_tangent_vector(m, [0])
-    
+
     @test manifold_point_error(m, [0]) === nothing
     @test_throws ErrorException manifold_point_error(m,p)
     @test is_manifold_point(m, [0])
