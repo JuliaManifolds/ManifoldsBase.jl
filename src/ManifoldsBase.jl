@@ -566,98 +566,84 @@ function similar_result(M::Manifold, f, x...)
 end
 
 """
-    manifold_point_error(M::Manifold, x; kwargs...)
+    check_manifold_point(M::Manifold, x; kwargs...)
 
 Return `nothing` when `x` is a point on manifold `M`.
 Otherwise, return a string with description why the point does not belong
 to manifold `M`.
 
-By default, `manifold_point_error` returns nothing for points not deriving
-from the [`MPoint`](@ref) type.
+By default, `check_manifold_point` returns `nothing`, i.e. if no checks are implmented,
+the assumption is to be optimistic for point not deriving from the [`MPoint`](@ref) type.
 """
-function manifold_point_error(M::Manifold, x; kwargs...)
+function check_manifold_point(M::Manifold, x; kwargs...)
     return nothing
 end
 
-function manifold_point_error(M::Manifold, x::MPoint; kwargs...)
-    error("manifold_point_error not implemented for manifold $(typeof(M)) and point $(typeof(x)).")
+function check_manifold_point(M::Manifold, x::MPoint; kwargs...)
+    error("check_manifold_point not implemented for manifold $(typeof(M)) and point $(typeof(x)).")
 end
 
 """
-    is_manifold_point(M,x)
+    is_manifold_point(M, x, throw_error = false; kwargs...)
 
 check, whether `x` is a valid point on the [`Manifold`](@ref) `M`.
-Returns either `true` or `false`.
-The default is to return `true`, i.e. if no checks are implmented,
-the assumption is to be optimistic.
-"""
-function is_manifold_point(M::Manifold, x; kwargs...)
-    return manifold_point_error(M, x; kwargs...) === nothing
-end
 
+If `throw_error` is false, the function returns either `true` or `false`.
+If `throw_error` if true, the function either returns `true` or throws an error.
+By default the function calls [`check_manifold_point`](@ref)`(M, x; kwargs...)`
+and checks whether the returned value is `nothing` or an error.
 """
-    check_manifold_point(M,x)
-
-check, whether `x` is a valid point on the [`Manifold`](@ref) `M`. If it is not,
-an error is thrown.
-The default is to return `true`, i.e. if no checks are implmented,
-the assumption is to be optimistic.
-"""
-function check_manifold_point(M::Manifold, x; kwargs...)
-    mpe = manifold_point_error(M, x; kwargs...)
-    if mpe !== nothing
-        throw(mpe)
+function is_manifold_point(M::Manifold, x, throw_error = false; kwargs...)
+    mpe = check_manifold_point(M, x; kwargs...)
+    if throw_error
+        if mpe !== nothing
+            throw(mpe)
+        end
+        return true
+    else
+        return mpe === nothing
     end
 end
 
-
 """
-    tangent_vector_error(M::Manifold, x, v; kwargs...)
+    check_tangent_vector(M::Manifold, x, v; kwargs...)
 
 check, whether `v` is a valid tangent vector in the tangent plane of `x` on the
 [`Manifold`](@ref) `M`. An implementation should first check
-[`manifold_point_error`](@ref)`(M,x)` and then validate `v`. If it is not a tangent
-vector error string should be returned.
+[`manifold_point_error`](@ref)`(M, x; kwargs...)` and then validate `v`.
+If it is not a tangent vector error string should be returned.
 
-The default is to return `nothing`, i.e. if no checks are implmented,
-the assumption is to be optimistic.
+By default, `check_tangent_vector` returns `nothing`, i.e. if no checks are implmented,
+the assumption is to be optimistic for tangent vectors not deriving from the [`TVector`](@ref) type.
 """
-function tangent_vector_error(M::Manifold, x, v; kwargs...)
+function check_tangent_vector(M::Manifold, x, v; kwargs...)
     return nothing
 end
 
-function tangent_vector_error(M::Manifold, x::MPoint, v::TVector; kwargs...)
-    error("tangent_vector_error not implemented for manifold $(typeof(M)), point $(typeof(x)) and vector $(typeof(v)).")
+function check_tangent_vector(M::Manifold, x::MPoint, v::TVector; kwargs...)
+    error("check_tangent_vector not implemented for manifold $(typeof(M)), point $(typeof(x)) and vector $(typeof(v)).")
 end
 
 """
-    is_tangent_vector(M, x, v; kwargs...)
+    is_tangent_vector(M, x, v, throw_error = false; kwargs...)
 
 check, whether `v` is a valid tangent vector at point `x` on
-the [`Manifold`](@ref) `M`. Returns either `true` or `false`.
+the [`Manifold`](@ref) `M`.
 
-The default is to return `true`, i.e. if no checks are implmented,
-the assumption is to be optimistic.
+If `throw_error` is false, the function returns either `true` or `false`.
+If `throw_error` if true, the function either returns `true` or throws an error.
+By default the function calls [`check_tangent_vector`](@ref)`(M, x, v; kwargs...)`
+and checks whether the returned value is `nothing` or an error.
 """
-function is_tangent_vector(M::Manifold, x, v; kwargs...)
-    return tangent_vector_error(M, x, v; kwargs...) === nothing
-end
-
-"""
-    check_tangent_vector(M, x, v; kwargs...)
-
-check, whether `v` is a valid tangent vector in the tangent plane of `x` on the
-[`Manifold`](@ref) `M`. An implementation should first check
-[`manifold_point_error`](@ref)`(M,x)` and then validate `v`. If it is not a tangent
-vector an error is thrown.
-
-The default is to return `nothing`, i.e. if no checks are implmented,
-the assumption is to be optimistic.
-"""
-function check_tangent_vector(M::Manifold, x, v; kwargs...)
-    tve = tangent_vector_error(M, x, v; kwargs...)
-    if tve !== nothing
-        throw(tve)
+function is_tangent_vector(M::Manifold, x, v, throw_error = false; kwargs...)
+    tve = check_tangent_vector(M, x, v; kwargs...)
+    if throw_error
+        if tve !== nothing
+            throw(tve)
+        end
+        return true
+    else
+        return tve === nothing
     end
 end
 
