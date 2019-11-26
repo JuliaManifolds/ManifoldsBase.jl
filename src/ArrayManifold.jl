@@ -101,106 +101,113 @@ array_value(v::ArrayCoTVector) = v.value
 
 
 function isapprox(M::ArrayManifold, x, y; kwargs...)
-    is_manifold_point(M, x; kwargs...)
-    is_manifold_point(M, y; kwargs...)
+    is_manifold_point(M, x, true; kwargs...)
+    is_manifold_point(M, y, true; kwargs...)
     return isapprox(M.manifold, array_value(x), array_value(y); kwargs...)
 end
 
 function isapprox(M::ArrayManifold, x, v, w; kwargs...)
-    is_manifold_point(M, x; kwargs...)
-    is_tangent_vector(M, x, v; kwargs...)
-    is_tangent_vector(M, x, w; kwargs...)
+    is_manifold_point(M, x, true; kwargs...)
+    is_tangent_vector(M, x, v, true; kwargs...)
+    is_tangent_vector(M, x, w, true; kwargs...)
     return isapprox(M.manifold, array_value(x), array_value(v), array_value(w); kwargs...)
 end
 
 function project_tangent!(M::ArrayManifold, w, x, v; kwargs...)
-    is_manifold_point(M, x; kwargs...)
+    is_manifold_point(M, x, true; kwargs...)
     project_tangent!(M.manifold, w.value, array_value(x), array_value(v))
-    is_tangent_vector(M, x, w; kwargs...)
+    is_tangent_vector(M, x, w, true; kwargs...)
     return w
 end
 
 function distance(M::ArrayManifold, x, y; kwargs...)
-    is_manifold_point(M, x; kwargs...)
-    is_manifold_point(M, y; kwargs...)
+    is_manifold_point(M, x, true; kwargs...)
+    is_manifold_point(M, y, true; kwargs...)
     return distance(M.manifold, array_value(x), array_value(y))
 end
 
 function inner(M::ArrayManifold, x, v, w; kwargs...)
-    is_manifold_point(M, x; kwargs...)
-    is_tangent_vector(M, x, v; kwargs...)
-    is_tangent_vector(M, x, w; kwargs...)
+    is_manifold_point(M, x, true; kwargs...)
+    is_tangent_vector(M, x, v, true; kwargs...)
+    is_tangent_vector(M, x, w, true; kwargs...)
     return inner(M.manifold, array_value(x), array_value(v), array_value(w))
 end
 
 function exp(M::ArrayManifold, x, v; kwargs...)
-    is_manifold_point(M, x; kwargs...)
-    is_tangent_vector(M, x, v; kwargs...)
+    is_manifold_point(M, x, true; kwargs...)
+    is_tangent_vector(M, x, v, true; kwargs...)
     y = ArrayMPoint(exp(M.manifold, array_value(x), array_value(v)))
-    is_manifold_point(M, y; kwargs...)
+    is_manifold_point(M, y, true; kwargs...)
     return y
 end
 
 function exp!(M::ArrayManifold, y, x, v; kwargs...)
-    is_manifold_point(M, x; kwargs...)
-    is_tangent_vector(M, x, v; kwargs...)
+    is_manifold_point(M, x, true; kwargs...)
+    is_tangent_vector(M, x, v, true; kwargs...)
     exp!(M.manifold, array_value(y), array_value(x), array_value(v))
-    is_manifold_point(M, y; kwargs...)
+    is_manifold_point(M, y, true; kwargs...)
     return y
 end
 
 function log(M::ArrayManifold, x, y; kwargs...)
-    is_manifold_point(M, x; kwargs...)
-    is_manifold_point(M, y; kwargs...)
+    is_manifold_point(M, x, true; kwargs...)
+    is_manifold_point(M, y, true; kwargs...)
     v = ArrayTVector(log(M.manifold, array_value(x), array_value(y)))
-    is_tangent_vector(M, x, v; kwargs...)
+    is_tangent_vector(M, x, v, true; kwargs...)
     return v
 end
 
 function log!(M::ArrayManifold, v, x, y; kwargs...)
-    is_manifold_point(M, x; kwargs...)
-    is_manifold_point(M, y; kwargs...)
+    is_manifold_point(M, x, true; kwargs...)
+    is_manifold_point(M, y, true; kwargs...)
     log!(M.manifold, array_value(v), array_value(x), array_value(y))
-    is_tangent_vector(M, x, v; kwargs...)
+    is_tangent_vector(M, x, v, true; kwargs...)
     return v
 end
 
 function zero_tangent_vector!(M::ArrayManifold, v, x; kwargs...)
-    is_manifold_point(M, x; kwargs...)
+    is_manifold_point(M, x, true; kwargs...)
     zero_tangent_vector!(M.manifold, array_value(v), array_value(x); kwargs...)
-    is_tangent_vector(M, x, v; kwargs...)
+    is_tangent_vector(M, x, v, true; kwargs...)
     return v
 end
 
 function zero_tangent_vector(M::ArrayManifold, x; kwargs...)
-    is_manifold_point(M, x; kwargs...)
+    is_manifold_point(M, x, true; kwargs...)
     w = zero_tangent_vector(M.manifold, array_value(x))
-    is_tangent_vector(M, x, w; kwargs...)
+    is_tangent_vector(M, x, w, true; kwargs...)
     return w
 end
 
-function vector_transport_to!(M::ArrayManifold, vto, x, v, y, m::AbstractVectorTransportMethod)
-    return vector_transport_to!(M.manifold,
-                                array_value(vto),
-                                array_value(x),
-                                array_value(v),
-                                array_value(y),
-                                m)
+function vector_transport_to!(M::ArrayManifold, vto, x, v, y, m::AbstractVectorTransportMethod; kwargs...)
+    is_manifold_point(M, y, true; kwargs...)
+    is_tangent_vector(M, x, v, true; kwargs...)
+    vector_transport_to!(M.manifold,
+                         array_value(vto),
+                         array_value(x),
+                         array_value(v),
+                         array_value(y),
+                         m)
+    is_tangent_vector(M, y, vto, true; kwargs...)
+    return vto
 end
 
-function vector_transport_along!(M::ArrayManifold, vto, x, v, c, m::AbstractVectorTransportMethod)
-    return vector_transport_along!(M.manifold,
-                                array_value(vto),
-                                array_value(x),
-                                array_value(v),
-                                c,
-                                m)
+function vector_transport_along!(M::ArrayManifold, vto, x, v, c, m::AbstractVectorTransportMethod; kwargs...)
+    is_tangent_vector(M, x, v, true; kwargs...)
+    vector_transport_along!(M.manifold,
+                            array_value(vto),
+                            array_value(x),
+                            array_value(v),
+                            c,
+                            m)
+    is_tangent_vector(M, c(1), vto, true; kwargs...)
+    return vto
 end
 
-function is_manifold_point(M::ArrayManifold, x::MPoint; kwargs...)
-    return is_manifold_point(M.manifold, array_value(x); kwargs...)
+function check_manifold_point(M::ArrayManifold, x::MPoint; kwargs...)
+    return check_manifold_point(M.manifold, array_value(x); kwargs...)
 end
 
-function is_tangent_vector(M::ArrayManifold, x::MPoint, v::TVector; kwargs...)
-    return is_tangent_vector(M.manifold, array_value(x), array_value(v); kwargs...)
+function check_tangent_vector(M::ArrayManifold, x::MPoint, v::TVector; kwargs...)
+    return check_tangent_vector(M.manifold, array_value(x), array_value(v); kwargs...)
 end
