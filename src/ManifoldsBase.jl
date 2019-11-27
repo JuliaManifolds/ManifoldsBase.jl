@@ -628,22 +628,30 @@ end
     is_tangent_vector(M, x, v, throw_error = false; kwargs...)
 
 check, whether `v` is a valid tangent vector at point `x` on
-the [`Manifold`](@ref) `M`.
+the [`Manifold`](@ref) `M`. Returns either `true` or `false`.
 
-If `throw_error` is false, the function returns either `true` or `false`.
-If `throw_error` if true, the function either returns `true` or throws an error.
-By default the function calls [`check_tangent_vector`](@ref)`(M, x, v; kwargs...)`
-and checks whether the returned value is `nothing` or an error.
+The default is to return `true`, i.e. if no checks are implmented,
+the assumption is to be optimistic.
 """
-function is_tangent_vector(M::Manifold, x, v, throw_error = false; kwargs...)
-    tve = check_tangent_vector(M, x, v; kwargs...)
-    if throw_error
-        if tve !== nothing
-            throw(tve)
-        end
-        return true
-    else
-        return tve === nothing
+function is_tangent_vector(M::Manifold, x, v; kwargs...)
+    return tangent_vector_error(M, x, v; kwargs...) === nothing
+end
+
+"""
+    check_tangent_vector(M, x, v; kwargs...)
+
+check, whether `v` is a valid tangent vector in the tangent plane of `x` on the
+[`Manifold`](@ref) `M`. An implementation should first check
+[`check_manifold_point`](@ref)`(M,x)` and then validate `v`.
+ If it is not a tangent vector an error is thrown.
+
+The default is to return `nothing`, i.e. if no checks are implmented,
+the assumption is to be optimistic.
+"""
+function check_tangent_vector(M::Manifold, x, v; kwargs...)
+    tve = tangent_vector_error(M, x, v; kwargs...)
+    if tve !== nothing
+        error(tve)
     end
 end
 

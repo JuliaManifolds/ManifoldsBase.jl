@@ -40,7 +40,7 @@ end
 """
     ArrayTVector <: TVector
 
-represent a tangent vector an [`ArrayManfold`](@ref), i.e. on a manifold where data
+represent a tangent vector an [`ArrayManifold`](@ref), i.e. on a manifold where data
 can be represented by arrays. The array is stored internally and semantically
 this distinguished the value from [`ArrayMPoint`](@ref)s and [`ArrayCoTVector`](@ref)s
 """
@@ -65,7 +65,7 @@ end
 """
     ArrayCoTVector <: CoTVector
 
-represent a cotangent vector an [`ArrayManfold`](@ref), i.e. on a manifold where data
+represent a cotangent vector an [`ArrayManifold`](@ref), i.e. on a manifold where data
 can be represented by arrays. The array is stored internally and semantically
 this distinguished the value from [`ArrayMPoint`](@ref)s and [`ArrayTVector`](@ref)s
 """
