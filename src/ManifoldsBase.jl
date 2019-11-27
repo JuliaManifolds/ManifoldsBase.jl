@@ -633,25 +633,15 @@ the [`Manifold`](@ref) `M`. Returns either `true` or `false`.
 The default is to return `true`, i.e. if no checks are implmented,
 the assumption is to be optimistic.
 """
-function is_tangent_vector(M::Manifold, x, v; kwargs...)
-    return tangent_vector_error(M, x, v; kwargs...) === nothing
-end
-
-"""
-    check_tangent_vector(M, x, v; kwargs...)
-
-check, whether `v` is a valid tangent vector in the tangent plane of `x` on the
-[`Manifold`](@ref) `M`. An implementation should first check
-[`check_manifold_point`](@ref)`(M,x)` and then validate `v`.
- If it is not a tangent vector an error is thrown.
-
-The default is to return `nothing`, i.e. if no checks are implmented,
-the assumption is to be optimistic.
-"""
-function check_tangent_vector(M::Manifold, x, v; kwargs...)
-    tve = tangent_vector_error(M, x, v; kwargs...)
-    if tve !== nothing
-        error(tve)
+function is_tangent_vector(M::Manifold, x, v, throw_error = false; kwargs...)
+    mtve = check_tangent_vector(M, x, v; kwargs...)
+    if throw_error
+        if mtve !== nothing
+            throw(mtve)
+        end
+        return true
+    else
+        return mtve === nothing
     end
 end
 
@@ -689,7 +679,6 @@ export base_manifold,
     log,
     log!,
     manifold_dimension,
-    manifold_point_error,
     norm,
     project_point,
     project_point!,
@@ -698,7 +687,6 @@ export base_manifold,
     representation_size,
     retract,
     retract!,
-    tangent_vector_error,
     vector_transport_along,
     vector_transport_along!,
     vector_transport_direction,
