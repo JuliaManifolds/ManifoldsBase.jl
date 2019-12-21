@@ -1,23 +1,7 @@
 module ManifoldsBase
 
-import Base: isapprox,
-    exp,
-    log,
-    convert,
-    copyto!,
-    angle,
-    eltype,
-    similar,
-    +,
-    -,
-    *
-import LinearAlgebra: dot,
-    norm,
-    det,
-    cross,
-    I,
-    UniformScaling,
-    Diagonal
+import Base: isapprox, exp, log, convert, copyto!, angle, eltype, similar, +, -, *
+import LinearAlgebra: dot, norm, det, cross, I, UniformScaling, Diagonal
 
 import Markdown: @doc_str
 using LinearAlgebra
@@ -97,7 +81,8 @@ The size of an array representing a point on manifold `M`.
 """
 representation_size(M::Manifold) = representation_size(M, is_decorator_manifold(M))
 representation_size(M::Manifold, ::Val{true}) = representation_size(base_manifold(M))
-representation_size(M::Manifold, ::Val{false}) = error("representation_size not implemented for manifold $(typeof(M)).")
+representation_size(M::Manifold, ::Val{false}) =
+    error("representation_size not implemented for manifold $(typeof(M)).")
 
 
 @doc doc"""
@@ -108,7 +93,8 @@ of each point of the manifold is homeomorphic.
 """
 manifold_dimension(M::Manifold) = manifold_dimension(M, is_decorator_manifold(M))
 manifold_dimension(M::Manifold, ::Val{true}) = manifold_dimension(base_manifold(M))
-manifold_dimension(M::Manifold, ::Val{false}) = error("manifold_dimension not implemented for manifold $(typeof(M)).")
+manifold_dimension(M::Manifold, ::Val{false}) =
+    error("manifold_dimension not implemented for manifold $(typeof(M)).")
 
 """
     isapprox(M::Manifold, x, y; kwargs...)
@@ -166,9 +152,10 @@ retract!(M::Manifold, y, x, v, method::ExponentialRetraction) = exp!(M, y, x, v)
 
 retract!(M::Manifold, y, x, v) = retract!(M, y, x, v, ExponentialRetraction())
 
-retract!(M::Manifold, y, x, v, t::Real) = retract!(M, y, x, t*v)
+retract!(M::Manifold, y, x, v, t::Real) = retract!(M, y, x, t * v)
 
-retract!(M::Manifold, y, x, v, t::Real, method::AbstractRetractionMethod) = retract!(M, y, x, t*v, method)
+retract!(M::Manifold, y, x, v, t::Real, method::AbstractRetractionMethod) =
+    retract!(M, y, x, t * v, method)
 
 """
     retract(M::Manifold, x, v[, t::Real=1], method::AbstractRetractionMethod=ExponentialRetraction())
@@ -188,9 +175,10 @@ function retract(M::Manifold, x, v)
     return xr
 end
 
-retract(M::Manifold, x, v, t::Real) = retract(M, x, t*v)
+retract(M::Manifold, x, v, t::Real) = retract(M, x, t * v)
 
-retract(M::Manifold, x, v, t::Real, method::AbstractRetractionMethod) = retract(M, x, t*v, method)
+retract(M::Manifold, x, v, t::Real, method::AbstractRetractionMethod) =
+    retract(M, x, t * v, method)
 
 """
     AbstractInverseRetractionMethod
@@ -218,9 +206,11 @@ Inverse retraction method can be specified by the last argument, defaulting to
 [`LogarithmicInverseRetraction`](@ref). Please look at the documentation of
 respective manifolds for available methods.
 """
-inverse_retract!(M::Manifold, v, x, y, method::LogarithmicInverseRetraction) = log!(M, v, x, y)
+inverse_retract!(M::Manifold, v, x, y, method::LogarithmicInverseRetraction) =
+    log!(M, v, x, y)
 
-inverse_retract!(M::Manifold, v, x, y) = inverse_retract!(M, v, x, y, LogarithmicInverseRetraction())
+inverse_retract!(M::Manifold, v, x, y) =
+    inverse_retract!(M, v, x, y, LogarithmicInverseRetraction())
 
 """
     inverse_retract(M::Manifold, x, y)
@@ -253,7 +243,8 @@ The point `y` is overwritten by the projection.
 The function works only for selected embedded manifolds and
 is *not* required to return the closest point.
 """
-project_point!(M::Manifold, y, x) = error("project_point! not implemented for a $(typeof(M)) and points $(typeof(y)) and $(typeof(x)).")
+project_point!(M::Manifold, y, x) =
+    error("project_point! not implemented for a $(typeof(M)) and points $(typeof(y)) and $(typeof(x)).")
 
 """
     project_point(M::Manifold, x)
@@ -277,7 +268,8 @@ at point `x` from the manifold `M`. The result is saved in vector `w`.
 The function works only for selected embedded manifolds and
 is *not* required to return the closest vector.
 """
-project_tangent!(M::Manifold, w, x, v) = error("project onto tangent space not implemented for a $(typeof(M)) and point $(typeof(x)) with input $(typeof(v)).")
+project_tangent!(M::Manifold, w, x, v) =
+    error("project onto tangent space not implemented for a $(typeof(M)) and point $(typeof(x)) with input $(typeof(v)).")
 
 """
     project_tangent(M::Manifold, x, v)
@@ -299,7 +291,8 @@ end
 
 Inner product of tangent vectors `v` and `w` at point `x` from manifold `M`.
 """
-inner(M::Manifold, x, v, w) = error("inner: Inner product not implemented on a $(typeof(M)) for input point $(typeof(x)) and tangent vectors $(typeof(v)) and $(typeof(w)).")
+inner(M::Manifold, x, v, w) =
+    error("inner: Inner product not implemented on a $(typeof(M)) for input point $(typeof(x)) and tangent vectors $(typeof(v)) and $(typeof(w)).")
 
 """
     norm(M::Manifold, x, v)
@@ -328,9 +321,10 @@ angle(M::Manifold, x, v, w) = acos(inner(M, x, v, w) / norm(M, x, v) / norm(M, x
 Exponential map of tangent vector `t*v` at point `x` from manifold `M`.
 Result is saved to `y`.
 """
-exp!(M::Manifold, y, x, v, t::Real) = exp!(M, y, x, t*v)
+exp!(M::Manifold, y, x, v, t::Real) = exp!(M, y, x, t * v)
 
-exp!(M::Manifold, y, x, v) = error("Exponential map not implemented on a $(typeof(M)) for input point $(x) and tangent vector $(v).")
+exp!(M::Manifold, y, x, v) =
+    error("Exponential map not implemented on a $(typeof(M)) for input point $(x) and tangent vector $(v).")
 
 """
     exp(M::Manifold, x, v, t::Real=1)
@@ -343,7 +337,7 @@ function exp(M::Manifold, x, v)
     return y
 end
 
-exp(M::Manifold, x, v, t::Real) = exp(M, x, t*v)
+exp(M::Manifold, x, v, t::Real) = exp(M, x, t * v)
 
 """
     exp(M::Manifold, x, v, T::AbstractVector) -> AbstractVector
@@ -359,7 +353,8 @@ exp(M::Manifold, x, v, T::AbstractVector) = map(geodesic(M, x, v), T)
 Logarithmic map of point `y` at base point `x` on Manifold `M`.
 Result is saved to `v`.
 """
-log!(M::Manifold, v, x, y) = error("Logarithmic map not implemented on $(typeof(M)) for points $(typeof(x)) and $(typeof(y))")
+log!(M::Manifold, v, x, y) =
+    error("Logarithmic map not implemented on $(typeof(M)) for points $(typeof(x)) and $(typeof(y))")
 
 """
     log(M::Manifold, x, y)
@@ -456,7 +451,8 @@ struct ProjectionTransport <: AbstractVectorTransportMethod end
 Vector transport of vector `v` at point `x` to point `y`. The result is saved
 to `vto`. By default, the `method` is [`ParallelTransport`](@ref).
 """
-vector_transport_to!(M::Manifold, vto, x, v, y) = vector_transport_to!(M,vto,x,v,y,ParallelTransport())
+vector_transport_to!(M::Manifold, vto, x, v, y) =
+    vector_transport_to!(M, vto, x, v, y, ParallelTransport())
 
 """
     vector_transport_to!(M::Manifold, vto, x, v, y, method::ProjectionTransport)
@@ -465,9 +461,17 @@ Implements a default projection based vector transport that projects a tangent
 vector `v` at `x` on a [`Manifold`](@ref) `M` onto the tangent space at `y` by
 interperting `v` as an element of the embedding and projecting back.
 """
-vector_transport_to!(M::Manifold, vto, x, v, y, ::ProjectionTransport) = project_tangent!(M, vto, y, v)
+vector_transport_to!(M::Manifold, vto, x, v, y, ::ProjectionTransport) =
+    project_tangent!(M, vto, y, v)
 
-function vector_transport_to!(M::Manifold, vto, x, v, y, method::AbstractVectorTransportMethod)
+function vector_transport_to!(
+    M::Manifold,
+    vto,
+    x,
+    v,
+    y,
+    method::AbstractVectorTransportMethod,
+)
     error("vector transport from a point of type $(typeof(x)) to a type $(typeof(y)) on a $(typeof(M)) for a vector of type $(v) and the $(typeof(method)) not yet implemented.")
 end
 
@@ -478,7 +482,8 @@ end
 Vector transport of vector `v` at point `x` to point `y` using the `method`,
 which defaults to [`ParallelTransport`](@ref).
 """
-vector_transport_to(M::Manifold, x, v, y) = vector_transport_to(M,x,v,y,ParallelTransport())
+vector_transport_to(M::Manifold, x, v, y) =
+    vector_transport_to(M, x, v, y, ParallelTransport())
 function vector_transport_to(M::Manifold, x, v, y, method::AbstractVectorTransportMethod)
     vto = similar_result(M, vector_transport_to, v, x, y)
     vector_transport_to!(M, vto, x, v, y, method)
@@ -494,8 +499,16 @@ by the tangent vector `vdir` at point `x`. The result is saved to `vto`.
 By default, [`exp`](@ref) and [`vector_transport_to!`](@ref) are used with the
 `method`, which defaults to [`ParallelTransport`](@ref).
 """
-vector_transport_direction!(M::Manifold, vto, x, v, vdir) = vector_transport_direction!(M,vto,x,v,vdir,ParallelTransport())
-function vector_transport_direction!(M::Manifold, vto, x, v, vdir, method::AbstractVectorTransportMethod)
+vector_transport_direction!(M::Manifold, vto, x, v, vdir) =
+    vector_transport_direction!(M, vto, x, v, vdir, ParallelTransport())
+function vector_transport_direction!(
+    M::Manifold,
+    vto,
+    x,
+    v,
+    vdir,
+    method::AbstractVectorTransportMethod,
+)
     y = exp(M, x, vdir)
     return vector_transport_to!(M, vto, x, v, y, m)
 end
@@ -508,8 +521,15 @@ Vector transport of vector `v` at point `x` in the direction indicated
 by the tangent vector `vdir` at point `x` using the `method`, which defaults to
 [`ParallelTransport`](@ref).
 """
-vector_transport_direction(M::Manifold, x, v, vdir) = vector_transport_direction(M,x,v,vdir,ParallelTransport())
-function vector_transport_direction(M::Manifold, x, v, vdir, method::AbstractVectorTransportMethod)
+vector_transport_direction(M::Manifold, x, v, vdir) =
+    vector_transport_direction(M, x, v, vdir, ParallelTransport())
+function vector_transport_direction(
+    M::Manifold,
+    x,
+    v,
+    vdir,
+    method::AbstractVectorTransportMethod,
+)
     vto = similar_result(M, vector_transport_direction, v, x, vdir)
     vector_transport_direction!(M, vto, x, v, vdir, method)
     return vto
@@ -523,8 +543,16 @@ Vector transport of vector `v` at point `x` along the curve `c` such that
 `c(0)` is equal to `x` to point `c(1)` using the `method`, which defaults to
 [`ParallelTransport`](@ref). The result is saved to `vto`.
 """
-vector_transport_along!(M::Manifold, vto, x, v, c) = vector_transport_along!(M, vto, x, v, c, ParallelTransport())
-function vector_transport_along!(M::Manifold, vto, x, v, c, method::AbstractVectorTransportMethod)
+vector_transport_along!(M::Manifold, vto, x, v, c) =
+    vector_transport_along!(M, vto, x, v, c, ParallelTransport())
+function vector_transport_along!(
+    M::Manifold,
+    vto,
+    x,
+    v,
+    c,
+    method::AbstractVectorTransportMethod,
+)
     error("vector_transport_along! not implemented for manifold $(typeof(M)), vector $(typeof(vto)), point $(typeof(x)), vector $(typeof(v)) along curve $(typeof(c)) with method $(typeof(method)).")
 end
 
@@ -536,7 +564,8 @@ Vector transport of vector `v` at point `x` along the curve `c` such that
 `c(0)` is equal to `x` to point `c(1)`.
 The default `method` used is [`ParallelTransport`](@ref).
 """
-vector_transport_along(M::Manifold, x, v, c) = vector_transport_along(M,x,v,c,ParallelTransport())
+vector_transport_along(M::Manifold, x, v, c) =
+    vector_transport_along(M, x, v, c, ParallelTransport())
 function vector_transport_along(M::Manifold, x, v, c, m::AbstractVectorTransportMethod)
     vto = similar_result(M, vector_transport_along, v, x)
     vector_transport_along!(M, vto, x, v, c, m)
@@ -592,7 +621,7 @@ zero_tangent_vector!(M::Manifold, v, x) = log!(M, v, x, x)
 Returns type of element of the array that will represent the result of
 function `f` for manifold `M` on given arguments `args` (passed as a tuple).
 """
-function similar_result_type(M::Manifold, f, args::NTuple{N,Any}) where N
+function similar_result_type(M::Manifold, f, args::NTuple{N,Any}) where {N}
     T = typeof(reduce(+, one(eltype(eti)) for eti ∈ args))
     return T
 end
@@ -696,51 +725,50 @@ include("ArrayManifold.jl")
 include("DefaultManifold.jl")
 
 export Manifold,
-    MPoint,
-    TVector,
-    CoTVector,
-    ArrayManifold,
-    ArrayMPoint,
-    ArrayTVector,
-    ArrayCoTVector
+       MPoint,
+       TVector,
+       CoTVector,
+       ArrayManifold,
+       ArrayMPoint,
+       ArrayTVector,
+       ArrayCoTVector
 
-export ParallelTransport,
-    ProjectionTransport
+export ParallelTransport, ProjectionTransport
 
 export base_manifold,
-    check_manifold_point,
-    check_tangent_vector,
-    distance,
-    exp,
-    exp!,
-    geodesic,
-    shortest_geodesic,
-    injectivity_radius,
-    inner,
-    inverse_retract,
-    inverse_retract!,
-    isapprox,
-    is_manifold_point,
-    is_tangent_vector,
-    is_decorator_manifold,
-    log,
-    log!,
-    manifold_dimension,
-    norm,
-    project_point,
-    project_point!,
-    project_tangent,
-    project_tangent!,
-    representation_size,
-    retract,
-    retract!,
-    vector_transport_along,
-    vector_transport_along!,
-    vector_transport_direction,
-    vector_transport_direction!,
-    vector_transport_to,
-    vector_transport_to!,
-    zero_tangent_vector,
-    zero_tangent_vector!
+       check_manifold_point,
+       check_tangent_vector,
+       distance,
+       exp,
+       exp!,
+       geodesic,
+       shortest_geodesic,
+       injectivity_radius,
+       inner,
+       inverse_retract,
+       inverse_retract!,
+       isapprox,
+       is_manifold_point,
+       is_tangent_vector,
+       is_decorator_manifold,
+       log,
+       log!,
+       manifold_dimension,
+       norm,
+       project_point,
+       project_point!,
+       project_tangent,
+       project_tangent!,
+       representation_size,
+       retract,
+       retract!,
+       vector_transport_along,
+       vector_transport_along!,
+       vector_transport_direction,
+       vector_transport_direction!,
+       vector_transport_to,
+       vector_transport_to!,
+       zero_tangent_vector,
+       zero_tangent_vector!
 
 end # module

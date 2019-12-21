@@ -11,12 +11,12 @@ might be handy in debugging and educative situations to verify correctness of
 involved variabes.
 """
 struct DefaultManifold{T<:Tuple} <: Manifold where {T} end
-DefaultManifold(n::Vararg{Int,N}) where N = DefaultManifold{Tuple{n...}}()
+DefaultManifold(n::Vararg{Int,N}) where {N} = DefaultManifold{Tuple{n...}}()
 
 @generated representation_size(::DefaultManifold{T}) where {T} = Tuple(T.parameters...)
 @generated manifold_dimension(::DefaultManifold{T}) where {T} = *(T.parameters...)
 @inline inner(::DefaultManifold, x, v, w) = dot(v, w)
-distance(::DefaultManifold, x, y) = norm(x-y)
+distance(::DefaultManifold, x, y) = norm(x - y)
 norm(::DefaultManifold, x, v) = norm(v)
 exp!(M::DefaultManifold, y, x, v) = (y .= x .+ v)
 log!(M::DefaultManifold, v, x, y) = (v .= y .- x)
