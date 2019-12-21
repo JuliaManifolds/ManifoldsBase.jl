@@ -549,7 +549,7 @@ end
 Distance $d$ such that [`exp(M, x, v)`](@ref exp(::Manifold, ::Any, ::Any)) is
 injective for all tangent vectors shorter than $d$ (i.e. has a left inverse).
 """
-injectivity_radius(M::Manifold, x) = Inf
+injectivity_radius(M::Manifold, x) = injectivity_radius(M)
 
 @doc doc"""
     injectivity_radius(M::Manifold, x, R::AbstractRetractionMethod)
