@@ -19,10 +19,10 @@ abstract type Manifold end
     MPoint
 
 Type for a point on a manifold. While a [`Manifold`](@ref) does not necessarily
-require this type, for example when it is implemented for `Vector`s or
-`Matrix` type elements, this type can be used for more complicated
-representations, semantic verification, or even dispatch for different
-representations of points on a manifold.
+require this type, for example when it is implemented for `Vector`s or `Matrix`
+type elements, this type can be used for more complicated representations,
+semantic verification, or even dispatch for different representations of points
+on a manifold.
 """
 abstract type MPoint end
 
@@ -51,9 +51,9 @@ abstract type CoTVector end
 """
     is_decorator_manifold(M::Manifold)
 
-Indicate whether a manifold is a decorator manifold, i.e. whether it encapsulates
-a [`Manifold`](@ref) with additional features and stores internally the original
-manifold instance. An example is the [`ArrayManifold`](@ref).
+Indicate whether a manifold is a decorator manifold, i.e. whether it
+encapsulates a [`Manifold`](@ref) with additional features and stores internally
+the original manifold instance. An example is the [`ArrayManifold`](@ref).
 
 Certain functions are just calling themselves on the internal manifold and hence
 do not need to be reimplemented for decorators again, for example
@@ -67,8 +67,8 @@ is_decorator_manifold(::Manifold) = Val(false)
 """
     base_manifold(M::Manifold)
 
-Return the internally stored manifold for decorated manifolds and the
-base manifold for vector bundles or power manifolds.
+Return the internally stored manifold for decorated manifolds and the base
+manifold for vector bundles or power manifolds.
 """
 base_manifold(M::Manifold) = base_manifold(M, is_decorator_manifold(M))
 base_manifold(M::Manifold, ::Val{true}) = base_manifold(M.manifold)
@@ -88,8 +88,8 @@ representation_size(M::Manifold, ::Val{false}) =
 @doc doc"""
     manifold_dimension(M::Manifold)
 
-The dimension $n$ of real space $\mathbb R^n$ to which the neighborhood
-of each point of the manifold is homeomorphic.
+The dimension $n$ of real space $\mathbb R^n$ to which the neighborhood of each
+point of the manifold is homeomorphic.
 """
 manifold_dimension(M::Manifold) = manifold_dimension(M, is_decorator_manifold(M))
 manifold_dimension(M::Manifold, ::Val{true}) = manifold_dimension(base_manifold(M))
@@ -108,8 +108,8 @@ isapprox(M::Manifold, x, y; kwargs...) = isapprox(x, y; kwargs...)
 """
     isapprox(M::Manifold, x, v, w; kwargs...)
 
-Check if vectors `v` and `w` tangent at `x` from manifold `M` are
-approximately equal.
+Check if vectors `v` and `w` tangent at `x` from manifold `M` are approximately
+equal.
 
 Keyword arguments can be used to specify tolerances.
 """
@@ -141,9 +141,8 @@ struct ExponentialRetraction <: AbstractRetractionMethod end
 """
     retract!(M::Manifold, y, x, v[, t::Real=1], method::AbstractRetractionMethod=ExponentialRetraction())
 
-Retraction (cheaper, approximate version of [`exp`](@ref)onential map) of tangent
-vector `t*v` at point `x` from manifold `M`.
-Result is saved to `y`.
+Retraction (cheaper, approximate version of [`exp`](@ref)onential map) of
+tangent vector `t*v` at point `x` from manifold `M`. Result is saved to `y`.
 
 Retraction method can be specified by the last argument. Please look at the
 documentation of respective manifolds for available methods.
@@ -238,10 +237,9 @@ end
 """
     project_point!(M::Manifold, y, x)
 
-Project point `x` from the ambient space onto the manifold `M`.
-The point `y` is overwritten by the projection.
-The function works only for selected embedded manifolds and
-is *not* required to return the closest point.
+Project point `x` from the ambient space onto the manifold `M`. The point `y` is
+overwritten by the projection. The function works only for selected embedded
+manifolds and is *not* required to return the closest point.
 """
 project_point!(M::Manifold, y, x) =
     error("project_point! not implemented for a $(typeof(M)) and points $(typeof(y)) and $(typeof(x)).")
@@ -249,9 +247,9 @@ project_point!(M::Manifold, y, x) =
 """
     project_point(M::Manifold, x)
 
-Project point from the ambient space onto the manifold `M`. The point `x`
-is not modified. The function works only for selected embedded manifolds and
-is *not* required to return the closest point.
+Project point from the ambient space onto the manifold `M`. The point `x` is not
+modified. The function works only for selected embedded manifolds and is *not*
+required to return the closest point.
 """
 function project_point(M::Manifold, x)
     y = similar_result(M, project_point, x)
@@ -350,8 +348,8 @@ exp(M::Manifold, x, v, T::AbstractVector) = map(geodesic(M, x, v), T)
 """
     log!(M::Manifold, v, x, y)
 
-Logarithmic map of point `y` at base point `x` on Manifold `M`.
-Result is saved to `v`.
+Logarithmic map of point `y` at base point `x` on Manifold `M`. Result is saved
+to `v`.
 """
 log!(M::Manifold, v, x, y) =
     error("Logarithmic map not implemented on $(typeof(M)) for points $(typeof(x)) and $(typeof(y))")
@@ -370,10 +368,9 @@ end
 """
     geodesic(M::Manifold, x, v) -> Function
 
-Get the geodesic with initial point `x` and velocity `v`. The geodesic
-is the curve of constant velocity that is locally distance-minimizing. This
-function returns a function of time, which may be a `Real` or an
-`AbstractVector`.
+Get the geodesic with initial point `x` and velocity `v`. The geodesic is the
+curve of constant velocity that is locally distance-minimizing. This function
+returns a function of time, which may be a `Real` or an `AbstractVector`.
 """
 geodesic(M::Manifold, x, v) = t -> exp(M, x, v, t)
 
@@ -448,8 +445,8 @@ struct ProjectionTransport <: AbstractVectorTransportMethod end
     vector_transport_to!(M::Manifold, vto, x, v, y)
     vector_transport_to!(M::Manifold, vto, x, v, y, method::AbstractVectorTransportMethod)
 
-Vector transport of vector `v` at point `x` to point `y`. The result is saved
-to `vto`. By default, the `method` is [`ParallelTransport`](@ref).
+Vector transport of vector `v` at point `x` to point `y`. The result is saved to
+`vto`. By default, the `method` is [`ParallelTransport`](@ref).
 """
 vector_transport_to!(M::Manifold, vto, x, v, y) =
     vector_transport_to!(M, vto, x, v, y, ParallelTransport())
@@ -494,10 +491,10 @@ end
     vector_transport_direction!(M::Manifold, vto, x, v, vdir)
     vector_transport_direction!(M::Manifold, vto, x, v, vdir, method::AbstractVectorTransportMethod)
 
-Vector transport of vector `v` at point `x` in the direction indicated
-by the tangent vector `vdir` at point `x`. The result is saved to `vto`.
-By default, [`exp`](@ref) and [`vector_transport_to!`](@ref) are used with the
-`method`, which defaults to [`ParallelTransport`](@ref).
+Vector transport of vector `v` at point `x` in the direction indicated by the
+tangent vector `vdir` at point `x`. The result is saved to `vto`. By default,
+[`exp`](@ref) and [`vector_transport_to!`](@ref) are used with the `method`,
+which defaults to [`ParallelTransport`](@ref).
 """
 vector_transport_direction!(M::Manifold, vto, x, v, vdir) =
     vector_transport_direction!(M, vto, x, v, vdir, ParallelTransport())
@@ -517,8 +514,8 @@ end
     vector_transport_direction(M::Manifold, x, v, vdir)
     vector_transport_direction(M::Manifold, x, v, vdir, method::AbstractVectorTransportMethod)
 
-Vector transport of vector `v` at point `x` in the direction indicated
-by the tangent vector `vdir` at point `x` using the `method`, which defaults to
+Vector transport of vector `v` at point `x` in the direction indicated by the
+tangent vector `vdir` at point `x` using the `method`, which defaults to
 [`ParallelTransport`](@ref).
 """
 vector_transport_direction(M::Manifold, x, v, vdir) =
@@ -539,8 +536,8 @@ end
     vector_transport_along!(M::Manifold, vto, x, v, c)
     vector_transport_along!(M::Manifold, vto, x, v, c, method::AbstractVectorTransportMethod)
 
-Vector transport of vector `v` at point `x` along the curve `c` such that
-`c(0)` is equal to `x` to point `c(1)` using the `method`, which defaults to
+Vector transport of vector `v` at point `x` along the curve `c` such that `c(0)`
+is equal to `x` to point `c(1)` using the `method`, which defaults to
 [`ParallelTransport`](@ref). The result is saved to `vto`.
 """
 vector_transport_along!(M::Manifold, vto, x, v, c) =
@@ -560,9 +557,9 @@ end
     vector_transport_along(M::Manifold, x, v, c)
     vector_transport_along(M::Manifold, x, v, c, method::AbstractVectorTransportMethod)
 
-Vector transport of vector `v` at point `x` along the curve `c` such that
-`c(0)` is equal to `x` to point `c(1)`.
-The default `method` used is [`ParallelTransport`](@ref).
+Vector transport of vector `v` at point `x` along the curve `c` such that `c(0)`
+is equal to `x` to point `c(1)`. The default `method` used is
+[`ParallelTransport`](@ref).
 """
 vector_transport_along(M::Manifold, x, v, c) =
     vector_transport_along(M, x, v, c, ParallelTransport())
@@ -618,8 +615,8 @@ zero_tangent_vector!(M::Manifold, v, x) = log!(M, v, x, x)
 """
     similar_result_type(M::Manifold, f, args::NTuple{N,Any}) where N
 
-Returns type of element of the array that will represent the result of
-function `f` for manifold `M` on given arguments `args` (passed as a tuple).
+Return type of element of the array that will represent the result of function
+`f` for manifold `M` on given arguments `args` (passed as a tuple).
 """
 function similar_result_type(M::Manifold, f, args::NTuple{N,Any}) where {N}
     T = typeof(reduce(+, one(eltype(eti)) for eti ∈ args))
@@ -629,9 +626,9 @@ end
 """
     similar_result(M::Manifold, f, x...)
 
-Allocates an array for the result of function `f` on manifold `M`
-and arguments `x...` for implementing the non-modifying operation
-using the modifying operation.
+Allocate an array for the result of function `f` on manifold `M` and arguments
+`x...` for implementing the non-modifying operation using the modifying
+operation.
 
 Usefulness of passing a function is demonstrated by methods that allocate
 results of musical isomorphisms.
@@ -644,12 +641,12 @@ end
 """
     check_manifold_point(M::Manifold, x; kwargs...) -> Union{Nothing,String}
 
-Return `nothing` when `x` is a point on manifold `M`.
-Otherwise, return a string with a description why the point does not belong
-to manifold `M`.
+Return `nothing` when `x` is a point on manifold `M`. Otherwise, return a string
+with a description why the point does not belong to manifold `M`.
 
-By default, `check_manifold_point` returns `nothing`, i.e. if no checks are implemented,
-the assumption is to be optimistic for a point not deriving from the [`MPoint`](@ref) type.
+By default, `check_manifold_point` returns `nothing`, i.e. if no checks are
+implemented, the assumption is to be optimistic for a point not deriving from
+the [`MPoint`](@ref) type.
 """
 function check_manifold_point(M::Manifold, x; kwargs...)
     return nothing
@@ -664,8 +661,8 @@ end
 
 Return whether `x` is a valid point on the [`Manifold`](@ref) `M`.
 
-If `throw_error` is `false`, the function returns either `true` or `false`.
-If `throw_error` if `true`, the function either returns `true` or throws an error.
+If `throw_error` is `false`, the function returns either `true` or `false`. If
+`throw_error` is `true`, the function either returns `true` or throws an error.
 By default the function calls [`check_manifold_point(M, x; kwargs...)`](@ref)
 and checks whether the returned value is `nothing` or an error.
 """
@@ -684,13 +681,14 @@ end
 """
     check_tangent_vector(M::Manifold, x, v; kwargs...) -> Union{Nothing,String}
 
-check, whether `v` is a valid tangent vector in the tangent plane of `x` on the
-[`Manifold`](@ref) `M`. An implementation should first check
-[`check_manifold_point(M, x; kwargs...)`](@ref) and then validate `v`.
-If it is not a tangent vector, an error string should be returned.
+Check whether `v` is a valid tangent vector in the tangent plane of `x` on the
+[`Manifold`](@ref) `M`. An implementation should first call
+[`check_manifold_point(M, x; kwargs...)`](@ref) and then validate `v`. If it is
+not a tangent vector, an error string should be returned.
 
-By default, `check_tangent_vector` returns `nothing`, i.e. if no checks are implemented,
-the assumption is to be optimistic for tangent vectors not deriving from the [`TVector`](@ref) type.
+By default, `check_tangent_vector` returns `nothing`, i.e. if no checks are
+implemented, the assumption is to be optimistic for tangent vectors not deriving
+from the [`TVector`](@ref) type.
 """
 function check_tangent_vector(M::Manifold, x, v; kwargs...)
     return nothing

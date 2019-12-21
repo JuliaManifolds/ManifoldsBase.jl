@@ -2,9 +2,9 @@
     ArrayManifold{M <: Manifold} <: Manifold
 
 A manifold to encapsulate manifolds working on array representations of
-`MPoints` and `TVectors` in a transparent way, such that for these manifolds it's
-not necessary to introduce explicit types for the points and tangent vectors,
-but they are encapsulated/stripped automatically when needed.
+`MPoints` and `TVectors` in a transparent way, such that for these manifolds
+it's not necessary to introduce explicit types for the points and tangent
+vectors, but they are encapsulated/stripped automatically when needed.
 
 This manifold is a decorator for a manifold, i.e. it decorates a manifold `M`
 with types points, vectors, and covectors.
@@ -95,9 +95,9 @@ end
 """
     array_value(x)
 
-Return the internal array value of a [`ArrayMPoint`](@ref), [`ArrayTVector`](@ref)
-or [`ArrayCoTVector`](@ref) if the value `x` is encapsulated as such.
-Return `x` if it is already an array
+Return the internal array value of a [`ArrayMPoint`](@ref),
+[`ArrayTVector`](@ref), or [`ArrayCoTVector`](@ref) if the value `x` is
+encapsulated as such. Return `x` if it is already an array.
 """
 array_value(x::AbstractArray) = x
 array_value(x::ArrayMPoint) = x.value
