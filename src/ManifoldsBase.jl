@@ -138,38 +138,45 @@ Retraction using the exponential map.
 struct ExponentialRetraction <: AbstractRetractionMethod end
 
 """
-    retract!(M::Manifold, y, x, v[, t::Real=1], method::AbstractRetractionMethod=ExponentialRetraction())
+    retract!(M::Manifold, y, x, v[, t::Real=1])
+    retract!(M::Manifold, y, x, v[, t::Real=1], method::AbstractRetractionMethod)
 
-Retraction (cheaper, approximate version of [`exp`](@ref)onential map) of
-tangent vector `t*v` at point `x` from manifold `M`. Result is saved to `y`.
+Retraction (cheaper, approximate version of [`exp`](@ref)onential map) of tangent vector
+`t*v` at point `x` from manifold `M`. Result is saved to `y`.
 
-Retraction method can be specified by the last argument. Please look at the
-documentation of respective manifolds for available methods.
+Retraction method can be specified by the last argument, defaulting to
+[`ExponentialRetraction`](@ref). See the documentation of respective manifolds for available
+methods.
 """
-retract!(M::Manifold, y, x, v, method::ExponentialRetraction) = exp!(M, y, x, v)
 retract!(M::Manifold, y, x, v) = retract!(M, y, x, v, ExponentialRetraction())
 retract!(M::Manifold, y, x, v, t::Real) = retract!(M, y, x, t * v)
+retract!(M::Manifold, y, x, v, method::ExponentialRetraction) = exp!(M, y, x, v)
 function retract!(M::Manifold, y, x, v, t::Real, method::AbstractRetractionMethod)
     return retract!(M, y, x, t * v, method)
 end
 
 """
-    retract(M::Manifold, x, v[, t::Real=1], method::AbstractRetractionMethod=ExponentialRetraction())
+    retract(M::Manifold, x, v[, t::Real=1])
+    retract(M::Manifold, x, v[, t::Real=1], method::AbstractRetractionMethod)
 
-Retraction (cheaper, approximate version of [`exp`](@ref)onential map) of tangent
-vector `t*v` at point `x` from manifold `M`.
+Retraction (cheaper, approximate version of [`exp`](@ref)onential map) of tangent vector
+`t*v` at point `x` from manifold `M`.
+
+Retraction method can be specified by the last argument, defaulting to
+[`ExponentialRetraction`](@ref). See the documentation of respective manifolds for available
+methods.
 """
-function retract(M::Manifold, x, v, method::AbstractRetractionMethod)
-    xr = similar_result(M, retract, x, v)
-    retract!(M, xr, x, v, method)
-    return xr
-end
 function retract(M::Manifold, x, v)
     xr = similar_result(M, retract, x, v)
     retract!(M, xr, x, v)
     return xr
 end
 retract(M::Manifold, x, v, t::Real) = retract(M, x, t * v)
+function retract(M::Manifold, x, v, method::AbstractRetractionMethod)
+    xr = similar_result(M, retract, x, v)
+    retract!(M, xr, x, v, method)
+    return xr
+end
 function retract(M::Manifold, x, v, t::Real, method::AbstractRetractionMethod)
     return retract(M, x, t * v, method)
 end
@@ -189,8 +196,7 @@ Inverse retraction using the [`log`](@ref)arithmic map.
 struct LogarithmicInverseRetraction <: AbstractInverseRetractionMethod end
 
 """
-    inverse_retract!(M::Manifold, v, x, y)
-    inverse_retract!(M::Manifold, v, x, y, method::AbstractInverseRetractionMethod)
+    inverse_retract!(M::Manifold, v, x, y[, method::AbstractInverseRetractionMethod])
 
 Inverse retraction (cheaper, approximate version of [`log`](@ref)arithmic map) of points `x`
 and `y`. Result is saved to `v`.
@@ -199,11 +205,11 @@ Inverse retraction method can be specified by the last argument, defaulting to
 [`LogarithmicInverseRetraction`](@ref). See the documentation of respective manifolds for
 available methods.
 """
-function inverse_retract!(M::Manifold, v, x, y, method::LogarithmicInverseRetraction)
-    return log!(M, v, x, y)
-end
 function inverse_retract!(M::Manifold, v, x, y)
     return inverse_retract!(M, v, x, y, LogarithmicInverseRetraction())
+end
+function inverse_retract!(M::Manifold, v, x, y, method::LogarithmicInverseRetraction)
+    return log!(M, v, x, y)
 end
 
 """
@@ -217,14 +223,14 @@ Inverse retraction method can be specified by the last argument, defaulting to
 [`LogarithmicInverseRetraction`](@ref). See the documentation of respective manifolds
 for available methods.
 """
-function inverse_retract(M::Manifold, x, y, method::AbstractInverseRetractionMethod)
-    vr = similar_result(M, inverse_retract, x, y)
-    inverse_retract!(M, vr, x, y, method)
-    return vr
-end
 function inverse_retract(M::Manifold, x, y)
     vr = similar_result(M, inverse_retract, x, y)
     inverse_retract!(M, vr, x, y)
+    return vr
+end
+function inverse_retract(M::Manifold, x, y, method::AbstractInverseRetractionMethod)
+    vr = similar_result(M, inverse_retract, x, y)
+    inverse_retract!(M, vr, x, y, method)
     return vr
 end
 
@@ -316,15 +322,17 @@ angle(M::Manifold, x, v, w) = acos(inner(M, x, v, w) / norm(M, x, v) / norm(M, x
 Exponential map of tangent vector `t*v` at point `x` from manifold `M`. Result is saved to
 `y`.
 """
-exp!(M::Manifold, y, x, v, t::Real) = exp!(M, y, x, t * v)
 function exp!(M::Manifold, y, x, v)
     error("exp! not implemented on a $(typeof(M)) for input point $(x) and tangent vector $(v).")
 end
+exp!(M::Manifold, y, x, v, t::Real) = exp!(M, y, x, t * v)
 
 """
     exp(M::Manifold, x, v, t::Real = 1)
+    exp(M::Manifold, x, v, T::AbstractVector) -> AbstractVector
 
-Exponential map of tangent vector `t*v` at point `x` from manifold `M`.
+Exponential map of tangent vector `t*v` at point `x` from manifold `M`. `t` may be a scalar
+or elements of vector `T`.
 """
 function exp(M::Manifold, x, v)
     y = similar_result(M, exp, x, v)
@@ -332,20 +340,12 @@ function exp(M::Manifold, x, v)
     return y
 end
 exp(M::Manifold, x, v, t::Real) = exp(M, x, t * v)
-
-"""
-    exp(M::Manifold, x, v, T::AbstractVector) -> AbstractVector
-
-Exponential map of tangent vector `t*v` at point `x` from manifold `M` for
-each `t` in `T`.
-"""
 exp(M::Manifold, x, v, T::AbstractVector) = map(geodesic(M, x, v), T)
 
 """
     log!(M::Manifold, v, x, y)
 
-Logarithmic map of point `y` at base point `x` on Manifold `M`. Result is saved
-to `v`.
+Logarithmic map of point `y` at base point `x` on Manifold `M`. Result is saved to `v`.
 """
 function log!(M::Manifold, v, x, y)
     error("log! not implemented on $(typeof(M)) for points $(typeof(x)) and $(typeof(y))")
@@ -365,52 +365,35 @@ end
 """
     geodesic(M::Manifold, x, v) -> Function
 
-Get the geodesic with initial point `x` and velocity `v`. The geodesic is the
-curve of constant velocity that is locally distance-minimizing. This function
-returns a function of time, which may be a `Real` or an `AbstractVector`.
-"""
-geodesic(M::Manifold, x, v) = t -> exp(M, x, v, t)
+Get the geodesic with initial point `x` and velocity `v`. The geodesic is the curve of
+constant velocity that is locally distance-minimizing. This function returns a function of
+time, which may be a `Real` or an `AbstractVector`.
 
-"""
     geodesic(M::Manifold, x, v, t::Real)
-
-Get the point at time `t` traveling from `x` along the geodesic with initial
-point `x` and velocity `v`.
-"""
-geodesic(M::Manifold, x, v, t::Real) = exp(M, x, v, t)
-
-"""
     geodesic(M::Manifold, x, v, T::AbstractVector) -> AbstractVector
 
-Get the points for each `t` in `T` traveling from `x` along the geodesic with
-initial point `x` and velocity `v`.
+Return the point at time `t` or points at times `t` in `T` along the geodesic.
 """
+geodesic(M::Manifold, x, v) = t -> exp(M, x, v, t)
+geodesic(M::Manifold, x, v, t::Real) = exp(M, x, v, t)
 geodesic(M::Manifold, x, v, T::AbstractVector) = exp(M, x, v, T)
 
-"""
+@doc doc"""
     shortest_geodesic(M::Manifold, x, y) -> Function
 
-Get a [`geodesic`](@ref) with initial point `x` and point `y` at `t=1` whose
-length is the shortest path between the two points. When there are multiple
-shortest geodesics, there is no guarantee which will be returned. This function
-returns a function of time, which may be a `Real` or an `AbstractVector`.
-"""
-shortest_geodesic(M::Manifold, x, y) = geodesic(M, x, log(M, x, y))
+Get a [`geodesic`](@ref) $\gamma_x(t)$ whose length is the shortest path between the points
+$x$ and $y$, where $\gamma_x(0)=x$ and $\gamma_x(1)=y$. When there are multiple shortest
+geodesics, there is no guarantee which will be returned.
 
-"""
+This function returns a function of time, which may be a `Real` or an `AbstractVector`.
+
     shortest_geodesic(M::Manifold, x, y, t::Real)
-
-Get the point at time `t` traveling from `x` along a shortest [`geodesic`](@ref)
-connecting `x` and `y`, where `y` is reached at `t=1`.
-"""
-shortest_geodesic(M::Manifold, x, y, t::Real) = geodesic(M, x, log(M, x, y), t)
-
-"""
     shortest_geodesic(M::Manifold, x, y, T::AbstractVector) -> AbstractVector
 
-Get the points for each `t` in `T` traveling from `x` along a shortest
-[`geodesic`](@ref) connecting `x` and `y`, where `y` is reached at `t=1`.
+Return the point at time $t$ or points at times $t$ in $T$ along the shortest geodesic.
 """
+shortest_geodesic(M::Manifold, x, y) = geodesic(M, x, log(M, x, y))
+shortest_geodesic(M::Manifold, x, y, t::Real) = geodesic(M, x, log(M, x, y), t)
 shortest_geodesic(M::Manifold, x, y, T::AbstractVector) = geodesic(M, x, log(M, x, y), T)
 
 """
@@ -439,8 +422,7 @@ Specify to use projection onto tangent space as vector transport method within
 struct ProjectionTransport <: AbstractVectorTransportMethod end
 
 """
-    vector_transport_to!(M::Manifold, vto, x, v, y)
-    vector_transport_to!(M::Manifold, vto, x, v, y, method::AbstractVectorTransportMethod)
+    vector_transport_to!(M::Manifold, vto, x, v, y[, method::AbstractVectorTransportMethod])
 
 Vector transport of vector `v` at point `x` to point `y`. The result is saved to `vto`. By
 default, the `method` is [`ParallelTransport`](@ref).
@@ -459,7 +441,6 @@ at `y`.
 function vector_transport_to!(M::Manifold, vto, x, v, y, ::ProjectionTransport)
     return project_tangent!(M, vto, y, v)
 end
-
 function vector_transport_to!(
     M::Manifold,
     vto,
@@ -472,8 +453,7 @@ function vector_transport_to!(
 end
 
 """
-    vector_transport_to(M::Manifold, x, v, y)
-    vector_transport_to(M::Manifold, x, v, y, method::AbstractVectorTransportMethod)
+    vector_transport_to(M::Manifold, x, v, y[, method::AbstractVectorTransportMethod])
 
 Transport a vector `v` at point `x` to point `y` using the `method`, which defaults to
 [`ParallelTransport`](@ref).
@@ -488,8 +468,7 @@ function vector_transport_to(M::Manifold, x, v, y, method::AbstractVectorTranspo
 end
 
 """
-    vector_transport_direction!(M::Manifold, vto, x, v, vdir)
-    vector_transport_direction!(M::Manifold, vto, x, v, vdir, method::AbstractVectorTransportMethod)
+    vector_transport_direction!(M::Manifold, vto, x, v, vdir[, method::AbstractVectorTransportMethod])
 
 Transport a vector `v` at point `x` in the direction indicated by the tangent vector `vdir`
 at point `x`. The result is saved to `vto`. By default, [`exp`](@ref) and
@@ -512,8 +491,7 @@ function vector_transport_direction!(
 end
 
 """
-    vector_transport_direction(M::Manifold, x, v, vdir)
-    vector_transport_direction(M::Manifold, x, v, vdir, method::AbstractVectorTransportMethod)
+    vector_transport_direction(M::Manifold, x, v, vdir[, method::AbstractVectorTransportMethod])
 
 Transport a vector `v` at point `x` in the direction indicated by the tangent vector `vdir`
 at point `x` using the `method`, which defaults to [`ParallelTransport`](@ref).
@@ -534,8 +512,7 @@ function vector_transport_direction(
 end
 
 """
-    vector_transport_along!(M::Manifold, vto, x, v, c)
-    vector_transport_along!(M::Manifold, vto, x, v, c, method::AbstractVectorTransportMethod)
+    vector_transport_along!(M::Manifold, vto, x, v, c[, method::AbstractVectorTransportMethod])
 
 Transport a vector `v` at point `x` along the curve `c` such that `c(0)` is equal to `x` to
 point `c(1)` using the `method`, which defaults to [`ParallelTransport`](@ref). The result
@@ -556,8 +533,7 @@ function vector_transport_along!(
 end
 
 """
-    vector_transport_along(M::Manifold, x, v, c)
-    vector_transport_along(M::Manifold, x, v, c, method::AbstractVectorTransportMethod)
+    vector_transport_along(M::Manifold, x, v, c[, method::AbstractVectorTransportMethod])
 
 Transport a vector `v` at point `x` along the curve `c` such that `c(0)` is equal to `x` to
 point `c(1)`. The default `method` used is [`ParallelTransport`](@ref).
@@ -574,29 +550,24 @@ end
 @doc doc"""
     injectivity_radius(M::Manifold, x)
 
-Distance $d$ such that [`exp(M, x, v)`](@ref exp(::Manifold, ::Any, ::Any)) is
-injective for all tangent vectors shorter than $d$ (i.e. has a left inverse).
-"""
-injectivity_radius(M::Manifold, x) = injectivity_radius(M)
+Distance $d$ such that [`exp(M, x, v)`](@ref exp(::Manifold, ::Any, ::Any)) is injective for
+all tangent vectors shorter than $d$ (i.e. has a left inverse).
 
-@doc doc"""
+    injectivity_radius(M::Manifold)
+
+Infimum of the injectivity radius of all manifold points.
+
     injectivity_radius(M::Manifold, x, method::AbstractRetractionMethod)
 
 Distance $d$ such that
 [`retract(M, x, v, method)`](@ref retract(::Manifold, ::Any, ::Any, ::AbstractRetractionMethod))
 is injective for all tangent vectors shorter than $d$ (i.e. has a left inverse).
 """
-injectivity_radius(M::Manifold, x, ::AbstractRetractionMethod) = injectivity_radius(M, x)
-
-"""
-    injectivity_radius(M::Manifold)
-
-Infimum of the [`injectivity_radius`](@ref injectivity_radius(::Manifold, ::Any))
-of all manifold points.
-"""
 function injectivity_radius(M::Manifold)
     error("injectivity_radius not implemented for manifold $(typeof(M)).")
 end
+injectivity_radius(M::Manifold, x) = injectivity_radius(M)
+injectivity_radius(M::Manifold, x, ::AbstractRetractionMethod) = injectivity_radius(M, x)
 
 """
     zero_tangent_vector(M::Manifold, x)
