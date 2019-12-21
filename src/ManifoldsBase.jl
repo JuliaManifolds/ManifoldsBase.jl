@@ -152,9 +152,7 @@ Retraction method can be specified by the last argument. Please look at the
 documentation of respective manifolds for available methods.
 """
 retract!(M::Manifold, y, x, v, method::ExponentialRetraction) = exp!(M, y, x, v)
-
 retract!(M::Manifold, y, x, v) = retract!(M, y, x, v, ExponentialRetraction())
-
 retract!(M::Manifold, y, x, v, t::Real) = retract!(M, y, x, t * v)
 
 function retract!(M::Manifold, y, x, v, t::Real, method::AbstractRetractionMethod)
