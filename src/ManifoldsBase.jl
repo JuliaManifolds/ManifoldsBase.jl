@@ -721,6 +721,13 @@ function is_tangent_vector(M::Manifold, x, v, throw_error = false; kwargs...)
     end
 end
 
+"""
+    AbstractEstimationMethod
+
+Abstract type for defining statistical estimation methods.
+"""
+abstract type AbstractEstimationMethod end
+
 include("ArrayManifold.jl")
 include("DefaultManifold.jl")
 
