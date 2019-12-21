@@ -510,7 +510,7 @@ function vector_transport_direction!(
     method::AbstractVectorTransportMethod,
 )
     y = exp(M, x, vdir)
-    return vector_transport_to!(M, vto, x, v, y, m)
+    return vector_transport_to!(M, vto, x, v, y, method)
 end
 
 """
