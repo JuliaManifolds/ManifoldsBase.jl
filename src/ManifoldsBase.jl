@@ -688,14 +688,8 @@ and checks whether the returned value is `nothing` or an error.
 """
 function is_manifold_point(M::Manifold, x, throw_error = false; kwargs...)
     mpe = check_manifold_point(M, x; kwargs...)
-    if throw_error
-        if mpe !== nothing
-            throw(mpe)
-        end
-        return true
-    else
-        return mpe === nothing
-    end
+    mpe === nothing && return true
+    return throw_error ? throw(mpe) : false
 end
 
 """
@@ -727,14 +721,8 @@ the assumption is to be optimistic.
 """
 function is_tangent_vector(M::Manifold, x, v, throw_error = false; kwargs...)
     mtve = check_tangent_vector(M, x, v; kwargs...)
-    if throw_error
-        if mtve !== nothing
-            throw(mtve)
-        end
-        return true
-    else
-        return mtve === nothing
-    end
+    mtve === nothing && return true
+    return throw_error ? throw(mtve) : false
 end
 
 """
