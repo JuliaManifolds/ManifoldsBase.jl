@@ -505,8 +505,8 @@ end
     vector_transport_direction!(M::Manifold, vto, x, v, vdir)
     vector_transport_direction!(M::Manifold, vto, x, v, vdir, method::AbstractVectorTransportMethod)
 
-Vector transport of vector `v` at point `x` in the direction indicated by the
-tangent vector `vdir` at point `x`. The result is saved to `vto`. By default,
+Transport a vector `v` at point `x` in the direction indicated by the tangent
+vector `vdir` at point `x`. The result is saved to `vto`. By default,
 [`exp`](@ref) and [`vector_transport_to!`](@ref) are used with the `method`,
 which defaults to [`ParallelTransport`](@ref).
 """
@@ -530,8 +530,8 @@ end
     vector_transport_direction(M::Manifold, x, v, vdir)
     vector_transport_direction(M::Manifold, x, v, vdir, method::AbstractVectorTransportMethod)
 
-Vector transport of vector `v` at point `x` in the direction indicated by the
-tangent vector `vdir` at point `x` using the `method`, which defaults to
+Transport a vector `v` at point `x` in the direction indicated by the tangent
+vector `vdir` at point `x` using the `method`, which defaults to
 [`ParallelTransport`](@ref).
 """
 function vector_transport_direction(M::Manifold, x, v, vdir)
@@ -554,8 +554,8 @@ end
     vector_transport_along!(M::Manifold, vto, x, v, c)
     vector_transport_along!(M::Manifold, vto, x, v, c, method::AbstractVectorTransportMethod)
 
-Vector transport of vector `v` at point `x` along the curve `c` such that `c(0)`
-is equal to `x` to point `c(1)` using the `method`, which defaults to
+Transport a vector `v` at point `x` along the curve `c` such that `c(0)` is
+equal to `x` to point `c(1)` using the `method`, which defaults to
 [`ParallelTransport`](@ref). The result is saved to `vto`.
 """
 function vector_transport_along!(M::Manifold, vto, x, v, c)
@@ -577,8 +577,8 @@ end
     vector_transport_along(M::Manifold, x, v, c)
     vector_transport_along(M::Manifold, x, v, c, method::AbstractVectorTransportMethod)
 
-Vector transport of vector `v` at point `x` along the curve `c` such that `c(0)`
-is equal to `x` to point `c(1)`. The default `method` used is
+Transport a vector `v` at point `x` along the curve `c` such that `c(0)` is
+equal to `x` to point `c(1)`. The default `method` used is
 [`ParallelTransport`](@ref).
 """
 function vector_transport_along(M::Manifold, x, v, c)
@@ -630,7 +630,7 @@ end
 """
     zero_tangent_vector!(M::Manifold, v, x)
 
-Vector `v` such that retracting `v` to manifold `M` at `x` produces `x`.
+Save to `v` a vector such that retracting `v` to manifold `M` at `x` produces `x`.
 """
 zero_tangent_vector!(M::Manifold, v, x) = log!(M, v, x, x)
 
@@ -713,11 +713,11 @@ end
 """
     is_tangent_vector(M::Manifold, x, v, throw_error = false; kwargs...)
 
-Return whether `v` is a valid tangent vector at point `x` on
-the [`Manifold`](@ref) `M`. Returns either `true` or `false`.
+Return whether `v` is a valid tangent vector at point `x` on the
+[`Manifold`](@ref) `M`. Returns either `true` or `false`.
 
-The default is to return `true`, i.e. if no checks are implemented,
-the assumption is to be optimistic.
+The default is to return `true`, i.e. if no checks are implemented, the
+assumption is to be optimistic.
 """
 function is_tangent_vector(M::Manifold, x, v, throw_error = false; kwargs...)
     mtve = check_tangent_vector(M, x, v; kwargs...)
