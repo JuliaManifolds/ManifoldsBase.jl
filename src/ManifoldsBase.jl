@@ -9,9 +9,10 @@ using LinearAlgebra
 """
     Manifold
 
-A manifold type. The `Manifold` is used to dispatch to different
-[`exp`](@ref)onential and [`log`](@ref)arithmic maps as well as other functions
-on the manifold.
+A manifold type. The `Manifold` is used to dispatch to different functions on a
+manifold, usually as the first argument of the function. Examples are the
+[`exp`](@ref)onential and [`log`](@ref)arithmic maps as well as more general
+functions that are built on them like the [`geodesic`](@ref).
 """
 abstract type Manifold end
 
