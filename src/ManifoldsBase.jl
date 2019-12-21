@@ -465,9 +465,9 @@ end
 """
     vector_transport_to!(M::Manifold, vto, x, v, y, method::ProjectionTransport)
 
-Implements a default projection based vector transport that projects a tangent
-vector `v` at `x` on a [`Manifold`](@ref) `M` onto the tangent space at `y` by
-interperting `v` as an element of the embedding and projecting back.
+Transport a vector `v` in the tangent space at `x` on a [`Manifold`](@ref) `M`
+by interpreting it as an element of the embedding and then projecting it onto
+the tangent space at `y`.
 """
 function vector_transport_to!(M::Manifold, vto, x, v, y, ::ProjectionTransport)
     return project_tangent!(M, vto, y, v)
@@ -488,8 +488,8 @@ end
     vector_transport_to(M::Manifold, x, v, y)
     vector_transport_to(M::Manifold, x, v, y, method::AbstractVectorTransportMethod)
 
-Vector transport of vector `v` at point `x` to point `y` using the `method`,
-which defaults to [`ParallelTransport`](@ref).
+Transport a vector `v` at point `x` to point `y` using the `method`, which
+defaults to [`ParallelTransport`](@ref).
 """
 function vector_transport_to(M::Manifold, x, v, y)
     return vector_transport_to(M, x, v, y, ParallelTransport())
