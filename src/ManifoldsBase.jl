@@ -81,7 +81,6 @@ The size of an array representing a point on manifold `M`.
 """
 representation_size(M::Manifold) = representation_size(M, is_decorator_manifold(M))
 representation_size(M::Manifold, ::Val{true}) = representation_size(base_manifold(M))
-
 function representation_size(M::Manifold, ::Val{false})
     error("representation_size not implemented for manifold $(typeof(M)).")
 end
@@ -94,7 +93,6 @@ manifold is homeomorphic.
 """
 manifold_dimension(M::Manifold) = manifold_dimension(M, is_decorator_manifold(M))
 manifold_dimension(M::Manifold, ::Val{true}) = manifold_dimension(base_manifold(M))
-
 function manifold_dimension(M::Manifold, ::Val{false})
     error("manifold_dimension not implemented for manifold $(typeof(M)).")
 end
@@ -151,7 +149,6 @@ documentation of respective manifolds for available methods.
 retract!(M::Manifold, y, x, v, method::ExponentialRetraction) = exp!(M, y, x, v)
 retract!(M::Manifold, y, x, v) = retract!(M, y, x, v, ExponentialRetraction())
 retract!(M::Manifold, y, x, v, t::Real) = retract!(M, y, x, t * v)
-
 function retract!(M::Manifold, y, x, v, t::Real, method::AbstractRetractionMethod)
     return retract!(M, y, x, t * v, method)
 end
@@ -167,15 +164,12 @@ function retract(M::Manifold, x, v, method::AbstractRetractionMethod)
     retract!(M, xr, x, v, method)
     return xr
 end
-
 function retract(M::Manifold, x, v)
     xr = similar_result(M, retract, x, v)
     retract!(M, xr, x, v)
     return xr
 end
-
 retract(M::Manifold, x, v, t::Real) = retract(M, x, t * v)
-
 function retract(M::Manifold, x, v, t::Real, method::AbstractRetractionMethod)
     return retract(M, x, t * v, method)
 end
@@ -208,7 +202,6 @@ available methods.
 function inverse_retract!(M::Manifold, v, x, y, method::LogarithmicInverseRetraction)
     return log!(M, v, x, y)
 end
-
 function inverse_retract!(M::Manifold, v, x, y)
     return inverse_retract!(M, v, x, y, LogarithmicInverseRetraction())
 end
@@ -229,7 +222,6 @@ function inverse_retract(M::Manifold, x, y, method::AbstractInverseRetractionMet
     inverse_retract!(M, vr, x, y, method)
     return vr
 end
-
 function inverse_retract(M::Manifold, x, y)
     vr = similar_result(M, inverse_retract, x, y)
     inverse_retract!(M, vr, x, y)
@@ -325,7 +317,6 @@ Exponential map of tangent vector `t*v` at point `x` from manifold `M`. Result i
 `y`.
 """
 exp!(M::Manifold, y, x, v, t::Real) = exp!(M, y, x, t * v)
-
 function exp!(M::Manifold, y, x, v)
     error("exp! not implemented on a $(typeof(M)) for input point $(x) and tangent vector $(v).")
 end
@@ -340,7 +331,6 @@ function exp(M::Manifold, x, v)
     exp!(M, y, x, v)
     return y
 end
-
 exp(M::Manifold, x, v, t::Real) = exp(M, x, t * v)
 
 """
@@ -491,7 +481,6 @@ Transport a vector `v` at point `x` to point `y` using the `method`, which defau
 function vector_transport_to(M::Manifold, x, v, y)
     return vector_transport_to(M, x, v, y, ParallelTransport())
 end
-
 function vector_transport_to(M::Manifold, x, v, y, method::AbstractVectorTransportMethod)
     vto = similar_result(M, vector_transport_to, v, x, y)
     vector_transport_to!(M, vto, x, v, y, method)
@@ -510,7 +499,6 @@ at point `x`. The result is saved to `vto`. By default, [`exp`](@ref) and
 function vector_transport_direction!(M::Manifold, vto, x, v, vdir)
     return vector_transport_direction!(M, vto, x, v, vdir, ParallelTransport())
 end
-
 function vector_transport_direction!(
     M::Manifold,
     vto,
@@ -533,7 +521,6 @@ at point `x` using the `method`, which defaults to [`ParallelTransport`](@ref).
 function vector_transport_direction(M::Manifold, x, v, vdir)
     return vector_transport_direction(M, x, v, vdir, ParallelTransport())
 end
-
 function vector_transport_direction(
     M::Manifold,
     x,
@@ -557,7 +544,6 @@ is saved to `vto`.
 function vector_transport_along!(M::Manifold, vto, x, v, c)
     return vector_transport_along!(M, vto, x, v, c, ParallelTransport())
 end
-
 function vector_transport_along!(
     M::Manifold,
     vto,
@@ -579,7 +565,6 @@ point `c(1)`. The default `method` used is [`ParallelTransport`](@ref).
 function vector_transport_along(M::Manifold, x, v, c)
     return vector_transport_along(M, x, v, c, ParallelTransport())
 end
-
 function vector_transport_along(M::Manifold, x, v, c, m::AbstractVectorTransportMethod)
     vto = similar_result(M, vector_transport_along, v, x)
     vector_transport_along!(M, vto, x, v, c, m)
@@ -666,7 +651,6 @@ By default, `check_manifold_point` returns `nothing`, i.e. if no checks are impl
 assumption is to be optimistic for a point not deriving from the [`MPoint`](@ref) type.
 """
 check_manifold_point(M::Manifold, x; kwargs...) = nothing
-
 function check_manifold_point(M::Manifold, x::MPoint; kwargs...)
     error("check_manifold_point not implemented for manifold $(typeof(M)) and point $(typeof(x)).")
 end
@@ -700,7 +684,6 @@ assumption is to be optimistic for tangent vectors not deriving from the [`TVect
 type.
 """
 check_tangent_vector(M::Manifold, x, v; kwargs...) = nothing
-
 function check_tangent_vector(M::Manifold, x::MPoint, v::TVector; kwargs...)
     error("check_tangent_vector not implemented for manifold $(typeof(M)), point $(typeof(x)) and vector $(typeof(v)).")
 end

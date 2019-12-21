@@ -54,7 +54,6 @@ struct ArrayTVector{V<:AbstractArray{<:Number}} <: TVector
 end
 
 convert(::Type{V}, v::ArrayTVector{V}) where {V<:AbstractArray{<:Number}} = v.value
-
 function convert(::Type{ArrayTVector{V}}, v::V) where {V<:AbstractArray{<:Number}}
     return ArrayTVector{V}(v)
 end
@@ -242,7 +241,6 @@ function vector_transport_along!(
 end
 
 injectivity_radius(M::ArrayManifold) = injectivity_radius(M.manifold)
-
 function injectivity_radius(M::ArrayManifold, x, args...; kwargs...)
     is_manifold_point(M, x, true; kwargs...)
     return injectivity_radius(M.manifold, array_value(x), args...)
