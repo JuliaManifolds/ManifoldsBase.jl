@@ -274,7 +274,7 @@ The function works only for selected embedded manifolds and
 is *not* required to return the closest vector.
 """
 function project_tangent!(M::Manifold, w, x, v)
-    error("project onto tangent space not implemented for a $(typeof(M)) and point $(typeof(x)) with input $(typeof(v)).")
+    error("project_tangent! not implemented for a $(typeof(M)) and point $(typeof(x)) with input $(typeof(v)).")
 end
 
 """
@@ -298,7 +298,7 @@ end
 Inner product of tangent vectors `v` and `w` at point `x` from manifold `M`.
 """
 function inner(M::Manifold, x, v, w)
-    error("inner: Inner product not implemented on a $(typeof(M)) for input point $(typeof(x)) and tangent vectors $(typeof(v)) and $(typeof(w)).")
+    error("inner not implemented on a $(typeof(M)) for input point $(typeof(x)) and tangent vectors $(typeof(v)) and $(typeof(w)).")
 end
 
 """
@@ -331,7 +331,7 @@ Result is saved to `y`.
 exp!(M::Manifold, y, x, v, t::Real) = exp!(M, y, x, t * v)
 
 function exp!(M::Manifold, y, x, v)
-    error("Exponential map not implemented on a $(typeof(M)) for input point $(x) and tangent vector $(v).")
+    error("exp! not implemented on a $(typeof(M)) for input point $(x) and tangent vector $(v).")
 end
 
 """
@@ -362,7 +362,7 @@ Logarithmic map of point `y` at base point `x` on Manifold `M`. Result is saved
 to `v`.
 """
 function log!(M::Manifold, v, x, y)
-    error("Logarithmic map not implemented on $(typeof(M)) for points $(typeof(x)) and $(typeof(y))")
+    error("log! not implemented on $(typeof(M)) for points $(typeof(x)) and $(typeof(y))")
 end
 
 """
@@ -482,7 +482,7 @@ function vector_transport_to!(
     y,
     method::AbstractVectorTransportMethod,
 )
-    error("vector transport from a point of type $(typeof(x)) to a type $(typeof(y)) on a $(typeof(M)) for a vector of type $(v) and the $(typeof(method)) not yet implemented.")
+    error("vector_transport_to! not implemented from a point of type $(typeof(x)) to a type $(typeof(y)) on a $(typeof(M)) for a vector of type $(v) and the $(typeof(method)).")
 end
 
 """
