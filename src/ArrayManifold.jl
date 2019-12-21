@@ -2,7 +2,7 @@
     ArrayManifold{M <: Manifold} <: Manifold
 
 A manifold to encapsulate manifolds working on array representations of
-`MPoints` and `TVectors` in a transparent way, such that for these manifolds its
+`MPoints` and `TVectors` in a transparent way, such that for these manifolds it's
 not necessary to introduce explicit types for the points and tangent vectors,
 but they are encapsulated/stripped automatically when needed.
 
@@ -20,9 +20,10 @@ is_decorator_manifold(::ArrayManifold) = Val(true)
 """
     ArrayMPoint <: MPoint
 
-represent a point on an [`ArrayManifold`](@ref), i.e. on a manifold where data
-can be represented by arrays. The array is stored internally and semantically
-this distinguished the value from [`ArrayTVector`](@ref)s and [`ArrayCoTVector`](@ref)s
+Represent a point on an [`ArrayManifold`](@ref), i.e. on a manifold where data
+can be represented by arrays. The array is stored internally and semantically.
+This distinguished the value from [`ArrayTVector`](@ref)s and
+[`ArrayCoTVector`](@ref)s.
 """
 struct ArrayMPoint{V <: AbstractArray{<:Number}} <: MPoint
     value::V
@@ -40,9 +41,10 @@ end
 """
     ArrayTVector <: TVector
 
-represent a tangent vector an [`ArrayManifold`](@ref), i.e. on a manifold where data
-can be represented by arrays. The array is stored internally and semantically
-this distinguished the value from [`ArrayMPoint`](@ref)s and [`ArrayCoTVector`](@ref)s
+Represent a tangent vector to a point on an [`ArrayManifold`](@ref), i.e. on a
+manifold where data can be represented by arrays. The array is stored internally
+and semantically. This distinguished the value from [`ArrayMPoint`](@ref)s and
+[`ArrayCoTVector`](@ref)s.
 """
 struct ArrayTVector{V <: AbstractArray{<:Number}} <: TVector
     value::V
@@ -65,9 +67,10 @@ end
 """
     ArrayCoTVector <: CoTVector
 
-represent a cotangent vector an [`ArrayManifold`](@ref), i.e. on a manifold where data
-can be represented by arrays. The array is stored internally and semantically
-this distinguished the value from [`ArrayMPoint`](@ref)s and [`ArrayTVector`](@ref)s
+Represent a cotangent vector to a point on an [`ArrayManifold`](@ref), i.e. on a
+manifold where data can be represented by arrays. The array is stored internally
+and semantically. This distinguished the value from [`ArrayMPoint`](@ref)s and
+[`ArrayTVector`](@ref)s.
 """
 struct ArrayCoTVector{V <: AbstractArray{<:Number}} <: TVector
     value::V
@@ -90,15 +93,14 @@ end
 """
     array_value(x)
 
-returns the internal array value of a [`ArrayMPoint`](@ref), [`ArrayTVector`](@ref)
-or [`ArrayCoTVector`](@ref) if the value `x` is encapsulated as such, otherwise
-if `x` is already an array, it just returns `x`
+Return the internal array value of a [`ArrayMPoint`](@ref), [`ArrayTVector`](@ref)
+or [`ArrayCoTVector`](@ref) if the value `x` is encapsulated as such.
+Return `x` if it is already an array
 """
 array_value(x::AbstractArray) = x
 array_value(x::ArrayMPoint) = x.value
 array_value(v::ArrayTVector) = v.value
 array_value(v::ArrayCoTVector) = v.value
-
 
 function isapprox(M::ArrayManifold, x, y; kwargs...)
     is_manifold_point(M, x, true; kwargs...)

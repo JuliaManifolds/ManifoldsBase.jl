@@ -2,10 +2,10 @@
     DefaultManifold <: Manifold
 
 This default manifold illustrates the main features of the interface and provides
-a good starting point for an own manifold. It is a simplified/shortened variant
+a skeleton to build one's own manifold. It is a simplified/shortened variant
 of `Euclidean` from `Manifolds.jl`.
 
-this manifold further illustrates, how to type your manifold points
+This manifold further illustrates how to type your manifold points
 and tangent vectors. Note that the interface does not require this, but it
 might be handy in debugging and educative situations to verify correctness of
 involved variabes.
