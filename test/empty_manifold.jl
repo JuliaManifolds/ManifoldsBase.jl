@@ -101,9 +101,9 @@ struct NonCoTVector <: CoTVector end
     @test_throws ErrorException ManifoldsBase.vector_transport_along!(m, [0], [0], [0], x -> x)
     @test_throws ErrorException ManifoldsBase.vector_transport_along(m, [0], [0], x -> x)
 
-    @test injectivity_radius(m) === Inf
-    @test injectivity_radius(m, [0]) === Inf
-    @test injectivity_radius(m, [0], exp_retr) === Inf
+    @test_throws ErrorException injectivity_radius(m)
+    @test_throws ErrorException injectivity_radius(m, [0])
+    @test_throws ErrorException injectivity_radius(m, [0], exp_retr)
 
     @test_throws ErrorException zero_tangent_vector!(m, [0], [0])
     @test_throws ErrorException zero_tangent_vector(m, [0])

@@ -73,5 +73,7 @@ using LinearAlgebra
         zero_tangent_vector!(A, v2s, x)
         @test isapprox(A, v2s, zero_tangent_vector(M,x))
         @test_throws ErrorException vector_transport_along!(A,v2s,x2,v2,ParallelTransport())
+        @test injectivity_radius(A) == Inf
+        @test injectivity_radius(A, x) == Inf
     end
 end

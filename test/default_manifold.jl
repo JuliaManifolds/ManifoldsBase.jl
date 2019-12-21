@@ -7,7 +7,7 @@ using ReverseDiff
 using StaticArrays
 using Test
 
-@testset "Testting Default (Euclidean)" begin
+@testset "Testing Default (Euclidean)" begin
     M = ManifoldsBase.DefaultManifold(3)
     types = [Vector{Float64},
              SizedVector{3, Float64},
