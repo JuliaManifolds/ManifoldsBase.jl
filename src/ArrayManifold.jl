@@ -244,6 +244,13 @@ function vector_transport_along!(
     return vto
 end
 
+injectivity_radius(M::ArrayManifold) = injectivity_radius(M.manifold)
+
+function injectivity_radius(M::ArrayManifold, x, args...; kwargs...)
+    is_manifold_point(M, x, true; kwargs...)
+    return injectivity_radius(M.manifold, array_value(x), args...)
+end
+
 function check_manifold_point(M::ArrayManifold, x::MPoint; kwargs...)
     return check_manifold_point(M.manifold, array_value(x); kwargs...)
 end

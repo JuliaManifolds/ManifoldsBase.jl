@@ -615,7 +615,9 @@ injectivity_radius(M::Manifold, x, ::AbstractRetractionMethod) = injectivity_rad
 Infimum of the [`injectivity_radius`](@ref injectivity_radius(::Manifold, ::Any))
 of all manifold points.
 """
-injectivity_radius(M::Manifold) = Inf
+function injectivity_radius(M::Manifold)
+    error("injectivity_radius not implemented for manifold $(typeof(M)).")
+end
 
 """
     zero_tangent_vector(M::Manifold, x)
