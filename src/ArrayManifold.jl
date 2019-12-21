@@ -50,8 +50,11 @@ struct ArrayTVector{V<:AbstractArray{<:Number}} <: TVector
     value::V
 end
 convert(::Type{V}, v::ArrayTVector{V}) where {V<:AbstractArray{<:Number}} = v.value
-convert(::Type{ArrayTVector{V}}, v::V) where {V<:AbstractArray{<:Number}} =
-    ArrayTVector{V}(v)
+
+function convert(::Type{ArrayTVector{V}}, v::V) where {V<:AbstractArray{<:Number}}
+    return ArrayTVector{V}(v)
+end
+
 eltype(::Type{ArrayTVector{V}}) where {V} = eltype(V)
 similar(x::ArrayTVector) = ArrayTVector(similar(x.value))
 similar(x::ArrayTVector, ::Type{T}) where {T} = ArrayTVector(similar(x.value, T))
@@ -77,8 +80,10 @@ struct ArrayCoTVector{V<:AbstractArray{<:Number}} <: TVector
     value::V
 end
 convert(::Type{V}, v::ArrayCoTVector{V}) where {V<:AbstractArray{<:Number}} = v.value
-convert(::Type{ArrayCoTVector{V}}, v::V) where {V<:AbstractArray{<:Number}} =
-    ArrayCoTVector{V}(v)
+function convert(::Type{ArrayCoTVector{V}}, v::V) where {V<:AbstractArray{<:Number}}
+    return ArrayCoTVector{V}(v)
+end
+
 eltype(::Type{ArrayCoTVector{V}}) where {V} = eltype(V)
 similar(x::ArrayCoTVector) = ArrayCoTVector(similar(x.value))
 similar(x::ArrayCoTVector, ::Type{T}) where {T} = ArrayCoTVector(similar(x.value, T))

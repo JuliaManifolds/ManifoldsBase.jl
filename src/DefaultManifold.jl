@@ -22,4 +22,6 @@ log!(M::DefaultManifold, v, x, y) = (v .= y .- x)
 zero_tangent_vector!(M::DefaultManifold, v, x) = fill!(v, 0)
 project_point!(M::DefaultManifold, y, x) = copyto!(y, x)
 project_tangent!(M::DefaultManifold, w, x, v) = copyto!(w, v)
-vector_transport_to!(M::DefaultManifold, vto, x, v, y, ::ParallelTransport) = copyto!(vto, v)
+function vector_transport_to!(M::DefaultManifold, vto, x, v, y, ::ParallelTransport)
+    return copyto!(vto, v)
+end
