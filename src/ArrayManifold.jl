@@ -1,5 +1,5 @@
 """
-    ArrayManifold{M <: Manifold} <: Manifold
+    ArrayManifold{M<:Manifold} <: Manifold
 
 A manifold to encapsulate manifolds working on array representations of
 `MPoints` and `TVectors` in a transparent way, such that for these manifolds
@@ -12,6 +12,7 @@ with types points, vectors, and covectors.
 struct ArrayManifold{M<:Manifold} <: Manifold
     manifold::M
 end
+
 convert(::Type{M}, m::ArrayManifold{M}) where {M<:Manifold} = m.manifold
 convert(::Type{ArrayManifold{M}}, m::M) where {M<:Manifold} = ArrayManifold(m)
 
@@ -28,11 +29,15 @@ This distinguished the value from [`ArrayTVector`](@ref)s and
 struct ArrayMPoint{V<:AbstractArray{<:Number}} <: MPoint
     value::V
 end
+
 convert(::Type{V}, x::ArrayMPoint{V}) where {V<:AbstractArray{<:Number}} = x.value
 convert(::Type{ArrayMPoint{V}}, x::V) where {V<:AbstractArray{<:Number}} = ArrayMPoint{V}(x)
+
 eltype(::Type{ArrayMPoint{V}}) where {V} = eltype(V)
+
 similar(x::ArrayMPoint) = ArrayMPoint(similar(x.value))
 similar(x::ArrayMPoint, ::Type{T}) where {T} = ArrayMPoint(similar(x.value, T))
+
 function copyto!(x::ArrayMPoint, y::ArrayMPoint)
     copyto!(x.value, y.value)
     return x
@@ -49,6 +54,7 @@ and semantically. This distinguished the value from [`ArrayMPoint`](@ref)s and
 struct ArrayTVector{V<:AbstractArray{<:Number}} <: TVector
     value::V
 end
+
 convert(::Type{V}, v::ArrayTVector{V}) where {V<:AbstractArray{<:Number}} = v.value
 
 function convert(::Type{ArrayTVector{V}}, v::V) where {V<:AbstractArray{<:Number}}
@@ -56,8 +62,10 @@ function convert(::Type{ArrayTVector{V}}, v::V) where {V<:AbstractArray{<:Number
 end
 
 eltype(::Type{ArrayTVector{V}}) where {V} = eltype(V)
+
 similar(x::ArrayTVector) = ArrayTVector(similar(x.value))
 similar(x::ArrayTVector, ::Type{T}) where {T} = ArrayTVector(similar(x.value, T))
+
 function copyto!(x::ArrayTVector, y::ArrayTVector)
     copyto!(x.value, y.value)
     return x
@@ -79,14 +87,17 @@ and semantically. This distinguished the value from [`ArrayMPoint`](@ref)s and
 struct ArrayCoTVector{V<:AbstractArray{<:Number}} <: TVector
     value::V
 end
+
 convert(::Type{V}, v::ArrayCoTVector{V}) where {V<:AbstractArray{<:Number}} = v.value
 function convert(::Type{ArrayCoTVector{V}}, v::V) where {V<:AbstractArray{<:Number}}
     return ArrayCoTVector{V}(v)
 end
 
 eltype(::Type{ArrayCoTVector{V}}) where {V} = eltype(V)
+
 similar(x::ArrayCoTVector) = ArrayCoTVector(similar(x.value))
 similar(x::ArrayCoTVector, ::Type{T}) where {T} = ArrayCoTVector(similar(x.value, T))
+
 function copyto!(x::ArrayCoTVector, y::ArrayCoTVector)
     copyto!(x.value, y.value)
     return x

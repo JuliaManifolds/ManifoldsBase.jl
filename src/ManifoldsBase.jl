@@ -324,7 +324,7 @@ Angle between tangent vectors `v` and `w` at point `x` from manifold `M`.
 angle(M::Manifold, x, v, w) = acos(inner(M, x, v, w) / norm(M, x, v) / norm(M, x, w))
 
 """
-    exp!(M::Manifold, y, x, v, t::Real=1)
+    exp!(M::Manifold, y, x, v, t::Real = 1)
 
 Exponential map of tangent vector `t*v` at point `x` from manifold `M`.
 Result is saved to `y`.
@@ -336,7 +336,7 @@ function exp!(M::Manifold, y, x, v)
 end
 
 """
-    exp(M::Manifold, x, v, t::Real=1)
+    exp(M::Manifold, x, v, t::Real = 1)
 
 Exponential map of tangent vector `t*v` at point `x` from manifold `M`.
 """
@@ -395,7 +395,7 @@ point `x` and velocity `v`.
 geodesic(M::Manifold, x, v, t::Real) = exp(M, x, v, t)
 
 """
-    geodesic(M::Manifold, x, v, T::AbstractVector)
+    geodesic(M::Manifold, x, v, T::AbstractVector) -> AbstractVector
 
 Get the points for each `t` in `T` traveling from `x` along the geodesic with
 initial point `x` and velocity `v`.
@@ -434,6 +434,7 @@ shortest_geodesic(M::Manifold, x, y, T::AbstractVector) = geodesic(M, x, log(M, 
 Abstract type for methods for transporting vectors.
 """
 abstract type AbstractVectorTransportMethod end
+
 """
     ParallelTransport <: AbstractVectorTransportMethod
 
@@ -451,6 +452,7 @@ Specify to use projection onto tangent space as vector transport method within
 [`vector_transport_along`](@ref). See [`project_tangent`](@ref) for details.
 """
 struct ProjectionTransport <: AbstractVectorTransportMethod end
+
 """
     vector_transport_to!(M::Manifold, vto, x, v, y)
     vector_transport_to!(M::Manifold, vto, x, v, y, method::AbstractVectorTransportMethod)
