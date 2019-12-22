@@ -44,6 +44,7 @@ ManifoldsBase.injectivity_radius(::ManifoldsBase.DefaultManifold, ::CustomDefine
 
             @test injectivity_radius(M, pts[1]) == Inf
             @test injectivity_radius(M, pts[1], rm) == Inf
+            @test injectivity_radius(M, rm) == Inf
             @test injectivity_radius(M, rm2) == 10
             @test injectivity_radius(M, pts[1], rm2) == 10
             @test_throws ErrorException injectivity_radius(M, rm3)
