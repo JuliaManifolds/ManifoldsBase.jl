@@ -7,6 +7,11 @@ using ReverseDiff
 using StaticArrays
 using Test
 
+struct CustomDefinedRetraction <: ManifoldsBase.AbstractRetractionMethod end
+struct CustomUndefinedRetraction <: ManifoldsBase.AbstractRetractionMethod end
+
+ManifoldsBase.injectivity_radius(::ManifoldsBase.DefaultManifold, ::CustomDefinedRetraction) = 10.0
+
 @testset "Testing Default (Euclidean)" begin
     M = ManifoldsBase.DefaultManifold(3)
     types = [Vector{Float64},
@@ -30,12 +35,19 @@ using Test
     rm = ManifoldsBase.ExponentialRetraction()
     irm = ManifoldsBase.LogarithmicInverseRetraction()
 
+    rm2 = CustomDefinedRetraction()
+    rm3 = CustomUndefinedRetraction()
+
     for T in types
         @testset "Type $T" begin
             pts = convert.(Ref(T), [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
 
             @test injectivity_radius(M, pts[1]) == Inf
             @test injectivity_radius(M, pts[1], rm) == Inf
+            @test injectivity_radius(M, rm2) == 10
+            @test injectivity_radius(M, pts[1], rm2) == 10
+            @test_throws ErrorException injectivity_radius(M, rm3)
+            @test_throws ErrorException injectivity_radius(M, pts[1], rm3)
 
             tv1 = log(M, pts[1], pts[2])
 
