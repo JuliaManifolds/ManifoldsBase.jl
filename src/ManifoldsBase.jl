@@ -557,17 +557,23 @@ all tangent vectors shorter than $d$ (i.e. has a left inverse).
 
 Infimum of the injectivity radius of all manifold points.
 
-    injectivity_radius(M::Manifold, x, method::AbstractRetractionMethod)
+    injectivity_radius(M::Manifold[, x], method::AbstractRetractionMethod)
 
 Distance $d$ such that
 [`retract(M, x, v, method)`](@ref retract(::Manifold, ::Any, ::Any, ::AbstractRetractionMethod))
-is injective for all tangent vectors shorter than $d$ (i.e. has a left inverse).
+is injective for all tangent vectors shorter than $d$ (i.e. has a left inverse) for point
+$x$ if provided or all manifold points otherwise.
 """
 function injectivity_radius(M::Manifold)
     error("injectivity_radius not implemented for manifold $(typeof(M)).")
 end
 injectivity_radius(M::Manifold, x) = injectivity_radius(M)
-injectivity_radius(M::Manifold, x, ::AbstractRetractionMethod) = injectivity_radius(M, x)
+injectivity_radius(M::Manifold, x, method::AbstractRetractionMethod) = injectivity_radius(M, method)
+function injectivity_radius(M::Manifold, method::AbstractRetractionMethod)
+    error("injectivity_radius not implemented for manifold $(typeof(M)) and retraction method $(typeof(method)).")
+end
+injectivity_radius(M::Manifold, x, ::ExponentialRetraction) = injectivity_radius(M, x)
+injectivity_radius(M::Manifold, ::ExponentialRetraction) = injectivity_radius(M)
 
 """
     zero_tangent_vector(M::Manifold, x)
