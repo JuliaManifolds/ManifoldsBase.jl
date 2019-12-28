@@ -70,10 +70,14 @@ using LinearAlgebra
         @test isapprox(A, zero_tangent_vector(A,x), zero_tangent_vector(M,x))
         vector_transport_to!(A, v2s, x2, v2, y2)
         @test isapprox(A, x2, v2, v2s)
+        vector_transport_to!(A, v2s, x2, v2, y2, ManifoldsBase.ProjectionTransport())
+        @test isapprox(A, x2, v2, v2s)
         zero_tangent_vector!(A, v2s, x)
         @test isapprox(A, v2s, zero_tangent_vector(M,x))
         @test_throws ErrorException vector_transport_along!(A,v2s,x2,v2,ParallelTransport())
         @test injectivity_radius(A) == Inf
         @test injectivity_radius(A, x) == Inf
+        @test injectivity_radius(A, ManifoldsBase.ExponentialRetraction()) == Inf
+        @test injectivity_radius(A, x, ManifoldsBase.ExponentialRetraction()) == Inf
     end
 end
