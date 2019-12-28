@@ -218,6 +218,29 @@ function vector_transport_to!(
     return vto
 end
 
+function vector_transport_to!(
+    M::ArrayManifold,
+    vto,
+    x,
+    v,
+    y,
+    m::ProjectionTransport;
+    kwargs...,
+)
+    is_manifold_point(M, y, true; kwargs...)
+    is_tangent_vector(M, x, v, true; kwargs...)
+    vector_transport_to!(
+        M.manifold,
+        array_value(vto),
+        array_value(x),
+        array_value(v),
+        array_value(y),
+        m,
+    )
+    is_tangent_vector(M, y, vto, true; kwargs...)
+    return vto
+end
+
 function vector_transport_along!(
     M::ArrayManifold,
     vto,
@@ -241,9 +264,28 @@ function vector_transport_along!(
 end
 
 injectivity_radius(M::ArrayManifold) = injectivity_radius(M.manifold)
-function injectivity_radius(M::ArrayManifold, x, args...; kwargs...)
+function injectivity_radius(M::ArrayManifold, method::AbstractRetractionMethod)
+    return injectivity_radius(M.manifold, method)
+end
+function injectivity_radius(M::ArrayManifold, x; kwargs...)
     is_manifold_point(M, x, true; kwargs...)
-    return injectivity_radius(M.manifold, array_value(x), args...)
+    return injectivity_radius(M.manifold, array_value(x))
+end
+function injectivity_radius(
+    M::ArrayManifold,
+    x,
+    method::AbstractRetractionMethod;
+    kwargs...,
+)
+    is_manifold_point(M, x, true; kwargs...)
+    return injectivity_radius(M.manifold, array_value(x), method)
+end
+function injectivity_radius(M::ArrayManifold, method::ExponentialRetraction)
+    return injectivity_radius(M.manifold, method)
+end
+function injectivity_radius(M::ArrayManifold, x, method::ExponentialRetraction; kwargs...)
+    is_manifold_point(M, x, true; kwargs...)
+    return injectivity_radius(M.manifold, array_value(x), method)
 end
 
 function check_manifold_point(M::ArrayManifold, x::MPoint; kwargs...)
