@@ -1,6 +1,11 @@
 using ManifoldsBase
 using LinearAlgebra
 
+struct CustomArrayManifoldRetraction <: ManifoldsBase.AbstractRetractionMethod end
+
+ManifoldsBase.injectivity_radius(::ManifoldsBase.DefaultManifold, ::CustomArrayManifoldRetraction) = 10.0
+ManifoldsBase.injectivity_radius(::ManifoldsBase.DefaultManifold, x, ::CustomArrayManifoldRetraction) = 11.0
+
 @testset "Array manifold" begin
     M = ManifoldsBase.DefaultManifold(3)
     A = ArrayManifold(M)
@@ -79,5 +84,7 @@ using LinearAlgebra
         @test injectivity_radius(A, x) == Inf
         @test injectivity_radius(A, ManifoldsBase.ExponentialRetraction()) == Inf
         @test injectivity_radius(A, x, ManifoldsBase.ExponentialRetraction()) == Inf
+        @test injectivity_radius(A, CustomArrayManifoldRetraction()) == 10
+        @test injectivity_radius(A, x, CustomArrayManifoldRetraction()) == 11
     end
 end
