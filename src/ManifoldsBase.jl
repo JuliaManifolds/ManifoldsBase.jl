@@ -300,7 +300,7 @@ end
 
 Norm of tangent vector `v` at point `x` from manifold `M`.
 """
-norm(M::Manifold, x, v) = sqrt(inner(M, x, v, v))
+norm(M::Manifold, x, v) = sqrt(real(inner(M, x, v, v)))
 
 """
     distance(M::Manifold, x, y)
@@ -314,7 +314,7 @@ distance(M::Manifold, x, y) = norm(M, x, log(M, x, y))
 
 Angle between tangent vectors `v` and `w` at point `x` from manifold `M`.
 """
-angle(M::Manifold, x, v, w) = acos(inner(M, x, v, w) / norm(M, x, v) / norm(M, x, w))
+angle(M::Manifold, x, v, w) = acos(real(inner(M, x, v, w)) / norm(M, x, v) / norm(M, x, w))
 
 """
     exp!(M::Manifold, y, x, v, t::Real = 1)
