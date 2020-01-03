@@ -150,12 +150,12 @@ ManifoldsBase.injectivity_radius(::ManifoldsBase.DefaultManifold, ::CustomDefine
             @testset "basis representation" begin
                 v1 = log(M, pts[1], pts[2])
 
-                vb = represent_in_basis(M, pts[1], v1, ArbitraryONB())
+                vb = represent_in_basis(M, pts[1], v1, ArbitraryOrthonormalBasis())
                 @test isa(vb, AbstractVector)
-                vbi = inverse_represent_in_basis(M, pts[1], vb, ArbitraryONB())
+                vbi = inverse_represent_in_basis(M, pts[1], vb, ArbitraryOrthonormalBasis())
                 @test isapprox(M, pts[1], v1, vbi)
 
-                b = basis(M, pts[1], ArbitraryONB())
+                b = basis(M, pts[1], ArbitraryOrthonormalBasis())
                 @test isa(b, AbstractVector)
                 N = manifold_dimension(M)
                 @test length(b) == N
@@ -171,9 +171,9 @@ ManifoldsBase.injectivity_radius(::ManifoldsBase.DefaultManifold, ::CustomDefine
                     @test inner(M, pts[1], v1, b[i]) ≈ vb[i]
                 end
 
-                pb = PrecomputedONB(b)
-                @test represent_in_basis(M, pts[1], v1, pb) ≈ represent_in_basis(M, pts[1], v1, ArbitraryONB())
-                @test inverse_represent_in_basis(M, pts[1], vb, pb) ≈ inverse_represent_in_basis(M, pts[1], vb, ArbitraryONB())
+                pb = PrecomputedOrthonormalBasis(b)
+                @test represent_in_basis(M, pts[1], v1, pb) ≈ represent_in_basis(M, pts[1], v1, ArbitraryOrthonormalBasis())
+                @test inverse_represent_in_basis(M, pts[1], vb, pb) ≈ inverse_represent_in_basis(M, pts[1], vb, ArbitraryOrthonormalBasis())
             end
 
             @testset "ForwardDiff support" begin

@@ -562,28 +562,28 @@ Abstract type that represents an orthonormal basis on a manifold or a subset of 
 abstract type AbstractOrthonormalBasis <: AbstractBasis end
 
 """
-    ArbitraryONB
+    ArbitraryOrthonormalBasis
 
 An arbitrary orthonormal basis on a manifold. This will usually
-be the fastest ONB available for a manifold.
+be the fastest OrthonormalBasis available for a manifold.
 """
-struct ArbitraryONB <: AbstractOrthonormalBasis end
+struct ArbitraryOrthonormalBasis <: AbstractOrthonormalBasis end
 
 """
-    ProjectedONB
+    ProjectedOrthonormalBasis
 
 An orthonormal basis that comes from orthonormalization of basis vectors
 of the ambient space projected onto the subspace representing the tangent space
 at a given point.
 """
-struct ProjectedONB <: AbstractOrthonormalBasis end
+struct ProjectedOrthonormalBasis <: AbstractOrthonormalBasis end
 
 """
-    PrecomputedONB(vectors::AbstractVector)
+    PrecomputedOrthonormalBasis(vectors::AbstractVector)
 
 A precomputed orthonormal basis at a point on a manifold.
 """
-struct PrecomputedONB{TV<:AbstractVector} <: AbstractOrthonormalBasis
+struct PrecomputedOrthonormalBasis{TV<:AbstractVector} <: AbstractOrthonormalBasis
     vectors::TV
 end
 
@@ -603,7 +603,7 @@ function represent_in_basis(M::Manifold, x, v, B::AbstractBasis)
     error("represent_in_basis not implemented for manifold of type $(typeof(M)) a point of type $(typeof(x)), tangent vector of type $(typeof(v)) and basis of type $(typeof(B)).")
 end
 
-function represent_in_basis(M::Manifold, x, v, B::PrecomputedONB)
+function represent_in_basis(M::Manifold, x, v, B::PrecomputedOrthonormalBasis)
     return map(vb -> inner(M, x, v, vb), B.vectors)
 end
 
@@ -623,7 +623,7 @@ function inverse_represent_in_basis(M::Manifold, x, v, B::AbstractBasis)
     error("inverse_represent_in_basis not implemented for manifold of type $(typeof(M)) a point of type $(typeof(x)), tangent vector of type $(typeof(v)) and basis of type $(typeof(B)).")
 end
 
-function inverse_represent_in_basis(M::Manifold, x, v, B::PrecomputedONB)
+function inverse_represent_in_basis(M::Manifold, x, v, B::PrecomputedOrthonormalBasis)
     # quite convoluted but:
     #  1) preserves the correct `eltype`
     #  2) guarantees a reasonable array type `vout`
@@ -655,7 +655,7 @@ function _euclidean_basis_vector(x, i)
     return y
 end
 
-function basis(M::Manifold, x, B::ProjectedONB)
+function basis(M::Manifold, x, B::ProjectedOrthonormalBasis)
     S = representation_size(M)
     PS = prod(S)
     dim = manifold_dimension(M)
@@ -830,7 +830,7 @@ export Manifold,
 
 export ParallelTransport, ProjectionTransport
 
-export AbstractBasis, AbstractOrthonormalBasis, ArbitraryONB, PrecomputedONB, ProjectedONB
+export AbstractBasis, AbstractOrthonormalBasis, ArbitraryOrthonormalBasis, PrecomputedOrthonormalBasis, ProjectedOrthonormalBasis
 
 export base_manifold,
        basis,

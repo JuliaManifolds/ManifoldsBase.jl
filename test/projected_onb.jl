@@ -10,12 +10,12 @@ ManifoldsBase.project_tangent!(S::ProjManifold, w, x, v) = (w .= v .- dot(x, v) 
 ManifoldsBase.representation_size(::ProjManifold) = (2,3)
 ManifoldsBase.manifold_dimension(::ProjManifold) = 5
 
-@testset "Projected ONB" begin
+@testset "Projected OrthonormalBasis" begin
     M = ProjManifold()
     x = [sqrt(2)/2 0.0 0.0;
          0.0 sqrt(2)/2 0.0]
 
-    pb = basis(M, x, ProjectedONB())
+    pb = basis(M, x, ProjectedOrthonormalBasis())
     N = manifold_dimension(M)
     @test length(pb) == N
     # test orthonormality

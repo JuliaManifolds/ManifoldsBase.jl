@@ -27,14 +27,14 @@ function vector_transport_to!(::DefaultManifold, vto, x, v, y, ::ParallelTranspo
     return vto
 end
 
-function represent_in_basis(M::DefaultManifold, x, v, ::ArbitraryONB)
+function represent_in_basis(M::DefaultManifold, x, v, ::ArbitraryOrthonormalBasis)
     return reshape(v, manifold_dimension(M))
 end
-function inverse_represent_in_basis(M::DefaultManifold, x, v, ::ArbitraryONB)
+function inverse_represent_in_basis(M::DefaultManifold, x, v, ::ArbitraryOrthonormalBasis)
     return reshape(v, representation_size(M))
 end
 
-function basis(M::DefaultManifold, x, ::ArbitraryONB)
+function basis(M::DefaultManifold, x, ::ArbitraryOrthonormalBasis)
     return [_euclidean_basis_vector(x, i) for i in eachindex(x)]
 end
 
