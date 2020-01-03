@@ -649,6 +649,32 @@ function basis(M::Manifold, x, B::AbstractBasis)
     error("basis not implemented for manifold of type $(typeof(M)) a point of type $(typeof(x)) and basis of type $(typeof(B)).")
 end
 
+function _euclidean_basis_vector(x, i)
+    y = zero(x)
+    y[i] = 1
+    return y
+end
+
+function basis(M::Manifold, x, B::ProjectedONB)
+    S = representation_size(M)
+    PS = prod(S)
+    dim = manifold_dimension(M)
+    # projection
+    vs = [reshape(project_tangent(M, x, _euclidean_basis_vector(x, i)), PS) for i in eachindex(x)]
+    O = reduce(hcat, vs)
+    # orthogonalization
+    # TODO: try using rank-revealing QR instead of SVD here
+    decomp = svd(O)
+    rotated = Diagonal(decomp.S) * decomp.Vt
+    vecs = [collect(reshape(rotated[i,:], S)) for i in 1:dim]
+    # normalization
+    for i in 1:dim
+        i_norm = norm(M, x, vecs[i])
+        vecs[i] /= i_norm
+    end
+    return vecs
+end
+
 
 @doc doc"""
     injectivity_radius(M::Manifold, x)

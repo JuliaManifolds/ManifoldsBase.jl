@@ -34,13 +34,8 @@ function inverse_represent_in_basis(M::DefaultManifold, x, v, ::ArbitraryONB)
     return reshape(v, representation_size(M))
 end
 
-function _basis_vector(x, i)
-    y = zero(x)
-    y[i] = 1
-    return y
-end
 function basis(M::DefaultManifold, x, ::ArbitraryONB)
-    return [_basis_vector(x, i) for i in eachindex(x)]
+    return [_euclidean_basis_vector(x, i) for i in eachindex(x)]
 end
 
 injectivity_radius(::DefaultManifold) = Inf

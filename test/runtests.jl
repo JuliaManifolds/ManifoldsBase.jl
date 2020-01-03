@@ -7,4 +7,5 @@ using Test
     include("complex_manifold.jl")
     include("array_manifold.jl")
     include("domain_errors.jl")
+    include("projected_onb.jl")
 end
