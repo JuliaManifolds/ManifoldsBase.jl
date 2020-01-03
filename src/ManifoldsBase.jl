@@ -547,6 +547,82 @@ function vector_transport_along(M::Manifold, x, v, c, m::AbstractVectorTransport
     return vto
 end
 
+"""
+    AbstractBasis
+
+Abstract type that represents a basis on a manifold or a subset of it.
+"""
+abstract type AbstractBasis end
+
+"""
+    AbstractOrthonormalBasis
+
+Abstract type that represents an orthonormal basis on a manifold or a subset of it.
+"""
+abstract type AbstractOrthonormalBasis <: AbstractBasis end
+
+"""
+    ArbitraryONB
+
+An arbitrary orthonormal basis on a manifold. This will usually
+be the fastest ONB available for a manifold.
+"""
+struct ArbitraryONB <: AbstractOrthonormalBasis end
+
+"""
+    ProjectedONB
+
+An orthonormal basis that comes from orthonormalization of basis vectors
+of the ambient space projected onto the subspace representing the tangent space
+at a given point.
+"""
+struct ProjectedONB <: AbstractOrthonormalBasis end
+
+"""
+    represent_in_basis(M::Manifold, x, v, B::AbstractBasis)
+
+Compute a one-dimentional vector of coefficients of the tangent vector `v`
+at point denoted by `x` on manifold `M` in basis `B`.
+
+Depending on the basis, `x` may not directly represent a point on the manifold.
+For example if a basis transported along a curve is used, `x` may be the coordinate
+along the curve.
+
+See also: [`inverse_represent_in_basis`](@ref), [`basis`](@ref)
+"""
+function represent_in_basis(M::Manifold, x, v, B::AbstractBasis)
+    error("represent_in_basis not implemented for manifold of type $(typeof(M)) a point of type $(typeof(x)), tangent vector of type $(typeof(v)) and basis of type $(typeof(B)).")
+end
+
+"""
+    inverse_represent_in_basis(M::Manifold, x, v, B::AbstractBasis)
+
+Convert a one-dimentional vector of coefficients in a basis `B` of
+the tangent space at `x` on manifold `M` to a tangent vector `v` at `x`.
+
+Depending on the basis, `x` may not directly represent a point on the manifold.
+For example if a basis transported along a curve is used, `x` may be the coordinate
+along the curve.
+
+See also: [`represent_in_basis`](@ref), [`basis`](@ref)
+"""
+function inverse_represent_in_basis(M::Manifold, x, v, B::AbstractBasis)
+    error("inverse_represent_in_basis not implemented for manifold of type $(typeof(M)) a point of type $(typeof(x)), tangent vector of type $(typeof(v)) and basis of type $(typeof(B)).")
+end
+
+"""
+    basis(M::Manifold, x, B::AbstractBasis)
+
+Compute the basis vectors of the tangent space at a point on manifold `M`
+represented by `x`.
+
+See also: [`represent_in_basis`](@ref), [`inverse_represent_in_basis`](@ref)
+"""
+function basis(M::Manifold, x, B::AbstractBasis)
+    error("basis not implemented for manifold of type $(typeof(M)) a point of type $(typeof(x)) and basis of type $(typeof(B)).")
+end
+
+
 @doc doc"""
     injectivity_radius(M::Manifold, x)
 
@@ -701,7 +777,10 @@ export Manifold,
 
 export ParallelTransport, ProjectionTransport
 
+export AbstractBasis, AbstractOrthonormalBasis, ArbitraryONB, ProjectedONB
+
 export base_manifold,
+       basis,
        check_manifold_point,
        check_tangent_vector,
        distance,
@@ -711,6 +790,7 @@ export base_manifold,
        shortest_geodesic,
        injectivity_radius,
        inner,
+       inverse_represent_in_basis,
        inverse_retract,
        inverse_retract!,
        isapprox,
@@ -726,6 +806,7 @@ export base_manifold,
        project_tangent,
        project_tangent!,
        representation_size,
+       represent_in_basis,
        retract,
        retract!,
        vector_transport_along,

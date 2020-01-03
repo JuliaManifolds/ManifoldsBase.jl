@@ -263,6 +263,23 @@ function vector_transport_along!(
     return vto
 end
 
+function represent_in_basis(M::ArrayManifold, x, v, B::AbstractBasis; kwargs...)
+    is_tangent_vector(M, x, v, true; kwargs...)
+    return represent_in_basis(M.manifold, x, v, B)
+end
+
+function inverse_represent_in_basis(M::ArrayManifold, x, v, B::AbstractBasis; kwargs...)
+    is_manifold_point(M, x; kwargs...)
+    vout = inverse_represent_in_basis(M.manifold, x, v, B)
+    is_tangent_vector(M, x, v, true; kwargs...)
+    return vout
+end
+
+function basis(M::ArrayManifold, x, B::AbstractBasis; kwargs...)
+    is_manifold_point(M, x; kwargs...)
+    return basis(M.manifold, x, B)
+end
+
 injectivity_radius(M::ArrayManifold) = injectivity_radius(M.manifold)
 function injectivity_radius(M::ArrayManifold, method::AbstractRetractionMethod)
     return injectivity_radius(M.manifold, method)

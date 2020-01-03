@@ -147,6 +147,31 @@ ManifoldsBase.injectivity_radius(::ManifoldsBase.DefaultManifold, ::CustomDefine
                 @test isapprox(M, pts[3], v1t1, v1t3)
             end
 
+            @testset "basis representation" begin
+                v1 = log(M, pts[1], pts[2])
+
+                vb = represent_in_basis(M, pts[1], v1, ArbitraryONB())
+                @test isa(vb, AbstractVector)
+                vbi = inverse_represent_in_basis(M, pts[1], vb, ArbitraryONB())
+                @test isapprox(M, pts[1], v1, vbi)
+
+                b = basis(M, pts[1], ArbitraryONB())
+                @test isa(b, AbstractVector)
+                N = manifold_dimension(M)
+                @test length(b) == N
+                # check orthonormality
+                for i in 1:N
+                    @test norm(M, pts[1], b[i]) ≈ 1
+                    for j in i+1:N
+                        @test inner(M, pts[1], b[i], b[j]) ≈ 0
+                    end
+                end
+                # check that the coefficients correspond to the basis
+                for i in 1:N
+                    @test inner(M, pts[1], v1, b[i]) ≈ vb[i]
+                end
+            end
+
             @testset "ForwardDiff support" begin
                 exp_f(t) = distance(M, pts[1], exp(M, pts[1], t*tv1))
                 d12 = distance(M, pts[1], pts[2])

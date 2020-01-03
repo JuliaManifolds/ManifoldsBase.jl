@@ -23,6 +23,24 @@ zero_tangent_vector!(::DefaultManifold, v, x) = fill!(v, 0)
 project_point!(::DefaultManifold, y, x) = copyto!(y, x)
 project_tangent!(::DefaultManifold, w, x, v) = copyto!(w, v)
 function vector_transport_to!(::DefaultManifold, vto, x, v, y, ::ParallelTransport)
-    return copyto!(vto, v)
+    copyto!(vto, v)
+    return vto
 end
+
+function represent_in_basis(M::DefaultManifold, x, v, ::ArbitraryONB)
+    return reshape(v, manifold_dimension(M))
+end
+function inverse_represent_in_basis(M::DefaultManifold, x, v, ::ArbitraryONB)
+    return reshape(v, representation_size(M))
+end
+
+function _basis_vector(x, i)
+    y = zero(x)
+    y[i] = 1
+    return y
+end
+function basis(M::DefaultManifold, x, ::ArbitraryONB)
+    return [_basis_vector(x, i) for i in eachindex(x)]
+end
+
 injectivity_radius(::DefaultManifold) = Inf

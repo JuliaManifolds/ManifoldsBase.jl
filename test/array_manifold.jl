@@ -80,6 +80,10 @@ ManifoldsBase.injectivity_radius(::ManifoldsBase.DefaultManifold, x, ::CustomArr
         zero_tangent_vector!(A, v2s, x)
         @test isapprox(A, v2s, zero_tangent_vector(M,x))
         @test_throws ErrorException vector_transport_along!(A,v2s,x2,v2,ParallelTransport())
+        vb = represent_in_basis(M, x, v, ArbitraryONB())
+        @test represent_in_basis(A, x, v, ArbitraryONB()) == vb
+        @test inverse_represent_in_basis(A, x, vb, ArbitraryONB()) == inverse_represent_in_basis(A, x, vb, ArbitraryONB())
+        @test basis(A, x, ArbitraryONB()) == basis(M, x, ArbitraryONB())
         @test injectivity_radius(A) == Inf
         @test injectivity_radius(A, x) == Inf
         @test injectivity_radius(A, ManifoldsBase.ExponentialRetraction()) == Inf

@@ -101,6 +101,10 @@ struct NonCoTVector <: CoTVector end
     @test_throws ErrorException ManifoldsBase.vector_transport_along!(m, [0], [0], [0], x -> x)
     @test_throws ErrorException ManifoldsBase.vector_transport_along(m, [0], [0], x -> x)
 
+    @test_throws ErrorException represent_in_basis(m, [0], [0], ArbitraryONB())
+    @test_throws ErrorException inverse_represent_in_basis(m, [0], [0], ArbitraryONB())
+    @test_throws ErrorException basis(m, [0], ArbitraryONB())
+
     @test_throws ErrorException injectivity_radius(m)
     @test_throws ErrorException injectivity_radius(m, [0])
     @test_throws ErrorException injectivity_radius(m, [0], exp_retr)
