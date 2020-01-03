@@ -579,6 +579,15 @@ at a given point.
 struct ProjectedONB <: AbstractOrthonormalBasis end
 
 """
+    PrecomputedONB(vectors::AbstractVector)
+
+A precomputed orthonormal basis at a point on a manifold.
+"""
+struct PrecomputedONB{TV<:AbstractVector} <: AbstractOrthonormalBasis
+    vectors::TV
+end
+
+"""
     represent_in_basis(M::Manifold, x, v, B::AbstractBasis)
 
 Compute a one-dimentional vector of coefficients of the tangent vector `v`
@@ -592,6 +601,10 @@ See also: [`inverse_represent_in_basis`](@ref), [`basis`](@ref)
 """
 function represent_in_basis(M::Manifold, x, v, B::AbstractBasis)
     error("represent_in_basis not implemented for manifold of type $(typeof(M)) a point of type $(typeof(x)), tangent vector of type $(typeof(v)) and basis of type $(typeof(B)).")
+end
+
+function represent_in_basis(M::Manifold, x, v, B::PrecomputedONB)
+    return map(vb -> inner(M, x, v, vb), B.vectors)
 end
 
 """
@@ -608,6 +621,20 @@ See also: [`represent_in_basis`](@ref), [`basis`](@ref)
 """
 function inverse_represent_in_basis(M::Manifold, x, v, B::AbstractBasis)
     error("inverse_represent_in_basis not implemented for manifold of type $(typeof(M)) a point of type $(typeof(x)), tangent vector of type $(typeof(v)) and basis of type $(typeof(B)).")
+end
+
+function inverse_represent_in_basis(M::Manifold, x, v, B::PrecomputedONB)
+    # quite convoluted but:
+    #  1) preserves the correct `eltype`
+    #  2) guarantees a reasonable array type `vout`
+    #     (for example scalar * `SizedArray` is an `SArray`)
+    vt = v[1] * B.vectors[1]
+    vout = similar(B.vectors, eltype(vt))
+    copyto!(vout, vt)
+    for i in 2:length(v)
+        vout .+= v[i] .* B.vectors[i]
+    end
+    return vout
 end
 
 """
@@ -777,7 +804,7 @@ export Manifold,
 
 export ParallelTransport, ProjectionTransport
 
-export AbstractBasis, AbstractOrthonormalBasis, ArbitraryONB, ProjectedONB
+export AbstractBasis, AbstractOrthonormalBasis, ArbitraryONB, PrecomputedONB, ProjectedONB
 
 export base_manifold,
        basis,

@@ -170,6 +170,10 @@ ManifoldsBase.injectivity_radius(::ManifoldsBase.DefaultManifold, ::CustomDefine
                 for i in 1:N
                     @test inner(M, pts[1], v1, b[i]) ≈ vb[i]
                 end
+
+                pb = PrecomputedONB(b)
+                @test represent_in_basis(M, pts[1], v1, pb) ≈ represent_in_basis(M, pts[1], v1, ArbitraryONB())
+                @test inverse_represent_in_basis(M, pts[1], vb, pb) ≈ inverse_represent_in_basis(M, pts[1], vb, ArbitraryONB())
             end
 
             @testset "ForwardDiff support" begin
