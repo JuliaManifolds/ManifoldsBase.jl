@@ -10,23 +10,24 @@ ManifoldsBase.project_tangent!(S::ProjManifold, w, x, v) = (w .= v .- dot(x, v) 
 ManifoldsBase.representation_size(::ProjManifold) = (2,3)
 ManifoldsBase.manifold_dimension(::ProjManifold) = 5
 
-@testset "Projected OrthonormalBasis" begin
+@testset "Projected orthonormal basis" begin
     M = ProjManifold()
     x = [sqrt(2)/2 0.0 0.0;
          0.0 sqrt(2)/2 0.0]
 
     pb = basis(M, x, ProjectedOrthonormalBasis())
     N = manifold_dimension(M)
-    @test length(pb) == N
+    @test isa(pb, PrecomputedOrthonormalBasis)
+    @test length(pb.vectors) == N
     # test orthonormality
     for i in 1:N
-        @test norm(M, x, pb[i]) ≈ 1
+        @test norm(M, x, pb.vectors[i]) ≈ 1
         for j in i+1:N
-            @test inner(M, x, pb[i], pb[j]) ≈ 0 atol = 1e-15
+            @test inner(M, x, pb.vectors[i], pb.vectors[j]) ≈ 0 atol = 1e-15
         end
     end
     # check projection idempotency
     for i in 1:N
-        @test project_tangent(M, x, pb[i]) ≈ pb[i]
+        @test project_tangent(M, x, pb.vectors[i]) ≈ pb.vectors[i]
     end
 end

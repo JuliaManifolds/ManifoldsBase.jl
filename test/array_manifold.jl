@@ -83,7 +83,7 @@ ManifoldsBase.injectivity_radius(::ManifoldsBase.DefaultManifold, x, ::CustomArr
         vb = represent_in_basis(M, x, v, ArbitraryOrthonormalBasis())
         @test represent_in_basis(A, x, v, ArbitraryOrthonormalBasis()) == vb
         @test inverse_represent_in_basis(A, x, vb, ArbitraryOrthonormalBasis()) == inverse_represent_in_basis(A, x, vb, ArbitraryOrthonormalBasis())
-        @test basis(A, x, ArbitraryOrthonormalBasis()) == basis(M, x, ArbitraryOrthonormalBasis())
+        @test basis(A, x, ArbitraryOrthonormalBasis()).vectors == basis(M, x, ArbitraryOrthonormalBasis()).vectors
         @test injectivity_radius(A) == Inf
         @test injectivity_radius(A, x) == Inf
         @test injectivity_radius(A, ManifoldsBase.ExponentialRetraction()) == Inf

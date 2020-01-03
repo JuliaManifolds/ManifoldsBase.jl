@@ -35,7 +35,7 @@ function inverse_represent_in_basis(M::DefaultManifold, x, v, ::ArbitraryOrthono
 end
 
 function basis(M::DefaultManifold, x, ::ArbitraryOrthonormalBasis)
-    return [_euclidean_basis_vector(x, i) for i in eachindex(x)]
+    return PrecomputedOrthonormalBasis([_euclidean_basis_vector(x, i) for i in eachindex(x)])
 end
 
 injectivity_radius(::DefaultManifold) = Inf

@@ -588,6 +588,14 @@ struct PrecomputedOrthonormalBasis{TV<:AbstractVector} <: AbstractOrthonormalBas
 end
 
 """
+    DiagonalizingOrthonormalBasis(vectors, kappas)
+"""
+struct DiagonalizingOrthonormalBasis{TV<:AbstractVector, TK<:AbstractVector} <: AbstractOrthonormalBasis
+    vectors::TV
+    kappas::TK
+end
+
+"""
     represent_in_basis(M::Manifold, x, v, B::AbstractBasis)
 
 Compute a one-dimentional vector of coefficients of the tangent vector `v`
@@ -638,10 +646,13 @@ function inverse_represent_in_basis(M::Manifold, x, v, B::PrecomputedOrthonormal
 end
 
 """
-    basis(M::Manifold, x, B::AbstractBasis)
+    basis(M::Manifold, x, B::AbstractBasis) -> AbstractBasis
 
 Compute the basis vectors of the tangent space at a point on manifold `M`
 represented by `x`.
+
+Returned object derives from [`AbstractBasis`](@ref) and has a field `.vectors`
+that stores tangent vectors.
 
 See also: [`represent_in_basis`](@ref), [`inverse_represent_in_basis`](@ref)
 """
@@ -672,7 +683,7 @@ function basis(M::Manifold, x, B::ProjectedOrthonormalBasis)
         i_norm = norm(M, x, vecs[i])
         vecs[i] /= i_norm
     end
-    return vecs
+    return PrecomputedOrthonormalBasis(vecs)
 end
 
 
