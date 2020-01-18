@@ -1,6 +1,7 @@
 using Test
 
 @testset "ManifoldsBase" begin
+    include("allocation.jl")
     include("decorator_manifold.jl")
     include("empty_manifold.jl")
     include("default_manifold.jl")

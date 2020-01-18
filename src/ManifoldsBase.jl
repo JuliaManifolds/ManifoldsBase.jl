@@ -593,6 +593,16 @@ Save to `v` a vector such that retracting `v` to manifold `M` at `x` produces `x
 """
 zero_tangent_vector!(M::Manifold, v, x) = log!(M, v, x, x)
 
+allocate(a) = similar(a)
+allocate(a, T::Type) = similar(a, T)
+allocate(a::AbstractArray{<:AbstractArray}) = map(allocate, a)
+allocate(a::AbstractArray{<:AbstractArray}, T::Type) = map(t -> allocate(t, T), a)
+allocate(a::NTuple{N,AbstractArray} where N) = map(allocate, a)
+allocate(a::NTuple{N,AbstractArray} where N, T::Type) = map(t -> allocate(t, T), a)
+
+scalar_eltype(x) = eltype(x)
+scalar_eltype(x::AbstractArray) = scalar_eltype(eltype(x))
+
 """
     similar_result_type(M::Manifold, f, args::NTuple{N,Any}) where N
 
@@ -600,7 +610,7 @@ Return type of element of the array that will represent the result of function `
 manifold `M` on given arguments `args` (passed as a tuple).
 """
 function similar_result_type(M::Manifold, f, args::NTuple{N,Any}) where {N}
-    T = typeof(reduce(+, one(eltype(eti)) for eti ∈ args))
+    T = typeof(reduce(+, one(scalar_eltype(eti)) for eti ∈ args))
     return T
 end
 
@@ -615,7 +625,7 @@ isomorphisms.
 """
 function similar_result(M::Manifold, f, x...)
     T = similar_result_type(M, f, x)
-    return similar(x[1], T)
+    return allocate(x[1], T)
 end
 
 """
@@ -701,7 +711,8 @@ export Manifold,
 
 export ParallelTransport, ProjectionTransport
 
-export base_manifold,
+export allocate,
+       base_manifold,
        check_manifold_point,
        check_tangent_vector,
        distance,
@@ -728,6 +739,7 @@ export base_manifold,
        representation_size,
        retract,
        retract!,
+       scalar_eltype,
        vector_transport_along,
        vector_transport_along!,
        vector_transport_direction,
