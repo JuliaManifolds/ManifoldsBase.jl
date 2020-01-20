@@ -595,6 +595,7 @@ zero_tangent_vector!(M::Manifold, v, x) = log!(M, v, x, x)
 
 allocate(a) = similar(a)
 allocate(a, dims::Int...) = similar(a, dims...)
+allocate(a, dims::Tuple) = similar(a, dims)
 allocate(a, T::Type) = similar(a, T)
 allocate(a, T::Type, dims::Int...) = similar(a, T, dims...)
 allocate(a, T::Type, dims::Tuple) = similar(a, T, dims)
@@ -604,7 +605,14 @@ allocate(a::NTuple{N,AbstractArray} where N) = map(allocate, a)
 allocate(a::NTuple{N,AbstractArray} where N, T::Type) = map(t -> allocate(t, T), a)
 
 number_eltype(x) = eltype(x)
-number_eltype(x::AbstractArray) = number_eltype(eltype(x))
+function number_eltype(x::AbstractArray{<:AbstractArray})
+    T = typeof(reduce(+, one(number_eltype(eti)) for eti ∈ x))
+    return T
+end
+function number_eltype(x::Tuple)
+    T = typeof(reduce(+, one(number_eltype(eti)) for eti ∈ x))
+    return T
+end
 
 """
     similar_result_type(M::Manifold, f, args::NTuple{N,Any}) where N
