@@ -33,8 +33,8 @@ ManifoldsBase.injectivity_radius(::ManifoldsBase.DefaultManifold, x, ::CustomArr
             p = T(x)
             @test convert(typeof(x),p) == x
             @test convert(typeof(p),y) == T(y)
-            @test scalar_eltype(typeof(p)) == eltype(x)
-            @test scalar_eltype(p) == eltype(x)
+            @test number_eltype(typeof(p)) == eltype(x)
+            @test number_eltype(p) == eltype(x)
             @test typeof(allocate(p)) == typeof(p)
             @test typeof(allocate(p,eltype(x))) == typeof(p)
             q = allocate(p)

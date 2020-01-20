@@ -600,8 +600,8 @@ allocate(a::AbstractArray{<:AbstractArray}, T::Type) = map(t -> allocate(t, T), 
 allocate(a::NTuple{N,AbstractArray} where N) = map(allocate, a)
 allocate(a::NTuple{N,AbstractArray} where N, T::Type) = map(t -> allocate(t, T), a)
 
-scalar_eltype(x) = eltype(x)
-scalar_eltype(x::AbstractArray) = scalar_eltype(eltype(x))
+number_eltype(x) = eltype(x)
+number_eltype(x::AbstractArray) = number_eltype(eltype(x))
 
 """
     similar_result_type(M::Manifold, f, args::NTuple{N,Any}) where N
@@ -610,7 +610,7 @@ Return type of element of the array that will represent the result of function `
 manifold `M` on given arguments `args` (passed as a tuple).
 """
 function similar_result_type(M::Manifold, f, args::NTuple{N,Any}) where {N}
-    T = typeof(reduce(+, one(scalar_eltype(eti)) for eti ∈ args))
+    T = typeof(reduce(+, one(number_eltype(eti)) for eti ∈ args))
     return T
 end
 
@@ -739,7 +739,7 @@ export allocate,
        representation_size,
        retract,
        retract!,
-       scalar_eltype,
+       number_eltype,
        vector_transport_along,
        vector_transport_along!,
        vector_transport_direction,

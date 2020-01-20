@@ -32,8 +32,8 @@ end
 convert(::Type{V}, x::ArrayMPoint{V}) where {V<:AbstractArray{<:Number}} = x.value
 convert(::Type{ArrayMPoint{V}}, x::V) where {V<:AbstractArray{<:Number}} = ArrayMPoint{V}(x)
 
-scalar_eltype(::Type{ArrayMPoint{V}}) where {V} = scalar_eltype(V)
-scalar_eltype(x::ArrayMPoint) = scalar_eltype(x.value)
+number_eltype(::Type{ArrayMPoint{V}}) where {V} = number_eltype(V)
+number_eltype(x::ArrayMPoint) = number_eltype(x.value)
 
 similar(x::ArrayMPoint) = ArrayMPoint(similar(x.value))
 similar(x::ArrayMPoint, ::Type{T}) where {T} = ArrayMPoint(similar(x.value, T))
@@ -62,8 +62,8 @@ function convert(::Type{ArrayTVector{V}}, v::V) where {V<:AbstractArray{<:Number
     return ArrayTVector{V}(v)
 end
 
-scalar_eltype(::Type{ArrayTVector{V}}) where {V} = scalar_eltype(V)
-scalar_eltype(x::ArrayTVector) = scalar_eltype(x.value)
+number_eltype(::Type{ArrayTVector{V}}) where {V} = number_eltype(V)
+number_eltype(x::ArrayTVector) = number_eltype(x.value)
 
 similar(x::ArrayTVector) = ArrayTVector(similar(x.value))
 similar(x::ArrayTVector, ::Type{T}) where {T} = ArrayTVector(similar(x.value, T))
@@ -97,8 +97,8 @@ function convert(::Type{ArrayCoTVector{V}}, v::V) where {V<:AbstractArray{<:Numb
     return ArrayCoTVector{V}(v)
 end
 
-scalar_eltype(::Type{ArrayCoTVector{V}}) where {V} = scalar_eltype(V)
-scalar_eltype(x::ArrayCoTVector) = scalar_eltype(x.value)
+number_eltype(::Type{ArrayCoTVector{V}}) where {V} = number_eltype(V)
+number_eltype(x::ArrayCoTVector) = number_eltype(x.value)
 
 similar(x::ArrayCoTVector) = ArrayCoTVector(similar(x.value))
 similar(x::ArrayCoTVector, ::Type{T}) where {T} = ArrayCoTVector(similar(x.value, T))
