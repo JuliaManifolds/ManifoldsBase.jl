@@ -594,7 +594,10 @@ Save to `v` a vector such that retracting `v` to manifold `M` at `x` produces `x
 zero_tangent_vector!(M::Manifold, v, x) = log!(M, v, x, x)
 
 allocate(a) = similar(a)
+allocate(a, dims::Int...) = similar(a, dims...)
 allocate(a, T::Type) = similar(a, T)
+allocate(a, T::Type, dims::Int...) = similar(a, T, dims...)
+allocate(a, T::Type, dims::Tuple) = similar(a, T, dims)
 allocate(a::AbstractArray{<:AbstractArray}) = map(allocate, a)
 allocate(a::AbstractArray{<:AbstractArray}, T::Type) = map(t -> allocate(t, T), a)
 allocate(a::NTuple{N,AbstractArray} where N) = map(allocate, a)
@@ -732,6 +735,7 @@ export allocate,
        log!,
        manifold_dimension,
        norm,
+       number_eltype,
        project_point,
        project_point!,
        project_tangent,
@@ -739,7 +743,6 @@ export allocate,
        representation_size,
        retract,
        retract!,
-       number_eltype,
        vector_transport_along,
        vector_transport_along!,
        vector_transport_direction,
