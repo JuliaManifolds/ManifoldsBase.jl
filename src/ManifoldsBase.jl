@@ -167,13 +167,13 @@ Retraction method can be specified by the last argument, defaulting to
 methods.
 """
 function retract(M::Manifold, x, v)
-    xr = similar_result(M, retract, x, v)
+    xr = allocate_result(M, retract, x, v)
     retract!(M, xr, x, v)
     return xr
 end
 retract(M::Manifold, x, v, t::Real) = retract(M, x, t * v)
 function retract(M::Manifold, x, v, method::AbstractRetractionMethod)
-    xr = similar_result(M, retract, x, v)
+    xr = allocate_result(M, retract, x, v)
     retract!(M, xr, x, v, method)
     return xr
 end
@@ -224,12 +224,12 @@ Inverse retraction method can be specified by the last argument, defaulting to
 for available methods.
 """
 function inverse_retract(M::Manifold, x, y)
-    vr = similar_result(M, inverse_retract, x, y)
+    vr = allocate_result(M, inverse_retract, x, y)
     inverse_retract!(M, vr, x, y)
     return vr
 end
 function inverse_retract(M::Manifold, x, y, method::AbstractInverseRetractionMethod)
-    vr = similar_result(M, inverse_retract, x, y)
+    vr = allocate_result(M, inverse_retract, x, y)
     inverse_retract!(M, vr, x, y, method)
     return vr
 end
@@ -253,7 +253,7 @@ The function works only for selected embedded manifolds and is *not* required to
 closest point.
 """
 function project_point(M::Manifold, x)
-    y = similar_result(M, project_point, x)
+    y = allocate_result(M, project_point, x)
     project_point!(M, y, x)
     return y
 end
@@ -281,7 +281,7 @@ The function works only for selected embedded manifolds and is *not* required to
 closest vector.
 """
 function project_tangent(M::Manifold, x, v)
-    vt = similar_result(M, project_tangent, v, x)
+    vt = allocate_result(M, project_tangent, v, x)
     project_tangent!(M, vt, x, v)
     return vt
 end
@@ -335,7 +335,7 @@ Exponential map of tangent vector `t*v` at point `x` from manifold `M`. `t` may 
 or elements of vector `T`.
 """
 function exp(M::Manifold, x, v)
-    y = similar_result(M, exp, x, v)
+    y = allocate_result(M, exp, x, v)
     exp!(M, y, x, v)
     return y
 end
@@ -357,7 +357,7 @@ end
 Logarithmic map of point `y` at base point `x` on Manifold `M`.
 """
 function log(M::Manifold, x, y)
-    v = similar_result(M, log, x, y)
+    v = allocate_result(M, log, x, y)
     log!(M, v, x, y)
     return v
 end
@@ -462,7 +462,7 @@ function vector_transport_to(M::Manifold, x, v, y)
     return vector_transport_to(M, x, v, y, ParallelTransport())
 end
 function vector_transport_to(M::Manifold, x, v, y, method::AbstractVectorTransportMethod)
-    vto = similar_result(M, vector_transport_to, v, x, y)
+    vto = allocate_result(M, vector_transport_to, v, x, y)
     vector_transport_to!(M, vto, x, v, y, method)
     return vto
 end
@@ -506,7 +506,7 @@ function vector_transport_direction(
     vdir,
     method::AbstractVectorTransportMethod,
 )
-    vto = similar_result(M, vector_transport_direction, v, x, vdir)
+    vto = allocate_result(M, vector_transport_direction, v, x, vdir)
     vector_transport_direction!(M, vto, x, v, vdir, method)
     return vto
 end
@@ -542,7 +542,7 @@ function vector_transport_along(M::Manifold, x, v, c)
     return vector_transport_along(M, x, v, c, ParallelTransport())
 end
 function vector_transport_along(M::Manifold, x, v, c, m::AbstractVectorTransportMethod)
-    vto = similar_result(M, vector_transport_along, v, x)
+    vto = allocate_result(M, vector_transport_along, v, x)
     vector_transport_along!(M, vto, x, v, c, m)
     return vto
 end
@@ -581,7 +581,7 @@ injectivity_radius(M::Manifold, ::ExponentialRetraction) = injectivity_radius(M)
 Vector `v` such that retracting `v` to manifold `M` at `x` produces `x`.
 """
 function zero_tangent_vector(M::Manifold, x)
-    v = similar_result(M, zero_tangent_vector, x)
+    v = allocate_result(M, zero_tangent_vector, x)
     zero_tangent_vector!(M, v, x)
     return v
 end
@@ -615,18 +615,18 @@ function number_eltype(x::Tuple)
 end
 
 """
-    similar_result_type(M::Manifold, f, args::NTuple{N,Any}) where N
+    allocate_result_type(M::Manifold, f, args::NTuple{N,Any}) where N
 
 Return type of element of the array that will represent the result of function `f` for
 manifold `M` on given arguments `args` (passed as a tuple).
 """
-function similar_result_type(M::Manifold, f, args::NTuple{N,Any}) where {N}
+function allocate_result_type(M::Manifold, f, args::NTuple{N,Any}) where {N}
     T = typeof(reduce(+, one(number_eltype(eti)) for eti ∈ args))
     return T
 end
 
 """
-    similar_result(M::Manifold, f, x...)
+    allocate_result(M::Manifold, f, x...)
 
 Allocate an array for the result of function `f` on manifold `M` and arguments `x...` for
 implementing the non-modifying operation using the modifying operation.
@@ -634,8 +634,8 @@ implementing the non-modifying operation using the modifying operation.
 Usefulness of passing a function is demonstrated by methods that allocate results of musical
 isomorphisms.
 """
-function similar_result(M::Manifold, f, x...)
-    T = similar_result_type(M, f, x)
+function allocate_result(M::Manifold, f, x...)
+    T = allocate_result_type(M, f, x)
     return allocate(x[1], T)
 end
 
