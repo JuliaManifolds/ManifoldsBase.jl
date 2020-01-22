@@ -593,6 +593,22 @@ Save to `v` a vector such that retracting `v` to manifold `M` at `x` produces `x
 """
 zero_tangent_vector!(M::Manifold, v, x) = log!(M, v, x, x)
 
+"""
+    allocate(a)
+    allocate(a, dims::Int...)
+    allocate(a, dims::Tuple)
+    allocate(a, T::Type)
+    allocate(a, T::Type, dims::Int...)
+    allocate(a, T::Type, dims::Tuple)
+
+Allocate an object similar to `a`. It is similar to function `similar`, although
+instead of working only on the outermost layer of a nested structure, it maps recursively
+through outer layers and calls `similar` on the innermost array-like object only.
+Type `T` is the new number element type [`number_eltype`](@ref), if it is not given
+the element type of `a` is retained. The `dims` argument can be given for non-nested
+allocation and is forwarded to the function `similar`.
+"""
+allocate(a, args...)
 allocate(a) = similar(a)
 allocate(a, dims::Int...) = similar(a, dims...)
 allocate(a, dims::Tuple) = similar(a, dims)
@@ -604,6 +620,12 @@ allocate(a::AbstractArray{<:AbstractArray}, T::Type) = map(t -> allocate(t, T), 
 allocate(a::NTuple{N,AbstractArray} where N) = map(allocate, a)
 allocate(a::NTuple{N,AbstractArray} where N, T::Type) = map(t -> allocate(t, T), a)
 
+"""
+    number_eltype(x)
+
+Numeric element type of the a nested representation of a point or a vector.
+To be used in conjuntion with [`allocate`](@ref) or [`allocate_result`](@ref).
+"""
 number_eltype(x) = eltype(x)
 function number_eltype(x::AbstractArray{<:AbstractArray})
     T = typeof(reduce(+, one(number_eltype(eti)) for eti ∈ x))

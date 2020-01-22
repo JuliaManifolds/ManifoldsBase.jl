@@ -38,7 +38,11 @@ ManifoldsBase.injectivity_radius(::ManifoldsBase.DefaultManifold, x, ::CustomArr
             @test typeof(allocate(p)) == typeof(p)
             @test typeof(allocate(p,eltype(x))) == typeof(p)
             @test allocate(p) isa T
+            @test allocate(p, Float32) isa T
+            @test number_eltype(allocate(p, Float32)) == Float32
             @test similar(p) isa T
+            @test similar(p, Float32) isa T
+            @test number_eltype(similar(p, Float32)) == Float32
             q = allocate(p)
             copyto!(q,p)
             @test isapprox(A,q,p)
