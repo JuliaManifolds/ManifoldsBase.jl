@@ -71,7 +71,7 @@ ManifoldsBase.injectivity_radius(::ManifoldsBase.DefaultManifold, x, ::CustomArr
         @test isapprox(A, x, y) == isapprox(A, x2, y2)
         @test isapprox(A, x, v2, v2) == isapprox(M, x, v, v)
         v2s = similar(v2)
-        project_tangent!(A,v2s,x2,v2)
+        project_tangent!(A, v2s, x2, v2)
         @test isapprox(A, v2, v2s)
         y2s = similar(y2)
         exp!(A,y2s,x2,v2)
@@ -86,8 +86,10 @@ ManifoldsBase.injectivity_radius(::ManifoldsBase.DefaultManifold, x, ::CustomArr
         @test isapprox(A, x2, v2, v2s)
         zero_tangent_vector!(A, v2s, x)
         @test isapprox(A, x, v2s, zero_tangent_vector(M, x))
-        @test_throws ErrorException vector_transport_along!(A, v2s, x2, v2, ParallelTransport())
-        @test_throws ErrorException vector_transport_along(A, x2, v2, v2, ManifoldsBase.ProjectionTransport())
+        c = t -> x2
+        v3 = similar(v2)
+        @test isapprox(A, x2, v2, vector_transport_along!(A, v3, x2, v2, c, ParallelTransport()))
+        @test isapprox(A, x2, v2, vector_transport_along(A, x2, v2, c, ManifoldsBase.ProjectionTransport()))
         @test injectivity_radius(A) == Inf
         @test injectivity_radius(A, x) == Inf
         @test injectivity_radius(A, ManifoldsBase.ExponentialRetraction()) == Inf

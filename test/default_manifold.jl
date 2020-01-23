@@ -145,6 +145,12 @@ ManifoldsBase.injectivity_radius(::ManifoldsBase.DefaultManifold, ::CustomDefine
                 @test is_tangent_vector(M, pts[3], v1t1)
                 @test is_tangent_vector(M, pts[3], v1t3)
                 @test isapprox(M, pts[3], v1t1, v1t3)
+                c = t -> pts[1]
+                v1t4 = vector_transport_along(M, pts[1], v1, c)
+                @test isapprox(M, pts[1], v1, v1t4)
+                v1t5 = allocate(v1)
+                vector_transport_along!(M, v1t5, pts[1], v1, c)
+                @test isapprox(M, pts[1], v1, v1t5)
             end
 
             @testset "ForwardDiff support" begin
