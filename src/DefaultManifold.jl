@@ -25,4 +25,14 @@ project_tangent!(::DefaultManifold, w, x, v) = copyto!(w, v)
 function vector_transport_to!(::DefaultManifold, vto, x, v, y, ::ParallelTransport)
     return copyto!(vto, v)
 end
+function vector_transport_along!(
+    ::DefaultManifold,
+    vto,
+    x,
+    v,
+    c,
+    ::AbstractVectorTransportMethod
+)
+    return copyto!(vto, v)
+end
 injectivity_radius(::DefaultManifold) = Inf
