@@ -1,5 +1,6 @@
 using ManifoldsBase
 using LinearAlgebra
+using Test
 
 struct CustomArrayManifoldRetraction <: ManifoldsBase.AbstractRetractionMethod end
 
@@ -62,30 +63,31 @@ ManifoldsBase.injectivity_radius(::ManifoldsBase.DefaultManifold, x, ::CustomArr
     end
     @testset "Manifold functions" begin
         @test manifold_dimension(A) == manifold_dimension(M)
-        @test isapprox(y2.value,y)
-        @test distance(A,x,y) == distance(M,x,y)
-        @test norm(A,x,v) == norm(M,x,v)
-        @test inner(A,x,v2,w2; atol=10^(-15)) == inner(M,x,v,w)
-        @test isapprox(A, x2, y2 ) == isapprox(M,x,y)
-        @test isapprox(A,x,y) == isapprox(A,x2,y2)
-        @test isapprox(A,x, v2,v2 ) == isapprox(M,x,v,v)
+        @test isapprox(y2.value, y)
+        @test distance(A, x, y) == distance(M, x, y)
+        @test norm(A, x, v) == norm(M, x, v)
+        @test inner(A, x, v2, w2; atol=10^(-15)) == inner(M, x, v, w)
+        @test isapprox(A, x2, y2) == isapprox(M, x, y)
+        @test isapprox(A, x, y) == isapprox(A, x2, y2)
+        @test isapprox(A, x, v2, v2) == isapprox(M, x, v, v)
         v2s = similar(v2)
         project_tangent!(A,v2s,x2,v2)
         @test isapprox(A, v2, v2s)
         y2s = similar(y2)
         exp!(A,y2s,x2,v2)
-        @test isapprox(A,y2s,y2)
+        @test isapprox(A, y2s, y2)
         log!(A, v2s, x, y)
         @test isapprox(A, x, v2s, v2)
-        @test isapprox(A, exp(A,x,v),y2)
-        @test isapprox(A, zero_tangent_vector(A,x), zero_tangent_vector(M,x))
+        @test isapprox(A, exp(A, x, v), y2)
+        @test isapprox(A, zero_tangent_vector(A, x), zero_tangent_vector(M, x))
         vector_transport_to!(A, v2s, x2, v2, y2)
         @test isapprox(A, x2, v2, v2s)
         vector_transport_to!(A, v2s, x2, v2, y2, ManifoldsBase.ProjectionTransport())
         @test isapprox(A, x2, v2, v2s)
         zero_tangent_vector!(A, v2s, x)
-        @test isapprox(A, v2s, zero_tangent_vector(M,x))
-        @test_throws ErrorException vector_transport_along!(A,v2s,x2,v2,ParallelTransport())
+        @test isapprox(A, x, v2s, zero_tangent_vector(M, x))
+        @test_throws ErrorException vector_transport_along!(A, v2s, x2, v2, ParallelTransport())
+        @test_throws ErrorException vector_transport_along(A, x2, v2, v2, ManifoldsBase.ProjectionTransport())
         @test injectivity_radius(A) == Inf
         @test injectivity_radius(A, x) == Inf
         @test injectivity_radius(A, ManifoldsBase.ExponentialRetraction()) == Inf
