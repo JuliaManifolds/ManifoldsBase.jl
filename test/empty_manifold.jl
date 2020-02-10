@@ -6,7 +6,7 @@ struct NonManifold <: Manifold end
 struct NonMPoint <: MPoint end
 struct NonTVector <: TVector end
 struct NonCoTVector <: CoTVector end
-*(t::Float64, v::NonTVector) = v
+*(t::Float64, X::NonTVector) = X
 @testset "Manifold with empty implementation" begin
     m = NonManifold()
     p = NonMPoint()

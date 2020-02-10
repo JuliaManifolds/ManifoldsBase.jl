@@ -10,7 +10,7 @@ ManifoldsBase.injectivity_radius(
 ) = 10.0
 ManifoldsBase.injectivity_radius(
     ::ManifoldsBase.DefaultManifold,
-    x,
+    p,
     ::CustomArrayManifoldRetraction,
 ) = 11.0
 

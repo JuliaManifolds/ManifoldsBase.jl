@@ -187,7 +187,7 @@ level, whether its decorated or not. any negative value deactivates this depth l
 base_manifold(M::Manifold, depth=-1) = base_manifold(M, is_decorator_manifold(M),depth)
 function base_manifold(M::Manifold, ::Val{true}, depth=-1)
     # if we reach zero, return M, otherwise reduce positive level
-    # and leave negative values unchanged to avoid the (really unprobable) underrun
+    # and leave negative values unchanged to avoid the (really improbable) underflow
     return (depth != 0) ? base_manifold(M.manifold, (depth > 0) ? depth-1 : depth) : M
 end
 base_manifold(M::Manifold, ::Val{false}, depth=-1) = M
@@ -254,7 +254,7 @@ exp(M::Manifold, p, X, T::AbstractVector) = map(t -> exp(M, p, X, t), T)
 
 Compute the exponential map of tangent vector `X`, optionally scaled by `t`,  at point `p`
 from manifold the [`Manifold`](@ref) `M`.
-The result is saved to `y`.
+The result is saved to `q`.
 """
 function exp!(M::Manifold, q, p, X)
     error("exp! not implemented on a $(typeof(M)) for input point $(p) and tangent vector $(X).")
@@ -376,7 +376,7 @@ equal.
 
 Keyword arguments can be used to specify tolerances.
 """
-isapprox(M::Manifold, x, v, w; kwargs...) = isapprox(v, w; kwargs...)
+isapprox(M::Manifold, p, X, Y; kwargs...) = isapprox(X, Y; kwargs...)
 
 """
     is_decorator_manifold(M::Manifold)
@@ -518,9 +518,9 @@ The function works only for selected embedded manifolds and is *not* required to
 closest vector.
 """
 function project_tangent(M::Manifold, p, X)
-    vt = allocate_result(M, project_tangent, X, p)
-    project_tangent!(M, vt, p, X)
-    return vt
+    Y = allocate_result(M, project_tangent, X, p)
+    project_tangent!(M, Y, p, X)
+    return Y
 end
 
 """
@@ -585,7 +585,7 @@ end
 
 Compute a retraction, a cheaper, approximate version of the [`exp`](@ref)onential map,
 from `p` into direction `X`, scaled by `t`, on the [`Manifold`](@ref) manifold `M`.
-Result is saved to `y`.
+Result is saved to `q`.
 
 Retraction method can be specified by the last argument, defaulting to
 [`ExponentialRetraction`](@ref). See the documentation of respective manifolds for available
@@ -620,7 +620,7 @@ shortest_geodesic(M::Manifold, p, q, T::AbstractVector) = geodesic(M, p, log(M, 
     vector_transport_along(M::Manifold, p, X, c)
     vector_transport_along(M::Manifold, p, X, c, method::AbstractVectorTransportMethod)
 
-Transport a vector `X` from a point `p` along the curve `c` such that `c(0)` is equal to `x`
+Transport a vector `X` from a point `p` along the curve `c` such that `c(0)` is equal to `p`
 to the point `c(1)` using the `method`, which defaults to [`ParallelTransport`](@ref).
 """
 function vector_transport_along(M::Manifold, p, X, c)
@@ -636,7 +636,7 @@ end
     vector_transport_along!(M::Manifold, Y, p, X, c)
     vector_transport_along!(M::Manifold, Y, p, X, c, method::AbstractVectorTransportMethod)
 
-Transport a vector `X` from a point `p` along the curve `c` such that `c(0)` is equal to `x`
+Transport a vector `X` from a point `p` along the curve `c` such that `c(0)` is equal to `p`
 to the point `c(1)` using the `method`, which defaults to [`ParallelTransport`](@ref).
 The result is saved to `Y`.
 """
@@ -762,8 +762,8 @@ zero_tangent_vector!(M::Manifold, X, p) = log!(M, X, p, p)
 """
     zero_tangent_vector(M::Manifold, p)
 
-Return the tangent vector from the tangent space at `x` on the [`Manifold`](@ref) `M`, that
-represents the zero vector, i.e. such that a retraction at `x` produces `x`.
+Return the tangent vector from the tangent space at `p` on the [`Manifold`](@ref) `M`, that
+represents the zero vector, i.e. such that a retraction at `p` produces `p`.
 """
 function zero_tangent_vector(M::Manifold, p)
     X = allocate_result(M, zero_tangent_vector, p)
