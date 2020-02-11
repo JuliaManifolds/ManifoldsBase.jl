@@ -4,25 +4,32 @@ using Test
 
 struct CustomArrayManifoldRetraction <: ManifoldsBase.AbstractRetractionMethod end
 
-ManifoldsBase.injectivity_radius(::ManifoldsBase.DefaultManifold, ::CustomArrayManifoldRetraction) = 10.0
-ManifoldsBase.injectivity_radius(::ManifoldsBase.DefaultManifold, x, ::CustomArrayManifoldRetraction) = 11.0
+ManifoldsBase.injectivity_radius(
+    ::ManifoldsBase.DefaultManifold,
+    ::CustomArrayManifoldRetraction,
+) = 10.0
+ManifoldsBase.injectivity_radius(
+    ::ManifoldsBase.DefaultManifold,
+    p,
+    ::CustomArrayManifoldRetraction,
+) = 11.0
 
 @testset "Array manifold" begin
     M = ManifoldsBase.DefaultManifold(3)
     A = ArrayManifold(M)
-    x = [1., 0., 0.]
-    y = 1/sqrt(2)*[1., 1., 0.]
-    z = [0., 1., 0.]
-    v = log(M,x,y)
+    x = [1.0, 0.0, 0.0]
+    y = 1 / sqrt(2) * [1.0, 1.0, 0.0]
+    z = [0.0, 1.0, 0.0]
+    v = log(M, x, y)
     x2 = ArrayMPoint(x)
     y2 = ArrayMPoint(y)
-    v2 = log(A,x,y) # auto convert
-    y2 = exp(A,x,v2)
-    w = log(M,x,z)
-    w2 = log(A,x,z; atol=10^(-15))
+    v2 = log(A, x, y) # auto convert
+    y2 = exp(A, x, v2)
+    w = log(M, x, z)
+    w2 = log(A, x, z; atol = 10^(-15))
     @testset "Types and Conversion" begin
         @test convert(typeof(M), A) == M
-        @test convert(typeof(A),M) == A
+        @test convert(typeof(A), M) == A
         @test is_decorator_manifold(A) == Val(true)
         @test base_manifold(A) == M
         @test base_manifold(base_manifold(A)) == base_manifold(A)
@@ -32,12 +39,12 @@ ManifoldsBase.injectivity_radius(::ManifoldsBase.DefaultManifold, x, ::CustomArr
         @test manifold_dimension(A) == 3
         for T in [ArrayMPoint, ArrayTVector, ArrayCoTVector]
             p = T(x)
-            @test convert(typeof(x),p) == x
-            @test convert(typeof(p),y) == T(y)
+            @test convert(typeof(x), p) == x
+            @test convert(typeof(p), y) == T(y)
             @test number_eltype(typeof(p)) == eltype(x)
             @test number_eltype(p) == eltype(x)
             @test typeof(allocate(p)) == typeof(p)
-            @test typeof(allocate(p,eltype(x))) == typeof(p)
+            @test typeof(allocate(p, eltype(x))) == typeof(p)
             @test allocate(p) isa T
             @test allocate(p, Float32) isa T
             @test number_eltype(allocate(p, Float32)) == Float32
@@ -45,8 +52,8 @@ ManifoldsBase.injectivity_radius(::ManifoldsBase.DefaultManifold, x, ::CustomArr
             @test similar(p, Float32) isa T
             @test number_eltype(similar(p, Float32)) == Float32
             q = allocate(p)
-            copyto!(q,p)
-            @test isapprox(A,q,p)
+            copyto!(q, p)
+            @test isapprox(A, q, p)
             @test ManifoldsBase.array_value(p) == x
             @test ManifoldsBase.array_value(x) == x
         end
@@ -55,10 +62,10 @@ ManifoldsBase.injectivity_radius(::ManifoldsBase.DefaultManifold, x, ::CustomArr
         for T in [ArrayTVector, ArrayCoTVector]
             a = T(v)
             b = T(w)
-            @test isapprox(A, a+b, T(v+w))
-            @test isapprox(A, (a-b), T(v-w) )
-            @test isapprox(A, -b, T(-w) )
-            @test isapprox(A, 2*a, T(2 .* v) )
+            @test isapprox(A, a + b, T(v + w))
+            @test isapprox(A, (a - b), T(v - w))
+            @test isapprox(A, -b, T(-w))
+            @test isapprox(A, 2 * a, T(2 .* v))
         end
     end
     @testset "Manifold functions" begin
@@ -66,7 +73,7 @@ ManifoldsBase.injectivity_radius(::ManifoldsBase.DefaultManifold, x, ::CustomArr
         @test isapprox(y2.value, y)
         @test distance(A, x, y) == distance(M, x, y)
         @test norm(A, x, v) == norm(M, x, v)
-        @test inner(A, x, v2, w2; atol=10^(-15)) == inner(M, x, v, w)
+        @test inner(A, x, v2, w2; atol = 10^(-15)) == inner(M, x, v, w)
         @test isapprox(A, x2, y2) == isapprox(M, x, y)
         @test isapprox(A, x, y) == isapprox(A, x2, y2)
         @test isapprox(A, x, v2, v2) == isapprox(M, x, v, v)
@@ -74,7 +81,7 @@ ManifoldsBase.injectivity_radius(::ManifoldsBase.DefaultManifold, x, ::CustomArr
         project_tangent!(A, v2s, x2, v2)
         @test isapprox(A, v2, v2s)
         y2s = similar(y2)
-        exp!(A,y2s,x2,v2)
+        exp!(A, y2s, x2, v2)
         @test isapprox(A, y2s, y2)
         log!(A, v2s, x, y)
         @test isapprox(A, x, v2s, v2)
@@ -88,8 +95,18 @@ ManifoldsBase.injectivity_radius(::ManifoldsBase.DefaultManifold, x, ::CustomArr
         @test isapprox(A, x, v2s, zero_tangent_vector(M, x))
         c = t -> x2
         v3 = similar(v2)
-        @test isapprox(A, x2, v2, vector_transport_along!(A, v3, x2, v2, c, ParallelTransport()))
-        @test isapprox(A, x2, v2, vector_transport_along(A, x2, v2, c, ManifoldsBase.ProjectionTransport()))
+        @test isapprox(
+            A,
+            x2,
+            v2,
+            vector_transport_along!(A, v3, x2, v2, c, ParallelTransport()),
+        )
+        @test isapprox(
+            A,
+            x2,
+            v2,
+            vector_transport_along(A, x2, v2, c, ManifoldsBase.ProjectionTransport()),
+        )
         @test injectivity_radius(A) == Inf
         @test injectivity_radius(A, x) == Inf
         @test injectivity_radius(A, ManifoldsBase.ExponentialRetraction()) == Inf

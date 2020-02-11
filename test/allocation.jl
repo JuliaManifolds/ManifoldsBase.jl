@@ -15,8 +15,8 @@ end
     M = AllocManifold()
     v = exp(M, a, b)
     @test v ≈ [[3.0], [5.0], [0.0]]
-    @test allocate(([1.0], [2.0])) isa Tuple{Vector{Float64}, Vector{Float64}}
-    @test allocate(([1.0], [2.0]), Int) isa Tuple{Vector{Int}, Vector{Int}}
+    @test allocate(([1.0], [2.0])) isa Tuple{Vector{Float64},Vector{Float64}}
+    @test allocate(([1.0], [2.0]), Int) isa Tuple{Vector{Int},Vector{Int}}
     @test allocate([[1.0], [2.0]]) isa Vector{Vector{Float64}}
     @test allocate([[1.0], [2.0]], Int) isa Vector{Vector{Int}}
 

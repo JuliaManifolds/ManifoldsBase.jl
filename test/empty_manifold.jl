@@ -6,7 +6,7 @@ struct NonManifold <: Manifold end
 struct NonMPoint <: MPoint end
 struct NonTVector <: TVector end
 struct NonCoTVector <: CoTVector end
-*(t::Float64,v::NonTVector) = v
+*(t::Float64, X::NonTVector) = X
 @testset "Manifold with empty implementation" begin
     m = NonManifold()
     p = NonMPoint()
@@ -19,20 +19,20 @@ struct NonCoTVector <: CoTVector end
 
     # by default isapprox compares given points or vectors
     @test isapprox(m, [0], [0])
-    @test isapprox(m, [0], [0]; atol=1e-6)
+    @test isapprox(m, [0], [0]; atol = 1e-6)
     @test !isapprox(m, [0], [1])
-    @test !isapprox(m, [0], [1]; atol=1e-6)
+    @test !isapprox(m, [0], [1]; atol = 1e-6)
     @test isapprox(m, [0], [0], [0])
-    @test isapprox(m, [0], [0], [0]; atol=1e-6)
+    @test isapprox(m, [0], [0], [0]; atol = 1e-6)
     @test !isapprox(m, [0], [0], [1])
-    @test !isapprox(m, [0], [0], [1]; atol=1e-6)
+    @test !isapprox(m, [0], [0], [1]; atol = 1e-6)
 
     exp_retr = ManifoldsBase.ExponentialRetraction()
 
     @test_throws ErrorException retract!(m, p, p, v)
     @test_throws ErrorException retract!(m, p, p, v, exp_retr)
-    @test_throws ErrorException retract!(m, p, p, [0.0], 0.)
-    @test_throws ErrorException retract!(m, p, p, [0.0], 0., exp_retr)
+    @test_throws ErrorException retract!(m, p, p, [0.0], 0.0)
+    @test_throws ErrorException retract!(m, p, p, [0.0], 0.0, exp_retr)
     @test_throws ErrorException retract!(m, [0], [0], [0])
     @test_throws ErrorException retract!(m, [0], [0], [0], exp_retr)
     @test_throws ErrorException retract!(m, [0], [0], [0], 0.0)
@@ -93,12 +93,24 @@ struct NonCoTVector <: CoTVector end
 
     @test_throws ErrorException vector_transport_to!(m, [0], [0], [0], [0])
     @test_throws ErrorException vector_transport_to(m, [0], [0], [0])
-    @test_throws ErrorException vector_transport_to!(m, [0], [0], [0], ProjectionTransport())
+    @test_throws ErrorException vector_transport_to!(
+        m,
+        [0],
+        [0],
+        [0],
+        ProjectionTransport(),
+    )
 
     @test_throws ErrorException vector_transport_direction!(m, [0], [0], [0], [0])
     @test_throws ErrorException vector_transport_direction(m, [0], [0], [0])
 
-    @test_throws ErrorException ManifoldsBase.vector_transport_along!(m, [0], [0], [0], x -> x)
+    @test_throws ErrorException ManifoldsBase.vector_transport_along!(
+        m,
+        [0],
+        [0],
+        [0],
+        x -> x,
+    )
     @test_throws ErrorException ManifoldsBase.vector_transport_along(m, [0], [0], x -> x)
 
     @test_throws ErrorException injectivity_radius(m)
@@ -109,12 +121,12 @@ struct NonCoTVector <: CoTVector end
     @test_throws ErrorException zero_tangent_vector(m, [0])
 
     @test check_manifold_point(m, [0]) === nothing
-    @test_throws ErrorException check_manifold_point(m,p)
+    @test_throws ErrorException check_manifold_point(m, p)
     @test is_manifold_point(m, [0])
     @test check_manifold_point(m, [0]) == nothing
 
     @test check_tangent_vector(m, [0], [0]) === nothing
-    @test_throws ErrorException check_tangent_vector(m,p,v)
+    @test_throws ErrorException check_tangent_vector(m, p, v)
     @test is_tangent_vector(m, [0], [0])
     @test check_tangent_vector(m, [0], [0]) == nothing
 
