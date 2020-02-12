@@ -275,7 +275,7 @@ macro decorator_transparent_function(ex)
             return ($fname)($(argnames[1]).manifold, $(argnames[2:end]...); $(kwargs_list...))
         end
         function ($fname)($(callargs...), ::Val{false}; $(kwargs_list...)) where {$(where_exprs...)}
-            error(manifold_function_not_implemented_message($(argnames...)))
+            error(manifold_function_not_implemented_message($(argnames[1]), $fname, $(argnames[2:end]...)))
         end
     end)
 end
