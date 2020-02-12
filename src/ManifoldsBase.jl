@@ -228,6 +228,59 @@ function check_tangent_vector(M::Manifold, p::MPoint, X::TVector; kwargs...)
 end
 
 """
+    @decorator_transparent_function(ex)
+
+Generates methods for forwarding a method from a decorator to the base manifold.
+Supports standard, keyword arguments and `where` clauses. Doesn't support parameters with
+default values.
+
+# Examples:
+
+    @decorator_transparent_function log!(M::AbstractDecoratorManifold, X, p, q)
+    @decorator_transparent_function log!(M::TD, X, p, q) where {TD<:AbstractDecoratorManifold}
+    @decorator_transparent_function isapprox(M::AbstractDecoratorManifold, p, q; kwargs...)
+"""
+macro decorator_transparent_function(ex)
+    if ex.head == :where
+        where_exprs = ex.args[2:end]
+        call_expr = ex.args[1]
+    elseif ex.head == :call
+        where_exprs = []
+        call_expr = ex
+    else
+        error("Incorrect syntax in $ex. Expected a :where or :call expression.")
+    end
+    fname = call_expr.args[1]
+    if isa(call_expr.args[2], Expr) && call_expr.args[2].head == :parameters
+        # we have keyword arguments
+        callargs = call_expr.args[3:end]
+        kwargs_list = call_expr.args[2].args
+    else
+        callargs = call_expr.args[2:end]
+        kwargs_list = []
+    end
+
+    argnames = map(callargs) do arg
+        if isa(arg, Expr)
+            return arg.args[1]
+        else
+            return arg
+        end
+    end
+    return esc(quote
+        function ($fname)($(callargs...); $(kwargs_list...)) where {$(where_exprs...)}
+            return ($fname)($(argnames...), _acts_transparently($(argnames[1]), $fname); $(kwargs_list...))
+        end
+        function ($fname)($(callargs...), ::Val{true}; $(kwargs_list...)) where {$(where_exprs...)}
+            return ($fname)($(argnames[1]).manifold, $(argnames[2:end]...); $(kwargs_list...))
+        end
+        function ($fname)($(callargs...), ::Val{false}; $(kwargs_list...)) where {$(where_exprs...)}
+            error(manifold_function_not_implemented_message($(argnames...)))
+        end
+    end)
+end
+
+"""
     distance(M::Manifold, p, q)
 
 Shortest distance between the points `p` and `q` on the [`Manifold`](@ref) `M`.
