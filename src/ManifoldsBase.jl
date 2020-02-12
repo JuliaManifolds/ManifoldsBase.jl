@@ -205,9 +205,7 @@ assumption is to be optimistic for a point not deriving from the [`MPoint`](@ref
 """
 check_manifold_point(M::Manifold, p; kwargs...) = nothing
 function check_manifold_point(M::Manifold, p::MPoint; kwargs...)
-    error(
-        "check_manifold_point not implemented for manifold $(typeof(M)) and point $(typeof(p))."
-    )
+    error(manifold_function_not_implemented_message(M, check_manifold_point, p))
 end
 
 """
@@ -224,7 +222,7 @@ type.
 """
 check_tangent_vector(M::Manifold, p, X; kwargs...) = nothing
 function check_tangent_vector(M::Manifold, p::MPoint, X::TVector; kwargs...)
-    error("check_tangent_vector not implemented for manifold $(typeof(M)), point $(typeof(p)) and vector $(typeof(X)).")
+    error(manifold_function_not_implemented_message(M, check_tangent_vector, p, X))
 end
 
 """
@@ -312,7 +310,7 @@ from manifold the [`Manifold`](@ref) `M`.
 The result is saved to `q`.
 """
 function exp!(M::Manifold, q, p, X)
-    error("exp! not implemented on a $(typeof(M)) for input point $(p) and tangent vector $(X).")
+    error(manifold_function_not_implemented_message(M, exp!, q, p, X))
 end
 exp!(M::Manifold, q, p, X, t::Real) = exp!(M, q, p, t * X)
 
@@ -351,13 +349,13 @@ is injective for all tangent vectors shorter than $d$ (i.e. has an inverse) for 
 if provided or all manifold points otherwise.
 """
 function injectivity_radius(M::Manifold)
-    error("injectivity_radius not implemented for manifold $(typeof(M)).")
+    error(manifold_function_not_implemented_message(M, injectivity_radius))
 end
 injectivity_radius(M::Manifold, p) = injectivity_radius(M)
 injectivity_radius(M::Manifold, p, method::AbstractRetractionMethod) =
     injectivity_radius(M, method)
 function injectivity_radius(M::Manifold, method::AbstractRetractionMethod)
-    error("injectivity_radius not implemented for manifold $(typeof(M)) and retraction method $(typeof(method)).")
+    error(manifold_function_not_implemented_message(M, injectivity_radius, method))
 end
 injectivity_radius(M::Manifold, p, ::ExponentialRetraction) = injectivity_radius(M, p)
 injectivity_radius(M::Manifold, ::ExponentialRetraction) = injectivity_radius(M)
@@ -369,9 +367,7 @@ Compute the inner product of tangent vectors `X` and `Y` at point `p` from the
 [`Manifold`](@ref) `M`.
 """
 function inner(M::Manifold, p, X, Y)
-    error(
-        "inner not implemented on a $(typeof(M)) for input point $(typeof(p)) and tangent vectors $(typeof(X)) and $(typeof(Y))."
-    )
+    error(manifold_function_not_implemented_message(M, inner, p, X, Y))
 end
 
 """
@@ -512,7 +508,7 @@ each point of the [`Manifold`](@ref) `M` is homeomorphic.
 manifold_dimension(M::Manifold) = manifold_dimension(M, is_decorator_manifold(M))
 manifold_dimension(M::Manifold, ::Val{true}) = manifold_dimension(base_manifold(M))
 function manifold_dimension(M::Manifold, ::Val{false})
-    error("manifold_dimension not implemented for manifold $(typeof(M)).")
+    error(manifold_function_not_implemented_message(M, manifold_dimension))
 end
 
 function manifold_function_not_implemented_message(M::Manifold, f, x...)
@@ -567,7 +563,7 @@ overwritten by the projection. The function works only for selected embedded man
 is *not* required to return the closest point.
 """
 function project_point!(M::Manifold, q, p)
-    error("project_point! not implemented for a $(typeof(M)) and points $(typeof(q)) and $(typeof(p)).")
+    error(manifold_function_not_implemented_message(M, project_point!, q, p))
 end
 
 """
@@ -595,9 +591,7 @@ The function works only for selected embedded manifolds and is *not* required to
 closest vector.
 """
 function project_tangent!(M::Manifold, Y, p, X)
-    error(
-        "project_tangent! not implemented for a $(typeof(M)) and point $(typeof(p)) with input $(typeof(X))."
-    )
+    error(manifold_function_not_implemented_message(M, project_tangent!, Y, p, X))
 end
 
 @doc doc"""
@@ -810,7 +804,7 @@ function vector_transport_to!(
     q,
     method::AbstractVectorTransportMethod,
 )
-    error("vector_transport_to! not implemented from a point of type $(typeof(p)) to a type $(typeof(q)) on a $(typeof(M)) for a vector of type $(X) and the $(typeof(method)).")
+    error(manifold_function_not_implemented_message(M, vector_transport_to!, Y, p, X, q, method))
 end
 
 """
