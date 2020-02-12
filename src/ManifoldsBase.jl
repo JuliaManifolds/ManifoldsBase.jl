@@ -177,20 +177,22 @@ Compute the angle between tangent vectors `X` and `Y` at point `p` from the
 angle(M::Manifold, p, X, Y) = acos(real(inner(M, p, X, Y)) / norm(M, p, X) / norm(M, p, Y))
 
 """
-    base_manifold(M::Manifold, depth = -1)
+    base_manifold(M::Manifold, depth = Val(-1))
 
 Return the internally stored [`Manifold`](@ref) for decorated manifold `M` and the base
 manifold for vector bundles or power manifolds. The optional parameter `depth` can be used
 to remove only the first `depth` many decorators and return the [`Manifold`](@ref) from that
 level, whether its decorated or not. any negative value deactivates this depth limit.
 """
-base_manifold(M::Manifold, depth=-1) = base_manifold(M, is_decorator_manifold(M),depth)
-function base_manifold(M::Manifold, ::Val{true}, depth=-1)
+function base_manifold(M::Manifold, depth = Val(-1))
+    return base_manifold(M, is_decorator_manifold(M), depth)
+end
+function base_manifold(M::Manifold, ::Val{true}, depth::Val{N} = Val(-1)) where {N}
     # if we reach zero, return M, otherwise reduce positive level
     # and leave negative values unchanged to avoid the (really improbable) underflow
-    return (depth != 0) ? base_manifold(M.manifold, (depth > 0) ? depth-1 : depth) : M
+    return (N != 0) ? base_manifold(M.manifold, (N > 0) ? Val(N-1) : depth) : M
 end
-base_manifold(M::Manifold, ::Val{false}, depth=-1) = M
+base_manifold(M::Manifold, ::Val{false}, depth = Val(-1)) = M
 
 """
     check_manifold_point(M::Manifold, p; kwargs...) -> Union{Nothing,String}

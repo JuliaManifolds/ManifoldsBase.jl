@@ -6,6 +6,7 @@ struct AllocManifold <: Manifold end
 function ManifoldsBase.exp!(::AllocManifold, v, x, y)
     v[1] .= x[1] .+ y[1]
     v[2] .= x[2] .+ y[2]
+    v[3] .= x[3] .+ y[3]
     return v
 end
 
