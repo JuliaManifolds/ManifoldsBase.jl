@@ -269,7 +269,7 @@ macro decorator_transparent_function(ex)
     end
     return esc(quote
         function ($fname)($(callargs...); $(kwargs_list...)) where {$(where_exprs...)}
-            return ($fname)($(argnames...), _acts_transparently($(argnames[1]), $fname); $(kwargs_list...))
+            return ($fname)($(argnames...), _acts_transparently($fname, $(argnames...)); $(kwargs_list...))
         end
         function ($fname)($(callargs...), ::Val{true}; $(kwargs_list...)) where {$(where_exprs...)}
             return ($fname)($(argnames[1]).manifold, $(argnames[2:end]...); $(kwargs_list...))
@@ -500,7 +500,7 @@ Compute the logarithmic map of point `q` at base point `p` on the [`Manifold`](@
 THe result is saved to `X`.
 """
 function log!(M::Manifold, X, p, q)
-    error("log! not implemented on $(typeof(M)) for points $(typeof(p)) and $(typeof(q))")
+    error(manifold_function_not_implemented_message(M, log!, X, p, q))
 end
 
 @doc doc"""
@@ -513,6 +513,13 @@ manifold_dimension(M::Manifold) = manifold_dimension(M, is_decorator_manifold(M)
 manifold_dimension(M::Manifold, ::Val{true}) = manifold_dimension(base_manifold(M))
 function manifold_dimension(M::Manifold, ::Val{false})
     error("manifold_dimension not implemented for manifold $(typeof(M)).")
+end
+
+function manifold_function_not_implemented_message(M::Manifold, f, x...)
+    s = join(map(string, map(typeof, x)),", "," and ")
+    a = length(x) > 1 ? "arguments" : "argument"
+    m = length(x) > 0 ? " for $(a) $(s)." : "."
+    return "$(f) not implemented on $(M)$(m)"
 end
 
 """
@@ -601,7 +608,7 @@ The size of an array representing a point on [`Manifold`](@ref) `M`.
 representation_size(M::Manifold) = representation_size(M, is_decorator_manifold(M))
 representation_size(M::Manifold, ::Val{true}) = representation_size(base_manifold(M))
 function representation_size(M::Manifold, ::Val{false})
-    error("representation_size not implemented for manifold $(typeof(M)).")
+    error(manifold_function_not_implemented_message(M, representation_size))
 end
 
 """
@@ -706,7 +713,7 @@ function vector_transport_along!(
     c,
     method::AbstractVectorTransportMethod,
 )
-    error("vector_transport_along! not implemented for manifold $(typeof(M)), vector $(typeof(Y)), point $(typeof(p)), vector $(typeof(X)) along curve $(typeof(c)) with method $(typeof(method)).")
+    error(manifold_function_not_implemented_message(M, vector_transport_along!, M, Y, p, X, c, method))
 end
 
 
