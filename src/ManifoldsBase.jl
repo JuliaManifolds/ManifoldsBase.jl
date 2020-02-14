@@ -265,15 +265,25 @@ macro decorator_transparent_function(ex)
             return arg
         end
     end
+    argtypes = map(callargs) do arg
+        if isa(arg, Expr)
+            return arg.args[2]
+        else
+            return Any
+        end
+    end
     return esc(quote
         function ($fname)($(callargs...); $(kwargs_list...)) where {$(where_exprs...)}
-            return ($fname)($(argnames...), _acts_transparently($fname, $(argnames...)); $(kwargs_list...))
+            return ($fname)($(argnames[1]), _acts_transparently($fname, $(argnames...)), $(argnames[2:end]...),; $(kwargs_list...))
         end
-        function ($fname)($(callargs...), ::Val{true}; $(kwargs_list...)) where {$(where_exprs...)}
+        function ($fname)($(callargs[1]), ::Val{:transparent}, $(callargs[2:end]...); $(kwargs_list...)) where {$(where_exprs...)}
             return ($fname)($(argnames[1]).manifold, $(argnames[2:end]...); $(kwargs_list...))
         end
-        function ($fname)($(callargs...), ::Val{false}; $(kwargs_list...)) where {$(where_exprs...)}
+        function ($fname)($(callargs[1]), ::Val{:intransparent}, $(callargs[2:end]...); $(kwargs_list...)) where {$(where_exprs...)}
             error(manifold_function_not_implemented_message($(argnames[1]), $fname, $(argnames[2:end]...)))
+        end
+        function ($fname)($(callargs[1]), ::Val{:parent}, $(callargs[2:end]...); $(kwargs_list...)) where {$(where_exprs...)}
+            return invoke($fname, Tuple{supertype($(argtypes[1])), $(argtypes[2:end]...)}, $(argnames...); $(kwargs_list...))
         end
     end)
 end
