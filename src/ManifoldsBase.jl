@@ -184,15 +184,7 @@ manifold for vector bundles or power manifolds. The optional parameter `depth` c
 to remove only the first `depth` many decorators and return the [`Manifold`](@ref) from that
 level, whether its decorated or not. any negative value deactivates this depth limit.
 """
-function base_manifold(M::Manifold, depth = Val(-1))
-    return base_manifold(M, is_decorator_manifold(M), depth)
-end
-function base_manifold(M::Manifold, ::Val{true}, depth::Val{N} = Val(-1)) where {N}
-    # if we reach zero, return M, otherwise reduce positive level
-    # and leave negative values unchanged to avoid the (really improbable) underflow
-    return (N != 0) ? base_manifold(M.manifold, (N > 0) ? Val(N-1) : depth) : M
-end
-base_manifold(M::Manifold, ::Val{false}, depth = Val(-1)) = M
+base_manifold(M::Manifold, depth = Val(-1)) = M
 
 """
     check_manifold_point(M::Manifold, p; kwargs...) -> Union{Nothing,String}
@@ -439,21 +431,6 @@ Keyword arguments can be used to specify tolerances.
 """
 isapprox(M::Manifold, p, X, Y; kwargs...) = isapprox(X, Y; kwargs...)
 
-"""
-    is_decorator_manifold(M::Manifold)
-
-Indicate whether a [`Manifold`](@ref) `M` is a decorator manifold, i.e. whether it
-encapsulates a manifold with additional features and stores internally the original manifold
-instance. An example is the [`ArrayManifold`](@ref).
-
-Certain functions are just calling themselves on the internal manifold and hence do not need
-to be reimplemented for decorators again, for example [`manifold_dimension`](@ref) and
-especially [`base_manifold`](@ref).
-
-It is assumed that the undecorated (base) manifold is stored in `M.manifold`. Alternatively,
-overload [`base_manifold`](@ref).
-"""
-is_decorator_manifold(::Manifold) = Val(false)
 
 """
     is_manifold_point(M::Manifold, p, throw_error = false; kwargs...)
@@ -515,9 +492,7 @@ end
 The dimension $n=\dim_{\mathcal M}$ of real space $\mathbb R^n$ to which the neighborhood of
 each point of the [`Manifold`](@ref) `M` is homeomorphic.
 """
-manifold_dimension(M::Manifold) = manifold_dimension(M, is_decorator_manifold(M))
-manifold_dimension(M::Manifold, ::Val{true}) = manifold_dimension(base_manifold(M))
-function manifold_dimension(M::Manifold, ::Val{false})
+function manifold_dimension(M::Manifold)
     error(manifold_function_not_implemented_message(M, manifold_dimension))
 end
 
@@ -609,9 +584,7 @@ end
 
 The size of an array representing a point on [`Manifold`](@ref) `M`.
 """
-representation_size(M::Manifold) = representation_size(M, is_decorator_manifold(M))
-representation_size(M::Manifold, ::Val{true}) = representation_size(base_manifold(M))
-function representation_size(M::Manifold, ::Val{false})
+function representation_size(M::Manifold)
     error(manifold_function_not_implemented_message(M, representation_size))
 end
 
@@ -861,7 +834,6 @@ export allocate,
     isapprox,
     is_manifold_point,
     is_tangent_vector,
-    is_decorator_manifold,
     log,
     log!,
     manifold_dimension,

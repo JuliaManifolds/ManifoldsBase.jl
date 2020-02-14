@@ -30,7 +30,6 @@ ManifoldsBase.injectivity_radius(
     @testset "Types and Conversion" begin
         @test convert(typeof(M), A) == M
         @test convert(typeof(A), M) == A
-        @test is_decorator_manifold(A) == Val(true)
         @test base_manifold(A) == M
         @test base_manifold(base_manifold(A)) == base_manifold(A)
         @test ManifoldsBase.representation_size(A) == ManifoldsBase.representation_size(M)

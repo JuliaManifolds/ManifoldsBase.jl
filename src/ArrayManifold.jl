@@ -74,6 +74,10 @@ array_value(x::ArrayMPoint) = x.value
 array_value(v::ArrayTVector) = v.value
 array_value(v::ArrayCoTVector) = v.value
 
+function base_manifold(M::ArrayManifold, depth::Val{N} = Val(-1)) where {N}
+    return (N != 0) ? base_manifold(M.manifold, (N > 0) ? Val(N-1) : depth) : M
+end
+
 function check_manifold_point(M::ArrayManifold, x::MPoint; kwargs...)
     return check_manifold_point(M.manifold, array_value(x); kwargs...)
 end
@@ -174,8 +178,6 @@ function isapprox(M::ArrayManifold, x, v, w; kwargs...)
     return isapprox(M.manifold, array_value(x), array_value(v), array_value(w); kwargs...)
 end
 
-is_decorator_manifold(::ArrayManifold) = Val(true)
-
 function log(M::ArrayManifold, x, y; kwargs...)
     is_manifold_point(M, x, true; kwargs...)
     is_manifold_point(M, y, true; kwargs...)
@@ -192,6 +194,8 @@ function log!(M::ArrayManifold, v, x, y; kwargs...)
     return v
 end
 
+manifold_dimension(M::ArrayManifold) = manifold_dimension(M.manifold)
+
 number_eltype(::Type{ArrayMPoint{V}}) where {V} = number_eltype(V)
 number_eltype(x::ArrayMPoint) = number_eltype(x.value)
 number_eltype(::Type{ArrayCoTVector{V}}) where {V} = number_eltype(V)
@@ -205,6 +209,8 @@ function project_tangent!(M::ArrayManifold, w, x, v; kwargs...)
     is_tangent_vector(M, x, w, true; kwargs...)
     return w
 end
+
+representation_size(M::ArrayManifold) = representation_size(M.manifold)
 
 similar(x::ArrayMPoint) = ArrayMPoint(similar(x.value))
 similar(x::ArrayMPoint, ::Type{T}) where {T} = ArrayMPoint(similar(x.value, T))
