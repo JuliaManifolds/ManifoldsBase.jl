@@ -233,7 +233,10 @@ default values.
     @decorator_transparent_fallback log!(M::TD, X, p, q) where {TD<:AbstractDecoratorManifold} = ...
     @decorator_transparent_fallback isapprox(M::AbstractDecoratorManifold, p, q; kwargs...) = ...
 """
-macro decorator_transparent_fallback(ex, fallback_case=QuoteNode(:intransparent))
+macro decorator_transparent_fallback(ex)
+    return esc(quote @decorator_transparent_fallback :intransparent ($ex) end)
+end
+macro decorator_transparent_fallback(fallback_case, ex)
     if ex.head == :function || ex.head == :(=) #complete or inline function
         sig = ex.args[1]
         body = ex.args[2]
