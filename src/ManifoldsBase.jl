@@ -285,7 +285,10 @@ default values.
     @decorator_transparent_function log!(M::TD, X, p, q) where {TD<:AbstractDecoratorManifold} = ...
     @decorator_transparent_function isapprox(M::AbstractDecoratorManifold, p, q; kwargs...) = ...
 """
-macro decorator_transparent_function(ex, fallback_case = QuoteNode(:intransparent))
+macro decorator_transparent_function(ex)
+    return esc(quote @decorator_transparent_function :intransparent ($ex) end)
+end
+macro decorator_transparent_function(fallback_case, ex)
     if ex.head == :function
         sig = ex.args[1]
         body = ex.args[2]
