@@ -218,19 +218,146 @@ function check_tangent_vector(M::Manifold, p::MPoint, X::TVector; kwargs...)
 end
 
 """
-    @decorator_transparent_function(ex)
+    @decorator_transparent_fallback(ex, fallback_case = :intransparent)
 
-Generates methods for forwarding a method from a decorator to the base manifold.
+Adds a further method as a fallback onto a specific decorator. This can be used to introduce
+a default implementation for a decorator that acts `:intransparent` for a function.
+The type that is affected by this fallback can be set by the second optional argument.
+
 Supports standard, keyword arguments and `where` clauses. Doesn't support parameters with
 default values.
 
 # Examples:
 
-    @decorator_transparent_function log!(M::AbstractDecoratorManifold, X, p, q)
-    @decorator_transparent_function log!(M::TD, X, p, q) where {TD<:AbstractDecoratorManifold}
-    @decorator_transparent_function isapprox(M::AbstractDecoratorManifold, p, q; kwargs...)
+    @decorator_transparent_fallback log!(M::AbstractDecoratorManifold, X, p, q) = ...
+    @decorator_transparent_fallback log!(M::TD, X, p, q) where {TD<:AbstractDecoratorManifold} = ...
+    @decorator_transparent_fallback isapprox(M::AbstractDecoratorManifold, p, q; kwargs...) = ...
 """
-macro decorator_transparent_function(ex)
+macro decorator_transparent_fallback(ex, fallback_case=QuoteNode(:intransparent))
+    if ex.head == :function || ex.head == :(=) #complete or inline function
+        sig = ex.args[1]
+        body = ex.args[2]
+    else
+        error("Incorrect syntax in $ex. Expected :function of :(=).")
+    end
+    if sig.head == :where
+        where_exprs = sig.args[2:end]
+        call_expr = sig.args[1]
+    elseif sig.head == :call
+        where_exprs = []
+        call_expr = sig
+    else
+        error("Incorrect syntax in $ex. Expected a :where or :call expression.")
+    end
+    fname = call_expr.args[1]
+    if isa(call_expr.args[2], Expr) && call_expr.args[2].head == :parameters
+        # we have keyword arguments
+        callargs = call_expr.args[3:end]
+        kwargs_list = call_expr.args[2].args
+    else
+        callargs = call_expr.args[2:end]
+        kwargs_list = []
+    end
+        argnames = map(callargs) do arg
+        if isa(arg, Expr)
+            return arg.args[1]
+        else
+            return arg
+        end
+    end
+    return esc(quote
+        function ($fname)($(callargs[1]), ::Val{$fallback_case}, $(callargs[2:end]...); $(kwargs_list...)) where {$(where_exprs...)}
+            ($body)
+        end
+    end)
+end
+"""
+    @decorator_transparent_function(ex, fallback_case = :intransparent)
+
+Generates methods for forwarding a method from a decorator to the base manifold based on a
+function definition either inline or as a complete function.
+Supports standard, keyword arguments and `where` clauses. Doesn't support parameters with
+default values.
+
+# Examples:
+
+    @decorator_transparent_function log!(M::AbstractDecoratorManifold, X, p, q) = ...
+    @decorator_transparent_function log!(M::TD, X, p, q) where {TD<:AbstractDecoratorManifold} = ...
+    @decorator_transparent_function isapprox(M::AbstractDecoratorManifold, p, q; kwargs...) = ...
+"""
+macro decorator_transparent_function(ex, fallback_case = QuoteNode(:intransparent))
+    if ex.head == :function
+        sig = ex.args[1]
+        body = ex.args[2]
+    else
+        error("Incorrect syntax in $ex. Expected :function. It does not yet work for inline functions.")
+    end
+    if sig.head == :where
+        where_exprs = sig.args[2:end]
+        call_expr = sig.args[1]
+    elseif sig.head == :call
+        where_exprs = []
+        call_expr = sig
+    else
+        error("Incorrect syntax in $sig. Expected a :where or :call expression.")
+    end
+    fname = call_expr.args[1]
+    if isa(call_expr.args[2], Expr) && call_expr.args[2].head == :parameters
+        # we have keyword arguments
+        callargs = call_expr.args[3:end]
+        kwargs_list = call_expr.args[2].args
+    else
+        callargs = call_expr.args[2:end]
+        kwargs_list = []
+    end
+    argnames = map(callargs) do arg
+        if isa(arg, Expr)
+            return arg.args[1]
+        else
+            return arg
+        end
+    end
+    argtypes = map(callargs) do arg
+        if isa(arg, Expr)
+            return arg.args[2]
+        else
+            return Any
+        end
+    end
+    return esc(quote
+        function ($fname)($(argnames[1])::AbstractDecoratorManifold, $(callargs[2:end]...); $(kwargs_list...)) where {$(where_exprs...)}
+            return ($fname)($(argnames[1]), _acts_transparently($fname, $(argnames...)), $(argnames[2:end]...),; $(kwargs_list...))
+        end
+        function ($fname)($(argnames[1])::AbstractDecoratorManifold, ::Val{:transparent}, $(callargs[2:end]...); $(kwargs_list...)) where {$(where_exprs...)}
+            return ($fname)($(argnames[1]).manifold, $(argnames[2:end]...); $(kwargs_list...))
+        end
+        function ($fname)($(argnames[1])::AbstractDecoratorManifold, ::Val{:intransparent}, $(callargs[2:end]...); $(kwargs_list...)) where {$(where_exprs...)}
+            error(manifold_function_not_implemented_message($(argnames[1]), $fname, $(argnames[2:end]...)))
+        end
+        function ($fname)($(argnames[1])::AbstractDecoratorManifold, ::Val{:parent}, $(callargs[2:end]...); $(kwargs_list...)) where {$(where_exprs...)}
+            return invoke($fname, Tuple{supertype($(argtypes[1])), $(argtypes[2:end]...)}, $(argnames...); $(kwargs_list...))
+        end
+        function ($fname)($(callargs[1]), ::Val{$fallback_case}, $(callargs[2:end]...); $(kwargs_list...)) where {$(where_exprs...)}
+            ($body)
+        end
+        decorator_transparent_dispatch(::typeof($fname), $(callargs...)) = Val($fallback_case)
+    end)
+end
+"""
+    @decorator_transparent_signature(ex)
+
+Generates methods for forwarding a method from a decorator to the base manifold based on a
+function signature.
+Supports standard, keyword arguments and `where` clauses. Doesn't support parameters with
+default values.
+
+# Examples:
+
+    @decorator_transparent_signature log!(M::AbstractDecoratorManifold, X, p, q)
+    @decorator_transparent_signature log!(M::TD, X, p, q) where {TD<:AbstractDecoratorManifold}
+    @decorator_transparent_signature isapprox(M::AbstractDecoratorManifold, p, q; kwargs...)
+"""
+macro decorator_transparent_signature(ex)
     if ex.head == :where
         where_exprs = ex.args[2:end]
         call_expr = ex.args[1]
@@ -822,6 +949,9 @@ export allocate,
     base_manifold,
     check_manifold_point,
     check_tangent_vector,
+    @decorator_transparent_fallback,
+    @decorator_transparent_function,
+    @decorator_transparent_signature,
     distance,
     exp,
     exp!,
