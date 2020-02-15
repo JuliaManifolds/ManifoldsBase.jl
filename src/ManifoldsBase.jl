@@ -368,7 +368,7 @@ default values.
     @decorator_transparent_signature log!(M::TD, X, p, q) where {TD<:AbstractDecoratorManifold}
     @decorator_transparent_signature isapprox(M::AbstractDecoratorManifold, p, q; kwargs...)
 """
-macro decorator_transparent_signature(fallback_case, ex)
+macro decorator_transparent_signature(ex)
     if ex.head == :where
         where_exprs = ex.args[2:end]
         call_expr = ex.args[1]
