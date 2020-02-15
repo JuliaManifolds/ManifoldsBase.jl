@@ -334,6 +334,14 @@ macro decorator_transparent_function(ex, fallback_case = QuoteNode(:intransparen
         function ($fname)($(argnames[1])::AbstractDecoratorManifold, ::Val{:intransparent}, $(callargs[2:end]...); $(kwargs_list...)) where {$(where_exprs...)}
             error(manifold_function_not_implemented_message($(argnames[1]), $fname, $(argnames[2:end]...)))
         end
+        function ($fname)($(argnames[1])::Manifold, $(callargs[2:end]...); $(kwargs_list...)) where {$(where_exprs...)}
+            error(string(
+                manifold_function_not_implemented_message($(argnames[1]), $fname, $(argnames[2:end]...)),
+                "Usually this is implemented for a ",
+                $(argtypes[1]),
+                ". Maybe you missed to implement this function for a default?"
+            ))
+        end
         function ($fname)($(argnames[1])::AbstractDecoratorManifold, ::Val{:parent}, $(callargs[2:end]...); $(kwargs_list...)) where {$(where_exprs...)}
             return invoke($fname, Tuple{supertype($(argtypes[1])), $(argtypes[2:end]...)}, $(argnames...); $(kwargs_list...))
         end
