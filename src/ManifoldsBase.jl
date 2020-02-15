@@ -351,7 +351,7 @@ macro decorator_transparent_function(fallback_case, ex)
         function ($fname)($(callargs[1]), ::Val{$fallback_case}, $(callargs[2:end]...); $(kwargs_list...)) where {$(where_exprs...)}
             ($body)
         end
-        decorator_transparent_dispatch(::typeof($fname), $(callargs...)) = Val($fallback_case)
+        decorator_transparent_dispatch(::typeof($fname), $(callargs...)) where {$(where_exprs...)} = Val($fallback_case)
     end)
 end
 """
@@ -369,6 +369,10 @@ default values.
     @decorator_transparent_signature isapprox(M::AbstractDecoratorManifold, p, q; kwargs...)
 """
 macro decorator_transparent_signature(ex)
+    return esc(quote @decorator_transparent_signature :transparent ($ex) end)
+end
+
+macro decorator_transparent_signature(fallback_case, ex)
     if ex.head == :where
         where_exprs = ex.args[2:end]
         call_expr = ex.args[1]
@@ -415,6 +419,7 @@ macro decorator_transparent_signature(ex)
         function ($fname)($(callargs[1]), ::Val{:parent}, $(callargs[2:end]...); $(kwargs_list...)) where {$(where_exprs...)}
             return invoke($fname, Tuple{supertype($(argtypes[1])), $(argtypes[2:end]...)}, $(argnames...); $(kwargs_list...))
         end
+        decorator_transparent_dispatch(::typeof($fname), $(callargs...)) where {$(where_exprs...)} = Val($fallback_case)
     end)
 end
 
