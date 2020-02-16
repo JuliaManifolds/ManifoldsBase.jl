@@ -9,7 +9,7 @@ encapsulated/stripped automatically when needed.
 This manifold is a decorator for a manifold, i.e. it decorates a manifold `M` with types
 points, vectors, and covectors.
 """
-struct ArrayManifold{M<:Manifold} <: Manifold
+struct ArrayManifold{M<:Manifold} <: AbstractDecoratorManifold
     manifold::M
 end
 
