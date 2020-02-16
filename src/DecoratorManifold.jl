@@ -1,4 +1,9 @@
 #
+# Helper
+#
+@inline _extract_val(::Val{T}) where {T} = T
+
+#
 # Type
 #
 """
@@ -16,6 +21,10 @@ decorator acts transparent on all other decorators, i.e. they just pass them thr
 the decorator the function is implemented for is not among the decorators, an error is
 issued. By default all base manifold functions, for example [`exp`](@ref) and [`log`](@ref)
 are transparent for all decorators.
+
+Transparency of functions with respect to decorators can be specified using the macros
+[`@decorator_transparent_fallback`](@ref), [`@decorator_transparent_function`](@ref) and
+[`@decorator_transparent_signature`](@ref).
 """
 abstract type AbstractDecoratorManifold <: Manifold end
 
@@ -340,7 +349,8 @@ end
 Given a [`Manifold`](@ref) `M` and a function `f(M,arge...)`, indicate, whether a
 function is `Val(:transparent)` or `Val(:intransparent)` for the (decorated)
 [`Manifold`](@ref) `M`. Another possibility is, that for `M` and given `args...`
-the function `f` should invoke `M`s `Val(:parent)` implementation.
+the function `f` should invoke `M`s `Val(:parent)` implementation, see
+[`@decorator_transparent_function`](@ref) for details.
 """
 decorator_transparent_dispatch(f, M::Manifold, args...) = Val(:transparent)
 
@@ -424,10 +434,6 @@ end
 @decorator_transparent_signature project_point!(M::AbstractDecoratorManifold, q, p)
 
 @decorator_transparent_signature project_tangent!(M::AbstractDecoratorManifold, Y, p, X)
-
-@decorator_transparent_signature projected_distribution(M::AbstractDecoratorManifold, d, p)
-
-@decorator_transparent_signature projected_distribution(M::AbstractDecoratorManifold, d)
 
 @decorator_transparent_signature representation_size(M::AbstractDecoratorManifold)
 
