@@ -9,14 +9,14 @@
 """
     AbstractDecoratorManifold <: Manifold
 
-An `AbstractDecoratorManifold` indicates that to some extend a manifold subtype
-decorates another manifold in the sense that
+An `AbstractDecoratorManifold` indicates that to some extent a manifold subtype
+decorates another manifold in the sense that it either
 
 * it extends the functionality of a manifold with further features
-* it defines a new manifold that internally uses functions from another manifold
+* it defines a new manifold that internally uses functions from the decorated manifold
 
-with the main intend that several or most functions of [`Manifold`](@ref) are transparently
-passed thrugh to the manifold that is decorated. This way a function implemented for a
+with the main intent that several or most functions of [`Manifold`](@ref) are transparently
+passed through to the manifold that is decorated. This way a function implemented for a
 decorator acts transparent on all other decorators, i.e. they just pass them through. If
 the decorator the function is implemented for is not among the decorators, an error is
 issued. By default all base manifold functions, for example [`exp`](@ref) and [`log`](@ref)
@@ -35,18 +35,18 @@ abstract type AbstractDecoratorManifold <: Manifold end
     @decorator_transparent_fallback(ex)
     @decorator_transparent_fallback(fallback_case = :intransparent, ex)
 
-This macro introdcues an additional implementation for a certain additional case.
+This macro introduces an additional implementation for a certain additional case.
 This can especially be used if for an already transparent function and an abstract
 intermediate type a change in the default is required.
 For implementing a concrete type, neither this nor any other trick is necessary. One
-just implements the function as before. Not that a decorator that [`is_default_decorator`](@ref)
+just implements the function as before. Note that a decorator that [`is_default_decorator`](@ref)
 still dispatches to the transparent case.
 
 
 * `:transparent` states, that the function is transparently passed on to the manifold that
 is decorated by the [`AbstractDecoratorManifold`](@ref) `M`, which by default is assumed to
 be stored in `M.manifold`.
-* `: intransparent` states that an implementation for this decorator is required, and if
+* `:intransparent` states that an implementation for this decorator is required, and if
 none of the types provides one, an error is issued. Since this macro provides such an
 implementation, this is the default.
 * `:parent` states, that this function passes on to the supertype instead of to the
@@ -123,7 +123,7 @@ The cases of transparency are
 * `:transparent` states, that the function is transparently passed on to the manifold that
 is decorated by the [`AbstractDecoratorManifold`](@ref) `M`, which by default is assumed to
 be stored in `M.manifold`.
-* `: intransparent` states that an implementation for this decorator is required, and if
+* `:intransparent` states that an implementation for this decorator is required, and if
 none of the types provides one, an error is issued. Since this macro provides such an
 implementation, this is the default.
 * `:parent` states, that this function passes on to the supertype instead of to the
@@ -313,7 +313,8 @@ example a metric. To avoid reimplementation of this metric when introducing a se
 the first metric can be set to be the default, i.e. its implementaion is already given by
 the undecorated case.
 
-to change this value, see [`default_decorator_dispatch`](@ref).
+Value returned by this function is determined by [`default_decorator_dispatch`](@ref),
+which returns a `Val`-wrapped boolean for type stability of certain functions.
 """
 is_default_decorator(M::Manifold) = _extract_val(default_decorator_dispatch(M))
 
@@ -329,10 +330,10 @@ default_decorator_dispatch(M::Manifold) = Val(false)
 """
     is_decorator_transparent(f, M, args...)
 
-Given a [`Manifold`](@ref) `M` and a function `f(M,arge...)`, indicate, whether a
-[`AbstractDecoratorManifold`](@ref) acts transparent for `f`. This means, it
+Given a [`Manifold`](@ref) `M` and a function `f(M, args...)`, indicate, whether an
+[`AbstractDecoratorManifold`](@ref) acts transparently for `f`. This means, it
 just passes through down to the internally stored manifold.
-Only decorator manifolds can be transparent and their default is, to be transparent.
+Transparency is only defined for decorator manifolds and by default all decorators are transparent.
 A function that is affected by the decorator indicates this by returning `false`. To change
 this behaviour, see [`decorator_transparent_dispatch`](@ref).
 
@@ -340,7 +341,7 @@ If a decorator manifold is not in general transparent, it might still pass down
 for the case that a decorator is the default decorator, see [`is_default_decorator`](@ref).
 """
 function is_decorator_transparent(f, M::Manifold, args...)
-    return decorator_transparent_dispatch(f, M, args...) == Val(:transparent)
+    return decorator_transparent_dispatch(f, M, args...) === Val(:transparent)
 end
 
 """
