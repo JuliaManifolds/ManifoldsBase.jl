@@ -4,15 +4,19 @@ using Test
 
 struct CustomArrayManifoldRetraction <: ManifoldsBase.AbstractRetractionMethod end
 
-ManifoldsBase.injectivity_radius(
+function ManifoldsBase.injectivity_radius(
     ::ManifoldsBase.DefaultManifold,
     ::CustomArrayManifoldRetraction,
-) = 10.0
-ManifoldsBase.injectivity_radius(
+)
+    return 10.0
+end
+function ManifoldsBase.injectivity_radius(
     ::ManifoldsBase.DefaultManifold,
     p,
     ::CustomArrayManifoldRetraction,
-) = 11.0
+)
+    return 11.0
+end
 
 @testset "Array manifold" begin
     M = ManifoldsBase.DefaultManifold(3)
