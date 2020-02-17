@@ -52,7 +52,7 @@ implementation, this is the default.
 * `:parent` states, that this function passes on to the supertype instead of to the
 decorated manifold.
 
-Currently inline-definitions are not yet covered – the function signature however may contain
+Inline definitions are not supported. The function signature however may contain
 keyword arguments and a where clause. It does not allow for parameters with default values.
 
 # Examples
@@ -71,11 +71,11 @@ macro decorator_transparent_fallback(ex)
 end
 macro decorator_transparent_fallback(fallback_case, input_ex)
     ex = macroexpand(__module__, input_ex)
-    if ex.head == :function || ex.head == :(=) #complete or inline function
+    if ex.head == :function
         sig = ex.args[1]
         body = ex.args[2]
     else
-        error("Incorrect syntax in $ex. Expected :function of :(=).")
+        error("Incorrect syntax in $ex. Expected :function.")
     end
     if sig.head == :where
         where_exprs = sig.args[2:end]
@@ -130,7 +130,7 @@ implementation, this is the default.
 * `:parent` states, that this function passes on to the supertype instead of to the
 decorated manifold.
 
-Currently inline-definitions are not yet covered – the function signature however may contain
+Inline-definitions are not yet covered – the function signature however may contain
 keyword arguments and a where clause.
 
 # Examples
@@ -153,7 +153,7 @@ macro decorator_transparent_function(fallback_case, input_ex)
         sig = ex.args[1]
         body = ex.args[2]
     else
-        error("Incorrect syntax in $ex. Expected :function. It does not yet work for inline functions.")
+        error("Incorrect syntax in $ex. Expected :function. It does not work for inline function definitions (using `=`).")
     end
     if sig.head == :where
         where_exprs = sig.args[2:end]
@@ -233,7 +233,7 @@ none of the types provides one, an error is issued.
 * `:parent` states, that this function passes on to the supertype instead of to the
 decorated manifold.
 
-currently inline-definitions are not yet covered – the function signature however may contain
+Inline definitions are not supported. The function signature however may contain
 keyword arguments and a where clause.
 
 The dispatch kind can later still be set to something diffrent, see [`decorator_transparent_dispatch`](@ref)
