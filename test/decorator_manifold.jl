@@ -7,6 +7,16 @@ struct TestDecorator{M<:Manifold} <: AbstractDecoratorManifold
     manifold::M
 end
 
+abstract type AbstractTestDecorator <: AbstractDecoratorManifold end
+
+struct TestDecorator2{M<:Manifold} <: AbstractTestDecorator
+    manifold::M
+end
+
+struct TestDecorator3{M<:Manifold} <: AbstractTestDecorator
+    manifold::M
+end
+
 test1(M::Manifold, p; a = 0) = 101 + a
 test2(M::Manifold, p; a = 0) = 102 + a
 test3(M::Manifold, p; a = 0) = 103 + a
@@ -27,11 +37,11 @@ decorator_transparent_dispatch(::typeof(test4), M::TestDecorator, args...) = Val
     return 5
 end
 
-@decorator_transparent_function @inline function test6(M::Manifold, p)
+@decorator_transparent_function @inline function test6(M::TestDecorator, p)
     return 6
 end
 
-@decorator_transparent_function :parent function test7(M::Manifold, p)
+@decorator_transparent_function :parent function test7(M::TestDecorator, p)
     return 7
 end
 
@@ -40,6 +50,18 @@ end
 end
 
 test8(M::Manifold, p; a = 0) = 8 + a
+
+@decorator_transparent_function :parent function test9(M::AbstractDecoratorManifold, p; a = 0)
+    return 9 + a
+end
+
+@decorator_transparent_fallback :parent @inline function test9(M::AbstractTestDecorator, p::TP; a = 0) where {TP}
+    return 19 + a
+end
+
+function test9(M::TestDecorator3, p::TP; a = 0) where {TP}
+    return 109 + a
+end
 
 @testset "Testing decorator manifold functions" begin
     M = ManifoldsBase.DefaultManifold(3)
@@ -86,4 +108,9 @@ test8(M::Manifold, p; a = 0) = 8 + a
     @test test7(TD, p) == 17
     @test (@inferred decorator_transparent_dispatch(test8, M, p)) === Val(:transparent)
     @test is_decorator_transparent(test8, M, p)
+    @test_throws ErrorException test9(M, p; a = 1000)
+    @test test9(TD, p; a = 1000) == 1009
+    @test test9(TestDecorator2(TD), p; a = 1000) == 1019
+    @test test9(TestDecorator3(TestDecorator2(TD)), p; a = 1000) == 1109
+    @test test9(TestDecorator3(TD), p; a = 1000) == 1109
 end

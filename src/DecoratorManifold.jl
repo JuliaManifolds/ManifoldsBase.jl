@@ -103,7 +103,12 @@ macro decorator_transparent_fallback(fallback_case, input_ex)
         end
     end
     return esc(quote
-        function ($fname)($(callargs[1]), ::Val{$fallback_case}, $(callargs[2:end]...); $(kwargs_list...)) where {$(where_exprs...)}
+        function ($fname)(
+            $(callargs[1]),
+            ::Val{$fallback_case},
+            $(callargs[2:end]...);
+            $(kwargs_list...),
+        ) where {$(where_exprs...)}
             ($body)
         end
     end)
@@ -173,6 +178,10 @@ macro decorator_transparent_function(fallback_case, input_ex)
         callargs = call_expr.args[2:end]
         kwargs_list = []
     end
+    kwargs_call = map(kwargs_list) do kwarg
+        kwargname = kwarg.args[1]
+        return :($kwargname = $kwargname)
+    end
     argnames = map(callargs) do arg
         if isa(arg, Expr)
             return arg.args[1]
@@ -188,30 +197,86 @@ macro decorator_transparent_function(fallback_case, input_ex)
         end
     end
     return esc(quote
-        function ($fname)($(argnames[1])::AbstractDecoratorManifold, $(callargs[2:end]...); $(kwargs_list...)) where {$(where_exprs...)}
-            return ($fname)($(argnames[1]), ManifoldsBase._acts_transparently($fname, $(argnames...)), $(argnames[2:end]...),; $(kwargs_list...))
+        function ($fname)(
+            $(argnames[1])::AbstractDecoratorManifold,
+            $(callargs[2:end]...);
+            $(kwargs_list...),
+        ) where {$(where_exprs...)}
+            return ($fname)(
+                $(argnames[1]),
+                ManifoldsBase._acts_transparently($fname, $(argnames...)),
+                $(argnames[2:end]...),;
+                $(kwargs_call...),
+            )
         end
-        function ($fname)($(argnames[1])::AbstractDecoratorManifold, ::Val{:transparent}, $(callargs[2:end]...); $(kwargs_list...)) where {$(where_exprs...)}
-            return ($fname)($(argnames[1]).manifold, $(argnames[2:end]...); $(kwargs_list...))
+        function ($fname)(
+            $(argnames[1])::AbstractDecoratorManifold,
+            ::Val{:transparent},
+            $(callargs[2:end]...);
+            $(kwargs_list...),
+        ) where {$(where_exprs...)}
+            return ($fname)(
+                $(argnames[1]).manifold,
+                $(argnames[2:end]...);
+                $(kwargs_call...),
+            )
         end
-        function ($fname)($(argnames[1])::AbstractDecoratorManifold, ::Val{:intransparent}, $(callargs[2:end]...); $(kwargs_list...)) where {$(where_exprs...)}
-            error(manifold_function_not_implemented_message($(argnames[1]), $fname, $(argnames[2:end]...)))
+        function ($fname)(
+                $(argnames[1])::AbstractDecoratorManifold,
+                ::Val{:intransparent},
+                $(callargs[2:end]...);
+                $(kwargs_list...),
+            ) where {$(where_exprs...)}
+            error_msg = ManifoldsBase.manifold_function_not_implemented_message(
+                $(argnames[1]),
+                $fname,
+                $(argnames[2:end]...),
+            )
+            error(error_msg)
         end
-        function ($fname)($(argnames[1])::Manifold, $(callargs[2:end]...); $(kwargs_list...)) where {$(where_exprs...)}
+        function ($fname)(
+            $(argnames[1])::Manifold,
+            $(callargs[2:end]...);
+            $(kwargs_list...),
+        ) where {$(where_exprs...)}
             error(string(
-                ManifoldsBase.manifold_function_not_implemented_message($(argnames[1]), $fname, $(argnames[2:end]...)),
-                "Usually this is implemented for a ",
+                ManifoldsBase.manifold_function_not_implemented_message(
+                    $(argnames[1]),
+                    $fname,
+                    $(argnames[2:end]...),
+                ),
+                " Usually this is implemented for a ",
                 $(argtypes[1]),
                 ". Maybe you missed to implement this function for a default?"
             ))
         end
-        function ($fname)($(argnames[1])::AbstractDecoratorManifold, ::Val{:parent}, $(callargs[2:end]...); $(kwargs_list...)) where {$(where_exprs...)}
-            return invoke($fname, Tuple{supertype($(argtypes[1])), $(argtypes[2:end]...)}, $(argnames...); $(kwargs_list...))
+        function ($fname)(
+            $(argnames[1])::AbstractDecoratorManifold,
+            ::Val{:parent},
+            $(callargs[2:end]...);
+            $(kwargs_list...),
+        ) where {$(where_exprs...)}
+            return invoke(
+                $fname,
+                Tuple{supertype($(argtypes[1])),$(argtypes[2:end]...)},
+                $(argnames...);
+                $(kwargs_call...),
+            )
         end
-        function ($fname)($(callargs[1]), ::Val{$fallback_case}, $(callargs[2:end]...); $(kwargs_list...)) where {$(where_exprs...)}
+        function ($fname)(
+            $(callargs[1]),
+            ::Val{$fallback_case},
+            $(callargs[2:end]...);
+            $(kwargs_list...),
+        ) where {$(where_exprs...)}
             ($body)
         end
-        decorator_transparent_dispatch(::typeof($fname), $(callargs...)) where {$(where_exprs...)} = Val($fallback_case)
+        function decorator_transparent_dispatch(
+            ::typeof($fname),
+            $(callargs...),
+        ) where {$(where_exprs...)}
+            return Val($fallback_case)
+        end
     end)
 end
 """
@@ -266,6 +331,10 @@ macro decorator_transparent_signature(ex)
         kwargs_list = []
     end
 
+    kwargs_call = map(kwargs_list) do kwarg
+        kwargname = kwarg.args[1]
+        return :($kwargname = $kwargname)
+    end
     argnames = map(callargs) do arg
         if isa(arg, Expr)
             return arg.args[1]
@@ -281,17 +350,54 @@ macro decorator_transparent_signature(ex)
         end
     end
     return esc(quote
-        function ($fname)($(callargs...); $(kwargs_list...)) where {$(where_exprs...)}
-            return ($fname)($(argnames[1]), ManifoldsBase._acts_transparently($fname, $(argnames...)), $(argnames[2:end]...),; $(kwargs_list...))
+        function ($fname)(
+            $(callargs...);
+            $(kwargs_list...),
+        ) where {$(where_exprs...)}
+            return ($fname)(
+                $(argnames[1]),
+                ManifoldsBase._acts_transparently($fname, $(argnames...)),
+                $(argnames[2:end]...);
+                $(kwargs_call...),
+            )
         end
-        function ($fname)($(callargs[1]), ::Val{:transparent}, $(callargs[2:end]...); $(kwargs_list...)) where {$(where_exprs...)}
-            return ($fname)($(argnames[1]).manifold, $(argnames[2:end]...); $(kwargs_list...))
+        function ($fname)(
+            $(callargs[1]),
+            ::Val{:transparent},
+            $(callargs[2:end]...);
+            $(kwargs_list...),
+        ) where {$(where_exprs...)}
+            return ($fname)(
+                $(argnames[1]).manifold,
+                $(argnames[2:end]...);
+                $(kwargs_call...),
+            )
         end
-        function ($fname)($(callargs[1]), ::Val{:intransparent}, $(callargs[2:end]...); $(kwargs_list...)) where {$(where_exprs...)}
-            error(manifold_function_not_implemented_message($(argnames[1]), $fname, $(argnames[2:end]...)))
+        function ($fname)(
+            $(callargs[1]),
+            ::Val{:intransparent},
+            $(callargs[2:end]...);
+            $(kwargs_list...),
+        ) where {$(where_exprs...)}
+            error_msg = ManifoldsBase.manifold_function_not_implemented_message(
+                $(argnames[1]),
+                $fname,
+                $(argnames[2:end]...),
+            )
+            error(error_msg)
         end
-        function ($fname)($(callargs[1]), ::Val{:parent}, $(callargs[2:end]...); $(kwargs_list...)) where {$(where_exprs...)}
-            return invoke($fname, Tuple{supertype($(argtypes[1])), $(argtypes[2:end]...)}, $(argnames...); $(kwargs_list...))
+        function ($fname)(
+            $(callargs[1]),
+            ::Val{:parent},
+            $(callargs[2:end]...);
+            $(kwargs_list...),
+        ) where {$(where_exprs...)}
+            return invoke(
+                $fname,
+                Tuple{supertype($(argtypes[1])), $(argtypes[2:end]...)},
+                $(argnames...);
+                $(kwargs_call...),
+            )
         end
     end)
 end
