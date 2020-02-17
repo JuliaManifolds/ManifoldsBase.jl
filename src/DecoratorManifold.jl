@@ -360,7 +360,7 @@ function _acts_transparently(f, M::Manifold, args...)
 end
 
 _val_or(::Val{true}, ::Val{T}) where {T} = Val(:transparent)
-_val_or(::Val{false}, ::Val{T}) where {T} = Val(T)
+_val_or(::Val{false}, val::Val) = val
 
 #
 # Functions overwritten with decorators
