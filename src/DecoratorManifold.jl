@@ -280,7 +280,7 @@ macro decorator_transparent_signature(ex)
     end
     return esc(quote
         function ($fname)($(callargs...); $(kwargs_list...)) where {$(where_exprs...)}
-            return ($fname)($(argnames[1]), _acts_transparently($fname, $(argnames...)), $(argnames[2:end]...),; $(kwargs_list...))
+            return ($fname)($(argnames[1]), ManifoldsBase._acts_transparently($fname, $(argnames...)), $(argnames[2:end]...),; $(kwargs_list...))
         end
         function ($fname)($(callargs[1]), ::Val{:transparent}, $(callargs[2:end]...); $(kwargs_list...)) where {$(where_exprs...)}
             return ($fname)($(argnames[1]).manifold, $(argnames[2:end]...); $(kwargs_list...))
