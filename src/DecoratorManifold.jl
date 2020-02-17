@@ -69,7 +69,8 @@ end
 macro decorator_transparent_fallback(ex)
     return esc(quote @decorator_transparent_fallback :intransparent ($ex) end)
 end
-macro decorator_transparent_fallback(fallback_case, ex)
+macro decorator_transparent_fallback(fallback_case, input_ex)
+    ex = macroexpand(ManifoldsBase, input_ex)
     if ex.head == :function || ex.head == :(=) #complete or inline function
         sig = ex.args[1]
         body = ex.args[2]
@@ -146,7 +147,8 @@ end
 macro decorator_transparent_function(ex)
     return esc(quote @decorator_transparent_function :intransparent ($ex) end)
 end
-macro decorator_transparent_function(fallback_case, ex)
+macro decorator_transparent_function(fallback_case, input_ex)
+    ex = macroexpand(ManifoldsBase, input_ex)
     if ex.head == :function
         sig = ex.args[1]
         body = ex.args[2]

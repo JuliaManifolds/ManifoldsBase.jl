@@ -27,7 +27,7 @@ decorator_transparent_dispatch(::typeof(test4), M::TestDecorator, args...) = Val
     return 5
 end
 
-@decorator_transparent_function function test6(M::Manifold, p)
+@decorator_transparent_function @inline function test6(M::Manifold, p)
     return 6
 end
 
@@ -35,7 +35,7 @@ end
     return 7
 end
 
-@decorator_transparent_fallback :parent function test7(M::TestDecorator, p)
+@decorator_transparent_fallback :parent @inline function test7(M::TestDecorator, p)
     return 17
 end
 
