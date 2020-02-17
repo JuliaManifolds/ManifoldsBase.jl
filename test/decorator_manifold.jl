@@ -23,6 +23,23 @@ decorator_transparent_dispatch(::typeof(test2), M::TestDecorator, args...) = Val
 decorator_transparent_dispatch(::typeof(test3), M::TestDecorator, args...) = Val(:parent)
 decorator_transparent_dispatch(::typeof(test4), M::TestDecorator, args...) = Val(:intransparent)
 
+@decorator_transparent_function :transparent function test5(M::AbstractDecoratorManifold, p)
+    return 5
+end
+
+@decorator_transparent_function function test6(M::Manifold, p)
+    return 6
+end
+
+@decorator_transparent_function :parent function test7(M::Manifold, p)
+    return 7
+end
+
+@decorator_transparent_fallback :parent function test7(M::TestDecorator, p)
+    return 17
+end
+
+
 @testset "Testing decorator manifold functions" begin
     M = ManifoldsBase.DefaultManifold(3)
     A = ArrayManifold(M)
@@ -49,6 +66,9 @@ decorator_transparent_dispatch(::typeof(test4), M::TestDecorator, args...) = Val
 
     TD = TestDecorator(M)
 
+    @test (@inferred ManifoldsBase.default_decorator_dispatch(M)) === Val(false)
+    @test ManifoldsBase.is_default_decorator(M) === false
+
     @test test1(TD, p) == 1
     @test test1(TD, p; a = 1000) == 1001
     @test test2(TD, p) == 102
@@ -57,4 +77,9 @@ decorator_transparent_dispatch(::typeof(test4), M::TestDecorator, args...) = Val
     @test test3(TD, p; a = 1000) == 1103
     @test_throws ErrorException test4(TD, p)
     @test_throws ErrorException test4(TD, p; a = 1000)
+    @test (@inferred decorator_transparent_dispatch(test5, TD, p)) === Val(:transparent)
+    @test test5(TD, p) == 5
+    @test (@inferred decorator_transparent_dispatch(test6, TD, p)) === Val(:intransparent)
+    @test_throws ErrorException test7(M, p)
+    @test test7(TD, p) == 17
 end
