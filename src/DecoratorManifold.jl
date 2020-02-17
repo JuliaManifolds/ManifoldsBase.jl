@@ -94,7 +94,7 @@ macro decorator_transparent_fallback(fallback_case, ex)
         callargs = call_expr.args[2:end]
         kwargs_list = []
     end
-        argnames = map(callargs) do arg
+    argnames = map(callargs) do arg
         if isa(arg, Expr)
             return arg.args[1]
         else
@@ -187,7 +187,7 @@ macro decorator_transparent_function(fallback_case, ex)
     end
     return esc(quote
         function ($fname)($(argnames[1])::AbstractDecoratorManifold, $(callargs[2:end]...); $(kwargs_list...)) where {$(where_exprs...)}
-            return ($fname)($(argnames[1]), _acts_transparently($fname, $(argnames...)), $(argnames[2:end]...),; $(kwargs_list...))
+            return ($fname)($(argnames[1]), ManifoldsBase._acts_transparently($fname, $(argnames...)), $(argnames[2:end]...),; $(kwargs_list...))
         end
         function ($fname)($(argnames[1])::AbstractDecoratorManifold, ::Val{:transparent}, $(callargs[2:end]...); $(kwargs_list...)) where {$(where_exprs...)}
             return ($fname)($(argnames[1]).manifold, $(argnames[2:end]...); $(kwargs_list...))
@@ -197,7 +197,7 @@ macro decorator_transparent_function(fallback_case, ex)
         end
         function ($fname)($(argnames[1])::Manifold, $(callargs[2:end]...); $(kwargs_list...)) where {$(where_exprs...)}
             error(string(
-                manifold_function_not_implemented_message($(argnames[1]), $fname, $(argnames[2:end]...)),
+                ManifoldsBase.manifold_function_not_implemented_message($(argnames[1]), $fname, $(argnames[2:end]...)),
                 "Usually this is implemented for a ",
                 $(argtypes[1]),
                 ". Maybe you missed to implement this function for a default?"
