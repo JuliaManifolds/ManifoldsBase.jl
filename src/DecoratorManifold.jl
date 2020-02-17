@@ -406,6 +406,8 @@ end
 
 @decorator_transparent_signature injectivity_radius(M::AbstractDecoratorManifold)
 @decorator_transparent_signature injectivity_radius(M::AbstractDecoratorManifold, p)
+@decorator_transparent_signature injectivity_radius(M::AbstractDecoratorManifold, m::AbstractRetractionMethod)
+@decorator_transparent_signature injectivity_radius(M::AbstractDecoratorManifold, p, m::AbstractRetractionMethod)
 
 @decorator_transparent_signature inner(M::AbstractDecoratorManifold, p, X, Y)
 
