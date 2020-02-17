@@ -108,14 +108,14 @@ macro decorator_transparent_fallback(fallback_case, ex)
     end)
 end
 """
-    @decorator_transparent_function(ex, fallback_case = :intransparent)
+    @decorator_transparent_function(ex)
+    @decorator_transparent_function(fallback_case = :intransparent, ex)
 
-
-Introduce the function specified by `to act transparent with respect to
+Introduce the function specified by `ex` to act transparently with respect to
 [`AbstractDecoratorManifold`](@ref)s. This intoduces the possibility to modify the kind of
 transparency the implementation is done for. This optional first argument, the `Symbol`
 within `fallback_case`. This macro can be used to define a function and introduce it as
-transparent to other deocorators. Not that a decorator that [`is_default_decorator`](@ref)
+transparent to other decorators. Note that a decorator that [`is_default_decorator`](@ref)
 still dispatches to the transparent case.
 
 The cases of transparency are
@@ -129,7 +129,7 @@ implementation, this is the default.
 * `:parent` states, that this function passes on to the supertype instead of to the
 decorated manifold.
 
-currently inline-definitions are not yet covered – the function signature however may contain
+Currently inline-definitions are not yet covered – the function signature however may contain
 keyword arguments and a where clause.
 
 # Examples
@@ -138,7 +138,7 @@ keyword arguments and a where clause.
 @decorator_transparent_function log!(M::AbstractDecoratorManifold, X, p, q)
     log!(M.manifold, X, p, Q)
 end
-@decorator_transparent_function :parent log!(M::TD, X, p, q) where {TD<:AbstractDecoratorManifold}
+@decorator_transparent_function :parent log!(M::AbstractDecoratorManifold, X, p, q)
     log!(M.manifold, X, p, Q)
 end
 ```
