@@ -39,6 +39,7 @@ end
     return 17
 end
 
+test8(M::Manifold, p; a = 0) = 8 + a
 
 @testset "Testing decorator manifold functions" begin
     M = ManifoldsBase.DefaultManifold(3)
@@ -78,8 +79,11 @@ end
     @test_throws ErrorException test4(TD, p)
     @test_throws ErrorException test4(TD, p; a = 1000)
     @test (@inferred decorator_transparent_dispatch(test5, TD, p)) === Val(:transparent)
+    @test is_decorator_transparent(test5, TD, p)
     @test test5(TD, p) == 5
     @test (@inferred decorator_transparent_dispatch(test6, TD, p)) === Val(:intransparent)
     @test_throws ErrorException test7(M, p)
     @test test7(TD, p) == 17
+    @test (@inferred decorator_transparent_dispatch(test8, M, p)) === Val(:transparent)
+    @test is_decorator_transparent(test8, M, p)
 end
