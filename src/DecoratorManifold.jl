@@ -3,6 +3,75 @@
 #
 @inline _extract_val(::Val{T}) where {T} = T
 
+function _split_signature(sig::Expr)
+    if sig.head == :where
+        where_exprs = sig.args[2:end]
+        call_expr = sig.args[1]
+    elseif sig.head == :call
+        where_exprs = []
+        call_expr = sig
+    else
+        error("Incorrect syntax in $ex. Expected a :where or :call expression.")
+    end
+    fname = call_expr.args[1]
+    if isa(call_expr.args[2], Expr) && call_expr.args[2].head == :parameters
+        # we have keyword arguments
+        callargs = call_expr.args[3:end]
+        kwargs_list = call_expr.args[2].args
+    else
+        callargs = call_expr.args[2:end]
+        kwargs_list = []
+    end
+
+    argnames = map(callargs) do arg
+        if isa(arg, Expr)
+            return arg.args[1]
+        else
+            return arg
+        end
+    end
+    argtypes = map(callargs) do arg
+        if isa(arg, Expr)
+            return arg.args[2]
+        else
+            return Any
+        end
+    end
+
+    kwargs_call = map(kwargs_list) do kwarg
+        if kwarg.head === :...
+            return kwarg
+        else
+            kwargname = kwarg.args[1]
+            return :($kwargname = $kwargname)
+        end
+    end
+
+    return (;
+        fname = fname,
+        where_exprs = where_exprs,
+        callargs = callargs,
+        kwargs_list = kwargs_list,
+        argnames = argnames,
+        argtypes = argtypes,
+        kwargs_call = kwargs_call,
+    )
+end
+
+function _split_function(ex::Expr)
+    if ex.head == :function
+        sig = ex.args[1]
+        body = ex.args[2]
+    else
+        error("Incorrect syntax in $ex. Expected :function.")
+    end
+
+    return (;
+        body = body,
+        _split_signature(sig)...
+    )
+end
+
 #
 # Type
 #
@@ -71,38 +140,17 @@ macro decorator_transparent_fallback(ex)
 end
 macro decorator_transparent_fallback(fallback_case, input_ex)
     ex = macroexpand(__module__, input_ex)
-    if ex.head == :function
-        sig = ex.args[1]
-        body = ex.args[2]
-    else
-        error("Incorrect syntax in $ex. Expected :function.")
-    end
-    if sig.head == :where
-        where_exprs = sig.args[2:end]
-        call_expr = sig.args[1]
-    elseif sig.head == :call
-        where_exprs = []
-        call_expr = sig
-    else
-        error("Incorrect syntax in $ex. Expected a :where or :call expression.")
-    end
-    fname = call_expr.args[1]
-    if isa(call_expr.args[2], Expr) && call_expr.args[2].head == :parameters
-        # we have keyword arguments
-        callargs = call_expr.args[3:end]
-        kwargs_list = call_expr.args[2].args
-    else
-        callargs = call_expr.args[2:end]
-        kwargs_list = []
-    end
+    parts = _split_function(ex)
+    callargs = parts[:callargs]
+    where_exprs = parts[:where_exprs]
     return esc(quote
-        function ($fname)(
+        function ($(parts[:fname]))(
             $(callargs[1]),
             ::Val{$fallback_case},
             $(callargs[2:end]...);
-            $(kwargs_list...),
+            $(parts[:kwargs_list]...),
         ) where {$(where_exprs...)}
-            ($body)
+            ($(parts[:body]))
         end
     end)
 end
@@ -147,52 +195,16 @@ macro decorator_transparent_function(ex)
 end
 macro decorator_transparent_function(fallback_case, input_ex)
     ex = macroexpand(__module__, input_ex)
-    if ex.head == :function
-        sig = ex.args[1]
-        body = ex.args[2]
-    else
-        error("Incorrect syntax in $ex. Expected :function. It does not work for inline function definitions (using `=`).")
-    end
-    if sig.head == :where
-        where_exprs = sig.args[2:end]
-        call_expr = sig.args[1]
-    elseif sig.head == :call
-        where_exprs = []
-        call_expr = sig
-    else
-        error("Incorrect syntax in $sig. Expected a :where or :call expression.")
-    end
-    fname = call_expr.args[1]
-    if isa(call_expr.args[2], Expr) && call_expr.args[2].head == :parameters
-        # we have keyword arguments
-        callargs = call_expr.args[3:end]
-        kwargs_list = call_expr.args[2].args
-    else
-        callargs = call_expr.args[2:end]
-        kwargs_list = []
-    end
-    kwargs_call = map(kwargs_list) do kwarg
-        if kwarg.head === :...
-            return kwarg
-        else
-            kwargname = kwarg.args[1]
-            return :($kwargname = $kwargname)
-        end
-    end
-    argnames = map(callargs) do arg
-        if isa(arg, Expr)
-            return arg.args[1]
-        else
-            return arg
-        end
-    end
-    argtypes = map(callargs) do arg
-        if isa(arg, Expr)
-            return arg.args[2]
-        else
-            return Any
-        end
-    end
+    parts = _split_function(ex)
+    kwargs_list = parts[:kwargs_list]
+    callargs = parts[:callargs]
+    fname = parts[:fname]
+    where_exprs = parts[:where_exprs]
+    body = parts[:body]
+    argnames = parts[:argnames]
+    argtypes = parts[:argtypes]
+    kwargs_call = parts[:kwargs_call]
+
     return esc(quote
         function ($fname)(
             $(argnames[1])::AbstractDecoratorManifold,
@@ -309,46 +321,15 @@ The dispatch kind can later still be set to something diffrent, see [`decorator_
 ```
 """
 macro decorator_transparent_signature(ex)
-    if ex.head == :where
-        where_exprs = ex.args[2:end]
-        call_expr = ex.args[1]
-    elseif ex.head == :call
-        where_exprs = []
-        call_expr = ex
-    else
-        error("Incorrect syntax in $ex. Expected a :where or :call expression.")
-    end
-    fname = call_expr.args[1]
-    if isa(call_expr.args[2], Expr) && call_expr.args[2].head == :parameters
-        # we have keyword arguments
-        callargs = call_expr.args[3:end]
-        kwargs_list = call_expr.args[2].args
-    else
-        callargs = call_expr.args[2:end]
-        kwargs_list = []
-    end
-    kwargs_call = map(kwargs_list) do kwarg
-        if kwarg.head === :...
-            return kwarg
-        else
-            kwargname = kwarg.args[1]
-            return :($kwargname = $kwargname)
-        end
-    end
-    argnames = map(callargs) do arg
-        if isa(arg, Expr)
-            return arg.args[1]
-        else
-            return arg
-        end
-    end
-    argtypes = map(callargs) do arg
-        if isa(arg, Expr)
-            return arg.args[2]
-        else
-            return Any
-        end
-    end
+    parts = _split_signature(ex)
+    kwargs_list = parts[:kwargs_list]
+    callargs = parts[:callargs]
+    fname = parts[:fname]
+    where_exprs = parts[:where_exprs]
+    argnames = parts[:argnames]
+    argtypes = parts[:argtypes]
+    kwargs_call = parts[:kwargs_call]
+
     return esc(quote
         function ($fname)(
             $(callargs...);
