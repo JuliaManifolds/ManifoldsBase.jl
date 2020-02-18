@@ -95,13 +95,6 @@ macro decorator_transparent_fallback(fallback_case, input_ex)
         callargs = call_expr.args[2:end]
         kwargs_list = []
     end
-    argnames = map(callargs) do arg
-        if isa(arg, Expr)
-            return arg.args[1]
-        else
-            return arg
-        end
-    end
     return esc(quote
         function ($fname)(
             $(callargs[1]),
