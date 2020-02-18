@@ -491,33 +491,39 @@ end
     kwargs...,
 )
 
-@decorator_transparent_signature distance(
-    M::AbstractDecoratorManifold,
-    p,
-    q,
-)
+@decorator_transparent_signature distance(M::AbstractDecoratorManifold, p, q)
 
-@decorator_transparent_signature exp!(
-    M::AbstractDecoratorManifold,
-    q,
-    p,
-    X,
-)
+@decorator_transparent_signature exp(M::AbstractDecoratorManifold, p, X)
 
-@decorator_transparent_signature exp!(
-    M::AbstractDecoratorManifold,
-    q,
-    p,
-    X,
-    T
-)
+@decorator_transparent_signature exp!(M::AbstractDecoratorManifold, q, p, X)
 
 @decorator_transparent_signature injectivity_radius(M::AbstractDecoratorManifold)
 @decorator_transparent_signature injectivity_radius(M::AbstractDecoratorManifold, p)
-@decorator_transparent_signature injectivity_radius(M::AbstractDecoratorManifold, m::AbstractRetractionMethod)
-@decorator_transparent_signature injectivity_radius(M::AbstractDecoratorManifold, p, m::AbstractRetractionMethod)
+@decorator_transparent_signature injectivity_radius(
+    M::AbstractDecoratorManifold,
+    m::AbstractRetractionMethod
+)
+@decorator_transparent_signature injectivity_radius(
+    M::AbstractDecoratorManifold,
+    p,
+    m::AbstractRetractionMethod
+)
 
 @decorator_transparent_signature inner(M::AbstractDecoratorManifold, p, X, Y)
+
+@decorator_transparent_signature inverse_retract(
+    M::AbstractDecoratorManifold,
+    p,
+    q,
+    m::AbstractInverseRetractionMethod,
+)
+
+@decorator_transparent_signature inverse_retract(
+    M::AbstractDecoratorManifold,
+    p,
+    q,
+    m::LogarithmicInverseRetraction,
+)
 
 @decorator_transparent_signature inverse_retract!(
     M::AbstractDecoratorManifold,
@@ -538,15 +544,33 @@ end
 @decorator_transparent_signature isapprox(M::AbstractDecoratorManifold, p, q; kwargs...)
 @decorator_transparent_signature isapprox(M::AbstractDecoratorManifold, p, X, Y; kwargs...)
 
+@decorator_transparent_signature log(M::AbstractDecoratorManifold, p, q)
 @decorator_transparent_signature log!(M::AbstractDecoratorManifold, X, p, q)
 
 @decorator_transparent_signature manifold_dimension(M::AbstractDecoratorManifold)
 
+
+@decorator_transparent_signature project_point(M::AbstractDecoratorManifold, p)
 @decorator_transparent_signature project_point!(M::AbstractDecoratorManifold, q, p)
 
+@decorator_transparent_signature project_tangent(M::AbstractDecoratorManifold, p, X)
 @decorator_transparent_signature project_tangent!(M::AbstractDecoratorManifold, Y, p, X)
 
 @decorator_transparent_signature representation_size(M::AbstractDecoratorManifold)
+
+@decorator_transparent_signature retract(
+    M::AbstractDecoratorManifold,
+    p,
+    X,
+    m::AbstractRetractionMethod
+)
+
+@decorator_transparent_signature retract(
+    M::AbstractDecoratorManifold,
+    p,
+    X,
+    m::ExponentialRetraction
+)
 
 @decorator_transparent_signature retract!(
     M::AbstractDecoratorManifold,
@@ -564,6 +588,12 @@ end
     m::ExponentialRetraction
 )
 
+@decorator_transparent_signature vector_transport_along(
+    M::AbstractDecoratorManifold,
+    p,
+    X,
+    c,
+)
 @decorator_transparent_signature vector_transport_along!(
     M::AbstractDecoratorManifold,
     Y,
@@ -572,6 +602,12 @@ end
     c,
 )
 
+@decorator_transparent_signature vector_transport_direction(
+    M::AbstractDecoratorManifold,
+    p,
+    X,
+    d,
+)
 @decorator_transparent_signature vector_transport_direction!(
     M::AbstractDecoratorManifold,
     Y,
@@ -580,6 +616,13 @@ end
     d,
 )
 
+@decorator_transparent_signature vector_transport_to(
+    M::AbstractDecoratorManifold,
+    p,
+    X,
+    q,
+    m::AbstractVectorTransportMethod,
+)
 @decorator_transparent_signature vector_transport_to!(
     M::AbstractDecoratorManifold,
     Y,
