@@ -51,16 +51,16 @@ end
 
 test8(M::Manifold, p; a = 0) = 8 + a
 
-@decorator_transparent_function :parent function test9(M::AbstractDecoratorManifold, p; a = 0)
-    return 9 + a
+@decorator_transparent_function :parent function test9(M::AbstractDecoratorManifold, p; a = 0, kwargs...)
+    return 9 + a + (haskey(kwargs, :b) ? kwargs[:b] : 0)
 end
 
-@decorator_transparent_fallback :parent @inline function test9(M::AbstractTestDecorator, p::TP; a = 0) where {TP}
-    return 19 + a
+@decorator_transparent_fallback :parent @inline function test9(M::AbstractTestDecorator, p::TP; a = 0, kwargs...) where {TP}
+    return 19 + a + (haskey(kwargs, :b) ? kwargs[:b] : 0)
 end
 
-function test9(M::TestDecorator3, p::TP; a = 0) where {TP}
-    return 109 + a
+function test9(M::TestDecorator3, p::TP; a = 0, kwargs...) where {TP}
+    return 109 + a + (haskey(kwargs, :b) ? kwargs[:b] : 0)
 end
 
 test10(M::AbstractTestDecorator, p::TP; a=0) where {TP} = 10*a
@@ -122,8 +122,12 @@ decorator_transparent_dispatch(::typeof(test10), M::TestDecorator3, args...) = V
     @test is_decorator_transparent(test8, M, p)
     @test_throws ErrorException test9(M, p; a = 1000)
     @test test9(TD, p; a = 1000) == 1009
+    @test test9(TD, p; a = 1000, b = 10000) == 11009
     @test test9(TestDecorator2(TD), p; a = 1000) == 1019
+    @test test9(TestDecorator2(TD), p; a = 1000, b = 10000) == 11019
     @test test9(TestDecorator3(TestDecorator2(TD)), p; a = 1000) == 1109
+    @test test9(TestDecorator3(TestDecorator2(TD)), p; a = 1000, b = 10000) == 11109
     @test test9(TestDecorator3(TD), p; a = 1000) == 1109
+    @test test9(TestDecorator3(TD), p; a = 1000, b = 10000) == 11109
     @test test10(TestDecorator3(TD), p; a = 11) == 110
 end

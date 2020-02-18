@@ -172,8 +172,12 @@ macro decorator_transparent_function(fallback_case, input_ex)
         kwargs_list = []
     end
     kwargs_call = map(kwargs_list) do kwarg
-        kwargname = kwarg.args[1]
-        return :($kwargname = $kwargname)
+        if kwarg.head === :...
+            return kwarg
+        else
+            kwargname = kwarg.args[1]
+            return :($kwargname = $kwargname)
+        end
     end
     argnames = map(callargs) do arg
         if isa(arg, Expr)
@@ -323,10 +327,13 @@ macro decorator_transparent_signature(ex)
         callargs = call_expr.args[2:end]
         kwargs_list = []
     end
-
     kwargs_call = map(kwargs_list) do kwarg
-        kwargname = kwarg.args[1]
-        return :($kwargname = $kwargname)
+        if kwarg.head === :...
+            return kwarg
+        else
+            kwargname = kwarg.args[1]
+            return :($kwargname = $kwargname)
+        end
     end
     argnames = map(callargs) do arg
         if isa(arg, Expr)
