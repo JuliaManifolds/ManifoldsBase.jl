@@ -227,7 +227,6 @@ distance(M::Manifold, p, q) = norm(M, p, log(M, p, q))
 """
     exp(M::Manifold, p, X)
     exp(M::Manifold, p, X, t::Real = 1)
-    exp(M::Manifold, p, X, T::AbstractVector) -> AbstractVector
 
 Compute the exponential map of tangent vector `X`, optionally scaled by `t`,  at point `p`
 from manifold the [`Manifold`](@ref) `M`.
@@ -238,7 +237,6 @@ function exp(M::Manifold, p, X)
     return q
 end
 exp(M::Manifold, p, X, t::Real) = exp(M, p, t * X)
-exp(M::Manifold, p, X, T::AbstractVector) = map(t -> exp(M, p, X, t), T)
 
 """
     exp!(M::Manifold, q, p, X)
@@ -267,7 +265,7 @@ Return the point at time `t` or points at times `t` in `T` along the geodesic.
 """
 geodesic(M::Manifold, p, X) = t -> exp(M, p, X, t)
 geodesic(M::Manifold, p, X, t::Real) = exp(M, p, X, t)
-geodesic(M::Manifold, p, X, T::AbstractVector) = exp(M, p, X, T)
+geodesic(M::Manifold, p, X, T::AbstractVector) = map(t -> exp(M, p, X, t), T)
 
 @doc doc"""
     injectivity_radius(M::Manifold, p)
