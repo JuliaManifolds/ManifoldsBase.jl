@@ -81,10 +81,8 @@ struct NonCoTVector <: CoTVector end
     @test_throws ErrorException exp!(m, [0], [0], [0], 0.0)
     @test_throws ErrorException exp(m, [0], [0])
     @test_throws ErrorException exp(m, [0], [0], 0.0)
-    @test_throws ErrorException exp(m, [0], [0], [0])
     @test_throws ErrorException exp(m, [0.0], [0.0])
     @test_throws ErrorException exp(m, [0.0], [0.0], 0.0)
-    @test_throws ErrorException exp(m, [0.0], [0.0], [0])
 
     @test_throws ErrorException log!(m, v, p, p)
     @test_throws ErrorException log!(m, [0], [0], [0])
