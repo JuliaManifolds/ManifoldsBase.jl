@@ -182,7 +182,7 @@ angle(M::Manifold, p, X, Y) = acos(real(inner(M, p, X, Y)) / norm(M, p, X) / nor
 Return the internally stored [`Manifold`](@ref) for decorated manifold `M` and the base
 manifold for vector bundles or power manifolds. The optional parameter `depth` can be used
 to remove only the first `depth` many decorators and return the [`Manifold`](@ref) from that
-level, whether its decorated or not. any negative value deactivates this depth limit.
+level, whether its decorated or not. Any negative value deactivates this depth limit.
 """
 base_manifold(M::Manifold, depth = Val(-1)) = M
 
