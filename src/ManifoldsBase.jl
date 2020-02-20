@@ -432,7 +432,7 @@ function manifold_dimension(M::Manifold)
 end
 
 function manifold_function_not_implemented_message(M::Manifold, f, x...)
-    s = join(map(string, map(typeof, x)),", "," and ")
+    s = join(map(string, map(typeof, x)), ", ", " and ")
     a = length(x) > 1 ? "arguments" : "argument"
     m = length(x) > 0 ? " for $(a) $(s)." : "."
     return "$(f) not implemented on $(M)$(m)"
@@ -625,7 +625,16 @@ function vector_transport_along!(
     c,
     method::AbstractVectorTransportMethod,
 )
-    error(manifold_function_not_implemented_message(M, vector_transport_along!, M, Y, p, X, c, method))
+    error(manifold_function_not_implemented_message(
+        M,
+        vector_transport_along!,
+        M,
+        Y,
+        p,
+        X,
+        c,
+        method,
+    ))
 end
 
 
@@ -722,7 +731,15 @@ function vector_transport_to!(
     q,
     method::AbstractVectorTransportMethod,
 )
-    error(manifold_function_not_implemented_message(M, vector_transport_to!, Y, p, X, q, method))
+    error(manifold_function_not_implemented_message(
+        M,
+        vector_transport_to!,
+        Y,
+        p,
+        X,
+        q,
+        method,
+    ))
 end
 
 """
