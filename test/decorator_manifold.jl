@@ -76,6 +76,7 @@ decorator_transparent_dispatch(::typeof(test10), M::TestDecorator3, args...) = V
 
     @test (@inferred base_manifold(M)) == M
     @test (@inferred base_manifold(A)) == M
+    @test (@inferred ManifoldsBase.decorated_manifold(A)) == M
     @test ManifoldsBase._extract_val(Val(:transparent)) === :transparent
 
     @test (@inferred base_manifold(M, Val(1))) == M

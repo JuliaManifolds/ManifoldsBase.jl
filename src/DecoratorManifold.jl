@@ -110,8 +110,8 @@ still dispatches to the transparent case.
 
 
 * `:transparent` states, that the function is transparently passed on to the manifold that
-is decorated by the [`AbstractDecoratorManifold`](@ref) `M`, which by default is assumed to
-be stored in `M.manifold`.
+is decorated by the [`AbstractDecoratorManifold`](@ref) `M`, which is determined using
+the function [`decorated_manifold`](@ref).
 * `:intransparent` states that an implementation for this decorator is required, and if
 none of the types provides one, an error is issued. Since this macro provides such an
 implementation, this is the default.
@@ -125,10 +125,10 @@ keyword arguments and a where clause. It does not allow for parameters with defa
 
 ```julia
 @decorator_transparent_fallback function log!(M::AbstractGroupManifold, X, p, q)
-    log!(M.manifold, X, p, Q)
+    log!(decorated_manifold(M), X, p, Q)
 end
 @decorator_transparent_fallback :transparent function log!(M::AbstractGroupManifold, X, p, q)
-    log!(M.manifold, X, p, Q)
+    log!(decorated_manifold(M), X, p, Q)
 end
 ```
 """
@@ -170,13 +170,14 @@ still dispatches to the transparent case.
 The cases of transparency are
 
 * `:transparent` states, that the function is transparently passed on to the manifold that
-is decorated by the [`AbstractDecoratorManifold`](@ref) `M`, which by default is assumed to
-be stored in `M.manifold`.
+is decorated by the [`AbstractDecoratorManifold`](@ref) `M`, which is determined using
+the function [`decorated_manifold`](@ref).
 * `:intransparent` states that an implementation for this decorator is required, and if
 none of the types provides one, an error is issued. Since this macro provides such an
 implementation, this is the default.
 * `:parent` states, that this function passes on to the supertype instead of to the
-decorated manifold.
+decorated manifold. Passing is performed using the `invoke` function where the type of
+manifold is replaced by its supertype.
 
 Inline-definitions are not yet covered – the function signature however may contain
 keyword arguments and a where clause.
@@ -185,10 +186,10 @@ keyword arguments and a where clause.
 
 ```julia
 @decorator_transparent_function log!(M::AbstractDecoratorManifold, X, p, q)
-    log!(M.manifold, X, p, Q)
+    log!(decorated_manifold(M), X, p, Q)
 end
 @decorator_transparent_function :parent log!(M::AbstractDecoratorManifold, X, p, q)
-    log!(M.manifold, X, p, Q)
+    log!(decorated_manifold(M), X, p, Q)
 end
 ```
 """
@@ -231,7 +232,7 @@ macro decorator_transparent_function(fallback_case, input_ex)
                 $(kwargs_list...),
             ) where {$(where_exprs...)}
                 return ($fname)(
-                    $(argnames[1]).manifold,
+                    decorated_manifold($(argnames[1])),
                     $(argnames[2:end]...);
                     $(kwargs_call...),
                 )
@@ -307,9 +308,9 @@ default values. It introduces a dispatch on several transparency modes
 The cases of transparency are
 
 * `:transparent` states, that the function is transparently passed on to the manifold that
-is decorated by the [`AbstractDecoratorManifold`](@ref) `M`, which by default is assumed to
-be stored in `M.manifold`. This is the default.
-* `: intransparent` states that an implementation for this decorator is required, and if
+is decorated by the [`AbstractDecoratorManifold`](@ref) `M`, which is determined using
+the function [`decorated_manifold`](@ref). This is the default.
+* `:intransparent` states that an implementation for this decorator is required, and if
 none of the types provides one, an error is issued.
 * `:parent` states, that this function passes on to the supertype instead of to the
 decorated manifold.
@@ -354,7 +355,7 @@ macro decorator_transparent_signature(ex)
                 $(kwargs_list...),
             ) where {$(where_exprs...)}
                 return ($fname)(
-                    $(argnames[1]).manifold,
+                    decorated_manifold($(argnames[1])),
                     $(argnames[2:end]...);
                     $(kwargs_call...),
                 )
@@ -466,8 +467,8 @@ _val_or(::Val{false}, val::Val) = val
 
 function base_manifold(M::AbstractDecoratorManifold, depth::Val{N} = Val(-1)) where {N}
     N == 0 && return M
-    N < 0 && return base_manifold(M.manifold, depth)
-    return base_manifold(M.manifold, Val(N - 1))
+    N < 0 && return base_manifold(decorated_manifold(M), depth)
+    return base_manifold(decorated_manifold(M), Val(N - 1))
 end
 
 @decorator_transparent_signature check_manifold_point(
@@ -482,6 +483,14 @@ end
     X;
     kwargs...,
 )
+
+"""
+    decorated_manifold(M::AbstractDecoratorManifold)
+
+Return the manifold decorated by the decorator `M`. Defaults to `M.manifold`.
+"""
+decorated_manifold(M::Manifold) = M.manifold
+
 
 @decorator_transparent_signature distance(M::AbstractDecoratorManifold, p, q)
 
