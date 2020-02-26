@@ -2,6 +2,10 @@ using ManifoldsBase
 using Test
 
 import ManifoldsBase.decorator_transparent_dispatch
+using ManifoldsBase: @decorator_transparent_function,
+    @decorator_transparent_fallback,
+    @decorator_transparent_signature,
+    is_decorator_transparent
 
 struct TestDecorator{M<:Manifold} <: AbstractDecoratorManifold
     manifold::M
