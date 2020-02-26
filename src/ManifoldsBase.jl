@@ -177,20 +177,14 @@ Compute the angle between tangent vectors `X` and `Y` at point `p` from the
 angle(M::Manifold, p, X, Y) = acos(real(inner(M, p, X, Y)) / norm(M, p, X) / norm(M, p, Y))
 
 """
-    base_manifold(M::Manifold, depth = -1)
+    base_manifold(M::Manifold, depth = Val(-1))
 
 Return the internally stored [`Manifold`](@ref) for decorated manifold `M` and the base
 manifold for vector bundles or power manifolds. The optional parameter `depth` can be used
 to remove only the first `depth` many decorators and return the [`Manifold`](@ref) from that
-level, whether its decorated or not. any negative value deactivates this depth limit.
+level, whether its decorated or not. Any negative value deactivates this depth limit.
 """
-base_manifold(M::Manifold, depth=-1) = base_manifold(M, is_decorator_manifold(M),depth)
-function base_manifold(M::Manifold, ::Val{true}, depth=-1)
-    # if we reach zero, return M, otherwise reduce positive level
-    # and leave negative values unchanged to avoid the (really improbable) underflow
-    return (depth != 0) ? base_manifold(M.manifold, (depth > 0) ? depth-1 : depth) : M
-end
-base_manifold(M::Manifold, ::Val{false}, depth=-1) = M
+base_manifold(M::Manifold, depth = Val(-1)) = M
 
 """
     check_manifold_point(M::Manifold, p; kwargs...) -> Union{Nothing,String}
@@ -203,9 +197,7 @@ assumption is to be optimistic for a point not deriving from the [`MPoint`](@ref
 """
 check_manifold_point(M::Manifold, p; kwargs...) = nothing
 function check_manifold_point(M::Manifold, p::MPoint; kwargs...)
-    error(
-        "check_manifold_point not implemented for manifold $(typeof(M)) and point $(typeof(p))."
-    )
+    error(manifold_function_not_implemented_message(M, check_manifold_point, p))
 end
 
 """
@@ -222,7 +214,7 @@ type.
 """
 check_tangent_vector(M::Manifold, p, X; kwargs...) = nothing
 function check_tangent_vector(M::Manifold, p::MPoint, X::TVector; kwargs...)
-    error("check_tangent_vector not implemented for manifold $(typeof(M)), point $(typeof(p)) and vector $(typeof(X)).")
+    error(manifold_function_not_implemented_message(M, check_tangent_vector, p, X))
 end
 
 """
@@ -235,7 +227,6 @@ distance(M::Manifold, p, q) = norm(M, p, log(M, p, q))
 """
     exp(M::Manifold, p, X)
     exp(M::Manifold, p, X, t::Real = 1)
-    exp(M::Manifold, p, X, T::AbstractVector) -> AbstractVector
 
 Compute the exponential map of tangent vector `X`, optionally scaled by `t`,  at point `p`
 from manifold the [`Manifold`](@ref) `M`.
@@ -246,7 +237,6 @@ function exp(M::Manifold, p, X)
     return q
 end
 exp(M::Manifold, p, X, t::Real) = exp(M, p, t * X)
-exp(M::Manifold, p, X, T::AbstractVector) = map(t -> exp(M, p, X, t), T)
 
 """
     exp!(M::Manifold, q, p, X)
@@ -257,7 +247,7 @@ from manifold the [`Manifold`](@ref) `M`.
 The result is saved to `q`.
 """
 function exp!(M::Manifold, q, p, X)
-    error("exp! not implemented on a $(typeof(M)) for input point $(p) and tangent vector $(X).")
+    error(manifold_function_not_implemented_message(M, exp!, q, p, X))
 end
 exp!(M::Manifold, q, p, X, t::Real) = exp!(M, q, p, t * X)
 
@@ -275,7 +265,7 @@ Return the point at time `t` or points at times `t` in `T` along the geodesic.
 """
 geodesic(M::Manifold, p, X) = t -> exp(M, p, X, t)
 geodesic(M::Manifold, p, X, t::Real) = exp(M, p, X, t)
-geodesic(M::Manifold, p, X, T::AbstractVector) = exp(M, p, X, T)
+geodesic(M::Manifold, p, X, T::AbstractVector) = map(t -> exp(M, p, X, t), T)
 
 @doc doc"""
     injectivity_radius(M::Manifold, p)
@@ -296,13 +286,13 @@ is injective for all tangent vectors shorter than $d$ (i.e. has an inverse) for 
 if provided or all manifold points otherwise.
 """
 function injectivity_radius(M::Manifold)
-    error("injectivity_radius not implemented for manifold $(typeof(M)).")
+    error(manifold_function_not_implemented_message(M, injectivity_radius))
 end
 injectivity_radius(M::Manifold, p) = injectivity_radius(M)
 injectivity_radius(M::Manifold, p, method::AbstractRetractionMethod) =
     injectivity_radius(M, method)
 function injectivity_radius(M::Manifold, method::AbstractRetractionMethod)
-    error("injectivity_radius not implemented for manifold $(typeof(M)) and retraction method $(typeof(method)).")
+    error(manifold_function_not_implemented_message(M, injectivity_radius, method))
 end
 injectivity_radius(M::Manifold, p, ::ExponentialRetraction) = injectivity_radius(M, p)
 injectivity_radius(M::Manifold, ::ExponentialRetraction) = injectivity_radius(M)
@@ -314,9 +304,7 @@ Compute the inner product of tangent vectors `X` and `Y` at point `p` from the
 [`Manifold`](@ref) `M`.
 """
 function inner(M::Manifold, p, X, Y)
-    error(
-        "inner not implemented on a $(typeof(M)) for input point $(typeof(p)) and tangent vectors $(typeof(X)) and $(typeof(Y))."
-    )
+    error(manifold_function_not_implemented_message(M, inner, p, X, Y))
 end
 
 """
@@ -378,21 +366,6 @@ Keyword arguments can be used to specify tolerances.
 """
 isapprox(M::Manifold, p, X, Y; kwargs...) = isapprox(X, Y; kwargs...)
 
-"""
-    is_decorator_manifold(M::Manifold)
-
-Indicate whether a [`Manifold`](@ref) `M` is a decorator manifold, i.e. whether it
-encapsulates a manifold with additional features and stores internally the original manifold
-instance. An example is the [`ArrayManifold`](@ref).
-
-Certain functions are just calling themselves on the internal manifold and hence do not need
-to be reimplemented for decorators again, for example [`manifold_dimension`](@ref) and
-especially [`base_manifold`](@ref).
-
-It is assumed that the undecorated (base) manifold is stored in `M.manifold`. Alternatively,
-overload [`base_manifold`](@ref).
-"""
-is_decorator_manifold(::Manifold) = Val(false)
 
 """
     is_manifold_point(M::Manifold, p, throw_error = false; kwargs...)
@@ -445,7 +418,7 @@ Compute the logarithmic map of point `q` at base point `p` on the [`Manifold`](@
 THe result is saved to `X`.
 """
 function log!(M::Manifold, X, p, q)
-    error("log! not implemented on $(typeof(M)) for points $(typeof(p)) and $(typeof(q))")
+    error(manifold_function_not_implemented_message(M, log!, X, p, q))
 end
 
 @doc doc"""
@@ -454,10 +427,15 @@ end
 The dimension $n=\dim_{\mathcal M}$ of real space $\mathbb R^n$ to which the neighborhood of
 each point of the [`Manifold`](@ref) `M` is homeomorphic.
 """
-manifold_dimension(M::Manifold) = manifold_dimension(M, is_decorator_manifold(M))
-manifold_dimension(M::Manifold, ::Val{true}) = manifold_dimension(base_manifold(M))
-function manifold_dimension(M::Manifold, ::Val{false})
-    error("manifold_dimension not implemented for manifold $(typeof(M)).")
+function manifold_dimension(M::Manifold)
+    error(manifold_function_not_implemented_message(M, manifold_dimension))
+end
+
+function manifold_function_not_implemented_message(M::Manifold, f, x...)
+    s = join(map(string, map(typeof, x)), ", ", " and ")
+    a = length(x) > 1 ? "arguments" : "argument"
+    m = length(x) > 0 ? " for $(a) $(s)." : "."
+    return "$(f) not implemented on $(M)$(m)"
 end
 
 """
@@ -505,7 +483,7 @@ overwritten by the projection. The function works only for selected embedded man
 is *not* required to return the closest point.
 """
 function project_point!(M::Manifold, q, p)
-    error("project_point! not implemented for a $(typeof(M)) and points $(typeof(q)) and $(typeof(p)).")
+    error(manifold_function_not_implemented_message(M, project_point!, q, p))
 end
 
 """
@@ -533,9 +511,7 @@ The function works only for selected embedded manifolds and is *not* required to
 closest vector.
 """
 function project_tangent!(M::Manifold, Y, p, X)
-    error(
-        "project_tangent! not implemented for a $(typeof(M)) and point $(typeof(p)) with input $(typeof(X))."
-    )
+    error(manifold_function_not_implemented_message(M, project_tangent!, Y, p, X))
 end
 
 @doc doc"""
@@ -543,10 +519,8 @@ end
 
 The size of an array representing a point on [`Manifold`](@ref) `M`.
 """
-representation_size(M::Manifold) = representation_size(M, is_decorator_manifold(M))
-representation_size(M::Manifold, ::Val{true}) = representation_size(base_manifold(M))
-function representation_size(M::Manifold, ::Val{false})
-    error("representation_size not implemented for manifold $(typeof(M)).")
+function representation_size(M::Manifold)
+    error(manifold_function_not_implemented_message(M, representation_size))
 end
 
 """
@@ -651,7 +625,16 @@ function vector_transport_along!(
     c,
     method::AbstractVectorTransportMethod,
 )
-    error("vector_transport_along! not implemented for manifold $(typeof(M)), vector $(typeof(Y)), point $(typeof(p)), vector $(typeof(X)) along curve $(typeof(c)) with method $(typeof(method)).")
+    error(manifold_function_not_implemented_message(
+        M,
+        vector_transport_along!,
+        M,
+        Y,
+        p,
+        X,
+        c,
+        method,
+    ))
 end
 
 
@@ -748,7 +731,15 @@ function vector_transport_to!(
     q,
     method::AbstractVectorTransportMethod,
 )
-    error("vector_transport_to! not implemented from a point of type $(typeof(p)) to a type $(typeof(q)) on a $(typeof(M)) for a vector of type $(X) and the $(typeof(method)).")
+    error(manifold_function_not_implemented_message(
+        M,
+        vector_transport_to!,
+        Y,
+        p,
+        X,
+        q,
+        method,
+    ))
 end
 
 """
@@ -770,12 +761,12 @@ function zero_tangent_vector(M::Manifold, p)
     zero_tangent_vector!(M, X, p)
     return X
 end
-
+include("DecoratorManifold.jl")
 include("ArrayManifold.jl")
 include("DefaultManifold.jl")
 
-export Manifold,
-    MPoint, TVector, CoTVector, ArrayManifold, ArrayMPoint, ArrayTVector, ArrayCoTVector
+export Manifold, MPoint, TVector, CoTVector
+export AbstractDecoratorManifold, ArrayManifold, ArrayMPoint, ArrayTVector, ArrayCoTVector
 
 export ParallelTransport, ProjectionTransport
 
@@ -795,7 +786,6 @@ export allocate,
     isapprox,
     is_manifold_point,
     is_tangent_vector,
-    is_decorator_manifold,
     log,
     log!,
     manifold_dimension,

@@ -4,15 +4,19 @@ using Test
 
 struct CustomArrayManifoldRetraction <: ManifoldsBase.AbstractRetractionMethod end
 
-ManifoldsBase.injectivity_radius(
+function ManifoldsBase.injectivity_radius(
     ::ManifoldsBase.DefaultManifold,
     ::CustomArrayManifoldRetraction,
-) = 10.0
-ManifoldsBase.injectivity_radius(
+)
+    return 10.0
+end
+function ManifoldsBase.injectivity_radius(
     ::ManifoldsBase.DefaultManifold,
     p,
     ::CustomArrayManifoldRetraction,
-) = 11.0
+)
+    return 11.0
+end
 
 @testset "Array manifold" begin
     M = ManifoldsBase.DefaultManifold(3)
@@ -30,7 +34,6 @@ ManifoldsBase.injectivity_radius(
     @testset "Types and Conversion" begin
         @test convert(typeof(M), A) == M
         @test convert(typeof(A), M) == A
-        @test is_decorator_manifold(A) == Val(true)
         @test base_manifold(A) == M
         @test base_manifold(base_manifold(A)) == base_manifold(A)
         @test ManifoldsBase.representation_size(A) == ManifoldsBase.representation_size(M)

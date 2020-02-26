@@ -9,7 +9,7 @@ encapsulated/stripped automatically when needed.
 This manifold is a decorator for a manifold, i.e. it decorates a manifold `M` with types
 points, vectors, and covectors.
 """
-struct ArrayManifold{M<:Manifold} <: Manifold
+struct ArrayManifold{M<:Manifold} <: AbstractDecoratorManifold
     manifold::M
 end
 
@@ -173,8 +173,6 @@ function isapprox(M::ArrayManifold, x, v, w; kwargs...)
     is_tangent_vector(M, x, w, true; kwargs...)
     return isapprox(M.manifold, array_value(x), array_value(v), array_value(w); kwargs...)
 end
-
-is_decorator_manifold(::ArrayManifold) = Val(true)
 
 function log(M::ArrayManifold, x, y; kwargs...)
     is_manifold_point(M, x, true; kwargs...)

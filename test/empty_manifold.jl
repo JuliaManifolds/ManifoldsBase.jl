@@ -11,7 +11,6 @@ struct NonCoTVector <: CoTVector end
     m = NonManifold()
     p = NonMPoint()
     v = NonTVector()
-    @test is_decorator_manifold(m) == Val(false)
     @test base_manifold(m) == m
     @test_throws ErrorException ManifoldsBase.representation_size(m)
 
@@ -82,10 +81,8 @@ struct NonCoTVector <: CoTVector end
     @test_throws ErrorException exp!(m, [0], [0], [0], 0.0)
     @test_throws ErrorException exp(m, [0], [0])
     @test_throws ErrorException exp(m, [0], [0], 0.0)
-    @test_throws ErrorException exp(m, [0], [0], [0])
     @test_throws ErrorException exp(m, [0.0], [0.0])
     @test_throws ErrorException exp(m, [0.0], [0.0], 0.0)
-    @test_throws ErrorException exp(m, [0.0], [0.0], [0])
 
     @test_throws ErrorException log!(m, v, p, p)
     @test_throws ErrorException log!(m, [0], [0], [0])

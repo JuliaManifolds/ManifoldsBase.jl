@@ -1,0 +1,636 @@
+#
+# Helper
+#
+@inline _extract_val(::Val{T}) where {T} = T
+
+function _split_signature(sig::Expr)
+    if sig.head == :where
+        where_exprs = sig.args[2:end]
+        call_expr = sig.args[1]
+    elseif sig.head == :call
+        where_exprs = []
+        call_expr = sig
+    else
+        error("Incorrect syntax in $ex. Expected a :where or :call expression.")
+    end
+    fname = call_expr.args[1]
+    if isa(call_expr.args[2], Expr) && call_expr.args[2].head == :parameters
+        # we have keyword arguments
+        callargs = call_expr.args[3:end]
+        kwargs_list = call_expr.args[2].args
+    else
+        callargs = call_expr.args[2:end]
+        kwargs_list = []
+    end
+
+    argnames = map(callargs) do arg
+        if isa(arg, Expr)
+            return arg.args[1]
+        else
+            return arg
+        end
+    end
+    argtypes = map(callargs) do arg
+        if isa(arg, Expr)
+            return arg.args[2]
+        else
+            return Any
+        end
+    end
+
+    kwargs_call = map(kwargs_list) do kwarg
+        if kwarg.head === :...
+            return kwarg
+        else
+            kwargname = kwarg.args[1]
+            return :($kwargname = $kwargname)
+        end
+    end
+
+    return (;
+        fname = fname,
+        where_exprs = where_exprs,
+        callargs = callargs,
+        kwargs_list = kwargs_list,
+        argnames = argnames,
+        argtypes = argtypes,
+        kwargs_call = kwargs_call,
+    )
+end
+
+function _split_function(ex::Expr)
+    if ex.head == :function
+        sig = ex.args[1]
+        body = ex.args[2]
+    else
+        error("Incorrect syntax in $ex. Expected :function.")
+    end
+
+    return (; body = body, _split_signature(sig)...)
+end
+
+#
+# Type
+#
+"""
+    AbstractDecoratorManifold <: Manifold
+
+An `AbstractDecoratorManifold` indicates that to some extent a manifold subtype
+decorates another manifold in the sense that it either
+
+* it extends the functionality of a manifold with further features
+* it defines a new manifold that internally uses functions from the decorated manifold
+
+with the main intent that several or most functions of [`Manifold`](@ref) are transparently
+passed through to the manifold that is decorated. This way a function implemented for a
+decorator acts transparent on all other decorators, i.e. they just pass them through. If
+the decorator the function is implemented for is not among the decorators, an error is
+issued. By default all base manifold functions, for example [`exp`](@ref) and [`log`](@ref)
+are transparent for all decorators.
+
+Transparency of functions with respect to decorators can be specified using the macros
+[`@decorator_transparent_fallback`](@ref), [`@decorator_transparent_function`](@ref) and
+[`@decorator_transparent_signature`](@ref).
+"""
+abstract type AbstractDecoratorManifold <: Manifold end
+
+#
+# Macros
+#
+"""
+    @decorator_transparent_fallback(ex)
+    @decorator_transparent_fallback(fallback_case = :intransparent, ex)
+
+This macro introduces an additional implementation for a certain additional case.
+This can especially be used if for an already transparent function and an abstract
+intermediate type a change in the default is required.
+For implementing a concrete type, neither this nor any other trick is necessary. One
+just implements the function as before. Note that a decorator that [`is_default_decorator`](@ref)
+still dispatches to the transparent case.
+
+
+* `:transparent` states, that the function is transparently passed on to the manifold that
+is decorated by the [`AbstractDecoratorManifold`](@ref) `M`, which is determined using
+the function [`decorated_manifold`](@ref).
+* `:intransparent` states that an implementation for this decorator is required, and if
+none of the types provides one, an error is issued. Since this macro provides such an
+implementation, this is the default.
+* `:parent` states, that this function passes on to the supertype instead of to the
+decorated manifold.
+
+Inline definitions are not supported. The function signature however may contain
+keyword arguments and a where clause. It does not allow for parameters with default values.
+
+# Examples
+
+```julia
+@decorator_transparent_fallback function log!(M::AbstractGroupManifold, X, p, q)
+    log!(decorated_manifold(M), X, p, Q)
+end
+@decorator_transparent_fallback :transparent function log!(M::AbstractGroupManifold, X, p, q)
+    log!(decorated_manifold(M), X, p, Q)
+end
+```
+"""
+macro decorator_transparent_fallback(ex)
+    return esc(quote
+        @decorator_transparent_fallback :intransparent ($ex)
+    end)
+end
+macro decorator_transparent_fallback(fallback_case, input_ex)
+    ex = macroexpand(__module__, input_ex)
+    parts = _split_function(ex)
+    callargs = parts[:callargs]
+    where_exprs = parts[:where_exprs]
+    return esc(
+        quote
+            function ($(parts[:fname]))(
+                $(callargs[1]),
+                ::Val{$fallback_case},
+                $(callargs[2:end]...);
+                $(parts[:kwargs_list]...),
+            ) where {$(where_exprs...)}
+                ($(parts[:body]))
+            end
+        end,
+    )
+end
+
+"""
+    @decorator_transparent_function(ex)
+    @decorator_transparent_function(fallback_case = :intransparent, ex)
+
+Introduce the function specified by `ex` to act transparently with respect to
+[`AbstractDecoratorManifold`](@ref)s. This introduces the possibility to modify the kind of
+transparency the implementation is done for. This optional first argument, the `Symbol`
+within `fallback_case`. This macro can be used to define a function and introduce it as
+transparent to other decorators. Note that a decorator that [`is_default_decorator`](@ref)
+still dispatches to the transparent case.
+
+The cases of transparency are
+
+* `:transparent` states, that the function is transparently passed on to the manifold that
+is decorated by the [`AbstractDecoratorManifold`](@ref) `M`, which is determined using
+the function [`decorated_manifold`](@ref).
+* `:intransparent` states that an implementation for this decorator is required, and if
+none of the types provides one, an error is issued. Since this macro provides such an
+implementation, this is the default.
+* `:parent` states, that this function passes on to the supertype instead of to the
+decorated manifold. Passing is performed using the `invoke` function where the type of
+manifold is replaced by its supertype.
+
+Inline-definitions are not yet covered – the function signature however may contain
+keyword arguments and a where clause.
+
+# Examples
+
+```julia
+@decorator_transparent_function log!(M::AbstractDecoratorManifold, X, p, q)
+    log!(decorated_manifold(M), X, p, Q)
+end
+@decorator_transparent_function :parent log!(M::AbstractDecoratorManifold, X, p, q)
+    log!(decorated_manifold(M), X, p, Q)
+end
+```
+"""
+macro decorator_transparent_function(ex)
+    return esc(quote
+        @decorator_transparent_function :intransparent ($ex)
+    end)
+end
+macro decorator_transparent_function(fallback_case, input_ex)
+    ex = macroexpand(__module__, input_ex)
+    parts = _split_function(ex)
+    kwargs_list = parts[:kwargs_list]
+    callargs = parts[:callargs]
+    fname = parts[:fname]
+    where_exprs = parts[:where_exprs]
+    body = parts[:body]
+    argnames = parts[:argnames]
+    argtypes = parts[:argtypes]
+    kwargs_call = parts[:kwargs_call]
+
+    return esc(
+        quote
+            function ($fname)(
+                $(argnames[1])::AbstractDecoratorManifold,
+                $(callargs[2:end]...);
+                $(kwargs_list...),
+            ) where {$(where_exprs...)}
+                return ($fname)(
+                    $(argnames[1]),
+                    ManifoldsBase._acts_transparently($fname, $(argnames...)),
+                    $(argnames[2:end]...),
+                    ;
+                    $(kwargs_call...),
+                )
+            end
+            function ($fname)(
+                $(argnames[1])::AbstractDecoratorManifold,
+                ::Val{:transparent},
+                $(callargs[2:end]...);
+                $(kwargs_list...),
+            ) where {$(where_exprs...)}
+                return ($fname)(
+                    decorated_manifold($(argnames[1])),
+                    $(argnames[2:end]...);
+                    $(kwargs_call...),
+                )
+            end
+            function ($fname)(
+                $(argnames[1])::AbstractDecoratorManifold,
+                ::Val{:intransparent},
+                $(callargs[2:end]...);
+                $(kwargs_list...),
+            ) where {$(where_exprs...)}
+                error_msg = ManifoldsBase.manifold_function_not_implemented_message(
+                    $(argnames[1]),
+                    $fname,
+                    $(argnames[2:end]...),
+                )
+                error(error_msg)
+            end
+            function ($fname)(
+                $(argnames[1])::Manifold,
+                $(callargs[2:end]...);
+                $(kwargs_list...),
+            ) where {$(where_exprs...)}
+                error(string(
+                    ManifoldsBase.manifold_function_not_implemented_message(
+                        $(argnames[1]),
+                        $fname,
+                        $(argnames[2:end]...),
+                    ),
+                    " Usually this is implemented for a ",
+                    $(argtypes[1]),
+                    ". Maybe you missed to implement this function for a default?",
+                ))
+            end
+            function ($fname)(
+                $(argnames[1])::AbstractDecoratorManifold,
+                ::Val{:parent},
+                $(callargs[2:end]...);
+                $(kwargs_list...),
+            ) where {$(where_exprs...)}
+                return invoke(
+                    $fname,
+                    Tuple{supertype($(argtypes[1])),$(argtypes[2:end]...)},
+                    $(argnames...);
+                    $(kwargs_call...),
+                )
+            end
+            function ($fname)(
+                $(callargs[1]),
+                ::Val{$fallback_case},
+                $(callargs[2:end]...);
+                $(kwargs_list...),
+            ) where {$(where_exprs...)}
+                ($body)
+            end
+            function decorator_transparent_dispatch(
+                ::typeof($fname),
+                $(callargs...),
+            ) where {$(where_exprs...)}
+                return Val($fallback_case)
+            end
+        end,
+    )
+end
+"""
+    @decorator_transparent_signature(ex)
+
+Introduces a given function to be transparent with respect to all decorators.
+The function is adressed by its signature in `ex`.
+
+Supports standard, keyword arguments and `where` clauses. Doesn't support parameters with
+default values. It introduces a dispatch on several transparency modes
+
+The cases of transparency are
+
+* `:transparent` states, that the function is transparently passed on to the manifold that
+is decorated by the [`AbstractDecoratorManifold`](@ref) `M`, which is determined using
+the function [`decorated_manifold`](@ref). This is the default.
+* `:intransparent` states that an implementation for this decorator is required, and if
+none of the types provides one, an error is issued.
+* `:parent` states, that this function passes on to the supertype instead of to the
+decorated manifold.
+
+Inline definitions are not supported. The function signature however may contain
+keyword arguments and a where clause.
+
+The dispatch kind can later still be set to something different, see [`decorator_transparent_dispatch`](@ref)
+
+# Examples:
+
+```julia
+@decorator_transparent_signature log!(M::AbstractDecoratorManifold, X, p, q)
+@decorator_transparent_signature log!(M::TD, X, p, q) where {TD<:AbstractDecoratorManifold}
+@decorator_transparent_signature isapprox(M::AbstractDecoratorManifold, p, q; kwargs...)
+```
+"""
+macro decorator_transparent_signature(ex)
+    parts = _split_signature(ex)
+    kwargs_list = parts[:kwargs_list]
+    callargs = parts[:callargs]
+    fname = parts[:fname]
+    where_exprs = parts[:where_exprs]
+    argnames = parts[:argnames]
+    argtypes = parts[:argtypes]
+    kwargs_call = parts[:kwargs_call]
+
+    return esc(
+        quote
+            function ($fname)($(callargs...); $(kwargs_list...)) where {$(where_exprs...)}
+                return ($fname)(
+                    $(argnames[1]),
+                    ManifoldsBase._acts_transparently($fname, $(argnames...)),
+                    $(argnames[2:end]...);
+                    $(kwargs_call...),
+                )
+            end
+            function ($fname)(
+                $(callargs[1]),
+                ::Val{:transparent},
+                $(callargs[2:end]...);
+                $(kwargs_list...),
+            ) where {$(where_exprs...)}
+                return ($fname)(
+                    decorated_manifold($(argnames[1])),
+                    $(argnames[2:end]...);
+                    $(kwargs_call...),
+                )
+            end
+            function ($fname)(
+                $(callargs[1]),
+                ::Val{:intransparent},
+                $(callargs[2:end]...);
+                $(kwargs_list...),
+            ) where {$(where_exprs...)}
+                error_msg = ManifoldsBase.manifold_function_not_implemented_message(
+                    $(argnames[1]),
+                    $fname,
+                    $(argnames[2:end]...),
+                )
+                error(error_msg)
+            end
+            function ($fname)(
+                $(callargs[1]),
+                ::Val{:parent},
+                $(callargs[2:end]...);
+                $(kwargs_list...),
+            ) where {$(where_exprs...)}
+                return invoke(
+                    $fname,
+                    Tuple{supertype($(argtypes[1])),$(argtypes[2:end]...)},
+                    $(argnames...);
+                    $(kwargs_call...),
+                )
+            end
+        end,
+    )
+end
+
+#
+# Functions
+#
+
+"""
+    is_default_decorator(M) -> Bool
+
+For any manifold that is a subtype of [`AbstractDecoratorManifold`](@ref), this function
+indicates whether a certain manifold `M` acts as a default decorator.
+
+This yields that _all_ functions are passed through to the decorated [`Manifold`](@ref)
+if `M` is indicated as default. This overwrites all [`is_decorator_transparent`](@ref)
+values.
+
+This yields the following advantange: For a manifold one usually implicitly assumes for
+example a metric. To avoid reimplementation of this metric when introducing a second metric,
+the first metric can be set to be the default, i.e. its implementaion is already given by
+the undecorated case.
+
+Value returned by this function is determined by [`default_decorator_dispatch`](@ref),
+which returns a `Val`-wrapped boolean for type stability of certain functions.
+"""
+is_default_decorator(M::Manifold) = _extract_val(default_decorator_dispatch(M))
+
+"""
+    default_decorator_dispatch(M) -> Val
+
+Return whether by default to dispatch the the inner manifold of
+a decorator (`Val(true)`) or not (`Val(false`). For more details see
+[`is_decorator_transparent`](@ref).
+"""
+default_decorator_dispatch(M::Manifold) = Val(false)
+
+"""
+    is_decorator_transparent(f, M::Manifold, args...) -> Bool
+
+Given a [`Manifold`](@ref) `M` and a function `f(M, args...)`, indicate, whether an
+[`AbstractDecoratorManifold`](@ref) acts transparently for `f`. This means, it
+just passes through down to the internally stored manifold.
+Transparency is only defined for decorator manifolds and by default all decorators are transparent.
+A function that is affected by the decorator indicates this by returning `false`. To change
+this behaviour, see [`decorator_transparent_dispatch`](@ref).
+
+If a decorator manifold is not in general transparent, it might still pass down
+for the case that a decorator is the default decorator, see [`is_default_decorator`](@ref).
+"""
+function is_decorator_transparent(f, M::Manifold, args...)
+    return decorator_transparent_dispatch(f, M, args...) === Val(:transparent)
+end
+
+"""
+    decorator_transparent_dispatch(f, M::Manifold, args...) -> Val
+
+Given a [`Manifold`](@ref) `M` and a function `f(M,args...)`, indicate, whether a
+function is `Val(:transparent)` or `Val(:intransparent)` for the (decorated)
+[`Manifold`](@ref) `M`. Another possibility is, that for `M` and given `args...`
+the function `f` should invoke `M`s `Val(:parent)` implementation, see
+[`@decorator_transparent_function`](@ref) for details.
+"""
+decorator_transparent_dispatch(f, M::Manifold, args...) = Val(:transparent)
+
+function _acts_transparently(f, M::Manifold, args...)
+    return _val_or(
+        default_decorator_dispatch(M),
+        decorator_transparent_dispatch(f, M, args...),
+    )
+end
+
+_val_or(::Val{true}, ::Val{T}) where {T} = Val(:transparent)
+_val_or(::Val{false}, val::Val) = val
+
+#
+# Functions overwritten with decorators
+#
+
+function base_manifold(M::AbstractDecoratorManifold, depth::Val{N} = Val(-1)) where {N}
+    N == 0 && return M
+    N < 0 && return base_manifold(decorated_manifold(M), depth)
+    return base_manifold(decorated_manifold(M), Val(N - 1))
+end
+
+@decorator_transparent_signature check_manifold_point(
+    M::AbstractDecoratorManifold,
+    p;
+    kwargs...,
+)
+
+@decorator_transparent_signature check_tangent_vector(
+    M::AbstractDecoratorManifold,
+    p,
+    X;
+    kwargs...,
+)
+
+"""
+    decorated_manifold(M::AbstractDecoratorManifold)
+
+Return the manifold decorated by the decorator `M`. Defaults to `M.manifold`.
+"""
+decorated_manifold(M::Manifold) = M.manifold
+
+
+@decorator_transparent_signature distance(M::AbstractDecoratorManifold, p, q)
+
+@decorator_transparent_signature exp(M::AbstractDecoratorManifold, p, X)
+
+@decorator_transparent_signature exp!(M::AbstractDecoratorManifold, q, p, X)
+
+@decorator_transparent_signature injectivity_radius(M::AbstractDecoratorManifold)
+@decorator_transparent_signature injectivity_radius(M::AbstractDecoratorManifold, p)
+@decorator_transparent_signature injectivity_radius(
+    M::AbstractDecoratorManifold,
+    m::AbstractRetractionMethod,
+)
+@decorator_transparent_signature injectivity_radius(
+    M::AbstractDecoratorManifold,
+    p,
+    m::AbstractRetractionMethod,
+)
+
+@decorator_transparent_signature inner(M::AbstractDecoratorManifold, p, X, Y)
+
+@decorator_transparent_signature inverse_retract(
+    M::AbstractDecoratorManifold,
+    p,
+    q,
+    m::AbstractInverseRetractionMethod,
+)
+
+@decorator_transparent_signature inverse_retract(
+    M::AbstractDecoratorManifold,
+    p,
+    q,
+    m::LogarithmicInverseRetraction,
+)
+
+@decorator_transparent_signature inverse_retract!(
+    M::AbstractDecoratorManifold,
+    X,
+    p,
+    q,
+    m::AbstractInverseRetractionMethod,
+)
+
+@decorator_transparent_signature inverse_retract!(
+    M::AbstractDecoratorManifold,
+    X,
+    p,
+    q,
+    m::LogarithmicInverseRetraction,
+)
+
+@decorator_transparent_signature isapprox(M::AbstractDecoratorManifold, p, q; kwargs...)
+@decorator_transparent_signature isapprox(M::AbstractDecoratorManifold, p, X, Y; kwargs...)
+
+@decorator_transparent_signature log(M::AbstractDecoratorManifold, p, q)
+@decorator_transparent_signature log!(M::AbstractDecoratorManifold, X, p, q)
+
+@decorator_transparent_signature manifold_dimension(M::AbstractDecoratorManifold)
+
+
+@decorator_transparent_signature project_point(M::AbstractDecoratorManifold, p)
+@decorator_transparent_signature project_point!(M::AbstractDecoratorManifold, q, p)
+
+@decorator_transparent_signature project_tangent(M::AbstractDecoratorManifold, p, X)
+@decorator_transparent_signature project_tangent!(M::AbstractDecoratorManifold, Y, p, X)
+
+@decorator_transparent_signature representation_size(M::AbstractDecoratorManifold)
+
+@decorator_transparent_signature retract(
+    M::AbstractDecoratorManifold,
+    p,
+    X,
+    m::AbstractRetractionMethod,
+)
+
+@decorator_transparent_signature retract(
+    M::AbstractDecoratorManifold,
+    p,
+    X,
+    m::ExponentialRetraction,
+)
+
+@decorator_transparent_signature retract!(
+    M::AbstractDecoratorManifold,
+    q,
+    p,
+    X,
+    m::AbstractRetractionMethod,
+)
+
+@decorator_transparent_signature retract!(
+    M::AbstractDecoratorManifold,
+    q,
+    p,
+    X,
+    m::ExponentialRetraction,
+)
+
+@decorator_transparent_signature vector_transport_along(
+    M::AbstractDecoratorManifold,
+    p,
+    X,
+    c,
+)
+@decorator_transparent_signature vector_transport_along!(
+    M::AbstractDecoratorManifold,
+    Y,
+    p,
+    X,
+    c,
+)
+
+@decorator_transparent_signature vector_transport_direction(
+    M::AbstractDecoratorManifold,
+    p,
+    X,
+    d,
+)
+@decorator_transparent_signature vector_transport_direction!(
+    M::AbstractDecoratorManifold,
+    Y,
+    p,
+    X,
+    d,
+)
+
+@decorator_transparent_signature vector_transport_to(
+    M::AbstractDecoratorManifold,
+    p,
+    X,
+    q,
+    m::AbstractVectorTransportMethod,
+)
+@decorator_transparent_signature vector_transport_to!(
+    M::AbstractDecoratorManifold,
+    Y,
+    p,
+    X,
+    q,
+    m::AbstractVectorTransportMethod,
+)
+
+@decorator_transparent_signature zero_tangent_vector!(M::AbstractDecoratorManifold, X, p)
