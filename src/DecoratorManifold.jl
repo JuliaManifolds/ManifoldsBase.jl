@@ -110,13 +110,13 @@ still dispatches to the transparent case.
 
 
 * `:transparent` states, that the function is transparently passed on to the manifold that
-is decorated by the [`AbstractDecoratorManifold`](@ref) `M`, which is determined using
-the function [`decorated_manifold`](@ref).
+  is decorated by the [`AbstractDecoratorManifold`](@ref) `M`, which is determined using
+  the function [`decorated_manifold`](@ref).
 * `:intransparent` states that an implementation for this decorator is required, and if
-none of the types provides one, an error is issued. Since this macro provides such an
-implementation, this is the default.
+  none of the types provides one, an error is issued. Since this macro provides such an
+  implementation, this is the default.
 * `:parent` states, that this function passes on to the supertype instead of to the
-decorated manifold.
+  decorated manifold.
 
 Inline definitions are not supported. The function signature however may contain
 keyword arguments and a where clause. It does not allow for parameters with default values.
@@ -170,16 +170,16 @@ still dispatches to the transparent case.
 The cases of transparency are
 
 * `:transparent` states, that the function is transparently passed on to the manifold that
-is decorated by the [`AbstractDecoratorManifold`](@ref) `M`, which is determined using
-the function [`decorated_manifold`](@ref).
+  is decorated by the [`AbstractDecoratorManifold`](@ref) `M`, which is determined using
+  the function [`decorated_manifold`](@ref).
 * `:intransparent` states that an implementation for this decorator is required, and if
-none of the types provides one, an error is issued. Since this macro provides such an
-implementation, this is the default.
+  none of the types provides one, an error is issued. Since this macro provides such an
+  implementation, this is the default.
 * `:parent` states, that this function passes on to the supertype instead of to the
-decorated manifold. Passing is performed using the `invoke` function where the type of
-manifold is replaced by its supertype.
+  decorated manifold. Passing is performed using the `invoke` function where the type of
+  manifold is replaced by its supertype.
 
-Inline-definitions are not yet covered – the function signature however may contain
+Innkoline-definitions are not yet covered – the function signature however may contain
 keyword arguments and a where clause.
 
 # Examples
@@ -308,12 +308,12 @@ default values. It introduces a dispatch on several transparency modes
 The cases of transparency are
 
 * `:transparent` states, that the function is transparently passed on to the manifold that
-is decorated by the [`AbstractDecoratorManifold`](@ref) `M`, which is determined using
-the function [`decorated_manifold`](@ref). This is the default.
+  is decorated by the [`AbstractDecoratorManifold`](@ref) `M`, which is determined using
+  the function [`decorated_manifold`](@ref). This is the default.
 * `:intransparent` states that an implementation for this decorator is required, and if
-none of the types provides one, an error is issued.
+  none of the types provides one, an error is issued.
 * `:parent` states, that this function passes on to the supertype instead of to the
-decorated manifold.
+  decorated manifold.
 
 Inline definitions are not supported. The function signature however may contain
 keyword arguments and a where clause.
