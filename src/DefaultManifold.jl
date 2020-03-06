@@ -16,7 +16,7 @@ distance(::DefaultManifold, x, y) = norm(x - y)
 
 exp!(::DefaultManifold, y, x, v) = (y .= x .+ v)
 
-hat!(::DefaultManifold, X, p, Xⁱ) = copyto!(X, Xⁱ)
+hat!(M::DefaultManifold, X, p, Xⁱ) = copyto!(X, reshape(Xⁱ, representation_size(M)))
 
 @generated manifold_dimension(::DefaultManifold{T}) where {T} = *(T.parameters...)
 
@@ -49,6 +49,6 @@ function vector_transport_to!(::DefaultManifold, vto, x, v, y, ::ParallelTranspo
     return copyto!(vto, v)
 end
 
-vee!(::DefaultManifold, Xⁱ, p, X) where {N} = copyto!(Xⁱ, X)
+vee!(M::DefaultManifold, Xⁱ, p, X) where {N} = copyto!(Xⁱ, reshape(X, manifold_dimension(M)))
 
 zero_tangent_vector!(::DefaultManifold, v, x) = fill!(v, 0)
