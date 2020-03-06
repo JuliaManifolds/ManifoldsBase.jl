@@ -49,6 +49,6 @@ function vector_transport_to!(::DefaultManifold, vto, x, v, y, ::ParallelTranspo
     return copyto!(vto, v)
 end
 
-vee!(M::DefaultManifold, Xⁱ, p, X) where {N} = copyto!(Xⁱ, reshape(X, manifold_dimension(M)))
+vee!(M::DefaultManifold, Xⁱ, p, X) = copyto!(Xⁱ, reshape(X, manifold_dimension(M)))
 
 zero_tangent_vector!(::DefaultManifold, v, x) = fill!(v, 0)
