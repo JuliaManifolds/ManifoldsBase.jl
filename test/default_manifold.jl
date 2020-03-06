@@ -139,6 +139,20 @@ ManifoldsBase.injectivity_radius(
                 @test isapprox(M, pts[1], (-1) * tv1, -tv1)
             end
 
+            @testset "Hat and vee in the tangent space" begin
+                X = log(M,pts[1],pts[2])
+                a = vee(M,pts[1],X)
+                b = similar(a)
+                vee!(M,b,pts[1],X)
+                Y = hat(M,pts[1],a)
+                Z = similar(Y)
+                hat!(M,Z,pts[1],a)
+                @test a==b
+                @test X == Y
+                @test Z == X
+                @test a == vec(X)
+            end
+
             @testset "broadcasted linear algebra in tangent space" begin
                 @test isapprox(M, pts[1], 3 * tv1, 2 .* tv1 .+ tv1)
                 @test isapprox(M, pts[1], -tv1, tv1 .- 2 .* tv1)

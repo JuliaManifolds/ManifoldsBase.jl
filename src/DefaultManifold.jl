@@ -16,6 +16,8 @@ distance(::DefaultManifold, x, y) = norm(x - y)
 
 exp!(::DefaultManifold, y, x, v) = (y .= x .+ v)
 
+hat!(::DefaultManifold, X, p, Xⁱ) = copyto!(X, Xⁱ)
+
 @generated manifold_dimension(::DefaultManifold{T}) where {T} = *(T.parameters...)
 
 injectivity_radius(::DefaultManifold) = Inf
@@ -46,5 +48,7 @@ end
 function vector_transport_to!(::DefaultManifold, vto, x, v, y, ::ParallelTransport)
     return copyto!(vto, v)
 end
+
+vee!(::DefaultManifold, Xⁱ, p, X) where {N} = copyto!(Xⁱ, X)
 
 zero_tangent_vector!(::DefaultManifold, v, x) = fill!(v, 0)

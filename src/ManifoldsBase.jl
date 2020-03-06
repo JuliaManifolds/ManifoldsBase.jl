@@ -837,7 +837,7 @@ end
 
 function allocate_result(M::Manifold, f::typeof(vee), p, X)
     T = allocate_result_type(M, f, (p, X))
-    return allocate(p, T, Size(manifold_dimension(M)))
+    return allocate(p, T, manifold_dimension(M))
 end
 
 """
@@ -886,6 +886,8 @@ export allocate,
     exp,
     exp!,
     geodesic,
+    hat,
+    hat!,
     shortest_geodesic,
     injectivity_radius,
     inner,
@@ -912,6 +914,8 @@ export allocate,
     vector_transport_direction!,
     vector_transport_to,
     vector_transport_to!,
+    vee,
+    vee!,
     zero_tangent_vector,
     zero_tangent_vector!
 
