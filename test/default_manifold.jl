@@ -140,14 +140,14 @@ ManifoldsBase.injectivity_radius(
             end
 
             @testset "Hat and vee in the tangent space" begin
-                X = log(M,pts[1],pts[2])
-                a = vee(M,pts[1],X)
+                X = log(M, pts[1], pts[2])
+                a = vee(M, pts[1], X)
                 b = similar(a)
-                vee!(M,b,pts[1],X)
-                Y = hat(M,pts[1],a)
+                vee!(M, b, pts[1], X)
+                Y = hat(M, pts[1], a)
                 Z = similar(Y)
-                hat!(M,Z,pts[1],a)
-                @test a==b
+                hat!(M, Z, pts[1], a)
+                @test a == b
                 @test X == Y
                 @test Z == X
                 @test a == vec(X)
