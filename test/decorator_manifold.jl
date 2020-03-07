@@ -74,6 +74,10 @@ end
 # the following then ignores the previous definition and passes again to the parent above
 decorator_transparent_dispatch(::typeof(test10), M::TestDecorator3, args...) = Val(:parent)
 
+@decorator_transparent_function function test11(M::TestDecorator3, p::TP; a::Int=0) where {TP}
+    return 15*a
+end
+
 @testset "Testing decorator manifold functions" begin
     M = ManifoldsBase.DefaultManifold(3)
     A = ArrayManifold(M)
@@ -135,4 +139,5 @@ decorator_transparent_dispatch(::typeof(test10), M::TestDecorator3, args...) = V
     @test test9(TestDecorator3(TD), p; a = 1000) == 1109
     @test test9(TestDecorator3(TD), p; a = 1000, b = 10000) == 11109
     @test test10(TestDecorator3(TD), p; a = 11) == 110
+    @test test11(TestDecorator3(TD), p; a = 12) == 180
 end

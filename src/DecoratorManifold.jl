@@ -42,7 +42,11 @@ function _split_signature(sig::Expr)
         if kwarg.head === :...
             return kwarg
         else
-            kwargname = kwarg.args[1]
+            if isa(kwarg.args[1], Symbol)
+                kwargname = kwarg.args[1]
+            else
+                kwargname = kwarg.args[1].args[1]
+            end
             return :($kwargname = $kwargname)
         end
     end
