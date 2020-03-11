@@ -854,6 +854,8 @@ function zero_tangent_vector(M::Manifold, p)
     zero_tangent_vector!(M, X, p)
     return X
 end
+
+include("numbers.jl")
 include("DecoratorManifold.jl")
 include("ArrayManifold.jl")
 include("DefaultManifold.jl")
@@ -900,6 +902,7 @@ export allocate,
     project_point!,
     project_tangent,
     project_tangent!,
+    real_dimension,
     representation_size,
     retract,
     retract!,
