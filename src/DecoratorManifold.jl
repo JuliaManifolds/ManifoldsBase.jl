@@ -502,10 +502,6 @@ decorated_manifold(M::Manifold) = M.manifold
 
 @decorator_transparent_signature exp!(M::AbstractDecoratorManifold, q, p, X)
 
-@decorator_transparent_signature hat(M::AbstractDecoratorManifold, p, Xⁱ)
-
-@decorator_transparent_signature hat!(M::AbstractDecoratorManifold, X, p, Xⁱ)
-
 @decorator_transparent_signature injectivity_radius(M::AbstractDecoratorManifold)
 @decorator_transparent_signature injectivity_radius(M::AbstractDecoratorManifold, p)
 @decorator_transparent_signature injectivity_radius(
@@ -640,9 +636,5 @@ decorated_manifold(M::Manifold) = M.manifold
     q,
     m::AbstractVectorTransportMethod,
 )
-
-@decorator_transparent_signature vee!(M::AbstractDecoratorManifold, Xⁱ, p, X)
-
-@decorator_transparent_signature vee(M::AbstractDecoratorManifold, p, X)
 
 @decorator_transparent_signature zero_tangent_vector!(M::AbstractDecoratorManifold, X, p)

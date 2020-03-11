@@ -835,11 +835,6 @@ function vee!(M::Manifold, Xⁱ, p, X)
     error(manifold_function_not_implemented_message(M, vee!, Xⁱ, p, X))
 end
 
-function allocate_result(M::Manifold, f::typeof(vee), p, X)
-    T = allocate_result_type(M, f, (p, X))
-    return allocate(p, T, manifold_dimension(M))
-end
-
 """
     zero_tangent_vector!(M::Manifold, X, p)
 
