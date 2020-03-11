@@ -130,6 +130,92 @@ function exp!(M::ArrayManifold, y, x, v; kwargs...)
     return y
 end
 
+function get_basis(
+    M::ArrayManifold,
+    p,
+    B::CachedBasis{<:AbstractOrthonormalBasis{ℝ},T,ℝ},
+) where {T<:AbstractVector}
+    bvectors = get_vectors(M, p, B)
+    N = length(bvectors)
+    M_dim = manifold_dimension(M)
+    if N != M_dim
+
+        throw(ArgumentError("Incorrect number of basis vectors; expected: $M_dim, given: $N"))
+    end
+    for i = 1:N
+        Xi_norm = norm(M, p, bvectors[i])
+        if !isapprox(Xi_norm, 1)
+            throw(ArgumentError("vector number $i is not normalized (norm = $Xi_norm)"))
+        end
+        for j = i+1:N
+            dot_val = real(inner(M, p, bvectors[i], bvectors[j]))
+            if !isapprox(dot_val, 0; atol = eps(eltype(p)))
+                throw(ArgumentError("vectors number $i and $j are not orthonormal (inner product = $dot_val)"))
+            end
+        end
+    end
+    return B
+end
+
+
+# the following is not nice, can we do better when using decorators and a specific last part?
+function get_coordinates(M::ArrayManifold, p, X, B::AbstractBasis; kwargs...)
+    _get_coordinates(M, p, X, B, kwargs...)
+end
+function get_coordinates(M::ArrayManifold, p, X, B::CachedBasis; kwargs...)
+    _get_coordinates(M, p, X, B, kwargs...)
+end
+function get_coordinates(M::ArrayManifold, p, X, B::DefaultBasis; kwargs...)
+    _get_coordinates(M, p, X, B, kwargs...)
+end
+function get_coordinates(M::ArrayManifold, p, X, B::DefaultOrthogonalBasis; kwargs...)
+    _get_coordinates(M, p, X, B, kwargs...)
+end
+function get_coordinates(M::ArrayManifold, p, X, B::DefaultOrthonormalBasis; kwargs...)
+    _get_coordinates(M, p, X, B, kwargs...)
+end
+
+function _get_coordinates(M::ArrayManifold, p, X, B::AbstractBasis; kwargs...)
+    is_tangent_vector(M, p, X, true; kwargs...)
+    return get_coordinates(M.manifold, p, X, B)
+end
+function get_coordinates!(M::ArrayManifold, Y, p, X, B::all_uncached_bases; kwargs...)
+    is_tangent_vector(M, p, X, true; kwargs...)
+    get_coordinates!(M, Y, p, X, B)
+    return Y
+end
+
+function get_vector(M::ArrayManifold, p, X, B::AbstractBasis; kwargs...)
+    return _get_vector(M, p, X, B, kwargs...)
+end
+function get_vector(M::ArrayManifold, p, X, B::CachedBasis; kwargs...)
+    return _get_vector(M, p, X, B, kwargs...)
+end
+function get_vector(M::ArrayManifold, p, X, B::DefaultBasis; kwargs...)
+    return _get_vector(M, p, X, B, kwargs...)
+end
+function get_vector(M::ArrayManifold, p, X, B::DefaultOrthogonalBasis; kwargs...)
+    return _get_vector(M, p, X, B, kwargs...)
+end
+function get_vector(M::ArrayManifold, p, X, B::DefaultOrthonormalBasis; kwargs...)
+    return _get_vector(M, p, X, B, kwargs...)
+end
+
+function _get_vector(M::ArrayManifold, p, X, B::AbstractBasis; kwargs...)
+    is_manifold_point(M, p, true; kwargs...)
+    size(X) == (manifold_dimension(M),) || error("Incorrect size of coefficient vector X")
+    Y = get_vector(M.manifold, p, X, B)
+    size(Y) == representation_size(M) || error("Incorrect size of tangent vector Y")
+    return Y
+end
+function get_vector!(M::ArrayManifold, Y, p, X, B::all_uncached_bases; kwargs...)
+    is_manifold_point(M, p, true; kwargs...)
+    size(X) == (manifold_dimension(M),) || error("Incorrect size of coefficient vector X")
+    get_vector!(M.manifold, Y, p, X, B)
+    size(Y) == representation_size(M) || error("Incorrect size of tangent vector Y")
+    return Y
+end
+
 injectivity_radius(M::ArrayManifold) = injectivity_radius(M.manifold)
 function injectivity_radius(M::ArrayManifold, method::AbstractRetractionMethod)
     return injectivity_radius(M.manifold, method)
