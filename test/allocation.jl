@@ -1,6 +1,6 @@
 using ManifoldsBase
 using Test
-using ManifoldsBase: combine_allocation_promotion_functions
+using ManifoldsBase: combine_allocation_promotion_functions, allocation_promotion_function
 
 struct AllocManifold <: Manifold end
 
@@ -35,6 +35,7 @@ end
     @test a4 isa Matrix{Float64}
     @test size(a4) == (2, 3)
 
+    @test allocation_promotion_function(M, exp, (a, b)) === identity
     @test combine_allocation_promotion_functions(identity, identity) === identity
     @test combine_allocation_promotion_functions(identity, complex) === complex
     @test combine_allocation_promotion_functions(complex, identity) === complex

@@ -117,4 +117,23 @@ end
         @test injectivity_radius(A, CustomArrayManifoldRetraction()) == 10
         @test injectivity_radius(A, x, CustomArrayManifoldRetraction()) == 11
     end
+
+    @testset "ArrayManifold basis" begin
+        for BT in (DefaultBasis, DefaultOrthonormalBasis, DefaultOrthogonalBasis)
+            cb = BT()
+            @test_broken b = get_basis(A, x, cb)
+            v = similar(x)
+            @test_throws ErrorException get_vector(A, x, [1.0], cb)
+            @test_throws ErrorException get_coordinates(A, x, [1.0], cb)
+            @test_throws ErrorException get_vector!(A, v, x, [], cb)
+            @test_throws ErrorException get_coordinates!(A, v, x, [], cb)
+            @test get_vector(A, x, [1, 2, 3], cb) ≈ get_vector(M, x, [1, 2, 3], cb)
+            @test get_coordinates(A, x, [1, 2, 3], cb) ≈ get_coordinates(M, x, [1, 2, 3], cb)
+
+
+            @test_throws ArgumentError get_basis(A, x, CachedBasis(cb, [x]))
+            @test_throws ArgumentError get_basis(A, x, CachedBasis(cb, [x, x, x]))
+            @test_throws ArgumentError get_basis(A, x, CachedBasis(cb, [2*x, x, x]))
+        end
+    end
 end

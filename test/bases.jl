@@ -55,6 +55,7 @@ struct NonBasis <: ManifoldsBase.AbstractBasis{ℝ} end
     end
 
     M = ManifoldsBase.DefaultManifold(3)
+
     pts = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
     @testset "basis representation" for BT in (DefaultBasis, DefaultOrthonormalBasis, DefaultOrthogonalBasis)
         v1 = log(M, pts[1], pts[2])
@@ -66,6 +67,7 @@ struct NonBasis <: ManifoldsBase.AbstractBasis{ℝ} end
 
         b = get_basis(M, pts[1], BT())
         @test isa(b, CachedBasis{BT{ℝ},Array{Array{Float64,1},1},ℝ})
+        @test get_basis(M, pts[1], b) === b
         N = manifold_dimension(M)
         @test length(get_vectors(M, pts[1], b)) == N
         # check orthonormality
@@ -95,16 +97,6 @@ struct NonBasis <: ManifoldsBase.AbstractBasis{ℝ} end
         v1cv = allocate(v1)
         get_vector!(M, v1cv, pts[1], v1c, b)
         @test isapprox(M, pts[1], v1, v1cv)
-    end
-
-    @testset "ArrayManifold basis" begin
-        A = ArrayManifold(M)
-        aonb = DefaultOrthonormalBasis()
-        b = get_basis(A, pts[1], aonb)
-        @test_throws ErrorException get_vector(A, pts[1], [], aonb)
-        @test_throws ArgumentError get_basis(A, pts[1], CachedBasis(aonb,[pts[1]]))
-        @test_throws ArgumentError get_basis(A, pts[1], CachedBasis(aonb,[pts[1], pts[1], pts[1]]))
-        @test_throws ArgumentError get_basis(A, pts[1], CachedBasis(aonb,[2*pts[1], pts[1], pts[1]]))
     end
 end
 

@@ -12,6 +12,36 @@ situations to verify correctness of involved variabes.
 struct DefaultManifold{T<:Tuple} <: Manifold where {T} end
 DefaultManifold(n::Vararg{Int,N}) where {N} = DefaultManifold{Tuple{n...}}()
 
+function check_manifold_point(M::DefaultManifold, p; kwargs...)
+    if size(p) != representation_size(M)
+        return DomainError(
+            size(p),
+            "The point $(p) does not lie on $M, since its size is not $(N+1).",
+        )
+    end
+    return nothing
+end
+
+function check_tangent_vector(
+    M::DefaultManifold,
+    p,
+    X;
+    check_base_point = true,
+    kwargs...,
+)
+    if check_base_point
+        perr = check_manifold_point(M, p)
+        perr === nothing || return perr
+    end
+    if size(X) != representation_size(M)
+        return DomainError(
+            size(X),
+            "The vector $(X) is not a tangent to a point on $M since its size does not match $(N+1).",
+        )
+    end
+    return nothing
+end
+
 distance(::DefaultManifold, x, y) = norm(x - y)
 
 exp!(::DefaultManifold, y, x, v) = (y .= x .+ v)

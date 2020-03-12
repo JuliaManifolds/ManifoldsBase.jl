@@ -169,7 +169,7 @@ end
 
 function get_coordinates!(M::ArrayManifold, Y, p, X, B::AbstractBasis; kwargs...)
     is_tangent_vector(M, p, X, true; kwargs...)
-    get_coordinates!(M, Y, p, X, B)
+    get_coordinates!(M.manifold, Y, p, X, B)
     return Y
 end
 for BT in DISAMBIGUATION_BASIS_TYPES
