@@ -137,7 +137,15 @@ function get_coordinates end
 function get_vector end
 
 const all_uncached_bases = Union{AbstractBasis, DefaultBasis, DefaultOrthogonalBasis, DefaultOrthonormalBasis}
-const DISAMBIGUATION_BASIS_TYPES = [CachedBasis, DefaultOrthogonalBasis, DefaultOrthonormalBasis, DefaultOrDiagonalizingBasis, VeeOrthogonalBasis]
+const DISAMBIGUATION_BASIS_TYPES = [
+    CachedBasis,
+    CachedBasis{<:AbstractBasis{ℝ}},
+    DefaultBasis,
+    DefaultOrthonormalBasis,
+    DefaultOrthogonalBasis,
+    DiagonalizingOrthonormalBasis,
+    VeeOrthogonalBasis,
+]
 
 function allocate_result(M::Manifold, f::typeof(get_coordinates), p, X)
     T = allocate_result_type(M, f, (p, X))
@@ -291,13 +299,11 @@ function get_coordinates!(M::Manifold, Y, p, X, B::AbstractBasis)
     error("get_coordinates! not implemented for manifold of type $(typeof(M)) coordinates of type $(typeof(Y)), a point of type $(typeof(p)), tangent vector of type $(typeof(X)) and basis of type $(typeof(B)).")
 end
 @decorator_transparent_signature get_coordinates!(M::AbstractDecoratorManifold, Y, p, X, B::AbstractBasis)
-@decorator_transparent_signature get_coordinates!(M::AbstractDecoratorManifold, Y, p, X, B::CachedBasis)
-@decorator_transparent_signature get_coordinates!(M::AbstractDecoratorManifold, Y, p, X, B::CachedBasis{BT,V,𝔽}) where {BT<:AbstractBasis{ℝ}, 𝔽, V}
-@decorator_transparent_signature get_coordinates!(M::AbstractDecoratorManifold, Y, p, X, B::DefaultBasis)
-@decorator_transparent_signature get_coordinates!(M::AbstractDecoratorManifold, Y, p, X, B::VeeOrthogonalBasis)
-@decorator_transparent_signature get_coordinates!(M::AbstractDecoratorManifold, Y, p, X, B::DefaultOrthogonalBasis)
-@decorator_transparent_signature get_coordinates!(M::AbstractDecoratorManifold, Y, p, X, B::DefaultOrthonormalBasis)
-@decorator_transparent_signature get_coordinates!(M::AbstractDecoratorManifold, Y, p, X, B::DiagonalizingOrthonormalBasis)
+for BT in DISAMBIGUATION_BASIS_TYPES
+    eval(quote
+        @decorator_transparent_signature get_coordinates!(M::AbstractDecoratorManifold, Y, p, X, B::$BT)
+    end)
+end
 function decorator_transparent_dispatch(::typeof(get_coordinates!), ::Manifold, args...)
     return Val(:transparent)
 end
@@ -355,13 +361,11 @@ function get_vector!(M::Manifold, Y, p, X, B::AbstractBasis)
     error("get_vector! not implemented for manifold of type $(typeof(M)) vector of type $(typeof(Y)), a point of type $(typeof(p)), coordinates of type $(typeof(X)) and basis of type $(typeof(B)).")
 end
 @decorator_transparent_signature get_vector!(M::AbstractDecoratorManifold, Y, p, X, B::AbstractBasis)
-@decorator_transparent_signature get_vector!(M::AbstractDecoratorManifold, Y, p, X, B::CachedBasis)
-@decorator_transparent_signature get_vector!(M::AbstractDecoratorManifold, Y, p, X, B::CachedBasis{BT,V,𝔽}) where {BT<:AbstractBasis{ℝ}, 𝔽, V}
-@decorator_transparent_signature get_vector!(M::AbstractDecoratorManifold, Y, p, X, B::DefaultBasis)
-@decorator_transparent_signature get_vector!(M::AbstractDecoratorManifold, Y, p, X, B::VeeOrthogonalBasis)
-@decorator_transparent_signature get_vector!(M::AbstractDecoratorManifold, Y, p, X, B::DefaultOrthogonalBasis)
-@decorator_transparent_signature get_vector!(M::AbstractDecoratorManifold, Y, p, X, B::DefaultOrthonormalBasis)
-@decorator_transparent_signature get_vector!(M::AbstractDecoratorManifold, Y, p, X, B::DiagonalizingOrthonormalBasis)
+for BT in DISAMBIGUATION_BASIS_TYPES
+    eval(quote
+        @decorator_transparent_signature get_vector!(M::AbstractDecoratorManifold, Y, p, X, B::$BT)
+    end)
+end
 function decorator_transparent_dispatch(::typeof(get_vector!), ::Manifold, args...)
     return Val(:transparent)
 end
@@ -545,3 +549,28 @@ inverse.
 """
 vee(M::Manifold, p, X) = get_coordinates(M, p, X, VeeOrthogonalBasis())
 vee!(M::Manifold, Y, p, X) = get_coordinates!(M, Y, p, X, VeeOrthogonalBasis())
+
+macro invoke_maker(argnum, type, sig)
+    parts = ManifoldsBase._split_signature(sig)
+    kwargs_list = parts[:kwargs_list]
+    callargs = parts[:callargs]
+    fname = parts[:fname]
+    where_exprs = parts[:where_exprs]
+    argnames = parts[:argnames]
+    argtypes = parts[:argtypes]
+    kwargs_call = parts[:kwargs_call]
+
+    return esc(quote
+        function ($fname)(
+            $(callargs...);
+            $(kwargs_list...),
+        ) where {$(where_exprs...)}
+            return invoke(
+                $fname,
+                Tuple{$(argtypes[1:argnum-1]...),$type,$(argtypes[argnum+1:end]...)},
+                $(argnames...);
+                $(kwargs_call...),
+            )
+        end
+    end)
+end
