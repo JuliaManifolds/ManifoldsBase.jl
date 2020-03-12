@@ -3,7 +3,7 @@ using ManifoldsBase
 
 @testset "ManifoldsBase" begin
     # TODO: decrease the number of ambiguities
-    @test length(Test.detect_ambiguities(ManifoldsBase)) <= 86
+    @test length(Test.detect_ambiguities(ManifoldsBase)) <= 35
     include("allocation.jl")
     include("numbers.jl")
     include("bases.jl")

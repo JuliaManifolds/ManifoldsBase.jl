@@ -105,8 +105,8 @@ end
 
     p = [1.0, 0.0, 0.0]
     X = [2.0, 1.0, 3.0]
-    @test inner(A, p, X, X) ≈ inner(A, Val(:transparent), p, X, X)
-    @test_throws ErrorException inner(A, Val(:intransparent), p, X, X)
+    @test inner(A, p, X, X) ≈ ManifoldsBase.inner__transparent(A, p, X, X)
+    @test_throws ErrorException ManifoldsBase.inner__intransparent(A, p, X, X)
 
     TD = TestDecorator(M)
 
