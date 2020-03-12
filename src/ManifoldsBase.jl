@@ -164,10 +164,10 @@ abstract type CoTVector end
 
 """
     allocate(a)
-    allocate(a, dims::Int...)
+    allocate(a, dims::Integer...)
     allocate(a, dims::Tuple)
     allocate(a, T::Type)
-    allocate(a, T::Type, dims::Int...)
+    allocate(a, T::Type, dims::Integer...)
     allocate(a, T::Type, dims::Tuple)
 
 Allocate an object similar to `a`. It is similar to function `similar`, although
@@ -179,10 +179,10 @@ allocation and is forwarded to the function `similar`.
 """
 allocate(a, args...)
 allocate(a) = similar(a)
-allocate(a, dims::Int...) = similar(a, dims...)
+allocate(a, dims::Integer...) = similar(a, dims...)
 allocate(a, dims::Tuple) = similar(a, dims)
 allocate(a, T::Type) = similar(a, T)
-allocate(a, T::Type, dims::Int...) = similar(a, T, dims...)
+allocate(a, T::Type, dims::Integer...) = similar(a, T, dims...)
 allocate(a, T::Type, dims::Tuple) = similar(a, T, dims)
 allocate(a::AbstractArray{<:AbstractArray}) = map(allocate, a)
 allocate(a::AbstractArray{<:AbstractArray}, T::Type) = map(t -> allocate(t, T), a)
