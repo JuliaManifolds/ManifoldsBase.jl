@@ -475,6 +475,12 @@ function _show_basis_vector_range_noheader(io::IO, Ξ; max_vectors = 4, pre = ""
     end
 end
 
+function show(io::IO, ::DefaultBasis{𝔽}) where {𝔽}
+    print(io, "DefaultBasis($(𝔽))")
+end
+function show(io::IO, ::DefaultOrthogonalBasis{𝔽}) where {𝔽}
+    print(io, "DefaultOrthogonalBasis($(𝔽))")
+end
 function show(io::IO, ::DefaultOrthonormalBasis{𝔽}) where {𝔽}
     print(io, "DefaultOrthonormalBasis($(𝔽))")
 end

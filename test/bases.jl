@@ -56,16 +56,16 @@ struct NonBasis <: ManifoldsBase.AbstractBasis{ℝ} end
 
     M = ManifoldsBase.DefaultManifold(3)
     pts = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
-    @testset "basis representation" begin
+    @testset "basis representation" for BT in (DefaultBasis, DefaultOrthonormalBasis, DefaultOrthogonalBasis)
         v1 = log(M, pts[1], pts[2])
 
-        vb = get_coordinates(M, pts[1], v1, DefaultOrthonormalBasis())
+        vb = get_coordinates(M, pts[1], v1, BT())
         @test isa(vb, AbstractVector)
-        vbi = get_vector(M, pts[1], vb, DefaultOrthonormalBasis())
+        vbi = get_vector(M, pts[1], vb, BT())
         @test isapprox(M, pts[1], v1, vbi)
 
-        b = get_basis(M, pts[1], DefaultOrthonormalBasis())
-        @test isa(b, CachedBasis{DefaultOrthonormalBasis{ℝ},Array{Array{Float64,1},1},ℝ})
+        b = get_basis(M, pts[1], BT())
+        @test isa(b, CachedBasis{BT{ℝ},Array{Array{Float64,1},1},ℝ})
         N = manifold_dimension(M)
         @test length(get_vectors(M, pts[1], b)) == N
         # check orthonormality
@@ -85,8 +85,8 @@ struct NonBasis <: ManifoldsBase.AbstractBasis{ℝ} end
             @test inner(M, pts[1], v1, get_vectors(M, pts[1], b)[i]) ≈ vb[i]
         end
 
-        @test get_coordinates(M, pts[1], v1, b) ≈ get_coordinates(M, pts[1], v1, DefaultOrthonormalBasis())
-        @test get_vector(M, pts[1], vb, b) ≈ get_vector(M, pts[1], vb, DefaultOrthonormalBasis())
+        @test get_coordinates(M, pts[1], v1, b) ≈ get_coordinates(M, pts[1], v1, BT())
+        @test get_vector(M, pts[1], vb, b) ≈ get_vector(M, pts[1], vb, BT())
 
         v1c = allocate(v1)
         get_coordinates!(M, v1c, pts[1], v1, b)
@@ -109,6 +109,8 @@ struct NonBasis <: ManifoldsBase.AbstractBasis{ℝ} end
 end
 
 @testset "Basis show methods" begin
+    @test sprint(show, DefaultBasis()) == "DefaultBasis(ℝ)"
+    @test sprint(show, DefaultOrthogonalBasis()) == "DefaultOrthogonalBasis(ℝ)"
     @test sprint(show, DefaultOrthonormalBasis()) == "DefaultOrthonormalBasis(ℝ)"
     @test sprint(show, DefaultOrthonormalBasis(ℂ)) == "DefaultOrthonormalBasis(ℂ)"
     @test sprint(show, ProjectedOrthonormalBasis(:svd)) == "ProjectedOrthonormalBasis(:svd, ℝ)"

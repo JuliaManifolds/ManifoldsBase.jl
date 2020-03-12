@@ -1,5 +1,6 @@
 using ManifoldsBase
 using Test
+using ManifoldsBase: combine_allocation_promotion_functions
 
 struct AllocManifold <: Manifold end
 
@@ -33,6 +34,11 @@ end
     a4 = allocate([1], Float64, (2, 3))
     @test a4 isa Matrix{Float64}
     @test size(a4) == (2, 3)
+
+    @test combine_allocation_promotion_functions(identity, identity) === identity
+    @test combine_allocation_promotion_functions(identity, complex) === complex
+    @test combine_allocation_promotion_functions(complex, identity) === complex
+    @test combine_allocation_promotion_functions(complex, complex) === complex
 
     @test number_eltype([2.0]) == Float64
     @test number_eltype([[2.0], [3]]) == Float64

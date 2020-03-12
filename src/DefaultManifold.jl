@@ -19,6 +19,12 @@ exp!(::DefaultManifold, y, x, v) = (y .= x .+ v)
 function get_basis(M::DefaultManifold, p, B::DefaultOrthonormalBasis)
     return CachedBasis(B, [_euclidean_basis_vector(p, i) for i in eachindex(p)])
 end
+function get_basis(M::DefaultManifold, p, B::DefaultOrthogonalBasis)
+    return CachedBasis(B, [_euclidean_basis_vector(p, i) for i in eachindex(p)])
+end
+function get_basis(M::DefaultManifold, p, B::DefaultBasis)
+    return CachedBasis(B, [_euclidean_basis_vector(p, i) for i in eachindex(p)])
+end
 
 function get_coordinates!(M::DefaultManifold, Y, p, X, B::DefaultOrthonormalBasis)
     Y .= reshape(X, manifold_dimension(M))
