@@ -251,9 +251,9 @@ end
 function log(M::ArrayManifold, x, y; kwargs...)
     is_manifold_point(M, x, true; kwargs...)
     is_manifold_point(M, y, true; kwargs...)
-    v = ArrayTVector(log(M.manifold, array_value(x), array_value(y)))
+    v = log(M.manifold, array_value(x), array_value(y))
     is_tangent_vector(M, x, v, true; kwargs...)
-    return v
+    return ArrayTVector(v)
 end
 
 function log!(M::ArrayManifold, v, x, y; kwargs...)
