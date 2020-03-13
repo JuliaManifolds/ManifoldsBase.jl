@@ -125,6 +125,7 @@ end
                 cb = BT()
                 @test b == get_vectors(M, x, get_basis(A, x, cb))
                 v = similar(x)
+                v2 = similar(x)
                 @test_throws ErrorException get_vector(A, x, [1.0], cb)
                 @test_throws DomainError get_vector(A, [1.0], [1.0, 0.0, 0.0], cb)
                 @test_throws ErrorException get_vector!(A, v, x, [], cb)
@@ -133,7 +134,9 @@ end
                 @test_throws DomainError get_coordinates!(A, v, x, [], cb)
                 @test_throws DomainError get_coordinates!(A, v, [1.0], [1.0, 0.0, 0.0], cb)
                 @test get_vector(A, x, [1, 2, 3], cb) ≈ get_vector(M, x, [1, 2, 3], cb)
+                @test get_vector!(A, v2, x, [1, 2, 3], cb) ≈ get_vector!(M, v, x, [1, 2, 3], cb)
                 @test get_coordinates(A, x, [1, 2, 3], cb) ≈ get_coordinates(M, x, [1, 2, 3], cb)
+                @test get_coordinates!(A, v2, x, [1, 2, 3], cb) ≈ get_coordinates!(M, v, x, [1, 2, 3], cb)
 
                 @test_throws ErrorException get_basis(A, x, CachedBasis(cb, [x]))
                 @test_throws ErrorException get_basis(A, x, CachedBasis(cb, [x, x, x]))

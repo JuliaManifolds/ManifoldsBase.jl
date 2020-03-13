@@ -118,15 +118,15 @@ struct NonCoTVector <: CoTVector end
     @test_throws ErrorException zero_tangent_vector(M, [0])
 
     @test check_manifold_point(M, [0]) === nothing
-    @test_throws ErrorException check_manifold_point(M, p)
+    @test check_manifold_point(M, p) === nothing
     @test is_manifold_point(M, [0])
-    @test check_manifold_point(M, [0]) == nothing
+    @test check_manifold_point(M, [0]) === nothing
 
     @test check_tangent_vector(M, [0], [0]) === nothing
-    @test_throws ErrorException check_tangent_vector(M, p, v)
+    @test check_tangent_vector(M, p, v) === nothing
     @test is_tangent_vector(M, [0], [0])
-    @test check_tangent_vector(M, [0], [0]) == nothing
+    @test check_tangent_vector(M, [0], [0]) === nothing
 
-    @test_throws ErrorException hat!(M,[0],[0],[0])
-    @test_throws ErrorException vee!(M,[0],[0],[0])
+    @test_throws ErrorException hat!(M, [0], [0], [0])
+    @test_throws ErrorException vee!(M, [0], [0], [0])
 end

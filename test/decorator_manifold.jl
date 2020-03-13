@@ -118,6 +118,8 @@ ManifoldsBase._acts_transparently(test12, TestDecorator3, p) = Val(:foo)
     @test (@inferred ManifoldsBase.default_decorator_dispatch(M)) === Val(false)
     @test ManifoldsBase.is_default_decorator(M) === false
 
+    @test injectivity_radius(TD, ManifoldsBase.ExponentialRetraction()) == Inf
+
     @test test1(TD, p) == 1
     @test test1(TD, p; a = 1000) == 1001
     @test test2(TD, p) == 102

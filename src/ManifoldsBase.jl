@@ -242,9 +242,6 @@ By default, `check_manifold_point` returns `nothing`, i.e. if no checks are impl
 assumption is to be optimistic for a point not deriving from the [`MPoint`](@ref) type.
 """
 check_manifold_point(M::Manifold, p; kwargs...) = nothing
-function check_manifold_point(M::Manifold, p::MPoint; kwargs...)
-    error(manifold_function_not_implemented_message(M, check_manifold_point, p))
-end
 
 """
     check_tangent_vector(M::Manifold, p, X; kwargs...) -> Union{Nothing,String}
@@ -259,9 +256,6 @@ assumption is to be optimistic for tangent vectors not deriving from the [`TVect
 type.
 """
 check_tangent_vector(M::Manifold, p, X; kwargs...) = nothing
-function check_tangent_vector(M::Manifold, p::MPoint, X::TVector; kwargs...)
-    error(manifold_function_not_implemented_message(M, check_tangent_vector, p, X))
-end
 
 """
     distance(M::Manifold, p, q)

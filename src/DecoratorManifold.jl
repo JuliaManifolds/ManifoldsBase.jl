@@ -522,8 +522,17 @@ decorated_manifold(M::Manifold) = M.manifold
 )
 @decorator_transparent_signature injectivity_radius(
     M::AbstractDecoratorManifold,
+    m::ExponentialRetraction,
+)
+@decorator_transparent_signature injectivity_radius(
+    M::AbstractDecoratorManifold,
     p,
     m::AbstractRetractionMethod,
+)
+@decorator_transparent_signature injectivity_radius(
+    M::AbstractDecoratorManifold,
+    p,
+    m::ExponentialRetraction,
 )
 
 @decorator_transparent_signature inner(M::AbstractDecoratorManifold, p, X, Y)
@@ -647,6 +656,14 @@ decorated_manifold(M::Manifold) = M.manifold
     X,
     q,
     m::AbstractVectorTransportMethod,
+)
+@decorator_transparent_signature vector_transport_to!(
+    M::AbstractDecoratorManifold,
+    Y,
+    p,
+    X,
+    q,
+    m::ProjectionTransport,
 )
 
 @decorator_transparent_signature zero_tangent_vector!(M::AbstractDecoratorManifold, X, p)
