@@ -59,8 +59,8 @@ end
 
 allocate(p::ArrayMPoint) = ArrayMPoint(allocate(p.value))
 allocate(p::ArrayMPoint, ::Type{T}) where {T} = ArrayMPoint(allocate(p.value, T))
-allocate(p::ArrayTVector) = ArrayTVector(allocate(p.value))
-allocate(p::ArrayTVector, ::Type{T}) where {T} = ArrayTVector(allocate(p.value, T))
+allocate(X::ArrayTVector) = ArrayTVector(allocate(X.value))
+allocate(X::ArrayTVector, ::Type{T}) where {T} = ArrayTVector(allocate(X.value, T))
 
 """
     array_value(p)
@@ -109,9 +109,9 @@ function copyto!(p::ArrayCoTVector, q::ArrayCoTVector)
     copyto!(p.value, q.value)
     return p
 end
-function copyto!(p::ArrayTVector, q::ArrayTVector)
-    copyto!(p.value, q.value)
-    return p
+function copyto!(Y::ArrayTVector, X::ArrayTVector)
+    copyto!(Y.value, X.value)
+    return Y
 end
 
 function distance(M::ArrayManifold, p, q; kwargs...)
@@ -320,7 +320,7 @@ number_eltype(p::ArrayMPoint) = number_eltype(p.value)
 number_eltype(::Type{ArrayCoTVector{V}}) where {V} = number_eltype(V)
 number_eltype(p::ArrayCoTVector) = number_eltype(p.value)
 number_eltype(::Type{ArrayTVector{V}}) where {V} = number_eltype(V)
-number_eltype(p::ArrayTVector) = number_eltype(p.value)
+number_eltype(X::ArrayTVector) = number_eltype(X.value)
 
 function project_tangent!(M::ArrayManifold, Y, p, X; kwargs...)
     is_manifold_point(M, p, true; kwargs...)
@@ -333,8 +333,8 @@ similar(p::ArrayMPoint) = ArrayMPoint(similar(p.value))
 similar(p::ArrayMPoint, ::Type{T}) where {T} = ArrayMPoint(similar(p.value, T))
 similar(p::ArrayCoTVector) = ArrayCoTVector(similar(p.value))
 similar(p::ArrayCoTVector, ::Type{T}) where {T} = ArrayCoTVector(similar(p.value, T))
-similar(p::ArrayTVector) = ArrayTVector(similar(p.value))
-similar(p::ArrayTVector, ::Type{T}) where {T} = ArrayTVector(similar(p.value, T))
+similar(X::ArrayTVector) = ArrayTVector(similar(X.value))
+similar(X::ArrayTVector, ::Type{T}) where {T} = ArrayTVector(similar(X.value, T))
 
 function vector_transport_along!(
     M::ArrayManifold,
