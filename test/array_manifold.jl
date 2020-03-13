@@ -119,21 +119,24 @@ end
     end
 
     @testset "ArrayManifold basis" begin
+        b = [Matrix(I,3,3)[:,i] for i=1:3]
         for BT in (DefaultBasis, DefaultOrthonormalBasis, DefaultOrthogonalBasis)
-            cb = BT()
-            @test_broken b = get_basis(A, x, cb)
-            v = similar(x)
-            @test_throws ErrorException get_vector(A, x, [1.0], cb)
-            @test_throws ErrorException get_coordinates(A, x, [1.0], cb)
-            @test_throws ErrorException get_vector!(A, v, x, [], cb)
-            @test_throws ErrorException get_coordinates!(A, v, x, [], cb)
-            @test get_vector(A, x, [1, 2, 3], cb) ≈ get_vector(M, x, [1, 2, 3], cb)
-            @test get_coordinates(A, x, [1, 2, 3], cb) ≈ get_coordinates(M, x, [1, 2, 3], cb)
+            @testset "Basis $(BT)" begin
+                cb = BT()
+                @test b == get_vectors(M, x, get_basis(A,x,cb))
+                v = similar(x)
+                @test_throws ErrorException get_vector(A, x, [1.0], cb)
+                @test_throws DomainError get_coordinates(A, x, [1.0], cb)
+                @test_throws ErrorException get_vector!(A, v, x, [], cb)
+                @test_throws DomainError get_coordinates!(A, v, x, [], cb)
+                @test get_vector(A, x, [1, 2, 3], cb) ≈ get_vector(M, x, [1, 2, 3], cb)
+                @test get_coordinates(A, x, [1, 2, 3], cb) ≈ get_coordinates(M, x, [1, 2, 3], cb)
 
-
-            @test_throws ArgumentError get_basis(A, x, CachedBasis(cb, [x]))
-            @test_throws ArgumentError get_basis(A, x, CachedBasis(cb, [x, x, x]))
-            @test_throws ArgumentError get_basis(A, x, CachedBasis(cb, [2*x, x, x]))
+                @test_throws ErrorException get_basis(A, x, CachedBasis(cb, [x]))
+                @test_throws ErrorException get_basis(A, x, CachedBasis(cb, [x, x, x]))
+                @test_throws ErrorException
+                 get_basis(A, x, CachedBasis(cb, [2*x, x, x]))
+            end
         end
     end
 end

@@ -77,8 +77,14 @@ array_value(ξ::ArrayCoTVector) = ξ.value
 function check_manifold_point(M::ArrayManifold, p; kwargs...)
     return check_manifold_point(M.manifold, array_value(p); kwargs...)
 end
+function check_manifold_point(M::ArrayManifold, p::MPoint; kwargs...)
+    return check_manifold_point(M.manifold, array_value(p); kwargs...)
+end
 
 function check_tangent_vector(M::ArrayManifold, p, X; kwargs...)
+    return check_tangent_vector(M.manifold, array_value(p), array_value(X); kwargs...)
+end
+function check_tangent_vector(M::ArrayManifold, p::MPoint, X::TVector; kwargs...)
     return check_tangent_vector(M.manifold, array_value(p), array_value(X); kwargs...)
 end
 
@@ -130,34 +136,26 @@ function exp!(M::ArrayManifold, q, p, X; kwargs...)
     return q
 end
 
-function get_basis(
-    M::ArrayManifold,
-    p,
-    B::CachedBasis{<:AbstractOrthonormalBasis{ℝ},T,ℝ},
-) where {T<:AbstractVector}
-    bvectors = get_vectors(M, p, B)
-    N = length(bvectors)
-    M_dim = manifold_dimension(M)
-    if N != M_dim
-
-        throw(ArgumentError("Incorrect number of basis vectors; expected: $M_dim, given: $N"))
+function get_basis(M::ArrayManifold, p, B::AbstractBasis; kwargs...)
+    is_manifold_point(M, p, true; kwargs...)
+    Ξ = get_basis(M.manifold, array_value(p), B)
+    nV = length(get_vectors(M.manifold, array_value(p), Ξ))
+    if nV != manifold_dimension(M.manifold)
+        return ErrorException(
+            "For a basis of the tangent space at $(p) of $(M.manifold), $(manifold_dimension(M)) vectors are required, but get_basis $(B) computed $(nV)"
+        )
     end
-    for i = 1:N
-        Xi_norm = norm(M, p, bvectors[i])
-        if !isapprox(Xi_norm, 1)
-            throw(ArgumentError("vector number $i is not normalized (norm = $Xi_norm)"))
-        end
-        for j = i+1:N
-            dot_val = real(inner(M, p, bvectors[i], bvectors[j]))
-            if !isapprox(dot_val, 0; atol = eps(eltype(p)))
-                throw(ArgumentError("vectors number $i and $j are not orthonormal (inner product = $dot_val)"))
-            end
-        end
-    end
-    return B
+    map(X -> is_tangent_vector(M, p, X, true; kwargs...), get_vectors(M.manifold, array_value(p), Ξ))
+    return Ξ
+end
+for BT in DISAMBIGUATION_BASIS_TYPES
+    eval(quote
+        @invoke_maker 3 AbstractBasis get_basis(M::ArrayManifold, p, B::$BT; kwargs...)
+    end)
 end
 
 function get_coordinates(M::ArrayManifold, p, X, B::AbstractBasis; kwargs...)
+    is_manifold_point(M, p, true; kwargs...)
     is_tangent_vector(M, p, X, true; kwargs...)
     return get_coordinates(M.manifold, p, X, B)
 end

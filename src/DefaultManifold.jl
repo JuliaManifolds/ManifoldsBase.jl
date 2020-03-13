@@ -36,7 +36,7 @@ function check_tangent_vector(
     if size(X) != representation_size(M)
         return DomainError(
             size(X),
-            "The vector $(X) is not a tangent to a point on $M since its size does not match $(N+1).",
+            "The vector $(X) is not a tangent to a point on $M since its size does not match $(representation_size(M)).",
         )
     end
     return nothing
