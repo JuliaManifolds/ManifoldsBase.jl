@@ -1,4 +1,5 @@
 using LinearAlgebra
+using ManifoldsBase
 
 struct ProjManifold <: Manifold end
 
@@ -8,29 +9,44 @@ ManifoldsBase.representation_size(::ProjManifold) = (2,3)
 ManifoldsBase.manifold_dimension(::ProjManifold) = 5
 ManifoldsBase.get_vector(::ProjManifold, x, v, ::DefaultOrthonormalBasis) = reverse(v)
 
+@testset "Dispatch" begin
+    @test ManifoldsBase.decorator_transparent_dispatch(
+        get_coordinates,
+        ManifoldsBase.DefaultManifold(3),
+        [0.0, 0.0, 0.0],
+    ) === Val(:parent)
+    @test ManifoldsBase.decorator_transparent_dispatch(
+        get_coordinates!,
+        ManifoldsBase.DefaultManifold(3),
+        [0.0, 0.0, 0.0],
+        [0.0, 0.0, 0.0],
+    ) === Val(:transparent)
+end
+
 @testset "Projected and arbitrary orthonormal basis" begin
     M = ProjManifold()
     x = [sqrt(2)/2 0.0 0.0;
          0.0 sqrt(2)/2 0.0]
 
-    pb = get_basis(M, x, ProjectedOrthonormalBasis(:svd))
-    @test number_system(pb) == ℝ
-    @test get_basis(M, x, pb) == pb
-    N = manifold_dimension(M)
-    @test isa(pb, CachedBasis)
-    @test length(get_vectors(M, x, pb)) == N
-    # test orthonormality
-    for i in 1:N
-        @test norm(M, x, get_vectors(M, x, pb)[i]) ≈ 1
-        for j in i+1:N
-            @test inner(M, x, get_vectors(M, x, pb)[i], get_vectors(M, x, pb)[j]) ≈ 0 atol = 1e-15
+    for pb in (ProjectedOrthonormalBasis(:svd), ProjectedOrthonormalBasis(:gram_schmidt))
+        pb = get_basis(M, x, pb)
+        @test number_system(pb) == ℝ
+        @test get_basis(M, x, pb) == pb
+        N = manifold_dimension(M)
+        @test isa(pb, CachedBasis)
+        @test length(get_vectors(M, x, pb)) == N
+        # test orthonormality
+        for i in 1:N
+            @test norm(M, x, get_vectors(M, x, pb)[i]) ≈ 1
+            for j in i+1:N
+                @test inner(M, x, get_vectors(M, x, pb)[i], get_vectors(M, x, pb)[j]) ≈ 0 atol = 1e-15
+            end
+        end
+        # check projection idempotency
+        for i in 1:N
+            @test project_tangent(M, x, get_vectors(M, x, pb)[i]) ≈ get_vectors(M, x, pb)[i]
         end
     end
-    # check projection idempotency
-    for i in 1:N
-        @test project_tangent(M, x, get_vectors(M, x, pb)[i]) ≈ get_vectors(M, x, pb)[i]
-    end
-
     aonb = get_basis(M, x, DefaultOrthonormalBasis())
     @test size(get_vectors(M, x, aonb)) == (5,)
     @test get_vectors(M, x, aonb)[1] ≈ [0, 0, 0, 0, 1]

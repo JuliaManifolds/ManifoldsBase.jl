@@ -16,7 +16,7 @@ function check_manifold_point(M::DefaultManifold, p; kwargs...)
     if size(p) != representation_size(M)
         return DomainError(
             size(p),
-            "The point $(p) does not lie on $M, since its size is not $(N+1).",
+            "The point $(p) does not lie on $M, since its size is not $(representation_size(M)).",
         )
     end
     return nothing

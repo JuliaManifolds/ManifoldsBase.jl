@@ -123,12 +123,15 @@ end
         for BT in (DefaultBasis, DefaultOrthonormalBasis, DefaultOrthogonalBasis)
             @testset "Basis $(BT)" begin
                 cb = BT()
-                @test b == get_vectors(M, x, get_basis(A,x,cb))
+                @test b == get_vectors(M, x, get_basis(A, x, cb))
                 v = similar(x)
                 @test_throws ErrorException get_vector(A, x, [1.0], cb)
-                @test_throws DomainError get_coordinates(A, x, [1.0], cb)
+                @test_throws DomainError get_vector(A, [1.0], [1.0, 0.0, 0.0], cb)
                 @test_throws ErrorException get_vector!(A, v, x, [], cb)
+                @test_throws DomainError get_vector!(A, v, [1.0], [1.0, 0.0, 0.0], cb)
+                @test_throws DomainError get_coordinates(A, x, [1.0], cb)
                 @test_throws DomainError get_coordinates!(A, v, x, [], cb)
+                @test_throws DomainError get_coordinates!(A, v, [1.0], [1.0, 0.0, 0.0], cb)
                 @test get_vector(A, x, [1, 2, 3], cb) ≈ get_vector(M, x, [1, 2, 3], cb)
                 @test get_coordinates(A, x, [1, 2, 3], cb) ≈ get_coordinates(M, x, [1, 2, 3], cb)
 
