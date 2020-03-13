@@ -139,18 +139,71 @@ end
 function get_basis(M::ArrayManifold, p, B::AbstractBasis; kwargs...)
     is_manifold_point(M, p, true; kwargs...)
     Ξ = get_basis(M.manifold, array_value(p), B)
-    nV = length(get_vectors(M.manifold, array_value(p), Ξ))
-    if nV != manifold_dimension(M.manifold)
-        return ErrorException(
-            "For a basis of the tangent space at $(p) of $(M.manifold), $(manifold_dimension(M)) vectors are required, but get_basis $(B) computed $(nV)"
-        )
+    bvectors = get_vectors(M, p, Ξ)
+    N = length(bvectors)
+    if N != manifold_dimension(M.manifold)
+        throw(ErrorException(
+            "For a basis of the tangent space at $(p) of $(M.manifold), $(manifold_dimension(M)) vectors are required, but get_basis $(B) computed $(N)"
+        ))
     end
-    map(X -> is_tangent_vector(M, p, X, true; kwargs...), get_vectors(M.manifold, array_value(p), Ξ))
+    # check that the vectors are linearly independent\
+    bv_rank = rank(reduce(hcat, bvectors))
+    if N != bv_rank
+        throw(ErrorException(
+            "For a basis of the tangent space at $(p) of $(M.manifold), $(manifold_dimension(M)) linearly independent vectors are required, but get_basis $(B) computed $(bv_rank)"
+        ))
+    end
+    map(X -> is_tangent_vector(M, p, X, true; kwargs...), bvectors)
+    return Ξ
+end
+function get_basis(
+    M::ArrayManifold,
+    p,
+    B::Union{AbstractOrthogonalBasis,CachedBasis{<:AbstractOrthogonalBasis}};
+    kwargs...,
+)
+    is_manifold_point(M, p, true; kwargs...)
+    Ξ = invoke(get_basis, Tuple{ArrayManifold,Any,AbstractBasis}, M, p, B; kwargs...)
+    bvectors = get_vectors(M, p, Ξ)
+    N = length(bvectors)
+    for i = 1:N
+        for j = i+1:N
+            dot_val = real(inner(M, p, bvectors[i], bvectors[j]))
+            if !isapprox(dot_val, 0; atol = eps(eltype(p)))
+                throw(ArgumentError("vectors number $i and $j are not orthonormal (inner product = $dot_val)"))
+            end
+        end
+    end
+    return Ξ
+end
+function get_basis(
+    M::ArrayManifold,
+    p,
+    B::Union{AbstractOrthonormalBasis,CachedBasis{<:AbstractOrthonormalBasis}};
+    kwargs...,
+)
+    is_manifold_point(M, p, true; kwargs...)
+    Ξ = invoke(get_basis, Tuple{ArrayManifold,Any,AbstractOrthogonalBasis}, M, p, B; kwargs...)
+    bvectors = get_vectors(M, p, Ξ)
+    N = length(bvectors)
+    for i = 1:N
+        Xi_norm = norm(M, p, bvectors[i])
+        if !isapprox(Xi_norm, 1)
+            throw(ArgumentError("vector number $i is not normalized (norm = $Xi_norm)"))
+        end
+    end
     return Ξ
 end
 for BT in DISAMBIGUATION_BASIS_TYPES
+    if BT <: Union{AbstractOrthonormalBasis,CachedBasis{<:AbstractOrthonormalBasis}}
+        CT = AbstractOrthonormalBasis
+    elseif BT <: Union{AbstractOrthogonalBasis,CachedBasis{<:AbstractOrthogonalBasis}}
+        CT = AbstractOrthogonalBasis
+    else
+        CT = AbstractBasis
+    end
     eval(quote
-        @invoke_maker 3 AbstractBasis get_basis(M::ArrayManifold, p, B::$BT; kwargs...)
+        @invoke_maker 3 $CT get_basis(M::ArrayManifold, p, B::$BT; kwargs...)
     end)
 end
 

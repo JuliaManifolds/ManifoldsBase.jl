@@ -481,10 +481,23 @@ end
     kwargs...,
 )
 
+@decorator_transparent_signature check_manifold_point(
+    M::AbstractDecoratorManifold,
+    p::MPoint;
+    kwargs...,
+)
+
 @decorator_transparent_signature check_tangent_vector(
     M::AbstractDecoratorManifold,
     p,
     X;
+    kwargs...,
+)
+
+@decorator_transparent_signature check_tangent_vector(
+    M::AbstractDecoratorManifold,
+    p::MPoint,
+    X::TVector;
     kwargs...,
 )
 

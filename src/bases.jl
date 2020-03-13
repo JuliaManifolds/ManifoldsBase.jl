@@ -140,10 +140,14 @@ const all_uncached_bases = Union{AbstractBasis, DefaultBasis, DefaultOrthogonalB
 const DISAMBIGUATION_BASIS_TYPES = [
     CachedBasis,
     CachedBasis{<:AbstractBasis{ℝ}},
+    CachedBasis{<:AbstractOrthogonalBasis{ℝ}},
+    CachedBasis{<:AbstractOrthonormalBasis{ℝ}},
     DefaultBasis,
     DefaultOrthonormalBasis,
     DefaultOrthogonalBasis,
     DiagonalizingOrthonormalBasis,
+    ProjectedOrthonormalBasis{:svd,ℝ},
+    ProjectedOrthonormalBasis{:gram_schmidt,ℝ},
     VeeOrthogonalBasis,
 ]
 

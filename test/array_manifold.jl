@@ -134,8 +134,12 @@ end
 
                 @test_throws ErrorException get_basis(A, x, CachedBasis(cb, [x]))
                 @test_throws ErrorException get_basis(A, x, CachedBasis(cb, [x, x, x]))
-                @test_throws ErrorException
-                 get_basis(A, x, CachedBasis(cb, [2*x, x, x]))
+                @test_throws ErrorException get_basis(A, x, CachedBasis(cb, [2*x, x, x]))
+                if BT <: ManifoldsBase.AbstractOrthogonalBasis
+                    @test_throws ErrorException get_basis(A, x, CachedBasis(cb, [[1.0, 0.0, 0.0], [1.0, 1.0, 0.0], [0.0, 0.0, 1.0]]))
+                elseif BT <: ManifoldsBase.AbstractOrthonormalBasis
+                    @test_throws ErrorException get_basis(A, x, CachedBasis(cb, [[2.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]))
+                end
             end
         end
     end
