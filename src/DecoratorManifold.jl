@@ -495,7 +495,6 @@ Return the manifold decorated by the decorator `M`. Defaults to `M.manifold`.
 """
 decorated_manifold(M::Manifold) = M.manifold
 
-
 @decorator_transparent_signature distance(M::AbstractDecoratorManifold, p, q)
 
 @decorator_transparent_signature exp(M::AbstractDecoratorManifold, p, X)
