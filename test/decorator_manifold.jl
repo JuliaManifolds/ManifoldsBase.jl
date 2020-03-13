@@ -78,6 +78,11 @@ decorator_transparent_dispatch(::typeof(test10), M::TestDecorator3, args...) = V
     return 15*a
 end
 
+@decorator_transparent_function function test12(M::ManifoldsBase.DefaultManifold, p)
+    return 12*p
+end
+ManifoldsBase._acts_transparently(test12, TestDecorator3, p) = Val(:foo)
+
 @testset "Testing decorator manifold functions" begin
     M = ManifoldsBase.DefaultManifold(3)
     A = ArrayManifold(M)
@@ -140,4 +145,5 @@ end
     @test test9(TestDecorator3(TD), p; a = 1000, b = 10000) == 11109
     @test test10(TestDecorator3(TD), p; a = 11) == 110
     @test test11(TestDecorator3(TD), p; a = 12) == 180
+    @test_throws ErrorException test12(TestDecorator3(TD), p)
 end

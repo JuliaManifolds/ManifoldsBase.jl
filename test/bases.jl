@@ -21,6 +21,17 @@ ManifoldsBase.get_vector(::ProjManifold, x, v, ::DefaultOrthonormalBasis) = reve
         [0.0, 0.0, 0.0],
         [0.0, 0.0, 0.0],
     ) === Val(:transparent)
+    @test ManifoldsBase.decorator_transparent_dispatch(
+        get_vector,
+        ManifoldsBase.DefaultManifold(3),
+        [0.0, 0.0, 0.0],
+    ) === Val(:parent)
+    @test ManifoldsBase.decorator_transparent_dispatch(
+        get_vector!,
+        ManifoldsBase.DefaultManifold(3),
+        [0.0, 0.0, 0.0],
+        [0.0, 0.0, 0.0],
+    ) === Val(:transparent)
 end
 
 @testset "Projected and arbitrary orthonormal basis" begin
@@ -34,6 +45,7 @@ end
         @test get_basis(M, x, pb) == pb
         N = manifold_dimension(M)
         @test isa(pb, CachedBasis)
+        @test CachedBasis(pb) === pb
         @test length(get_vectors(M, x, pb)) == N
         # test orthonormality
         for i in 1:N
