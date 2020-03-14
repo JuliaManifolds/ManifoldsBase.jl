@@ -395,7 +395,7 @@ function get_vector!(M::Manifold, Y, p, X, B::CachedBasis)
         Xt = X[1] * bvectors[1]
         copyto!(Y, Xt)
         for i = 2:length(X)
-            Y += X[i] * bvectors[i]
+            copyto!(Y, Y + X[i] * bvectors[i])
         end
         return Y
     else

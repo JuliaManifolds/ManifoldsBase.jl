@@ -1,5 +1,8 @@
 using LinearAlgebra
 using ManifoldsBase
+using ManifoldsBase: DefaultManifold
+using Test
+import Base: +, -, *, copyto!, isapprox
 
 struct ProjManifold <: Manifold end
 
@@ -12,23 +15,23 @@ ManifoldsBase.get_vector(::ProjManifold, x, v, ::DefaultOrthonormalBasis) = reve
 @testset "Dispatch" begin
     @test ManifoldsBase.decorator_transparent_dispatch(
         get_coordinates,
-        ManifoldsBase.DefaultManifold(3),
+        DefaultManifold(3),
         [0.0, 0.0, 0.0],
     ) === Val(:parent)
     @test ManifoldsBase.decorator_transparent_dispatch(
         get_coordinates!,
-        ManifoldsBase.DefaultManifold(3),
+        DefaultManifold(3),
         [0.0, 0.0, 0.0],
         [0.0, 0.0, 0.0],
     ) === Val(:transparent)
     @test ManifoldsBase.decorator_transparent_dispatch(
         get_vector,
-        ManifoldsBase.DefaultManifold(3),
+        DefaultManifold(3),
         [0.0, 0.0, 0.0],
     ) === Val(:parent)
     @test ManifoldsBase.decorator_transparent_dispatch(
         get_vector!,
-        ManifoldsBase.DefaultManifold(3),
+        DefaultManifold(3),
         [0.0, 0.0, 0.0],
         [0.0, 0.0, 0.0],
     ) === Val(:transparent)
@@ -67,6 +70,89 @@ end
 struct NonManifold <: Manifold end
 struct NonBasis <: ManifoldsBase.AbstractBasis{ℝ} end
 
+struct NonBroadcastBasisThing{T}
+    v::T
+end
+
++(a::NonBroadcastBasisThing, b::NonBroadcastBasisThing) = NonBroadcastBasisThing(a.v + b.v)
+*(α, a::NonBroadcastBasisThing) = NonBroadcastBasisThing(α * a.v)
+-(a::NonBroadcastBasisThing, b::NonBroadcastBasisThing) = NonBroadcastBasisThing(a.v - b.v)
+
+isapprox(a::NonBroadcastBasisThing, b::NonBroadcastBasisThing) = isapprox(a.v, b.v)
+
+function ManifoldsBase.number_eltype(a::NonBroadcastBasisThing)
+    return typeof(reduce(+, one(number_eltype(eti)) for eti ∈ a.v))
+end
+
+import ManifoldsBase.allocate
+
+allocate(a::NonBroadcastBasisThing) = NonBroadcastBasisThing(allocate(a.v))
+function allocate(a::NonBroadcastBasisThing, ::Type{T}) where {T}
+    return NonBroadcastBasisThing(allocate(a.v, T))
+end
+allocate(::NonBroadcastBasisThing, ::Type{T}, s::Integer) where {S,T} = Vector{T}(undef, s)
+
+function copyto!(a::NonBroadcastBasisThing, b::NonBroadcastBasisThing)
+    copyto!(a.v, b.v)
+    return a
+end
+
+function ManifoldsBase.log!(
+    ::DefaultManifold,
+    v::NonBroadcastBasisThing,
+    x::NonBroadcastBasisThing,
+    y::NonBroadcastBasisThing,
+)
+    return copyto!(v, y - x)
+end
+
+function ManifoldsBase.exp!(
+    ::DefaultManifold,
+    y::NonBroadcastBasisThing,
+    x::NonBroadcastBasisThing,
+    v::NonBroadcastBasisThing,
+)
+    return copyto!(y, x + v)
+end
+
+function ManifoldsBase.get_basis(M::DefaultManifold, p::NonBroadcastBasisThing, B::DefaultOrthonormalBasis)
+    return CachedBasis(B, [NonBroadcastBasisThing(ManifoldsBase._euclidean_basis_vector(p.v, i)) for i in eachindex(p.v)])
+end
+function ManifoldsBase.get_basis(M::DefaultManifold, p::NonBroadcastBasisThing, B::DefaultOrthogonalBasis)
+    return CachedBasis(B, [NonBroadcastBasisThing(ManifoldsBase._euclidean_basis_vector(p.v, i)) for i in eachindex(p.v)])
+end
+function ManifoldsBase.get_basis(M::DefaultManifold, p::NonBroadcastBasisThing, B::DefaultBasis)
+    return CachedBasis(B, [NonBroadcastBasisThing(ManifoldsBase._euclidean_basis_vector(p.v, i)) for i in eachindex(p.v)])
+end
+
+function ManifoldsBase.get_coordinates!(
+    M::DefaultManifold,
+    Y,
+    p::NonBroadcastBasisThing,
+    X::NonBroadcastBasisThing,
+    B::DefaultOrthonormalBasis,
+)
+    copyto!(Y, reshape(X.v, manifold_dimension(M)))
+    return Y
+end
+
+function ManifoldsBase.get_vector!(
+    M::DefaultManifold,
+    Y::NonBroadcastBasisThing,
+    p::NonBroadcastBasisThing,
+    X,
+    B::DefaultOrthonormalBasis,
+)
+    copyto!(Y.v, reshape(X, representation_size(M)))
+    return Y
+end
+
+ManifoldsBase.inner(::DefaultManifold, x::NonBroadcastBasisThing, v::NonBroadcastBasisThing, w::NonBroadcastBasisThing) = dot(v.v, w.v)
+
+ManifoldsBase._get_vector_cache_broadcast(::NonBroadcastBasisThing) = Val(false)
+
+DiagonalizingBasisProxy() = DiagonalizingOrthonormalBasis([1.0, 0.0, 0.0])
+
 @testset "ManifoldsBase.jl stuff" begin
 
     @testset "Errors" begin
@@ -82,43 +168,63 @@ struct NonBasis <: ManifoldsBase.AbstractBasis{ℝ} end
         @test_throws ErrorException get_vectors(m, [0], NonBasis())
     end
 
-    M = ManifoldsBase.DefaultManifold(3)
+    M = DefaultManifold(3)
 
-    pts = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
-    @testset "basis representation" for BT in (DefaultBasis, DefaultOrthonormalBasis, DefaultOrthogonalBasis)
+    _pts = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
+    @testset "basis representation" for BT in (
+        DefaultBasis,
+        DefaultOrthonormalBasis,
+        DefaultOrthogonalBasis,
+        DiagonalizingBasisProxy,
+    ), pts in (_pts, map(NonBroadcastBasisThing, _pts))
+        if BT == DiagonalizingBasisProxy && pts !== _pts
+            continue
+        end
         v1 = log(M, pts[1], pts[2])
 
-        vb = get_coordinates(M, pts[1], v1, BT())
-        @test isa(vb, AbstractVector)
-        vbi = get_vector(M, pts[1], vb, BT())
-        @test isapprox(M, pts[1], v1, vbi)
+        if BT != DiagonalizingBasisProxy
+            vb = get_coordinates(M, pts[1], v1, BT())
+            @test isa(vb, AbstractVector)
+            vbi = get_vector(M, pts[1], vb, BT())
+            @test isapprox(M, pts[1], v1, vbi)
+        end
 
         b = get_basis(M, pts[1], BT())
-        @test isa(b, CachedBasis{BT{ℝ},Array{Array{Float64,1},1},ℝ})
+        if BT != DiagonalizingBasisProxy
+            if pts[1] isa Array
+                @test isa(b, CachedBasis{BT{ℝ},Vector{Vector{Float64}},ℝ})
+            else
+                @test isa(b, CachedBasis{BT{ℝ},Vector{NonBroadcastBasisThing{Vector{Float64}}},ℝ})
+            end
+        end
         @test get_basis(M, pts[1], b) === b
         N = manifold_dimension(M)
         @test length(get_vectors(M, pts[1], b)) == N
         # check orthonormality
-        for i in 1:N
-            @test norm(M, pts[1], get_vectors(M, pts[1], b)[i]) ≈ 1
-            for j in i+1:N
-                @test inner(
-                    M,
-                    pts[1],
-                    get_vectors(M, pts[1], b)[i],
-                    get_vectors(M, pts[1], b)[j]
-                ) ≈ 0
+        if BT isa DefaultOrthonormalBasis && pts[1] isa Vector
+            for i in 1:N
+                @test norm(M, pts[1], get_vectors(M, pts[1], b)[i]) ≈ 1
+                for j in i+1:N
+                    @test inner(
+                        M,
+                        pts[1],
+                        get_vectors(M, pts[1], b)[i],
+                        get_vectors(M, pts[1], b)[j]
+                    ) ≈ 0
+                end
+            end
+            # check that the coefficients correspond to the basis
+            for i in 1:N
+                @test inner(M, pts[1], v1, get_vectors(M, pts[1], b)[i]) ≈ vb[i]
             end
         end
-        # check that the coefficients correspond to the basis
-        for i in 1:N
-            @test inner(M, pts[1], v1, get_vectors(M, pts[1], b)[i]) ≈ vb[i]
+
+        if BT != DiagonalizingBasisProxy
+            @test get_coordinates(M, pts[1], v1, b) ≈ get_coordinates(M, pts[1], v1, BT())
+            @test get_vector(M, pts[1], vb, b) ≈ get_vector(M, pts[1], vb, BT())
         end
 
-        @test get_coordinates(M, pts[1], v1, b) ≈ get_coordinates(M, pts[1], v1, BT())
-        @test get_vector(M, pts[1], vb, b) ≈ get_vector(M, pts[1], vb, BT())
-
-        v1c = allocate(v1)
+        v1c = Vector{Float64}(undef, 3)
         get_coordinates!(M, v1c, pts[1], v1, b)
         @test v1c ≈ get_coordinates(M, pts[1], v1, b)
 
@@ -143,7 +249,7 @@ end
       2.0
       3.0"""
 
-    M = ManifoldsBase.DefaultManifold(2, 3)
+    M = DefaultManifold(2, 3)
     x = collect(reshape(1.0:6.0, (2, 3)))
     pb = get_basis(M, x, DefaultOrthonormalBasis())
     @test sprint(show, "text/plain", pb) == """
@@ -200,7 +306,7 @@ end
       5.0
       6.0"""
 
-    M = ManifoldsBase.DefaultManifold(1, 1, 1)
+    M = DefaultManifold(1, 1, 1)
     x = reshape(Float64[1], (1, 1, 1))
     pb = get_basis(M, x, DefaultOrthonormalBasis())
     @test sprint(show, "text/plain", pb) == """

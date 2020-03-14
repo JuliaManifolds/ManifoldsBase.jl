@@ -55,14 +55,19 @@ end
 function get_basis(M::DefaultManifold, p, B::DefaultBasis)
     return CachedBasis(B, [_euclidean_basis_vector(p, i) for i in eachindex(p)])
 end
+function get_basis(M::DefaultManifold, p, B::DiagonalizingOrthonormalBasis)
+    vecs = get_vectors(M, p, get_basis(M, p, DefaultOrthonormalBasis()))
+    eigenvalues = zeros(real(eltype(p)), manifold_dimension(M))
+    return CachedBasis(B, DiagonalizingBasisData(B.frame_direction, eigenvalues, vecs))
+end
 
 function get_coordinates!(M::DefaultManifold, Y, p, X, B::DefaultOrthonormalBasis)
-    Y .= reshape(X, manifold_dimension(M))
+    copyto!(Y, reshape(X, manifold_dimension(M)))
     return Y
 end
 
 function get_vector!(M::DefaultManifold, Y, p, X, B::DefaultOrthonormalBasis)
-    Y .= reshape(X, representation_size(M))
+    copyto!(Y, reshape(X, representation_size(M)))
     return Y
 end
 
