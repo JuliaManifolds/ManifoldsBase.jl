@@ -363,7 +363,7 @@ macro decorator_transparent_signature(ex)
                 $(kwargs_list...),
             ) where {$(where_exprs...)}
                 return ($fname)(
-                    decorated_manifold($(argnames[1])),
+                    ManifoldsBase.decorated_manifold($(argnames[1])),
                     $(argnames[2:end]...);
                     $(kwargs_call...),
                 )

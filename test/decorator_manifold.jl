@@ -83,6 +83,22 @@ end
 end
 ManifoldsBase._acts_transparently(test12, TestDecorator3, p) = Val(:foo)
 
+@decorator_transparent_function :none function test13(M::TestDecorator3, p)
+    return 13.5*p
+end
+decorator_transparent_dispatch(::typeof(test13), M::TestDecorator, args...) = Val(:intransparent)
+decorator_transparent_dispatch(::typeof(test13), M::TestDecorator2, args...) = Val(:transparent)
+test13(::ManifoldsBase.DefaultManifold,a) = 13*a
+
+function test14(M::AbstractDecoratorManifold, p)
+    return 14.5*p
+end
+@decorator_transparent_signature test14(M::AbstractDecoratorManifold,p)
+decorator_transparent_dispatch(::typeof(test14), M::TestDecorator3, args...) = Val(:none)
+decorator_transparent_dispatch(::typeof(test14), M::TestDecorator, args...) = Val(:intransparent)
+decorator_transparent_dispatch(::typeof(test14), M::TestDecorator2, args...) = Val(:transparent)
+test14(::ManifoldsBase.DefaultManifold,a) = 14*a
+
 @testset "Testing decorator manifold functions" begin
     M = ManifoldsBase.DefaultManifold(3)
     A = ArrayManifold(M)
@@ -148,4 +164,12 @@ ManifoldsBase._acts_transparently(test12, TestDecorator3, p) = Val(:foo)
     @test test10(TestDecorator3(TD), p; a = 11) == 110
     @test test11(TestDecorator3(TD), p; a = 12) == 180
     @test_throws ErrorException test12(TestDecorator3(TD), p)
+
+    @test_throws ErrorException test13(TestDecorator3(M),1) # :none nonexistent
+    @test_throws ErrorException test13(TestDecorator(M),1) # not implemented
+    @test test13(TestDecorator2(M),2) == 26 # from parent
+
+    @test_throws ErrorException test14(TestDecorator3(M),1) # :none nonexistent
+    @test_throws ErrorException test14(TestDecorator(M),1) # not implemented
+    @test test14(TestDecorator2(M),2) == 28 # from parent
 end
