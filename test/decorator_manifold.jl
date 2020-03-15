@@ -21,6 +21,12 @@ struct TestDecorator3{M<:Manifold} <: AbstractTestDecorator
     manifold::M
 end
 
+abstract type AbstractParentDecorator <: AbstractDecoratorManifold end
+
+struct ChildDecorator{M<:Manifold} <: AbstractParentDecorator
+    manifold::M
+end
+
 test1(M::Manifold, p; a = 0) = 101 + a
 test2(M::Manifold, p; a = 0) = 102 + a
 test3(M::Manifold, p; a = 0) = 103 + a
@@ -99,6 +105,20 @@ decorator_transparent_dispatch(::typeof(test14), M::TestDecorator, args...) = Va
 decorator_transparent_dispatch(::typeof(test14), M::TestDecorator2, args...) = Val(:transparent)
 test14(::ManifoldsBase.DefaultManifold,a) = 14*a
 
+test15(::ManifoldsBase.DefaultManifold,a) = 15.5*a
+@decorator_transparent_function function test15(M::AbstractDecoratorManifold, p)
+    error("Not yet implemented")
+end
+test15(::AbstractParentDecorator,p) = 15*p
+decorator_transparent_dispatch(::typeof(test15), M::ChildDecorator, args...) = Val(:parent)
+
+function test16(::AbstractParentDecorator, p)
+    return 16*p
+end
+test16(::ManifoldsBase.DefaultManifold, a) = 16.5*a
+@decorator_transparent_signature test16(M::AbstractDecoratorManifold, p)
+decorator_transparent_dispatch(::typeof(test16), M::ChildDecorator, args...) = Val(:parent)
+
 @testset "Testing decorator manifold functions" begin
     M = ManifoldsBase.DefaultManifold(3)
     A = ArrayManifold(M)
@@ -172,4 +192,7 @@ test14(::ManifoldsBase.DefaultManifold,a) = 14*a
     @test_throws ErrorException test14(TestDecorator3(M),1) # :none nonexistent
     @test_throws ErrorException test14(TestDecorator(M),1) # not implemented
     @test test14(TestDecorator2(M),2) == 28 # from parent
+
+    @test test15(ChildDecorator(M),1) == 15
+    @test test16(ChildDecorator(M),1) == 16
 end
