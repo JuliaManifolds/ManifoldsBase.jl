@@ -161,11 +161,6 @@ function allocate_result(M::Manifold, f::typeof(get_coordinates), p, X, B::Cache
     return allocate(p, T, length(get_vectors(M, p, B)))
 end
 
-function allocate_result(M::Manifold, f::typeof(get_coordinates), p, X)
-    T = allocate_result_type(M, f, (p, X))
-    return allocate(p, T, manifold_dimension(M))
-end
-
 @inline function allocate_result_type(
     M::Manifold,
     f::Union{typeof(get_coordinates), typeof(get_vector)},
