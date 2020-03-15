@@ -234,6 +234,17 @@ DiagonalizingBasisProxy() = DiagonalizingOrthonormalBasis([1.0, 0.0, 0.0])
     end
 end
 
+@testset "Complex Cached Basis" begin
+    M = ManifoldsBase.DefaultManifold(3; field = ManifoldsBase.ℂ)
+    p = [1.0, 2.0im, 3.0]
+    X = [1.2, 2.2im, 2.3im]
+    b = [ [Matrix{Float64}(I,3,3)[:,i] for i=1:3]..., [Matrix{Float64}(I,3,3)[:,i]im for i=1:3]... ]
+    B = CachedBasis(DefaultOrthonormalBasis(),b,ManifoldsBase.ℂ)
+    a = get_coordinates(M,p,X,B)
+    Y = get_vector(M,p,a,B)
+    @test Y ≈ X
+end
+
 @testset "Basis show methods" begin
     @test sprint(show, DefaultBasis()) == "DefaultBasis(ℝ)"
     @test sprint(show, DefaultOrthogonalBasis()) == "DefaultOrthogonalBasis(ℝ)"
