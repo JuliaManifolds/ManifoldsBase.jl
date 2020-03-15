@@ -37,6 +37,15 @@ ManifoldsBase.get_vector(::ProjManifold, x, v, ::DefaultOrthonormalBasis) = reve
     ) === Val(:transparent)
 end
 
+struct ProjectionTestManifold <: Manifold end
+ManifoldsBase.inner(::ProjectionTestManifold, ::Any, X, Y) = dot(X, Y)
+function ManifoldsBase.project_tangent!(::ProjectionTestManifold, Y, p, X)
+    Y .= X .- dot(p, X) .* p
+    Y[end] = 0
+    return Y
+end
+ManifoldsBase.manifold_dimension(::ProjectionTestManifold) = 100
+
 @testset "Projected and arbitrary orthonormal basis" begin
     M = ProjManifold()
     x = [sqrt(2)/2 0.0 0.0;
@@ -65,6 +74,15 @@ end
     aonb = get_basis(M, x, DefaultOrthonormalBasis())
     @test size(get_vectors(M, x, aonb)) == (5,)
     @test get_vectors(M, x, aonb)[1] ≈ [0, 0, 0, 0, 1]
+
+    @testset "Gram-Schmidt special cases" begin
+        tm = ProjectionTestManifold()
+        bt = ProjectedOrthonormalBasis(:gram_schmidt)
+        p = [sqrt(2)/2, 0.0, sqrt(2)/2, 0.0, 0.0]
+        @test_throws ErrorException get_basis(tm, p, bt)
+        b = get_basis(tm, p, bt; return_incomplete_set = true, warn_linearly_dependent = true)
+        @test length(get_vectors(tm, p, b)) == 3
+    end
 end
 
 struct NonManifold <: Manifold end

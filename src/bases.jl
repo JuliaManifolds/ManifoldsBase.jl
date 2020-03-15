@@ -240,7 +240,14 @@ function get_basis(M::Manifold, p, B::ProjectedOrthonormalBasis{:svd,ℝ})
     end
     return CachedBasis(B, vecs)
 end
-function get_basis(M::Manifold, p, B::ProjectedOrthonormalBasis{:gram_schmidt,ℝ}; kwargs...)
+function get_basis(
+    M::Manifold,
+    p,
+    B::ProjectedOrthonormalBasis{:gram_schmidt,ℝ};
+    warn_linearly_dependent = false,
+    return_incomplete_set = false,
+    kwargs...,
+)
     E = [_euclidean_basis_vector(p, i) for i in eachindex(p)]
     N = length(E)
     Ξ = empty(E)
@@ -254,13 +261,13 @@ function get_basis(M::Manifold, p, B::ProjectedOrthonormalBasis{:gram_schmidt,�
         end
         nrmΞₙ = norm(M, p, Ξₙ)
         if nrmΞₙ == 0
-            @warn "Input vector $(n) has length 0."
+            warn_linearly_dependent && @warn "Input vector $(n) has length 0."
             @goto skip
         end
         Ξₙ ./= nrmΞₙ
         for k = 1:K
             if !isapprox(real(inner(M, p, Ξ[k], Ξₙ)), 0; kwargs...)
-                @warn "Input vector $(n) is not linearly independent of output basis vector $(k)."
+                warn_linearly_dependent && @warn "Input vector $(n) is not linearly independent of output basis vector $(k)."
                 @goto skip
             end
         end
@@ -269,8 +276,11 @@ function get_basis(M::Manifold, p, B::ProjectedOrthonormalBasis{:gram_schmidt,�
         K * real_dimension(number_system(B)) == dim && return CachedBasis(B, Ξ, ℝ)
         @label skip
     end
-    @warn "get_basis with bases $(typeof(B)) only found $(K) orthonormal basis vectors, but manifold dimension is $(dim)."
-    return CachedBasis(B, Ξ)
+    if return_incomplete_set
+        return CachedBasis(B, Ξ, ℝ)
+    else
+        error("get_basis with bases $(typeof(B)) only found $(K) orthonormal basis vectors, but manifold dimension is $(dim).")
+    end
 end
 
 """
