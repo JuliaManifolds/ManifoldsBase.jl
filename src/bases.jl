@@ -151,9 +151,14 @@ const DISAMBIGUATION_BASIS_TYPES = [
     VeeOrthogonalBasis,
 ]
 
-function allocate_result(M::Manifold, f::typeof(get_coordinates), p, X)
+function allocate_result(M::Manifold, f::typeof(get_coordinates), p, X, B)
     T = allocate_result_type(M, f, (p, X))
     return allocate(p, T, manifold_dimension(M))
+end
+
+function allocate_result(M::Manifold, f::typeof(get_coordinates), p, X, B::CachedBasis)
+    T = allocate_result_type(M, f, (p, X))
+    return allocate(p, T, length(get_vectors(M, p, B)))
 end
 
 @inline function allocate_result_type(
@@ -301,7 +306,7 @@ requires either a dual basis or the cached basis to be selfdual, for example ort
 See also: [`get_vector`](@ref), [`get_basis`](@ref)
 """
 function get_coordinates(M::Manifold, p, X, B::AbstractBasis)
-    Y = allocate_result(M, get_coordinates, p, X)
+    Y = allocate_result(M, get_coordinates, p, X, B)
     return get_coordinates!(M, Y, p, X, B)
 end
 @decorator_transparent_signature get_coordinates(M::AbstractDecoratorManifold, p, X, B::AbstractBasis)
@@ -342,7 +347,7 @@ function get_coordinates!(
     return Y
 end
 function get_coordinates!(M::Manifold, Y, p, X, B::CachedBasis)
-    map!(vb -> inner(M, p, X, vb), Y, get_vectors(M, p, B))
+    map!(vb -> conj(inner(M, p, X, vb)), Y, get_vectors(M, p, B))
     return Y
 end
 
