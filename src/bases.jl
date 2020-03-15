@@ -435,18 +435,10 @@ end
 function get_vectors(
     M::Manifold,
     p,
-    B::CachedBasis{<:AbstractBasis,<:AbstractArray},
+    B::CachedBasis,
 )
-    return B.data
+    return _get_vectors(B)
 end
-function get_vectors(
-    M::Manifold,
-    p,
-    B::CachedBasis{<:AbstractBasis,<:DiagonalizingBasisData},
-)
-    return B.data.vectors
-end
-
 #internal for directly cached basis i.e. those that are just arrays – used in show
 _get_vectors(B::CachedBasis{<:AbstractBasis,<:AbstractArray}) = B.data
 _get_vectors(B::CachedBasis{<:AbstractBasis,<:DiagonalizingBasisData}) = B.data.vectors
