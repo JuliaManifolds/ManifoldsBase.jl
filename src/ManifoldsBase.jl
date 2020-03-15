@@ -1,6 +1,6 @@
 module ManifoldsBase
 
-import Base: isapprox, exp, log, convert, copyto!, angle, eltype, similar, +, -, *
+import Base: isapprox, exp, log, convert, copyto!, angle, eltype, similar, show, +, -, *
 import LinearAlgebra: dot, norm, det, cross, I, UniformScaling, Diagonal
 
 import Markdown: @doc_str
@@ -164,10 +164,10 @@ abstract type CoTVector end
 
 """
     allocate(a)
-    allocate(a, dims::Int...)
+    allocate(a, dims::Integer...)
     allocate(a, dims::Tuple)
     allocate(a, T::Type)
-    allocate(a, T::Type, dims::Int...)
+    allocate(a, T::Type, dims::Integer...)
     allocate(a, T::Type, dims::Tuple)
 
 Allocate an object similar to `a`. It is similar to function `similar`, although
@@ -179,10 +179,10 @@ allocation and is forwarded to the function `similar`.
 """
 allocate(a, args...)
 allocate(a) = similar(a)
-allocate(a, dims::Int...) = similar(a, dims...)
+allocate(a, dims::Integer...) = similar(a, dims...)
 allocate(a, dims::Tuple) = similar(a, dims)
 allocate(a, T::Type) = similar(a, T)
-allocate(a, T::Type, dims::Int...) = similar(a, T, dims...)
+allocate(a, T::Type, dims::Integer...) = similar(a, T, dims...)
 allocate(a, T::Type, dims::Tuple) = similar(a, T, dims)
 allocate(a::AbstractArray{<:AbstractArray}) = map(allocate, a)
 allocate(a::AbstractArray{<:AbstractArray}, T::Type) = map(t -> allocate(t, T), a)
@@ -242,9 +242,6 @@ By default, `check_manifold_point` returns `nothing`, i.e. if no checks are impl
 assumption is to be optimistic for a point not deriving from the [`MPoint`](@ref) type.
 """
 check_manifold_point(M::Manifold, p; kwargs...) = nothing
-function check_manifold_point(M::Manifold, p::MPoint; kwargs...)
-    error(manifold_function_not_implemented_message(M, check_manifold_point, p))
-end
 
 """
     check_tangent_vector(M::Manifold, p, X; kwargs...) -> Union{Nothing,String}
@@ -259,9 +256,6 @@ assumption is to be optimistic for tangent vectors not deriving from the [`TVect
 type.
 """
 check_tangent_vector(M::Manifold, p, X; kwargs...) = nothing
-function check_tangent_vector(M::Manifold, p::MPoint, X::TVector; kwargs...)
-    error(manifold_function_not_implemented_message(M, check_tangent_vector, p, X))
-end
 
 """
     distance(M::Manifold, p, q)
@@ -312,29 +306,6 @@ Return the point at time `t` or points at times `t` in `T` along the geodesic.
 geodesic(M::Manifold, p, X) = t -> exp(M, p, X, t)
 geodesic(M::Manifold, p, X, t::Real) = exp(M, p, X, t)
 geodesic(M::Manifold, p, X, T::AbstractVector) = map(t -> exp(M, p, X, t), T)
-
-@doc raw"""
-    hat(M::Manifold, p, Xⁱ)
-
-Given a basis $e_i$ on the tangent space at a point `p` and tangent
-component vector $X^i$, compute the equivalent vector representation
-$X=X^i e_i$, where Einstein summation notation is used:
-
-````math
-∧ : X^i ↦ X^i e_i
-````
-
-For array manifolds, this converts a vector representation of the tangent
-vector to an array representation. The [`vee`](@ref) map is the `hat` map's
-inverse.
-"""
-function hat(M::Manifold, p, Xⁱ)
-    X = allocate_result(M, hat, p, Xⁱ)
-    return hat!(M, X, p, Xⁱ)
-end
-function hat!(M::Manifold, X, p, Xⁱ)
-    error(manifold_function_not_implemented_message(M, hat!, X, p, Xⁱ))
-end
 
 @doc doc"""
     injectivity_radius(M::Manifold, p)
@@ -811,35 +782,6 @@ function vector_transport_to!(
     ))
 end
 
-@doc raw"""
-    vee(M::Manifold, p, X)
-
-Given a basis $e_i$ on the tangent space at a point `p` and tangent
-vector `X`, compute the vector components $X^i$, such that $X = X^i e_i$, where
-Einstein summation notation is used:
-
-````math
-\vee : X^i e_i ↦ X^i
-````
-
-For array manifolds, this converts an array representation of the tangent
-vector to a vector representation. The [`hat`](@ref) map is the `vee` map's
-inverse.
-"""
-function vee(M::Manifold, p, X)
-    Xⁱ = allocate_result(M, vee, p, X)
-    return vee!(M, Xⁱ, p, X)
-end
-
-function vee!(M::Manifold, Xⁱ, p, X)
-    error(manifold_function_not_implemented_message(M, vee!, Xⁱ, p, X))
-end
-
-function allocate_result(M::Manifold, f::typeof(vee), p, X)
-    T = allocate_result_type(M, f, (p, X))
-    return allocate(p, T, manifold_dimension(M))
-end
-
 """
     zero_tangent_vector!(M::Manifold, X, p)
 
@@ -859,7 +801,10 @@ function zero_tangent_vector(M::Manifold, p)
     zero_tangent_vector!(M, X, p)
     return X
 end
+
+include("numbers.jl")
 include("DecoratorManifold.jl")
+include("bases.jl")
 include("ArrayManifold.jl")
 include("DefaultManifold.jl")
 
@@ -878,6 +823,15 @@ export AbstractInverseRetractionMethod,
 
 export ParallelTransport, ProjectionTransport
 
+export
+    CachedBasis,
+    DefaultBasis,
+    DefaultOrthogonalBasis,
+    DefaultOrthonormalBasis,
+    DiagonalizingOrthonormalBasis,
+    DefaultOrthonormalBasis,
+    ProjectedOrthonormalBasis
+
 export allocate,
     base_manifold,
     check_manifold_point,
@@ -886,6 +840,12 @@ export allocate,
     exp,
     exp!,
     geodesic,
+    get_basis,
+    get_coordinates,
+    get_coordinates!,
+    get_vector,
+    get_vector!,
+    get_vectors,
     hat,
     hat!,
     shortest_geodesic,
@@ -901,10 +861,12 @@ export allocate,
     manifold_dimension,
     norm,
     number_eltype,
+    number_system,
     project_point,
     project_point!,
     project_tangent,
     project_tangent!,
+    real_dimension,
     representation_size,
     retract,
     retract!,

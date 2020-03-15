@@ -21,6 +21,12 @@ struct TestDecorator3{M<:Manifold} <: AbstractTestDecorator
     manifold::M
 end
 
+abstract type AbstractParentDecorator <: AbstractDecoratorManifold end
+
+struct ChildDecorator{M<:Manifold} <: AbstractParentDecorator
+    manifold::M
+end
+
 test1(M::Manifold, p; a = 0) = 101 + a
 test2(M::Manifold, p; a = 0) = 102 + a
 test3(M::Manifold, p; a = 0) = 103 + a
@@ -78,6 +84,41 @@ decorator_transparent_dispatch(::typeof(test10), M::TestDecorator3, args...) = V
     return 15*a
 end
 
+@decorator_transparent_function function test12(M::ManifoldsBase.DefaultManifold, p)
+    return 12*p
+end
+ManifoldsBase._acts_transparently(test12, TestDecorator3, p) = Val(:foo)
+
+@decorator_transparent_function :none function test13(M::TestDecorator3, p)
+    return 13.5*p
+end
+decorator_transparent_dispatch(::typeof(test13), M::TestDecorator, args...) = Val(:intransparent)
+decorator_transparent_dispatch(::typeof(test13), M::TestDecorator2, args...) = Val(:transparent)
+test13(::ManifoldsBase.DefaultManifold,a) = 13*a
+
+function test14(M::AbstractDecoratorManifold, p)
+    return 14.5*p
+end
+@decorator_transparent_signature test14(M::AbstractDecoratorManifold,p)
+decorator_transparent_dispatch(::typeof(test14), M::TestDecorator3, args...) = Val(:none)
+decorator_transparent_dispatch(::typeof(test14), M::TestDecorator, args...) = Val(:intransparent)
+decorator_transparent_dispatch(::typeof(test14), M::TestDecorator2, args...) = Val(:transparent)
+test14(::ManifoldsBase.DefaultManifold,a) = 14*a
+
+test15(::ManifoldsBase.DefaultManifold,a) = 15.5*a
+@decorator_transparent_function function test15(M::AbstractDecoratorManifold, p)
+    error("Not yet implemented")
+end
+test15(::AbstractParentDecorator,p) = 15*p
+decorator_transparent_dispatch(::typeof(test15), M::ChildDecorator, args...) = Val(:parent)
+
+function test16(::AbstractParentDecorator, p)
+    return 16*p
+end
+test16(::ManifoldsBase.DefaultManifold, a) = 16.5*a
+@decorator_transparent_signature test16(M::AbstractDecoratorManifold, p)
+decorator_transparent_dispatch(::typeof(test16), M::ChildDecorator, args...) = Val(:parent)
+
 @testset "Testing decorator manifold functions" begin
     M = ManifoldsBase.DefaultManifold(3)
     A = ArrayManifold(M)
@@ -105,13 +146,15 @@ end
 
     p = [1.0, 0.0, 0.0]
     X = [2.0, 1.0, 3.0]
-    @test inner(A, p, X, X) ≈ inner(A, Val(:transparent), p, X, X)
-    @test_throws ErrorException inner(A, Val(:intransparent), p, X, X)
+    @test inner(A, p, X, X) ≈ ManifoldsBase.inner__transparent(A, p, X, X)
+    @test_throws ErrorException ManifoldsBase.inner__intransparent(A, p, X, X)
 
     TD = TestDecorator(M)
 
     @test (@inferred ManifoldsBase.default_decorator_dispatch(M)) === Val(false)
     @test ManifoldsBase.is_default_decorator(M) === false
+
+    @test injectivity_radius(TD, ManifoldsBase.ExponentialRetraction()) == Inf
 
     @test test1(TD, p) == 1
     @test test1(TD, p; a = 1000) == 1001
@@ -140,4 +183,16 @@ end
     @test test9(TestDecorator3(TD), p; a = 1000, b = 10000) == 11109
     @test test10(TestDecorator3(TD), p; a = 11) == 110
     @test test11(TestDecorator3(TD), p; a = 12) == 180
+    @test_throws ErrorException test12(TestDecorator3(TD), p)
+
+    @test_throws ErrorException test13(TestDecorator3(M),1) # :none nonexistent
+    @test_throws ErrorException test13(TestDecorator(M),1) # not implemented
+    @test test13(TestDecorator2(M),2) == 26 # from parent
+
+    @test_throws ErrorException test14(TestDecorator3(M),1) # :none nonexistent
+    @test_throws ErrorException test14(TestDecorator(M),1) # not implemented
+    @test test14(TestDecorator2(M),2) == 28 # from parent
+
+    @test test15(ChildDecorator(M),1) == 15
+    @test test16(ChildDecorator(M),1) == 16
 end

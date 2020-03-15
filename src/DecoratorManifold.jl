@@ -59,6 +59,9 @@ function _split_signature(sig::Expr)
         argnames = argnames,
         argtypes = argtypes,
         kwargs_call = kwargs_call,
+        fname__parent = Symbol(string(fname) * "__parent"),
+        fname__transparent = Symbol(string(fname) * "__transparent"),
+        fname__intransparent = Symbol(string(fname) * "__intransparent"),
     )
 end
 
@@ -146,12 +149,11 @@ macro decorator_transparent_fallback(fallback_case, input_ex)
     parts = _split_function(ex)
     callargs = parts[:callargs]
     where_exprs = parts[:where_exprs]
+    fname_fallback = Symbol(string(parts.fname) * "__" * string(fallback_case)[2:end])
     return esc(
         quote
-            function ($(parts[:fname]))(
-                $(callargs[1]),
-                ::Val{$fallback_case},
-                $(callargs[2:end]...);
+            function ($(fname_fallback))(
+                $(callargs...);
                 $(parts[:kwargs_list]...),
             ) where {$(where_exprs...)}
                 ($(parts[:body]))
@@ -213,6 +215,7 @@ macro decorator_transparent_function(fallback_case, input_ex)
     argnames = parts[:argnames]
     argtypes = parts[:argtypes]
     kwargs_call = parts[:kwargs_call]
+    fname_fallback = Symbol(string(parts.fname) * "__" * string(fallback_case)[2:end])
 
     return esc(
         quote
@@ -221,29 +224,30 @@ macro decorator_transparent_function(fallback_case, input_ex)
                 $(callargs[2:end]...);
                 $(kwargs_list...),
             ) where {$(where_exprs...)}
-                return ($fname)(
-                    $(argnames[1]),
-                    ManifoldsBase._acts_transparently($fname, $(argnames...)),
-                    $(argnames[2:end]...),
-                    ;
-                    $(kwargs_call...),
-                )
+                transparency = ManifoldsBase._acts_transparently($fname, $(argnames...))
+                if transparency === Val(:parent)
+                    return ($(parts.fname__parent))($(argnames...); $(kwargs_call...))
+                elseif transparency === Val(:transparent)
+                    return ($(parts.fname__transparent))($(argnames...); $(kwargs_call...))
+                elseif transparency === Val(:intransparent)
+                    return ($(parts.fname__intransparent))($(argnames...); $(kwargs_call...))
+                else
+                    error("incorrect transparency: $transparency")
+                end
             end
-            function ($fname)(
+            function ($(parts[:fname__transparent]))(
                 $(argnames[1])::AbstractDecoratorManifold,
-                ::Val{:transparent},
                 $(callargs[2:end]...);
                 $(kwargs_list...),
             ) where {$(where_exprs...)}
                 return ($fname)(
-                    decorated_manifold($(argnames[1])),
+                    ManifoldsBase.decorated_manifold($(argnames[1])),
                     $(argnames[2:end]...);
                     $(kwargs_call...),
                 )
             end
-            function ($fname)(
+            function ($(parts[:fname__intransparent]))(
                 $(argnames[1])::AbstractDecoratorManifold,
-                ::Val{:intransparent},
                 $(callargs[2:end]...);
                 $(kwargs_list...),
             ) where {$(where_exprs...)}
@@ -270,9 +274,8 @@ macro decorator_transparent_function(fallback_case, input_ex)
                     ". Maybe you missed to implement this function for a default?",
                 ))
             end
-            function ($fname)(
+            function ($(parts[:fname__parent]))(
                 $(argnames[1])::AbstractDecoratorManifold,
-                ::Val{:parent},
                 $(callargs[2:end]...);
                 $(kwargs_list...),
             ) where {$(where_exprs...)}
@@ -283,9 +286,8 @@ macro decorator_transparent_function(fallback_case, input_ex)
                     $(kwargs_call...),
                 )
             end
-            function ($fname)(
+            function ($fname_fallback)(
                 $(callargs[1]),
-                ::Val{$fallback_case},
                 $(callargs[2:end]...);
                 $(kwargs_list...),
             ) where {$(where_exprs...)}
@@ -345,29 +347,29 @@ macro decorator_transparent_signature(ex)
     return esc(
         quote
             function ($fname)($(callargs...); $(kwargs_list...)) where {$(where_exprs...)}
-                return ($fname)(
-                    $(argnames[1]),
-                    ManifoldsBase._acts_transparently($fname, $(argnames...)),
-                    $(argnames[2:end]...);
-                    $(kwargs_call...),
-                )
+                transparency = ManifoldsBase._acts_transparently($fname, $(argnames...))
+                if transparency === Val(:parent)
+                    return ($(parts.fname__parent))($(argnames...); $(kwargs_call...))
+                elseif transparency === Val(:transparent)
+                    return ($(parts.fname__transparent))($(argnames...); $(kwargs_call...))
+                elseif transparency === Val(:intransparent)
+                    return ($(parts.fname__intransparent))($(argnames...); $(kwargs_call...))
+                else
+                    error("incorrect transparency: $transparency")
+                end
             end
-            function ($fname)(
-                $(callargs[1]),
-                ::Val{:transparent},
-                $(callargs[2:end]...);
+            function ($(parts[:fname__transparent]))(
+                $(callargs...);
                 $(kwargs_list...),
             ) where {$(where_exprs...)}
                 return ($fname)(
-                    decorated_manifold($(argnames[1])),
+                    ManifoldsBase.decorated_manifold($(argnames[1])),
                     $(argnames[2:end]...);
                     $(kwargs_call...),
                 )
             end
-            function ($fname)(
-                $(callargs[1]),
-                ::Val{:intransparent},
-                $(callargs[2:end]...);
+            function ($(parts[:fname__intransparent]))(
+                $(callargs...);
                 $(kwargs_list...),
             ) where {$(where_exprs...)}
                 error_msg = ManifoldsBase.manifold_function_not_implemented_message(
@@ -377,10 +379,8 @@ macro decorator_transparent_signature(ex)
                 )
                 error(error_msg)
             end
-            function ($fname)(
-                $(callargs[1]),
-                ::Val{:parent},
-                $(callargs[2:end]...);
+            function ($(parts[:fname__parent]))(
+                $(callargs...);
                 $(kwargs_list...),
             ) where {$(where_exprs...)}
                 return invoke(
@@ -495,16 +495,11 @@ Return the manifold decorated by the decorator `M`. Defaults to `M.manifold`.
 """
 decorated_manifold(M::Manifold) = M.manifold
 
-
 @decorator_transparent_signature distance(M::AbstractDecoratorManifold, p, q)
 
 @decorator_transparent_signature exp(M::AbstractDecoratorManifold, p, X)
 
 @decorator_transparent_signature exp!(M::AbstractDecoratorManifold, q, p, X)
-
-@decorator_transparent_signature hat(M::AbstractDecoratorManifold, p, Xⁱ)
-
-@decorator_transparent_signature hat!(M::AbstractDecoratorManifold, X, p, Xⁱ)
 
 @decorator_transparent_signature injectivity_radius(M::AbstractDecoratorManifold)
 @decorator_transparent_signature injectivity_radius(M::AbstractDecoratorManifold, p)
@@ -514,8 +509,17 @@ decorated_manifold(M::Manifold) = M.manifold
 )
 @decorator_transparent_signature injectivity_radius(
     M::AbstractDecoratorManifold,
+    m::ExponentialRetraction,
+)
+@decorator_transparent_signature injectivity_radius(
+    M::AbstractDecoratorManifold,
     p,
     m::AbstractRetractionMethod,
+)
+@decorator_transparent_signature injectivity_radius(
+    M::AbstractDecoratorManifold,
+    p,
+    m::ExponentialRetraction,
 )
 
 @decorator_transparent_signature inner(M::AbstractDecoratorManifold, p, X, Y)
@@ -640,9 +644,13 @@ decorated_manifold(M::Manifold) = M.manifold
     q,
     m::AbstractVectorTransportMethod,
 )
-
-@decorator_transparent_signature vee!(M::AbstractDecoratorManifold, Xⁱ, p, X)
-
-@decorator_transparent_signature vee(M::AbstractDecoratorManifold, p, X)
+@decorator_transparent_signature vector_transport_to!(
+    M::AbstractDecoratorManifold,
+    Y,
+    p,
+    X,
+    q,
+    m::ProjectionTransport,
+)
 
 @decorator_transparent_signature zero_tangent_vector!(M::AbstractDecoratorManifold, X, p)
