@@ -142,6 +142,7 @@ const DISAMBIGUATION_BASIS_TYPES = [
     CachedBasis{<:AbstractBasis{ℝ}},
     CachedBasis{<:AbstractOrthogonalBasis{ℝ}},
     CachedBasis{<:AbstractOrthonormalBasis{ℝ}},
+    CachedBasis{<:AbstractBasis{ℂ}},
     DefaultBasis,
     DefaultOrthonormalBasis,
     DefaultOrthogonalBasis,
@@ -346,7 +347,7 @@ function get_coordinates!(
     map!(vb -> real(inner(M, p, X, vb)), Y, get_vectors(M, p, B))
     return Y
 end
-function get_coordinates!(M::Manifold, Y, p, X, B::CachedBasis)
+function get_coordinates!(M::Manifold, Y, p, X, B::CachedBasis{<:AbstractBasis{ℂ}})
     map!(vb -> conj(inner(M, p, X, vb)), Y, get_vectors(M, p, B))
     return Y
 end
