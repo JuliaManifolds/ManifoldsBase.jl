@@ -91,13 +91,20 @@ end
 """
     base_manifold(M::AbstractEmbeddedManifold, d::Val{N} = Val(-1))
 
-Return the base manifold of `M`. While functions like `inner` might be overwritten to
-use the (decorated) manifold representing the embedding, the base_manifold is the manifold
-itself in the sense that detemining e.g. the [`is_default_metric`](@ref) does not check with
-the embedding but with the manifold itself.
+Return the base manifold of `M` that is enhanced with its embedding.
+While functions like `inner` might be overwritten to use the (decorated) manifold
+representing the embedding, the base_manifold is the manifold itself in the sense that
+detemining e.g. the [`is_default_metric`](@ref) does not fall back to check with
+the embedding but with the manifold itself. For this abstract case, just `M` is returned.
 """
 base_manifold(M::AbstractEmbeddedManifold, d::Val{N}=Val(-1)) where {N} = M
-base_manifold(M::EmbeddedManifold, d::Val{N}=Val(-1)) where {N} = M.M
+"""
+    base_manifold(M::EmbeddedManifold, d::Val{N} = Val(-1))
+
+Return the base manifold of `M` that is enhanced with its embedding. For this specific
+type the internally stored enhanced manifold `M.manifold` is returned.
+"""
+base_manifold(M::EmbeddedManifold, d::Val{N}=Val(-1)) where {N} = M.manifold
 
 
 """

@@ -28,6 +28,7 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{DefaultEmbedd
         M = EmbeddedManifold(ManifoldsBase.DefaultManifold(2), ManifoldsBase.DefaultManifold(3))
         @test repr(M) ==
             "EmbeddedManifold(DefaultManifold{Tuple{2},ℝ}(), DefaultManifold{Tuple{3},ℝ}(), TransparentIsometricEmbedding())"
+        @test base_manifold(M) == ManifoldsBase.DefaultManifold(2)
         @test ManifoldsBase.decorated_manifold(M) == ManifoldsBase.DefaultManifold(3)
         @test ManifoldsBase.default_embedding_dispatch(M) === Val{false}()
         @test ManifoldsBase.default_decorator_dispatch(M) === ManifoldsBase.default_embedding_dispatch(M)
@@ -82,6 +83,7 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{DefaultEmbedd
         end
         @testset "General Isometric Embedding Fallback Error Tests" begin
             M2 = NotImplementedEmbeddedManifold2()
+            @test base_manifold(M2) == M2
             A = zeros(2)
             @test_throws ErrorException exp(M2, [1, 2], [2, 3])
             @test_throws ErrorException exp!(M2, A, [1, 2], [2, 3])
