@@ -57,14 +57,14 @@ struct NonCoTVector <: CoTVector end
     @test_throws ErrorException inverse_retract(M, [0.0], [0.0])
     @test_throws ErrorException inverse_retract(M, [0.0], [0.0], log_invretr)
 
-    @test_throws ErrorException project_point!(M, p, [0])
-    @test_throws ErrorException project_point!(M, [0], [0])
-    @test_throws ErrorException project_point(M, [0])
+    @test_throws ErrorException project!(M, p, [0])
+    @test_throws ErrorException project!(M, [0], [0])
+    @test_throws ErrorException project(M, [0])
 
-    @test_throws ErrorException project_tangent!(M, v, p, [0.0])
-    @test_throws ErrorException project_tangent!(M, [0], [0], [0])
-    @test_throws ErrorException project_tangent(M, [0], [0])
-    @test_throws ErrorException project_tangent(M, [0.0], [0.0])
+    @test_throws ErrorException project!(M, v, p, [0.0])
+    @test_throws ErrorException project!(M, [0], [0], [0])
+    @test_throws ErrorException project(M, [0], [0])
+    @test_throws ErrorException project(M, [0.0], [0.0])
 
     @test_throws ErrorException inner(M, p, v, v)
     @test_throws ErrorException inner(M, [0], [0], [0])

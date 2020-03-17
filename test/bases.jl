@@ -7,7 +7,7 @@ import Base: +, -, *, copyto!, isapprox
 struct ProjManifold <: Manifold end
 
 ManifoldsBase.inner(::ProjManifold, x, w, v) = dot(w, v)
-ManifoldsBase.project_tangent!(S::ProjManifold, w, x, v) = (w .= v .- dot(x, v) .* x)
+ManifoldsBase.project!(S::ProjManifold, w, x, v) = (w .= v .- dot(x, v) .* x)
 ManifoldsBase.representation_size(::ProjManifold) = (2,3)
 ManifoldsBase.manifold_dimension(::ProjManifold) = 5
 ManifoldsBase.get_vector(::ProjManifold, x, v, ::DefaultOrthonormalBasis) = reverse(v)
@@ -39,7 +39,7 @@ end
 
 struct ProjectionTestManifold <: Manifold end
 ManifoldsBase.inner(::ProjectionTestManifold, ::Any, X, Y) = dot(X, Y)
-function ManifoldsBase.project_tangent!(::ProjectionTestManifold, Y, p, X)
+function ManifoldsBase.project!(::ProjectionTestManifold, Y, p, X)
     Y .= X .- dot(p, X) .* p
     Y[end] = 0
     return Y
@@ -68,7 +68,7 @@ ManifoldsBase.manifold_dimension(::ProjectionTestManifold) = 100
         end
         # check projection idempotency
         for i in 1:N
-            @test project_tangent(M, x, get_vectors(M, x, pb)[i]) ≈ get_vectors(M, x, pb)[i]
+            @test project(M, x, get_vectors(M, x, pb)[i]) ≈ get_vectors(M, x, pb)[i]
         end
     end
     aonb = get_basis(M, x, DefaultOrthonormalBasis())
