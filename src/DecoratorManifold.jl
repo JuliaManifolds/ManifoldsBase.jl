@@ -497,6 +497,12 @@ decorated_manifold(M::Manifold) = M.manifold
 
 @decorator_transparent_signature distance(M::AbstractDecoratorManifold, p, q)
 
+@decorator_transparent_signature embed(M::AbstractDecoratorManifold, p, X)
+@decorator_transparent_signature embed(M::AbstractDecoratorManifold, p)
+
+@decorator_transparent_signature embed!(M::AbstractDecoratorManifold, q, p)
+@decorator_transparent_signature embed!(M::AbstractDecoratorManifold, Y, p, X)
+
 @decorator_transparent_signature exp(M::AbstractDecoratorManifold, p, X)
 
 @decorator_transparent_signature exp!(M::AbstractDecoratorManifold, q, p, X)

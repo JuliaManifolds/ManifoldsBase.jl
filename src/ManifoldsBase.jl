@@ -854,10 +854,17 @@ include("numbers.jl")
 include("DecoratorManifold.jl")
 include("bases.jl")
 include("ArrayManifold.jl")
+include("EmbeddedManifold.jl")
 include("DefaultManifold.jl")
 
 export Manifold, MPoint, TVector, CoTVector
 export AbstractDecoratorManifold, ArrayManifold, ArrayMPoint, ArrayTVector, ArrayCoTVector
+export AbstractEmbeddingType,
+    TransparentIsometricEmbedding,
+    DefaultIsometricEmbeddingType,
+    DefaultEmbeddingType
+export AbstractEmbeddedManifold, EmbeddedManifold, TransparentIsometricEmbedding
+
 export AbstractRetractionMethod,
     ExponentialRetraction,
     QRRetraction,
