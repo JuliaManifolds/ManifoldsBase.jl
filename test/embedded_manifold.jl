@@ -64,8 +64,8 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{DefaultEmbedd
         @testset "Default Isometric Embedding Fallback Error Tests" begin
             M = NotImplementedEmbeddedManifold()
             A = zeros(2)
-            @test check_manifold_point(M, [1, 2]) === nothing
-            @test check_tangent_vector(M, [1, 2], [3, 4]) ===nothing
+            @test_throws ErrorException check_manifold_point(M, [1, 2])
+            @test_throws ErrorException check_tangent_vector(M, [1, 2], [3, 4])
             @test norm(M, [1, 2], [2, 3]) ≈ sqrt(13)
             @test inner(M, [1, 2], [2, 3], [2, 3]) ≈ 13
             @test_throws ErrorException manifold_dimension(M)
