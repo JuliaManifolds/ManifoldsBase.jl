@@ -27,6 +27,11 @@ struct ChildDecorator{M<:Manifold} <: AbstractParentDecorator
     manifold::M
 end
 
+struct DefaultDecorator{M<:Manifold} <: AbstractDecoratorManifold
+    manifold::M
+end
+ManifoldsBase.default_decorator_dispatch(::DefaultDecorator) = Val(true)
+
 test1(M::Manifold, p; a = 0) = 101 + a
 test2(M::Manifold, p; a = 0) = 102 + a
 test3(M::Manifold, p; a = 0) = 103 + a
@@ -119,6 +124,13 @@ test16(::ManifoldsBase.DefaultManifold, a) = 16.5*a
 @decorator_transparent_signature test16(M::AbstractDecoratorManifold, p)
 decorator_transparent_dispatch(::typeof(test16), M::ChildDecorator, args...) = Val(:parent)
 
+function test17(M::ManifoldsBase.DefaultManifold, p)
+    return 17*p
+end
+@decorator_transparent_signature test17(M::AbstractDecoratorManifold, p)
+decorator_transparent_dispatch(::typeof(test17), M::AbstractDecoratorManifold, args...) = Val(:intransparent)
+default_decorator_dispatch(::DefaultDecorator) = Val(true)
+
 @testset "Testing decorator manifold functions" begin
     M = ManifoldsBase.DefaultManifold(3)
     A = ArrayManifold(M)
@@ -195,4 +207,7 @@ decorator_transparent_dispatch(::typeof(test16), M::ChildDecorator, args...) = V
 
     @test test15(ChildDecorator(M),1) == 15
     @test test16(ChildDecorator(M),1) == 16
+
+    @test_throws ErrorException test17(TestDecorator(ManifoldsBase.DefaultManifold(3)),1)
+    @test test17(DefaultDecorator(ManifoldsBase.DefaultManifold(3)),1) == 17
 end
