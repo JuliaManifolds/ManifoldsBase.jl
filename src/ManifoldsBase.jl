@@ -271,8 +271,8 @@ Embed point `p` from the [`Manifold`](@ref) `M` into the ambient space.
 The function works only for selected embedded manifolds.
 """
 function embed(M::Manifold, p)
-    q = allocate_result(M, project, p)
-    project!(M, q, p)
+    q = allocate_result(M, embed, p)
+    embed!(M, q, p)
     return q
 end
 
@@ -283,7 +283,7 @@ Embed point `p` from the [`Manifold`](@ref) `M` into the ambient space. The poin
 overwritten by the embedded point. The function works only for selected embedded manifolds.
 """
 function embed!(M::Manifold, q, p)
-    error(manifold_function_not_implemented_message(M, project!, q, p))
+    error(manifold_function_not_implemented_message(M, embed!, q, p))
 end
 
 """
@@ -295,8 +295,8 @@ ambient space.
 The function works only for selected embedded manifolds.
 """
 function embed(M::Manifold, p, X)
-    Y = allocate_result(M, project, X, p)
-    project!(M, Y, p, X)
+    Y = allocate_result(M, embed, X, p)
+    embed!(M, Y, p, X)
     return Y
 end
 
@@ -309,7 +309,7 @@ ambient space. The result is saved in vector `Y`.
 The function works only for selected embedded manifolds.
 """
 function embed!(M::Manifold, Y, p, X)
-    error(manifold_function_not_implemented_message(M, project!, Y, p, X))
+    error(manifold_function_not_implemented_message(M, embed!, Y, p, X))
 end
 
 """
