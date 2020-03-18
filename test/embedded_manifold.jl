@@ -3,11 +3,6 @@ struct PlaneManifold <: AbstractEmbeddedManifold{TransparentIsometricEmbedding} 
 ManifoldsBase.decorated_manifold(::PlaneManifold) = ManifoldsBase.DefaultManifold(3)
 ManifoldsBase.base_manifold(::PlaneManifold) = ManifoldsBase.DefaultManifold(2)
 
-function ManifoldsBase.check_manifold_point(M::PlaneManifold, p; kwargs...)
-    length(p) != 3 && return "Wrong size"
-    isapprox(p[3], 0.0; kwargs...) != 0 && return "Third component not zero"
-    return nothing
-end
 ManifoldsBase.embed!(::PlaneManifold, q, p) = copyto!(q, p)
 ManifoldsBase.embed!(::PlaneManifold, Y, p, X) = copyto!(Y, X)
 ManifoldsBase.project!(::PlaneManifold, q, p) = (q .= [p[1] p[2] 0.0])
@@ -37,6 +32,11 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{DefaultEmbedd
         M = PlaneManifold()
         @test repr(M) == "PlaneManifold()"
         @test ManifoldsBase.default_decorator_dispatch(M) === Val{false}()
+        @test get_embedding(M) == ManifoldsBase.DefaultManifold(3)
+        # Check fallbacks to check embed->check_manifoldpoint Defaults
+        @test_throws DomainError is_manifold_point(M,[1,0], true)
+        @test_throws DomainError is_tangent_vector(M, [1,0], [1,0,0], true)
+        @test_throws DomainError is_tangent_vector(M, [1,0,0], [0,0], true)
         p = [1.0 1.0 0.0]
         q = [1.0 0.0 0.0]
         X = q - p
@@ -57,7 +57,6 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{DefaultEmbedd
         r = similar(p)
         exp!(M, r, p, X)
         @test r == q
-
     end
 
     @testset "Test nonimplemented fallbacks" begin

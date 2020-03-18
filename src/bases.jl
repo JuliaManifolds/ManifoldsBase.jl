@@ -517,13 +517,17 @@ function show(
     mime::MIME"text/plain",
     B::CachedBasis{T,D,𝔽},
 ) where {T<:AbstractBasis,D,𝔽}
-    vectors = _get_vectors(B)
-    nv = length(vectors)
     print(
         io,
-        "$(T()) with coordinates in $(number_system(B)) and $(nv) basis vector$(nv == 1 ? "" : "s"):",
+        "$(T()) with coordinates in $(number_system(B)) and $(length(_get_vectors(B))) basis vector$(length(_get_vectors(B)) == 1 ? "" : "s"):",
     )
-    _show_basis_vector_range_noheader(io, vectors; max_vectors = 4, pre = "  ", sym = " E")
+    _show_basis_vector_range_noheader(
+        io,
+        _get_vectors(B);
+        max_vectors = 4,
+        pre = "  ",
+        sym = " E"
+    )
 end
 function show(
     io::IO,

@@ -131,6 +131,11 @@ end
 decorator_transparent_dispatch(::typeof(test17), M::AbstractDecoratorManifold, args...) = Val(:intransparent)
 default_decorator_dispatch(::DefaultDecorator) = Val(true)
 
+@decorator_transparent_function function test18(M::AbstractDecoratorManifold, p)
+    return 18.25*p
+end
+decorator_transparent_dispatch(::typeof(test18), M::ChildDecorator, args...) = Val(:parent)
+
 @testset "Testing decorator manifold functions" begin
     M = ManifoldsBase.DefaultManifold(3)
     A = ArrayManifold(M)
@@ -210,4 +215,7 @@ default_decorator_dispatch(::DefaultDecorator) = Val(true)
 
     @test_throws ErrorException test17(TestDecorator(ManifoldsBase.DefaultManifold(3)),1)
     @test test17(DefaultDecorator(ManifoldsBase.DefaultManifold(3)),1) == 17
+
+    # states that child has to implement at least a parent case
+    @test_throws ErrorException test18(ChildDecorator(ManifoldsBase.DefaultManifold(3)), 1)
 end
