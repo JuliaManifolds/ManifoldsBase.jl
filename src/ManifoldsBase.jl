@@ -136,7 +136,7 @@ struct ParallelTransport <: AbstractVectorTransportMethod end
 
 Specify to use projection onto tangent space as vector transport method within
 [`vector_transport_to`](@ref), [`vector_transport_direction`](@ref), or
-[`vector_transport_along`](@ref). See [`project_tangent`](@ref) for details.
+[`vector_transport_along`](@ref). See [`project`](@ref) for details.
 """
 struct ProjectionTransport <: AbstractVectorTransportMethod end
 
@@ -263,6 +263,54 @@ check_tangent_vector(M::Manifold, p, X; kwargs...) = nothing
 Shortest distance between the points `p` and `q` on the [`Manifold`](@ref) `M`.
 """
 distance(M::Manifold, p, q) = norm(M, p, log(M, p, q))
+
+"""
+    embed(M::Manifold, p)
+
+Embed point `p` from the [`Manifold`](@ref) `M` into the ambient space.
+The function works only for selected embedded manifolds.
+"""
+function embed(M::Manifold, p)
+    q = allocate_result(M, embed, p)
+    embed!(M, q, p)
+    return q
+end
+
+"""
+    project!(M::Manifold, q, p)
+
+Embed point `p` from the [`Manifold`](@ref) `M` into the ambient space. The point `q` is
+overwritten by the embedded point. The function works only for selected embedded manifolds.
+"""
+function embed!(M::Manifold, q, p)
+    error(manifold_function_not_implemented_message(M, embed!, q, p))
+end
+
+"""
+    embed(M::Manifold, p, X)
+
+Embed a tangent vector `X` at a point `p` on the [`Manifold`](@ref) `M` into the manifolds
+ambient space.
+
+The function works only for selected embedded manifolds.
+"""
+function embed(M::Manifold, p, X)
+    Y = allocate_result(M, embed, X, p)
+    embed!(M, Y, p, X)
+    return Y
+end
+
+"""
+    embed!(M::Manifold, Y, p, X)
+
+Embed a tangent vector `X` at a point `p` on the [`Manifold`](@ref) `M` into the manifolds
+ambient space. The result is saved in vector `Y`.
+
+The function works only for selected embedded manifolds.
+"""
+function embed!(M::Manifold, Y, p, X)
+    error(manifold_function_not_implemented_message(M, embed!, Y, p, X))
+end
 
 """
     exp(M::Manifold, p, X)
@@ -503,31 +551,31 @@ function number_eltype(x::Tuple)
 end
 
 """
-    project_point(M::Manifold, p)
+    project(M::Manifold, p)
 
 Project point `p`from the ambient space onto the [`Manifold`](@ref) `M`.
 The function works only for selected embedded manifolds and is *not* required to return the
 closest point.
 """
-function project_point(M::Manifold, p)
-    q = allocate_result(M, project_point, p)
-    project_point!(M, q, p)
+function project(M::Manifold, p)
+    q = allocate_result(M, project, p)
+    project!(M, q, p)
     return q
 end
 
 """
-    project_point!(M::Manifold, q, p)
+    project!(M::Manifold, q, p)
 
 Project point `p` from the ambient space onto the [`Manifold`](@ref) `M`. The point `q` is
 overwritten by the projection. The function works only for selected embedded manifolds and
 is *not* required to return the closest point.
 """
-function project_point!(M::Manifold, q, p)
-    error(manifold_function_not_implemented_message(M, project_point!, q, p))
+function project!(M::Manifold, q, p)
+    error(manifold_function_not_implemented_message(M, project!, q, p))
 end
 
 """
-    project_tangent(M::Manifold, p, X)
+    project(M::Manifold, p, X)
 
 Project ambient space representation of a vector `X` to a tangent vector at point `p` on
 the [`Manifold`](@ref) `M`.
@@ -535,14 +583,14 @@ the [`Manifold`](@ref) `M`.
 The function works only for selected embedded manifolds and is *not* required to return the
 closest vector.
 """
-function project_tangent(M::Manifold, p, X)
-    Y = allocate_result(M, project_tangent, X, p)
-    project_tangent!(M, Y, p, X)
+function project(M::Manifold, p, X)
+    Y = allocate_result(M, project, X, p)
+    project!(M, Y, p, X)
     return Y
 end
 
 """
-    project_tangent!(M::Manifold, Y, p, X)
+    project!(M::Manifold, Y, p, X)
 
 Project ambient space representation of a vector `X` to a tangent vector at point `p` on
 the [`Manifold`](@ref) `M`. The result is saved in vector `Y`.
@@ -550,8 +598,8 @@ the [`Manifold`](@ref) `M`. The result is saved in vector `Y`.
 The function works only for selected embedded manifolds and is *not* required to return the
 closest vector.
 """
-function project_tangent!(M::Manifold, Y, p, X)
-    error(manifold_function_not_implemented_message(M, project_tangent!, Y, p, X))
+function project!(M::Manifold, Y, p, X)
+    error(manifold_function_not_implemented_message(M, project!, Y, p, X))
 end
 
 @doc doc"""
@@ -758,10 +806,10 @@ end
 
 Transport a vector `X` from the tangent space at `p` on a [`Manifold`](@ref) `M` by
 interpreting it as an element of the embedding and then projecting it onto the tangent space
-at `q`. This method requires [`project_tangent`](@ref).
+at `q`. This method requires [`project`](@ref).
 """
 function vector_transport_to!(M::Manifold, Y, p, X, q, ::ProjectionTransport)
-    return project_tangent!(M, Y, q, X)
+    return project!(M, Y, q, X)
 end
 function vector_transport_to!(
     M::Manifold,
@@ -806,10 +854,17 @@ include("numbers.jl")
 include("DecoratorManifold.jl")
 include("bases.jl")
 include("ArrayManifold.jl")
+include("EmbeddedManifold.jl")
 include("DefaultManifold.jl")
 
 export Manifold, MPoint, TVector, CoTVector
 export AbstractDecoratorManifold, ArrayManifold, ArrayMPoint, ArrayTVector, ArrayCoTVector
+export AbstractEmbeddingType,
+    TransparentIsometricEmbedding,
+    DefaultIsometricEmbeddingType,
+    DefaultEmbeddingType
+export AbstractEmbeddedManifold, EmbeddedManifold, TransparentIsometricEmbedding
+
 export AbstractRetractionMethod,
     ExponentialRetraction,
     QRRetraction,
@@ -839,10 +894,13 @@ export allocate,
     distance,
     exp,
     exp!,
+    embed,
+    embed!,
     geodesic,
     get_basis,
     get_coordinates,
     get_coordinates!,
+    get_embedding,
     get_vector,
     get_vector!,
     get_vectors,
@@ -862,10 +920,8 @@ export allocate,
     norm,
     number_eltype,
     number_system,
-    project_point,
-    project_point!,
-    project_tangent,
-    project_tangent!,
+    project,
+    project!,
     real_dimension,
     representation_size,
     retract,

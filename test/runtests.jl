@@ -12,5 +12,6 @@ using ManifoldsBase
     include("default_manifold.jl")
     include("complex_manifold.jl")
     include("array_manifold.jl")
+    include("embedded_manifold.jl")
     include("domain_errors.jl")
 end

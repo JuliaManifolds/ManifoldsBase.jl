@@ -44,6 +44,11 @@ end
 
 distance(::DefaultManifold, x, y) = norm(x - y)
 
+embed!(::DefaultManifold, y, x) = copyto!(y, x)
+
+embed!(::DefaultManifold, w, x, v) = copyto!(w, v)
+
+
 exp!(::DefaultManifold, y, x, v) = (y .= x .+ v)
 
 function get_basis(M::DefaultManifold, p, B::DefaultOrthonormalBasis)
@@ -81,9 +86,8 @@ log!(::DefaultManifold, v, x, y) = (v .= y .- x)
 
 norm(::DefaultManifold, x, v) = norm(v)
 
-project_point!(::DefaultManifold, y, x) = copyto!(y, x)
-
-project_tangent!(::DefaultManifold, w, x, v) = copyto!(w, v)
+project!(::DefaultManifold, y, x) = copyto!(y, x)
+project!(::DefaultManifold, w, x, v) = copyto!(w, v)
 
 @generated representation_size(::DefaultManifold{T}) where {T} = Tuple(T.parameters...)
 

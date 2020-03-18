@@ -497,6 +497,12 @@ decorated_manifold(M::Manifold) = M.manifold
 
 @decorator_transparent_signature distance(M::AbstractDecoratorManifold, p, q)
 
+@decorator_transparent_signature embed(M::AbstractDecoratorManifold, p, X)
+@decorator_transparent_signature embed(M::AbstractDecoratorManifold, p)
+
+@decorator_transparent_signature embed!(M::AbstractDecoratorManifold, q, p)
+@decorator_transparent_signature embed!(M::AbstractDecoratorManifold, Y, p, X)
+
 @decorator_transparent_signature exp(M::AbstractDecoratorManifold, p, X)
 
 @decorator_transparent_signature exp!(M::AbstractDecoratorManifold, q, p, X)
@@ -563,11 +569,11 @@ decorated_manifold(M::Manifold) = M.manifold
 @decorator_transparent_signature manifold_dimension(M::AbstractDecoratorManifold)
 
 
-@decorator_transparent_signature project_point(M::AbstractDecoratorManifold, p)
-@decorator_transparent_signature project_point!(M::AbstractDecoratorManifold, q, p)
+@decorator_transparent_signature project(M::AbstractDecoratorManifold, p)
+@decorator_transparent_signature project!(M::AbstractDecoratorManifold, q, p)
 
-@decorator_transparent_signature project_tangent(M::AbstractDecoratorManifold, p, X)
-@decorator_transparent_signature project_tangent!(M::AbstractDecoratorManifold, Y, p, X)
+@decorator_transparent_signature project(M::AbstractDecoratorManifold, p, X)
+@decorator_transparent_signature project!(M::AbstractDecoratorManifold, Y, p, X)
 
 @decorator_transparent_signature representation_size(M::AbstractDecoratorManifold)
 

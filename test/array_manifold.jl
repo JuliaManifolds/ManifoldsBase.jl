@@ -81,7 +81,7 @@ end
         @test isapprox(A, x, y) == isapprox(A, x2, y2)
         @test isapprox(A, x, v2, v2) == isapprox(M, x, v, v)
         v2s = similar(v2)
-        project_tangent!(A, v2s, x2, v2)
+        project!(A, v2s, x2, v2)
         @test isapprox(A, v2, v2s)
         y2s = similar(y2)
         exp!(A, y2s, x2, v2)

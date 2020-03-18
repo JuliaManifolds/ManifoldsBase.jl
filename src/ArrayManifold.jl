@@ -322,9 +322,9 @@ number_eltype(p::ArrayCoTVector) = number_eltype(p.value)
 number_eltype(::Type{ArrayTVector{V}}) where {V} = number_eltype(V)
 number_eltype(X::ArrayTVector) = number_eltype(X.value)
 
-function project_tangent!(M::ArrayManifold, Y, p, X; kwargs...)
+function project!(M::ArrayManifold, Y, p, X; kwargs...)
     is_manifold_point(M, p, true; kwargs...)
-    project_tangent!(M.manifold, array_value(Y), array_value(p), array_value(X))
+    project!(M.manifold, array_value(Y), array_value(p), array_value(X))
     is_tangent_vector(M, p, Y, true; kwargs...)
     return Y
 end

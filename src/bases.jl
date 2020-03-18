@@ -230,7 +230,7 @@ function get_basis(M::Manifold, p, B::ProjectedOrthonormalBasis{:svd,ℝ})
     # projection
     # TODO: find a better way to obtain a basis of the ambient space
     Xs = [
-        convert(Vector, reshape(project_tangent(M, p, _euclidean_basis_vector(p, i)), PS))
+        convert(Vector, reshape(project(M, p, _euclidean_basis_vector(p, i)), PS))
         for i in eachindex(p)
     ]
     O = reduce(hcat, Xs)
@@ -261,7 +261,7 @@ function get_basis(
     N < dim && @warn "Input only has $(N) vectors, but manifold dimension is $(dim)."
     K = 0
     @inbounds for n = 1:N
-        Ξₙ = project_tangent(M, p, E[n])
+        Ξₙ = project(M, p, E[n])
         for k = 1:K
             Ξₙ .-= real(inner(M, p, Ξ[k], Ξₙ)) .* Ξ[k]
         end
@@ -517,13 +517,17 @@ function show(
     mime::MIME"text/plain",
     B::CachedBasis{T,D,𝔽},
 ) where {T<:AbstractBasis,D,𝔽}
-    vectors = _get_vectors(B)
-    nv = length(vectors)
     print(
         io,
-        "$(T()) with coordinates in $(number_system(B)) and $(nv) basis vector$(nv == 1 ? "" : "s"):",
+        "$(T()) with coordinates in $(number_system(B)) and $(length(_get_vectors(B))) basis vector$(length(_get_vectors(B)) == 1 ? "" : "s"):",
     )
-    _show_basis_vector_range_noheader(io, vectors; max_vectors = 4, pre = "  ", sym = " E")
+    _show_basis_vector_range_noheader(
+        io,
+        _get_vectors(B);
+        max_vectors = 4,
+        pre = "  ",
+        sym = " E"
+    )
 end
 function show(
     io::IO,
