@@ -84,6 +84,8 @@ log!(::DefaultManifold, v, x, y) = (v .= y .- x)
 
 @generated manifold_dimension(::DefaultManifold{T,𝔽}) where {T,𝔽} = *(T.parameters...)*real_dimension(𝔽)
 
+number_system(::DefaultManifold{T,𝔽}) where {T,𝔽} = 𝔽
+
 norm(::DefaultManifold, x, v) = norm(v)
 
 project!(::DefaultManifold, y, x) = copyto!(y, x)
