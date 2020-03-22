@@ -145,6 +145,9 @@ decorator_transparent_dispatch(::typeof(test18), M::ChildDecorator, args...) = V
     @test (@inferred ManifoldsBase.decorated_manifold(A)) == M
     @test ManifoldsBase._extract_val(Val(:transparent)) === :transparent
 
+    @test number_system(M) == ℝ
+    @test number_system(ManifoldsBase.DefaultManifold(3; field=ℂ)) == ℂ
+
     @test (@inferred base_manifold(M, Val(1))) == M
     @test (@inferred base_manifold(M, Val(0))) == M
     @test (@inferred base_manifold(A, Val(1))) == M
