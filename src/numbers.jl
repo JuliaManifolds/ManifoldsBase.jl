@@ -56,7 +56,7 @@ real_dimension(::QuaternionNumbers) = 4
 @doc raw"""
     number_system(M::Manifold)
 
-return the number system a manifold is based on. The default of the number system is
+Return the number system the manifold `M` is based on. The default of the number system is
 real-valued, i.e. `number_system(M) = ℝ`.
 """
 number_system(M::Manifold) = ℝ
