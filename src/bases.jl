@@ -3,7 +3,8 @@
 
 Abstract type that represents a basis on a manifold or a subset of it.
 
-The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used as scalars.
+The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used
+for the vectors elements.
 """
 abstract type AbstractBasis{𝔽} end
 
@@ -13,7 +14,8 @@ abstract type AbstractBasis{𝔽} end
 An arbitrary basis on a manifold. This will usually
 be the fastest basis available for a manifold.
 
-The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used as scalars.
+The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used
+for the vectors elements
 """
 struct DefaultBasis{𝔽} <: AbstractBasis{𝔽} end
 DefaultBasis(𝔽::AbstractNumbers = ℝ) = DefaultBasis{𝔽}()
@@ -23,7 +25,8 @@ DefaultBasis(𝔽::AbstractNumbers = ℝ) = DefaultBasis{𝔽}()
 
 Abstract type that represents an orthonormal basis on a manifold or a subset of it.
 
-The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used as scalars.
+The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used
+for the vectors elements.
 """
 abstract type AbstractOrthogonalBasis{𝔽} <: AbstractBasis{𝔽} end
 
@@ -33,7 +36,8 @@ abstract type AbstractOrthogonalBasis{𝔽} <: AbstractBasis{𝔽} end
 An arbitrary orthogonal basis on a manifold. This will usually
 be the fastest orthogonal basis available for a manifold.
 
-The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used as scalars.
+The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used
+for the vectors elements.
 """
 struct DefaultOrthogonalBasis{𝔽} <: AbstractOrthogonalBasis{𝔽} end
 DefaultOrthogonalBasis(𝔽::AbstractNumbers = ℝ) = DefaultOrthogonalBasis{𝔽}()
@@ -47,7 +51,8 @@ VeeOrthogonalBasis(𝔽::AbstractNumbers = ℝ) = VeeOrthogonalBasis{𝔽}()
 
 Abstract type that represents an orthonormal basis on a manifold or a subset of it.
 
-The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used as scalars.
+The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used
+for the vectors elements.
 """
 abstract type AbstractOrthonormalBasis{𝔽} <: AbstractOrthogonalBasis{𝔽} end
 
@@ -57,8 +62,8 @@ abstract type AbstractOrthonormalBasis{𝔽} <: AbstractOrthogonalBasis{𝔽} en
 An arbitrary orthonormal basis on a manifold. This will usually
 be the fastest orthonormal basis available for a manifold.
 
-The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used as
-scalars.
+The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used
+for the vectors elements.
 """
 struct DefaultOrthonormalBasis{𝔽} <: AbstractOrthonormalBasis{𝔽} end
 
@@ -71,8 +76,8 @@ An orthonormal basis that comes from orthonormalization of basis vectors
 of the ambient space projected onto the subspace representing the tangent space
 at a given point.
 
-The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used as
-scalars.
+The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used
+for the vectors elements.
 
 Available methods:
   - `:gram_schmidt` uses a modified Gram-Schmidt orthonormalization.
@@ -94,8 +99,8 @@ An orthonormal basis `Ξ` as a vector of tangent vectors (of length determined b
 [`manifold_dimension`](@ref)) in the tangent space that diagonalizes the curvature
 tensor $R(u,v)w$ and where the direction `frame_direction` $v$ has curvature `0`.
 
-The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used as
-scalars.
+The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used
+for the vectors elements.
 """
 struct DiagonalizingOrthonormalBasis{TV,𝔽} <: AbstractOrthonormalBasis{𝔽}
     frame_direction::TV
@@ -344,7 +349,7 @@ function get_coordinates!(
     X,
     B::CachedBasis{BT},
 ) where {BT<:AbstractBasis{ℝ}}
-    map!(vb -> real(inner(M, p, X, vb)), Y, get_vectors(M, p, B))
+    map!(vb -> inner(M, p, X, vb), Y, get_vectors(M, p, B))
     return Y
 end
 function get_coordinates!(M::Manifold, Y, p, X, B::CachedBasis{<:AbstractBasis{ℂ}})
@@ -464,7 +469,7 @@ hat!(M::Manifold, Y, p, X) = get_vector!(M, Y, p, X, VeeOrthogonalBasis())
 """
     number_system(::AbstractBasis)
 
-The number system used as scalars in the given basis.
+The number system for the vectors of the given basis.
 """
 number_system(::AbstractBasis{𝔽}) where {𝔽} = 𝔽
 
@@ -506,7 +511,7 @@ end
 function show(io::IO, mime::MIME"text/plain", onb::DiagonalizingOrthonormalBasis)
     println(
         io,
-        "DiagonalizingOrthonormalBasis with coordinates in $(number_system(onb)) and eigenvalue 0 in direction:",
+        "DiagonalizingOrthonormalBasis($(number_system(onb))) and eigenvalue 0 in direction:",
     )
     sk = sprint(show, "text/plain", onb.frame_direction, context = io, sizehint = 0)
     sk = replace(sk, '\n' => "\n ")
@@ -519,7 +524,8 @@ function show(
 ) where {T<:AbstractBasis,D,𝔽}
     print(
         io,
-        "$(T()) with coordinates in $(number_system(B)) and $(length(_get_vectors(B))) basis vector$(length(_get_vectors(B)) == 1 ? "" : "s"):",
+
+        "$(T()) and $(length(_get_vectors(B))) basis vector$(length(_get_vectors(B)) == 1 ? "" : "s"):",
     )
     _show_basis_vector_range_noheader(
         io,
