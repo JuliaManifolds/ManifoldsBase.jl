@@ -12,6 +12,7 @@ struct NonCoTVector <: CoTVector end
     p = NonMPoint()
     v = NonTVector()
     @test base_manifold(M) == M
+    @test number_system(M) == ℝ
     @test_throws ErrorException ManifoldsBase.representation_size(M)
 
     @test_throws ErrorException manifold_dimension(M)
