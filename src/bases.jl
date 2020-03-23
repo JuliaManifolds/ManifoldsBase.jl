@@ -352,7 +352,7 @@ function get_coordinates!(
     if number_system(M) === 𝔽
         map!(vb -> real(inner(M, p, X, vb)), Y, get_vectors(M, p, B))
     else
-        map!(vb -> inner(M, p, X, vb), Y, get_vectors(M, p, B))
+        map!(vb -> conj(inner(M, p, X, vb)), Y, get_vectors(M, p, B))
     end
     return Y
 end
@@ -510,7 +510,7 @@ end
 function show(io::IO, mime::MIME"text/plain", onb::DiagonalizingOrthonormalBasis)
     println(
         io,
-        "DiagonalizingOrthonormalBasis($(number_system(onb))) and eigenvalue 0 in direction:",
+        "DiagonalizingOrthonormalBasis($(number_system(onb))) with eigenvalue 0 in direction:",
     )
     sk = sprint(show, "text/plain", onb.frame_direction, context = io, sizehint = 0)
     sk = replace(sk, '\n' => "\n ")
@@ -524,7 +524,7 @@ function show(
     print(
         io,
 
-        "$(T()) and $(length(_get_vectors(B))) basis vector$(length(_get_vectors(B)) == 1 ? "" : "s"):",
+        "$(T()) with $(length(_get_vectors(B))) basis vector$(length(_get_vectors(B)) == 1 ? "" : "s"):",
     )
     _show_basis_vector_range_noheader(
         io,
