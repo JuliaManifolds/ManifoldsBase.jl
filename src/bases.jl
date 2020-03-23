@@ -348,15 +348,14 @@ function get_coordinates!(
     p,
     X,
     B::CachedBasis{BT},
-) where {BT<:AbstractBasis{ℝ}}
-    map!(vb -> inner(M, p, X, vb), Y, get_vectors(M, p, B))
+) where {BT<:AbstractBasis{𝔽}} where 𝔽
+    if number_system(M) === 𝔽
+        map!(vb -> real(inner(M, p, X, vb)), Y, get_vectors(M, p, B))
+    else
+        map!(vb -> inner(M, p, X, vb), Y, get_vectors(M, p, B))
+    end
     return Y
 end
-function get_coordinates!(M::Manifold, Y, p, X, B::CachedBasis{<:AbstractBasis{ℂ}})
-    map!(vb -> conj(inner(M, p, X, vb)), Y, get_vectors(M, p, B))
-    return Y
-end
-
 
 """
     get_vector(M::Manifold, p, X, B::AbstractBasis)
