@@ -127,7 +127,7 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{DefaultEmbedd
         for f in [embed, exp, get_basis, get_coordinates, get_vector, inverse_retract, log]
             @test ManifoldsBase.decorator_transparent_dispatch(f,AM) === Val{:parent}()
         end
-        for f in [project, retract, inverse_retract!, retract!]
+        for f in [project, retract, inverse_retract!, retract!, get_coordinates!, get_vector!]
             @test ManifoldsBase.decorator_transparent_dispatch(f,AM) === Val{:parent}()
         end
         for f in [vector_transport_along, vector_transport_direction, vector_transport_to]
