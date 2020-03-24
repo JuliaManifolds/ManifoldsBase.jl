@@ -1,6 +1,6 @@
 using LinearAlgebra
 using ManifoldsBase
-using ManifoldsBase: DefaultManifold
+using ManifoldsBase: DefaultManifold, ℝ, ℂ
 using Test
 import Base: +, -, *, copyto!, isapprox
 
@@ -252,15 +252,20 @@ DiagonalizingBasisProxy() = DiagonalizingOrthonormalBasis([1.0, 0.0, 0.0])
     end
 end
 
-@testset "Complex DeaultManifold with real Cached Basis" begin
-    M = ManifoldsBase.DefaultManifold(3; field = ManifoldsBase.ℂ)
+@testset "Complex DeaultManifold with real and complex Cached Bases" begin
+    M = ManifoldsBase.DefaultManifold(3; field = ℂ)
     p = [1.0, 2.0im, 3.0]
     X = [1.2, 2.2im, 2.3im]
     b = [Matrix{Float64}(I,3,3)[:,i] for i=1:3]
-    B = CachedBasis(DefaultOrthonormalBasis{ManifoldsBase.ℝ}(),b,ManifoldsBase.ℂ)
-    a = get_coordinates(M,p,X,B)
-    Y = get_vector(M,p,a,B)
-    @test Y ≈ X
+    Bℝ = CachedBasis(DefaultOrthonormalBasis{ℝ}(),b)
+    aℝ = get_coordinates(M,p,X,Bℝ)
+    Yℝ = get_vector(M,p,aℝ,Bℝ)
+    @test Yℝ ≈ X
+
+    Bℂ = CachedBasis(DefaultOrthonormalBasis{ℂ}(),b)
+    aℂ = get_coordinates(M,p,X,Bℂ)
+    Yℂ = get_vector(M,p,aℂ,Bℂ)
+    @test Yℂ ≈ X
 end
 
 @testset "Basis show methods" begin
