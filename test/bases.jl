@@ -262,7 +262,8 @@ end
     Yℝ = get_vector(M,p,aℝ,Bℝ)
     @test Yℝ ≈ X
 
-    Bℂ = CachedBasis(DefaultOrthonormalBasis{ℂ}(),b)
+    bℂ = [b...,(b.*1im)...]
+    Bℂ = CachedBasis(DefaultOrthonormalBasis{ℂ}(), bℂ)
     aℂ = get_coordinates(M,p,X,Bℂ)
     Yℂ = get_vector(M,p,aℂ,Bℂ)
     @test Yℂ ≈ X
