@@ -145,9 +145,11 @@ const all_uncached_bases = Union{AbstractBasis, DefaultBasis, DefaultOrthogonalB
 const DISAMBIGUATION_BASIS_TYPES = [
     CachedBasis,
     CachedBasis{<:AbstractBasis{ℝ}},
+    CachedBasis{<:AbstractBasis{ℂ}},
+    CachedBasis{<:AbstractBasis{ℝ},V where V,ℝ},
+    CachedBasis{<:AbstractBasis{ℂ},V where V,ℂ},
     CachedBasis{<:AbstractOrthogonalBasis{ℝ}},
     CachedBasis{<:AbstractOrthonormalBasis{ℝ}},
-    CachedBasis{<:AbstractBasis{ℂ}},
     DefaultBasis,
     DefaultOrthonormalBasis,
     DefaultOrthogonalBasis,
@@ -348,7 +350,7 @@ function get_coordinates!(
     p,
     X,
     B::CachedBasis{BT},
-) where {BT<:AbstractBasis{𝔽}} where 𝔽
+) where {𝔽, BT<:AbstractBasis{𝔽}}
     if number_system(M) === 𝔽
         map!(vb -> real(inner(M, p, X, vb)), Y, get_vectors(M, p, B))
     else
