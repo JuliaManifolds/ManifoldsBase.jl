@@ -273,6 +273,8 @@ is given.
 Additionally, `embed` includes changing data representation, if applicable, i.e.
 if the points on `M` are not represented in the same way as points on the embedding,
 the representation is changed accordingly.
+
+See also: [`EmbeddedManifold`](@ref), [`project`](@ref project(M::Manifold,p))
 """
 function embed(M::Manifold, p)
     q = allocate_result(M, embed, p)
@@ -289,6 +291,8 @@ is given.
 Additionally, `embed` includes changing data representation, if applicable, i.e.
 if the points on `M` are not represented in the same way as points on the embedding,
 the representation is changed accordingly.
+
+See also: [`EmbeddedManifold`](@ref), [`project!`](@ref project!(M::Manifold, q, p))
 """
 function embed!(M::Manifold, q, p)
     error(manifold_function_not_implemented_message(M, embed!, q, p))
@@ -305,6 +309,8 @@ if the tangents on `M` are not represented in the same way as tangents on the em
 the representation is changed accordingly. This is the case for example for Lie groups,
 when tangent vectors are represented in the Lie algebra. The embedded tangents are then in
 the tangent spaces of the embedded base points.
+
+See also: [`EmbeddedManifold`](@ref), [`project`](@ref project(M::Manifold, p, X))
 """
 function embed(M::Manifold, p, X)
     Y = allocate_result(M, embed, X, p)
@@ -324,6 +330,8 @@ if the tangents on `M` are not represented in the same way as tangents on the em
 the representation is changed accordingly. This is the case for example for Lie groups,
 when tangent vectors are represented in the Lie algebra. The embedded tangents are then in
 the tangent spaces of the embedded base points.
+
+See also: [`EmbeddedManifold`](@ref), [`project!`](@ref project!(M::Manifold, Y, p, X))
 """
 function embed!(M::Manifold, Y, p, X)
     error(manifold_function_not_implemented_message(M, embed!, Y, p, X))
@@ -407,6 +415,8 @@ injectivity_radius(M::Manifold, ::ExponentialRetraction) = injectivity_radius(M)
 
 Compute the inner product of tangent vectors `X` and `Y` at point `p` from the
 [`Manifold`](@ref) `M`.
+
+See also: [`MetricManifold`](@ref)
 """
 function inner(M::Manifold, p, X, Y)
     error(manifold_function_not_implemented_message(M, inner, p, X, Y))
@@ -575,6 +585,8 @@ This method is only available for manifolds where implicitly an embedding or amb
 is given. Additionally, the projection includes changing data representation, if applicable,
 i.e. if the points on `M` are not represented in the same array data, the data is changed
 accordingly.
+
+See also: [`EmbeddedManifold`](@ref), [`embed`](@ref embed(M::Manifold, p))
 """
 function project(M::Manifold, p)
     q = allocate_result(M, project, p)
@@ -591,6 +603,8 @@ This method is only available for manifolds where implicitly an embedding or amb
 is given. Additionally, the projection includes changing data representation, if applicable,
 i.e. if the points on `M` are not represented in the same array data, the data is changed
 accordingly.
+
+See also: [`EmbeddedManifold`](@ref), [`embed!`](@ref embed!(M::Manifold, q, p))
 """
 function project!(M::Manifold, q, p)
     error(manifold_function_not_implemented_message(M, project!, q, p))
@@ -608,6 +622,8 @@ if the tangents on `M` are not represented in the same way as points on the embe
 the representation is changed accordingly. This is the case for example for Lie groups,
 when tangent vectors are represented in the Lie algebra. after projection the change to the
 Lie algebra is perfomed, too.
+
+See also: [`EmbeddedManifold`](@ref), [`embed`](@ref embed(M::Manifold, p, X))
 """
 function project(M::Manifold, p, X)
     Y = allocate_result(M, project, X, p)
@@ -627,6 +643,8 @@ if the tangents on `M` are not represented in the same way as points on the embe
 the representation is changed accordingly. This is the case for example for Lie groups,
 when tangent vectors are represented in the Lie algebra. after projection the change to the
 Lie algebra is perfomed, too.
+
+See also: [`EmbeddedManifold`](@ref), [`embed!`](@ref embed!(M::Manifold, Y, p, X))
 """
 function project!(M::Manifold, Y, p, X)
     error(manifold_function_not_implemented_message(M, project!, Y, p, X))
