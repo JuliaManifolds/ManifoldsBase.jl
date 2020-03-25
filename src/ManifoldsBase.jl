@@ -271,7 +271,7 @@ Embed point `p` from the [`Manifold`](@ref) `M` into the ambient space.
 This method is only available for manifolds where implicitly an embedding or ambient space
 is given.
 Additionally, `embed` includes changing data representation, if applicable, i.e.
-if the points on `M` are not represented in the embeddings array data,
+if the points on `M` are not represented in the same way as points on the embedding,
 the representation is changed accordingly.
 """
 function embed(M::Manifold, p)
@@ -287,7 +287,7 @@ Embed point `p` from the [`Manifold`](@ref) `M` into the ambient space and retur
 This method is only available for manifolds where implicitly an embedding or ambient space
 is given.
 Additionally, `embed` includes changing data representation, if applicable, i.e.
-if the points on `M` are not represented in the embeddings array data,
+if the points on `M` are not represented in the same way as points on the embedding,
 the representation is changed accordingly.
 """
 function embed!(M::Manifold, q, p)
@@ -301,7 +301,7 @@ Embed a tangent vector `X` at a point `p` on the [`Manifold`](@ref) `M` into the
 This method is only available for manifolds where implicitly an embedding or ambient space
 is given.
 Additionally, `embed` includes changing data representation, if applicable, i.e.
-if the tangents on `M` are not represented in the embeddings array data,
+if the tangents on `M` are not represented in the same way as tangents on the embedding,
 the representation is changed accordingly. This is the case for example for Lie groups,
 when tangent vectors are represented in the Lie algebra. The embedded tangents are then in
 the tangent spaces of the embedded base points.
@@ -320,7 +320,7 @@ space and return the result in `Y`.
 This method is only available for manifolds where implicitly an embedding or ambient space
 is given.
 Additionally, `embed!` includes changing data representation, if applicable, i.e.
-if the tangents on `M` are not represented in the embeddings array data,
+if the tangents on `M` are not represented in the same way as tangents on the embedding,
 the representation is changed accordingly. This is the case for example for Lie groups,
 when tangent vectors are represented in the Lie algebra. The embedded tangents are then in
 the tangent spaces of the embedded base points.
@@ -604,7 +604,7 @@ the [`Manifold`](@ref) `M`.
 This method is only available for manifolds where implicitly an embedding or ambient space
 is given.
 Additionally, `project` includes changing data representation, if applicable, i.e.
-if the tangents on `M` are not represented in the embeddings array data,
+if the tangents on `M` are not represented in the same way as points on the embedding,
 the representation is changed accordingly. This is the case for example for Lie groups,
 when tangent vectors are represented in the Lie algebra. after projection the change to the
 Lie algebra is perfomed, too.
@@ -623,7 +623,7 @@ the [`Manifold`](@ref) `M`. The result is saved in vector `Y`.
 This method is only available for manifolds where implicitly an embedding or ambient space
 is given.
 Additionally, `project!` includes changing data representation, if applicable, i.e.
-if the tangents on `M` are not represented in the embeddings array data,
+if the tangents on `M` are not represented in the same way as points on the embedding,
 the representation is changed accordingly. This is the case for example for Lie groups,
 when tangent vectors are represented in the Lie algebra. after projection the change to the
 Lie algebra is perfomed, too.
