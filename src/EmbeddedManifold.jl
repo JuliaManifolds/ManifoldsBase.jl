@@ -147,18 +147,6 @@ function check_tangent_vector(M::AbstractEmbeddedManifold, p, X; check_base_poin
         kwargs...
     )
 end
-"""
-    embed(M::AbstractEmbeddedManifold, p)
-
-return the embedded representation of a point `p` on the [`AbstractEmbeddedManifold`](@ref)
-`M`.
-
-    embed(M::AbstractEmbeddedManifold, p, X)
-
-return the embedded representation of a tangent vector `X` at point `p` on the
-[`AbstractEmbeddedManifold`](@ref) `M`.
-"""
-embed(::AbstractEmbeddedManifold, ::Any...)
 
 decorated_manifold(M::AbstractEmbeddedManifold) = M.embedding
 
@@ -266,7 +254,21 @@ function decorator_transparent_dispatch(
     return Val(:parent)
 end
 function decorator_transparent_dispatch(
+    ::typeof(get_coordinates!),
+    ::AbstractEmbeddedManifold,
+    args...,
+)
+    return Val(:parent)
+end
+function decorator_transparent_dispatch(
     ::typeof(get_vector),
+    ::AbstractEmbeddedManifold,
+    args...,
+)
+    return Val(:parent)
+end
+function decorator_transparent_dispatch(
+    ::typeof(get_vector!),
     ::AbstractEmbeddedManifold,
     args...,
 )

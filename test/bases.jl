@@ -1,6 +1,6 @@
 using LinearAlgebra
 using ManifoldsBase
-using ManifoldsBase: DefaultManifold
+using ManifoldsBase: DefaultManifold, ℝ, ℂ
 using Test
 import Base: +, -, *, copyto!, isapprox
 
@@ -252,15 +252,21 @@ DiagonalizingBasisProxy() = DiagonalizingOrthonormalBasis([1.0, 0.0, 0.0])
     end
 end
 
-@testset "Complex Cached Basis" begin
-    M = ManifoldsBase.DefaultManifold(3; field = ManifoldsBase.ℂ)
+@testset "Complex DeaultManifold with real and complex Cached Bases" begin
+    M = ManifoldsBase.DefaultManifold(3; field = ℂ)
     p = [1.0, 2.0im, 3.0]
     X = [1.2, 2.2im, 2.3im]
     b = [Matrix{Float64}(I,3,3)[:,i] for i=1:3]
-    B = CachedBasis(DefaultOrthonormalBasis{ManifoldsBase.ℂ}(),b,ManifoldsBase.ℂ)
-    a = get_coordinates(M,p,X,B)
-    Y = get_vector(M,p,a,B)
-    @test Y ≈ X
+    Bℝ = CachedBasis(DefaultOrthonormalBasis{ℝ}(),b)
+    aℝ = get_coordinates(M,p,X,Bℝ)
+    Yℝ = get_vector(M,p,aℝ,Bℝ)
+    @test Yℝ ≈ X
+
+    bℂ = [b...,(b.*1im)...]
+    Bℂ = CachedBasis(DefaultOrthonormalBasis{ℂ}(), bℂ)
+    aℂ = get_coordinates(M,p,X,Bℂ)
+    Yℂ = get_vector(M,p,aℂ,Bℂ)
+    @test Yℂ ≈ X
 end
 
 @testset "Basis show methods" begin
@@ -272,7 +278,7 @@ end
     @test sprint(show, ProjectedOrthonormalBasis(:gram_schmidt, ℂ)) == "ProjectedOrthonormalBasis(:gram_schmidt, ℂ)"
 
     @test sprint(show, "text/plain", DiagonalizingOrthonormalBasis(Float64[1, 2, 3])) == """
-    DiagonalizingOrthonormalBasis(ℝ) and eigenvalue 0 in direction:
+    DiagonalizingOrthonormalBasis(ℝ) with eigenvalue 0 in direction:
     3-element Array{Float64,1}:
       1.0
       2.0
@@ -282,7 +288,7 @@ end
     x = collect(reshape(1.0:6.0, (2, 3)))
     pb = get_basis(M, x, DefaultOrthonormalBasis())
     @test sprint(show, "text/plain", pb) == """
-    DefaultOrthonormalBasis(ℝ) and 6 basis vectors:
+    DefaultOrthonormalBasis(ℝ) with 6 basis vectors:
      E1 =
       2×3 Array{Float64,2}:
        1.0  0.0  0.0
@@ -303,7 +309,7 @@ end
     b = DiagonalizingOrthonormalBasis(get_vectors(M, x, pb)[1])
     dpb = CachedBasis(b, Float64[1, 2, 3, 4, 5, 6], get_vectors(M, x, pb))
     @test sprint(show, "text/plain", dpb) == """
-    DiagonalizingOrthonormalBasis(ℝ) and eigenvalue 0 in direction:
+    DiagonalizingOrthonormalBasis(ℝ) with eigenvalue 0 in direction:
      2×3 Array{Float64,2}:
        1.0  0.0  0.0
        0.0  0.0  0.0
@@ -339,7 +345,7 @@ end
     x = reshape(Float64[1], (1, 1, 1))
     pb = get_basis(M, x, DefaultOrthonormalBasis())
     @test sprint(show, "text/plain", pb) == """
-    DefaultOrthonormalBasis(ℝ) and 1 basis vector:
+    DefaultOrthonormalBasis(ℝ) with 1 basis vector:
      E1 =
       1×1×1 Array{Float64,3}:
       [:, :, 1] =
@@ -347,7 +353,7 @@ end
 
     dpb = CachedBasis(DiagonalizingOrthonormalBasis(get_vectors(M, x, pb)), Float64[1], get_vectors(M, x, pb))
     @test sprint(show, "text/plain", dpb) == """
-    DiagonalizingOrthonormalBasis(ℝ) and eigenvalue 0 in direction:
+    DiagonalizingOrthonormalBasis(ℝ) with eigenvalue 0 in direction:
      1-element Array{Array{Float64,3},1}:
        [1.0]
     and 1 basis vector.

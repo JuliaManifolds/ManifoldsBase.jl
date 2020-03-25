@@ -268,7 +268,13 @@ distance(M::Manifold, p, q) = norm(M, p, log(M, p, q))
     embed(M::Manifold, p)
 
 Embed point `p` from the [`Manifold`](@ref) `M` into the ambient space.
-The function works only for selected embedded manifolds.
+This method is only available for manifolds where implicitly an embedding or ambient space
+is given.
+Additionally, `embed` includes changing data representation, if applicable, i.e.
+if the points on `M` are not represented in the same way as points on the embedding,
+the representation is changed accordingly.
+
+See also: [`EmbeddedManifold`](@ref), [`project`](@ref project(M::Manifold,p))
 """
 function embed(M::Manifold, p)
     q = allocate_result(M, embed, p)
@@ -277,10 +283,16 @@ function embed(M::Manifold, p)
 end
 
 """
-    project!(M::Manifold, q, p)
+    embed!(M::Manifold, q, p)
 
-Embed point `p` from the [`Manifold`](@ref) `M` into the ambient space. The point `q` is
-overwritten by the embedded point. The function works only for selected embedded manifolds.
+Embed point `p` from the [`Manifold`](@ref) `M` into the ambient space and return the result in `q`.
+This method is only available for manifolds where implicitly an embedding or ambient space
+is given.
+Additionally, `embed` includes changing data representation, if applicable, i.e.
+if the points on `M` are not represented in the same way as points on the embedding,
+the representation is changed accordingly.
+
+See also: [`EmbeddedManifold`](@ref), [`project!`](@ref project!(M::Manifold, q, p))
 """
 function embed!(M::Manifold, q, p)
     error(manifold_function_not_implemented_message(M, embed!, q, p))
@@ -289,10 +301,16 @@ end
 """
     embed(M::Manifold, p, X)
 
-Embed a tangent vector `X` at a point `p` on the [`Manifold`](@ref) `M` into the manifolds
-ambient space.
+Embed a tangent vector `X` at a point `p` on the [`Manifold`](@ref) `M` into the ambient space.
+This method is only available for manifolds where implicitly an embedding or ambient space
+is given.
+Additionally, `embed` includes changing data representation, if applicable, i.e.
+if the tangents on `M` are not represented in the same way as tangents on the embedding,
+the representation is changed accordingly. This is the case for example for Lie groups,
+when tangent vectors are represented in the Lie algebra. The embedded tangents are then in
+the tangent spaces of the embedded base points.
 
-The function works only for selected embedded manifolds.
+See also: [`EmbeddedManifold`](@ref), [`project`](@ref project(M::Manifold, p, X))
 """
 function embed(M::Manifold, p, X)
     Y = allocate_result(M, embed, X, p)
@@ -303,10 +321,17 @@ end
 """
     embed!(M::Manifold, Y, p, X)
 
-Embed a tangent vector `X` at a point `p` on the [`Manifold`](@ref) `M` into the manifolds
-ambient space. The result is saved in vector `Y`.
+Embed a tangent vector `X` at a point `p` on the [`Manifold`](@ref) `M` into the ambient
+space and return the result in `Y`.
+This method is only available for manifolds where implicitly an embedding or ambient space
+is given.
+Additionally, `embed!` includes changing data representation, if applicable, i.e.
+if the tangents on `M` are not represented in the same way as tangents on the embedding,
+the representation is changed accordingly. This is the case for example for Lie groups,
+when tangent vectors are represented in the Lie algebra. The embedded tangents are then in
+the tangent spaces of the embedded base points.
 
-The function works only for selected embedded manifolds.
+See also: [`EmbeddedManifold`](@ref), [`project!`](@ref project!(M::Manifold, Y, p, X))
 """
 function embed!(M::Manifold, Y, p, X)
     error(manifold_function_not_implemented_message(M, embed!, Y, p, X))
@@ -390,6 +415,8 @@ injectivity_radius(M::Manifold, ::ExponentialRetraction) = injectivity_radius(M)
 
 Compute the inner product of tangent vectors `X` and `Y` at point `p` from the
 [`Manifold`](@ref) `M`.
+
+See also: [`MetricManifold`](@ref)
 """
 function inner(M::Manifold, p, X, Y)
     error(manifold_function_not_implemented_message(M, inner, p, X, Y))
@@ -553,9 +580,13 @@ end
 """
     project(M::Manifold, p)
 
-Project point `p`from the ambient space onto the [`Manifold`](@ref) `M`.
-The function works only for selected embedded manifolds and is *not* required to return the
-closest point.
+Project point `p` from the ambient space of the [`Manifold`](@ref) `M` to `M`.
+This method is only available for manifolds where implicitly an embedding or ambient space
+is given. Additionally, the projection includes changing data representation, if applicable,
+i.e. if the points on `M` are not represented in the same array data, the data is changed
+accordingly.
+
+See also: [`EmbeddedManifold`](@ref), [`embed`](@ref embed(M::Manifold, p))
 """
 function project(M::Manifold, p)
     q = allocate_result(M, project, p)
@@ -566,9 +597,14 @@ end
 """
     project!(M::Manifold, q, p)
 
-Project point `p` from the ambient space onto the [`Manifold`](@ref) `M`. The point `q` is
-overwritten by the projection. The function works only for selected embedded manifolds and
-is *not* required to return the closest point.
+Project point `p` from the ambient space onto the [`Manifold`](@ref) `M`. The result is
+storedin `q`.
+This method is only available for manifolds where implicitly an embedding or ambient space
+is given. Additionally, the projection includes changing data representation, if applicable,
+i.e. if the points on `M` are not represented in the same array data, the data is changed
+accordingly.
+
+See also: [`EmbeddedManifold`](@ref), [`embed!`](@ref embed!(M::Manifold, q, p))
 """
 function project!(M::Manifold, q, p)
     error(manifold_function_not_implemented_message(M, project!, q, p))
@@ -579,9 +615,15 @@ end
 
 Project ambient space representation of a vector `X` to a tangent vector at point `p` on
 the [`Manifold`](@ref) `M`.
+This method is only available for manifolds where implicitly an embedding or ambient space
+is given.
+Additionally, `project` includes changing data representation, if applicable, i.e.
+if the tangents on `M` are not represented in the same way as points on the embedding,
+the representation is changed accordingly. This is the case for example for Lie groups,
+when tangent vectors are represented in the Lie algebra. after projection the change to the
+Lie algebra is perfomed, too.
 
-The function works only for selected embedded manifolds and is *not* required to return the
-closest vector.
+See also: [`EmbeddedManifold`](@ref), [`embed`](@ref embed(M::Manifold, p, X))
 """
 function project(M::Manifold, p, X)
     Y = allocate_result(M, project, X, p)
@@ -594,9 +636,15 @@ end
 
 Project ambient space representation of a vector `X` to a tangent vector at point `p` on
 the [`Manifold`](@ref) `M`. The result is saved in vector `Y`.
+This method is only available for manifolds where implicitly an embedding or ambient space
+is given.
+Additionally, `project!` includes changing data representation, if applicable, i.e.
+if the tangents on `M` are not represented in the same way as points on the embedding,
+the representation is changed accordingly. This is the case for example for Lie groups,
+when tangent vectors are represented in the Lie algebra. after projection the change to the
+Lie algebra is perfomed, too.
 
-The function works only for selected embedded manifolds and is *not* required to return the
-closest vector.
+See also: [`EmbeddedManifold`](@ref), [`embed!`](@ref embed!(M::Manifold, Y, p, X))
 """
 function project!(M::Manifold, Y, p, X)
     error(manifold_function_not_implemented_message(M, project!, Y, p, X))

@@ -121,7 +121,7 @@ const DefaultOrDiagonalizingBasis =
 struct CachedBasis{B,V,𝔽} <: AbstractBasis{𝔽} where {BT<:AbstractBasis,V}
     data::V
 end
-function CachedBasis(basis::B, data::V, 𝔽::AbstractNumbers = ℝ) where {V,B<:AbstractBasis}
+function CachedBasis(basis::B, data::V) where {V,𝔽,B<:AbstractBasis{𝔽}}
     return CachedBasis{B,V,𝔽}(data)
 end
 function CachedBasis(basis::CachedBasis) # avoid double encapsulation
@@ -131,10 +131,9 @@ function CachedBasis(
     basis::DiagonalizingOrthonormalBasis,
     eigenvalues::ET,
     vectors::T,
-    𝔽::AbstractNumbers = ℝ,
 ) where {ET<:AbstractVector,T<:AbstractVector}
     data = DiagonalizingBasisData(basis.frame_direction, eigenvalues, vectors)
-    return CachedBasis(basis, data, 𝔽)
+    return CachedBasis(basis, data)
 end
 
 # forward declarations
@@ -145,9 +144,9 @@ const all_uncached_bases = Union{AbstractBasis, DefaultBasis, DefaultOrthogonalB
 const DISAMBIGUATION_BASIS_TYPES = [
     CachedBasis,
     CachedBasis{<:AbstractBasis{ℝ}},
+    CachedBasis{<:AbstractBasis{ℂ}},
     CachedBasis{<:AbstractOrthogonalBasis{ℝ}},
     CachedBasis{<:AbstractOrthonormalBasis{ℝ}},
-    CachedBasis{<:AbstractBasis{ℂ}},
     DefaultBasis,
     DefaultOrthonormalBasis,
     DefaultOrthogonalBasis,
@@ -284,11 +283,11 @@ function get_basis(
         end
         push!(Ξ, Ξₙ)
         K += 1
-        K * real_dimension(number_system(B)) == dim && return CachedBasis(B, Ξ, ℝ)
+        K * real_dimension(number_system(B)) == dim && return CachedBasis(B, Ξ)
         @label skip
     end
     if return_incomplete_set
-        return CachedBasis(B, Ξ, ℝ)
+        return CachedBasis(B, Ξ)
     else
         error("get_basis with bases $(typeof(B)) only found $(K) orthonormal basis vectors, but manifold dimension is $(dim).")
     end
@@ -347,16 +346,15 @@ function get_coordinates!(
     Y,
     p,
     X,
-    B::CachedBasis{BT},
-) where {BT<:AbstractBasis{ℝ}}
-    map!(vb -> inner(M, p, X, vb), Y, get_vectors(M, p, B))
+    B::CachedBasis,
+)
+    if number_system(M) === number_system(B)
+        map!(vb -> real(inner(M, p, X, vb)), Y, get_vectors(M, p, B))
+    else
+        map!(vb -> conj(inner(M, p, X, vb)), Y, get_vectors(M, p, B))
+    end
     return Y
 end
-function get_coordinates!(M::Manifold, Y, p, X, B::CachedBasis{<:AbstractBasis{ℂ}})
-    map!(vb -> conj(inner(M, p, X, vb)), Y, get_vectors(M, p, B))
-    return Y
-end
-
 
 """
     get_vector(M::Manifold, p, X, B::AbstractBasis)
@@ -511,7 +509,7 @@ end
 function show(io::IO, mime::MIME"text/plain", onb::DiagonalizingOrthonormalBasis)
     println(
         io,
-        "DiagonalizingOrthonormalBasis($(number_system(onb))) and eigenvalue 0 in direction:",
+        "DiagonalizingOrthonormalBasis($(number_system(onb))) with eigenvalue 0 in direction:",
     )
     sk = sprint(show, "text/plain", onb.frame_direction, context = io, sizehint = 0)
     sk = replace(sk, '\n' => "\n ")
@@ -525,7 +523,7 @@ function show(
     print(
         io,
 
-        "$(T()) and $(length(_get_vectors(B))) basis vector$(length(_get_vectors(B)) == 1 ? "" : "s"):",
+        "$(T()) with $(length(_get_vectors(B))) basis vector$(length(_get_vectors(B)) == 1 ? "" : "s"):",
     )
     _show_basis_vector_range_noheader(
         io,
