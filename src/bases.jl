@@ -117,7 +117,13 @@ end
 const DefaultOrDiagonalizingBasis =
     Union{DefaultOrthonormalBasis,DiagonalizingOrthonormalBasis}
 
+"""
+    CachedBasis(basis::AbstractBasis, data)
 
+A cached version of the given `basis` with precomputed basis vectors. The basis vectors
+are stored in `data`, either explicitly (like in cached variants of
+[`ProjectedOrthonormalBasis`](@ref)) or implicitly.
+"""
 struct CachedBasis{B,V,𝔽} <: AbstractBasis{𝔽} where {BT<:AbstractBasis,V}
     data::V
 end

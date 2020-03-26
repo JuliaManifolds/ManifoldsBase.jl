@@ -416,7 +416,7 @@ injectivity_radius(M::Manifold, ::ExponentialRetraction) = injectivity_radius(M)
 Compute the inner product of tangent vectors `X` and `Y` at point `p` from the
 [`Manifold`](@ref) `M`.
 
-See also: [`MetricManifold`](@ref)
+See also: [`MetricManifold`](@ref Main.Manifolds.MetricManifold)
 """
 function inner(M::Manifold, p, X, Y)
     error(manifold_function_not_implemented_message(M, inner, p, X, Y))

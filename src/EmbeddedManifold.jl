@@ -50,8 +50,9 @@ Specify that an embedding is the default isometric embedding. This even inherits
 logarithmic and exponential map as well as retraction and inverse retractions from the
 embedding.
 
-For an example, see [`SymmetricMatrices`](@ref) which are isometrically embedded in
-the Euclidean space of matrices but also inherit exponential and logarithmic maps.
+For an example, see [`SymmetricMatrices`](@ref Main.Manifolds.SymmetricMatrices) which are
+isometrically embedded in the Euclidean space of matrices but also inherit exponential
+and logarithmic maps.
 """
 struct TransparentIsometricEmbedding <: AbstractIsometricEmbeddingType end
 
