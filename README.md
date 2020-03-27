@@ -8,6 +8,18 @@ Basic interface for manifolds in Julia.
 The project [`Manifolds.jl`](https://github.com/JuliaManifolds/Manifolds.jl)
 is based on this interface and provides a variety of manifolds.
 
+## Number system
+A number system represents the field a manifold is based upon.
+Most prominently, these are real-valued (`ℝ`) complex valued (`ℂ`) fields that
+parametrize certain manifolds.
+A further type to represent the field of quaternions (`ℍ`) can also be used.
+
+## Bases
+Several different types of bases for a tangent space at `p` on a [`Manifold`](@ref) are provided.
+Methods are provided to obtain such a basis, to represent a tangent vector in a basis and to reconstruct a tangent vector from coefficients with respect to a basis.
+The last two can be performed without computing the complete basis.
+Further a basis can be cached and hence be reused, see [`CachedBasis`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.CachedBasis).
+
 ## `DecoratorManifold`
 
 The decorator manifold enhances a manifold by certain, in most cases implicitly
