@@ -530,7 +530,7 @@ end
     log!(M::Manifold, X, p, q)
 
 Compute the logarithmic map of point `q` at base point `p` on the [`Manifold`](@ref) `M`.
-THe result is saved to `X`.
+The result is saved to `X`.
 """
 function log!(M::Manifold, X, p, q)
     error(manifold_function_not_implemented_message(M, log!, X, p, q))
