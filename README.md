@@ -23,7 +23,7 @@ of the [`Euclidean`](https://github.com/JuliaManifolds/Manifolds.jl/blob/master/
 manifold from [`Manifolds.jl`](https://github.com/JuliaManifolds/Manifolds.jl),
 such that the interface functions can be tested.
 
-## Embedded Manifold
+## `EmbeddedManifold`
 
 The embedded manifold models the embedding of a manifold into another manifold.
 This way a manifold can benefit from existing implementations.
