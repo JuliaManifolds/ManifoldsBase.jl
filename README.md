@@ -1,6 +1,8 @@
 # ManifoldsBase.jl
-
-[![Build Status](https://travis-ci.org/JuliaManifolds/ManifoldsBase.jl.svg?branch=master)](https://travis-ci.org/JuliaManifolds/ManifoldsBase.jl/) [![codecov.io](http://codecov.io/github/JuliaManifolds/ManifoldsBase.jl/coverage.svg?branch=master)](https://codecov.io/gh/JuliaManifolds/ManifoldsBase.jl/)
+[![](https://img.shields.io/badge/docs-stable-blue.svg)](https://juliamanifolds.github.io/Manifolds.jl/stable/interface.html)
+[![](https://img.shields.io/badge/docs-dev-blue.svg)](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html)
+[![Build Status](https://travis-ci.org/JuliaManifolds/ManifoldsBase.jl.svg?branch=master)](https://travis-ci.org/JuliaManifolds/ManifoldsBase.jl/)
+[![codecov.io](http://codecov.io/github/JuliaManifolds/ManifoldsBase.jl/coverage.svg?branch=master)](https://codecov.io/gh/JuliaManifolds/ManifoldsBase.jl/)
 [![](https://img.shields.io/badge/docs-dev-blue.svg)](https://julianlsolvers.github.io/Manifolds.jl/latest/)
 
 Basic interface for manifolds in Julia.
@@ -17,10 +19,10 @@ A further type to represent the field of quaternions (`ℍ`) can also be used.
 
 ## Bases
 
-Several different types of bases for a tangent space at `p` on a [`Manifold`](@ref) are provided.
+Several different types of bases for a tangent space at `p` on a [`Manifold`](https://juliamanifolds.github.io/Manifolds.jl/stable/interface.html#ManifoldsBase.Manifold) are provided.
 Methods are provided to obtain such a basis, to represent a tangent vector in a basis and to reconstruct a tangent vector from coefficients with respect to a basis.
 The last two can be performed without computing the complete basis.
-Further a basis can be cached and hence be reused, see [`CachedBasis`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.CachedBasis).
+Further a basis can be cached and hence be reused, see [`CachedBasis`](https://juliamanifolds.github.io/Manifolds.jl/stable/interface.html#ManifoldsBase.CachedBasis).
 
 ## `DecoratorManifold`
 
@@ -33,7 +35,7 @@ passes to `:parent` in order to fill default values.
 ## `DefaultManifold`
 
 This interface includes a simple `DefaultManifold`, which is a reduced version
-of the [`Euclidean`](https://github.com/JuliaManifolds/Manifolds.jl/blob/master/src/Euclidean.jl)
+of the [`Euclidean`](https://juliamanifolds.github.io/Manifolds.jl/stable/manifolds/euclidean.html)
 manifold from [`Manifolds.jl`](https://github.com/JuliaManifolds/Manifolds.jl),
 such that the interface functions can be tested.
 
