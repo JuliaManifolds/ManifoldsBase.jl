@@ -93,7 +93,7 @@ function convert(::Type{ArrayCoTVector{V}}, X::V) where {V<:AbstractArray{<:Numb
     return ArrayCoTVector{V}(X)
 end
 convert(::Type{M}, m::ArrayManifold{𝔽,M}) where {𝔽,M<:Manifold{𝔽}} = m.manifold
-convert(::Type{ArrayManifold{M}}, m::M) where {𝔽,M<:Manifold{𝔽}} = ArrayManifold(m)
+convert(::Type{ArrayManifold{𝔽,M}}, m::M) where {𝔽,M<:Manifold{𝔽}} = ArrayManifold(m)
 convert(::Type{V}, p::ArrayMPoint{V}) where {V<:AbstractArray{<:Number}} = p.value
 convert(::Type{ArrayMPoint{V}}, x::V) where {V<:AbstractArray{<:Number}} = ArrayMPoint{V}(x)
 convert(::Type{V}, X::ArrayTVector{V}) where {V<:AbstractArray{<:Number}} = X.value

@@ -7,27 +7,27 @@ using ManifoldsBase: @decorator_transparent_function,
     @decorator_transparent_signature,
     is_decorator_transparent
 
-struct TestDecorator{M<:Manifold} <: AbstractDecoratorManifold
+struct TestDecorator{M<:Manifold{ℝ}} <: AbstractDecoratorManifold{ℝ}
     manifold::M
 end
 
-abstract type AbstractTestDecorator <: AbstractDecoratorManifold end
+abstract type AbstractTestDecorator <: AbstractDecoratorManifold{ℝ} end
 
-struct TestDecorator2{M<:Manifold} <: AbstractTestDecorator
+struct TestDecorator2{M<:Manifold{ℝ}} <: AbstractTestDecorator
     manifold::M
 end
 
-struct TestDecorator3{M<:Manifold} <: AbstractTestDecorator
+struct TestDecorator3{M<:Manifold{ℝ}} <: AbstractTestDecorator
     manifold::M
 end
 
-abstract type AbstractParentDecorator <: AbstractDecoratorManifold end
+abstract type AbstractParentDecorator <: AbstractDecoratorManifold{ℝ} end
 
-struct ChildDecorator{M<:Manifold} <: AbstractParentDecorator
+struct ChildDecorator{M<:Manifold{ℝ}} <: AbstractParentDecorator
     manifold::M
 end
 
-struct DefaultDecorator{M<:Manifold} <: AbstractDecoratorManifold
+struct DefaultDecorator{M<:Manifold{ℝ}} <: AbstractDecoratorManifold{ℝ}
     manifold::M
 end
 ManifoldsBase.default_decorator_dispatch(::DefaultDecorator) = Val(true)

@@ -1,8 +1,9 @@
 using ManifoldsBase
 using Test
-using ManifoldsBase: combine_allocation_promotion_functions, allocation_promotion_function
+using ManifoldsBase: combine_allocation_promotion_functions, allocation_promotion_function, ℝ
 
-struct AllocManifold <: Manifold end
+struct AllocManifold{𝔽} <: Manifold{𝔽} end
+AllocManifold() = AllocManifold{ℝ}()
 
 function ManifoldsBase.exp!(::AllocManifold, v, x, y)
     v[1] .= x[1] .+ y[1]

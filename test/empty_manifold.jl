@@ -2,7 +2,7 @@ using ManifoldsBase
 
 using Test
 import Base: *
-struct NonManifold <: Manifold end
+struct NonManifold <: Manifold{ℝ} end
 struct NonMPoint <: MPoint end
 struct NonTVector <: TVector end
 struct NonCoTVector <: CoTVector end
