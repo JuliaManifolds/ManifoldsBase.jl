@@ -11,7 +11,7 @@ is based on this interface and provides a variety of manifolds.
 ## Number system
 
 A number system represents the field a manifold is based upon.
-Most prominently, these are real-valued (`ℝ`) complex valued (`ℂ`) fields that
+Most prominently, these are real-valued (`ℝ`) and complex valued (`ℂ`) fields that
 parametrize certain manifolds.
 A further type to represent the field of quaternions (`ℍ`) can also be used.
 
