@@ -80,10 +80,10 @@ end
 # Type
 #
 """
-    AbstractDecoratorManifold <: Manifold
+    AbstractDecoratorManifold{𝔽} <: Manifold{𝔽}
 
 An `AbstractDecoratorManifold` indicates that to some extent a manifold subtype
-decorates another manifold in the sense that it either
+decorates another [`Manifold`](@ref) in the sense that it either
 
 * it extends the functionality of a manifold with further features
 * it defines a new manifold that internally uses functions from the decorated manifold
@@ -99,7 +99,7 @@ Transparency of functions with respect to decorators can be specified using the 
 [`@decorator_transparent_fallback`](@ref), [`@decorator_transparent_function`](@ref) and
 [`@decorator_transparent_signature`](@ref).
 """
-abstract type AbstractDecoratorManifold <: Manifold end
+abstract type AbstractDecoratorManifold{𝔽} <: Manifold{𝔽} end
 
 #
 # Macros

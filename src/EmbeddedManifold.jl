@@ -6,7 +6,7 @@ A type used to specify properties of an [`AbstractEmbeddedManifold`](@ref).
 abstract type AbstractEmbeddingType end
 
 """
-    AbstractEmbeddedManifold{T<:AbstractEmbeddingType} <: AbstractDecoratorManifold
+    AbstractEmbeddedManifold{T<:AbstractEmbeddingType,𝔽} <: AbstractDecoratorManifold{𝔽}
 
 An abstract type for embedded manifolds, which acts as an [`AbstractDecoratorManifold`](@ref).
 The functions of the manifold that is embedded can hence be just passed on to the embedding.
@@ -16,8 +16,8 @@ This means, that technically an embedded manifold is a decorator for the embeddi
 functions of this type get, in the semi-transparent way of the
 [`AbstractDecoratorManifold`](@ref), passed on to the embedding.
 """
-abstract type AbstractEmbeddedManifold{T<:AbstractEmbeddingType} <:
-              AbstractDecoratorManifold end
+abstract type AbstractEmbeddedManifold{T<:AbstractEmbeddingType,𝔽} <:
+              AbstractDecoratorManifold{𝔽} end
 
 """
 DefaultEmbeddingType <: AbstractEmbeddingType
@@ -77,7 +77,7 @@ Generate the `EmbeddedManifold` of the [`Manifold`](@ref) `M` into the
 [`Manifold`](@ref) `N` with [`AbstractEmbeddingType`](@ref) `e` that by default is the most
 transparent [`TransparentIsometricEmbedding`](@ref)
 """
-struct EmbeddedManifold{MT<:Manifold,NT<:Manifold,ET} <: AbstractEmbeddedManifold{ET}
+struct EmbeddedManifold{𝔽,MT<:Manifold{𝔽},NT<:Manifold,ET} <: AbstractEmbeddedManifold{𝔽}
     manifold::MT
     embedding::NT
 end
@@ -85,8 +85,8 @@ function EmbeddedManifold(
     M::MT,
     N::NT,
     e::ET = TransparentIsometricEmbedding(),
-) where {MT<:Manifold,NT<:Manifold,ET<:AbstractEmbeddingType}
-    return EmbeddedManifold{MT,NT,ET}(M, N)
+) where {𝔽,MT<:Manifold{𝔽}, NT<:Manifold,ET<:AbstractEmbeddingType}
+    return EmbeddedManifold{𝔽,MT,NT,ET}(M, N)
 end
 
 """
@@ -164,8 +164,8 @@ end
 
 function show(
     io::IO,
-    M::EmbeddedManifold{MT,NT,ET},
-) where {MT<:Manifold,NT<:Manifold,ET<:AbstractEmbeddingType}
+    M::EmbeddedManifold{𝔽,MT,NT,ET},
+) where {𝔽, MT<:Manifold{𝔽},NT<:Manifold,ET<:AbstractEmbeddingType}
     print(io, "EmbeddedManifold($(M.manifold), $(M.embedding), $(ET()))")
 end
 

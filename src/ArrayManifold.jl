@@ -9,7 +9,7 @@ encapsulated/stripped automatically when needed.
 This manifold is a decorator for a manifold, i.e. it decorates a manifold `M` with types
 points, vectors, and covectors.
 """
-struct ArrayManifold{M<:Manifold} <: AbstractDecoratorManifold
+struct ArrayManifold{𝔽,M<:Manifold{𝔽}} <: AbstractDecoratorManifold{𝔽}
     manifold::M
 end
 
@@ -92,8 +92,8 @@ convert(::Type{V}, X::ArrayCoTVector{V}) where {V<:AbstractArray{<:Number}} = X.
 function convert(::Type{ArrayCoTVector{V}}, X::V) where {V<:AbstractArray{<:Number}}
     return ArrayCoTVector{V}(X)
 end
-convert(::Type{M}, m::ArrayManifold{M}) where {M<:Manifold} = m.manifold
-convert(::Type{ArrayManifold{M}}, m::M) where {M<:Manifold} = ArrayManifold(m)
+convert(::Type{M}, m::ArrayManifold{𝔽,M}) where {𝔽,M<:Manifold{𝔽}} = m.manifold
+convert(::Type{ArrayManifold{M}}, m::M) where {𝔽,M<:Manifold{𝔽}} = ArrayManifold(m)
 convert(::Type{V}, p::ArrayMPoint{V}) where {V<:AbstractArray{<:Number}} = p.value
 convert(::Type{ArrayMPoint{V}}, x::V) where {V<:AbstractArray{<:Number}} = ArrayMPoint{V}(x)
 convert(::Type{V}, X::ArrayTVector{V}) where {V<:AbstractArray{<:Number}} = X.value

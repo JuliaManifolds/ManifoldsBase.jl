@@ -7,14 +7,17 @@ import Markdown: @doc_str
 using LinearAlgebra
 
 """
-    Manifold
+    Manifold{F}
 
 A manifold type. The `Manifold` is used to dispatch to different functions on a manifold,
 usually as the first argument of the function. Examples are the [`exp`](@ref)onential and
 [`log`](@ref)arithmic maps as well as more general functions that are built on them like the
 [`geodesic`](@ref).
+
+The manifold is parametrized by an [`AbstractNumbers`](@ref) to distinguish for example
+real (ℝ) and complex (ℂ) manifold.
 """
-abstract type Manifold end
+abstract type Manifold{𝔽} end
 
 """
     AbstractEstimationMethod
