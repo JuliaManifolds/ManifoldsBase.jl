@@ -16,6 +16,10 @@ usually as the first argument of the function. Examples are the [`exp`](@ref)one
 
 The manifold is parametrized by an [`AbstractNumbers`](@ref) to distinguish for example
 real (ℝ) and complex (ℂ) manifold.
+
+For subtypes the preferred order of parameters is: size and simple value parameters,
+followed by the [`AbstractNumbers`](@ref) `field`, followed by data type parameters,
+which might depend on the abstract number field type.
 """
 abstract type Manifold{𝔽} end
 

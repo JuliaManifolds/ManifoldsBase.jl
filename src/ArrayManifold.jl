@@ -157,11 +157,11 @@ function get_basis(M::ArrayManifold, p, B::AbstractBasis; kwargs...)
     return Ξ
 end
 function get_basis(
-    M::ArrayManifold,
+    M::ArrayManifold{𝔽},
     p,
-    B::Union{AbstractOrthogonalBasis,CachedBasis{<:AbstractOrthogonalBasis}};
+    B::Union{AbstractOrthogonalBasis,CachedBasis{𝔽,<:AbstractOrthogonalBasis{𝔽}}};
     kwargs...,
-)
+) where {𝔽}
     is_manifold_point(M, p, true; kwargs...)
     Ξ = invoke(get_basis, Tuple{ArrayManifold,Any,AbstractBasis}, M, p, B; kwargs...)
     bvectors = get_vectors(M, p, Ξ)
@@ -177,11 +177,11 @@ function get_basis(
     return Ξ
 end
 function get_basis(
-    M::ArrayManifold,
+    M::ArrayManifold{𝔽},
     p,
-    B::Union{AbstractOrthonormalBasis,CachedBasis{<:AbstractOrthonormalBasis}};
+    B::Union{AbstractOrthonormalBasis{𝔽},CachedBasis{𝔽,<:AbstractOrthonormalBasis{𝔽}}};
     kwargs...,
-)
+) where {𝔽}
     is_manifold_point(M, p, true; kwargs...)
     Ξ = invoke(get_basis, Tuple{ArrayManifold,Any,AbstractOrthogonalBasis}, M, p, B; kwargs...)
     bvectors = get_vectors(M, p, Ξ)
@@ -195,9 +195,9 @@ function get_basis(
     return Ξ
 end
 for BT in DISAMBIGUATION_BASIS_TYPES
-    if BT <: Union{AbstractOrthonormalBasis,CachedBasis{<:AbstractOrthonormalBasis}}
+    if BT <: Union{AbstractOrthonormalBasis,CachedBasis{𝔽,<:AbstractOrthonormalBasis} where 𝔽}
         CT = AbstractOrthonormalBasis
-    elseif BT <: Union{AbstractOrthogonalBasis,CachedBasis{<:AbstractOrthogonalBasis}}
+    elseif BT <: Union{AbstractOrthogonalBasis,CachedBasis{𝔽,<:AbstractOrthogonalBasis} where 𝔽}
         CT = AbstractOrthogonalBasis
     else
         CT = AbstractBasis

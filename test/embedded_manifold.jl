@@ -1,4 +1,4 @@
-struct PlaneManifold <: AbstractEmbeddedManifold{TransparentIsometricEmbedding,ℝ} end
+struct PlaneManifold <: AbstractEmbeddedManifold{ℝ,TransparentIsometricEmbedding} end
 
 ManifoldsBase.decorated_manifold(::PlaneManifold) = ManifoldsBase.DefaultManifold(3)
 ManifoldsBase.base_manifold(::PlaneManifold) = ManifoldsBase.DefaultManifold(2)
@@ -9,14 +9,14 @@ ManifoldsBase.project!(::PlaneManifold, q, p) = (q .= [p[1] p[2] 0.0])
 ManifoldsBase.project!(::PlaneManifold, Y, p, X) = (Y .= [X[1] X[2] 0.0])
 
 struct NotImplementedEmbeddedManifold <:
-       AbstractEmbeddedManifold{TransparentIsometricEmbedding,ℝ} end
+       AbstractEmbeddedManifold{ℝ,TransparentIsometricEmbedding} end
 ManifoldsBase.decorated_manifold(::NotImplementedEmbeddedManifold) = ManifoldsBase.DefaultManifold(2)
 ManifoldsBase.base_manifold(::NotImplementedEmbeddedManifold) = ManifoldsBase.DefaultManifold(2)
 
 struct NotImplementedEmbeddedManifold2 <:
-       AbstractEmbeddedManifold{DefaultIsometricEmbeddingType,ℝ} end
+       AbstractEmbeddedManifold{ℝ,DefaultIsometricEmbeddingType} end
 
-struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{DefaultEmbeddingType,ℝ} end
+struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEmbeddingType} end
 
 @testset "Embedded Manifolds" begin
     @testset "EmbeddedManifold basic tests" begin

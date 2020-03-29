@@ -211,9 +211,9 @@ DiagonalizingBasisProxy() = DiagonalizingOrthonormalBasis([1.0, 0.0, 0.0])
         b = get_basis(M, pts[1], BT())
         if BT != DiagonalizingBasisProxy
             if pts[1] isa Array
-                @test isa(b, CachedBasis{BT{ℝ},Vector{Vector{Float64}},ℝ})
+                @test isa(b, CachedBasis{ℝ,BT{ℝ},Vector{Vector{Float64}}})
             else
-                @test isa(b, CachedBasis{BT{ℝ},Vector{NonBroadcastBasisThing{Vector{Float64}}},ℝ})
+                @test isa(b, CachedBasis{ℝ,BT{ℝ},Vector{NonBroadcastBasisThing{Vector{Float64}}}})
             end
         end
         @test get_basis(M, pts[1], b) === b
