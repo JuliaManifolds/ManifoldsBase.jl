@@ -157,7 +157,7 @@ function get_basis(M::ArrayManifold, p, B::AbstractBasis; kwargs...)
     return Ξ
 end
 function get_basis(
-    M::ArrayManifold{𝔽},
+    M::ArrayManifold,
     p,
     B::Union{AbstractOrthogonalBasis,CachedBasis{𝔽,<:AbstractOrthogonalBasis{𝔽}}};
     kwargs...,
@@ -177,9 +177,9 @@ function get_basis(
     return Ξ
 end
 function get_basis(
-    M::ArrayManifold{𝔽},
+    M::ArrayManifold,
     p,
-    B::Union{AbstractOrthonormalBasis{𝔽},CachedBasis{𝔽,<:AbstractOrthonormalBasis{𝔽}}};
+    B::Union{AbstractOrthonormalBasis,CachedBasis{𝔽,<:AbstractOrthonormalBasis{𝔽}}};
     kwargs...,
 ) where {𝔽}
     is_manifold_point(M, p, true; kwargs...)
