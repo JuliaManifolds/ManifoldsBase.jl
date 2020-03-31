@@ -131,7 +131,7 @@ are stored in `data`, either explicitly (like in cached variants of
 
     CachedBasis(basis::AbstractBasis, data)
 """
-struct CachedBasis{𝔽,B,V} <: AbstractBasis{𝔽} where {BT<:AbstractBasis{𝔽},V}
+struct CachedBasis{𝔽,B,V} <: AbstractBasis{𝔽} where {B<:AbstractBasis{𝔽},V}
     data::V
 end
 function CachedBasis(basis::B, data::V) where {V,𝔽,B<:AbstractBasis{𝔽}}
@@ -450,7 +450,7 @@ function get_vectors(
     return _get_vectors(B)
 end
 #internal for directly cached basis i.e. those that are just arrays – used in show
-_get_vectors(B::CachedBasis{𝔽,<:AbstractBasis,<:AbstractArray}) where {𝔽}= B.data
+_get_vectors(B::CachedBasis{𝔽,<:AbstractBasis,<:AbstractArray}) where {𝔽} = B.data
 _get_vectors(B::CachedBasis{𝔽,<:AbstractBasis,<:DiagonalizingBasisData}) where {𝔽} = B.data.vectors
 
 @doc raw"""

@@ -15,7 +15,7 @@ usually as the first argument of the function. Examples are the [`exp`](@ref)one
 [`geodesic`](@ref).
 
 The manifold is parametrized by an [`AbstractNumbers`](@ref) to distinguish for example
-real (ℝ) and complex (ℂ) manifold.
+real (ℝ) and complex (ℂ) manifolds.
 
 For subtypes the preferred order of parameters is: size and simple value parameters,
 followed by the [`AbstractNumbers`](@ref) `field`, followed by data type parameters,
