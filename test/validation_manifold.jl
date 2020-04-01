@@ -2,18 +2,18 @@ using ManifoldsBase
 using LinearAlgebra
 using Test
 
-struct CustomArrayManifoldRetraction <: ManifoldsBase.AbstractRetractionMethod end
+struct CustomValidationManifoldRetraction <: ManifoldsBase.AbstractRetractionMethod end
 
 function ManifoldsBase.injectivity_radius(
     ::ManifoldsBase.DefaultManifold,
-    ::CustomArrayManifoldRetraction,
+    ::CustomValidationManifoldRetraction,
 )
     return 10.0
 end
 function ManifoldsBase.injectivity_radius(
     ::ManifoldsBase.DefaultManifold,
     p,
-    ::CustomArrayManifoldRetraction,
+    ::CustomValidationManifoldRetraction,
 )
     return 11.0
 end
@@ -114,8 +114,8 @@ end
         @test injectivity_radius(A, x) == Inf
         @test injectivity_radius(A, ManifoldsBase.ExponentialRetraction()) == Inf
         @test injectivity_radius(A, x, ManifoldsBase.ExponentialRetraction()) == Inf
-        @test injectivity_radius(A, CustomArrayManifoldRetraction()) == 10
-        @test injectivity_radius(A, x, CustomArrayManifoldRetraction()) == 11
+        @test injectivity_radius(A, CustomValidationManifoldRetraction()) == 10
+        @test injectivity_radius(A, x, CustomValidationManifoldRetraction()) == 11
     end
 
     @testset "ValidationManifold basis" begin
