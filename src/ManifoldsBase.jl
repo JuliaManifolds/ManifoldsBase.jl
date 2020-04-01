@@ -920,6 +920,8 @@ export AbstractEmbeddingType,
     DefaultEmbeddingType
 export AbstractEmbeddedManifold, EmbeddedManifold, TransparentIsometricEmbedding
 
+export OutOfInjectivityRadiusError
+
 export AbstractRetractionMethod,
     ExponentialRetraction,
     QRRetraction,
