@@ -93,7 +93,7 @@ function ProjectedOrthonormalBasis(method::Symbol, 𝔽::AbstractNumbers = ℝ)
 end
 
 @doc raw"""
-    DiagonalizingOrthonormalBasis(frame_direction, 𝔽::AbstractNumbers = ℝ)
+    DiagonalizingOrthonormalBasis{𝔽,TV} <: AbstractOrthonormalBasis{𝔽}
 
 An orthonormal basis `Ξ` as a vector of tangent vectors (of length determined by
 [`manifold_dimension`](@ref)) in the tangent space that diagonalizes the curvature
@@ -101,12 +101,15 @@ tensor $R(u,v)w$ and where the direction `frame_direction` $v$ has curvature `0`
 
 The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used
 for the vectors elements.
+
+# Constructor
+    DiagonalizingOrthonormalBasis(frame_direction, 𝔽::AbstractNumbers = ℝ)
 """
-struct DiagonalizingOrthonormalBasis{TV,𝔽} <: AbstractOrthonormalBasis{𝔽}
+struct DiagonalizingOrthonormalBasis{𝔽, TV} <: AbstractOrthonormalBasis{𝔽}
     frame_direction::TV
 end
 function DiagonalizingOrthonormalBasis(X, 𝔽::AbstractNumbers = ℝ)
-    return DiagonalizingOrthonormalBasis{typeof(X),𝔽}(X)
+    return DiagonalizingOrthonormalBasis{𝔽,typeof(X)}(X)
 end
 struct DiagonalizingBasisData{D,V,ET}
     frame_direction::D
@@ -118,17 +121,21 @@ const DefaultOrDiagonalizingBasis =
     Union{DefaultOrthonormalBasis,DiagonalizingOrthonormalBasis}
 
 """
-    CachedBasis(basis::AbstractBasis, data)
+    CachedBasis{𝔽,V,<:AbstractBasis{𝔽}} <: AbstractBasis{𝔽}
 
 A cached version of the given `basis` with precomputed basis vectors. The basis vectors
 are stored in `data`, either explicitly (like in cached variants of
 [`ProjectedOrthonormalBasis`](@ref)) or implicitly.
+
+# Constructor
+
+    CachedBasis(basis::AbstractBasis, data)
 """
-struct CachedBasis{B,V,𝔽} <: AbstractBasis{𝔽} where {BT<:AbstractBasis,V}
+struct CachedBasis{𝔽,B,V} <: AbstractBasis{𝔽} where {B<:AbstractBasis{𝔽},V}
     data::V
 end
 function CachedBasis(basis::B, data::V) where {V,𝔽,B<:AbstractBasis{𝔽}}
-    return CachedBasis{B,V,𝔽}(data)
+    return CachedBasis{𝔽,B,V}(data)
 end
 function CachedBasis(basis::CachedBasis) # avoid double encapsulation
     return basis
@@ -149,10 +156,10 @@ function get_vector end
 const all_uncached_bases = Union{AbstractBasis, DefaultBasis, DefaultOrthogonalBasis, DefaultOrthonormalBasis}
 const DISAMBIGUATION_BASIS_TYPES = [
     CachedBasis,
-    CachedBasis{<:AbstractBasis{ℝ}},
-    CachedBasis{<:AbstractBasis{ℂ}},
-    CachedBasis{<:AbstractOrthogonalBasis{ℝ}},
-    CachedBasis{<:AbstractOrthonormalBasis{ℝ}},
+    CachedBasis{ℝ,<:AbstractBasis{ℝ}},
+    CachedBasis{ℂ,<:AbstractBasis{ℂ}},
+    CachedBasis{ℝ,<:AbstractOrthogonalBasis{ℝ}},
+    CachedBasis{ℝ,<:AbstractOrthonormalBasis{ℝ}},
     DefaultBasis,
     DefaultOrthonormalBasis,
     DefaultOrthogonalBasis,
@@ -347,18 +354,12 @@ end
 function get_coordinates!(M::Manifold, Y, p, X, B::DefaultOrthogonalBasis)
     return get_coordinates!(M, Y, p, X, DefaultOrthonormalBasis(number_system(B)))
 end
-function get_coordinates!(
-    M::Manifold,
-    Y,
-    p,
-    X,
-    B::CachedBasis,
-)
-    if number_system(M) === number_system(B)
-        map!(vb -> real(inner(M, p, X, vb)), Y, get_vectors(M, p, B))
-    else
-        map!(vb -> conj(inner(M, p, X, vb)), Y, get_vectors(M, p, B))
-    end
+function get_coordinates!(M::Manifold{𝔾}, Y, p, X, C::CachedBasis{𝔽,B,V}) where {B,V,𝔾,𝔽}
+    map!(vb -> conj(inner(M, p, X, vb)), Y, get_vectors(M, p, C))
+    return Y
+end
+function get_coordinates!(M::Manifold{𝔽}, Y, p, X, C::CachedBasis{𝔽,B,V}) where {B,V,𝔽}
+    map!(vb -> real(inner(M, p, X, vb)), Y, get_vectors(M, p, C))
     return Y
 end
 
@@ -414,7 +415,7 @@ function get_vector!(M::Manifold, Y, p, X, B::CachedBasis)
     # quite convoluted but:
     #  1) preserves the correct `eltype`
     #  2) guarantees a reasonable array type `Y`
-    #     (for example scalar * `SizedArray` is an `SArray`)
+    #     (for example scalar * `SizedValidation` is an `SArray`)
     bvectors = get_vectors(M, p, B)
     if _get_vector_cache_broadcast(bvectors[1]) === Val(false)
         Xt = X[1] * bvectors[1]
@@ -449,8 +450,8 @@ function get_vectors(
     return _get_vectors(B)
 end
 #internal for directly cached basis i.e. those that are just arrays – used in show
-_get_vectors(B::CachedBasis{<:AbstractBasis,<:AbstractArray}) = B.data
-_get_vectors(B::CachedBasis{<:AbstractBasis,<:DiagonalizingBasisData}) = B.data.vectors
+_get_vectors(B::CachedBasis{𝔽,<:AbstractBasis,<:AbstractArray}) where {𝔽} = B.data
+_get_vectors(B::CachedBasis{𝔽,<:AbstractBasis,<:DiagonalizingBasisData}) where {𝔽} = B.data.vectors
 
 @doc raw"""
     hat(M::Manifold, p, Xⁱ)
@@ -524,11 +525,10 @@ end
 function show(
     io::IO,
     mime::MIME"text/plain",
-    B::CachedBasis{T,D,𝔽},
-) where {T<:AbstractBasis,D,𝔽}
+    B::CachedBasis{𝔽,T,D},
+) where {𝔽,T<:AbstractBasis,D}
     print(
         io,
-
         "$(T()) with $(length(_get_vectors(B))) basis vector$(length(_get_vectors(B)) == 1 ? "" : "s"):",
     )
     _show_basis_vector_range_noheader(
@@ -542,8 +542,8 @@ end
 function show(
     io::IO,
     mime::MIME"text/plain",
-    B::CachedBasis{T,D,𝔽},
-) where {T<:DiagonalizingOrthonormalBasis,D<:DiagonalizingBasisData,𝔽}
+    B::CachedBasis{𝔽,T,D},
+) where {𝔽,T<:DiagonalizingOrthonormalBasis,D<:DiagonalizingBasisData}
     vectors = _get_vectors(B)
     nv = length(vectors)
     sk = sprint(show, "text/plain", T(B.data.frame_direction), context = io, sizehint = 0)

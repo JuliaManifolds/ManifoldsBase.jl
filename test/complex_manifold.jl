@@ -3,7 +3,7 @@ import ManifoldsBase: representation_size, manifold_dimension, inner
 using LinearAlgebra
 using Test
 
-struct ComplexEuclidean{N} <: Manifold where {N} end
+struct ComplexEuclidean{N} <: Manifold{ℂ} where {N} end
 ComplexEuclidean(n::Int) = ComplexEuclidean{n}()
 representation_size(::ComplexEuclidean{N}) where {N} = (N,)
 manifold_dimension(::ComplexEuclidean{N}) where {N} = 2N

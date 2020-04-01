@@ -4,7 +4,7 @@ using ManifoldsBase: DefaultManifold, ℝ, ℂ
 using Test
 import Base: +, -, *, copyto!, isapprox
 
-struct ProjManifold <: Manifold end
+struct ProjManifold <: Manifold{ℝ} end
 
 ManifoldsBase.inner(::ProjManifold, x, w, v) = dot(w, v)
 ManifoldsBase.project!(S::ProjManifold, w, x, v) = (w .= v .- dot(x, v) .* x)
@@ -37,7 +37,8 @@ ManifoldsBase.get_vector(::ProjManifold, x, v, ::DefaultOrthonormalBasis) = reve
     ) === Val(:transparent)
 end
 
-struct ProjectionTestManifold <: Manifold end
+struct ProjectionTestManifold <: Manifold{ℝ} end
+
 ManifoldsBase.inner(::ProjectionTestManifold, ::Any, X, Y) = dot(X, Y)
 function ManifoldsBase.project!(::ProjectionTestManifold, Y, p, X)
     Y .= X .- dot(p, X) .* p
@@ -85,7 +86,7 @@ ManifoldsBase.manifold_dimension(::ProjectionTestManifold) = 100
     end
 end
 
-struct NonManifold <: Manifold end
+struct NonManifold <: Manifold{ℝ} end
 struct NonBasis <: ManifoldsBase.AbstractBasis{ℝ} end
 
 struct NonBroadcastBasisThing{T}
@@ -210,9 +211,9 @@ DiagonalizingBasisProxy() = DiagonalizingOrthonormalBasis([1.0, 0.0, 0.0])
         b = get_basis(M, pts[1], BT())
         if BT != DiagonalizingBasisProxy
             if pts[1] isa Array
-                @test isa(b, CachedBasis{BT{ℝ},Vector{Vector{Float64}},ℝ})
+                @test isa(b, CachedBasis{ℝ,BT{ℝ},Vector{Vector{Float64}}})
             else
-                @test isa(b, CachedBasis{BT{ℝ},Vector{NonBroadcastBasisThing{Vector{Float64}}},ℝ})
+                @test isa(b, CachedBasis{ℝ,BT{ℝ},Vector{NonBroadcastBasisThing{Vector{Float64}}}})
             end
         end
         @test get_basis(M, pts[1], b) === b

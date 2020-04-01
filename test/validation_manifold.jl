@@ -2,31 +2,31 @@ using ManifoldsBase
 using LinearAlgebra
 using Test
 
-struct CustomArrayManifoldRetraction <: ManifoldsBase.AbstractRetractionMethod end
+struct CustomValidationManifoldRetraction <: ManifoldsBase.AbstractRetractionMethod end
 
 function ManifoldsBase.injectivity_radius(
     ::ManifoldsBase.DefaultManifold,
-    ::CustomArrayManifoldRetraction,
+    ::CustomValidationManifoldRetraction,
 )
     return 10.0
 end
 function ManifoldsBase.injectivity_radius(
     ::ManifoldsBase.DefaultManifold,
     p,
-    ::CustomArrayManifoldRetraction,
+    ::CustomValidationManifoldRetraction,
 )
     return 11.0
 end
 
-@testset "Array manifold" begin
+@testset "Validation manifold" begin
     M = ManifoldsBase.DefaultManifold(3)
-    A = ArrayManifold(M)
+    A = ValidationManifold(M)
     x = [1.0, 0.0, 0.0]
     y = 1 / sqrt(2) * [1.0, 1.0, 0.0]
     z = [0.0, 1.0, 0.0]
     v = log(M, x, y)
-    x2 = ArrayMPoint(x)
-    y2 = ArrayMPoint(y)
+    x2 = ValidationMPoint(x)
+    y2 = ValidationMPoint(y)
     v2 = log(A, x, y) # auto convert
     y2 = exp(A, x, v2)
     w = log(M, x, z)
@@ -40,7 +40,7 @@ end
         @test ManifoldsBase.representation_size(A) == (3,)
         @test manifold_dimension(A) == manifold_dimension(M)
         @test manifold_dimension(A) == 3
-        for T in [ArrayMPoint, ArrayTVector, ArrayCoTVector]
+        for T in [ValidationMPoint, ValidationTVector, ValidationCoTVector]
             p = T(x)
             @test convert(typeof(x), p) == x
             @test convert(typeof(p), y) == T(y)
@@ -62,7 +62,7 @@ end
         end
     end
     @testset "Vector functions" begin
-        for T in [ArrayTVector, ArrayCoTVector]
+        for T in [ValidationTVector, ValidationCoTVector]
             a = T(v)
             b = T(w)
             @test isapprox(A, a + b, T(v + w))
@@ -114,11 +114,11 @@ end
         @test injectivity_radius(A, x) == Inf
         @test injectivity_radius(A, ManifoldsBase.ExponentialRetraction()) == Inf
         @test injectivity_radius(A, x, ManifoldsBase.ExponentialRetraction()) == Inf
-        @test injectivity_radius(A, CustomArrayManifoldRetraction()) == 10
-        @test injectivity_radius(A, x, CustomArrayManifoldRetraction()) == 11
+        @test injectivity_radius(A, CustomValidationManifoldRetraction()) == 10
+        @test injectivity_radius(A, x, CustomValidationManifoldRetraction()) == 11
     end
 
-    @testset "ArrayManifold basis" begin
+    @testset "ValidationManifold basis" begin
         b = [Matrix(I,3,3)[:,i] for i=1:3]
         for BT in (DefaultBasis, DefaultOrthonormalBasis, DefaultOrthogonalBasis)
             @testset "Basis $(BT)" begin

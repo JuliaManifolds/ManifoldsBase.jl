@@ -9,7 +9,7 @@ This manifold further illustrates how to type your manifold points and tangent v
 that the interface does not require this, but it might be handy in debugging and educative
 situations to verify correctness of involved variabes.
 """
-struct DefaultManifold{T<:Tuple, 𝔽} <: Manifold where {T, 𝔽} end
+struct DefaultManifold{T<:Tuple, 𝔽} <: Manifold{𝔽} end
 DefaultManifold(n::Vararg{Int,N}; field = ℝ) where {N} = DefaultManifold{Tuple{n...}, field}()
 
 function check_manifold_point(M::DefaultManifold, p; kwargs...)

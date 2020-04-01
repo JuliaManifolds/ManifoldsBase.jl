@@ -7,14 +7,21 @@ import Markdown: @doc_str
 using LinearAlgebra
 
 """
-    Manifold
+    Manifold{F}
 
 A manifold type. The `Manifold` is used to dispatch to different functions on a manifold,
 usually as the first argument of the function. Examples are the [`exp`](@ref)onential and
 [`log`](@ref)arithmic maps as well as more general functions that are built on them like the
 [`geodesic`](@ref).
+
+The manifold is parametrized by an [`AbstractNumbers`](@ref) to distinguish for example
+real (ℝ) and complex (ℂ) manifolds.
+
+For subtypes the preferred order of parameters is: size and simple value parameters,
+followed by the [`AbstractNumbers`](@ref) `field`, followed by data type parameters,
+which might depend on the abstract number field type.
 """
-abstract type Manifold end
+abstract type Manifold{𝔽} end
 
 """
     AbstractEstimationMethod
@@ -901,17 +908,20 @@ end
 include("numbers.jl")
 include("DecoratorManifold.jl")
 include("bases.jl")
-include("ArrayManifold.jl")
+include("ValidationManifold.jl")
 include("EmbeddedManifold.jl")
 include("DefaultManifold.jl")
 
 export Manifold, MPoint, TVector, CoTVector
-export AbstractDecoratorManifold, ArrayManifold, ArrayMPoint, ArrayTVector, ArrayCoTVector
+export AbstractDecoratorManifold
+export ValidationManifold, ValidationMPoint, ValidationTVector, ValidationCoTVector
 export AbstractEmbeddingType,
     TransparentIsometricEmbedding,
     DefaultIsometricEmbeddingType,
     DefaultEmbeddingType
 export AbstractEmbeddedManifold, EmbeddedManifold, TransparentIsometricEmbedding
+
+export OutOfInjectivityRadiusError
 
 export AbstractRetractionMethod,
     ExponentialRetraction,
