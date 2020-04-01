@@ -138,7 +138,7 @@ decorator_transparent_dispatch(::typeof(test18), M::ChildDecorator, args...) = V
 
 @testset "Testing decorator manifold functions" begin
     M = ManifoldsBase.DefaultManifold(3)
-    A = ArrayManifold(M)
+    A = ValidationManifold(M)
 
     @test (@inferred base_manifold(M)) == M
     @test (@inferred base_manifold(A)) == M

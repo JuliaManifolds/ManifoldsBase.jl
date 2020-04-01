@@ -908,12 +908,13 @@ end
 include("numbers.jl")
 include("DecoratorManifold.jl")
 include("bases.jl")
-include("ArrayManifold.jl")
+include("ValidationManifold.jl")
 include("EmbeddedManifold.jl")
 include("DefaultManifold.jl")
 
 export Manifold, MPoint, TVector, CoTVector
-export AbstractDecoratorManifold, ArrayManifold, ArrayMPoint, ArrayTVector, ArrayCoTVector
+export AbstractDecoratorManifold
+export ValidationManifold, ValidationMPoint, ValidationTVector, ValidationCoTVector
 export AbstractEmbeddingType,
     TransparentIsometricEmbedding,
     DefaultIsometricEmbeddingType,

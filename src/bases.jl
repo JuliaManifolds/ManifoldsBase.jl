@@ -415,7 +415,7 @@ function get_vector!(M::Manifold, Y, p, X, B::CachedBasis)
     # quite convoluted but:
     #  1) preserves the correct `eltype`
     #  2) guarantees a reasonable array type `Y`
-    #     (for example scalar * `SizedArray` is an `SArray`)
+    #     (for example scalar * `SizedValidation` is an `SArray`)
     bvectors = get_vectors(M, p, B)
     if _get_vector_cache_broadcast(bvectors[1]) === Val(false)
         Xt = X[1] * bvectors[1]

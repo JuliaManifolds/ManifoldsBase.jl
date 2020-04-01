@@ -44,15 +44,15 @@ This way a manifold can benefit from existing implementations.
 One example is the `TransparentIsometricEmbeddingType` where a manifold uses the metric,
 `inner`, from its embedding.
 
-## `ArrayManifold`
+## `ValidationManifold`
 
-The `ArrayManifold` further illustrates how one can also used types to
+The `ValidationManifold` further illustrates how one can also used types to
 represent points on a manifold, tangent vectors, and cotangent vectors,
 where values are encapsulated in a certain type.
 
-In general, `ArrayManifold` might be used for manifolds where these three types are represented
+In general, `ValidationManifold` might be used for manifolds where these three types are represented
 by more complicated data structures or when it is necessary to distinguish these
 by type.
 
 This adds a semantic layer to the interface, and the default implementation of
-`ArrayManifold` adds checks to all inputs and outputs of typed data.
+`ValidationManifold` adds checks to all inputs and outputs of typed data.
