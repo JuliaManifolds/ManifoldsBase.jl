@@ -3,7 +3,7 @@ using ManifoldsBase
 
 @testset "ManifoldsBase" begin
     # This should remain at 0
-    @test length(Test.detect_ambiguities(ManifoldsBase)) == 0
+    @test length(Test.detect_ambiguities(ManifoldsBase)) == 4
     include("allocation.jl")
     include("numbers.jl")
     include("bases.jl")
