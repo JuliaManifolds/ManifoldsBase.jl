@@ -158,6 +158,7 @@ const DISAMBIGUATION_BASIS_TYPES = [
     CachedBasis,
     CachedBasis{ℝ,<:AbstractBasis{ℝ}},
     CachedBasis{ℂ,<:AbstractBasis{ℂ}},
+    CachedBasis{𝔽,<:AbstractBasis{𝔽}} where {𝔽},
     CachedBasis{ℝ,<:AbstractOrthogonalBasis{ℝ}},
     CachedBasis{ℝ,<:AbstractOrthonormalBasis{ℝ}},
     DefaultBasis,
@@ -170,16 +171,14 @@ const DISAMBIGUATION_BASIS_TYPES = [
 ]
 
 function allocate_result(
-    M::Manifold{𝔽},
+    M::Manifold,
     f::typeof(get_coordinates),
     p,
     X,
-    B::AbstractBasis{𝔾}
-) where {𝔽,𝔾}
+    B::AbstractBasis,
+)
     T = allocate_result_type(M, f, (p, X))
-    # avoid that 1D complex manifolds get set to zero
-    s = max(div(manifold_dimension(M), real_dimension(𝔽)),1) * real_dimension(𝔾)
-    return allocate(p, T, s)
+    return allocate(p, T, number_of_coordinates(M, B))
 end
 
 function allocate_result(M::Manifold, f::typeof(get_coordinates), p, X, B::CachedBasis)
@@ -362,11 +361,11 @@ end
 function get_coordinates!(M::Manifold, Y, p, X, B::DefaultOrthogonalBasis)
     return get_coordinates!(M, Y, p, X, DefaultOrthonormalBasis(number_system(B)))
 end
-function get_coordinates!(M::Manifold{𝔾}, Y, p, X, C::CachedBasis{𝔽,B,V}) where {B,V,𝔾,𝔽}
+function get_coordinates!(M::Manifold, Y, p, X, C::CachedBasis)
     map!(vb -> conj(inner(M, p, X, vb)), Y, get_vectors(M, p, C))
     return Y
 end
-function get_coordinates!(M::Manifold{𝔽}, Y, p, X, C::CachedBasis{𝔽,B,V}) where {B,V,𝔽}
+function get_coordinates!(M::Manifold{𝔽}, Y, p, X, C::CachedBasis{𝔽}) where {𝔽}
     map!(vb -> real(inner(M, p, X, vb)), Y, get_vectors(M, p, C))
     return Y
 end
@@ -425,7 +424,7 @@ function get_vector!(M::Manifold, Y, p, X, B::CachedBasis)
     #  2) guarantees a reasonable array type `Y`
     #     (for example scalar * `SizedValidation` is an `SArray`)
     bvectors = get_vectors(M, p, B)
-    print("hi.\nB:$(B)\n& X:$(X)\n\nyields\n $(bvectors).")
+    #print("hi.\nB:$(B)\n& X:$(X)\n\nyields\n $(bvectors).")
     if _get_vector_cache_broadcast(bvectors[1]) === Val(false)
         Xt = X[1] * bvectors[1]
         copyto!(Y, Xt)
@@ -479,6 +478,15 @@ inverse.
 """
 hat(M::Manifold, p, X) = get_vector(M, p, X, VeeOrthogonalBasis())
 hat!(M::Manifold, Y, p, X) = get_vector!(M, Y, p, X, VeeOrthogonalBasis())
+
+"""
+    number_of_coordinates(M::Manifold, B::AbstractBasis)
+
+Compute the number of coordinates in basis `B` of manifold `M`.
+"""
+function number_of_coordinates(M::Manifold{𝔽}, B::AbstractBasis{𝔾}) where {𝔽,𝔾}
+    return div(manifold_dimension(M), real_dimension(𝔽)) * real_dimension(𝔾)
+end
 
 """
     number_system(::AbstractBasis)

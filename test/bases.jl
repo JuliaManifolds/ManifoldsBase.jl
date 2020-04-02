@@ -200,6 +200,7 @@ DiagonalizingBasisProxy() = DiagonalizingOrthonormalBasis([1.0, 0.0, 0.0])
             continue
         end
         v1 = log(M, pts[1], pts[2])
+        @test ManifoldsBase.number_of_coordinates(M, BT()) == 3
 
         if BT != DiagonalizingBasisProxy
             vb = get_coordinates(M, pts[1], v1, BT())
@@ -259,15 +260,17 @@ end
     X = [1.2, 2.2im, 2.3im]
     b = [Matrix{Float64}(I,3,3)[:,i] for i=1:3]
     Bℝ = CachedBasis(DefaultOrthonormalBasis{ℝ}(),b)
-    aℝ = get_coordinates(M,p,X,Bℝ)
-    Yℝ = get_vector(M,p,aℝ,Bℝ)
+    aℝ = get_coordinates(M, p, X, Bℝ)
+    Yℝ = get_vector(M, p, aℝ, Bℝ)
     @test Yℝ ≈ X
+    @test ManifoldsBase.number_of_coordinates(M, Bℝ) == 3
 
     bℂ = [b...,(b.*1im)...]
     Bℂ = CachedBasis(DefaultOrthonormalBasis{ℂ}(), bℂ)
-    aℂ = get_coordinates(M,p,X,Bℂ)
-    Yℂ = get_vector(M,p,aℂ,Bℂ)
+    aℂ = get_coordinates(M, p, X, Bℂ)
+    Yℂ = get_vector(M, p, aℂ, Bℂ)
     @test Yℂ ≈ X
+    @test ManifoldsBase.number_of_coordinates(M, Bℂ) == 6
 end
 
 @testset "Basis show methods" begin
