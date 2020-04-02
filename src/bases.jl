@@ -487,6 +487,9 @@ Compute the number of coordinates in basis `B` of manifold `M`.
 function number_of_coordinates(M::Manifold{𝔽}, B::AbstractBasis{𝔾}) where {𝔽,𝔾}
     return div(manifold_dimension(M), real_dimension(𝔽)) * real_dimension(𝔾)
 end
+function number_of_coordinates(M::Manifold{𝔽}, B::AbstractBasis{𝔽}) where {𝔽}
+   return manifold_dimension(M)
+end
 
 """
     number_system(::AbstractBasis)
