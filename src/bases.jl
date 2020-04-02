@@ -117,8 +117,8 @@ struct DiagonalizingBasisData{D,V,ET}
     vectors::V
 end
 
-const DefaultOrDiagonalizingBasis =
-    Union{DefaultOrthonormalBasis,DiagonalizingOrthonormalBasis}
+const DefaultOrDiagonalizingBasis{𝔽} =
+    Union{DefaultOrthonormalBasis{𝔽},DiagonalizingOrthonormalBasis{𝔽}}
 
 """
     CachedBasis{𝔽,V,<:AbstractBasis{𝔽}} <: AbstractBasis{𝔽}
@@ -169,9 +169,17 @@ const DISAMBIGUATION_BASIS_TYPES = [
     VeeOrthogonalBasis,
 ]
 
-function allocate_result(M::Manifold, f::typeof(get_coordinates), p, X, B)
+function allocate_result(
+    M::Manifold{𝔽},
+    f::typeof(get_coordinates),
+    p,
+    X,
+    B::AbstractBasis{𝔾}
+) where {𝔽,𝔾}
     T = allocate_result_type(M, f, (p, X))
-    return allocate(p, T, manifold_dimension(M))
+    # avoid that 1D complex manifolds get set to zero
+    s = max(div(manifold_dimension(M), real_dimension(𝔽)),1) * real_dimension(𝔾)
+    return allocate(p, T, s)
 end
 
 function allocate_result(M::Manifold, f::typeof(get_coordinates), p, X, B::CachedBasis)
@@ -417,6 +425,7 @@ function get_vector!(M::Manifold, Y, p, X, B::CachedBasis)
     #  2) guarantees a reasonable array type `Y`
     #     (for example scalar * `SizedValidation` is an `SArray`)
     bvectors = get_vectors(M, p, B)
+    print("hi.\nB:$(B)\n& X:$(X)\n\nyields\n $(bvectors).")
     if _get_vector_cache_broadcast(bvectors[1]) === Val(false)
         Xt = X[1] * bvectors[1]
         copyto!(Y, Xt)
