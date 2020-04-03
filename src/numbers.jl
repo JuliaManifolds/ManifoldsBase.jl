@@ -33,6 +33,26 @@ const ℝ = RealNumbers()
 const ℂ = ComplexNumbers()
 const ℍ = QuaternionNumbers()
 
+"""
+    _unify_number_systems(𝔽s::AbstractNumbers...)
+
+Compute a number system that includes all given number systems (as sub-systems) and is
+closed under addition and multiplication.
+"""
+function _unify_number_systems(a::AbstractNumbers, rest::AbstractNumbers...)
+    return _unify_number_systems(a, _unify_number_systems(rest...))
+end
+_unify_number_systems(𝔽::AbstractNumbers) = 𝔽
+_unify_number_systems(r::RealNumbers, ::RealNumbers) = r
+_unify_number_systems(::RealNumbers, c::ComplexNumbers) = c
+_unify_number_systems(::RealNumbers, q::QuaternionNumbers) = q
+_unify_number_systems(c::ComplexNumbers, ::RealNumbers) = c
+_unify_number_systems(c::ComplexNumbers, ::ComplexNumbers) = c
+_unify_number_systems(::ComplexNumbers, q::QuaternionNumbers) = q
+_unify_number_systems(q::QuaternionNumbers, ::RealNumbers) = q
+_unify_number_systems(q::QuaternionNumbers, ::ComplexNumbers) = q
+_unify_number_systems(q::QuaternionNumbers, ::QuaternionNumbers) = q
+
 Base.show(io::IO, ::RealNumbers) = print(io, "ℝ")
 Base.show(io::IO, ::ComplexNumbers) = print(io, "ℂ")
 Base.show(io::IO, ::QuaternionNumbers) = print(io, "ℍ")

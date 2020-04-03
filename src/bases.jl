@@ -183,7 +183,7 @@ end
 
 function allocate_result(M::Manifold, f::typeof(get_coordinates), p, X, B::CachedBasis)
     T = allocate_result_type(M, f, (p, X))
-    return allocate(p, T, length(get_vectors(M, p, B)))
+    return allocate(p, T, number_of_coordinates(M, B))
 end
 
 @inline function allocate_result_type(
@@ -374,7 +374,7 @@ function get_coordinates!(M::N, Y, p, X, C::D) where {N<:Manifold{ℂ}, D<:Cache
     map!(vb -> conj(inner(M, p, X, vb)), Y, get_vectors(M, p, C))
     return Y
 end
-function get_coordinates!(M::N, Y, p, X, C::D) where {𝔽, N<:Manifold{<:𝔽}, D<:CachedBasis{<:𝔽}}
+function get_coordinates!(M::Manifold{𝔽}, Y, p, X, C::CachedBasis{𝔽}) where {𝔽}
     map!(vb -> real(inner(M, p, X, vb)), Y, get_vectors(M, p, C))
     return Y
 end
