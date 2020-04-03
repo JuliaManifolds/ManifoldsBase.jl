@@ -236,6 +236,10 @@ See also: [`get_coordinates`](@ref), [`get_vector`](@ref)
 function get_basis(M::Manifold, p, B::AbstractBasis)
     error("get_basis not implemented for manifold of type $(typeof(M)) a point of type $(typeof(p)) and basis of type $(typeof(B)).")
 end
+@decorator_transparent_signature get_basis(M::AbstractDecoratorManifold, p, B::AbstractBasis)
+function decorator_transparent_dispatch(::typeof(get_basis), ::Manifold, args...)
+    return Val(:parent)
+end
 
 function get_basis(M::Manifold, p, B::DefaultOrthonormalBasis)
     dim = manifold_dimension(M)
@@ -311,6 +315,11 @@ function get_basis(
     else
         error("get_basis with bases $(typeof(B)) only found $(K) orthonormal basis vectors, but manifold dimension is $(dim).")
     end
+end
+for BT in DISAMBIGUATION_BASIS_TYPES
+    eval(quote
+        @decorator_transparent_signature get_basis(M::AbstractDecoratorManifold, p, B::$BT)
+    end)
 end
 
 """
