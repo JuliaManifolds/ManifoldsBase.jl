@@ -183,7 +183,8 @@ function get_basis(
     kwargs...,
 ) where {𝔽}
     is_manifold_point(M, p, true; kwargs...)
-    Ξ = invoke(get_basis, Tuple{ValidationManifold,Any,AbstractOrthogonalBasis}, M, p, B; kwargs...)
+    get_basis_invoke_types = Tuple{ValidationManifold,Any,Union{AbstractOrthogonalBasis,CachedBasis{𝔽,<:AbstractOrthogonalBasis{𝔽}}} where {𝔽}}
+    Ξ = invoke(get_basis, get_basis_invoke_types, M, p, B; kwargs...)
     bvectors = get_vectors(M, p, Ξ)
     N = length(bvectors)
     for i = 1:N

@@ -156,11 +156,6 @@ function get_vector end
 const all_uncached_bases = Union{AbstractBasis, DefaultBasis, DefaultOrthogonalBasis, DefaultOrthonormalBasis}
 const DISAMBIGUATION_BASIS_TYPES = [
     CachedBasis,
-    CachedBasis{ℝ,<:AbstractBasis{ℝ}},
-    CachedBasis{ℂ,<:AbstractBasis{ℂ}},
-    CachedBasis{𝔽,<:AbstractBasis{𝔽}} where {𝔽},
-    CachedBasis{ℝ,<:AbstractOrthogonalBasis{ℝ}},
-    CachedBasis{ℝ,<:AbstractOrthonormalBasis{ℝ}},
     DefaultBasis,
     DefaultOrthonormalBasis,
     DefaultOrthogonalBasis,
