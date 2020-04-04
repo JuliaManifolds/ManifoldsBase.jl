@@ -370,11 +370,14 @@ end
 function get_coordinates!(M::Manifold, Y, p, X, B::DefaultOrthogonalBasis)
     return get_coordinates!(M, Y, p, X, DefaultOrthonormalBasis(number_system(B)))
 end
-function get_coordinates!(M::N, Y, p, X, C::D) where {N<:Manifold{ℂ}, D<:CachedBasis{ℝ}}
-    map!(vb -> conj(inner(M, p, X, vb)), Y, get_vectors(M, p, C))
+function get_coordinates!(M::Manifold, Y, p, X, B::CachedBasis)
+    _get_coordinates!(M, number_system(M), Y, p, X, B, number_system(B))
+end
+function _get_coordinates!(M::Manifold, ::ComplexNumbers, Y, p, X, B::CachedBasis,::RealNumbers)
+    map!(vb -> conj(inner(M, p, X, vb)), Y, get_vectors(M, p, B))
     return Y
 end
-function get_coordinates!(M::Manifold{𝔽}, Y, p, X, C::CachedBasis{𝔽}) where {𝔽}
+function _get_coordinates!(M::Manifold, a::𝔽, Y, p, X, C::CachedBasis, b::𝔽) where {𝔽}
     map!(vb -> real(inner(M, p, X, vb)), Y, get_vectors(M, p, C))
     return Y
 end
