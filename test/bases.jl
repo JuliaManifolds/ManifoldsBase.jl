@@ -14,6 +14,12 @@ ManifoldsBase.get_vector(::ProjManifold, x, v, ::DefaultOrthonormalBasis) = reve
 
 @testset "Dispatch" begin
     @test ManifoldsBase.decorator_transparent_dispatch(
+        get_basis,
+        DefaultManifold(3),
+        [0.0, 0.0, 0.0],
+        DefaultBasis(),
+    ) === Val(:parent)
+    @test ManifoldsBase.decorator_transparent_dispatch(
         get_coordinates,
         DefaultManifold(3),
         [0.0, 0.0, 0.0],
