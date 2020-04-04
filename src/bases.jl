@@ -117,8 +117,8 @@ struct DiagonalizingBasisData{D,V,ET}
     vectors::V
 end
 
-const DefaultOrDiagonalizingBasis =
-    Union{DefaultOrthonormalBasis,DiagonalizingOrthonormalBasis}
+const DefaultOrDiagonalizingBasis{𝔽} =
+    Union{DefaultOrthonormalBasis{𝔽},DiagonalizingOrthonormalBasis{𝔽}}
 
 """
     CachedBasis{𝔽,V,<:AbstractBasis{𝔽}} <: AbstractBasis{𝔽}
@@ -156,10 +156,6 @@ function get_vector end
 const all_uncached_bases = Union{AbstractBasis, DefaultBasis, DefaultOrthogonalBasis, DefaultOrthonormalBasis}
 const DISAMBIGUATION_BASIS_TYPES = [
     CachedBasis,
-    CachedBasis{ℝ,<:AbstractBasis{ℝ}},
-    CachedBasis{ℂ,<:AbstractBasis{ℂ}},
-    CachedBasis{ℝ,<:AbstractOrthogonalBasis{ℝ}},
-    CachedBasis{ℝ,<:AbstractOrthonormalBasis{ℝ}},
     DefaultBasis,
     DefaultOrthonormalBasis,
     DefaultOrthogonalBasis,
@@ -169,14 +165,20 @@ const DISAMBIGUATION_BASIS_TYPES = [
     VeeOrthogonalBasis,
 ]
 
-function allocate_result(M::Manifold, f::typeof(get_coordinates), p, X, B)
+function allocate_result(
+    M::Manifold,
+    f::typeof(get_coordinates),
+    p,
+    X,
+    B::AbstractBasis,
+)
     T = allocate_result_type(M, f, (p, X))
-    return allocate(p, T, manifold_dimension(M))
+    return allocate(p, T, number_of_coordinates(M, B))
 end
 
 function allocate_result(M::Manifold, f::typeof(get_coordinates), p, X, B::CachedBasis)
     T = allocate_result_type(M, f, (p, X))
-    return allocate(p, T, length(get_vectors(M, p, B)))
+    return allocate(p, T, number_of_coordinates(M, B))
 end
 
 @inline function allocate_result_type(
@@ -228,6 +230,10 @@ See also: [`get_coordinates`](@ref), [`get_vector`](@ref)
 """
 function get_basis(M::Manifold, p, B::AbstractBasis)
     error("get_basis not implemented for manifold of type $(typeof(M)) a point of type $(typeof(p)) and basis of type $(typeof(B)).")
+end
+@decorator_transparent_signature get_basis(M::AbstractDecoratorManifold, p, B::AbstractBasis)
+function decorator_transparent_dispatch(::typeof(get_basis), ::Manifold, args...)
+    return Val(:parent)
 end
 
 function get_basis(M::Manifold, p, B::DefaultOrthonormalBasis)
@@ -305,6 +311,11 @@ function get_basis(
         error("get_basis with bases $(typeof(B)) only found $(K) orthonormal basis vectors, but manifold dimension is $(dim).")
     end
 end
+for BT in DISAMBIGUATION_BASIS_TYPES
+    eval(quote
+        @decorator_transparent_signature get_basis(M::AbstractDecoratorManifold, p, B::$BT)
+    end)
+end
 
 """
     get_coordinates(M::Manifold, p, X, B::AbstractBasis)
@@ -354,11 +365,14 @@ end
 function get_coordinates!(M::Manifold, Y, p, X, B::DefaultOrthogonalBasis)
     return get_coordinates!(M, Y, p, X, DefaultOrthonormalBasis(number_system(B)))
 end
-function get_coordinates!(M::Manifold{𝔾}, Y, p, X, C::CachedBasis{𝔽,B,V}) where {B,V,𝔾,𝔽}
-    map!(vb -> conj(inner(M, p, X, vb)), Y, get_vectors(M, p, C))
+function get_coordinates!(M::Manifold, Y, p, X, B::CachedBasis)
+    _get_coordinates!(M, number_system(M), Y, p, X, B, number_system(B))
+end
+function _get_coordinates!(M::Manifold, ::ComplexNumbers, Y, p, X, B::CachedBasis,::RealNumbers)
+    map!(vb -> conj(inner(M, p, X, vb)), Y, get_vectors(M, p, B))
     return Y
 end
-function get_coordinates!(M::Manifold{𝔽}, Y, p, X, C::CachedBasis{𝔽,B,V}) where {B,V,𝔽}
+function _get_coordinates!(M::Manifold, a::𝔽, Y, p, X, C::CachedBasis, b::𝔽) where {𝔽}
     map!(vb -> real(inner(M, p, X, vb)), Y, get_vectors(M, p, C))
     return Y
 end
@@ -417,6 +431,7 @@ function get_vector!(M::Manifold, Y, p, X, B::CachedBasis)
     #  2) guarantees a reasonable array type `Y`
     #     (for example scalar * `SizedValidation` is an `SArray`)
     bvectors = get_vectors(M, p, B)
+    #print("hi.\nB:$(B)\n& X:$(X)\n\nyields\n $(bvectors).")
     if _get_vector_cache_broadcast(bvectors[1]) === Val(false)
         Xt = X[1] * bvectors[1]
         copyto!(Y, Xt)
@@ -470,6 +485,20 @@ inverse.
 """
 hat(M::Manifold, p, X) = get_vector(M, p, X, VeeOrthogonalBasis())
 hat!(M::Manifold, Y, p, X) = get_vector!(M, Y, p, X, VeeOrthogonalBasis())
+
+"""
+    number_of_coordinates(M::Manifold, B::AbstractBasis)
+
+Compute the number of coordinates in basis `B` of manifold `M`.
+This also corresponds to the number of vectors represented by `B`,
+or stored within `B` in case of a [`CachedBasis`](@ref).
+"""
+function number_of_coordinates(M::Manifold{𝔽}, B::AbstractBasis{𝔾}) where {𝔽,𝔾}
+    return div(manifold_dimension(M), real_dimension(𝔽)) * real_dimension(𝔾)
+end
+function number_of_coordinates(M::Manifold{𝔽}, B::AbstractBasis{𝔽}) where {𝔽}
+   return manifold_dimension(M)
+end
 
 """
     number_system(::AbstractBasis)

@@ -1,6 +1,6 @@
 using Test
 using ManifoldsBase
-using ManifoldsBase: AbstractNumbers, ℝ, ℂ, ℍ
+using ManifoldsBase: AbstractNumbers, ℝ, ℂ, ℍ, _unify_number_systems
 
 struct NotImplementedNumbers <: ManifoldsBase.AbstractNumbers end
 
@@ -21,4 +21,19 @@ struct NotImplementedNumbers <: ManifoldsBase.AbstractNumbers end
     @test ManifoldsBase.QuaternionNumbers() === ℍ
     @test real_dimension(ℍ) == 4
     @test repr(ℍ) == "ℍ"
+
+    @test (@inferred _unify_number_systems(ℝ)) === ℝ
+    @test (@inferred _unify_number_systems(ℂ)) === ℂ
+    @test (@inferred _unify_number_systems(ℍ)) === ℍ
+    @test (@inferred _unify_number_systems(ℝ, ℝ)) === ℝ
+    @test (@inferred _unify_number_systems(ℝ, ℂ)) === ℂ
+    @test (@inferred _unify_number_systems(ℝ, ℍ)) === ℍ
+    @test (@inferred _unify_number_systems(ℂ, ℝ)) === ℂ
+    @test (@inferred _unify_number_systems(ℂ, ℂ)) === ℂ
+    @test (@inferred _unify_number_systems(ℂ, ℍ)) === ℍ
+    @test (@inferred _unify_number_systems(ℍ, ℝ)) === ℍ
+    @test (@inferred _unify_number_systems(ℍ, ℂ)) === ℍ
+    @test (@inferred _unify_number_systems(ℍ, ℍ)) === ℍ
+    @test (@inferred _unify_number_systems(ℝ, ℂ, ℝ)) === ℂ
+    @test (@inferred _unify_number_systems(ℝ, ℝ, ℝ)) === ℝ
 end

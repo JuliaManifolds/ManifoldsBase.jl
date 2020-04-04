@@ -6,7 +6,7 @@ A type used to specify properties of an [`AbstractEmbeddedManifold`](@ref).
 abstract type AbstractEmbeddingType end
 
 """
-    AbstractEmbeddedManifold{T<:AbstractEmbeddingType,𝔽} <: AbstractDecoratorManifold{𝔽}
+    AbstractEmbeddedManifold{𝔽,T<:AbstractEmbeddingType,𝔽} <: AbstractDecoratorManifold{𝔽}
 
 An abstract type for embedded manifolds, which acts as an [`AbstractDecoratorManifold`](@ref).
 The functions of the manifold that is embedded can hence be just passed on to the embedding.
@@ -20,7 +20,7 @@ abstract type AbstractEmbeddedManifold{𝔽,T<:AbstractEmbeddingType} <:
               AbstractDecoratorManifold{𝔽} end
 
 """
-DefaultEmbeddingType <: AbstractEmbeddingType
+    DefaultEmbeddingType <: AbstractEmbeddingType
 
 A type of default embedding that does not have any special properties.
 """
