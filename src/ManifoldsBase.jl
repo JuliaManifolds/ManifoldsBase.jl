@@ -737,8 +737,9 @@ shortest_geodesic(M::Manifold, p, q, T::AbstractVector) = geodesic(M, p, log(M, 
     vector_transport_along(M::Manifold, p, X, c)
     vector_transport_along(M::Manifold, p, X, c, method::AbstractVectorTransportMethod)
 
-Transport a vector `X` from a point `p` along the curve `c` such that `c(0)` is equal to `p`
-to the point `c(1)` using the `method`, which defaults to [`ParallelTransport`](@ref).
+Transport a vector `X` from the tangent space at a point `p` on the [`Manifold`](@ref) `M`
+along the curve `c` such that `c(0)` is equal to `p` to the point `c(1)` using the `method`,
+which defaults to [`ParallelTransport`](@ref).
 """
 function vector_transport_along(M::Manifold, p, X, c)
     return vector_transport_along(M, p, X, c, ParallelTransport())
@@ -753,9 +754,9 @@ end
     vector_transport_along!(M::Manifold, Y, p, X, c)
     vector_transport_along!(M::Manifold, Y, p, X, c, method::AbstractVectorTransportMethod)
 
-Transport a vector `X` from a point `p` along the curve `c` such that `c(0)` is equal to `p`
-to the point `c(1)` using the `method`, which defaults to [`ParallelTransport`](@ref).
-The result is saved to `Y`.
+Transport a vector `X` from the tangent space at a point `p` on the [`Manifold`](@ref) `M`
+along the curve `c` such that `c(0)` is equal to `p` to the point `c(1)` using the `method`,
+which defaults to [`ParallelTransport`](@ref). The result is saved to `Y`.
 """
 function vector_transport_along!(M::Manifold, Y, p, X, c)
     return vector_transport_along!(M, Y, p, X, c, ParallelTransport())
@@ -785,9 +786,10 @@ end
     vector_transport_direction(M::Manifold, p, X, d)
     vector_transport_direction(M::Manifold, p, X, d, method::AbstractVectorTransportMethod)
 
-Transport a vector `X` from a point `p` in the direction indicated by the tangent vector `d`
-at point `p`. By default, [`exp`](@ref) and [`vector_transport_to!`](@ref) are used with
-the `method`, which defaults to [`ParallelTransport`](@ref).
+Transport a vector `X` from the tangent space at a point `p` on the [`Manifold`](@ref) `M`
+in the direction indicated by the tangent vector `d` at `p`. By default, [`exp`](@ref) and
+[`vector_transport_to!`](@ref) are used with the `method`, which defaults
+to [`ParallelTransport`](@ref).
 """
 function vector_transport_direction(M::Manifold, p, X, d)
     return vector_transport_direction(M, p, X, d, ParallelTransport())
@@ -808,10 +810,10 @@ end
     vector_transport_direction!(M::Manifold, Y, p, X, d)
     vector_transport_direction!(M::Manifold, Y, p, X, d, method::AbstractVectorTransportMethod)
 
-Transport a vector `X` from a point `p` in the direction indicated by the tangent vector `d`
-at point `p`. The result is saved to `Y`. By default, [`exp`](@ref) and
-[`vector_transport_to!`](@ref) are used with the `method`, which defaults to
-[`ParallelTransport`](@ref).
+Transport a vector `X` from the tangent space at a point `p` on the [`Manifold`](@ref) `M`
+in the direction indicated by the tangent vector `d` at `p`. By default, [`exp`](@ref) and
+[`vector_transport_to!`](@ref) are used with the `method`, which defaults
+to [`ParallelTransport`](@ref). The result is saved to `Y`.
 """
 function vector_transport_direction!(M::Manifold, Y, p, X, d)
     return vector_transport_direction!(M, Y, p, X, d, ParallelTransport())
@@ -832,7 +834,8 @@ end
     vector_transport_to(M::Manifold, p, X, q)
     vector_transport_to(M::Manifold, p, X, q, method::AbstractVectorTransportMethod)
 
-Compute the vector transport of vector `X` at point `p` to point `q`.
+Transport a vector `X` from the tangent space at a point `p` on the [`Manifold`](@ref) `M`
+along the [`shortest_geodesic`](@ref) to the tangent space at another point `q`.
 By default, the [`AbstractVectorTransportMethod`](@ref) `method` is
 [`ParallelTransport`](@ref).
 """
@@ -849,9 +852,10 @@ end
     vector_transport_to!(M::Manifold, Y, p, X, q)
     vector_transport_to!(M::Manifold, Y, p, X, q, method::AbstractVectorTransportMethod)
 
-Compute the vector transport of vector `X` at point `p` to point `q`.
-The result is saved to `Y`. By default, the [`AbstractVectorTransportMethod`](@ref) `method`
-is [`ParallelTransport`](@ref).
+Transport a vector `X` from the tangent space at a point `p` on the [`Manifold`](@ref) `M`
+along the [`shortest_geodesic`](@ref) to the tangent space at another point `q`.
+By default, the [`AbstractVectorTransportMethod`](@ref) `method` is
+[`ParallelTransport`](@ref). The result is saved to `Y`.
 """
 function vector_transport_to!(M::Manifold, Y, p, q, X)
     return vector_transport_to!(M, Y, p, q, X, ParallelTransport())
