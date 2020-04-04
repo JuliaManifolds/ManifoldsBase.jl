@@ -1,13 +1,13 @@
 """
-    ValidationManifold{M<:Manifold} <: Manifold
+    ValidationManifold{𝔽,M<:Manifold{𝔽}} <: AbstractDecoratorManifold{𝔽}
 
-A manifold to encapsulate manifolds working on array representations of `MPoints` and
-`TVectors` in a transparent way, such that for these manifolds it's not necessary to
-introduce explicit types for the points and tangent vectors, but they are
+A manifold to encapsulate manifolds working on array representations of [`MPoint`](@ref)s
+and [`TVector`](@ref)s in a transparent way, such that for these manifolds it's not
+necessary to introduce explicit types for the points and tangent vectors, but they are
 encapsulated/stripped automatically when needed.
 
-This manifold is a decorator for a manifold, i.e. it decorates a manifold `M` with types
-points, vectors, and covectors.
+This manifold is a decorator for a manifold, i.e. it decorates a [`Manifold`](@ref) `M`
+with types points, vectors, and covectors.
 """
 struct ValidationManifold{𝔽,M<:Manifold{𝔽}} <: AbstractDecoratorManifold{𝔽}
     manifold::M

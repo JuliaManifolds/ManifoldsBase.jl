@@ -863,9 +863,9 @@ end
 """
     vector_transport_to!(M::Manifold, Y, p, X, q, method::ProjectionTransport)
 
-Transport a vector `X` from the tangent space at `p` on a [`Manifold`](@ref) `M` by
+Transport a vector `X` from the tangent space at `p` on the [`Manifold`](@ref) `M` by
 interpreting it as an element of the embedding and then projecting it onto the tangent space
-at `q`. This method requires [`project`](@ref).
+at `q`. This method requires  [`project`](@ref project(M::Manifold, p, X)).
 """
 function vector_transport_to!(M::Manifold, Y, p, X, q, ::ProjectionTransport)
     return project!(M, Y, q, X)

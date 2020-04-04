@@ -9,6 +9,7 @@ the fields [`RealNumbers`](@ref) (`ℝ` for short) and [`ComplexNumbers`](@ref) 
 abstract type AbstractNumbers end
 
 """
+    RealNumbers <: AbstractNumbers
     ℝ = RealNumbers()
 
 The field of real numbers.
@@ -16,6 +17,7 @@ The field of real numbers.
 struct RealNumbers <: AbstractNumbers end
 
 """
+    ComplexNumbers <: AbstractNumbers
     ℂ = ComplexNumbers()
 
 The field of complex numbers.
@@ -23,6 +25,7 @@ The field of complex numbers.
 struct ComplexNumbers <: AbstractNumbers end
 
 """
+    QuaternionNumbers <: AbstractNumbers
     ℍ = QuaternionNumbers()
 
 The division algebra of quaternions.
@@ -60,7 +63,7 @@ Base.show(io::IO, ::QuaternionNumbers) = print(io, "ℍ")
 @doc raw"""
     real_dimension(𝔽::AbstractNumbers)
 
-Return the real dimension $\dim_ℝ 𝔽$ of the [`AbstractNumbers`] system `𝔽`.
+Return the real dimension $\dim_ℝ 𝔽$ of the [`AbstractNumbers`](@ref) system `𝔽`.
 The real dimension is the dimension of a real vector space with which a number in `𝔽` can be
 identified.
 For example, [`ComplexNumbers`](@ref) have a real dimension of 2, and
