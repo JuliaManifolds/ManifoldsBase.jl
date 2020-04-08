@@ -446,6 +446,9 @@ end
 function inverse_retract!(M::Manifold, X, p, q, method::LogarithmicInverseRetraction)
     return log!(M, X, p, q)
 end
+function inverse_retract!(M::Manifold, X, p, q, method::AbstractRetractionMethod)
+    error(manifold_function_not_implemented_message(M, inverse_retract!,X,p,q,method))
+end
 
 """
     inverse_retract(M::Manifold, x, y)
@@ -714,7 +717,9 @@ retract!(M::Manifold, q, p, X, method::ExponentialRetraction) = exp!(M, q, p, X)
 function retract!(M::Manifold, q, p, X, t::Real, method::AbstractRetractionMethod)
     return retract!(M, q, p, t * X, method)
 end
-
+function retract!(M::Manifold, q, p, X, method::AbstractRetractionMethod)
+    error(manifold_function_not_implemented_message(M, retract!,q,p,method))
+end
 @doc doc"""
     shortest_geodesic(M::Manifold, p, q) -> Function
 
