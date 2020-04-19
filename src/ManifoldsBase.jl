@@ -554,8 +554,8 @@ function manifold_features(M::Manifold, p, X; curve=nothing)
     result = Array{Tuple{Function, Array{Any,1},Bool},1}()
     no_specs = Array{DataType,1}()
     push!(result, manifold_feature(M, angle, no_specs, (p, X, X)))
-    push!(result, manifold_feature(M, check_manifold_point, no_specs, (p)))
-    push!(result, manifold_feature(M, check_tangent_vector, no_specs, (p)))
+    push!(result, manifold_feature(M, check_manifold_point, no_specs, (p,)))
+    push!(result, manifold_feature(M, check_tangent_vector, no_specs, (p,)))
     push!(result, manifold_feature(M, distance, no_specs, (p, p)))
     push!(result, manifold_feature(M, exp, no_specs, (p, X)))
     push!(result, manifold_feature(M, log, no_specs, (p, p)))
@@ -567,7 +567,6 @@ function manifold_features(M::Manifold, p, X; curve=nothing)
         [DefaultBasis],
         [DefaultOrthogonalBasis],
         [DefaultOrthonormalBasis],
-        [DefaultOrDiagonalizingBasis],
         [ProjectedOrthonormalBasis,:svd],
         [ProjectedOrthonormalBasis,:gram_schmidt],
         [VeeOrthogonalBasis],
@@ -609,7 +608,7 @@ function manifold_features(M::Manifold, p, X; curve=nothing)
         ProjectionRetraction,
         QRRetraction,
     ]
-        push!(result, manifold_feature(M, inverse_retract, [m], (p, p, m())))
+        push!(result, manifold_feature(M, retract, [m], (p, p, m())))
     end
     push!(result, manifold_feature(M, shortest_geodesic, no_specs, (p, p)))
     for m in [
@@ -618,9 +617,9 @@ function manifold_features(M::Manifold, p, X; curve=nothing)
     ]
         push!(result, manifold_feature(M, vector_transport_along, [m], (p, X, curve, m())))
         push!(result, manifold_feature(M, vector_transport_to, [m], (p, X, p, m())))
-        push!(result, manifold_feature(M, vector_transport_along, [m], (p, X, X, m())))
+        push!(result, manifold_feature(M, vector_transport_direction, [m], (p, X, X, m())))
     end
-    push!(result,  manifold_feature(M, zero_tangent_vector, no_specs, (p, X)))
+    push!(result,  manifold_feature(M, zero_tangent_vector, no_specs, (p,)))
     return result
 end
 
@@ -643,6 +642,7 @@ function manifold_feature(M, f::Function, specs,args=())
     try
         f(M,args...)
     catch e
+        print("$(f)\n$(e)\n\n")
         #the first from really not implemented, the second for errors in transparency
         exists &= !(isa(e,MethodError) || isa(e,ErrorException))
         if exists # for other errors issue a warning but still set to false
