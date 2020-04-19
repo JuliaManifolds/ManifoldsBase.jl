@@ -555,12 +555,12 @@ function manifold_features(M::Manifold, p, X; curve=nothing)
     no_specs = Array{DataType,1}()
     push!(result, manifold_feature(M, angle, no_specs, (p, X, X)))
     push!(result, manifold_feature(M, check_manifold_point, no_specs, (p,)))
-    push!(result, manifold_feature(M, check_tangent_vector, no_specs, (p,)))
+    push!(result, manifold_feature(M, check_tangent_vector, no_specs, (p,X)))
     push!(result, manifold_feature(M, distance, no_specs, (p, p)))
     push!(result, manifold_feature(M, exp, no_specs, (p, X)))
     push!(result, manifold_feature(M, log, no_specs, (p, p)))
     push!(result, manifold_feature(M, norm, no_specs, (p, X)))
-    push!(result, manifold_feature(M, embed, [MPoint], (p)))
+    push!(result, manifold_feature(M, embed, [MPoint], (p,)))
     push!(result, manifold_feature(M, embed, [TVector], (p, X)))
     push!(result, manifold_feature(M, geodesic, no_specs, (p, X)))
     for m in [
@@ -642,7 +642,6 @@ function manifold_feature(M, f::Function, specs,args=())
     try
         f(M,args...)
     catch e
-        print("$(f)\n$(e)\n\n")
         #the first from really not implemented, the second for errors in transparency
         exists &= !(isa(e,MethodError) || isa(e,ErrorException))
         if exists # for other errors issue a warning but still set to false
