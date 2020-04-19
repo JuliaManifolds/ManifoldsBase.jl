@@ -366,9 +366,6 @@ Compute the exponential map of tangent vector `X`, optionally scaled by `t`,  at
 from manifold the [`Manifold`](@ref) `M`.
 The result is saved to `q`.
 """
-function exp!(M::Manifold, q, p, X)
-    error(manifold_function_not_implemented_message(M, exp!, q, p, X))
-end
 exp!(M::Manifold, q, p, X, t::Real) = exp!(M, q, p, t * X)
 
 """
@@ -554,6 +551,125 @@ each point of the [`Manifold`](@ref) `M` is homeomorphic.
 """
 function manifold_dimension(M::Manifold)
     error(manifold_function_not_implemented_message(M, manifold_dimension))
+end
+
+@doc raw"""
+    manifold_features(M,p,X; curve=nothing)
+
+Checks, which features this manifolds provides by checking which functions are implemented.
+Both the point `p` and the tangent vector `X` are used within these checks
+The function returns a vector of all functions in the following tuple format
+`(function, Array{DataType}, treu/false)`, where the second argument, the array, contains
+types to distinguish for example different retractions.
+
+this method covers all functions that have either no default implementation or a default
+implementation that depends on several other functions. Only the non-mutating
+functions are tested assuming they fall back to the mutating ones usually.
+
+# Optional arguments
+- `curve` – (`nothing`) a curve to check [`vector_transport_along`](@ref)
+"""
+function manifold_features(M::Manifold, p, X; curve=nothing)
+    result = Array{Tuple{Function, Array{Any,1},Bool},1}()
+    no_specs = Array{DataType,1}()
+    push!(result, manifold_feature(M, angle, no_specs, (p, X, X)))
+    push!(result, manifold_feature(M, check_manifold_point, no_specs, (p)))
+    push!(result, manifold_feature(M, check_tangent_vector, no_specs, (p)))
+    push!(result, manifold_feature(M, distance, no_specs, (p, p)))
+    push!(result, manifold_feature(M, exp, no_specs, (p, X)))
+    push!(result, manifold_feature(M, log, no_specs, (p, p)))
+    push!(result, manifold_feature(M, norm, no_specs, (p, X)))
+    push!(result, manifold_feature(M, embed, [MPoint], (p)))
+    push!(result, manifold_feature(M, embed, [TVector], (p, X)))
+    push!(result, manifold_feature(M, geodesic, no_specs, (p, X)))
+    for m in [
+        [DefaultBasis],
+        [DefaultOrthogonalBasis],
+        [DefaultOrthonormalBasis],
+        [DefaultOrDiagonalizingBasis],
+        [ProjectedOrthonormalBasis,:svd],
+        [ProjectedOrthonormalBasis,:gram_schmidt],
+        [VeeOrthogonalBasis],
+    ]
+        if length(m) == 2
+            b = m[1](m[2],number_system(M))
+        else
+            b = m[1](number_system(M))
+        end
+        push!(result, manifold_feature(M, get_basis, [m], (p, b)))
+        push!(result, manifold_feature(M, get_coordinates, [m], (p, X, b)))
+        push!(
+            result,
+            manifold_feature(M, get_vector, [m], (p, zeros(number_of_coordinates(M,b)), b))
+        )
+        push!(result, manifold_feature(M, get_vectors, [m], (p, b)))
+        push!(result, manifold_feature(M, number_of_coordinates, [m], (b,)))
+    end
+    push!(result, manifold_feature(M,injectivity_radius,no_specs))
+    push!(result, manifold_feature(M,inner,no_specs,(p,X,X)))
+    for m in [
+        LogarithmicInverseRetraction,
+        PolarInverseRetraction,
+        ProjectionInverseRetraction,
+        QRInverseRetraction,
+
+    ]
+        push!(result, manifold_feature(M, inverse_retract,  [m],  (p, p, m())))
+    end
+    push!(result,  manifold_feature(M, is_manifold_point, no_specs, (p, )))
+    push!(result,  manifold_feature(M, is_tangent_vector, no_specs, (p, X)))
+    push!(result,  manifold_feature(M, is_tangent_vector, no_specs, (p, X)))
+    push!(result,  manifold_feature(M, project, [MPoint], (p, )))
+    push!(result,  manifold_feature(M, project, [TVector], (p, X)))
+    push!(result,  manifold_feature(M, representation_size, no_specs))
+    for m in [
+        ExponentialRetraction,
+        PolarRetraction,
+        ProjectionRetraction,
+        QRRetraction,
+    ]
+        push!(result, manifold_feature(M, inverse_retract, [m], (p, p, m())))
+    end
+    push!(result, manifold_feature(M, shortest_geodesic, no_specs, (p, p)))
+    for m in [
+        ParallelTransport,
+        ProjectionTransport,
+    ]
+        push!(result, manifold_feature(M, vector_transport_along, [m], (p, X, curve, m())))
+        push!(result, manifold_feature(M, vector_transport_to, [m], (p, X, p, m())))
+        push!(result, manifold_feature(M, vector_transport_along, [m], (p, X, X, m())))
+    end
+    push!(result,  manifold_feature(M, zero_tangent_vector, no_specs, (p, X)))
+    return result
+end
+
+@doc raw"""
+    manifold_feature(M, f, specs, args)
+
+check whether the function `f` “exists” for a [`Manifold`](@ref) `M` given the arguments
+from the tuple `args`. The `specs` can be used to distinguish different
+parametrizations/instances of `f`.
+Exists here means, that no error is thrown. For errors different then a
+`MethodError` – really not implemented – or a `ErrorException` – not implemented
+due to an error from transparency rules – a warning is issued.
+
+This method returns a tuple `(f,specs,b)`, where `b` is a boolean
+
+see also [`manifold_features`](@ref).
+"""
+function manifold_feature(M, f::Function, specs,args=())
+    exists = true
+    try
+        f(M,args...)
+    catch e
+        #the first from really not implemented, the second for errors in transparency
+        exists &= !(isa(e,MethodError) || isa(e,ErrorException))
+        if exists # for other errors issue a warning but still set to false
+            @warn "While the function $(f) seems to exist, is throws:\n$(e)"
+            exists = false
+        end
+    end
+    return (f,specs,exists)
 end
 
 function manifold_function_not_implemented_message(M::Manifold, f, x...)
@@ -984,6 +1100,8 @@ export allocate,
     log,
     log!,
     manifold_dimension,
+    manifold_features,
+    manifold_feature,
     norm,
     number_eltype,
     number_of_coordinates,
