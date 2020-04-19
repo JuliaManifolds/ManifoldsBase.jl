@@ -295,15 +295,25 @@ end
 Embed point `p` from the [`Manifold`](@ref) `M` into the ambient space and return the result in `q`.
 This method is only available for manifolds where implicitly an embedding or ambient space
 is given.
-Additionally, `embed` includes changing data representation, if applicable, i.e.
+Additionally, `embed!` includes changing data representation, if applicable, i.e.
 if the points on `M` are not represented in the same way as points on the embedding,
 the representation is changed accordingly.
 
-See also: [`EmbeddedManifold`](@ref), [`project!`](@ref project!(M::Manifold, q, p))
+    embed!(M::Manifold, Y, p, X)
+
+Embed a tangent vector `X` at a point `p` on the [`Manifold`](@ref) `M` into the ambient
+space and return the result in `Y`.
+This method is only available for manifolds where implicitly an embedding or ambient space
+is given.
+Additionally, `embed!` includes changing data representation, if applicable, i.e.
+if the tangents on `M` are not represented in the same way as tangents on the embedding,
+the representation is changed accordingly. This is the case for example for Lie groups,
+when tangent vectors are represented in the Lie algebra. The embedded tangents are then in
+the tangent spaces of the embedded base points.
+
+See also: [`EmbeddedManifold`](@ref), [`project!`](@ref)
 """
-function embed!(M::Manifold, q, p)
-    error(manifold_function_not_implemented_message(M, embed!, q, p))
-end
+function embed! end
 
 """
     embed(M::Manifold, p, X)
@@ -323,25 +333,6 @@ function embed(M::Manifold, p, X)
     Y = allocate_result(M, embed, X, p)
     embed!(M, Y, p, X)
     return Y
-end
-
-"""
-    embed!(M::Manifold, Y, p, X)
-
-Embed a tangent vector `X` at a point `p` on the [`Manifold`](@ref) `M` into the ambient
-space and return the result in `Y`.
-This method is only available for manifolds where implicitly an embedding or ambient space
-is given.
-Additionally, `embed!` includes changing data representation, if applicable, i.e.
-if the tangents on `M` are not represented in the same way as tangents on the embedding,
-the representation is changed accordingly. This is the case for example for Lie groups,
-when tangent vectors are represented in the Lie algebra. The embedded tangents are then in
-the tangent spaces of the embedded base points.
-
-See also: [`EmbeddedManifold`](@ref), [`project!`](@ref project!(M::Manifold, Y, p, X))
-"""
-function embed!(M::Manifold, Y, p, X)
-    error(manifold_function_not_implemented_message(M, embed!, Y, p, X))
 end
 
 """
@@ -402,12 +393,11 @@ Distance $d$ such that
 is injective for all tangent vectors shorter than $d$ (i.e. has an inverse) for point `p`
 if provided or all manifold points otherwise.
 """
-function injectivity_radius(M::Manifold)
-    error(manifold_function_not_implemented_message(M, injectivity_radius))
-end
+function injectivity_radius end
 injectivity_radius(M::Manifold, p) = injectivity_radius(M)
-injectivity_radius(M::Manifold, p, method::AbstractRetractionMethod) =
-    injectivity_radius(M, method)
+function injectivity_radius(M::Manifold, p, method::AbstractRetractionMethod)
+    return injectivity_radius(M, method)
+end
 function injectivity_radius(M::Manifold, method::AbstractRetractionMethod)
     error(manifold_function_not_implemented_message(M, injectivity_radius, method))
 end
@@ -422,9 +412,7 @@ Compute the inner product of tangent vectors `X` and `Y` at point `p` from the
 
 See also: [`MetricManifold`](@ref Main.Manifolds.MetricManifold)
 """
-function inner(M::Manifold, p, X, Y)
-    error(manifold_function_not_implemented_message(M, inner, p, X, Y))
-end
+function inner end
 
 """
     inverse_retract!(M::Manifold, X, p, q[, method::AbstractInverseRetractionMethod])
@@ -442,9 +430,6 @@ function inverse_retract!(M::Manifold, X, p, q)
 end
 function inverse_retract!(M::Manifold, X, p, q, method::LogarithmicInverseRetraction)
     return log!(M, X, p, q)
-end
-function inverse_retract!(M::Manifold, X, p, q, method::AbstractRetractionMethod)
-    error(manifold_function_not_implemented_message(M, inverse_retract!,X,p,q,method))
 end
 
 """
@@ -539,9 +524,7 @@ end
 Compute the logarithmic map of point `q` at base point `p` on the [`Manifold`](@ref) `M`.
 The result is saved to `X`.
 """
-function log!(M::Manifold, X, p, q)
-    error(manifold_function_not_implemented_message(M, log!, X, p, q))
-end
+function log! end
 
 @doc doc"""
     manifold_dimension(M::Manifold)
@@ -549,9 +532,7 @@ end
 The dimension $n=\dim_{\mathcal M}$ of real space $\mathbb R^n$ to which the neighborhood of
 each point of the [`Manifold`](@ref) `M` is homeomorphic.
 """
-function manifold_dimension(M::Manifold)
-    error(manifold_function_not_implemented_message(M, manifold_dimension))
-end
+function manifold_dimension end
 
 @doc raw"""
     manifold_features(M,p,X; curve=nothing)
@@ -730,11 +711,21 @@ is given. Additionally, the projection includes changing data representation, if
 i.e. if the points on `M` are not represented in the same array data, the data is changed
 accordingly.
 
-See also: [`EmbeddedManifold`](@ref), [`embed!`](@ref embed!(M::Manifold, q, p))
+    project!(M::Manifold, Y, p, X)
+
+Project ambient space representation of a vector `X` to a tangent vector at point `p` on
+the [`Manifold`](@ref) `M`. The result is saved in vector `Y`.
+This method is only available for manifolds where implicitly an embedding or ambient space
+is given.
+Additionally, `project!` includes changing data representation, if applicable, i.e.
+if the tangents on `M` are not represented in the same way as points on the embedding,
+the representation is changed accordingly. This is the case for example for Lie groups,
+when tangent vectors are represented in the Lie algebra. after projection the change to the
+Lie algebra is perfomed, too.
+
+See also: [`EmbeddedManifold`](@ref), [`embed!`](@ref)
 """
-function project!(M::Manifold, q, p)
-    error(manifold_function_not_implemented_message(M, project!, q, p))
-end
+function project! end
 
 """
     project(M::Manifold, p, X)
@@ -757,33 +748,12 @@ function project(M::Manifold, p, X)
     return Y
 end
 
-"""
-    project!(M::Manifold, Y, p, X)
-
-Project ambient space representation of a vector `X` to a tangent vector at point `p` on
-the [`Manifold`](@ref) `M`. The result is saved in vector `Y`.
-This method is only available for manifolds where implicitly an embedding or ambient space
-is given.
-Additionally, `project!` includes changing data representation, if applicable, i.e.
-if the tangents on `M` are not represented in the same way as points on the embedding,
-the representation is changed accordingly. This is the case for example for Lie groups,
-when tangent vectors are represented in the Lie algebra. after projection the change to the
-Lie algebra is perfomed, too.
-
-See also: [`EmbeddedManifold`](@ref), [`embed!`](@ref embed!(M::Manifold, Y, p, X))
-"""
-function project!(M::Manifold, Y, p, X)
-    error(manifold_function_not_implemented_message(M, project!, Y, p, X))
-end
-
 @doc doc"""
     representation_size(M::Manifold)
 
 The size of an array representing a point on [`Manifold`](@ref) `M`.
 """
-function representation_size(M::Manifold)
-    error(manifold_function_not_implemented_message(M, representation_size))
-end
+function representation_size end
 
 """
     retract(M::Manifold, p, X)
@@ -833,9 +803,7 @@ retract!(M::Manifold, q, p, X, method::ExponentialRetraction) = exp!(M, q, p, X)
 function retract!(M::Manifold, q, p, X, t::Real, method::AbstractRetractionMethod)
     return retract!(M, q, p, t * X, method)
 end
-function retract!(M::Manifold, q, p, X, method::AbstractRetractionMethod)
-    error(manifold_function_not_implemented_message(M, retract!,q,p,method))
-end
+
 @doc doc"""
     shortest_geodesic(M::Manifold, p, q) -> Function
 
@@ -882,26 +850,6 @@ which defaults to [`ParallelTransport`](@ref). The result is saved to `Y`.
 function vector_transport_along!(M::Manifold, Y, p, X, c)
     return vector_transport_along!(M, Y, p, X, c, ParallelTransport())
 end
-function vector_transport_along!(
-    M::Manifold,
-    Y,
-    p,
-    X,
-    c,
-    method::AbstractVectorTransportMethod,
-)
-    error(manifold_function_not_implemented_message(
-        M,
-        vector_transport_along!,
-        M,
-        Y,
-        p,
-        X,
-        c,
-        method,
-    ))
-end
-
 
 """
     vector_transport_direction(M::Manifold, p, X, d)
@@ -990,24 +938,6 @@ at `q`. This method requires  [`project`](@ref project(M::Manifold, p, X)).
 """
 function vector_transport_to!(M::Manifold, Y, p, X, q, ::ProjectionTransport)
     return project!(M, Y, q, X)
-end
-function vector_transport_to!(
-    M::Manifold,
-    Y,
-    p,
-    X,
-    q,
-    method::AbstractVectorTransportMethod,
-)
-    error(manifold_function_not_implemented_message(
-        M,
-        vector_transport_to!,
-        Y,
-        p,
-        X,
-        q,
-        method,
-    ))
 end
 
 """

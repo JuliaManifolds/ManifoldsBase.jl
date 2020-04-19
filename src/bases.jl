@@ -228,9 +228,7 @@ the function [`get_vectors`](@ref) needs to be used to retrieve the basis vector
 
 See also: [`get_coordinates`](@ref), [`get_vector`](@ref)
 """
-function get_basis(M::Manifold, p, B::AbstractBasis)
-    error("get_basis not implemented for manifold of type $(typeof(M)) a point of type $(typeof(p)) and basis of type $(typeof(B)).")
-end
+function get_basis end
 @decorator_transparent_signature get_basis(M::AbstractDecoratorManifold, p, B::AbstractBasis)
 function decorator_transparent_dispatch(::typeof(get_basis), ::Manifold, args...)
     return Val(:parent)
@@ -343,9 +341,7 @@ function decorator_transparent_dispatch(::typeof(get_coordinates), ::Manifold, a
     return Val(:parent)
 end
 
-function get_coordinates!(M::Manifold, Y, p, X, B::AbstractBasis)
-    error("get_coordinates! not implemented for manifold of type $(typeof(M)) coordinates of type $(typeof(Y)), a point of type $(typeof(p)), tangent vector of type $(typeof(X)) and basis of type $(typeof(B)).")
-end
+function get_coordinates! end
 @decorator_transparent_signature get_coordinates!(M::AbstractDecoratorManifold, Y, p, X, B::AbstractBasis)
 for BT in DISAMBIGUATION_BASIS_TYPES
     eval(quote
@@ -401,9 +397,7 @@ function decorator_transparent_dispatch(::typeof(get_vector), ::Manifold, args..
     return Val(:parent)
 end
 
-function get_vector!(M::Manifold, Y, p, X, B::AbstractBasis)
-    error("get_vector! not implemented for manifold of type $(typeof(M)) vector of type $(typeof(Y)), a point of type $(typeof(p)), coordinates of type $(typeof(X)) and basis of type $(typeof(B)).")
-end
+function get_vector! end
 @decorator_transparent_signature get_vector!(M::AbstractDecoratorManifold, Y, p, X, B::AbstractBasis)
 for BT in DISAMBIGUATION_BASIS_TYPES
     eval(quote
@@ -454,9 +448,7 @@ end
 
 Get the basis vectors of basis `B` of the tangent space at point `p`.
 """
-function get_vectors(M::Manifold, p, B::AbstractBasis)
-    error("get_vectors not implemented for manifold of type $(typeof(M)) a point of type $(typeof(p)) and basis of type $(typeof(B)).")
-end
+function get_vectors end
 function get_vectors(
     M::Manifold,
     p,
