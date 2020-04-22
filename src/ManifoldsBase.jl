@@ -712,7 +712,7 @@ Numeric element type of the a nested representation of a point or a vector.
 To be used in conjuntion with [`allocate`](@ref) or [`allocate_result`](@ref).
 """
 number_eltype(x) = eltype(x)
-function number_eltype(x::AbstractArray{<:AbstractArray})
+function number_eltype(x::AbstractArray)
     T = typeof(reduce(+, one(number_eltype(eti)) for eti ∈ x))
     return T
 end
