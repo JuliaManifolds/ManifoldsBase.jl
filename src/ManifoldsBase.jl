@@ -553,16 +553,24 @@ functions are tested assuming they fall back to the mutating ones usually.
 function manifold_features(M::Manifold, p, X; curve=nothing)
     result = Array{Tuple{Function, Array{Any,1},Bool},1}()
     no_specs = Array{DataType,1}()
-    push!(result, manifold_feature(M, angle, no_specs, (p, X, X)))
-    push!(result, manifold_feature(M, check_manifold_point, no_specs, (p,)))
-    push!(result, manifold_feature(M, check_tangent_vector, no_specs, (p,X)))
-    push!(result, manifold_feature(M, distance, no_specs, (p, p)))
-    push!(result, manifold_feature(M, exp, no_specs, (p, X)))
-    push!(result, manifold_feature(M, log, no_specs, (p, p)))
-    push!(result, manifold_feature(M, norm, no_specs, (p, X)))
-    push!(result, manifold_feature(M, embed, [MPoint], (p,)))
-    push!(result, manifold_feature(M, embed, [TVector], (p, X)))
-    push!(result, manifold_feature(M, geodesic, no_specs, (p, X)))
+    push!(result, (angle, no_specs, manifold_feature(M, angle, (p, X, X)) ))
+    push!(result, (
+        check_manifold_point,
+        no_specs,
+        manifold_feature(M, check_manifold_point, (p,)),
+    ))
+    push!(result, (
+        check_tangent_vector,
+        no_specs,
+        manifold_feature(M, check_tangent_vector, (p,X)),
+    ))
+    push!(result, (distance, no_specs, manifold_feature(M, distance, (p, p))) )
+    push!(result, (exp, no_specs, manifold_feature(M, exp, (p, X))))
+    push!(result, (log, no_specs, manifold_feature(M, log, (p, p))))
+    push!(result, (norm, no_specs, manifold_feature(M, norm, (p, X))) )
+    push!(result, (embded, [MPoint], manifold_feature(M, embed, (p,))) )
+    push!(result, (embded, [TVector], manifold_feature(M, embed, (p, X))) )
+    push!(result, (geodesic, manifold_feature(M, geodesic, no_specs, (p, X))) )
     for m in [
         [DefaultBasis],
         [DefaultOrthogonalBasis],
@@ -576,17 +584,21 @@ function manifold_features(M::Manifold, p, X; curve=nothing)
         else
             b = m[1](number_system(M))
         end
-        push!(result, manifold_feature(M, get_basis, [m], (p, b)))
-        push!(result, manifold_feature(M, get_coordinates, [m], (p, X, b)))
+        push!(result, (get_bases, [m], manifold_feature(M, get_basis, (p, b))))
+        push!(result, (get_coordinates, [m], manifold_feature(M, get_coordinates,(p, X, b))))
         push!(
             result,
-            manifold_feature(M, get_vector, [m], (p, zeros(number_of_coordinates(M,b)), b))
+            (
+                get_vector,
+                [m],
+                manifold_feature(M, get_vector, (p, zeros(number_of_coordinates(M,b)), b))
+            )
         )
-        push!(result, manifold_feature(M, get_vectors, [m], (p, b)))
-        push!(result, manifold_feature(M, number_of_coordinates, [m], (b,)))
+        push!(result, (get_vectors, [m], manifold_feature(M, get_vectors, (p, b))))
+        push!(result, (number_of_coordinates, [m], manifold_feature(M, number_of_coordinates, (b,))))
     end
-    push!(result, manifold_feature(M,injectivity_radius,no_specs))
-    push!(result, manifold_feature(M,inner,no_specs,(p,X,X)))
+    push!(result, (injectivity_radius, no_specs, manifold_feature(M,injectivity_radius)))
+    push!(result, (inner, no_specs, manifold_feature(M,(p,X,X))))
     for m in [
         LogarithmicInverseRetraction,
         PolarInverseRetraction,
@@ -596,39 +608,57 @@ function manifold_features(M::Manifold, p, X; curve=nothing)
     ]
         push!(result, manifold_feature(M, inverse_retract,  [m],  (p, p, m())))
     end
-    push!(result,  manifold_feature(M, is_manifold_point, no_specs, (p, )))
-    push!(result,  manifold_feature(M, is_tangent_vector, no_specs, (p, X)))
-    push!(result,  manifold_feature(M, is_tangent_vector, no_specs, (p, X)))
-    push!(result,  manifold_feature(M, project, [MPoint], (p, )))
-    push!(result,  manifold_feature(M, project, [TVector], (p, X)))
-    push!(result,  manifold_feature(M, representation_size, no_specs))
+    push!(result, (is_manifold_point, no_specs, manifold_feature(M, is_manifold_point, (p, ))))
+    push!(result, (is_tangent_vector, no_specs, manifold_feature(M, is_tangent_vector, (p, X))))
+    push!(result, (projct, [MPoint], manifold_feature(M, project, (p, ))))
+    push!(result, (projct, [TVector], manifold_feature(M, project, [TVector], (p, X))))
+    push!(result, (representation_size, no_specs, manifold_feature(M, representation_size)))
     for m in [
         ExponentialRetraction,
         PolarRetraction,
         ProjectionRetraction,
         QRRetraction,
     ]
-        push!(result, manifold_feature(M, retract, [m], (p, p, m())))
+        push!(result, (retract, [m], manifold_feature(M, retract, (p, p, m()))))
     end
-    push!(result, manifold_feature(M, shortest_geodesic, no_specs, (p, p)))
+    push!(result, (
+        shortest_geodesic,
+        no_specs,
+        manifold_feature(M, shortest_geodesic, (p, p))),
+    )
     for m in [
         ParallelTransport,
         ProjectionTransport,
     ]
-        push!(result, manifold_feature(M, vector_transport_along, [m], (p, X, curve, m())))
-        push!(result, manifold_feature(M, vector_transport_to, [m], (p, X, p, m())))
-        push!(result, manifold_feature(M, vector_transport_direction, [m], (p, X, X, m())))
+        push!(result, (
+            vector_transport_along,
+            [m],
+            manifold_feature(M, vector_transport_along, (p, X, curve, m()))
+        ))
+        push!(result, (
+            vector_transport_to,
+            [m],
+            manifold_feature(M, vector_transport_to, (p, X, p, m()))
+        ))
+        push!(result, (
+            vector_transport_direction,
+            [m],
+            manifold_feature(M, vector_transport_direction, (p, X, X, m()))
+        ))
     end
-    push!(result,  manifold_feature(M, zero_tangent_vector, no_specs, (p,)))
+    push!(result, (
+        zero_tangent_vector,
+        no_specs,
+        manifold_feature(M, zero_tangent_vector, (p,)))
+    )
     return result
 end
 
 @doc raw"""
-    manifold_feature(M, f, specs, args)
+    manifold_feature(M, f, args)
 
 check whether the function `f` “exists” for a [`Manifold`](@ref) `M` given the arguments
-from the tuple `args`. The `specs` can be used to distinguish different
-parametrizations/instances of `f`.
+from the tuple `args`.
 Exists here means, that no error is thrown. For errors different then a
 `MethodError` – really not implemented – or a `ErrorException` – not implemented
 due to an error from transparency rules – a warning is issued.
@@ -637,19 +667,27 @@ This method returns a tuple `(f,specs,b)`, where `b` is a boolean
 
 see also [`manifold_features`](@ref).
 """
-function manifold_feature(M, f::Function, specs,args=())
-    exists = true
+function manifold_feature(M, f::Function,args=(), mutating_f = nothing, mutating_var=nothing)
+    if !(mutating_f === nothing) && !(mutating_var === nothing)
+        f_mut_exists = manifold_feature(M, mutating_f, specs, (M, mutating_var, args[2:end]...))
+    end
+    t = decorator_transparent_dispatch(f,M,args...)
+    dispatch_manifold_feature(M, f, decorator_transparent_dispatch(f,M,args...), args)
+end
+function dispatch_manifold_feature(M::mT,f::F,::Val{:parent},args...) where {mT,F}
+    return invoke(manifold_feature, Tuple{supertype(typeof(M)),F,typeof(args)}, M,f, args...)
+end
+function dispatch_manifold_feature(M::mT,f::F,::Val{:transparent},args...) where {mT,F}
+    return invoke(manifold_feature, Tuple{supertype(typeof(M)),F,typeof(args)}, M,f, args...)
+end
+function dispatch_manifold_feature(M::mT,f::F,::Val{:intransparent},args...) where {mT,F}
+    exists = applicable(f, M, args...)
     try
         f(M,args...)
     catch e
-        #the first from really not implemented, the second for errors in transparency
-        exists &= !(isa(e,MethodError) || isa(e,ErrorException))
-        if exists # for other errors issue a warning but still set to false
-            @warn "While the function $(f) seems to exist, is throws:\n$(e)"
-            exists = false
-        end
+        return false
     end
-    return (f,specs,exists)
+    return exists
 end
 
 function manifold_function_not_implemented_message(M::Manifold, f, x...)
