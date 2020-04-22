@@ -42,11 +42,12 @@ end
     @test combine_allocation_promotion_functions(complex, identity) === complex
     @test combine_allocation_promotion_functions(complex, complex) === complex
 
-    @test number_eltype([2.0]) == Float64
-    @test number_eltype([[2.0], [3]]) == Float64
-    @test number_eltype([[2], [3.0]]) == Float64
-    @test number_eltype([[2], [3]]) == Int
-    @test number_eltype(([2.0], [3])) == Float64
-    @test number_eltype(([2], [3.0])) == Float64
-    @test number_eltype(([2], [3])) == Int
+    @test number_eltype([2.0]) === Float64
+    @test number_eltype([[2.0], [3]]) === Float64
+    @test number_eltype([[2], [3.0]]) === Float64
+    @test number_eltype([[2], [3]]) === Int
+    @test number_eltype(([2.0], [3])) === Float64
+    @test number_eltype(([2], [3.0])) === Float64
+    @test number_eltype(([2], [3])) === Int
+    @test number_eltype(Any[[2.0], [3.0]]) === Float64
 end
