@@ -667,18 +667,19 @@ This method returns a tuple `(f,specs,b)`, where `b` is a boolean
 
 see also [`manifold_features`](@ref).
 """
-function manifold_feature(M, f::Function,args=(), mutating_f = nothing, mutating_var=nothing)
+function manifold_feature(M, f::Function,args=(), mutating_f = nothing, mutating_var = nothing)
     if !(mutating_f === nothing) && !(mutating_var === nothing)
         f_mut_exists = manifold_feature(M, mutating_f, specs, (M, mutating_var, args[2:end]...))
     end
     t = decorator_transparent_dispatch(f,M,args...)
-    dispatch_manifold_feature(M, f, decorator_transparent_dispatch(f,M,args...), args)
+    return dispatch_manifold_feature(M, f, t, args)
 end
+
 function dispatch_manifold_feature(M::mT,f::F,::Val{:parent},args...) where {mT,F}
-    return invoke(manifold_feature, Tuple{supertype(typeof(M)),F,typeof(args)}, M,f, args...)
+    return invoke(manifold_feature, Tuple{supertype(typeof(M)),F,typeof(args)}, M,f, args)
 end
 function dispatch_manifold_feature(M::mT,f::F,::Val{:transparent},args...) where {mT,F}
-    return invoke(manifold_feature, Tuple{supertype(typeof(M)),F,typeof(args)}, M,f, args...)
+    return invoke(manifold_feature, Tuple{supertype(typeof(M)),F,typeof(args)}, M, f, args)
 end
 function dispatch_manifold_feature(M::mT,f::F,::Val{:intransparent},args...) where {mT,F}
     exists = applicable(f, M, args...)
