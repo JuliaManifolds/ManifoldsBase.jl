@@ -553,6 +553,7 @@ functions are tested assuming they fall back to the mutating ones usually.
 function manifold_features(M::Manifold, p, X; curve=nothing)
     result = Array{Tuple{Function, Array{Any,1},Bool},1}()
     no_specs = Array{DataType,1}()
+    print("Hi.")
     push!(result, (angle, no_specs, manifold_feature(M, angle, (p, X, X)) ))
     push!(result, (
         check_manifold_point,
@@ -668,20 +669,38 @@ This method returns a tuple `(f,specs,b)`, where `b` is a boolean
 see also [`manifold_features`](@ref).
 """
 function manifold_feature(M, f::Function,args=(), mutating_f = nothing, mutating_var = nothing)
+    f_mut_exists = true # if mutating_f is nothing we don't have this so it exists
     if !(mutating_f === nothing) && !(mutating_var === nothing)
         f_mut_exists = manifold_feature(M, mutating_f, specs, (M, mutating_var, args[2:end]...))
     end
-    t = decorator_transparent_dispatch(f,M,args...)
-    return dispatch_manifold_feature(M, f, t, args)
+    if isa(M,AbstractDecoratorManifold)
+        t = decorator_transparent_dispatch(f,M,args...)
+        f_exists = dispatch_manifold_feature(M, f, t, args)
+    else
+        f_exists = applicable(f, M, args...)
+    end
+    return f_exists && f_mut_exists
 end
 
-function dispatch_manifold_feature(M::mT,f::F,::Val{:parent},args...) where {mT,F}
-    return invoke(manifold_feature, Tuple{supertype(typeof(M)),F,typeof(args)}, M,f, args)
+function dispatch_manifold_feature(M::Manifold, f, ::Val{:parent}, args)
+    return invoke(
+        manifold_feature,
+        Tuple{supertype(typeof(M)),typeof(f),typeof(args)},
+        M,
+        f,
+        args
+    )
 end
-function dispatch_manifold_feature(M::mT,f::F,::Val{:transparent},args...) where {mT,F}
-    return invoke(manifold_feature, Tuple{supertype(typeof(M)),F,typeof(args)}, M, f, args)
+function dispatch_manifold_feature(M::Manifold, f, ::Val{:transparent}, args)
+    return invoke(
+        manifold_feature,
+        Tuple{typeof(decorated_manifold(M)),typeof(f),typeof(args)},
+        decorated_manifold(M),
+        f,
+        args
+    )
 end
-function dispatch_manifold_feature(M::mT,f::F,::Val{:intransparent},args...) where {mT,F}
+function dispatch_manifold_feature(M::Manifold, f, ::Val{:intransparent}, args)
     exists = applicable(f, M, args...)
     try
         f(M,args...)
