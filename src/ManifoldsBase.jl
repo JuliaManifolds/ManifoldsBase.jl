@@ -667,13 +667,13 @@ This method returns a tuple `(f,specs,b)`, where `b` is a boolean
 
 see also [`manifold_features`](@ref).
 """
-function manifold_feature(M, f::Function,args=(), mutating_f = nothing, mutating_var = nothing)
+function manifold_feature(M::Manifold, f::Function,args=(), mutating_f = nothing, mutating_var = nothing)
     f_mut_exists = true # if mutating_f is nothing we don't have this so it exists
     if !(mutating_f === nothing) && !(mutating_var === nothing)
-        f_mut_exists = manifold_feature(M, mutating_f, specs, (M, mutating_var, args[2:end]...))
+        f_mut_exists = manifold_feature(M, mutating_f, (M, mutating_var, args...))
     end
     if isa(M,AbstractDecoratorManifold)
-        t = decorator_transparent_dispatch(f, M, args...)
+        t = ManifoldsBase.decorator_transparent_dispatch(f, M, args...)
         f_exists = dispatch_manifold_feature(M, f, t, args)
     else
         f_exists = applicable(f, M, args...)
