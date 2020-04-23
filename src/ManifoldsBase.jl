@@ -553,7 +553,6 @@ functions are tested assuming they fall back to the mutating ones usually.
 function manifold_features(M::Manifold, p, X; curve=nothing)
     result = Array{Tuple{Function, Array{Any,1},Bool},1}()
     no_specs = Array{DataType,1}()
-    print("Hi.")
     push!(result, (angle, no_specs, manifold_feature(M, angle, (p, X, X)) ))
     push!(result, (
         check_manifold_point,
@@ -674,7 +673,7 @@ function manifold_feature(M, f::Function,args=(), mutating_f = nothing, mutating
         f_mut_exists = manifold_feature(M, mutating_f, specs, (M, mutating_var, args[2:end]...))
     end
     if isa(M,AbstractDecoratorManifold)
-        t = decorator_transparent_dispatch(f,M,args...)
+        t = decorator_transparent_dispatch(f, M, args...)
         f_exists = dispatch_manifold_feature(M, f, t, args)
     else
         f_exists = applicable(f, M, args...)
