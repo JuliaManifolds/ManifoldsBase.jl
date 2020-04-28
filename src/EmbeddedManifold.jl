@@ -486,7 +486,7 @@ function decorator_transparent_dispatch(
     ::AbstractEmbeddedManifold,
     args...,
 )
-    return Val(:intransparent)
+    return Val(:parent)
 end
 function decorator_transparent_dispatch(
     ::typeof(vector_transport_direction!),

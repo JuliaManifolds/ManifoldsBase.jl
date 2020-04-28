@@ -139,9 +139,10 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEm
         for f in [log!, norm, manifold_dimension, project!]
             @test ManifoldsBase.decorator_transparent_dispatch(f,AM) === Val{:intransparent}()
         end
-        for f in [vector_transport_along!, vector_transport_direction!, vector_transport_to!]
+        for f in [vector_transport_along!, vector_transport_to!]
             @test ManifoldsBase.decorator_transparent_dispatch(f,AM) === Val{:intransparent}()
         end
+        @test ManifoldsBase.decorator_transparent_dispatch(vector_transport_direction!, AM) === Val{:parent}()
 
         for f in [inner, norm]
             @test ManifoldsBase.decorator_transparent_dispatch(f,IM) === Val{:transparent}()
