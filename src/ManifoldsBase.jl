@@ -587,6 +587,43 @@ function number_eltype(x::Tuple)
     return T
 end
 
+
+@doc raw"""
+    pole_ladder(M, p, X, q; c=shortest_geodesic(M,p,q))
+
+approximate the [`ParallelTransport`](@ref) in [`vector_transport_to`](@ref) by the so-called
+Pole ladder. Let $d=\exp_pX$ and $c = \gamma_{p,q}(\frac{1}{2})$ denote the end point when
+“following” `X` from `p` and the mid point between `p` and `q`
+
+Then the pole ladder is given by
+
+````math
+    P^{\mathrm{P}}_{q\gets p}(X) = -\log\bigl(\gamma_{d,c}(\frac{1}{2})\bigr)
+````
+
+It is cheaper to evaluate than [`schilds_ladder`](@ref), if you want to transport several
+vectors, since the mid point $c$ then stays unchanged. That's why it can be passed as an
+optional keyword argument
+
+its image on Euclidean space, where this method is exact, resembles a pole ladder.
+It was proposed in [^LorenziPennec2014] and is also exact on symmetric Riemannian manifolds,
+as was shown in [^Pennec2018].
+
+[^LorenziPennec2014]:
+    > Lorenzi, M. and Pennec, X: Efficient parallel transport of deformations in time
+    > series of images: From Schild’s to pole ladder.
+    > Journal of Mathematical Imaging and Vision (2014), 50(1), pp. 5–17
+    > doi [10.1007/s10851-013-0470-3](https://doi.org/10.1007/s10851-013-0470-3),
+    > hal: [hal-00870489](https://hal.inria.fr/hal-00870489)
+[^Pennec2018]:
+    > Pennec, X: Parallel Transport with Pole Ladder: a Third Order Scheme in Affine
+    > Connection Spaces which is Exact in Affine Symmetric Spaces.
+    > arXiv: [1805.11436](https://arxiv.org/abs/1805.11436)
+"""
+function pole_ladder(M, p, X, q; c = shortest_geodesic(M, p, q) )
+    return -log(M, shortest_geodesic(M, exp(M,p,X), c), 0.5)
+end
+
 """
     project(M::Manifold, p)
 
@@ -720,6 +757,37 @@ end
 function retract!(M::Manifold, q, p, X, method::AbstractRetractionMethod)
     error(manifold_function_not_implemented_message(M, retract!,q,p,method))
 end
+
+@doc raw"""
+    schilds_ladder(M,p,X,q)
+
+approximate the [`ParallelTransport`](@ref) in [`vector_transport_to`](@ref) by the so-called
+Schild's ladder. With $d=\exp_pX$ let $c = \gamma_{q,d}(\frac{1}{2})$ denote the mid point
+on the geodesic conncting $q$ and the point $d$, which is the end point from $p$ in
+direction $X$. Then Schild's ladder reads as
+
+````math
+P^{\mathrm{S}}_{q\gets p}(X) = \log_q\bigl(\gamma_{x,c}(2))\bigr)
+````
+
+It can be best understood imagining the Euclidean case. Then $p,q,d$ form a triangle and
+adding $\gamma_{x,c}(2)$ yields a parallelogram; especially the two
+vectors $\gamma_{x,c}(2)-q$ and $d-p$ are opposing sides and hence equal,
+and hence for this case the approximation is exact.
+
+The name stems from the image of this paralleltogram in a repeated application yielding the
+image of a ladder. The approximation was proposed in [^EhlersPiraniSchild1972].
+
+[^EhlersPiraniSchild1972]:
+    > Ehlers, J., Pirani, F.A.E., Schild, A.: The geometry of free fall and light
+    > propagation. In: O’Raifeartaigh, L. (ed.) General Relativity: Papers in Honour of
+    > J. L. Synge, pp. 63–84. Clarendon Press, Oxford (1972).
+    > reprint doi: [10.1007/s10714-012-1353-4](https://doi.org/10.1007/s10714-012-1353-4)
+"""
+function schilds_ladder(M, p, X, q)
+    return log(M, q, shortest_geodesic(M, p, shortest_geodesic(M, q, exp(M, p, X), 0.5), 2))
+end
+
 @doc doc"""
     shortest_geodesic(M::Manifold, p, q) -> Function
 
