@@ -147,6 +147,34 @@ Specify to use projection onto tangent space as vector transport method within
 """
 struct ProjectionTransport <: AbstractVectorTransportMethod end
 
+@doc raw"""
+    SchildsLadderTransport <: AbstractVectorTransportMethod
+
+Specify to use [`schilds_ladder`](@ref) as vector transport method within
+[`vector_transport_to`](@ref), [`vector_transport_direction`](@ref), or
+[`vector_transport_along`](@ref), i.e.
+
+Let $X\in T_p\mathcal M$ be a tangent vector at $p\in\mathcal M$ and $q\in\mathcal M$ the
+point to transport to. Then $x = \exp_pX$ is used to call
+`y = [`schilds_ladder`](@ref)`(M,p,x,q)` and the resulting vector is obtained by computing
+$Y = \log_qy$.
+"""
+struct SchildsLadderTransport <: AbstractVectorTransportMethod end
+
+@doc raw"""
+    PoleLadderTransport <: AbstractVectorTransportMethod
+
+Specify to use [`pole_ladder`](@ref) as vector transport method within
+[`vector_transport_to`](@ref), [`vector_transport_direction`](@ref), or
+[`vector_transport_along`](@ref), i.e.
+
+Let $X\in T_p\mathcal M$ be a tangent vector at $p\in\mathcal M$ and $q\in\mathcal M$ the
+point to transport to. Then $x = \exp_pX$ is used to call
+`y = [`pole_ladder`](@ref)`(M,p,x,q)` and the resulting vector is obtained by computing
+$Y = -\log_qy$.
+"""
+struct PoleLadderTransport <: AbstractVectorTransportMethod end
+
 """
     TVector
 
@@ -589,17 +617,19 @@ end
 
 
 @doc raw"""
-    pole_ladder(M, p, X, q; c=shortest_geodesic(M,p,q))
+    pole_ladder(M, p, d, q; c=shortest_geodesic(M,p,q))
 
 approximate the [`ParallelTransport`](@ref) in [`vector_transport_to`](@ref) by the so-called
-Pole ladder. Let $d=\exp_pX$ and $c = \gamma_{p,q}(\frac{1}{2})$ denote the end point when
-“following” `X` from `p` and the mid point between `p` and `q`
+Pole ladder. Assume we want to transport a vector $X = \log_pd$.
+Let $c = \gamma_{p,q}(\frac{1}{2})$ mid point between `p` and `q`
 
 Then the pole ladder is given by
 
 ````math
-    P^{\mathrm{P}}_{q\gets p}(X) = -\log\bigl(\gamma_{d,c}(\frac{1}{2})\bigr)
+    \operatorname{Pl}(p,d,q) = \gamma_{d,c}(2)
 ````
+
+Note that the approximate transport is then obtained by $Y = -\log_q \operatorname{Pl}(p,d,q)$
 
 It is cheaper to evaluate than [`schilds_ladder`](@ref), if you want to transport several
 vectors, since the mid point $c$ then stays unchanged. That's why it can be passed as an
@@ -620,8 +650,8 @@ as was shown in [^Pennec2018].
     > Connection Spaces which is Exact in Affine Symmetric Spaces.
     > arXiv: [1805.11436](https://arxiv.org/abs/1805.11436)
 """
-function pole_ladder(M, p, X, q; c = shortest_geodesic(M, p, q) )
-    return -log(M, shortest_geodesic(M, exp(M,p,X), c), 0.5)
+function pole_ladder(M, p, d, q; c = shortest_geodesic(M, p, q) )
+    return exp(M, d, 2*log(M,d,c))
 end
 
 """
@@ -759,20 +789,22 @@ function retract!(M::Manifold, q, p, X, method::AbstractRetractionMethod)
 end
 
 @doc raw"""
-    schilds_ladder(M,p,X,q)
+    schilds_ladder(M,p,d,q)
 
 approximate the [`ParallelTransport`](@ref) in [`vector_transport_to`](@ref) by the so-called
-Schild's ladder. With $d=\exp_pX$ let $c = \gamma_{q,d}(\frac{1}{2})$ denote the mid point
-on the geodesic conncting $q$ and the point $d$, which is the end point from $p$ in
-direction $X$. Then Schild's ladder reads as
+Schild's ladder. It approximates the transport of the vector $X = \log_pd$ to $q$.
+Let $c = \gamma_{q,d}(\frac{1}{2})$ denote the mid point
+on the geodesic conncting $q$ and the point $d$. Then Schild's ladder reads as
 
 ````math
-P^{\mathrm{S}}_{q\gets p}(X) = \log_q\bigl(\gamma_{x,c}(2))\bigr)
+\operatorname{Sl}(p,d,q) = \gamma_{x,c}(2)).
 ````
 
+Then the approximation to the transported vector is given by $\log_q\operatorname{Sl}(p,d,q)$.
+
 It can be best understood imagining the Euclidean case. Then $p,q,d$ form a triangle and
-adding $\gamma_{x,c}(2)$ yields a parallelogram; especially the two
-vectors $\gamma_{x,c}(2)-q$ and $d-p$ are opposing sides and hence equal,
+adding $\gamma_{p,c}(2)$ yields a parallelogram; especially the two
+vectors $\gamma_{p,c}(2)-q$ and $d-p$ are opposing sides and hence equal,
 and hence for this case the approximation is exact.
 
 The name stems from the image of this paralleltogram in a repeated application yielding the
@@ -784,8 +816,9 @@ image of a ladder. The approximation was proposed in [^EhlersPiraniSchild1972].
     > J. L. Synge, pp. 63–84. Clarendon Press, Oxford (1972).
     > reprint doi: [10.1007/s10714-012-1353-4](https://doi.org/10.1007/s10714-012-1353-4)
 """
-function schilds_ladder(M, p, X, q)
-    return log(M, q, shortest_geodesic(M, p, shortest_geodesic(M, q, exp(M, p, X), 0.5), 2))
+function schilds_ladder(M, p, d, q)
+    c = exp(M, q, 0.5 * log(M, q, d))
+    return exp(M, p, 2*log(M, p, c))
 end
 
 @doc doc"""
@@ -943,6 +976,34 @@ at `q`. This method requires  [`project`](@ref project(M::Manifold, p, X)).
 function vector_transport_to!(M::Manifold, Y, p, X, q, ::ProjectionTransport)
     return project!(M, Y, q, X)
 end
+@doc raw"""
+    vector_transport_to!(M::Manifold, Y, p, X, q, method::PoleLadderTransport)
+
+Perform a vector transport by approximation parallel transport using [`pole_ladder`](@ref).
+The complete formula reads with $d=exp(p,X)$ and $c = \gamma_{p,q}(\frac{1}{2})$ as
+
+````math
+P^{\mathrm{P}}_{q\gets p}(X) = -\log_q\bigl(\gamma_{d,c}(2)\bigr)
+````
+"""
+function vector_transport_to!(M::Manifold, Y, p, X, q, ::PoleLadderTransport)
+    return -log(M,q, pole_ladder(M, p, exp(M,p,X), q))
+end
+
+@doc raw"""
+    vector_transport_to!(M::Manifold, Y, p, X, q, method::SchildsLadderTransport)
+
+Perform a vector transport by approximation parallel transport using [`schilds_ladder`](@ref).
+The complete formula reads with $c = \gamma_{q,d}(\frac{1}{2}), d = \exp_pX$ as
+
+````math
+P^{\mathrm{S}}_{q\gets p}(X) = \log_q\bigl(\gamma_{p,c}(2))\bigr)
+````
+"""
+function vector_transport_to!(M::Manifold, Y, p, X, q, ::SchildsLadderTransport)
+    return log(M,q, schilds_ladder(M, p, exp(M,p,X), q))
+end
+
 function vector_transport_to!(
     M::Manifold,
     Y,
@@ -1004,7 +1065,9 @@ export AbstractRetractionMethod,
     ExponentialRetraction,
     QRRetraction,
     PolarRetraction,
-    ProjectionRetraction
+    ProjectionRetraction,
+    SchildsLadderTransport,
+    PoleLadderTransport
 export AbstractInverseRetractionMethod,
     LogarithmicInverseRetraction,
     QRInverseRetraction,
