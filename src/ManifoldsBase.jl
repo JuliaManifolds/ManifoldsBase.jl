@@ -138,8 +138,10 @@ Specify a discretized vector transport for given data of type `D` and a
 iteratively a vector transport along the given data.
 
 # Fields
-* `points` a set of points on `M` either as a vector of points or a point on a [`PowerManifold`](@ref)
-* `method` – the [`AbstractVectorTransportMethod`](@ref) to use internally.
+* `points` a set of points on `M` either as a vector of points or a point on a
+  [`PowerManifold`](@ref)
+* `method` – the [`AbstractVectorTransportMethod`](@ref) to use internally for
+  transporting between successive points.
 """
 struct DisretizedVectorTransport{DT,M} <:
     AbstractVectorTransportMethod where {DT, M <: AbstractVectorTransportMethod}
@@ -193,7 +195,7 @@ it resembles a pole ladder when applied to a sequence of points usccessively.
 ````julia
 PoleLadderTransport(
     retraction = ExponentialRetraction(),
-    inverse_retraction = LogarithmicInverseRetraction()
+    inverse_retraction = LogarithmicInverseRetraction(),
 )
 ````
 Construct the classical pole ladder that employs exp and log, i.e. as proposed
@@ -213,12 +215,15 @@ changed to an [`AbstractRetractionMethod`](@ref) `retraction` and an
     > arXiv: [1805.11436](https://arxiv.org/abs/1805.11436)
 
 """
-struct PoleLadderTransport <: AbstractVectorTransportMethod
-    retraction::AbstractRetractionMethod
-    inverse_retraction::AbstractInverseRetractionMethod
+struct PoleLadderTransport{
+    RT<:AbstractRetractionMethod,
+    IRT<:AbstractInverseRetractionMethod,
+} <: AbstractVectorTransportMethod
+    retraction::RT
+    inverse_retraction::IRT
     function PoleLadderTransport(
-        retraction=AbstractRetractionMethod(),
-        inverse_retraction = LogarithmicInverseRetraction()
+        retraction = ExponentialRetraction(),
+        inverse_retraction = LogarithmicInverseRetraction(),
     )
         PoleLadderTransport(retraction, inverse_retraction)
     end
@@ -249,7 +254,7 @@ image of a ladder. The approximation was proposed in [^EhlersPiraniSchild1972].
 ````julia
 SchildsLadderTransport(
     retraction = ExponentialRetraction(),
-    inverse_retraction = LogarithmicInverseRetraction()
+    inverse_retraction = LogarithmicInverseRetraction(),
 )
 ````
 Construct the classical Schilds ladder that employs exp and log, i.e. as proposed
@@ -264,12 +269,15 @@ changed to an [`AbstractRetractionMethod`](@ref) `retraction` and an
     > reprint doi: [10.1007/s10714-012-1353-4](https://doi.org/10.1007/s10714-012-1353-4)
 
 """
-struct SchildsLadderTransport <: AbstractVectorTransportMethod
-    retraction::AbstractRetractionMethod
-    inverse_retraction::AbstractInverseRetractionMethod
+struct SchildsLadderTransport{
+    RT<:AbstractRetractionMethod,
+    IRT<:AbstractInverseRetractionMethod,
+} <: AbstractVectorTransportMethod
+    retraction::RT
+    inverse_retraction::IRT
     function SchildsLadderTransport(
-        retraction=AbstractRetractionMethod(),
-        inverse_retraction = LogarithmicInverseRetraction()
+        retraction = ExponentialRetraction(),
+        inverse_retraction = LogarithmicInverseRetraction(),
     )
         SchildsLadderTransport(retraction, inverse_retraction)
     end
@@ -721,15 +729,15 @@ end
         M,
         p,
         d,
-        q;
-        c=shortest_geodesic(M,p,q,0.5),
+        q,
+        c = shortest_geodesic(M, p, q, 0.5);
         retraction=ExponentialRetraction(),
         inverse_retraction=LogarithmicInverseRetraction()
     )
 
-an inner step of the pole ladder, that can be used as a [`vector_transport_to`](@ref).
-Let $c = \gamma_{p,q}(\frac{1}{2})$ mid point between `p` and `q`, then the pole ladder is
-given by
+Compute an inner step of the pole ladder, that can be used as a [`vector_transport_to`](@ref).
+Let $\mathit{midpoint} = \gamma_{p,q}(\frac{1}{2})$ mid point between `p` and `q`,
+then the pole ladder is given by
 
 ````math
     \operatorname{Pl}(p,d,q) = \operatorname{retr}_d (2\operatorname{retr}_d^{-1}c)
@@ -752,12 +760,12 @@ function pole_ladder(
     M,
     p,
     d,
-    q;
-    c = shortest_geodesic(M, p, q, 0.5),
+    q,
+    c = shortest_geodesic(M, p, q, 0.5);
     retraction = ExponentialRetraction(),
-    inverse_retraction = LogarithmicInverseRetraction()
-    )
-    return rettract(M, d, 2*inverse_retract(M,d,c, inverse_retraction), retraction)
+    inverse_retraction = LogarithmicInverseRetraction(),
+)
+    return retract(M, d, 2*inverse_retract(M, d, c, inverse_retraction), retraction)
 end
 @doc raw"""
     pole_ladder(
@@ -765,25 +773,30 @@ end
         pl,
         p,
         d,
-        q;
-        c=shortest_geodesic(M,p,q),
-        retraction=ExponentialRetraction(),
-        inverse_retraction=LogarithmicInverseRetraction()
+        q,
+        c = shortest_geodesic(M, p, q, 0.5),
+        X = allocate_result_type(M, log, d, c);
+        retraction = ExponentialRetraction(),
+        inverse_retraction = LogarithmicInverseRetraction()
     )
 
-Computaes the [`pole_ladder`](@ref), i.e. the result is computed in `pl`.
+Compute the [`pole_ladder`](@ref), i.e. the result is saved in `pl`.
+`X` is used for storing intermediate inverse retraction.
 """
 function pole_ladder!(
     M,
     pl,
     p,
     d,
-    q;
-    c = shortest_geodesic(M, p, q),
+    q,
+    c = shortest_geodesic(M, p, q, 0.5),
+    X = allocate_result_type(M, log, d, c);
     retraction = ExponentialRetraction(),
-    inverse_retraction = LogarithmicInverseRetraction()
-    )
-    return rettract!(M, d, 2*inverse_retract(M,d,c, inverse_retraction), retraction)
+    inverse_retraction = LogarithmicInverseRetraction(),
+)
+    inverse_retract!(M, X, d, c, inverse_retraction)
+    X *= 2
+    return retract!(M, pl, d, X, retraction)
 end
 
 """
@@ -925,16 +938,16 @@ end
         M,
         p,
         d,
-        q;
-        c = shortest_geodesic(M, q, d, 0.5),
-        retraction=ExponentialRetraction(),
-        inverse_retraction=LogarithmicInverseRetraction()
+        q,
+        c = shortest_geodesic(M, q, d, 0.5);
+        retraction = ExponentialRetraction(),
+        inverse_retraction = LogarithmicInverseRetraction()
     )
 
-perform an inner step of schilds ladder, which can be used as a
+Perform an inner step of schilds ladder, which can be used as a
 [`vector_transport_to`](@ref), see [`SchildsLadderTransport`](@ref).
 Let $c = \gamma_{q,d}(\frac{1}{2})$ denote the mid point
-on the geodesic conncting $q$ and the point $d$. Then Schild's ladder reads as
+on the shortest geodesic connecting $q$ and the point $d$. Then Schild's ladder reads as
 
 ````math
 \operatorname{Sl}(p,d,q) = \operatorname{retr}_x( 2\operatorname{retr}_x^{-1} c
@@ -959,12 +972,12 @@ function schilds_ladder(
     M,
     p,
     d,
-    q;
-    c = shortest_geodesic(M, q, d, 0.5),
-    retraction=ExponentialRetraction(),
-    inverse_retraction=LogarithmicInverseRetraction(),
+    q,
+    c = shortest_geodesic(M, q, d, 0.5);
+    retraction = ExponentialRetraction(),
+    inverse_retraction = LogarithmicInverseRetraction(),
 )
-    return retract(M, p, 2*inverse_retract!(M, p, c, inverse_retraction), retraction)
+    return retract(M, p, 2*inverse_retract(M, p, c, inverse_retraction), retraction)
 end
 @doc raw"""
     schilds_ladder!(
@@ -972,10 +985,11 @@ end
         sl
         p,
         d,
-        q;
+        q,
         c = shortest_geodesic(M, q, d, 0.5),
-        retraction=ExponentialRetraction(),
-        inverse_retraction=LogarithmicInverseRetraction()
+        X = allocate_result_type(M, log, d, c);
+        retraction = ExponentialRetraction(),
+        inverse_retraction = LogarithmicInverseRetraction()
     )
 
 Compute [`schilds_ladder`](@ref) and return the value in the parameter `sl`.
@@ -985,12 +999,15 @@ function schilds_ladder!(
     sl,
     p,
     d,
-    q;
+    q,
     c = shortest_geodesic(M, q, d, 0.5),
-    retraction=ExponentialRetraction(),
-    inverse_retraction=LogarithmicInverseRetraction(),
+    X = allocate_result_type(M, log, d, c);
+    retraction = ExponentialRetraction(),
+    inverse_retraction = LogarithmicInverseRetraction(),
 )
-    return retract!(M, sl, d, 2*inverse_retract!(M, d, c, inverse_retraction), retraction)
+    inverse_retract!(M, X, d, c, inverse_retraction)
+    X *= 2
+    return retract!(M, sl, d, X, retraction)
 end
 
 @doc doc"""
@@ -1154,17 +1171,18 @@ end
 Perform a vector transport by using [`PoleLadderTransport`](@ref).
 """
 function vector_transport_to!(M::Manifold, Y, p, X, q, m::PoleLadderTransport)
-    return -log(
+    return -log!(
         M,
+        Y,
         q,
         pole_ladder(
             M,
             p,
-            exp(M,p,X),
+            exp(M, p, X),
             q;
-            retraction=m.retraction,
-            inverse_retraction=m.inverse_retraction
-        )
+            retraction = m.retraction,
+            inverse_retraction = m.inverse_retraction,
+        ),
     )
 end
 
@@ -1181,10 +1199,10 @@ function vector_transport_to!(M::Manifold, Y, p, X, q, m::SchildsLadderTransport
         schilds_ladder(
             M,
             p,
-            exp(M,p,X),
+            exp(M, p, X),
             q;
-            retraction=m.retraction,
-            inverse_retraction=m.inverse_retraction
+            retraction = m.retraction,
+            inverse_retraction = m.inverse_retraction
         )
     )
 end
