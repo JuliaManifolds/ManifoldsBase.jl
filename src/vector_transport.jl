@@ -322,6 +322,9 @@ end
     )
 
 Compute [`schilds_ladder`](@ref) and return the value in the parameter `sl`.
+If the required mid point `c` was computed before, it can be passed using `c`,
+and the allocation of new memory can be avoided providing a tangent vector `X`
+for the interims result.
 """
 function schilds_ladder!(
     M,
@@ -385,6 +388,124 @@ function vector_transport_along!(
         c,
         method,
     ))
+end
+@doc raw"""
+    vector_transport_along!(
+        M::Manifold,
+        Y,
+        p,
+        X,
+        c::AbstractVector{T},
+        method::AbstractVectorTransportMethod
+    ) where {T}
+
+Compute the vector transport along a discretized curve `c` using an
+[`AbstractVectorTransportMethod`](@ref) `method` succesively along the sampled curve.
+"""
+function vector_transport_along!(
+    M::Manifold,
+    Y,
+    p,
+    X,
+    c::AbstractVector{T},
+    method::AbstractVectorTransportMethod
+) where {T}
+    vector_transport_to!(M, Y, p, Y, c[1], method)
+    for i=1:(length(c)-1)
+        vector_transport_to!(M, Y, c[i], Y, c[i+1], method)
+    end
+    return Y
+end
+@doc raw"""
+    function vector_transport_along!(
+        M::Manifold,
+        Y,
+        p,
+        X,
+        c::AbstractVector{T},
+        method::PoleLadderTransport
+    ) where {T}
+
+Compute the vector transport along a discretized curve using
+[`PoleLadderTransport`](@ref) succesively along the sampled curve.
+This method is avoiding additional allocations as well as inner exp/log by performing all
+ladder steps on the manifold and only computing one tangent vector in the end.
+"""
+function vector_transport_along!(
+    M::Manifold,
+    Y,
+    p,
+    X,
+    c::AbstractVector{T},
+    method::PoleLadderTransport
+) where {T}
+    d = exp(M,p,X)
+    m = p
+    for i=1:(length(c)-1)
+        # precompute mid point inplace
+        log!(M, Y, c[i], c[i+1])
+        exp!(M, m, c[i], 0.5*Y)
+        # compute new ladder point
+        pole_ladder!(
+            M,
+            d,
+            c[i],
+            d,
+            c[i+1],
+            m,
+            Y;
+            retraction = method.retraction,
+            inverse_retraction = method.inverse_retraction,
+        )
+    end
+    log!(M, Y, c[end], d)
+    Y *= (-1)^length(c)
+    return Y
+end
+@doc raw"""
+    vector_transport_along!(
+        M::Manifold,
+        Y,
+        p,
+        X,
+        c::AbstractVector{T},
+        method::SchildsLadderTransport
+    ) where {T}
+
+Compute the vector transport along a discretized curve using
+[`SchildsLadderTransport`](@ref) succesively along the sampled curve.
+This method is avoiding additional allocations as well as inner exp/log by performing all
+ladder steps on the manifold and only computing one tangent vector in the end.
+"""
+function vector_transport_along!(
+    M::Manifold,
+    Y,
+    p,
+    X,
+    c::AbstractVector{T},
+    method::SchildsLadderTransport
+) where {T}
+    d = exp(M,p,X)
+    m = p
+    for i=1:(length(c)-1)
+        # precompute mid point inplace
+        log!(M, Y, c[i+1], d)
+        exp!(M, m, c[i+1], 0.5*Y)
+        # compute new ladder point
+        schilds_ladder!(
+            M,
+            d,
+            c[i],
+            d,
+            c[i+1],
+            m,
+            Y;
+            retraction = method.retraction,
+            inverse_retraction = method.inverse_retraction,
+        )
+    end
+    log!(M, Y, c[end], d)
+    return Y
 end
 
 
