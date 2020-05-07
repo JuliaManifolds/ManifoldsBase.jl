@@ -20,7 +20,7 @@ iteratively a vector transport along the given data.
 * `method` – the [`AbstractVectorTransportMethod`](@ref) to use internally for
   transporting between successive points.
 """
-struct DisretizedVectorTransport{MT,DT} <:
+struct DiscretizedVectorTransport{MT,DT} <:
     AbstractVectorTransportMethod where {MT<:AbstractVectorTransportMethod, DT}
     method::MT
     points::DT
@@ -28,14 +28,14 @@ end
 
 """
     get_discretized_point(
-        dvt::DisretizedVectorTransport{<:AbstractVectorTransportMethod,<:AbstractVector},
+        dvt::DiscretizedVectorTransport{<:AbstractVectorTransportMethod,<:AbstractVector},
         i,
     )
 
-Get the `i`th point from the [`DisretizedVectorTransport`](@ref) `dvt`.
+Get the `i`th point from the [`DiscretizedVectorTransport`](@ref) `dvt`.
 """
 function get_discretized_point(
-    dvt::DisretizedVectorTransport{<:AbstractVectorTransportMethod,<:AbstractVector},
+    dvt::DiscretizedVectorTransport{<:AbstractVectorTransportMethod,<:AbstractVector},
     i,
 )
     return dvt.points[i]
@@ -43,13 +43,13 @@ end
 
 """
     get_length(
-        dvt::DisretizedVectorTransport{<:AbstractVectorTransportMethod,<:AbstractVector},
+        dvt::DiscretizedVectorTransport{<:AbstractVectorTransportMethod,<:AbstractVector},
     )
 
-Get the number of points in the [`DisretizedVectorTransport`](@ref) `dvt`.
+Get the number of points in the [`DiscretizedVectorTransport`](@ref) `dvt`.
 """
 function get_length(
-    dvt::DisretizedVectorTransport{<:AbstractVectorTransportMethod,<:AbstractVector},
+    dvt::DiscretizedVectorTransport{<:AbstractVectorTransportMethod,<:AbstractVector},
 )
     return length(dvt.points)
 end

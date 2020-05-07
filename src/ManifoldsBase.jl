@@ -735,9 +735,9 @@ function zero_tangent_vector(M::Manifold, p)
 end
 
 include("numbers.jl")
+include("vector_transport.jl")
 include("DecoratorManifold.jl")
 include("bases.jl")
-include("vector_transport.jl")
 include("ValidationManifold.jl")
 include("EmbeddedManifold.jl")
 include("DefaultManifold.jl")
