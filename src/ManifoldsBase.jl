@@ -155,12 +155,48 @@ Specify to use [`schilds_ladder`](@ref) as vector transport method within
 [`vector_transport_along`](@ref), i.e.
 
 Let $X\in T_p\mathcal M$ be a tangent vector at $p\in\mathcal M$ and $q\in\mathcal M$ the
-point to transport to. Then $x = \exp_pX$ is used to call
-`y = [`schilds_ladder`](@ref)`(M,p,x,q)` and the resulting vector is obtained by computing
-$Y = \log_qy$.
-"""
-struct SchildsLadderTransport <: AbstractVectorTransportMethod end
+point to transport to. Then
 
+````math
+P^{\mathrm{S}}_{q\gets p}(X) = \log_q\bigl( \retr_p( 2\retr_p^{-1}c)\bigr),
+````
+where $c$ is the mid point between $q$ and $d=\exp_pX$.
+
+This method employs the internal function [`schilds_ladder`](@ref)`(M,p,d,q)` that avoids
+leaving the manifold.
+
+The name stems from the image of this paralleltogram in a repeated application yielding the
+image of a ladder. The approximation was proposed in [^EhlersPiraniSchild1972].
+
+# Constructor
+````julia
+SchildsLadderTransport(
+    retraction = ExponentialRetraction(),
+    inverse_retraction = LogarithmicInverseRetraction()
+)
+````
+Construct the classical Schilds ladder that employs exp and log, i.e. as proposed
+in[^EhlersPiraniSchild1972]. For an even cheaper transport these inner operations can be
+changed to an [`AbstractRetractionMethod`](@ref) `retraction` and an
+[`AbstractInverseRetractionMethod`](@ref) `inverse_retraction`, respectively.
+
+[^EhlersPiraniSchild1972]:
+    > Ehlers, J., Pirani, F.A.E., Schild, A.: The geometry of free fall and light
+    > propagation. In: O’Raifeartaigh, L. (ed.) General Relativity: Papers in Honour of
+    > J. L. Synge, pp. 63–84. Clarendon Press, Oxford (1972).
+    > reprint doi: [10.1007/s10714-012-1353-4](https://doi.org/10.1007/s10714-012-1353-4)
+
+"""
+struct SchildsLadderTransport <: AbstractVectorTransportMethod
+    retraction::AbstractRetractionMethod
+    inverse_retraction::AbstractInverseRetractionMethod
+    function SchildsLadderTransport(
+        retraction=AbstractRetractionMethod(),
+        inverse_retraction = LogarithmicInverseRetraction()
+    )
+        SchildsLadderTransport(retraction, inverse_retraction)
+    end
+end
 @doc raw"""
     PoleLadderTransport <: AbstractVectorTransportMethod
 
@@ -172,9 +208,51 @@ Let $X\in T_p\mathcal M$ be a tangent vector at $p\in\mathcal M$ and $q\in\mathc
 point to transport to. Then $x = \exp_pX$ is used to call
 `y = [`pole_ladder`](@ref)`(M,p,x,q)` and the resulting vector is obtained by computing
 $Y = -\log_qy$.
-"""
-struct PoleLadderTransport <: AbstractVectorTransportMethod end
 
+The [`PoleLadderTransport`](@ref) posesses two advantages compared to
+[`SchildsLadderTransport`](@ref):
+* it is cheaper to evaluate, if you want to transport several vectors, since the
+  mid point $c$ then stays unchanged.
+* while both methods are exact if the curvature is zero, pole ladder is even exact in
+  symmetric Riemannian manifolds[^Pennec2018]
+
+The pole ladder was was proposed in [^LorenziPennec2014]. Its name stems from the fact that
+it resembles a pole ladder when applied to a sequence of points usccessively.
+
+# Constructor
+````julia
+PoleLadderTransport(
+    retraction = ExponentialRetraction(),
+    inverse_retraction = LogarithmicInverseRetraction()
+)
+````
+Construct the classical pole ladder that employs exp and log, i.e. as proposed
+in[^LorenziPennec2014]. For an even cheaper transport the inner operations can be
+changed to an [`AbstractRetractionMethod`](@ref) `retraction` and an
+[`AbstractInverseRetractionMethod`](@ref) `inverse_retraction`, respectively.
+
+[^LorenziPennec2014]:
+    > Lorenzi, M. and Pennec, X: Efficient parallel transport of deformations in time
+    > series of images: From Schild’s to pole ladder.
+    > Journal of Mathematical Imaging and Vision (2014), 50(1), pp. 5–17
+    > doi [10.1007/s10851-013-0470-3](https://doi.org/10.1007/s10851-013-0470-3),
+    > hal: [hal-00870489](https://hal.inria.fr/hal-00870489)
+[^Pennec2018]:
+    > Pennec, X: Parallel Transport with Pole Ladder: a Third Order Scheme in Affine
+    > Connection Spaces which is Exact in Affine Symmetric Spaces.
+    > arXiv: [1805.11436](https://arxiv.org/abs/1805.11436)
+
+"""
+struct PoleLadderTransport <: AbstractVectorTransportMethod
+    retraction::AbstractRetractionMethod
+    inverse_retraction::AbstractInverseRetractionMethod
+    function PoleLadderTransport(
+        retraction=AbstractRetractionMethod(),
+        inverse_retraction = LogarithmicInverseRetraction()
+    )
+        PoleLadderTransport(retraction, inverse_retraction)
+    end
+end
 """
     TVector
 
@@ -617,41 +695,73 @@ end
 
 
 @doc raw"""
-    pole_ladder(M, p, d, q; c=shortest_geodesic(M,p,q))
+    pole_ladder(
+        M,
+        p,
+        d,
+        q;
+        c=shortest_geodesic(M,p,q,0.5),
+        retraction=ExponentialRetraction(),
+        inverse_retraction=LogarithmicInverseRetraction()
+    )
 
-approximate the [`ParallelTransport`](@ref) in [`vector_transport_to`](@ref) by the so-called
-Pole ladder. Assume we want to transport a vector $X = \log_pd$.
-Let $c = \gamma_{p,q}(\frac{1}{2})$ mid point between `p` and `q`
-
-Then the pole ladder is given by
+an inner step of the pole ladder, that can be used as a [`vector_transport_to`](@ref).
+Let $c = \gamma_{p,q}(\frac{1}{2})$ mid point between `p` and `q`, then the pole ladder is
+given by
 
 ````math
-    \operatorname{Pl}(p,d,q) = \gamma_{d,c}(2)
+    \operatorname{Pl}(p,d,q) = \operatorname{retr}_d (2\operatorname{retr}_d^{-1}c)
 ````
 
-Note that the approximate transport is then obtained by $Y = -\log_q \operatorname{Pl}(p,d,q)$
+Where the classical pole ladder employs $\operatorname{retr}_d=\exp_d$
+and $\operatorname{retr}_d^{-1}=\log_d$ but for an even cheaper transport these can be set
+to different [`AbstractRetractionMethod`](@ref) and [`AbstractInverseRetractionMethod`](@ref).
 
-It is cheaper to evaluate than [`schilds_ladder`](@ref), if you want to transport several
-vectors, since the mid point $c$ then stays unchanged. That's why it can be passed as an
-optional keyword argument
+When you have $X=log_pd$ and $Y = -\log_q \operatorname{Pl}(p,d,q)$,
+you will obtain the [`PoleLadderTransport`](@ref). When performing multiple steps, this
+method avoidsd the switching to the tangent space. Keep in mind that after $n$ successive
+steps the tangent vector reads $Y_n = (-1)^n\log_q \operatorname{Pl}(p_{n-1},d_{n-1},p_n)$.
 
-its image on Euclidean space, where this method is exact, resembles a pole ladder.
-It was proposed in [^LorenziPennec2014] and is also exact on symmetric Riemannian manifolds,
-as was shown in [^Pennec2018].
-
-[^LorenziPennec2014]:
-    > Lorenzi, M. and Pennec, X: Efficient parallel transport of deformations in time
-    > series of images: From Schild’s to pole ladder.
-    > Journal of Mathematical Imaging and Vision (2014), 50(1), pp. 5–17
-    > doi [10.1007/s10851-013-0470-3](https://doi.org/10.1007/s10851-013-0470-3),
-    > hal: [hal-00870489](https://hal.inria.fr/hal-00870489)
-[^Pennec2018]:
-    > Pennec, X: Parallel Transport with Pole Ladder: a Third Order Scheme in Affine
-    > Connection Spaces which is Exact in Affine Symmetric Spaces.
-    > arXiv: [1805.11436](https://arxiv.org/abs/1805.11436)
+It is cheaper to evaluate than [`schilds_ladder`](@ref), sinc if you want to form multiple
+ladder steps between `p` and `q`, but with different `d`, there is just one evaluation of a geodesic
+each., since the center `c` can be reused.
 """
-function pole_ladder(M, p, d, q; c = shortest_geodesic(M, p, q) )
-    return exp(M, d, 2*log(M,d,c))
+function pole_ladder(
+    M,
+    p,
+    d,
+    q;
+    c = shortest_geodesic(M, p, q, 0.5),
+    retraction = ExponentialRetraction(),
+    inverse_retraction = LogarithmicInverseRetraction()
+    )
+    return rettract(M, d, 2*inverse_retract(M,d,c, inverse_retraction), retraction)
+end
+@doc raw"""
+    pole_ladder(
+        M,
+        pl,
+        p,
+        d,
+        q;
+        c=shortest_geodesic(M,p,q),
+        retraction=ExponentialRetraction(),
+        inverse_retraction=LogarithmicInverseRetraction()
+    )
+
+Computaes the [`pole_ladder`](@ref), i.e. the result is computed in `pl`.
+"""
+function pole_ladder!(
+    M,
+    pl,
+    p,
+    d,
+    q;
+    c = shortest_geodesic(M, p, q),
+    retraction = ExponentialRetraction(),
+    inverse_retraction = LogarithmicInverseRetraction()
+    )
+    return rettract!(M, d, 2*inverse_retract(M,d,c, inverse_retraction), retraction)
 end
 
 """
@@ -789,36 +899,76 @@ function retract!(M::Manifold, q, p, X, method::AbstractRetractionMethod)
 end
 
 @doc raw"""
-    schilds_ladder(M,p,d,q)
+    schilds_ladder(
+        M,
+        p,
+        d,
+        q;
+        c = shortest_geodesic(M, q, d, 0.5),
+        retraction=ExponentialRetraction(),
+        inverse_retraction=LogarithmicInverseRetraction()
+    )
 
-approximate the [`ParallelTransport`](@ref) in [`vector_transport_to`](@ref) by the so-called
-Schild's ladder. It approximates the transport of the vector $X = \log_pd$ to $q$.
+perform an inner step of schilds ladder, which can be used as a
+[`vector_transport_to`](@ref), see [`SchildsLadderTransport`](@ref).
 Let $c = \gamma_{q,d}(\frac{1}{2})$ denote the mid point
 on the geodesic conncting $q$ and the point $d$. Then Schild's ladder reads as
 
 ````math
-\operatorname{Sl}(p,d,q) = \gamma_{x,c}(2)).
+\operatorname{Sl}(p,d,q) = \operatorname{retr}_x( 2\operatorname{retr}_x^{-1} c
 ````
 
+Where the classical Schilds ladder employs $\operatorname{retr}_d=\exp_d$
+and $\operatorname{retr}_d^{-1}=\log_d$ but for an even cheaper transport these can be set
+to different [`AbstractRetractionMethod`](@ref) and [`AbstractInverseRetractionMethod`](@ref).
+
+In consistency with [`pole_ladder`](@ref) you can change the way the mid point is computed
+using the optional parameter `c`, but note that here it's the mid point between `q` and d`.
+
+When you have $X=log_pd$ and $Y = \log_q \operatorname{Sl}(p,d,q)$,
+you will obtain the [`PoleLadderTransport`](@ref).
 Then the approximation to the transported vector is given by $\log_q\operatorname{Sl}(p,d,q)$.
 
-It can be best understood imagining the Euclidean case. Then $p,q,d$ form a triangle and
-adding $\gamma_{p,c}(2)$ yields a parallelogram; especially the two
-vectors $\gamma_{p,c}(2)-q$ and $d-p$ are opposing sides and hence equal,
-and hence for this case the approximation is exact.
-
-The name stems from the image of this paralleltogram in a repeated application yielding the
-image of a ladder. The approximation was proposed in [^EhlersPiraniSchild1972].
-
-[^EhlersPiraniSchild1972]:
-    > Ehlers, J., Pirani, F.A.E., Schild, A.: The geometry of free fall and light
-    > propagation. In: O’Raifeartaigh, L. (ed.) General Relativity: Papers in Honour of
-    > J. L. Synge, pp. 63–84. Clarendon Press, Oxford (1972).
-    > reprint doi: [10.1007/s10714-012-1353-4](https://doi.org/10.1007/s10714-012-1353-4)
+When performing multiple steps, this method avoidsd the switching to the tangent space.
+Hence after $n$ successive steps the tangent vector reads
+$Y_n = \log_q \operatorname{Pl}(p_{n-1},d_{n-1},p_n)$.
 """
-function schilds_ladder(M, p, d, q)
-    c = exp(M, q, 0.5 * log(M, q, d))
-    return exp(M, p, 2*log(M, p, c))
+function schilds_ladder(
+    M,
+    p,
+    d,
+    q;
+    c = shortest_geodesic(M, q, d, 0.5),
+    retraction=ExponentialRetraction(),
+    inverse_retraction=LogarithmicInverseRetraction(),
+)
+    return retract(M, p, 2*inverse_retract!(M, p, c, inverse_retraction), retraction)
+end
+@doc raw"""
+    schilds_ladder!(
+        M,
+        sl
+        p,
+        d,
+        q;
+        c = shortest_geodesic(M, q, d, 0.5),
+        retraction=ExponentialRetraction(),
+        inverse_retraction=LogarithmicInverseRetraction()
+    )
+
+Compute [`schilds_ladder`](@ref) and return the value in the parameter `sl`.
+"""
+function schilds_ladder!(
+    M,
+    sl,
+    p,
+    d,
+    q;
+    c = shortest_geodesic(M, q, d, 0.5),
+    retraction=ExponentialRetraction(),
+    inverse_retraction=LogarithmicInverseRetraction(),
+)
+    return retract!(M, sl, d, 2*inverse_retract!(M, d, c, inverse_retraction), retraction)
 end
 
 @doc doc"""
@@ -986,22 +1136,41 @@ The complete formula reads with $d=exp(p,X)$ and $c = \gamma_{p,q}(\frac{1}{2})$
 P^{\mathrm{P}}_{q\gets p}(X) = -\log_q\bigl(\gamma_{d,c}(2)\bigr)
 ````
 """
-function vector_transport_to!(M::Manifold, Y, p, X, q, ::PoleLadderTransport)
-    return -log(M,q, pole_ladder(M, p, exp(M,p,X), q))
+function vector_transport_to!(M::Manifold, Y, p, X, q, m::PoleLadderTransport)
+    return -log(
+        M,
+        q,
+        pole_ladder(
+            M,
+            p,
+            exp(M,p,X),
+            q;
+            retraction=m.retraction,
+            inverse_retraction=m.inverse_retraction
+        )
+    )
 end
 
 @doc raw"""
     vector_transport_to!(M::Manifold, Y, p, X, q, method::SchildsLadderTransport)
 
-Perform a vector transport by approximation parallel transport using [`schilds_ladder`](@ref).
-The complete formula reads with $c = \gamma_{q,d}(\frac{1}{2}), d = \exp_pX$ as
-
-````math
-P^{\mathrm{S}}_{q\gets p}(X) = \log_q\bigl(\gamma_{p,c}(2))\bigr)
-````
+Perform a vector transport by approximation parallel transport using
+[`SchildsLadderTransport`](@ref).
 """
-function vector_transport_to!(M::Manifold, Y, p, X, q, ::SchildsLadderTransport)
-    return log(M,q, schilds_ladder(M, p, exp(M,p,X), q))
+function vector_transport_to!(M::Manifold, Y, p, X, q, m::SchildsLadderTransport)
+    return log!(
+        M,
+        Y,
+        q,
+        schilds_ladder(
+            M,
+            p,
+            exp(M,p,X),
+            q;
+            retraction=m.retraction,
+            inverse_retraction=m.inverse_retraction
+        )
+    )
 end
 
 function vector_transport_to!(

@@ -659,5 +659,20 @@ decorated_manifold(M::Manifold) = M.manifold
     q,
     m::ProjectionTransport,
 )
-
+@decorator_transparent_signature vector_transport_to!(
+    M::AbstractDecoratorManifold,
+    Y,
+    p,
+    X,
+    q,
+    m::PoleLadderTransport,
+)
+@decorator_transparent_signature vector_transport_to!(
+    M::AbstractDecoratorManifold,
+    Y,
+    p,
+    X,
+    q,
+    m::SchildsLadderTransport,
+)
 @decorator_transparent_signature zero_tangent_vector!(M::AbstractDecoratorManifold, X, p)
