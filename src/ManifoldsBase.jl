@@ -217,8 +217,7 @@ Return type of element of the array that will represent the result of function `
 [`Manifold`](@ref) `M` on given arguments `args` (passed as a tuple).
 """
 function allocate_result_type(M::Manifold, f, args::NTuple{N,Any}) where {N}
-    T = typeof(reduce(+, one(number_eltype(eti)) for eti ∈ args))
-    return T
+    return typeof(mapreduce(eti -> one(number_eltype(eti)), +, args))
 end
 
 """
@@ -579,12 +578,10 @@ To be used in conjuntion with [`allocate`](@ref) or [`allocate_result`](@ref).
 """
 number_eltype(x) = eltype(x)
 function number_eltype(x::AbstractArray)
-    T = typeof(reduce(+, one(number_eltype(eti)) for eti ∈ x))
-    return T
+    return typeof(mapreduce(eti -> one(number_eltype(eti)), +, x))
 end
 function number_eltype(x::Tuple)
-    T = typeof(reduce(+, one(number_eltype(eti)) for eti ∈ x))
-    return T
+    return typeof(mapreduce(eti -> one(number_eltype(eti)), +, x))
 end
 
 """
