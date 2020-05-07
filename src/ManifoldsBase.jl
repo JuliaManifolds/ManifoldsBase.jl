@@ -130,6 +130,25 @@ An error thrown when a function (for example [`log`](@ref)arithmic map or
 struct OutOfInjectivityRadiusError <: Exception end
 
 """
+````julia
+    DiscretizedVectorTransport{D,M} <: AbstractVectorTransportMethod
+````
+Specify a discretized vector transport for given data of type `D` and a
+[`AbstractVectorTransportMethod`](@ref) of type `M`, this method performs
+iteratively a vector transport along the given data.
+
+# Fields
+* `points` a set of points on `M` either as a vector of points or a point on a [`PowerManifold`](@ref)
+* `method` – the [`AbstractVectorTransportMethod`](@ref) to use internally.
+"""
+struct DisretizedVectorTransport{DT,M} <:
+    AbstractVectorTransportMethod where {DT, M <: AbstractVectorTransportMethod}
+    points::DT
+    method::M
+end
+
+
+"""
     ParallelTransport <: AbstractVectorTransportMethod
 
 Specify to use parallel transport as vector transport method within
@@ -147,56 +166,7 @@ Specify to use projection onto tangent space as vector transport method within
 """
 struct ProjectionTransport <: AbstractVectorTransportMethod end
 
-@doc raw"""
-    SchildsLadderTransport <: AbstractVectorTransportMethod
 
-Specify to use [`schilds_ladder`](@ref) as vector transport method within
-[`vector_transport_to`](@ref), [`vector_transport_direction`](@ref), or
-[`vector_transport_along`](@ref), i.e.
-
-Let $X\in T_p\mathcal M$ be a tangent vector at $p\in\mathcal M$ and $q\in\mathcal M$ the
-point to transport to. Then
-
-````math
-P^{\mathrm{S}}_{q\gets p}(X) = \log_q\bigl( \retr_p( 2\retr_p^{-1}c)\bigr),
-````
-where $c$ is the mid point between $q$ and $d=\exp_pX$.
-
-This method employs the internal function [`schilds_ladder`](@ref)`(M,p,d,q)` that avoids
-leaving the manifold.
-
-The name stems from the image of this paralleltogram in a repeated application yielding the
-image of a ladder. The approximation was proposed in [^EhlersPiraniSchild1972].
-
-# Constructor
-````julia
-SchildsLadderTransport(
-    retraction = ExponentialRetraction(),
-    inverse_retraction = LogarithmicInverseRetraction()
-)
-````
-Construct the classical Schilds ladder that employs exp and log, i.e. as proposed
-in[^EhlersPiraniSchild1972]. For an even cheaper transport these inner operations can be
-changed to an [`AbstractRetractionMethod`](@ref) `retraction` and an
-[`AbstractInverseRetractionMethod`](@ref) `inverse_retraction`, respectively.
-
-[^EhlersPiraniSchild1972]:
-    > Ehlers, J., Pirani, F.A.E., Schild, A.: The geometry of free fall and light
-    > propagation. In: O’Raifeartaigh, L. (ed.) General Relativity: Papers in Honour of
-    > J. L. Synge, pp. 63–84. Clarendon Press, Oxford (1972).
-    > reprint doi: [10.1007/s10714-012-1353-4](https://doi.org/10.1007/s10714-012-1353-4)
-
-"""
-struct SchildsLadderTransport <: AbstractVectorTransportMethod
-    retraction::AbstractRetractionMethod
-    inverse_retraction::AbstractInverseRetractionMethod
-    function SchildsLadderTransport(
-        retraction=AbstractRetractionMethod(),
-        inverse_retraction = LogarithmicInverseRetraction()
-    )
-        SchildsLadderTransport(retraction, inverse_retraction)
-    end
-end
 @doc raw"""
     PoleLadderTransport <: AbstractVectorTransportMethod
 
@@ -253,6 +223,58 @@ struct PoleLadderTransport <: AbstractVectorTransportMethod
         PoleLadderTransport(retraction, inverse_retraction)
     end
 end
+
+@doc raw"""
+    SchildsLadderTransport <: AbstractVectorTransportMethod
+
+Specify to use [`schilds_ladder`](@ref) as vector transport method within
+[`vector_transport_to`](@ref), [`vector_transport_direction`](@ref), or
+[`vector_transport_along`](@ref), i.e.
+
+Let $X\in T_p\mathcal M$ be a tangent vector at $p\in\mathcal M$ and $q\in\mathcal M$ the
+point to transport to. Then
+
+````math
+P^{\mathrm{S}}_{q\gets p}(X) = \log_q\bigl( \retr_p( 2\retr_p^{-1}c)\bigr),
+````
+where $c$ is the mid point between $q$ and $d=\exp_pX$.
+
+This method employs the internal function [`schilds_ladder`](@ref)`(M,p,d,q)` that avoids
+leaving the manifold.
+
+The name stems from the image of this paralleltogram in a repeated application yielding the
+image of a ladder. The approximation was proposed in [^EhlersPiraniSchild1972].
+
+# Constructor
+````julia
+SchildsLadderTransport(
+    retraction = ExponentialRetraction(),
+    inverse_retraction = LogarithmicInverseRetraction()
+)
+````
+Construct the classical Schilds ladder that employs exp and log, i.e. as proposed
+in[^EhlersPiraniSchild1972]. For an even cheaper transport these inner operations can be
+changed to an [`AbstractRetractionMethod`](@ref) `retraction` and an
+[`AbstractInverseRetractionMethod`](@ref) `inverse_retraction`, respectively.
+
+[^EhlersPiraniSchild1972]:
+    > Ehlers, J., Pirani, F.A.E., Schild, A.: The geometry of free fall and light
+    > propagation. In: O’Raifeartaigh, L. (ed.) General Relativity: Papers in Honour of
+    > J. L. Synge, pp. 63–84. Clarendon Press, Oxford (1972).
+    > reprint doi: [10.1007/s10714-012-1353-4](https://doi.org/10.1007/s10714-012-1353-4)
+
+"""
+struct SchildsLadderTransport <: AbstractVectorTransportMethod
+    retraction::AbstractRetractionMethod
+    inverse_retraction::AbstractInverseRetractionMethod
+    function SchildsLadderTransport(
+        retraction=AbstractRetractionMethod(),
+        inverse_retraction = LogarithmicInverseRetraction()
+    )
+        SchildsLadderTransport(retraction, inverse_retraction)
+    end
+end
+
 """
     TVector
 
@@ -1129,12 +1151,7 @@ end
 @doc raw"""
     vector_transport_to!(M::Manifold, Y, p, X, q, method::PoleLadderTransport)
 
-Perform a vector transport by approximation parallel transport using [`pole_ladder`](@ref).
-The complete formula reads with $d=exp(p,X)$ and $c = \gamma_{p,q}(\frac{1}{2})$ as
-
-````math
-P^{\mathrm{P}}_{q\gets p}(X) = -\log_q\bigl(\gamma_{d,c}(2)\bigr)
-````
+Perform a vector transport by using [`PoleLadderTransport`](@ref).
 """
 function vector_transport_to!(M::Manifold, Y, p, X, q, m::PoleLadderTransport)
     return -log(
@@ -1154,8 +1171,7 @@ end
 @doc raw"""
     vector_transport_to!(M::Manifold, Y, p, X, q, method::SchildsLadderTransport)
 
-Perform a vector transport by approximation parallel transport using
-[`SchildsLadderTransport`](@ref).
+Perform a vector transport by using [`SchildsLadderTransport`](@ref).
 """
 function vector_transport_to!(M::Manifold, Y, p, X, q, m::SchildsLadderTransport)
     return log!(
