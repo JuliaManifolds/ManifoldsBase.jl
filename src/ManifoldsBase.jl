@@ -45,13 +45,6 @@ Abstract type for methods for [`retract`](@ref)ing a tangent vector to a manifol
 abstract type AbstractRetractionMethod end
 
 """
-    AbstractVectorTransportMethod
-
-Abstract type for methods for transporting vectors.
-"""
-abstract type AbstractVectorTransportMethod end
-
-"""
     ExponentialRetraction
 
 Retraction using the exponential map.
@@ -569,82 +562,6 @@ function number_eltype(x::Tuple)
     return T
 end
 
-
-@doc raw"""
-    pole_ladder(
-        M,
-        p,
-        d,
-        q,
-        c = shortest_geodesic(M, p, q, 0.5);
-        retraction=ExponentialRetraction(),
-        inverse_retraction=LogarithmicInverseRetraction()
-    )
-
-Compute an inner step of the pole ladder, that can be used as a [`vector_transport_to`](@ref).
-Let $c = \gamma_{p,q}(\frac{1}{2})$ mid point between `p` and `q`, then the pole ladder is
-given by
-
-````math
-    \operatorname{Pl}(p,d,q) = \operatorname{retr}_d (2\operatorname{retr}_d^{-1}c)
-````
-
-Where the classical pole ladder employs $\operatorname{retr}_d=\exp_d$
-and $\operatorname{retr}_d^{-1}=\log_d$ but for an even cheaper transport these can be set
-to different [`AbstractRetractionMethod`](@ref) and [`AbstractInverseRetractionMethod`](@ref).
-
-When you have $X=log_pd$ and $Y = -\log_q \operatorname{Pl}(p,d,q)$,
-you will obtain the [`PoleLadderTransport`](@ref). When performing multiple steps, this
-method avoidsd the switching to the tangent space. Keep in mind that after $n$ successive
-steps the tangent vector reads $Y_n = (-1)^n\log_q \operatorname{Pl}(p_{n-1},d_{n-1},p_n)$.
-
-It is cheaper to evaluate than [`schilds_ladder`](@ref), sinc if you want to form multiple
-ladder steps between `p` and `q`, but with different `d`, there is just one evaluation of a geodesic
-each., since the center `c` can be reused.
-"""
-function pole_ladder(
-    M,
-    p,
-    d,
-    q,
-    c = shortest_geodesic(M, p, q, 0.5);
-    retraction = ExponentialRetraction(),
-    inverse_retraction = LogarithmicInverseRetraction(),
-)
-    return retract(M, d, 2*inverse_retract(M, d, c, inverse_retraction), retraction)
-end
-@doc raw"""
-    pole_ladder(
-        M,
-        pl,
-        p,
-        d,
-        q,
-        c = shortest_geodesic(M, p, q, 0.5),
-        X = allocate_result_type(M, log, d, c);
-        retraction = ExponentialRetraction(),
-        inverse_retraction = LogarithmicInverseRetraction()
-    )
-
-Compute the [`pole_ladder`](@ref), i.e. the result is saved in `pl`.
-`X` is used for storing intermediate inverse retraction.
-"""
-function pole_ladder!(
-    M,
-    pl,
-    p,
-    d,
-    q,
-    c = shortest_geodesic(M, p, q, 0.5),
-    X = allocate_result_type(M, log, d, c);
-    retraction = ExponentialRetraction(),
-    inverse_retraction = LogarithmicInverseRetraction(),
-)
-    inverse_retract!(M, X, d, c, inverse_retraction)
-    X *= 2
-    return retract!(M, pl, d, X, retraction)
-end
-
 """
     project(M::Manifold, p)
 
@@ -777,83 +694,6 @@ function retract!(M::Manifold, q, p, X, t::Real, method::AbstractRetractionMetho
 end
 function retract!(M::Manifold, q, p, X, method::AbstractRetractionMethod)
     error(manifold_function_not_implemented_message(M, retract!,q,p,method))
-end
-
-@doc raw"""
-    schilds_ladder(
-        M,
-        p,
-        d,
-        q,
-        c = shortest_geodesic(M, q, d, 0.5);
-        retraction = ExponentialRetraction(),
-        inverse_retraction = LogarithmicInverseRetraction()
-    )
-
-Perform an inner step of schilds ladder, which can be used as a
-[`vector_transport_to`](@ref), see [`SchildsLadderTransport`](@ref).
-Let $c = \gamma_{q,d}(\frac{1}{2})$ denote the mid point
-on the shortest geodesic connecting $q$ and the point $d$. Then Schild's ladder reads as
-
-````math
-\operatorname{Sl}(p,d,q) = \operatorname{retr}_x( 2\operatorname{retr}_x^{-1} c
-````
-
-Where the classical Schilds ladder employs $\operatorname{retr}_d=\exp_d$
-and $\operatorname{retr}_d^{-1}=\log_d$ but for an even cheaper transport these can be set
-to different [`AbstractRetractionMethod`](@ref) and [`AbstractInverseRetractionMethod`](@ref).
-
-In consistency with [`pole_ladder`](@ref) you can change the way the mid point is computed
-using the optional parameter `c`, but note that here it's the mid point between `q` and d`.
-
-When you have $X=log_pd$ and $Y = \log_q \operatorname{Sl}(p,d,q)$,
-you will obtain the [`PoleLadderTransport`](@ref).
-Then the approximation to the transported vector is given by $\log_q\operatorname{Sl}(p,d,q)$.
-
-When performing multiple steps, this method avoidsd the switching to the tangent space.
-Hence after $n$ successive steps the tangent vector reads
-$Y_n = \log_q \operatorname{Pl}(p_{n-1},d_{n-1},p_n)$.
-"""
-function schilds_ladder(
-    M,
-    p,
-    d,
-    q,
-    c = shortest_geodesic(M, q, d, 0.5);
-    retraction = ExponentialRetraction(),
-    inverse_retraction = LogarithmicInverseRetraction(),
-)
-    return retract(M, p, 2*inverse_retract(M, p, c, inverse_retraction), retraction)
-end
-@doc raw"""
-    schilds_ladder!(
-        M,
-        sl
-        p,
-        d,
-        q,
-        c = shortest_geodesic(M, q, d, 0.5),
-        X = allocate_result_type(M, log, d, c);
-        retraction = ExponentialRetraction(),
-        inverse_retraction = LogarithmicInverseRetraction()
-    )
-
-Compute [`schilds_ladder`](@ref) and return the value in the parameter `sl`.
-"""
-function schilds_ladder!(
-    M,
-    sl,
-    p,
-    d,
-    q,
-    c = shortest_geodesic(M, q, d, 0.5),
-    X = allocate_result_type(M, log, d, c);
-    retraction = ExponentialRetraction(),
-    inverse_retraction = LogarithmicInverseRetraction(),
-)
-    inverse_retract!(M, X, d, c, inverse_retraction)
-    X *= 2
-    return retract!(M, sl, d, X, retraction)
 end
 
 @doc doc"""
