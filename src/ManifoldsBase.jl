@@ -736,8 +736,8 @@ end
     )
 
 Compute an inner step of the pole ladder, that can be used as a [`vector_transport_to`](@ref).
-Let $\mathit{midpoint} = \gamma_{p,q}(\frac{1}{2})$ mid point between `p` and `q`,
-then the pole ladder is given by
+Let $c = \gamma_{p,q}(\frac{1}{2})$ mid point between `p` and `q`, then the pole ladder is
+given by
 
 ````math
     \operatorname{Pl}(p,d,q) = \operatorname{retr}_d (2\operatorname{retr}_d^{-1}c)
