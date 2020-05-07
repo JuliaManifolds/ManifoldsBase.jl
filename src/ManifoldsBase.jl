@@ -664,9 +664,11 @@ end
     representation_size(M::Manifold)
 
 The size of an array representing a point on [`Manifold`](@ref) `M`.
+Returns `nothing` by default indicating that points are not represented using an
+`AbstractArray`.
 """
 function representation_size(M::Manifold)
-    error(manifold_function_not_implemented_message(M, representation_size))
+    return nothing
 end
 
 """
