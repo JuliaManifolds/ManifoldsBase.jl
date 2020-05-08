@@ -301,7 +301,7 @@ the representation is changed accordingly.
 See also: [`EmbeddedManifold`](@ref), [`project!`](@ref project!(M::Manifold, q, p))
 """
 function embed!(M::Manifold, q, p)
-    error(manifold_function_not_implemented_message(M, embed!, q, p))
+    return error(manifold_function_not_implemented_message(M, embed!, q, p))
 end
 
 """
@@ -340,7 +340,7 @@ the tangent spaces of the embedded base points.
 See also: [`EmbeddedManifold`](@ref), [`project!`](@ref project!(M::Manifold, Y, p, X))
 """
 function embed!(M::Manifold, Y, p, X)
-    error(manifold_function_not_implemented_message(M, embed!, Y, p, X))
+    return error(manifold_function_not_implemented_message(M, embed!, Y, p, X))
 end
 
 """
@@ -366,7 +366,7 @@ from manifold the [`Manifold`](@ref) `M`.
 The result is saved to `q`.
 """
 function exp!(M::Manifold, q, p, X)
-    error(manifold_function_not_implemented_message(M, exp!, q, p, X))
+    return error(manifold_function_not_implemented_message(M, exp!, q, p, X))
 end
 exp!(M::Manifold, q, p, X, t::Real) = exp!(M, q, p, t * X)
 
@@ -405,13 +405,14 @@ is injective for all tangent vectors shorter than $d$ (i.e. has an inverse) for 
 if provided or all manifold points otherwise.
 """
 function injectivity_radius(M::Manifold)
-    error(manifold_function_not_implemented_message(M, injectivity_radius))
+    return error(manifold_function_not_implemented_message(M, injectivity_radius))
 end
 injectivity_radius(M::Manifold, p) = injectivity_radius(M)
-injectivity_radius(M::Manifold, p, method::AbstractRetractionMethod) =
-    injectivity_radius(M, method)
+function injectivity_radius(M::Manifold, p, method::AbstractRetractionMethod)
+    return injectivity_radius(M, method)
+end
 function injectivity_radius(M::Manifold, method::AbstractRetractionMethod)
-    error(manifold_function_not_implemented_message(M, injectivity_radius, method))
+    return error(manifold_function_not_implemented_message(M, injectivity_radius, method))
 end
 injectivity_radius(M::Manifold, p, ::ExponentialRetraction) = injectivity_radius(M, p)
 injectivity_radius(M::Manifold, ::ExponentialRetraction) = injectivity_radius(M)
@@ -425,7 +426,7 @@ Compute the inner product of tangent vectors `X` and `Y` at point `p` from the
 See also: [`MetricManifold`](@ref Main.Manifolds.MetricManifold)
 """
 function inner(M::Manifold, p, X, Y)
-    error(manifold_function_not_implemented_message(M, inner, p, X, Y))
+    return error(manifold_function_not_implemented_message(M, inner, p, X, Y))
 end
 
 """
@@ -446,7 +447,14 @@ function inverse_retract!(M::Manifold, X, p, q, method::LogarithmicInverseRetrac
     return log!(M, X, p, q)
 end
 function inverse_retract!(M::Manifold, X, p, q, method::AbstractRetractionMethod)
-    error(manifold_function_not_implemented_message(M, inverse_retract!,X,p,q,method))
+    return error(manifold_function_not_implemented_message(
+        M,
+        inverse_retract!,
+        X,
+        p,
+        q,
+        method,
+    ))
 end
 
 """
@@ -542,7 +550,7 @@ Compute the logarithmic map of point `q` at base point `p` on the [`Manifold`](@
 The result is saved to `X`.
 """
 function log!(M::Manifold, X, p, q)
-    error(manifold_function_not_implemented_message(M, log!, X, p, q))
+    return error(manifold_function_not_implemented_message(M, log!, X, p, q))
 end
 
 @doc doc"""
@@ -552,7 +560,7 @@ The dimension $n=\dim_{\mathcal M}$ of real space $\mathbb R^n$ to which the nei
 each point of the [`Manifold`](@ref) `M` is homeomorphic.
 """
 function manifold_dimension(M::Manifold)
-    error(manifold_function_not_implemented_message(M, manifold_dimension))
+    return error(manifold_function_not_implemented_message(M, manifold_dimension))
 end
 
 function manifold_function_not_implemented_message(M::Manifold, f, x...)
@@ -614,7 +622,7 @@ accordingly.
 See also: [`EmbeddedManifold`](@ref), [`embed!`](@ref embed!(M::Manifold, q, p))
 """
 function project!(M::Manifold, q, p)
-    error(manifold_function_not_implemented_message(M, project!, q, p))
+    return error(manifold_function_not_implemented_message(M, project!, q, p))
 end
 
 """
@@ -654,7 +662,7 @@ Lie algebra is perfomed, too.
 See also: [`EmbeddedManifold`](@ref), [`embed!`](@ref embed!(M::Manifold, Y, p, X))
 """
 function project!(M::Manifold, Y, p, X)
-    error(manifold_function_not_implemented_message(M, project!, Y, p, X))
+    return error(manifold_function_not_implemented_message(M, project!, Y, p, X))
 end
 
 @doc doc"""
@@ -717,7 +725,7 @@ function retract!(M::Manifold, q, p, X, t::Real, method::AbstractRetractionMetho
     return retract!(M, q, p, t * X, method)
 end
 function retract!(M::Manifold, q, p, X, method::AbstractRetractionMethod)
-    error(manifold_function_not_implemented_message(M, retract!,q,p,method))
+    return error(manifold_function_not_implemented_message(M, retract!, q, p, method))
 end
 @doc doc"""
     shortest_geodesic(M::Manifold, p, q) -> Function
@@ -773,7 +781,7 @@ function vector_transport_along!(
     c,
     method::AbstractVectorTransportMethod,
 )
-    error(manifold_function_not_implemented_message(
+    return error(manifold_function_not_implemented_message(
         M,
         vector_transport_along!,
         M,
@@ -882,7 +890,7 @@ function vector_transport_to!(
     q,
     method::AbstractVectorTransportMethod,
 )
-    error(manifold_function_not_implemented_message(
+    return error(manifold_function_not_implemented_message(
         M,
         vector_transport_to!,
         Y,
@@ -924,18 +932,13 @@ export Manifold, MPoint, TVector, CoTVector
 export AbstractDecoratorManifold
 export ValidationManifold, ValidationMPoint, ValidationTVector, ValidationCoTVector
 export AbstractEmbeddingType,
-    TransparentIsometricEmbedding,
-    DefaultIsometricEmbeddingType,
-    DefaultEmbeddingType
+    TransparentIsometricEmbedding, DefaultIsometricEmbeddingType, DefaultEmbeddingType
 export AbstractEmbeddedManifold, EmbeddedManifold, TransparentIsometricEmbedding
 
 export OutOfInjectivityRadiusError
 
 export AbstractRetractionMethod,
-    ExponentialRetraction,
-    QRRetraction,
-    PolarRetraction,
-    ProjectionRetraction
+    ExponentialRetraction, QRRetraction, PolarRetraction, ProjectionRetraction
 export AbstractInverseRetractionMethod,
     LogarithmicInverseRetraction,
     QRInverseRetraction,
@@ -944,8 +947,7 @@ export AbstractInverseRetractionMethod,
 
 export ParallelTransport, ProjectionTransport
 
-export
-    CachedBasis,
+export CachedBasis,
     DefaultBasis,
     DefaultOrthogonalBasis,
     DefaultOrthonormalBasis,
