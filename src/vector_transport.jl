@@ -7,51 +7,41 @@ Abstract type for methods for transporting vectors.
 abstract type AbstractVectorTransportMethod end
 
 """
-````julia
-    DiscretizedVectorTransport{D,M} <: AbstractVectorTransportMethod
-````
-Specify a discretized vector transport for given data of type `D` and a
-[`AbstractVectorTransportMethod`](@ref) of type `M`, this method performs
-iteratively a vector transport along the given data.
+    AbstractPointSequence
 
-# Fields
-* `points` a set of points on `M` either as a vector of points or a point on a
-  [`PowerManifold`](@ref)
-* `method` – the [`AbstractVectorTransportMethod`](@ref) to use internally for
-  transporting between successive points.
+A sequence of points used for vector transport along a curve in function
+[`vector_transport_along`](@ref).
+
+Using this type reduces ambiguities that may be caused by defining vector transports
+along curves represented in a different way than an `AbstractVector` of points.
 """
-struct DiscretizedVectorTransport{MT,DT} <:
-    AbstractVectorTransportMethod where {MT<:AbstractVectorTransportMethod, DT}
-    method::MT
-    points::DT
+abstract type AbstractPointSequence end
+
+"""
+    VectorOfPoints(points::AbstractVector)
+
+An `AbstractVector` of points used for vector transport along a curve.
+"""
+struct VectorOfPoints{TV<:AbstractVector} <: AbstractPointSequence
+    points::TV
 end
 
 """
-    get_discretized_point(
-        dvt::DiscretizedVectorTransport{<:AbstractVectorTransportMethod,<:AbstractVector},
-        i,
-    )
+    get_point(vp::VectorOfPoints, i)
 
-Get the `i`th point from the [`DiscretizedVectorTransport`](@ref) `dvt`.
+Get the `i`th point from the [`VectorOfPoints`](@ref) `vp`.
 """
-function get_discretized_point(
-    dvt::DiscretizedVectorTransport{<:AbstractVectorTransportMethod,<:AbstractVector},
-    i,
-)
-    return dvt.points[i]
+function get_point(vp::VectorOfPoints, i)
+    return vp.points[i]
 end
 
 """
-    get_length(
-        dvt::DiscretizedVectorTransport{<:AbstractVectorTransportMethod,<:AbstractVector},
-    )
+    Base.length(vp::VectorOfPoints)
 
-Get the number of points in the [`DiscretizedVectorTransport`](@ref) `dvt`.
+Get the number of points in the [`VectorOfPoints`](@ref) `vp`.
 """
-function get_length(
-    dvt::DiscretizedVectorTransport{<:AbstractVectorTransportMethod,<:AbstractVector},
-)
-    return length(dvt.points)
+function Base.length(vp::VectorOfPoints)
+    return length(vp.points)
 end
 
 """
@@ -395,7 +385,7 @@ end
         Y,
         p,
         X,
-        c::AbstractVector{T},
+        c::AbstractPointSequence,
         method::AbstractVectorTransportMethod
     ) where {T}
 
@@ -407,12 +397,21 @@ function vector_transport_along!(
     Y,
     p,
     X,
-    c::AbstractVector{T},
-    method::AbstractVectorTransportMethod
-) where {T}
-    vector_transport_to!(M, Y, p, Y, c[1], method)
-    for i=1:(length(c)-1)
-        vector_transport_to!(M, Y, c[i], Y, c[i+1], method)
+    c::AbstractPointSequence,
+    method::AbstractVectorTransportMethod,
+)
+    n = length(c)
+    if n == 0
+        copyto!(Y, X)
+    else
+        # we shouldn't assume that vector_transport_to! works when both input and output
+        # vectors are the same object
+        Y2 = allocate(X)
+        vector_transport_to!(M, Y2, p, X, get_point(c, 1), method)
+        for i=1:(length(c)-1)
+            vector_transport_to!(M, Y, get_point(c, i), Y2, get_point(c, i+1), method)
+            copyto!(Y2, Y)
+        end
     end
     return Y
 end
@@ -422,9 +421,9 @@ end
         Y,
         p,
         X,
-        c::AbstractVector{T},
+        c::AbstractPointSequence,
         method::PoleLadderTransport
-    ) where {T}
+    )
 
 Compute the vector transport along a discretized curve using
 [`PoleLadderTransport`](@ref) succesively along the sampled curve.
@@ -436,30 +435,33 @@ function vector_transport_along!(
     Y,
     p,
     X,
-    c::AbstractVector{T},
+    c::AbstractPointSequence,
     method::PoleLadderTransport
-) where {T}
-    d = exp(M,p,X)
+)
+    d = exp(M, p, X)
     m = p
-    for i=1:(length(c)-1)
+    clen = length(c)
+    for i=1:(clen-1)
         # precompute mid point inplace
-        log!(M, Y, c[i], c[i+1])
-        exp!(M, m, c[i], 0.5*Y)
+        ci = get_point(c, i)
+        cip1 = get_point(c, i+1)
+        log!(M, Y, ci, cip1)
+        exp!(M, m, ci, Y/2)
         # compute new ladder point
         pole_ladder!(
             M,
             d,
-            c[i],
+            ci,
             d,
-            c[i+1],
+            cip1,
             m,
             Y;
             retraction = method.retraction,
             inverse_retraction = method.inverse_retraction,
         )
     end
-    log!(M, Y, c[end], d)
-    Y *= (-1)^length(c)
+    log!(M, Y, get_point(c, clen), d)
+    Y *= (-1)^clen
     return Y
 end
 @doc raw"""
@@ -468,9 +470,9 @@ end
         Y,
         p,
         X,
-        c::AbstractVector{T},
+        c::AbstractPointSequence,
         method::SchildsLadderTransport
-    ) where {T}
+    )
 
 Compute the vector transport along a discretized curve using
 [`SchildsLadderTransport`](@ref) succesively along the sampled curve.
@@ -482,29 +484,32 @@ function vector_transport_along!(
     Y,
     p,
     X,
-    c::AbstractVector{T},
+    c::AbstractPointSequence,
     method::SchildsLadderTransport
-) where {T}
-    d = exp(M,p,X)
+)
+    d = exp(M, p, X)
     m = p
-    for i=1:(length(c)-1)
+    clen = length(c)
+    for i=1:(clen-1)
+        ci = get_point(c, i)
+        cip1 = get_point(c, i+1)
         # precompute mid point inplace
-        log!(M, Y, c[i+1], d)
-        exp!(M, m, c[i+1], 0.5*Y)
+        log!(M, Y, cip1, d)
+        exp!(M, m, cip1, Y/2)
         # compute new ladder point
         schilds_ladder!(
             M,
             d,
-            c[i],
+            ci,
             d,
-            c[i+1],
+            cip1,
             m,
             Y;
             retraction = method.retraction,
             inverse_retraction = method.inverse_retraction,
         )
     end
-    log!(M, Y, c[end], d)
+    log!(M, Y, get_point(c, clen), d)
     return Y
 end
 
@@ -575,41 +580,6 @@ function vector_transport_to(M::Manifold, p, X, q, method::AbstractVectorTranspo
     return Y
 end
 
-function vector_transport_to!(
-    M::Manifold,
-    Y,
-    p,
-    X,
-    q,
-    m::DiscretizedVectorTransport{<:PoleLadderTransport},
-)
-    Xtmp = allocate(X)
-    p_tmp = allocate(p)
-    step = 1
-    num_pts = get_length(m)
-    cur_p = p
-    cur_d = exp(M, p, X)
-    next_p = get_discretized_point(m, 1)
-    c = shortest_geodesic(M, cur_p, next_p, 0.5)
-    while step < num_pts
-        pole_ladder!(
-            M,
-            p_tmp,
-            cur_p,
-            cur_d,
-            next_p,
-            c,
-            X_tmp;
-            retraction = m.method.retraction,
-            inverse_retraction = m.method.inverse_retraction,
-        )
-        copyto!(cur_d, p_tmp)
-        step += 1
-        cur_p = next_p
-        next_p = get_discretized_point(m, step)
-    end
-    return log!(M, Y, next_p, p_tmp)
-end
 """
     vector_transport_to!(M::Manifold, Y, p, X, q)
     vector_transport_to!(M::Manifold, Y, p, X, q, method::AbstractVectorTransportMethod)
@@ -692,3 +662,5 @@ function vector_transport_to!(
         method,
     ))
 end
+
+const VECTOR_TRANSPORT_DISAMBIGUATION = [PoleLadderTransport, SchildsLadderTransport]

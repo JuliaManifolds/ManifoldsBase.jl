@@ -96,7 +96,7 @@ end
         @test isapprox(A, x2, v2, v2s)
         zero_tangent_vector!(A, v2s, x)
         @test isapprox(A, x, v2s, zero_tangent_vector(M, x))
-        c = t -> x2
+        c = ManifoldsBase.VectorOfPoints([x2])
         v3 = similar(v2)
         @test isapprox(
             A,

@@ -98,10 +98,24 @@ function vector_transport_along!(
     vto,
     x,
     v,
-    c,
+    c::AbstractPointSequence,
     ::AbstractVectorTransportMethod,
 )
     return copyto!(vto, v)
+end
+for VT in VECTOR_TRANSPORT_DISAMBIGUATION
+    eval(
+        quote
+            @invoke_maker 6 AbstractVectorTransportMethod vector_transport_along!(
+                M::DefaultManifold,
+                vto,
+                x,
+                v,
+                c::AbstractPointSequence,
+                B::$VT,
+            )
+        end,
+    )
 end
 
 function vector_transport_to!(::DefaultManifold, vto, x, v, y, ::ParallelTransport)

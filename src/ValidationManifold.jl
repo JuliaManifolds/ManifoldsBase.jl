@@ -342,7 +342,7 @@ function vector_transport_along!(
     Y,
     p,
     X,
-    c,
+    c::AbstractPointSequence,
     m::AbstractVectorTransportMethod;
     kwargs...,
 )
@@ -355,8 +355,22 @@ function vector_transport_along!(
         c,
         m,
     )
-    is_tangent_vector(M, c(1), Y, true; kwargs...)
+    is_tangent_vector(M, get_point(c, length(c)), Y, true; kwargs...)
     return Y
+end
+for VT in VECTOR_TRANSPORT_DISAMBIGUATION
+    eval(
+        quote
+            @invoke_maker 6 AbstractVectorTransportMethod vector_transport_along!(
+                M::ValidationManifold,
+                vto,
+                x,
+                v,
+                c::AbstractPointSequence,
+                B::$VT,
+            )
+        end,
+    )
 end
 
 function vector_transport_to!(
