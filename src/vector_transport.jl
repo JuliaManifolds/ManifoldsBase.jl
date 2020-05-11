@@ -406,15 +406,14 @@ function vector_transport_along!(
     c::AbstractVector,
     method::PoleLadderTransport,
 )
-    d = exp(M, p, X)
+    d = retract(M, p, X, method.retraction)
     m = p
     clen = length(c)
     for i in 1:(clen - 1)
         # precompute mid point inplace
         ci = c[i]
         cip1 = c[i + 1]
-        log!(M, Y, ci, cip1)
-        exp!(M, m, ci, Y / 2)
+        mid_point!(M, m, Y, ci, cip1)
         # compute new ladder point
         pole_ladder!(
             M,
@@ -428,7 +427,7 @@ function vector_transport_along!(
             inverse_retraction = method.inverse_retraction,
         )
     end
-    log!(M, Y, c[clen], d)
+    inverse_retract!(M, Y, c[clen], d, method.inverse_retraction)
     Y *= (-1)^clen
     return Y
 end
@@ -455,15 +454,14 @@ function vector_transport_along!(
     c::AbstractVector,
     method::SchildsLadderTransport,
 )
-    d = exp(M, p, X)
+    d = retract(M, p, X, method.retraction)
     m = p
     clen = length(c)
     for i in 1:(clen - 1)
         ci = c[i]
         cip1 = c[i + 1]
         # precompute mid point inplace
-        log!(M, Y, cip1, d)
-        exp!(M, m, cip1, Y / 2)
+        mid_point!(M, m, Y, cip1, d)
         # compute new ladder point
         schilds_ladder!(
             M,
@@ -477,7 +475,7 @@ function vector_transport_along!(
             inverse_retraction = method.inverse_retraction,
         )
     end
-    log!(M, Y, c[clen], d)
+    inverse_retract!(M, Y, c[clen], d, method.inverse_retraction)
     return Y
 end
 
@@ -576,20 +574,21 @@ end
 Perform a vector transport by using [`PoleLadderTransport`](@ref).
 """
 function vector_transport_to!(M::Manifold, Y, p, X, q, m::PoleLadderTransport)
-    log!(
+    inverse_retract!(
         M,
         Y,
         q,
         pole_ladder(
             M,
             p,
-            exp(M, p, X),
+            retract(M, p, X, m.retraction),
             q;
             retraction = m.retraction,
             inverse_retraction = m.inverse_retraction,
         ),
+        m.inverse_retraction,
     )
-    Y .= -Y
+    copyto!(Y, -Y)
     return Y
 end
 
@@ -599,18 +598,19 @@ end
 Perform a vector transport by using [`SchildsLadderTransport`](@ref).
 """
 function vector_transport_to!(M::Manifold, Y, p, X, q, m::SchildsLadderTransport)
-    return log!(
+    return inverse_retract!(
         M,
         Y,
         q,
         schilds_ladder(
             M,
             p,
-            exp(M, p, X),
+            retract(M, p, X, m.retraction),
             q;
             retraction = m.retraction,
             inverse_retraction = m.inverse_retraction,
         ),
+        m.inverse_retraction,
     )
 end
 

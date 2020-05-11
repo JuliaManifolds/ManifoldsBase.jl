@@ -116,6 +116,11 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
 
             @test distance(M, pts[1], pts[2]) ≈ norm(M, pts[1], tv1)
 
+            @test mid_point(M, pts[1], pts[2]) == [0.5, 0.5, 0.0]
+            midp = allocate(pts[1])
+            @test mid_point!(M, midp, pts[1], pts[2]) === midp
+            @test midp == [0.5, 0.5, 0.0]
+
             @testset "Geodesic interface test" begin
                 @test isapprox(M, geodesic(M, pts[1], tv1)(0.0), pts[1])
                 @test isapprox(M, geodesic(M, pts[1], tv1)(1.0), pts[2])

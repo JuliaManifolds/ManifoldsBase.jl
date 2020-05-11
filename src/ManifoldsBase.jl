@@ -546,6 +546,42 @@ function manifold_function_not_implemented_message(M::Manifold, f, x...)
 end
 
 """
+    mid_point(M::Manifold, p1, p2)
+
+Calculate the middle between the two point `p1` and `p2` from manifold `M`.
+By default uses [`log`](@ref), divides the vector by 2 and uses [`exp`](@ref).
+"""
+function mid_point(M::Manifold, p1, p2)
+    q = allocate(p1)
+    return mid_point!(M, q, p1, p2)
+end
+
+"""
+    mid_point!(M::Manifold, q, p1, p2)
+
+Calculate the middle between the two point `p1` and `p2` from manifold `M`.
+By default uses [`log`](@ref), divides the vector by 2 and uses [`exp!`](@ref).
+Saves the result in `q`.
+"""
+function mid_point!(M::Manifold, q, p1, p2)
+    X = allocate_result(M, log, p1, p2)
+    return mid_point!(M, q, X, p1, p2)
+end
+
+"""
+    mid_point!(M::Manifold, q, X, p1, p2)
+
+Calculate the middle between the two point `p1` and `p2` from manifold `M`.
+By default uses [`log`](@ref), divides the vector by 2 and uses [`exp!`](@ref).
+Saves the result in `q`. Uses `X` for intermediate calculation of `log!`.
+"""
+function mid_point!(M::Manifold, q, X, p1, p2)
+    log!(M, X, p1, p2)
+    X /= 2
+    return exp!(M, q, p1, X)
+end
+
+"""
     norm(M::Manifold, p, X)
 
 Compute the norm of tangent vector `X` at point `p` from a [`Manifold`](@ref) `M`.
@@ -811,6 +847,8 @@ export allocate,
     log,
     log!,
     manifold_dimension,
+    mid_point,
+    mid_point!,
     norm,
     number_eltype,
     number_of_coordinates,
