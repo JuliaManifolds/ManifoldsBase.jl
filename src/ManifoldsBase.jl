@@ -446,7 +446,7 @@ end
 function inverse_retract!(M::Manifold, X, p, q, method::LogarithmicInverseRetraction)
     return log!(M, X, p, q)
 end
-function inverse_retract!(M::Manifold, X, p, q, method::AbstractRetractionMethod)
+function inverse_retract!(M::Manifold, X, p, q, method::AbstractInverseRetractionMethod)
     return error(manifold_function_not_implemented_message(
         M,
         inverse_retract!,

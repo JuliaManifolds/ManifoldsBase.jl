@@ -7,6 +7,7 @@ struct NonMPoint <: MPoint end
 struct NonTVector <: TVector end
 struct NonCoTVector <: CoTVector end
 struct NotImplementedRetraction <: AbstractRetractionMethod end
+struct NotImplementedInverseRetraction <: AbstractInverseRetractionMethod end
 *(t::Float64, X::NonTVector) = X
 @testset "Manifold with empty implementation" begin
     M = NonManifold()
@@ -58,6 +59,7 @@ struct NotImplementedRetraction <: AbstractRetractionMethod end
     @test_throws ErrorException inverse_retract(M, [0], [0], log_invretr)
     @test_throws ErrorException inverse_retract(M, [0.0], [0.0])
     @test_throws ErrorException inverse_retract(M, [0.0], [0.0], log_invretr)
+    @test_throws ErrorException inverse_retract(M, [0.0], [0.0], NotImplementedInverseRetraction())
 
     @test_throws ErrorException project!(M, p, [0])
     @test_throws ErrorException project!(M, [0], [0])
