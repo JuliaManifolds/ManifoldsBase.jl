@@ -5,6 +5,7 @@
 
 #! format: off
 # turn formatting for for the following functions
+# due to the if with returns inside (formatter puts a return upfront the if)
 function _split_signature(sig::Expr)
     if sig.head == :where
         where_exprs = sig.args[2:end]
@@ -306,6 +307,8 @@ macro decorator_transparent_function(fallback_case, input_ex)
         end,
     )
 end
+#! format: off
+# due to the if with returns inside (formatter puts a return upfront the if)
 """
     @decorator_transparent_signature(ex)
 
@@ -400,7 +403,8 @@ macro decorator_transparent_signature(ex)
         end,
     )
 end
-#! fomrat: on
+#! format: on
+
 
 #
 # Functions
