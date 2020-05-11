@@ -101,7 +101,12 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEm
             @test_throws ErrorException project!(M2, A, [1, 2])
             @test_throws ErrorException project(M2, [1, 2], [2, 3])
             @test_throws ErrorException project!(M2, A, [1, 2], [2, 3])
-            @test_throws ErrorException vector_transport_along(M2, [1, 2], [2, 3], ManifoldsBase.VectorOfPoints([[1, 2]]))
+            @test_throws ErrorException vector_transport_along(
+                M2,
+                [1, 2],
+                [2, 3],
+                ManifoldsBase.VectorOfPoints([[1, 2]]),
+            )
             @test_throws ErrorException vector_transport_along(
                 M2,
                 [1, 2],
@@ -109,7 +114,13 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEm
                 [[1, 2]],
                 ParallelTransport(),
             )
-            @test_throws ErrorException vector_transport_along!(M2, A, [1, 2], [2, 3], ManifoldsBase.VectorOfPoints([]))
+            @test_throws ErrorException vector_transport_along!(
+                M2,
+                A,
+                [1, 2],
+                [2, 3],
+                ManifoldsBase.VectorOfPoints([]),
+            )
             @test_throws ErrorException vector_transport_direction(
                 M2,
                 [1, 2],

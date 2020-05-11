@@ -206,8 +206,15 @@ end
                 vector_transport_along!(M, v1t5, pts[1], v1, c)
                 @test isapprox(M, pts[1], v1, v1t5)
                 # On Euclidean Space Schild & Pole are identity
-                @test vector_transport_to(M, pts[1], v2, pts[2], SchildsLadderTransport()) == v2
-                @test vector_transport_to(M, pts[1], v2, pts[2], PoleLadderTransport()) == v2
+                @test vector_transport_to(
+                    M,
+                    pts[1],
+                    v2,
+                    pts[2],
+                    SchildsLadderTransport(),
+                ) == v2
+                @test vector_transport_to(M, pts[1], v2, pts[2], PoleLadderTransport()) ==
+                      v2
             end
 
             @testset "ForwardDiff support" begin

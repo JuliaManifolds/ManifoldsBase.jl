@@ -119,7 +119,10 @@ struct PoleLadderTransport{
         retraction = ExponentialRetraction(),
         inverse_retraction = LogarithmicInverseRetraction(),
     )
-        new{typeof(retraction),typeof(inverse_retraction)}(retraction, inverse_retraction)
+        return new{typeof(retraction),typeof(inverse_retraction)}(
+            retraction,
+            inverse_retraction,
+        )
     end
 end
 
@@ -173,7 +176,10 @@ struct SchildsLadderTransport{
         retraction = ExponentialRetraction(),
         inverse_retraction = LogarithmicInverseRetraction(),
     )
-        new{typeof(retraction),typeof(inverse_retraction)}(retraction, inverse_retraction)
+        return new{typeof(retraction),typeof(inverse_retraction)}(
+            retraction,
+            inverse_retraction,
+        )
     end
 end
 
@@ -218,7 +224,7 @@ function pole_ladder(
     retraction = ExponentialRetraction(),
     inverse_retraction = LogarithmicInverseRetraction(),
 )
-    return retract(M, d, 2*inverse_retract(M, d, c, inverse_retraction), retraction)
+    return retract(M, d, 2 * inverse_retract(M, d, c, inverse_retraction), retraction)
 end
 @doc raw"""
     pole_ladder(
@@ -296,7 +302,7 @@ function schilds_ladder(
     retraction = ExponentialRetraction(),
     inverse_retraction = LogarithmicInverseRetraction(),
 )
-    return retract(M, p, 2*inverse_retract(M, p, c, inverse_retraction), retraction)
+    return retract(M, p, 2 * inverse_retract(M, p, c, inverse_retraction), retraction)
 end
 @doc raw"""
     schilds_ladder!(
@@ -368,7 +374,7 @@ function vector_transport_along!(
     c,
     method::AbstractVectorTransportMethod,
 )
-    error(manifold_function_not_implemented_message(
+    return error(manifold_function_not_implemented_message(
         M,
         vector_transport_along!,
         M,
@@ -408,8 +414,8 @@ function vector_transport_along!(
         # vectors are the same object
         Y2 = allocate(X)
         vector_transport_to!(M, Y2, p, X, get_point(c, 1), method)
-        for i=1:(length(c)-1)
-            vector_transport_to!(M, Y, get_point(c, i), Y2, get_point(c, i+1), method)
+        for i in 1:(length(c) - 1)
+            vector_transport_to!(M, Y, get_point(c, i), Y2, get_point(c, i + 1), method)
             copyto!(Y2, Y)
         end
     end
@@ -436,17 +442,17 @@ function vector_transport_along!(
     p,
     X,
     c::AbstractPointSequence,
-    method::PoleLadderTransport
+    method::PoleLadderTransport,
 )
     d = exp(M, p, X)
     m = p
     clen = length(c)
-    for i=1:(clen-1)
+    for i in 1:(clen - 1)
         # precompute mid point inplace
         ci = get_point(c, i)
-        cip1 = get_point(c, i+1)
+        cip1 = get_point(c, i + 1)
         log!(M, Y, ci, cip1)
-        exp!(M, m, ci, Y/2)
+        exp!(M, m, ci, Y / 2)
         # compute new ladder point
         pole_ladder!(
             M,
@@ -485,17 +491,17 @@ function vector_transport_along!(
     p,
     X,
     c::AbstractPointSequence,
-    method::SchildsLadderTransport
+    method::SchildsLadderTransport,
 )
     d = exp(M, p, X)
     m = p
     clen = length(c)
-    for i=1:(clen-1)
+    for i in 1:(clen - 1)
         ci = get_point(c, i)
-        cip1 = get_point(c, i+1)
+        cip1 = get_point(c, i + 1)
         # precompute mid point inplace
         log!(M, Y, cip1, d)
-        exp!(M, m, cip1, Y/2)
+        exp!(M, m, cip1, Y / 2)
         # compute new ladder point
         schilds_ladder!(
             M,
@@ -641,8 +647,8 @@ function vector_transport_to!(M::Manifold, Y, p, X, q, m::SchildsLadderTransport
             exp(M, p, X),
             q;
             retraction = m.retraction,
-            inverse_retraction = m.inverse_retraction
-        )
+            inverse_retraction = m.inverse_retraction,
+        ),
     )
 end
 
@@ -654,7 +660,7 @@ function vector_transport_to!(
     q,
     method::AbstractVectorTransportMethod,
 )
-    error(manifold_function_not_implemented_message(
+    return error(manifold_function_not_implemented_message(
         M,
         vector_transport_to!,
         Y,
