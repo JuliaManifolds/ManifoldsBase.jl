@@ -119,7 +119,7 @@ struct PoleLadderTransport{
         retraction = ExponentialRetraction(),
         inverse_retraction = LogarithmicInverseRetraction(),
     )
-        PoleLadderTransport(retraction, inverse_retraction)
+        new{typeof(retraction),typeof(inverse_retraction)}(retraction, inverse_retraction)
     end
 end
 
@@ -173,7 +173,7 @@ struct SchildsLadderTransport{
         retraction = ExponentialRetraction(),
         inverse_retraction = LogarithmicInverseRetraction(),
     )
-        SchildsLadderTransport(retraction, inverse_retraction)
+        new{typeof(retraction),typeof(inverse_retraction)}(retraction, inverse_retraction)
     end
 end
 
@@ -608,7 +608,7 @@ end
 Perform a vector transport by using [`PoleLadderTransport`](@ref).
 """
 function vector_transport_to!(M::Manifold, Y, p, X, q, m::PoleLadderTransport)
-    return -log!(
+    log!(
         M,
         Y,
         q,
@@ -621,6 +621,8 @@ function vector_transport_to!(M::Manifold, Y, p, X, q, m::PoleLadderTransport)
             inverse_retraction = m.inverse_retraction,
         ),
     )
+    Y .= -Y
+    return Y
 end
 
 @doc raw"""
