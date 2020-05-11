@@ -408,6 +408,18 @@ function vector_transport_along!(
 )
     d = retract(M, p, X, method.retraction)
     m = p
+    mid_point!(M, m, p, c[1])
+    pole_ladder!(
+        M,
+        d,
+        p,
+        d,
+        c[1],
+        m,
+        Y;
+        retraction = method.retraction,
+        inverse_retraction = method.inverse_retraction,
+    )
     clen = length(c)
     for i in 1:(clen - 1)
         # precompute mid point inplace
@@ -456,6 +468,18 @@ function vector_transport_along!(
 )
     d = retract(M, p, X, method.retraction)
     m = p
+    mid_point!(M, m, c[1], d)
+    schilds_ladder!(
+        M,
+        d,
+        p,
+        d,
+        c[1],
+        m,
+        Y;
+        retraction = method.retraction,
+        inverse_retraction = method.inverse_retraction,
+    )
     clen = length(c)
     for i in 1:(clen - 1)
         ci = c[i]
