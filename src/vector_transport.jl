@@ -7,44 +7,6 @@ Abstract type for methods for transporting vectors.
 abstract type AbstractVectorTransportMethod end
 
 """
-    AbstractPointSequence
-
-A sequence of points used for vector transport along a curve in function
-[`vector_transport_along`](@ref).
-
-Using this type reduces ambiguities that may be caused by defining vector transports
-along curves represented in a different way than an `AbstractVector` of points.
-"""
-abstract type AbstractPointSequence end
-
-"""
-    VectorOfPoints(points::AbstractVector)
-
-An `AbstractVector` of points used for vector transport along a curve.
-"""
-struct VectorOfPoints{TV<:AbstractVector} <: AbstractPointSequence
-    points::TV
-end
-
-"""
-    get_point(vp::VectorOfPoints, i)
-
-Get the `i`th point from the [`VectorOfPoints`](@ref) `vp`.
-"""
-function get_point(vp::VectorOfPoints, i)
-    return vp.points[i]
-end
-
-"""
-    Base.length(vp::VectorOfPoints)
-
-Get the number of points in the [`VectorOfPoints`](@ref) `vp`.
-"""
-function Base.length(vp::VectorOfPoints)
-    return length(vp.points)
-end
-
-"""
     ParallelTransport <: AbstractVectorTransportMethod
 
 Specify to use parallel transport as vector transport method within
@@ -391,7 +353,7 @@ end
         Y,
         p,
         X,
-        c::AbstractPointSequence,
+        c::AbstractVector,
         method::AbstractVectorTransportMethod
     ) where {T}
 
@@ -403,7 +365,7 @@ function vector_transport_along!(
     Y,
     p,
     X,
-    c::AbstractPointSequence,
+    c::AbstractVector,
     method::AbstractVectorTransportMethod,
 )
     n = length(c)
@@ -413,9 +375,9 @@ function vector_transport_along!(
         # we shouldn't assume that vector_transport_to! works when both input and output
         # vectors are the same object
         Y2 = allocate(X)
-        vector_transport_to!(M, Y2, p, X, get_point(c, 1), method)
+        vector_transport_to!(M, Y2, p, X, c[1], method)
         for i in 1:(length(c) - 1)
-            vector_transport_to!(M, Y, get_point(c, i), Y2, get_point(c, i + 1), method)
+            vector_transport_to!(M, Y, c[i], Y2, c[i + 1], method)
             copyto!(Y2, Y)
         end
     end
@@ -427,7 +389,7 @@ end
         Y,
         p,
         X,
-        c::AbstractPointSequence,
+        c::AbstractVector,
         method::PoleLadderTransport
     )
 
@@ -441,7 +403,7 @@ function vector_transport_along!(
     Y,
     p,
     X,
-    c::AbstractPointSequence,
+    c::AbstractVector,
     method::PoleLadderTransport,
 )
     d = exp(M, p, X)
@@ -449,8 +411,8 @@ function vector_transport_along!(
     clen = length(c)
     for i in 1:(clen - 1)
         # precompute mid point inplace
-        ci = get_point(c, i)
-        cip1 = get_point(c, i + 1)
+        ci = c[i]
+        cip1 = c[i + 1]
         log!(M, Y, ci, cip1)
         exp!(M, m, ci, Y / 2)
         # compute new ladder point
@@ -466,7 +428,7 @@ function vector_transport_along!(
             inverse_retraction = method.inverse_retraction,
         )
     end
-    log!(M, Y, get_point(c, clen), d)
+    log!(M, Y, c[clen], d)
     Y *= (-1)^clen
     return Y
 end
@@ -476,7 +438,7 @@ end
         Y,
         p,
         X,
-        c::AbstractPointSequence,
+        c::AbstractVector,
         method::SchildsLadderTransport
     )
 
@@ -490,15 +452,15 @@ function vector_transport_along!(
     Y,
     p,
     X,
-    c::AbstractPointSequence,
+    c::AbstractVector,
     method::SchildsLadderTransport,
 )
     d = exp(M, p, X)
     m = p
     clen = length(c)
     for i in 1:(clen - 1)
-        ci = get_point(c, i)
-        cip1 = get_point(c, i + 1)
+        ci = c[i]
+        cip1 = c[i + 1]
         # precompute mid point inplace
         log!(M, Y, cip1, d)
         exp!(M, m, cip1, Y / 2)
@@ -515,7 +477,7 @@ function vector_transport_along!(
             inverse_retraction = method.inverse_retraction,
         )
     end
-    log!(M, Y, get_point(c, clen), d)
+    log!(M, Y, c[clen], d)
     return Y
 end
 

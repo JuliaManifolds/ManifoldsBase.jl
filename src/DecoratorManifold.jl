@@ -638,7 +638,7 @@ decorated_manifold(M::Manifold) = M.manifold
     Y,
     p,
     X,
-    c::AbstractPointSequence,
+    c::AbstractVector,
     m::AbstractVectorTransportMethod,
 )
 @decorator_transparent_signature vector_transport_along!(
@@ -646,7 +646,7 @@ decorated_manifold(M::Manifold) = M.manifold
     Y,
     p,
     X,
-    c::AbstractPointSequence,
+    c::AbstractVector,
     m::PoleLadderTransport,
 )
 @decorator_transparent_signature vector_transport_along!(
@@ -654,7 +654,7 @@ decorated_manifold(M::Manifold) = M.manifold
     Y,
     p,
     X,
-    c::AbstractPointSequence,
+    c::AbstractVector,
     m::SchildsLadderTransport,
 )
 

@@ -96,7 +96,7 @@ function vector_transport_along!(
     vto,
     x,
     v,
-    c::AbstractPointSequence,
+    c::AbstractVector,
     ::AbstractVectorTransportMethod,
 )
     return copyto!(vto, v)
@@ -109,7 +109,7 @@ for VT in VECTOR_TRANSPORT_DISAMBIGUATION
                 vto,
                 x,
                 v,
-                c::AbstractPointSequence,
+                c::AbstractVector,
                 B::$VT,
             )
         end,

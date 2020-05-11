@@ -17,6 +17,14 @@ function ManifoldsBase.injectivity_radius(
     return 10.0
 end
 
+struct MatrixVectorTransport{T} <: AbstractVector{T}
+    m::Matrix{T}
+end
+
+Base.getindex(x::MatrixVectorTransport, i) = x.m[:, i]
+
+Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
+
 @testset "Testing Default (Euclidean)" begin
     M = ManifoldsBase.DefaultManifold(3)
     types = [
@@ -199,12 +207,21 @@ end
                 @test is_tangent_vector(M, pts[3], v1t1)
                 @test is_tangent_vector(M, pts[3], v1t3)
                 @test isapprox(M, pts[3], v1t1, v1t3)
-                c = ManifoldsBase.VectorOfPoints([pts[1]])
+                # along a `Vector` of points
+                c = [pts[1]]
                 v1t4 = vector_transport_along(M, pts[1], v1, c)
                 @test isapprox(M, pts[1], v1, v1t4)
                 v1t5 = allocate(v1)
                 vector_transport_along!(M, v1t5, pts[1], v1, c)
                 @test isapprox(M, pts[1], v1, v1t5)
+                # along a custom type of points
+                T = eltype(pts[1])
+                c2 = MatrixVectorTransport{T}(reshape(pts[1], length(pts[1]), 1))
+                v1t4c2 = vector_transport_along(M, pts[1], v1, c2)
+                @test isapprox(M, pts[1], v1, v1t4c2)
+                v1t5c2 = allocate(v1)
+                vector_transport_along!(M, v1t5c2, pts[1], v1, c2)
+                @test isapprox(M, pts[1], v1, v1t5c2)
                 # On Euclidean Space Schild & Pole are identity
                 @test vector_transport_to(
                     M,
