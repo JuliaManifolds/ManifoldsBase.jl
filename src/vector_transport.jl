@@ -211,7 +211,7 @@ function pole_ladder!(
     d,
     q,
     c = mid_point(M, p, q),
-    X = allocate_result_type(M, log, d, c);
+    X = allocate_result(M, log, d, c);
     retraction = ExponentialRetraction(),
     inverse_retraction = LogarithmicInverseRetraction(),
 )
@@ -291,13 +291,13 @@ function schilds_ladder!(
     d,
     q,
     c = mid_point(M, q, d),
-    X = allocate_result_type(M, log, d, c);
+    X = allocate_result(M, log, d, c);
     retraction = ExponentialRetraction(),
     inverse_retraction = LogarithmicInverseRetraction(),
 )
-    inverse_retract!(M, X, d, c, inverse_retraction)
+    inverse_retract!(M, X, p, c, inverse_retraction)
     X *= 2
-    return retract!(M, sl, d, X, retraction)
+    return retract!(M, sl, p, X, retraction)
 end
 
 """
