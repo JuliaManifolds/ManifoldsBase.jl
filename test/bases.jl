@@ -3,6 +3,7 @@ using ManifoldsBase
 using ManifoldsBase: DefaultManifold, ℝ, ℂ
 using Test
 import Base: +, -, *, copyto!, isapprox
+import ManifoldsBase: allocate
 
 struct ProjManifold <: Manifold{ℝ} end
 
@@ -117,9 +118,6 @@ isapprox(a::NonBroadcastBasisThing, b::NonBroadcastBasisThing) = isapprox(a.v, b
 function ManifoldsBase.number_eltype(a::NonBroadcastBasisThing)
     return typeof(reduce(+, one(number_eltype(eti)) for eti in a.v))
 end
-
-using ManifoldsBase: ManifoldsBase
-using allocate: allocate
 
 allocate(a::NonBroadcastBasisThing) = NonBroadcastBasisThing(allocate(a.v))
 function allocate(a::NonBroadcastBasisThing, ::Type{T}) where {T}

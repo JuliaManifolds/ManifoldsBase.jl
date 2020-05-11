@@ -3,6 +3,8 @@
 #
 @inline _extract_val(::Val{T}) where {T} = T
 
+#! format: off
+# turn formatting for for the following functions
 function _split_signature(sig::Expr)
     if sig.head == :where
         where_exprs = sig.args[2:end]
@@ -22,16 +24,15 @@ function _split_signature(sig::Expr)
         callargs = call_expr.args[2:end]
         kwargs_list = []
     end
-
     argnames = map(callargs) do arg
-        return if isa(arg, Expr)
+        if isa(arg, Expr)
             return arg.args[1]
         else
             return arg
         end
     end
     argtypes = map(callargs) do arg
-        return if isa(arg, Expr)
+        if isa(arg, Expr)
             return arg.args[2]
         else
             return Any
@@ -39,7 +40,7 @@ function _split_signature(sig::Expr)
     end
 
     kwargs_call = map(kwargs_list) do kwarg
-        return if kwarg.head === :...
+        if kwarg.head === :...
             return kwarg
         else
             if isa(kwarg.args[1], Symbol)
@@ -64,7 +65,7 @@ function _split_signature(sig::Expr)
         fname__intransparent = Symbol(string(fname) * "__intransparent"),
     )
 end
-
+#! format: on
 function _split_function(ex::Expr)
     if ex.head == :function
         sig = ex.args[1]
@@ -346,12 +347,12 @@ macro decorator_transparent_signature(ex)
     argnames = parts[:argnames]
     argtypes = parts[:argtypes]
     kwargs_call = parts[:kwargs_call]
-
+    #! format: off
     return esc(
         quote
             function ($fname)($(callargs...); $(kwargs_list...)) where {$(where_exprs...)}
                 transparency = ManifoldsBase._acts_transparently($fname, $(argnames...))
-                return if transparency === Val(:parent)
+                if transparency === Val(:parent)
                     return ($(parts.fname__parent))($(argnames...); $(kwargs_call...))
                 elseif transparency === Val(:transparent)
                     return ($(parts.fname__transparent))($(argnames...); $(kwargs_call...))
@@ -399,6 +400,7 @@ macro decorator_transparent_signature(ex)
         end,
     )
 end
+#! fomrat: on
 
 #
 # Functions
