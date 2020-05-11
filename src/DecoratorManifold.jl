@@ -3,6 +3,9 @@
 #
 @inline _extract_val(::Val{T}) where {T} = T
 
+#! format: off
+# turn formatting for for the following functions
+# due to the if with returns inside (formatter puts a return upfront the if)
 function _split_signature(sig::Expr)
     if sig.head == :where
         where_exprs = sig.args[2:end]
@@ -22,7 +25,6 @@ function _split_signature(sig::Expr)
         callargs = call_expr.args[2:end]
         kwargs_list = []
     end
-
     argnames = map(callargs) do arg
         if isa(arg, Expr)
             return arg.args[1]
@@ -64,7 +66,7 @@ function _split_signature(sig::Expr)
         fname__intransparent = Symbol(string(fname) * "__intransparent"),
     )
 end
-
+#! format: on
 function _split_function(ex::Expr)
     if ex.head == :function
         sig = ex.args[1]
@@ -156,7 +158,7 @@ macro decorator_transparent_fallback(fallback_case, input_ex)
                 $(callargs...);
                 $(parts[:kwargs_list]...),
             ) where {$(where_exprs...)}
-                ($(parts[:body]))
+                return ($(parts[:body]))
             end
         end,
     )
@@ -225,12 +227,15 @@ macro decorator_transparent_function(fallback_case, input_ex)
                 $(kwargs_list...),
             ) where {$(where_exprs...)}
                 transparency = ManifoldsBase._acts_transparently($fname, $(argnames...))
-                if transparency === Val(:parent)
+                return if transparency === Val(:parent)
                     return ($(parts.fname__parent))($(argnames...); $(kwargs_call...))
                 elseif transparency === Val(:transparent)
                     return ($(parts.fname__transparent))($(argnames...); $(kwargs_call...))
                 elseif transparency === Val(:intransparent)
-                    return ($(parts.fname__intransparent))($(argnames...); $(kwargs_call...))
+                    return ($(parts.fname__intransparent))(
+                        $(argnames...);
+                        $(kwargs_call...),
+                    )
                 else
                     error("incorrect transparency: $transparency")
                 end
@@ -256,14 +261,14 @@ macro decorator_transparent_function(fallback_case, input_ex)
                     $fname,
                     $(argnames[2:end]...),
                 )
-                error(error_msg)
+                return error(error_msg)
             end
             function ($fname)(
                 $(argnames[1])::Manifold,
                 $(callargs[2:end]...);
                 $(kwargs_list...),
             ) where {$(where_exprs...)}
-                error(string(
+                return error(string(
                     ManifoldsBase.manifold_function_not_implemented_message(
                         $(argnames[1]),
                         $fname,
@@ -291,7 +296,7 @@ macro decorator_transparent_function(fallback_case, input_ex)
                 $(callargs[2:end]...);
                 $(kwargs_list...),
             ) where {$(where_exprs...)}
-                ($body)
+                return ($body)
             end
             function decorator_transparent_dispatch(
                 ::typeof($fname),
@@ -302,6 +307,8 @@ macro decorator_transparent_function(fallback_case, input_ex)
         end,
     )
 end
+#! format: off
+# due to the if with returns inside (formatter puts a return upfront the if)
 """
     @decorator_transparent_signature(ex)
 
@@ -343,7 +350,7 @@ macro decorator_transparent_signature(ex)
     argnames = parts[:argnames]
     argtypes = parts[:argtypes]
     kwargs_call = parts[:kwargs_call]
-
+    #! format: off
     return esc(
         quote
             function ($fname)($(callargs...); $(kwargs_list...)) where {$(where_exprs...)}
@@ -353,7 +360,10 @@ macro decorator_transparent_signature(ex)
                 elseif transparency === Val(:transparent)
                     return ($(parts.fname__transparent))($(argnames...); $(kwargs_call...))
                 elseif transparency === Val(:intransparent)
-                    return ($(parts.fname__intransparent))($(argnames...); $(kwargs_call...))
+                    return ($(parts.fname__intransparent))(
+                        $(argnames...);
+                        $(kwargs_call...),
+                    )
                 else
                     error("incorrect transparency: $transparency")
                 end
@@ -377,7 +387,7 @@ macro decorator_transparent_signature(ex)
                     $fname,
                     $(argnames[2:end]...),
                 )
-                error(error_msg)
+                return error(error_msg)
             end
             function ($(parts[:fname__parent]))(
                 $(callargs...);
@@ -393,6 +403,8 @@ macro decorator_transparent_signature(ex)
         end,
     )
 end
+#! format: on
+
 
 #
 # Functions

@@ -9,8 +9,10 @@ This manifold further illustrates how to type your manifold points and tangent v
 that the interface does not require this, but it might be handy in debugging and educative
 situations to verify correctness of involved variabes.
 """
-struct DefaultManifold{T<:Tuple, 𝔽} <: Manifold{𝔽} end
-DefaultManifold(n::Vararg{Int,N}; field = ℝ) where {N} = DefaultManifold{Tuple{n...}, field}()
+struct DefaultManifold{T<:Tuple,𝔽} <: Manifold{𝔽} end
+function DefaultManifold(n::Vararg{Int,N}; field = ℝ) where {N}
+    return DefaultManifold{Tuple{n...},field}()
+end
 
 function check_manifold_point(M::DefaultManifold, p; kwargs...)
     if size(p) != representation_size(M)
@@ -22,13 +24,7 @@ function check_manifold_point(M::DefaultManifold, p; kwargs...)
     return nothing
 end
 
-function check_tangent_vector(
-    M::DefaultManifold,
-    p,
-    X;
-    check_base_point = true,
-    kwargs...,
-)
+function check_tangent_vector(M::DefaultManifold, p, X; check_base_point = true, kwargs...)
     if check_base_point
         perr = check_manifold_point(M, p)
         perr === nothing || return perr
@@ -82,7 +78,9 @@ injectivity_radius(::DefaultManifold) = Inf
 
 log!(::DefaultManifold, v, x, y) = (v .= y .- x)
 
-@generated manifold_dimension(::DefaultManifold{T,𝔽}) where {T,𝔽} = *(T.parameters...)*real_dimension(𝔽)
+@generated function manifold_dimension(::DefaultManifold{T,𝔽}) where {T,𝔽}
+    return *(T.parameters...) * real_dimension(𝔽)
+end
 
 number_system(::DefaultManifold{T,𝔽}) where {T,𝔽} = 𝔽
 

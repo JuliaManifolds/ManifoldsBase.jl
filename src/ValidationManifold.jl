@@ -60,7 +60,9 @@ end
 allocate(p::ValidationMPoint) = ValidationMPoint(allocate(p.value))
 allocate(p::ValidationMPoint, ::Type{T}) where {T} = ValidationMPoint(allocate(p.value, T))
 allocate(X::ValidationTVector) = ValidationTVector(allocate(X.value))
-allocate(X::ValidationTVector, ::Type{T}) where {T} = ValidationTVector(allocate(X.value, T))
+function allocate(X::ValidationTVector, ::Type{T}) where {T}
+    return ValidationTVector(allocate(X.value, T))
+end
 
 """
     array_value(p)
@@ -93,9 +95,13 @@ function convert(::Type{ValidationCoTVector{V}}, X::V) where {V<:AbstractArray{<
     return ValidationCoTVector{V}(X)
 end
 convert(::Type{M}, m::ValidationManifold{𝔽,M}) where {𝔽,M<:Manifold{𝔽}} = m.manifold
-convert(::Type{ValidationManifold{𝔽,M}}, m::M) where {𝔽,M<:Manifold{𝔽}} = ValidationManifold(m)
+function convert(::Type{ValidationManifold{𝔽,M}}, m::M) where {𝔽,M<:Manifold{𝔽}}
+    return ValidationManifold(m)
+end
 convert(::Type{V}, p::ValidationMPoint{V}) where {V<:AbstractArray{<:Number}} = p.value
-convert(::Type{ValidationMPoint{V}}, x::V) where {V<:AbstractArray{<:Number}} = ValidationMPoint{V}(x)
+function convert(::Type{ValidationMPoint{V}}, x::V) where {V<:AbstractArray{<:Number}}
+    return ValidationMPoint{V}(x)
+end
 convert(::Type{V}, X::ValidationTVector{V}) where {V<:AbstractArray{<:Number}} = X.value
 function convert(::Type{ValidationTVector{V}}, X::V) where {V<:AbstractArray{<:Number}}
     return ValidationTVector{V}(X)
@@ -142,16 +148,12 @@ function get_basis(M::ValidationManifold, p, B::AbstractBasis; kwargs...)
     bvectors = get_vectors(M, p, Ξ)
     N = length(bvectors)
     if N != manifold_dimension(M.manifold)
-        throw(ErrorException(
-            "For a basis of the tangent space at $(p) of $(M.manifold), $(manifold_dimension(M)) vectors are required, but get_basis $(B) computed $(N)"
-        ))
+        throw(ErrorException("For a basis of the tangent space at $(p) of $(M.manifold), $(manifold_dimension(M)) vectors are required, but get_basis $(B) computed $(N)"))
     end
     # check that the vectors are linearly independent\
     bv_rank = rank(reduce(hcat, bvectors))
     if N != bv_rank
-        throw(ErrorException(
-            "For a basis of the tangent space at $(p) of $(M.manifold), $(manifold_dimension(M)) linearly independent vectors are required, but get_basis $(B) computed $(bv_rank)"
-        ))
+        throw(ErrorException("For a basis of the tangent space at $(p) of $(M.manifold), $(manifold_dimension(M)) linearly independent vectors are required, but get_basis $(B) computed $(bv_rank)"))
     end
     map(X -> is_tangent_vector(M, p, X, true; kwargs...), bvectors)
     return Ξ
@@ -166,8 +168,8 @@ function get_basis(
     Ξ = invoke(get_basis, Tuple{ValidationManifold,Any,AbstractBasis}, M, p, B; kwargs...)
     bvectors = get_vectors(M, p, Ξ)
     N = length(bvectors)
-    for i = 1:N
-        for j = i+1:N
+    for i in 1:N
+        for j in (i + 1):N
             dot_val = real(inner(M, p, bvectors[i], bvectors[j]))
             if !isapprox(dot_val, 0; atol = eps(eltype(p)))
                 throw(ArgumentError("vectors number $i and $j are not orthonormal (inner product = $dot_val)"))
@@ -183,11 +185,18 @@ function get_basis(
     kwargs...,
 ) where {𝔽}
     is_manifold_point(M, p, true; kwargs...)
-    get_basis_invoke_types = Tuple{ValidationManifold,Any,Union{AbstractOrthogonalBasis,CachedBasis{𝔽,<:AbstractOrthogonalBasis{𝔽}}} where {𝔽}}
+    get_basis_invoke_types = Tuple{
+        ValidationManifold,
+        Any,
+        Union{
+            AbstractOrthogonalBasis,
+            CachedBasis{𝔽,<:AbstractOrthogonalBasis{𝔽}},
+        } where {𝔽},
+    }
     Ξ = invoke(get_basis, get_basis_invoke_types, M, p, B; kwargs...)
     bvectors = get_vectors(M, p, Ξ)
     N = length(bvectors)
-    for i = 1:N
+    for i in 1:N
         Xi_norm = norm(M, p, bvectors[i])
         if !isapprox(Xi_norm, 1)
             throw(ArgumentError("vector number $i is not normalized (norm = $Xi_norm)"))
@@ -196,9 +205,11 @@ function get_basis(
     return Ξ
 end
 for BT in DISAMBIGUATION_BASIS_TYPES
-    if BT <: Union{AbstractOrthonormalBasis,CachedBasis{𝔽,<:AbstractOrthonormalBasis} where 𝔽}
+    if BT <:
+       Union{AbstractOrthonormalBasis,CachedBasis{𝔽,<:AbstractOrthonormalBasis} where 𝔽}
         CT = AbstractOrthonormalBasis
-    elseif BT <: Union{AbstractOrthogonalBasis,CachedBasis{𝔽,<:AbstractOrthogonalBasis} where 𝔽}
+    elseif BT <:
+           Union{AbstractOrthogonalBasis,CachedBasis{𝔽,<:AbstractOrthogonalBasis} where 𝔽}
         CT = AbstractOrthogonalBasis
     else
         CT = AbstractBasis
@@ -214,9 +225,17 @@ function get_coordinates(M::ValidationManifold, p, X, B::AbstractBasis; kwargs..
     return get_coordinates(M.manifold, p, X, B)
 end
 for BT in DISAMBIGUATION_BASIS_TYPES
-    eval(quote
-        @invoke_maker 4 AbstractBasis get_coordinates(M::ValidationManifold, p, X, B::$BT; kwargs...)
-    end)
+    eval(
+        quote
+            @invoke_maker 4 AbstractBasis get_coordinates(
+                M::ValidationManifold,
+                p,
+                X,
+                B::$BT;
+                kwargs...,
+            )
+        end,
+    )
 end
 
 function get_coordinates!(M::ValidationManifold, Y, p, X, B::AbstractBasis; kwargs...)
@@ -225,9 +244,18 @@ function get_coordinates!(M::ValidationManifold, Y, p, X, B::AbstractBasis; kwar
     return Y
 end
 for BT in DISAMBIGUATION_BASIS_TYPES
-    eval(quote
-        @invoke_maker 5 AbstractBasis get_coordinates!(M::ValidationManifold, Y, p, X, B::$BT; kwargs...)
-    end)
+    eval(
+        quote
+            @invoke_maker 5 AbstractBasis get_coordinates!(
+                M::ValidationManifold,
+                Y,
+                p,
+                X,
+                B::$BT;
+                kwargs...,
+            )
+        end,
+    )
 end
 
 function get_vector(M::ValidationManifold, p, X, B::AbstractBasis; kwargs...)
@@ -238,9 +266,17 @@ function get_vector(M::ValidationManifold, p, X, B::AbstractBasis; kwargs...)
     return Y
 end
 for BT in DISAMBIGUATION_BASIS_TYPES
-    eval(quote
-        @invoke_maker 4 AbstractBasis get_vector(M::ValidationManifold, p, X, B::$BT; kwargs...)
-    end)
+    eval(
+        quote
+            @invoke_maker 4 AbstractBasis get_vector(
+                M::ValidationManifold,
+                p,
+                X,
+                B::$BT;
+                kwargs...,
+            )
+        end,
+    )
 end
 
 function get_vector!(M::ValidationManifold, Y, p, X, B::AbstractBasis; kwargs...)
@@ -251,9 +287,18 @@ function get_vector!(M::ValidationManifold, Y, p, X, B::AbstractBasis; kwargs...
     return Y
 end
 for BT in DISAMBIGUATION_BASIS_TYPES
-    eval(quote
-        @invoke_maker 5 AbstractBasis get_vector!(M::ValidationManifold, Y, p, X, B::$BT; kwargs...)
-    end)
+    eval(
+        quote
+            @invoke_maker 5 AbstractBasis get_vector!(
+                M::ValidationManifold,
+                Y,
+                p,
+                X,
+                B::$BT;
+                kwargs...,
+            )
+        end,
+    )
 end
 
 injectivity_radius(M::ValidationManifold) = injectivity_radius(M.manifold)
@@ -276,7 +321,12 @@ end
 function injectivity_radius(M::ValidationManifold, method::ExponentialRetraction)
     return injectivity_radius(M.manifold, method)
 end
-function injectivity_radius(M::ValidationManifold, p, method::ExponentialRetraction; kwargs...)
+function injectivity_radius(
+    M::ValidationManifold,
+    p,
+    method::ExponentialRetraction;
+    kwargs...,
+)
     is_manifold_point(M, p, true; kwargs...)
     return injectivity_radius(M.manifold, array_value(p), method)
 end
@@ -333,7 +383,9 @@ end
 similar(p::ValidationMPoint) = ValidationMPoint(similar(p.value))
 similar(p::ValidationMPoint, ::Type{T}) where {T} = ValidationMPoint(similar(p.value, T))
 similar(p::ValidationCoTVector) = ValidationCoTVector(similar(p.value))
-similar(p::ValidationCoTVector, ::Type{T}) where {T} = ValidationCoTVector(similar(p.value, T))
+function similar(p::ValidationCoTVector, ::Type{T}) where {T}
+    return ValidationCoTVector(similar(p.value, T))
+end
 similar(X::ValidationTVector) = ValidationTVector(similar(X.value))
 similar(X::ValidationTVector, ::Type{T}) where {T} = ValidationTVector(similar(X.value, T))
 

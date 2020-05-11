@@ -2,18 +2,20 @@ using ManifoldsBase
 
 using Test
 import Base: *
-struct NonManifold <: Manifold{ℝ} end
+struct NonManifold <: Manifold{ManifoldsBase.ℝ} end
 struct NonMPoint <: MPoint end
 struct NonTVector <: TVector end
 struct NonCoTVector <: CoTVector end
+struct NotImplementedRetraction <: AbstractRetractionMethod end
+struct NotImplementedInverseRetraction <: AbstractInverseRetractionMethod end
 *(t::Float64, X::NonTVector) = X
 @testset "Manifold with empty implementation" begin
     M = NonManifold()
     p = NonMPoint()
     v = NonTVector()
-    @test base_manifold(M) == M
-    @test number_system(M) == ℝ
-    @test_throws ErrorException ManifoldsBase.representation_size(M)
+    @test base_manifold(M) === M
+    @test number_system(M) === ℝ
+    @test representation_size(M) === nothing
 
     @test_throws ErrorException manifold_dimension(M)
 
@@ -45,6 +47,7 @@ struct NonCoTVector <: CoTVector end
     @test_throws ErrorException retract(M, [0.0], [0.0], exp_retr)
     @test_throws ErrorException retract(M, [0.0], [0.0], 0.0)
     @test_throws ErrorException retract(M, [0.0], [0.0], 0.0, exp_retr)
+    @test_throws ErrorException retract(M, [0.0], [0.0], NotImplementedRetraction())
 
     log_invretr = ManifoldsBase.LogarithmicInverseRetraction()
 
@@ -54,9 +57,14 @@ struct NonCoTVector <: CoTVector end
     @test_throws ErrorException inverse_retract!(M, [0], [0], [0], log_invretr)
     @test_throws ErrorException inverse_retract(M, [0], [0])
     @test_throws ErrorException inverse_retract(M, [0], [0], log_invretr)
-
     @test_throws ErrorException inverse_retract(M, [0.0], [0.0])
     @test_throws ErrorException inverse_retract(M, [0.0], [0.0], log_invretr)
+    @test_throws ErrorException inverse_retract(
+        M,
+        [0.0],
+        [0.0],
+        NotImplementedInverseRetraction(),
+    )
 
     @test_throws ErrorException project!(M, p, [0])
     @test_throws ErrorException project!(M, [0], [0])

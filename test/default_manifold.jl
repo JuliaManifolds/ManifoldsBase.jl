@@ -10,10 +10,12 @@ using Test
 struct CustomDefinedRetraction <: ManifoldsBase.AbstractRetractionMethod end
 struct CustomUndefinedRetraction <: ManifoldsBase.AbstractRetractionMethod end
 
-ManifoldsBase.injectivity_radius(
+function ManifoldsBase.injectivity_radius(
     ::ManifoldsBase.DefaultManifold,
     ::CustomDefinedRetraction,
-) = 10.0
+)
+    return 10.0
+end
 
 @testset "Testing Default (Euclidean)" begin
     M = ManifoldsBase.DefaultManifold(3)
@@ -57,7 +59,7 @@ ManifoldsBase.injectivity_radius(
 
             tv1 = log(M, pts[1], pts[2])
 
-            for pt ∈ pts
+            for pt in pts
                 @test is_manifold_point(M, pt)
             end
             @test is_tangent_vector(M, pts[1], tv1; atol = eps(eltype(pts[1])))
@@ -76,7 +78,7 @@ ManifoldsBase.injectivity_radius(
             new_pt = exp(M, pts[1], tv1)
             retract!(M, new_pt, pts[1], tv1)
             @test is_manifold_point(M, new_pt)
-            for x ∈ pts
+            for x in pts
                 @test isapprox(
                     M,
                     zero_tangent_vector(M, x),
@@ -211,12 +213,12 @@ ManifoldsBase.injectivity_radius(
             @testset "ForwardDiff support" begin
                 exp_f(t) = distance(M, pts[1], exp(M, pts[1], t * tv1))
                 d12 = distance(M, pts[1], pts[2])
-                for t ∈ 0.1:0.1:0.9
+                for t in 0.1:0.1:0.9
                     @test d12 ≈ ForwardDiff.derivative(exp_f, t)
                 end
 
                 retract_f(t) = distance(M, pts[1], retract(M, pts[1], t * tv1))
-                for t ∈ 0.1:0.1:0.9
+                for t in 0.1:0.1:0.9
                     @test ForwardDiff.derivative(retract_f, t) ≥ 0
                 end
             end
@@ -224,12 +226,12 @@ ManifoldsBase.injectivity_radius(
             isa(pts[1], Union{Vector,SizedVector}) && @testset "ReverseDiff support" begin
                 exp_f(t) = distance(M, pts[1], exp(M, pts[1], t[1] * tv1))
                 d12 = distance(M, pts[1], pts[2])
-                for t ∈ 0.1:0.1:0.9
+                for t in 0.1:0.1:0.9
                     @test d12 ≈ ReverseDiff.gradient(exp_f, [t])[1]
                 end
 
                 retract_f(t) = distance(M, pts[1], retract(M, pts[1], t[1] * tv1))
-                for t ∈ 0.1:0.1:0.9
+                for t in 0.1:0.1:0.9
                     @test ReverseDiff.gradient(retract_f, [t])[1] ≥ 0
                 end
             end

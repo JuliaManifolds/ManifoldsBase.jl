@@ -1,11 +1,11 @@
 using ManifoldsBase
 using Test
-
-import ManifoldsBase.decorator_transparent_dispatch
-using ManifoldsBase: @decorator_transparent_function,
+using ManifoldsBase:
+    @decorator_transparent_function,
     @decorator_transparent_fallback,
     @decorator_transparent_signature,
     is_decorator_transparent
+import ManifoldsBase: decorator_transparent_dispatch
 
 struct TestDecorator{M<:Manifold{ℝ}} <: AbstractDecoratorManifold{ℝ}
     manifold::M
@@ -36,17 +36,23 @@ test1(M::Manifold, p; a = 0) = 101 + a
 test2(M::Manifold, p; a = 0) = 102 + a
 test3(M::Manifold, p; a = 0) = 103 + a
 function test4(M::Manifold, p; a = 0)
-    error(ManifoldsBase.manifold_function_not_implemented_message(M, test4, p))
+    return error(ManifoldsBase.manifold_function_not_implemented_message(M, test4, p))
 end
 
 function test1(M::TestDecorator, p; a = 0)
     return 1 + a
 end
 
-decorator_transparent_dispatch(::typeof(test1), M::TestDecorator, args...) = Val(:intransparent)
-decorator_transparent_dispatch(::typeof(test2), M::TestDecorator, args...) = Val(:transparent)
+function decorator_transparent_dispatch(::typeof(test1), M::TestDecorator, args...)
+    return Val(:intransparent)
+end
+function decorator_transparent_dispatch(::typeof(test2), M::TestDecorator, args...)
+    return Val(:transparent)
+end
 decorator_transparent_dispatch(::typeof(test3), M::TestDecorator, args...) = Val(:parent)
-decorator_transparent_dispatch(::typeof(test4), M::TestDecorator, args...) = Val(:intransparent)
+function decorator_transparent_dispatch(::typeof(test4), M::TestDecorator, args...)
+    return Val(:intransparent)
+end
 
 @decorator_transparent_function :transparent function test5(M::AbstractDecoratorManifold, p)
     return 5
@@ -66,11 +72,21 @@ end
 
 test8(M::Manifold, p; a = 0) = 8 + a
 
-@decorator_transparent_function :parent function test9(M::AbstractDecoratorManifold, p; a = 0, kwargs...)
+@decorator_transparent_function :parent function test9(
+    M::AbstractDecoratorManifold,
+    p;
+    a = 0,
+    kwargs...,
+)
     return 9 + a + (haskey(kwargs, :b) ? kwargs[:b] : 0)
 end
 
-@decorator_transparent_fallback :parent @inline function test9(M::AbstractTestDecorator, p::TP; a = 0, kwargs...) where {TP}
+@decorator_transparent_fallback :parent @inline function test9(
+    M::AbstractTestDecorator,
+    p::TP;
+    a = 0,
+    kwargs...,
+) where {TP}
     return 19 + a + (haskey(kwargs, :b) ? kwargs[:b] : 0)
 end
 
@@ -78,61 +94,79 @@ function test9(M::TestDecorator3, p::TP; a = 0, kwargs...) where {TP}
     return 109 + a + (haskey(kwargs, :b) ? kwargs[:b] : 0)
 end
 
-test10(M::AbstractTestDecorator, p::TP; a=0) where {TP} = 10*a
-@decorator_transparent_function function test10(M::TestDecorator3, p::TP; a=0) where {TP}
-    return 5*a
+test10(M::AbstractTestDecorator, p::TP; a = 0) where {TP} = 10 * a
+@decorator_transparent_function function test10(M::TestDecorator3, p::TP; a = 0) where {TP}
+    return 5 * a
 end
 # the following then ignores the previous definition and passes again to the parent above
 decorator_transparent_dispatch(::typeof(test10), M::TestDecorator3, args...) = Val(:parent)
 
-@decorator_transparent_function function test11(M::TestDecorator3, p::TP; a::Int=0) where {TP}
-    return 15*a
+@decorator_transparent_function function test11(
+    M::TestDecorator3,
+    p::TP;
+    a::Int = 0,
+) where {TP}
+    return 15 * a
 end
 
 @decorator_transparent_function function test12(M::ManifoldsBase.DefaultManifold, p)
-    return 12*p
+    return 12 * p
 end
 ManifoldsBase._acts_transparently(test12, TestDecorator3, p) = Val(:foo)
 
 @decorator_transparent_function :none function test13(M::TestDecorator3, p)
-    return 13.5*p
+    return 13.5 * p
 end
-decorator_transparent_dispatch(::typeof(test13), M::TestDecorator, args...) = Val(:intransparent)
-decorator_transparent_dispatch(::typeof(test13), M::TestDecorator2, args...) = Val(:transparent)
-test13(::ManifoldsBase.DefaultManifold,a) = 13*a
+function decorator_transparent_dispatch(::typeof(test13), M::TestDecorator, args...)
+    return Val(:intransparent)
+end
+function decorator_transparent_dispatch(::typeof(test13), M::TestDecorator2, args...)
+    return Val(:transparent)
+end
+test13(::ManifoldsBase.DefaultManifold, a) = 13 * a
 
 function test14(M::AbstractDecoratorManifold, p)
-    return 14.5*p
+    return 14.5 * p
 end
-@decorator_transparent_signature test14(M::AbstractDecoratorManifold,p)
+@decorator_transparent_signature test14(M::AbstractDecoratorManifold, p)
 decorator_transparent_dispatch(::typeof(test14), M::TestDecorator3, args...) = Val(:none)
-decorator_transparent_dispatch(::typeof(test14), M::TestDecorator, args...) = Val(:intransparent)
-decorator_transparent_dispatch(::typeof(test14), M::TestDecorator2, args...) = Val(:transparent)
-test14(::ManifoldsBase.DefaultManifold,a) = 14*a
-
-test15(::ManifoldsBase.DefaultManifold,a) = 15.5*a
-@decorator_transparent_function function test15(M::AbstractDecoratorManifold, p)
-    error("Not yet implemented")
+function decorator_transparent_dispatch(::typeof(test14), M::TestDecorator, args...)
+    return Val(:intransparent)
 end
-test15(::AbstractParentDecorator,p) = 15*p
+function decorator_transparent_dispatch(::typeof(test14), M::TestDecorator2, args...)
+    return Val(:transparent)
+end
+test14(::ManifoldsBase.DefaultManifold, a) = 14 * a
+
+test15(::ManifoldsBase.DefaultManifold, a) = 15.5 * a
+@decorator_transparent_function function test15(M::AbstractDecoratorManifold, p)
+    return error("Not yet implemented")
+end
+test15(::AbstractParentDecorator, p) = 15 * p
 decorator_transparent_dispatch(::typeof(test15), M::ChildDecorator, args...) = Val(:parent)
 
 function test16(::AbstractParentDecorator, p)
-    return 16*p
+    return 16 * p
 end
-test16(::ManifoldsBase.DefaultManifold, a) = 16.5*a
+test16(::ManifoldsBase.DefaultManifold, a) = 16.5 * a
 @decorator_transparent_signature test16(M::AbstractDecoratorManifold, p)
 decorator_transparent_dispatch(::typeof(test16), M::ChildDecorator, args...) = Val(:parent)
 
 function test17(M::ManifoldsBase.DefaultManifold, p)
-    return 17*p
+    return 17 * p
 end
 @decorator_transparent_signature test17(M::AbstractDecoratorManifold, p)
-decorator_transparent_dispatch(::typeof(test17), M::AbstractDecoratorManifold, args...) = Val(:intransparent)
+function decorator_transparent_dispatch(
+    ::typeof(test17),
+    M::AbstractDecoratorManifold,
+    args...,
+)
+    return Val(:intransparent)
+end
 default_decorator_dispatch(::DefaultDecorator) = Val(true)
 
 @decorator_transparent_function function test18(M::AbstractDecoratorManifold, p)
-    return 18.25*p
+    return 18.25 * p
 end
 decorator_transparent_dispatch(::typeof(test18), M::ChildDecorator, args...) = Val(:parent)
 
@@ -146,7 +180,7 @@ decorator_transparent_dispatch(::typeof(test18), M::ChildDecorator, args...) = V
     @test ManifoldsBase._extract_val(Val(:transparent)) === :transparent
 
     @test number_system(M) == ℝ
-    @test number_system(ManifoldsBase.DefaultManifold(3; field=ℂ)) == ℂ
+    @test number_system(ManifoldsBase.DefaultManifold(3; field = ℂ)) == ℂ
 
     @test (@inferred base_manifold(M, Val(1))) == M
     @test (@inferred base_manifold(M, Val(0))) == M
@@ -154,9 +188,9 @@ decorator_transparent_dispatch(::typeof(test18), M::ChildDecorator, args...) = V
     @test (@inferred base_manifold(A, Val(0))) == A
 
     x = 0
-    @test_throws LoadError eval(:(@decorator_transparent_fallback x = x+1))
-    @test_throws LoadError eval(:(@decorator_transparent_function x = x+1))
-    @test_throws LoadError eval(:(@decorator_transparent_signature x = x+1))
+    @test_throws LoadError eval(:(@decorator_transparent_fallback x = x + 1))
+    @test_throws LoadError eval(:(@decorator_transparent_function x = x + 1))
+    @test_throws LoadError eval(:(@decorator_transparent_signature x = x + 1))
 
     @test representation_size(M) == (3,)
     @test representation_size(A) == (3,)
@@ -205,19 +239,19 @@ decorator_transparent_dispatch(::typeof(test18), M::ChildDecorator, args...) = V
     @test test11(TestDecorator3(TD), p; a = 12) == 180
     @test_throws ErrorException test12(TestDecorator3(TD), p)
 
-    @test_throws ErrorException test13(TestDecorator3(M),1) # :none nonexistent
-    @test_throws ErrorException test13(TestDecorator(M),1) # not implemented
-    @test test13(TestDecorator2(M),2) == 26 # from parent
+    @test_throws ErrorException test13(TestDecorator3(M), 1) # :none nonexistent
+    @test_throws ErrorException test13(TestDecorator(M), 1) # not implemented
+    @test test13(TestDecorator2(M), 2) == 26 # from parent
 
-    @test_throws ErrorException test14(TestDecorator3(M),1) # :none nonexistent
-    @test_throws ErrorException test14(TestDecorator(M),1) # not implemented
-    @test test14(TestDecorator2(M),2) == 28 # from parent
+    @test_throws ErrorException test14(TestDecorator3(M), 1) # :none nonexistent
+    @test_throws ErrorException test14(TestDecorator(M), 1) # not implemented
+    @test test14(TestDecorator2(M), 2) == 28 # from parent
 
-    @test test15(ChildDecorator(M),1) == 15
-    @test test16(ChildDecorator(M),1) == 16
+    @test test15(ChildDecorator(M), 1) == 15
+    @test test16(ChildDecorator(M), 1) == 16
 
-    @test_throws ErrorException test17(TestDecorator(ManifoldsBase.DefaultManifold(3)),1)
-    @test test17(DefaultDecorator(ManifoldsBase.DefaultManifold(3)),1) == 17
+    @test_throws ErrorException test17(TestDecorator(ManifoldsBase.DefaultManifold(3)), 1)
+    @test test17(DefaultDecorator(ManifoldsBase.DefaultManifold(3)), 1) == 17
 
     # states that child has to implement at least a parent case
     @test_throws ErrorException test18(ChildDecorator(ManifoldsBase.DefaultManifold(3)), 1)

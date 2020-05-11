@@ -3,12 +3,13 @@ using ManifoldsBase
 using ManifoldsBase: DefaultManifold, ℝ, ℂ
 using Test
 import Base: +, -, *, copyto!, isapprox
+import ManifoldsBase: allocate
 
 struct ProjManifold <: Manifold{ℝ} end
 
 ManifoldsBase.inner(::ProjManifold, x, w, v) = dot(w, v)
 ManifoldsBase.project!(S::ProjManifold, w, x, v) = (w .= v .- dot(x, v) .* x)
-ManifoldsBase.representation_size(::ProjManifold) = (2,3)
+ManifoldsBase.representation_size(::ProjManifold) = (2, 3)
 ManifoldsBase.manifold_dimension(::ProjManifold) = 5
 ManifoldsBase.get_vector(::ProjManifold, x, v, ::DefaultOrthonormalBasis) = reverse(v)
 
@@ -55,8 +56,10 @@ ManifoldsBase.manifold_dimension(::ProjectionTestManifold) = 100
 
 @testset "Projected and arbitrary orthonormal basis" begin
     M = ProjManifold()
-    x = [sqrt(2)/2 0.0 0.0;
-         0.0 sqrt(2)/2 0.0]
+    x = [
+        sqrt(2) / 2 0.0 0.0
+        0.0 sqrt(2) / 2 0.0
+    ]
 
     for pb in (ProjectedOrthonormalBasis(:svd), ProjectedOrthonormalBasis(:gram_schmidt))
         pb = get_basis(M, x, pb)
@@ -69,8 +72,9 @@ ManifoldsBase.manifold_dimension(::ProjectionTestManifold) = 100
         # test orthonormality
         for i in 1:N
             @test norm(M, x, get_vectors(M, x, pb)[i]) ≈ 1
-            for j in i+1:N
-                @test inner(M, x, get_vectors(M, x, pb)[i], get_vectors(M, x, pb)[j]) ≈ 0 atol = 1e-15
+            for j in (i + 1):N
+                @test inner(M, x, get_vectors(M, x, pb)[i], get_vectors(M, x, pb)[j]) ≈ 0 atol =
+                    1e-15
             end
         end
         # check projection idempotency
@@ -85,9 +89,15 @@ ManifoldsBase.manifold_dimension(::ProjectionTestManifold) = 100
     @testset "Gram-Schmidt special cases" begin
         tm = ProjectionTestManifold()
         bt = ProjectedOrthonormalBasis(:gram_schmidt)
-        p = [sqrt(2)/2, 0.0, sqrt(2)/2, 0.0, 0.0]
+        p = [sqrt(2) / 2, 0.0, sqrt(2) / 2, 0.0, 0.0]
         @test_throws ErrorException get_basis(tm, p, bt)
-        b = get_basis(tm, p, bt; return_incomplete_set = true, warn_linearly_dependent = true)
+        b = get_basis(
+            tm,
+            p,
+            bt;
+            return_incomplete_set = true,
+            warn_linearly_dependent = true,
+        )
         @test length(get_vectors(tm, p, b)) == 3
     end
 end
@@ -106,10 +116,8 @@ end
 isapprox(a::NonBroadcastBasisThing, b::NonBroadcastBasisThing) = isapprox(a.v, b.v)
 
 function ManifoldsBase.number_eltype(a::NonBroadcastBasisThing)
-    return typeof(reduce(+, one(number_eltype(eti)) for eti ∈ a.v))
+    return typeof(reduce(+, one(number_eltype(eti)) for eti in a.v))
 end
-
-import ManifoldsBase.allocate
 
 allocate(a::NonBroadcastBasisThing) = NonBroadcastBasisThing(allocate(a.v))
 function allocate(a::NonBroadcastBasisThing, ::Type{T}) where {T}
@@ -140,14 +148,44 @@ function ManifoldsBase.exp!(
     return copyto!(y, x + v)
 end
 
-function ManifoldsBase.get_basis(M::DefaultManifold, p::NonBroadcastBasisThing, B::DefaultOrthonormalBasis)
-    return CachedBasis(B, [NonBroadcastBasisThing(ManifoldsBase._euclidean_basis_vector(p.v, i)) for i in eachindex(p.v)])
+function ManifoldsBase.get_basis(
+    M::DefaultManifold,
+    p::NonBroadcastBasisThing,
+    B::DefaultOrthonormalBasis,
+)
+    return CachedBasis(
+        B,
+        [
+            NonBroadcastBasisThing(ManifoldsBase._euclidean_basis_vector(p.v, i))
+            for i in eachindex(p.v)
+        ],
+    )
 end
-function ManifoldsBase.get_basis(M::DefaultManifold, p::NonBroadcastBasisThing, B::DefaultOrthogonalBasis)
-    return CachedBasis(B, [NonBroadcastBasisThing(ManifoldsBase._euclidean_basis_vector(p.v, i)) for i in eachindex(p.v)])
+function ManifoldsBase.get_basis(
+    M::DefaultManifold,
+    p::NonBroadcastBasisThing,
+    B::DefaultOrthogonalBasis,
+)
+    return CachedBasis(
+        B,
+        [
+            NonBroadcastBasisThing(ManifoldsBase._euclidean_basis_vector(p.v, i))
+            for i in eachindex(p.v)
+        ],
+    )
 end
-function ManifoldsBase.get_basis(M::DefaultManifold, p::NonBroadcastBasisThing, B::DefaultBasis)
-    return CachedBasis(B, [NonBroadcastBasisThing(ManifoldsBase._euclidean_basis_vector(p.v, i)) for i in eachindex(p.v)])
+function ManifoldsBase.get_basis(
+    M::DefaultManifold,
+    p::NonBroadcastBasisThing,
+    B::DefaultBasis,
+)
+    return CachedBasis(
+        B,
+        [
+            NonBroadcastBasisThing(ManifoldsBase._euclidean_basis_vector(p.v, i))
+            for i in eachindex(p.v)
+        ],
+    )
 end
 
 function ManifoldsBase.get_coordinates!(
@@ -172,7 +210,14 @@ function ManifoldsBase.get_vector!(
     return Y
 end
 
-ManifoldsBase.inner(::DefaultManifold, x::NonBroadcastBasisThing, v::NonBroadcastBasisThing, w::NonBroadcastBasisThing) = dot(v.v, w.v)
+function ManifoldsBase.inner(
+    ::DefaultManifold,
+    x::NonBroadcastBasisThing,
+    v::NonBroadcastBasisThing,
+    w::NonBroadcastBasisThing,
+)
+    return dot(v.v, w.v)
+end
 
 ManifoldsBase._get_vector_cache_broadcast(::NonBroadcastBasisThing) = Val(false)
 
@@ -197,11 +242,13 @@ DiagonalizingBasisProxy() = DiagonalizingOrthonormalBasis([1.0, 0.0, 0.0])
 
     _pts = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
     @testset "basis representation" for BT in (
-        DefaultBasis,
-        DefaultOrthonormalBasis,
-        DefaultOrthogonalBasis,
-        DiagonalizingBasisProxy,
-    ), pts in (_pts, map(NonBroadcastBasisThing, _pts))
+            DefaultBasis,
+            DefaultOrthonormalBasis,
+            DefaultOrthogonalBasis,
+            DiagonalizingBasisProxy,
+        ),
+        pts in (_pts, map(NonBroadcastBasisThing, _pts))
+
         if BT == DiagonalizingBasisProxy && pts !== _pts
             continue
         end
@@ -220,7 +267,10 @@ DiagonalizingBasisProxy() = DiagonalizingOrthonormalBasis([1.0, 0.0, 0.0])
             if pts[1] isa Array
                 @test isa(b, CachedBasis{ℝ,BT{ℝ},Vector{Vector{Float64}}})
             else
-                @test isa(b, CachedBasis{ℝ,BT{ℝ},Vector{NonBroadcastBasisThing{Vector{Float64}}}})
+                @test isa(
+                    b,
+                    CachedBasis{ℝ,BT{ℝ},Vector{NonBroadcastBasisThing{Vector{Float64}}}},
+                )
             end
         end
         @test get_basis(M, pts[1], b) === b
@@ -230,12 +280,12 @@ DiagonalizingBasisProxy() = DiagonalizingOrthonormalBasis([1.0, 0.0, 0.0])
         if BT isa DefaultOrthonormalBasis && pts[1] isa Vector
             for i in 1:N
                 @test norm(M, pts[1], get_vectors(M, pts[1], b)[i]) ≈ 1
-                for j in i+1:N
+                for j in (i + 1):N
                     @test inner(
                         M,
                         pts[1],
                         get_vectors(M, pts[1], b)[i],
-                        get_vectors(M, pts[1], b)[j]
+                        get_vectors(M, pts[1], b)[j],
                     ) ≈ 0
                 end
             end
@@ -264,14 +314,14 @@ end
     M = ManifoldsBase.DefaultManifold(3; field = ℂ)
     p = [1.0, 2.0im, 3.0]
     X = [1.2, 2.2im, 2.3im]
-    b = [Matrix{Float64}(I,3,3)[:,i] for i=1:3]
-    Bℝ = CachedBasis(DefaultOrthonormalBasis{ℝ}(),b)
+    b = [Matrix{Float64}(I, 3, 3)[:, i] for i in 1:3]
+    Bℝ = CachedBasis(DefaultOrthonormalBasis{ℝ}(), b)
     aℝ = get_coordinates(M, p, X, Bℝ)
     Yℝ = get_vector(M, p, aℝ, Bℝ)
     @test Yℝ ≈ X
     @test ManifoldsBase.number_of_coordinates(M, Bℝ) == 3
 
-    bℂ = [b...,(b.*1im)...]
+    bℂ = [b..., (b .* 1im)...]
     Bℂ = CachedBasis(DefaultOrthonormalBasis{ℂ}(), bℂ)
     aℂ = get_coordinates(M, p, X, Bℂ)
     Yℂ = get_vector(M, p, aℂ, Bℂ)
@@ -284,8 +334,10 @@ end
     @test sprint(show, DefaultOrthogonalBasis()) == "DefaultOrthogonalBasis(ℝ)"
     @test sprint(show, DefaultOrthonormalBasis()) == "DefaultOrthonormalBasis(ℝ)"
     @test sprint(show, DefaultOrthonormalBasis(ℂ)) == "DefaultOrthonormalBasis(ℂ)"
-    @test sprint(show, ProjectedOrthonormalBasis(:svd)) == "ProjectedOrthonormalBasis(:svd, ℝ)"
-    @test sprint(show, ProjectedOrthonormalBasis(:gram_schmidt, ℂ)) == "ProjectedOrthonormalBasis(:gram_schmidt, ℂ)"
+    @test sprint(show, ProjectedOrthonormalBasis(:svd)) ==
+          "ProjectedOrthonormalBasis(:svd, ℝ)"
+    @test sprint(show, ProjectedOrthonormalBasis(:gram_schmidt, ℂ)) ==
+          "ProjectedOrthonormalBasis(:gram_schmidt, ℂ)"
 
     @test sprint(show, "text/plain", DiagonalizingOrthonormalBasis(Float64[1, 2, 3])) == """
     DiagonalizingOrthonormalBasis(ℝ) with eigenvalue 0 in direction:
@@ -361,7 +413,11 @@ end
       [:, :, 1] =
        1.0"""
 
-    dpb = CachedBasis(DiagonalizingOrthonormalBasis(get_vectors(M, x, pb)), Float64[1], get_vectors(M, x, pb))
+    dpb = CachedBasis(
+        DiagonalizingOrthonormalBasis(get_vectors(M, x, pb)),
+        Float64[1],
+        get_vectors(M, x, pb),
+    )
     @test sprint(show, "text/plain", dpb) == """
     DiagonalizingOrthonormalBasis(ℝ) with eigenvalue 0 in direction:
      1-element Array{Array{Float64,3},1}:

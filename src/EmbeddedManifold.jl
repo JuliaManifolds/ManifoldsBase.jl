@@ -85,7 +85,7 @@ function EmbeddedManifold(
     M::MT,
     N::NT,
     e::ET = TransparentIsometricEmbedding(),
-) where {𝔽,MT<:Manifold{𝔽}, NT<:Manifold,ET<:AbstractEmbeddingType}
+) where {𝔽,MT<:Manifold{𝔽},NT<:Manifold,ET<:AbstractEmbeddingType}
     return EmbeddedManifold{𝔽,MT,NT,ET}(M, N)
 end
 
@@ -98,14 +98,14 @@ representing the embedding, the base_manifold is the manifold itself in the sens
 detemining e.g. the [`is_default_metric`](@ref) does not fall back to check with
 the embedding but with the manifold itself. For this abstract case, just `M` is returned.
 """
-base_manifold(M::AbstractEmbeddedManifold, d::Val{N}=Val(-1)) where {N} = M
+base_manifold(M::AbstractEmbeddedManifold, d::Val{N} = Val(-1)) where {N} = M
 """
     base_manifold(M::EmbeddedManifold, d::Val{N} = Val(-1))
 
 Return the base manifold of `M` that is enhanced with its embedding. For this specific
 type the internally stored enhanced manifold `M.manifold` is returned.
 """
-base_manifold(M::EmbeddedManifold, d::Val{N}=Val(-1)) where {N} = M.manifold
+base_manifold(M::EmbeddedManifold, d::Val{N} = Val(-1)) where {N} = M.manifold
 
 
 """
@@ -115,13 +115,13 @@ check whether a point `p` is a valid point on the [`AbstractEmbeddedManifold`](@
 i.e. that `embed(M, p)` is a valid point on the embedded manifold.
 """
 function check_manifold_point(M::AbstractEmbeddedManifold, p; kwargs...)
-    q = embed(M,p)
+    q = embed(M, p)
     return invoke(
         check_manifold_point,
-        Tuple{typeof(get_embedding(M)), typeof(q)},
+        Tuple{typeof(get_embedding(M)),typeof(q)},
         get_embedding(M),
         q;
-        kwargs...
+        kwargs...,
     )
 end
 
@@ -142,16 +142,16 @@ function check_tangent_vector(
         mpe = check_manifold_point(M, p; kwargs...)
         mpe === nothing || return mpe
     end
-    q = embed(M,p)
-    Y = embed(M,p,X)
+    q = embed(M, p)
+    Y = embed(M, p, X)
     return invoke(
         check_tangent_vector,
-        Tuple{typeof(get_embedding(M)), typeof(q), typeof(Y)},
+        Tuple{typeof(get_embedding(M)),typeof(q),typeof(Y)},
         get_embedding(M),
         q,
         Y;
         check_base_point = check_base_point,
-        kwargs...
+        kwargs...,
     )
 end
 
@@ -171,8 +171,8 @@ end
 function show(
     io::IO,
     M::EmbeddedManifold{𝔽,MT,NT,ET},
-) where {𝔽, MT<:Manifold{𝔽},NT<:Manifold,ET<:AbstractEmbeddingType}
-    print(io, "EmbeddedManifold($(M.manifold), $(M.embedding), $(ET()))")
+) where {𝔽,MT<:Manifold{𝔽},NT<:Manifold,ET<:AbstractEmbeddingType}
+    return print(io, "EmbeddedManifold($(M.manifold), $(M.embedding), $(ET()))")
 end
 
 function default_decorator_dispatch(M::EmbeddedManifold)
@@ -218,11 +218,7 @@ function decorator_transparent_dispatch(
 )
     return Val(:intransparent)
 end
-function decorator_transparent_dispatch(
-    ::typeof(exp),
-    ::AbstractEmbeddedManifold,
-    args...,
-)
+function decorator_transparent_dispatch(::typeof(exp), ::AbstractEmbeddedManifold, args...)
     return Val(:parent)
 end
 function decorator_transparent_dispatch(
@@ -232,11 +228,7 @@ function decorator_transparent_dispatch(
 ) where {𝔽}
     return Val(:transparent)
 end
-function decorator_transparent_dispatch(
-    ::typeof(exp!),
-    ::AbstractEmbeddedManifold,
-    args...,
-)
+function decorator_transparent_dispatch(::typeof(exp!), ::AbstractEmbeddedManifold, args...)
     return Val(:intransparent)
 end
 function decorator_transparent_dispatch(
@@ -331,11 +323,7 @@ function decorator_transparent_dispatch(
     return Val(:transparent)
 end
 
-function decorator_transparent_dispatch(
-    ::typeof(log),
-    ::AbstractEmbeddedManifold,
-    args...,
-)
+function decorator_transparent_dispatch(::typeof(log), ::AbstractEmbeddedManifold, args...)
     return Val(:parent)
 end
 function decorator_transparent_dispatch(
@@ -345,11 +333,7 @@ function decorator_transparent_dispatch(
 ) where {𝔽}
     return Val(:transparent)
 end
-function decorator_transparent_dispatch(
-    ::typeof(log!),
-    ::AbstractEmbeddedManifold,
-    args...,
-)
+function decorator_transparent_dispatch(::typeof(log!), ::AbstractEmbeddedManifold, args...)
     return Val(:intransparent)
 end
 function decorator_transparent_dispatch(
