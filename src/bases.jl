@@ -105,7 +105,7 @@ for the vectors elements.
 # Constructor
     DiagonalizingOrthonormalBasis(frame_direction, 𝔽::AbstractNumbers = ℝ)
 """
-struct DiagonalizingOrthonormalBasis{𝔽, TV} <: AbstractOrthonormalBasis{𝔽}
+struct DiagonalizingOrthonormalBasis{𝔽,TV} <: AbstractOrthonormalBasis{𝔽}
     frame_direction::TV
 end
 function DiagonalizingOrthonormalBasis(X, 𝔽::AbstractNumbers = ℝ)
@@ -153,7 +153,8 @@ end
 function get_coordinates end
 function get_vector end
 
-const all_uncached_bases = Union{AbstractBasis, DefaultBasis, DefaultOrthogonalBasis, DefaultOrthonormalBasis}
+const all_uncached_bases =
+    Union{AbstractBasis,DefaultBasis,DefaultOrthogonalBasis,DefaultOrthonormalBasis}
 const DISAMBIGUATION_BASIS_TYPES = [
     CachedBasis,
     DefaultBasis,
@@ -165,13 +166,7 @@ const DISAMBIGUATION_BASIS_TYPES = [
     VeeOrthogonalBasis,
 ]
 
-function allocate_result(
-    M::Manifold,
-    f::typeof(get_coordinates),
-    p,
-    X,
-    B::AbstractBasis,
-)
+function allocate_result(M::Manifold, f::typeof(get_coordinates), p, X, B::AbstractBasis)
     T = allocate_result_type(M, f, (p, X))
     return allocate(p, T, number_of_coordinates(M, B))
 end
@@ -183,7 +178,7 @@ end
 
 @inline function allocate_result_type(
     M::Manifold,
-    f::Union{typeof(get_coordinates), typeof(get_vector)},
+    f::Union{typeof(get_coordinates),typeof(get_vector)},
     args::Tuple,
 )
     apf = allocation_promotion_function(M, f, args)
@@ -229,9 +224,13 @@ the function [`get_vectors`](@ref) needs to be used to retrieve the basis vector
 See also: [`get_coordinates`](@ref), [`get_vector`](@ref)
 """
 function get_basis(M::Manifold, p, B::AbstractBasis)
-    error("get_basis not implemented for manifold of type $(typeof(M)) a point of type $(typeof(p)) and basis of type $(typeof(B)).")
+    return error("get_basis not implemented for manifold of type $(typeof(M)) a point of type $(typeof(p)) and basis of type $(typeof(B)).")
 end
-@decorator_transparent_signature get_basis(M::AbstractDecoratorManifold, p, B::AbstractBasis)
+@decorator_transparent_signature get_basis(
+    M::AbstractDecoratorManifold,
+    p,
+    B::AbstractBasis,
+)
 function decorator_transparent_dispatch(::typeof(get_basis), ::Manifold, args...)
     return Val(:parent)
 end
@@ -240,7 +239,7 @@ function get_basis(M::Manifold, p, B::DefaultOrthonormalBasis)
     dim = manifold_dimension(M)
     return CachedBasis(
         B,
-        [get_vector(M, p, [ifelse(i == j, 1, 0) for j = 1:dim], B) for i = 1:dim],
+        [get_vector(M, p, [ifelse(i == j, 1, 0) for j in 1:dim], B) for i in 1:dim],
     )
 end
 function get_basis(M::Manifold, p, B::CachedBasis)
@@ -261,9 +260,9 @@ function get_basis(M::Manifold, p, B::ProjectedOrthonormalBasis{:svd,ℝ})
     # TODO: try using rank-revealing QR here
     decomp = svd(O)
     rotated = Diagonal(decomp.S) * decomp.Vt
-    vecs = [collect(reshape(rotated[i, :], S)) for i = 1:dim]
+    vecs = [collect(reshape(rotated[i, :], S)) for i in 1:dim]
     # normalization
-    for i = 1:dim
+    for i in 1:dim
         i_norm = norm(M, p, vecs[i])
         vecs[i] /= i_norm
     end
@@ -283,9 +282,9 @@ function get_basis(
     dim = manifold_dimension(M)
     N < dim && @warn "Input only has $(N) vectors, but manifold dimension is $(dim)."
     K = 0
-    @inbounds for n = 1:N
+    @inbounds for n in 1:N
         Ξₙ = project(M, p, E[n])
-        for k = 1:K
+        for k in 1:K
             Ξₙ .-= real(inner(M, p, Ξ[k], Ξₙ)) .* Ξ[k]
         end
         nrmΞₙ = norm(M, p, Ξₙ)
@@ -294,9 +293,10 @@ function get_basis(
             @goto skip
         end
         Ξₙ ./= nrmΞₙ
-        for k = 1:K
+        for k in 1:K
             if !isapprox(real(inner(M, p, Ξ[k], Ξₙ)), 0; kwargs...)
-                warn_linearly_dependent && @warn "Input vector $(n) is not linearly independent of output basis vector $(k)."
+                warn_linearly_dependent &&
+                    @warn "Input vector $(n) is not linearly independent of output basis vector $(k)."
                 @goto skip
             end
         end
@@ -305,16 +305,22 @@ function get_basis(
         K * real_dimension(number_system(B)) == dim && return CachedBasis(B, Ξ)
         @label skip
     end
-    if return_incomplete_set
+    return if return_incomplete_set
         return CachedBasis(B, Ξ)
     else
         error("get_basis with bases $(typeof(B)) only found $(K) orthonormal basis vectors, but manifold dimension is $(dim).")
     end
 end
 for BT in DISAMBIGUATION_BASIS_TYPES
-    eval(quote
-        @decorator_transparent_signature get_basis(M::AbstractDecoratorManifold, p, B::$BT)
-    end)
+    eval(
+        quote
+            @decorator_transparent_signature get_basis(
+                M::AbstractDecoratorManifold,
+                p,
+                B::$BT,
+            )
+        end,
+    )
 end
 
 """
@@ -338,19 +344,38 @@ function get_coordinates(M::Manifold, p, X, B::AbstractBasis)
     Y = allocate_result(M, get_coordinates, p, X, B)
     return get_coordinates!(M, Y, p, X, B)
 end
-@decorator_transparent_signature get_coordinates(M::AbstractDecoratorManifold, p, X, B::AbstractBasis)
+@decorator_transparent_signature get_coordinates(
+    M::AbstractDecoratorManifold,
+    p,
+    X,
+    B::AbstractBasis,
+)
 function decorator_transparent_dispatch(::typeof(get_coordinates), ::Manifold, args...)
     return Val(:parent)
 end
 
 function get_coordinates!(M::Manifold, Y, p, X, B::AbstractBasis)
-    error("get_coordinates! not implemented for manifold of type $(typeof(M)) coordinates of type $(typeof(Y)), a point of type $(typeof(p)), tangent vector of type $(typeof(X)) and basis of type $(typeof(B)).")
+    return error("get_coordinates! not implemented for manifold of type $(typeof(M)) coordinates of type $(typeof(Y)), a point of type $(typeof(p)), tangent vector of type $(typeof(X)) and basis of type $(typeof(B)).")
 end
-@decorator_transparent_signature get_coordinates!(M::AbstractDecoratorManifold, Y, p, X, B::AbstractBasis)
+@decorator_transparent_signature get_coordinates!(
+    M::AbstractDecoratorManifold,
+    Y,
+    p,
+    X,
+    B::AbstractBasis,
+)
 for BT in DISAMBIGUATION_BASIS_TYPES
-    eval(quote
-        @decorator_transparent_signature get_coordinates!(M::AbstractDecoratorManifold, Y, p, X, B::$BT)
-    end)
+    eval(
+        quote
+            @decorator_transparent_signature get_coordinates!(
+                M::AbstractDecoratorManifold,
+                Y,
+                p,
+                X,
+                B::$BT,
+            )
+        end,
+    )
 end
 function decorator_transparent_dispatch(::typeof(get_coordinates!), ::Manifold, args...)
     return Val(:transparent)
@@ -366,9 +391,17 @@ function get_coordinates!(M::Manifold, Y, p, X, B::DefaultOrthogonalBasis)
     return get_coordinates!(M, Y, p, X, DefaultOrthonormalBasis(number_system(B)))
 end
 function get_coordinates!(M::Manifold, Y, p, X, B::CachedBasis)
-    _get_coordinates!(M, number_system(M), Y, p, X, B, number_system(B))
+    return _get_coordinates!(M, number_system(M), Y, p, X, B, number_system(B))
 end
-function _get_coordinates!(M::Manifold, ::ComplexNumbers, Y, p, X, B::CachedBasis,::RealNumbers)
+function _get_coordinates!(
+    M::Manifold,
+    ::ComplexNumbers,
+    Y,
+    p,
+    X,
+    B::CachedBasis,
+    ::RealNumbers,
+)
     map!(vb -> conj(inner(M, p, X, vb)), Y, get_vectors(M, p, B))
     return Y
 end
@@ -396,19 +429,38 @@ function get_vector(M::Manifold, p, X, B::AbstractBasis)
     Y = allocate_result(M, get_vector, p, X)
     return get_vector!(M, Y, p, X, B)
 end
-@decorator_transparent_signature get_vector(M::AbstractDecoratorManifold, p, X, B::AbstractBasis)
+@decorator_transparent_signature get_vector(
+    M::AbstractDecoratorManifold,
+    p,
+    X,
+    B::AbstractBasis,
+)
 function decorator_transparent_dispatch(::typeof(get_vector), ::Manifold, args...)
     return Val(:parent)
 end
 
 function get_vector!(M::Manifold, Y, p, X, B::AbstractBasis)
-    error("get_vector! not implemented for manifold of type $(typeof(M)) vector of type $(typeof(Y)), a point of type $(typeof(p)), coordinates of type $(typeof(X)) and basis of type $(typeof(B)).")
+    return error("get_vector! not implemented for manifold of type $(typeof(M)) vector of type $(typeof(Y)), a point of type $(typeof(p)), coordinates of type $(typeof(X)) and basis of type $(typeof(B)).")
 end
-@decorator_transparent_signature get_vector!(M::AbstractDecoratorManifold, Y, p, X, B::AbstractBasis)
+@decorator_transparent_signature get_vector!(
+    M::AbstractDecoratorManifold,
+    Y,
+    p,
+    X,
+    B::AbstractBasis,
+)
 for BT in DISAMBIGUATION_BASIS_TYPES
-    eval(quote
-        @decorator_transparent_signature get_vector!(M::AbstractDecoratorManifold, Y, p, X, B::$BT)
-    end)
+    eval(
+        quote
+            @decorator_transparent_signature get_vector!(
+                M::AbstractDecoratorManifold,
+                Y,
+                p,
+                X,
+                B::$BT,
+            )
+        end,
+    )
 end
 function decorator_transparent_dispatch(::typeof(get_vector!), ::Manifold, args...)
     return Val(:transparent)
@@ -432,17 +484,17 @@ function get_vector!(M::Manifold, Y, p, X, B::CachedBasis)
     #     (for example scalar * `SizedValidation` is an `SArray`)
     bvectors = get_vectors(M, p, B)
     #print("hi.\nB:$(B)\n& X:$(X)\n\nyields\n $(bvectors).")
-    if _get_vector_cache_broadcast(bvectors[1]) === Val(false)
+    return if _get_vector_cache_broadcast(bvectors[1]) === Val(false)
         Xt = X[1] * bvectors[1]
         copyto!(Y, Xt)
-        for i = 2:length(X)
+        for i in 2:length(X)
             copyto!(Y, Y + X[i] * bvectors[i])
         end
         return Y
     else
         Xt = X[1] .* bvectors[1]
         copyto!(Y, Xt)
-        for i = 2:length(X)
+        for i in 2:length(X)
             Y .+= X[i] .* bvectors[i]
         end
         return Y
@@ -455,18 +507,16 @@ end
 Get the basis vectors of basis `B` of the tangent space at point `p`.
 """
 function get_vectors(M::Manifold, p, B::AbstractBasis)
-    error("get_vectors not implemented for manifold of type $(typeof(M)) a point of type $(typeof(p)) and basis of type $(typeof(B)).")
+    return error("get_vectors not implemented for manifold of type $(typeof(M)) a point of type $(typeof(p)) and basis of type $(typeof(B)).")
 end
-function get_vectors(
-    M::Manifold,
-    p,
-    B::CachedBasis,
-)
+function get_vectors(M::Manifold, p, B::CachedBasis)
     return _get_vectors(B)
 end
 #internal for directly cached basis i.e. those that are just arrays – used in show
 _get_vectors(B::CachedBasis{𝔽,<:AbstractBasis,<:AbstractArray}) where {𝔽} = B.data
-_get_vectors(B::CachedBasis{𝔽,<:AbstractBasis,<:DiagonalizingBasisData}) where {𝔽} = B.data.vectors
+function _get_vectors(B::CachedBasis{𝔽,<:AbstractBasis,<:DiagonalizingBasisData}) where {𝔽}
+    return B.data.vectors
+end
 
 @doc raw"""
     hat(M::Manifold, p, Xⁱ)
@@ -497,7 +547,7 @@ function number_of_coordinates(M::Manifold{𝔽}, B::AbstractBasis{𝔾}) where 
     return div(manifold_dimension(M), real_dimension(𝔽)) * real_dimension(𝔾)
 end
 function number_of_coordinates(M::Manifold{𝔽}, B::AbstractBasis{𝔽}) where {𝔽}
-   return manifold_dimension(M)
+    return manifold_dimension(M)
 end
 
 """
@@ -510,7 +560,7 @@ number_system(::AbstractBasis{𝔽}) where {𝔽} = 𝔽
 function _show_basis_vector(io::IO, X; pre = "", head = "")
     sX = sprint(show, "text/plain", X, context = io, sizehint = 0)
     sX = replace(sX, '\n' => "\n$(pre)")
-    print(io, head, pre, sX)
+    return print(io, head, pre, sX)
 end
 function _show_basis_vector_range(io::IO, Ξ, range; pre = "", sym = "E")
     for i in range
@@ -520,27 +570,27 @@ function _show_basis_vector_range(io::IO, Ξ, range; pre = "", sym = "E")
 end
 function _show_basis_vector_range_noheader(io::IO, Ξ; max_vectors = 4, pre = "", sym = "E")
     nv = length(Ξ)
-    if nv ≤ max_vectors
+    return if nv ≤ max_vectors
         _show_basis_vector_range(io, Ξ, 1:nv; pre = "  ", sym = " E")
     else
         halfn = div(max_vectors, 2)
         _show_basis_vector_range(io, Ξ, 1:halfn; pre = "  ", sym = " E")
         print(io, "\n ⋮")
-        _show_basis_vector_range(io, Ξ, (nv-halfn+1):nv; pre = "  ", sym = " E")
+        _show_basis_vector_range(io, Ξ, (nv - halfn + 1):nv; pre = "  ", sym = " E")
     end
 end
 
 function show(io::IO, ::DefaultBasis{𝔽}) where {𝔽}
-    print(io, "DefaultBasis($(𝔽))")
+    return print(io, "DefaultBasis($(𝔽))")
 end
 function show(io::IO, ::DefaultOrthogonalBasis{𝔽}) where {𝔽}
-    print(io, "DefaultOrthogonalBasis($(𝔽))")
+    return print(io, "DefaultOrthogonalBasis($(𝔽))")
 end
 function show(io::IO, ::DefaultOrthonormalBasis{𝔽}) where {𝔽}
-    print(io, "DefaultOrthonormalBasis($(𝔽))")
+    return print(io, "DefaultOrthonormalBasis($(𝔽))")
 end
 function show(io::IO, ::ProjectedOrthonormalBasis{method,𝔽}) where {method,𝔽}
-    print(io, "ProjectedOrthonormalBasis($(repr(method)), $(𝔽))")
+    return print(io, "ProjectedOrthonormalBasis($(repr(method)), $(𝔽))")
 end
 function show(io::IO, mime::MIME"text/plain", onb::DiagonalizingOrthonormalBasis)
     println(
@@ -549,7 +599,7 @@ function show(io::IO, mime::MIME"text/plain", onb::DiagonalizingOrthonormalBasis
     )
     sk = sprint(show, "text/plain", onb.frame_direction, context = io, sizehint = 0)
     sk = replace(sk, '\n' => "\n ")
-    print(io, sk)
+    return print(io, sk)
 end
 function show(
     io::IO,
@@ -560,12 +610,12 @@ function show(
         io,
         "$(T()) with $(length(_get_vectors(B))) basis vector$(length(_get_vectors(B)) == 1 ? "" : "s"):",
     )
-    _show_basis_vector_range_noheader(
+    return _show_basis_vector_range_noheader(
         io,
         _get_vectors(B);
         max_vectors = 4,
         pre = "  ",
-        sym = " E"
+        sym = " E",
     )
 end
 function show(
@@ -584,7 +634,7 @@ function show(
     println(io, "\nEigenvalues:")
     sk = sprint(show, "text/plain", B.data.eigenvalues, context = io, sizehint = 0)
     sk = replace(sk, '\n' => "\n ")
-    print(io, ' ', sk)
+    return print(io, ' ', sk)
 end
 
 @doc raw"""
@@ -615,17 +665,20 @@ macro invoke_maker(argnum, type, sig)
     argtypes = parts[:argtypes]
     kwargs_call = parts[:kwargs_call]
 
-    return esc(quote
-        function ($fname)(
-            $(callargs...);
-            $(kwargs_list...),
-        ) where {$(where_exprs...)}
-            return invoke(
-                $fname,
-                Tuple{$(argtypes[1:argnum-1]...),$type,$(argtypes[argnum+1:end]...)},
-                $(argnames...);
-                $(kwargs_call...),
-            )
-        end
-    end)
+    return esc(
+        quote
+            function ($fname)($(callargs...); $(kwargs_list...)) where {$(where_exprs...)}
+                return invoke(
+                    $fname,
+                    Tuple{
+                        $(argtypes[1:(argnum - 1)]...),
+                        $type,
+                        $(argtypes[(argnum + 1):end]...),
+                    },
+                    $(argnames...);
+                    $(kwargs_call...),
+                )
+            end
+        end,
+    )
 end

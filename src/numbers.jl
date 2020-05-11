@@ -70,7 +70,7 @@ For example, [`ComplexNumbers`](@ref) have a real dimension of 2, and
 [`QuaternionNumbers`](@ref) have a real dimension of 4.
 """
 function real_dimension(𝔽::AbstractNumbers)
-    error("real_dimension not defined for number system $(𝔽)")
+    return error("real_dimension not defined for number system $(𝔽)")
 end
 real_dimension(::RealNumbers) = 1
 real_dimension(::ComplexNumbers) = 2

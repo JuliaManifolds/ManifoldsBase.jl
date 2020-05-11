@@ -10,8 +10,12 @@ ManifoldsBase.project!(::PlaneManifold, Y, p, X) = (Y .= [X[1] X[2] 0.0])
 
 struct NotImplementedEmbeddedManifold <:
        AbstractEmbeddedManifold{ℝ,TransparentIsometricEmbedding} end
-ManifoldsBase.decorated_manifold(::NotImplementedEmbeddedManifold) = ManifoldsBase.DefaultManifold(2)
-ManifoldsBase.base_manifold(::NotImplementedEmbeddedManifold) = ManifoldsBase.DefaultManifold(2)
+function ManifoldsBase.decorated_manifold(::NotImplementedEmbeddedManifold)
+    return ManifoldsBase.DefaultManifold(2)
+end
+function ManifoldsBase.base_manifold(::NotImplementedEmbeddedManifold)
+    return ManifoldsBase.DefaultManifold(2)
+end
 
 struct NotImplementedEmbeddedManifold2 <:
        AbstractEmbeddedManifold{ℝ,DefaultIsometricEmbeddingType} end
@@ -20,13 +24,17 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEm
 
 @testset "Embedded Manifolds" begin
     @testset "EmbeddedManifold basic tests" begin
-        M = EmbeddedManifold(ManifoldsBase.DefaultManifold(2), ManifoldsBase.DefaultManifold(3))
+        M = EmbeddedManifold(
+            ManifoldsBase.DefaultManifold(2),
+            ManifoldsBase.DefaultManifold(3),
+        )
         @test repr(M) ==
-            "EmbeddedManifold(DefaultManifold{Tuple{2},ℝ}(), DefaultManifold{Tuple{3},ℝ}(), TransparentIsometricEmbedding())"
+              "EmbeddedManifold(DefaultManifold{Tuple{2},ℝ}(), DefaultManifold{Tuple{3},ℝ}(), TransparentIsometricEmbedding())"
         @test base_manifold(M) == ManifoldsBase.DefaultManifold(2)
         @test ManifoldsBase.decorated_manifold(M) == ManifoldsBase.DefaultManifold(3)
         @test ManifoldsBase.default_embedding_dispatch(M) === Val{false}()
-        @test ManifoldsBase.default_decorator_dispatch(M) === ManifoldsBase.default_embedding_dispatch(M)
+        @test ManifoldsBase.default_decorator_dispatch(M) ===
+              ManifoldsBase.default_embedding_dispatch(M)
     end
     @testset "PlaneManifold" begin
         M = PlaneManifold()
@@ -34,9 +42,9 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEm
         @test ManifoldsBase.default_decorator_dispatch(M) === Val{false}()
         @test get_embedding(M) == ManifoldsBase.DefaultManifold(3)
         # Check fallbacks to check embed->check_manifoldpoint Defaults
-        @test_throws DomainError is_manifold_point(M,[1,0], true)
-        @test_throws DomainError is_tangent_vector(M, [1,0], [1,0,0], true)
-        @test_throws DomainError is_tangent_vector(M, [1,0,0], [0,0], true)
+        @test_throws DomainError is_manifold_point(M, [1, 0], true)
+        @test_throws DomainError is_tangent_vector(M, [1, 0], [1, 0, 0], true)
+        @test_throws DomainError is_tangent_vector(M, [1, 0, 0], [0, 0], true)
         p = [1.0 1.0 0.0]
         q = [1.0 0.0 0.0]
         X = q - p
@@ -125,45 +133,59 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEm
         IM = NotImplementedEmbeddedManifold2() # iso
         AM = NotImplementedEmbeddedManifold3() # general
         for f in [embed, exp, get_basis, get_coordinates, get_vector, inverse_retract, log]
-            @test ManifoldsBase.decorator_transparent_dispatch(f,AM) === Val{:parent}()
+            @test ManifoldsBase.decorator_transparent_dispatch(f, AM) === Val{:parent}()
         end
-        for f in [project, retract, inverse_retract!, retract!, get_coordinates!, get_vector!]
-            @test ManifoldsBase.decorator_transparent_dispatch(f,AM) === Val{:parent}()
+        for f in
+            [project, retract, inverse_retract!, retract!, get_coordinates!, get_vector!]
+            @test ManifoldsBase.decorator_transparent_dispatch(f, AM) === Val{:parent}()
         end
         for f in [vector_transport_along, vector_transport_direction, vector_transport_to]
-            @test ManifoldsBase.decorator_transparent_dispatch(f,AM) === Val{:parent}()
+            @test ManifoldsBase.decorator_transparent_dispatch(f, AM) === Val{:parent}()
         end
         for f in [check_manifold_point, check_tangent_vector, exp!, inner, embed!]
-            @test ManifoldsBase.decorator_transparent_dispatch(f,AM) === Val{:intransparent}()
+            @test ManifoldsBase.decorator_transparent_dispatch(f, AM) ===
+                  Val{:intransparent}()
         end
         for f in [log!, norm, manifold_dimension, project!]
-            @test ManifoldsBase.decorator_transparent_dispatch(f,AM) === Val{:intransparent}()
+            @test ManifoldsBase.decorator_transparent_dispatch(f, AM) ===
+                  Val{:intransparent}()
         end
         for f in [vector_transport_along!, vector_transport_to!]
-            @test ManifoldsBase.decorator_transparent_dispatch(f,AM) === Val{:intransparent}()
+            @test ManifoldsBase.decorator_transparent_dispatch(f, AM) ===
+                  Val{:intransparent}()
         end
-        @test ManifoldsBase.decorator_transparent_dispatch(vector_transport_direction!, AM) === Val{:parent}()
+        @test ManifoldsBase.decorator_transparent_dispatch(
+            vector_transport_direction!,
+            AM,
+        ) === Val{:parent}()
 
         for f in [inner, norm]
-            @test ManifoldsBase.decorator_transparent_dispatch(f,IM) === Val{:transparent}()
+            @test ManifoldsBase.decorator_transparent_dispatch(f, IM) ===
+                  Val{:transparent}()
         end
         for f in [inverse_retract!, retract!]
-            @test ManifoldsBase.decorator_transparent_dispatch(f,IM) === Val{:parent}()
+            @test ManifoldsBase.decorator_transparent_dispatch(f, IM) === Val{:parent}()
         end
 
         for f in [exp, inverse_retract, log, project, retract]
-            @test ManifoldsBase.decorator_transparent_dispatch(f,TM) === Val{:transparent}()
+            @test ManifoldsBase.decorator_transparent_dispatch(f, TM) ===
+                  Val{:transparent}()
         end
         for f in [exp!, inverse_retract!, log!, project!, retract!]
-            @test ManifoldsBase.decorator_transparent_dispatch(f,TM) === Val{:transparent}()
+            @test ManifoldsBase.decorator_transparent_dispatch(f, TM) ===
+                  Val{:transparent}()
         end
         for f in [vector_transport_along, vector_transport_direction, vector_transport_to]
-            @test ManifoldsBase.decorator_transparent_dispatch(f,TM) === Val{:transparent}()
+            @test ManifoldsBase.decorator_transparent_dispatch(f, TM) ===
+                  Val{:transparent}()
         end
-        for f in [vector_transport_along!, vector_transport_direction!, vector_transport_to!]
-            @test ManifoldsBase.decorator_transparent_dispatch(f,TM) === Val{:transparent}()
+        for f in
+            [vector_transport_along!, vector_transport_direction!, vector_transport_to!]
+            @test ManifoldsBase.decorator_transparent_dispatch(f, TM) ===
+                  Val{:transparent}()
         end
         @test ManifoldsBase.decorator_transparent_dispatch(embed, TM) === Val{:parent}()
-        @test ManifoldsBase.decorator_transparent_dispatch(embed!, TM) === Val{:intransparent}()
+        @test ManifoldsBase.decorator_transparent_dispatch(embed!, TM) ===
+              Val{:intransparent}()
     end
 end
