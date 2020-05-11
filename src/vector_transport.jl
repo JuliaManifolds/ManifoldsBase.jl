@@ -151,7 +151,7 @@ end
         p,
         d,
         q,
-        c = shortest_geodesic(M, p, q, 0.5);
+        c = mid_point(M, p, q);
         retraction=ExponentialRetraction(),
         inverse_retraction=LogarithmicInverseRetraction()
     )
@@ -182,7 +182,7 @@ function pole_ladder(
     p,
     d,
     q,
-    c = shortest_geodesic(M, p, q, 0.5);
+    c = mid_point(M, p, q);
     retraction = ExponentialRetraction(),
     inverse_retraction = LogarithmicInverseRetraction(),
 )
@@ -195,7 +195,7 @@ end
         p,
         d,
         q,
-        c = shortest_geodesic(M, p, q, 0.5),
+        c = mid_point(M, p, q),
         X = allocate_result_type(M, log, d, c);
         retraction = ExponentialRetraction(),
         inverse_retraction = LogarithmicInverseRetraction()
@@ -210,7 +210,7 @@ function pole_ladder!(
     p,
     d,
     q,
-    c = shortest_geodesic(M, p, q, 0.5),
+    c = mid_point(M, p, q),
     X = allocate_result_type(M, log, d, c);
     retraction = ExponentialRetraction(),
     inverse_retraction = LogarithmicInverseRetraction(),
@@ -226,7 +226,7 @@ end
         p,
         d,
         q,
-        c = shortest_geodesic(M, q, d, 0.5);
+        c = mid_point(M, q, d);
         retraction = ExponentialRetraction(),
         inverse_retraction = LogarithmicInverseRetraction()
     )
@@ -260,7 +260,7 @@ function schilds_ladder(
     p,
     d,
     q,
-    c = shortest_geodesic(M, q, d, 0.5);
+    c = mid_point(M, q, d);
     retraction = ExponentialRetraction(),
     inverse_retraction = LogarithmicInverseRetraction(),
 )
@@ -273,7 +273,7 @@ end
         p,
         d,
         q,
-        c = shortest_geodesic(M, q, d, 0.5),
+        c = mid_point(M, q, d),
         X = allocate_result_type(M, log, d, c);
         retraction = ExponentialRetraction(),
         inverse_retraction = LogarithmicInverseRetraction()
@@ -290,7 +290,7 @@ function schilds_ladder!(
     p,
     d,
     q,
-    c = shortest_geodesic(M, q, d, 0.5),
+    c = mid_point(M, q, d),
     X = allocate_result_type(M, log, d, c);
     retraction = ExponentialRetraction(),
     inverse_retraction = LogarithmicInverseRetraction(),
