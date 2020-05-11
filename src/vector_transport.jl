@@ -413,7 +413,7 @@ function vector_transport_along!(
         # precompute mid point inplace
         ci = c[i]
         cip1 = c[i + 1]
-        mid_point!(M, m, Y, ci, cip1)
+        mid_point!(M, m, ci, cip1)
         # compute new ladder point
         pole_ladder!(
             M,
@@ -461,7 +461,7 @@ function vector_transport_along!(
         ci = c[i]
         cip1 = c[i + 1]
         # precompute mid point inplace
-        mid_point!(M, m, Y, cip1, d)
+        mid_point!(M, m, cip1, d)
         # compute new ladder point
         schilds_ladder!(
             M,
