@@ -20,11 +20,8 @@ function ManifoldsBase.vector_transport_to!(
 end
 
 @testset "vector_transport_along" begin
-    M = NonDefaultEuclidean();
-    types = [
-        Vector{Float64},
-        Vector{Float32},
-    ]
+    M = NonDefaultEuclidean()
+    types = [Vector{Float64}, Vector{Float32}]
     for T in types
         @testset "Type $T" begin
             pts = convert.(Ref(T), [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
