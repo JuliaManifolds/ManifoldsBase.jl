@@ -580,6 +580,9 @@ decorated_manifold(M::Manifold) = M.manifold
 
 @decorator_transparent_signature manifold_dimension(M::AbstractDecoratorManifold)
 
+@decorator_transparent_signature mid_point(M::AbstractDecoratorManifold, p1, p2)
+@decorator_transparent_signature mid_point!(M::AbstractDecoratorManifold, q, p1, p2)
+
 @decorator_transparent_signature number_system(M::AbstractDecoratorManifold)
 
 @decorator_transparent_signature project(M::AbstractDecoratorManifold, p)
@@ -711,4 +714,6 @@ decorated_manifold(M::Manifold) = M.manifold
     q,
     m::SchildsLadderTransport,
 )
+
+@decorator_transparent_signature zero_tangent_vector(M::AbstractDecoratorManifold, p)
 @decorator_transparent_signature zero_tangent_vector!(M::AbstractDecoratorManifold, X, p)

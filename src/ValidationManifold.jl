@@ -366,6 +366,22 @@ function log!(M::ValidationManifold, X, p, q; kwargs...)
     return X
 end
 
+function mid_point(M::ValidationManifold, p1, p2; kwargs...)
+    is_manifold_point(M, p1, true; kwargs...)
+    is_manifold_point(M, p2, true; kwargs...)
+    q = mid_point(M.manifold, array_value(p1), array_value(p2))
+    is_manifold_point(M, q, true; kwargs...)
+    return q
+end
+
+function mid_point!(M::ValidationManifold, q, p1, p2; kwargs...)
+    is_manifold_point(M, p1, true; kwargs...)
+    is_manifold_point(M, p2, true; kwargs...)
+    mid_point!(M.manifold, array_value(q), array_value(p1), array_value(p2))
+    is_manifold_point(M, q, true; kwargs...)
+    return q
+end
+
 number_eltype(::Type{ValidationMPoint{V}}) where {V} = number_eltype(V)
 number_eltype(p::ValidationMPoint) = number_eltype(p.value)
 number_eltype(::Type{ValidationCoTVector{V}}) where {V} = number_eltype(V)
