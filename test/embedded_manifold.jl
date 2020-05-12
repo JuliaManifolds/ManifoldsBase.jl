@@ -170,29 +170,24 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEm
         ) === Val(:parent)
 
         for f in [inner, norm]
-            @test ManifoldsBase.decorator_transparent_dispatch(f, IM) ===
-                  Val(:transparent)
+            @test ManifoldsBase.decorator_transparent_dispatch(f, IM) === Val(:transparent)
         end
         for f in [inverse_retract!, retract!, mid_point!]
             @test ManifoldsBase.decorator_transparent_dispatch(f, IM) === Val(:parent)
         end
 
         for f in [exp, inverse_retract, log, project, retract, mid_point]
-            @test ManifoldsBase.decorator_transparent_dispatch(f, TM) ===
-                  Val(:transparent)
+            @test ManifoldsBase.decorator_transparent_dispatch(f, TM) === Val(:transparent)
         end
         for f in [exp!, inverse_retract!, log!, project!, retract!, mid_point!]
-            @test ManifoldsBase.decorator_transparent_dispatch(f, TM) ===
-                  Val(:transparent)
+            @test ManifoldsBase.decorator_transparent_dispatch(f, TM) === Val(:transparent)
         end
         for f in [vector_transport_along, vector_transport_direction, vector_transport_to]
-            @test ManifoldsBase.decorator_transparent_dispatch(f, TM) ===
-                  Val(:transparent)
+            @test ManifoldsBase.decorator_transparent_dispatch(f, TM) === Val(:transparent)
         end
         for f in
             [vector_transport_along!, vector_transport_direction!, vector_transport_to!]
-            @test ManifoldsBase.decorator_transparent_dispatch(f, TM) ===
-                  Val(:transparent)
+            @test ManifoldsBase.decorator_transparent_dispatch(f, TM) === Val(:transparent)
         end
         @test ManifoldsBase.decorator_transparent_dispatch(embed, TM) === Val{:parent}()
         @test ManifoldsBase.decorator_transparent_dispatch(embed!, TM) ===
