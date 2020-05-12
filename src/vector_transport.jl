@@ -407,8 +407,7 @@ function vector_transport_along!(
     method::PoleLadderTransport,
 )
     d = retract(M, p, X, method.retraction)
-    m = p
-    mid_point!(M, m, p, c[1])
+    m = mid_point(M, p, c[1])
     pole_ladder!(
         M,
         d,
@@ -467,8 +466,7 @@ function vector_transport_along!(
     method::SchildsLadderTransport,
 )
     d = retract(M, p, X, method.retraction)
-    m = p
-    mid_point!(M, m, c[1], d)
+    m = mid_point(M, c[1], d)
     schilds_ladder!(
         M,
         d,
