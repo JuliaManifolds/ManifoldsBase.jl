@@ -406,40 +406,44 @@ function vector_transport_along!(
     c::AbstractVector,
     method::PoleLadderTransport,
 )
-    d = retract(M, p, X, method.retraction)
-    m = mid_point(M, p, c[1])
-    pole_ladder!(
-        M,
-        d,
-        p,
-        d,
-        c[1],
-        m,
-        Y;
-        retraction = method.retraction,
-        inverse_retraction = method.inverse_retraction,
-    )
     clen = length(c)
-    for i in 1:(clen - 1)
-        # precompute mid point inplace
-        ci = c[i]
-        cip1 = c[i + 1]
-        mid_point!(M, m, ci, cip1)
-        # compute new ladder point
+    if clen == 0
+        copyto!(Y, X)
+    else
+        d = retract(M, p, X, method.retraction)
+        m = mid_point(M, p, c[1])
         pole_ladder!(
             M,
             d,
-            ci,
+            p,
             d,
-            cip1,
+            c[1],
             m,
             Y;
             retraction = method.retraction,
             inverse_retraction = method.inverse_retraction,
         )
+        for i in 1:(clen - 1)
+            # precompute mid point inplace
+            ci = c[i]
+            cip1 = c[i + 1]
+            mid_point!(M, m, ci, cip1)
+            # compute new ladder point
+            pole_ladder!(
+                M,
+                d,
+                ci,
+                d,
+                cip1,
+                m,
+                Y;
+                retraction = method.retraction,
+                inverse_retraction = method.inverse_retraction,
+            )
+        end
+        inverse_retract!(M, Y, c[clen], d, method.inverse_retraction)
+        Y *= (-1)^clen
     end
-    inverse_retract!(M, Y, c[clen], d, method.inverse_retraction)
-    Y *= (-1)^clen
     return Y
 end
 @doc raw"""
@@ -465,39 +469,43 @@ function vector_transport_along!(
     c::AbstractVector,
     method::SchildsLadderTransport,
 )
-    d = retract(M, p, X, method.retraction)
-    m = mid_point(M, c[1], d)
-    schilds_ladder!(
-        M,
-        d,
-        p,
-        d,
-        c[1],
-        m,
-        Y;
-        retraction = method.retraction,
-        inverse_retraction = method.inverse_retraction,
-    )
     clen = length(c)
-    for i in 1:(clen - 1)
-        ci = c[i]
-        cip1 = c[i + 1]
-        # precompute mid point inplace
-        mid_point!(M, m, cip1, d)
-        # compute new ladder point
+    if clen == 0
+        copyto!(Y, X)
+    else
+        d = retract(M, p, X, method.retraction)
+        m = mid_point(M, c[1], d)
         schilds_ladder!(
             M,
             d,
-            ci,
+            p,
             d,
-            cip1,
+            c[1],
             m,
             Y;
             retraction = method.retraction,
             inverse_retraction = method.inverse_retraction,
         )
+        for i in 1:(clen - 1)
+            ci = c[i]
+            cip1 = c[i + 1]
+            # precompute mid point inplace
+            mid_point!(M, m, cip1, d)
+            # compute new ladder point
+            schilds_ladder!(
+                M,
+                d,
+                ci,
+                d,
+                cip1,
+                m,
+                Y;
+                retraction = method.retraction,
+                inverse_retraction = method.inverse_retraction,
+            )
+        end
+        inverse_retract!(M, Y, c[clen], d, method.inverse_retraction)
     end
-    inverse_retract!(M, Y, c[clen], d, method.inverse_retraction)
     return Y
 end
 
