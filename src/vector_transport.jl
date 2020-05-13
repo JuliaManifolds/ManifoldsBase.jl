@@ -598,17 +598,8 @@ projection [`project`](@ref project(M::Manifold, p, X)) may also change vector
 representation (if it's different than in the embedding) and it is assumed that the vector
 `X` already has the correct representation for `M`.
 """
-function vector_transport_to!(M::Manifold, Y, p, X, q, m::ProjectionTransport)
-    return error(manifold_function_not_implemented_message(
-        M,
-        vector_transport_to!,
-        Y,
-        p,
-        X,
-        q,
-        m,
-    ))
-end
+vector_transport_to!(M::Manifold, Y, p, X, q, m::ProjectionTransport)
+
 @doc raw"""
     vector_transport_to!(M::Manifold, Y, p, X, q, method::PoleLadderTransport)
 
