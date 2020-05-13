@@ -38,14 +38,13 @@ function check_tangent_vector(M::DefaultManifold, p, X; check_base_point = true,
     return nothing
 end
 
-distance(::DefaultManifold, x, y) = norm(x - y)
+distance(::DefaultManifold, p, q) = norm(p - q)
 
-embed!(::DefaultManifold, y, x) = copyto!(y, x)
+embed!(::DefaultManifold, q, p) = copyto!(q, p)
 
-embed!(::DefaultManifold, w, x, v) = copyto!(w, v)
+embed!(::DefaultManifold, Y, p, X) = copyto!(Y, X)
 
-
-exp!(::DefaultManifold, y, x, v) = (y .= x .+ v)
+exp!(::DefaultManifold, q, p, X) = (q .= p .+ X)
 
 function get_basis(M::DefaultManifold, p, B::DefaultOrthonormalBasis)
     return CachedBasis(B, [_euclidean_basis_vector(p, i) for i in eachindex(p)])
@@ -74,9 +73,9 @@ end
 
 injectivity_radius(::DefaultManifold) = Inf
 
-@inline inner(::DefaultManifold, x, v, w) = dot(v, w)
+@inline inner(::DefaultManifold, p, X, Y) = dot(X, Y)
 
-log!(::DefaultManifold, v, x, y) = (v .= y .- x)
+log!(::DefaultManifold, Y, p, q) = (Y .= q .- p)
 
 @generated function manifold_dimension(::DefaultManifold{T,𝔽}) where {T,𝔽}
     return *(T.parameters...) * real_dimension(𝔽)
@@ -84,31 +83,31 @@ end
 
 number_system(::DefaultManifold{T,𝔽}) where {T,𝔽} = 𝔽
 
-norm(::DefaultManifold, x, v) = norm(v)
+norm(::DefaultManifold, p, X) = norm(X)
 
-project!(::DefaultManifold, y, x) = copyto!(y, x)
-project!(::DefaultManifold, w, x, v) = copyto!(w, v)
+project!(::DefaultManifold, q, p) = copyto!(q, p)
+project!(::DefaultManifold, Y, p, X) = copyto!(Y, X)
 
 @generated representation_size(::DefaultManifold{T}) where {T} = Tuple(T.parameters...)
 
 function vector_transport_along!(
     ::DefaultManifold,
-    vto,
-    x,
-    v,
+    Y,
+    p,
+    X,
     c::AbstractVector,
     ::AbstractVectorTransportMethod,
 )
-    return copyto!(vto, v)
+    return copyto!(Y, X)
 end
 for VT in VECTOR_TRANSPORT_DISAMBIGUATION
     eval(
         quote
             @invoke_maker 6 AbstractVectorTransportMethod vector_transport_along!(
                 M::DefaultManifold,
-                vto,
-                x,
-                v,
+                Y,
+                p,
+                X,
                 c::AbstractVector,
                 B::$VT,
             )
@@ -116,8 +115,11 @@ for VT in VECTOR_TRANSPORT_DISAMBIGUATION
     )
 end
 
-function vector_transport_to!(::DefaultManifold, vto, x, v, y, ::ParallelTransport)
-    return copyto!(vto, v)
+function vector_transport_to!(::DefaultManifold, Y, p, X, q, ::ParallelTransport)
+    return copyto!(Y, X)
+end
+function vector_transport_to!(M::DefaultManifold, Y, p, X, q, ::ProjectionTransport)
+    return project!(M, Y, q, X)
 end
 
-zero_tangent_vector!(::DefaultManifold, v, x) = fill!(v, 0)
+zero_tangent_vector!(::DefaultManifold, Y, p) = fill!(Y, 0)

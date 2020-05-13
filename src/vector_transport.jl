@@ -593,10 +593,21 @@ end
 
 Transport a vector `X` from the tangent space at `p` on the [`Manifold`](@ref) `M` by
 interpreting it as an element of the embedding and then projecting it onto the tangent space
-at `q`. This method requires  [`project`](@ref project(M::Manifold, p, X)).
+at `q`. This function needs to be separately implemented for each manifold because
+projection [`project`](@ref project(M::Manifold, p, X)) may also change vector
+representation (if it's different than in the embedding) and it is assumed that the vector
+`X` already has the correct representation for `M`.
 """
-function vector_transport_to!(M::Manifold, Y, p, X, q, ::ProjectionTransport)
-    return project!(M, Y, q, X)
+function vector_transport_to!(M::Manifold, Y, p, X, q, m::ProjectionTransport)
+    return error(manifold_function_not_implemented_message(
+        M,
+        vector_transport_to!,
+        Y,
+        p,
+        X,
+        q,
+        m,
+    ))
 end
 @doc raw"""
     vector_transport_to!(M::Manifold, Y, p, X, q, method::PoleLadderTransport)
