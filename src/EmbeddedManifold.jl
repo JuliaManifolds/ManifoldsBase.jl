@@ -362,13 +362,6 @@ function decorator_transparent_dispatch(
     ::AbstractEmbeddedManifold,
     args...,
 )
-    return Val(:intransparent)
-end
-function decorator_transparent_dispatch(
-    ::typeof(mid_point!),
-    ::AbstractEmbeddedManifold{𝔽,<:AbstractIsometricEmbeddingType},
-    args...,
-) where {𝔽}
     return Val(:parent)
 end
 function decorator_transparent_dispatch(
