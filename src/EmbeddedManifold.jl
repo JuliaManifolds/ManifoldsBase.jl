@@ -530,6 +530,28 @@ function decorator_transparent_dispatch(
 end
 function decorator_transparent_dispatch(
     ::typeof(vector_transport_to!),
+    ::AbstractEmbeddedManifold,
+    Y,
+    p,
+    X,
+    q,
+    ::PoleLadderTransport,
+)
+    return Val(:parent)
+end
+function decorator_transparent_dispatch(
+    ::typeof(vector_transport_to!),
+    ::AbstractEmbeddedManifold,
+    Y,
+    p,
+    X,
+    q,
+    ::SchildsLadderTransport,
+)
+    return Val(:parent)
+end
+function decorator_transparent_dispatch(
+    ::typeof(vector_transport_to!),
     ::AbstractEmbeddedManifold{𝔽,<:TransparentIsometricEmbedding},
     args...,
 ) where {𝔽}
