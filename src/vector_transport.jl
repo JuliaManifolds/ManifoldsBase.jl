@@ -34,7 +34,7 @@ Specify to use [`pole_ladder`](@ref) as vector transport method within
 
 Let $X\in T_p\mathcal M$ be a tangent vector at $p\in\mathcal M$ and $q\in\mathcal M$ the
 point to transport to. Then $x = \exp_pX$ is used to call
-`y = [`pole_ladder`](@ref)`(M,p,x,q)` and the resulting vector is obtained by computing
+`y = `[`pole_ladder`](@ref)`(M, p, x, q)` and the resulting vector is obtained by computing
 $Y = -\log_qy$.
 
 The [`PoleLadderTransport`](@ref) posesses two advantages compared to
@@ -99,11 +99,11 @@ Let $X\in T_p\mathcal M$ be a tangent vector at $p\in\mathcal M$ and $q\in\mathc
 point to transport to. Then
 
 ````math
-P^{\mathrm{S}}_{q\gets p}(X) = \log_q\bigl( \retr_p( 2\retr_p^{-1}c)\bigr),
+    P^{\mathrm{S}}_{q\gets p}(X) = \log_q\bigl( \retr_p( 2\retr_p^{-1}c)\bigr),
 ````
 where $c$ is the mid point between $q$ and $d=\exp_pX$.
 
-This method employs the internal function [`schilds_ladder`](@ref)`(M,p,d,q)` that avoids
+This method employs the internal function [`schilds_ladder`](@ref)`(M, p, d, q)` that avoids
 leaving the manifold.
 
 The name stems from the image of this paralleltogram in a repeated application yielding the
@@ -228,7 +228,7 @@ end
         q,
         c = mid_point(M, q, d);
         retraction = ExponentialRetraction(),
-        inverse_retraction = LogarithmicInverseRetraction()
+        inverse_retraction = LogarithmicInverseRetraction(),
     )
 
 Perform an inner step of schilds ladder, which can be used as a
@@ -237,7 +237,7 @@ Let $c = \gamma_{q,d}(\frac{1}{2})$ denote the mid point
 on the shortest geodesic connecting $q$ and the point $d$. Then Schild's ladder reads as
 
 ````math
-\operatorname{Sl}(p,d,q) = \operatorname{retr}_x( 2\operatorname{retr}_x^{-1} c
+\operatorname{Sl}(p,d,q) = \operatorname{retr}_x( 2\operatorname{retr}_p^{-1} c)
 ````
 
 Where the classical Schilds ladder employs $\operatorname{retr}_d=\exp_d$
@@ -245,7 +245,7 @@ and $\operatorname{retr}_d^{-1}=\log_d$ but for an even cheaper transport these 
 to different [`AbstractRetractionMethod`](@ref) and [`AbstractInverseRetractionMethod`](@ref).
 
 In consistency with [`pole_ladder`](@ref) you can change the way the mid point is computed
-using the optional parameter `c`, but note that here it's the mid point between `q` and d`.
+using the optional parameter `c`, but note that here it's the mid point between `q` and `d`.
 
 When you have $X=log_pd$ and $Y = \log_q \operatorname{Sl}(p,d,q)$,
 you will obtain the [`PoleLadderTransport`](@ref).
@@ -305,8 +305,8 @@ end
     vector_transport_along(M::Manifold, p, X, c, method::AbstractVectorTransportMethod)
 
 Transport a vector `X` from the tangent space at a point `p` on the [`Manifold`](@ref) `M`
-along the curve `c` such that `c(0)` is equal to `p` to the point `c(1)` using the `method`,
-which defaults to [`ParallelTransport`](@ref).
+along the curve represented by `c` using the `method`, which defaults to
+[`ParallelTransport`](@ref).
 """
 function vector_transport_along(M::Manifold, p, X, c)
     return vector_transport_along(M, p, X, c, ParallelTransport())
@@ -322,8 +322,8 @@ end
     vector_transport_along!(M::Manifold, Y, p, X, c, method::AbstractVectorTransportMethod)
 
 Transport a vector `X` from the tangent space at a point `p` on the [`Manifold`](@ref) `M`
-along the curve `c` such that `c(0)` is equal to `p` to the point `c(1)` using the `method`,
-which defaults to [`ParallelTransport`](@ref). The result is saved to `Y`.
+along the curve represented by `c` using the `method`, which defaults to
+[`ParallelTransport`](@ref). The result is saved to `Y`.
 """
 function vector_transport_along!(M::Manifold, Y, p, X, c)
     return vector_transport_along!(M, Y, p, X, c, ParallelTransport())
