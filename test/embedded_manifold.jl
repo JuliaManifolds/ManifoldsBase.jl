@@ -160,10 +160,10 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEm
             @test ManifoldsBase.decorator_transparent_dispatch(f, AM) ===
                   Val(:intransparent)
         end
-        for f in [vector_transport_along!, vector_transport_to!]
-            @test ManifoldsBase.decorator_transparent_dispatch(f, AM) ===
+            @test ManifoldsBase.decorator_transparent_dispatch(vector_transport_along!, AM) ===
                   Val(:intransparent)
-        end
+            @test ManifoldsBase.decorator_transparent_dispatch(vector_transport_to!, AM, 1, 1, 1, 1, 1) ===
+                  Val(:intransparent)
         @test ManifoldsBase.decorator_transparent_dispatch(
             vector_transport_direction!,
             AM,
@@ -188,6 +188,17 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEm
         for f in
             [vector_transport_along!, vector_transport_direction!, vector_transport_to!]
             @test ManifoldsBase.decorator_transparent_dispatch(f, TM) === Val(:transparent)
+        end
+        for t in [PoleLadderTransport(), SchildsLadderTransport()], M in [AM, TM, IM]
+           @test ManifoldsBase.decorator_transparent_dispatch(
+                vector_transport_to!,
+                M,
+                1,
+                1,
+                1,
+                1,
+                PoleLadderTransport(),
+            ) === Val(:parent)
         end
         @test ManifoldsBase.decorator_transparent_dispatch(embed, TM) === Val{:parent}()
         @test ManifoldsBase.decorator_transparent_dispatch(embed!, TM) ===
