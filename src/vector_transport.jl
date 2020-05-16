@@ -99,8 +99,10 @@ Let $X\in T_p\mathcal M$ be a tangent vector at $p\in\mathcal M$ and $q\in\mathc
 point to transport to. Then
 
 ````math
-    P^{\mathrm{S}}_{q\gets p}(X) = \log_q\bigl( \retr_p( 2\retr_p^{-1}c)\bigr),
+P^{\mathrm{S}}_{q\gets p}(X) =
+    \log_q\bigl( \operatorname{retr}_p ( 2\operatorname{retr}_p^{-1}c ) \bigr),
 ````
+
 where $c$ is the mid point between $q$ and $d=\exp_pX$.
 
 This method employs the internal function [`schilds_ladder`](@ref)`(M, p, d, q)` that avoids
