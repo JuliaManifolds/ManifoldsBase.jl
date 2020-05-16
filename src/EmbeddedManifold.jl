@@ -343,6 +343,34 @@ function decorator_transparent_dispatch(
 ) where {𝔽}
     return Val(:transparent)
 end
+function decorator_transparent_dispatch(
+    ::typeof(mid_point),
+    ::AbstractEmbeddedManifold,
+    args...,
+)
+    return Val(:parent)
+end
+function decorator_transparent_dispatch(
+    ::typeof(mid_point),
+    ::AbstractEmbeddedManifold{𝔽,<:TransparentIsometricEmbedding},
+    args...,
+) where {𝔽}
+    return Val(:transparent)
+end
+function decorator_transparent_dispatch(
+    ::typeof(mid_point!),
+    ::AbstractEmbeddedManifold,
+    args...,
+)
+    return Val(:parent)
+end
+function decorator_transparent_dispatch(
+    ::typeof(mid_point!),
+    ::AbstractEmbeddedManifold{𝔽,<:TransparentIsometricEmbedding},
+    args...,
+) where {𝔽}
+    return Val(:transparent)
+end
 function decorator_transparent_dispatch(::typeof(norm), ::AbstractEmbeddedManifold, args...)
     return Val(:intransparent)
 end
@@ -495,15 +523,45 @@ function decorator_transparent_dispatch(
 end
 function decorator_transparent_dispatch(
     ::typeof(vector_transport_to!),
-    ::AbstractEmbeddedManifold,
-    args...,
-)
+    ::AbstractEmbeddedManifold{𝔽,<:E},
+    Y,
+    p,
+    X,
+    q,
+    ::T,
+) where {𝔽,T,E}
     return Val(:intransparent)
 end
 function decorator_transparent_dispatch(
     ::typeof(vector_transport_to!),
+    ::AbstractEmbeddedManifold{𝔽,<:E},
+    Y,
+    p,
+    X,
+    q,
+    ::Union{PoleLadderTransport,SchildsLadderTransport},
+) where {𝔽,E}
+    return Val(:parent)
+end
+function decorator_transparent_dispatch(
+    ::typeof(vector_transport_to!),
     ::AbstractEmbeddedManifold{𝔽,<:TransparentIsometricEmbedding},
-    args...,
+    Y,
+    p,
+    X,
+    q,
+    ::Union{PoleLadderTransport,SchildsLadderTransport},
 ) where {𝔽}
+    return Val(:parent)
+end
+function decorator_transparent_dispatch(
+    ::typeof(vector_transport_to!),
+    ::AbstractEmbeddedManifold{𝔽,<:TransparentIsometricEmbedding},
+    Y,
+    p,
+    X,
+    q,
+    ::T,
+) where {𝔽,T}
     return Val(:transparent)
 end

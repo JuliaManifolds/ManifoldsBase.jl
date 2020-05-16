@@ -87,16 +87,24 @@ end
         exp!(A, y2s, x2, v2)
         @test isapprox(A, y2s, y2)
         log!(A, v2s, x, y)
+        @test mid_point(A, x, y) == 0.5 * (x .+ y)
+        mp = similar(x)
+        mid_point!(A, mp, x, y)
+        @test mp == 0.5 * (x .+ y)
         @test isapprox(A, x, v2s, v2)
         @test isapprox(A, exp(A, x, v), y2)
         @test isapprox(A, zero_tangent_vector(A, x), zero_tangent_vector(M, x))
         vector_transport_to!(A, v2s, x2, v2, y2)
         @test isapprox(A, x2, v2, v2s)
+        vector_transport_to!(A, v2s, x2, v2, y2, ManifoldsBase.SchildsLadderTransport())
+        @test isapprox(A, x2, v2, v2s)
+        vector_transport_to!(A, v2s, x2, v2, y, ManifoldsBase.PoleLadderTransport())
+        @test isapprox(A, x2, v2, v2s)
         vector_transport_to!(A, v2s, x2, v2, y2, ManifoldsBase.ProjectionTransport())
         @test isapprox(A, x2, v2, v2s)
         zero_tangent_vector!(A, v2s, x)
         @test isapprox(A, x, v2s, zero_tangent_vector(M, x))
-        c = t -> x2
+        c = [x2]
         v3 = similar(v2)
         @test isapprox(
             A,

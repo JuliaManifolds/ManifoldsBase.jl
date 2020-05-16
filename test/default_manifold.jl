@@ -17,6 +17,14 @@ function ManifoldsBase.injectivity_radius(
     return 10.0
 end
 
+struct MatrixVectorTransport{T} <: AbstractVector{T}
+    m::Matrix{T}
+end
+
+Base.getindex(x::MatrixVectorTransport, i) = x.m[:, i]
+
+Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
+
 @testset "Testing Default (Euclidean)" begin
     M = ManifoldsBase.DefaultManifold(3)
     types = [
@@ -107,6 +115,11 @@ end
             @test isapprox(M, exp(M, pts[1], tv1, 0), pts[1])
 
             @test distance(M, pts[1], pts[2]) ≈ norm(M, pts[1], tv1)
+
+            @test mid_point(M, pts[1], pts[2]) == [0.5, 0.5, 0.0]
+            midp = allocate(pts[1])
+            @test mid_point!(M, midp, pts[1], pts[2]) === midp
+            @test midp == [0.5, 0.5, 0.0]
 
             @testset "Geodesic interface test" begin
                 @test isapprox(M, geodesic(M, pts[1], tv1)(0.0), pts[1])
@@ -199,12 +212,44 @@ end
                 @test is_tangent_vector(M, pts[3], v1t1)
                 @test is_tangent_vector(M, pts[3], v1t3)
                 @test isapprox(M, pts[3], v1t1, v1t3)
-                c = t -> pts[1]
+                # along a `Vector` of points
+                c = [pts[1]]
                 v1t4 = vector_transport_along(M, pts[1], v1, c)
                 @test isapprox(M, pts[1], v1, v1t4)
                 v1t5 = allocate(v1)
                 vector_transport_along!(M, v1t5, pts[1], v1, c)
                 @test isapprox(M, pts[1], v1, v1t5)
+                # along a custom type of points
+                T = eltype(pts[1])
+                c2 = MatrixVectorTransport{T}(reshape(pts[1], length(pts[1]), 1))
+                v1t4c2 = vector_transport_along(M, pts[1], v1, c2)
+                @test isapprox(M, pts[1], v1, v1t4c2)
+                v1t5c2 = allocate(v1)
+                vector_transport_along!(M, v1t5c2, pts[1], v1, c2)
+                @test isapprox(M, pts[1], v1, v1t5c2)
+                # On Euclidean Space Schild & Pole are identity
+                @test vector_transport_to(
+                    M,
+                    pts[1],
+                    v2,
+                    pts[2],
+                    SchildsLadderTransport(),
+                ) == v2
+                @test vector_transport_to(M, pts[1], v2, pts[2], PoleLadderTransport()) ==
+                      v2
+                # along is also the identity
+                c = [0.5 * (pts[1] + pts[2]), pts[2], 0.5 * (pts[2] + pts[3]), pts[3]]
+                @test vector_transport_along(M, pts[1], v2, c, SchildsLadderTransport()) ==
+                      v2
+                @test vector_transport_along(M, pts[1], v2, c, PoleLadderTransport()) == v2
+                @test vector_transport_along(M, pts[1], v2, c, ParallelTransport()) == v2
+                # check mutating ones with defaults
+                p = allocate(pts[1])
+                ManifoldsBase.pole_ladder!(M, p, pts[1], pts[2], pts[3])
+                # -log_p3 p == log_p1 p2
+                @test isapprox(M, -log(M, pts[3], p), log(M, pts[1], pts[2]))
+                ManifoldsBase.schilds_ladder!(M, p, pts[1], pts[2], pts[3])
+                @test isapprox(M, log(M, pts[3], p), log(M, pts[1], pts[2]))
             end
 
             @testset "ForwardDiff support" begin

@@ -580,6 +580,9 @@ decorated_manifold(M::Manifold) = M.manifold
 
 @decorator_transparent_signature manifold_dimension(M::AbstractDecoratorManifold)
 
+@decorator_transparent_signature mid_point(M::AbstractDecoratorManifold, p1, p2)
+@decorator_transparent_signature mid_point!(M::AbstractDecoratorManifold, q, p1, p2)
+
 @decorator_transparent_signature number_system(M::AbstractDecoratorManifold)
 
 @decorator_transparent_signature project(M::AbstractDecoratorManifold, p)
@@ -633,6 +636,30 @@ decorated_manifold(M::Manifold) = M.manifold
     X,
     c,
 )
+@decorator_transparent_signature vector_transport_along!(
+    M::AbstractDecoratorManifold,
+    Y,
+    p,
+    X,
+    c::AbstractVector,
+    m::AbstractVectorTransportMethod,
+)
+@decorator_transparent_signature vector_transport_along!(
+    M::AbstractDecoratorManifold,
+    Y,
+    p,
+    X,
+    c::AbstractVector,
+    m::PoleLadderTransport,
+)
+@decorator_transparent_signature vector_transport_along!(
+    M::AbstractDecoratorManifold,
+    Y,
+    p,
+    X,
+    c::AbstractVector,
+    m::SchildsLadderTransport,
+)
 
 @decorator_transparent_signature vector_transport_direction(
     M::AbstractDecoratorManifold,
@@ -671,5 +698,22 @@ decorated_manifold(M::Manifold) = M.manifold
     q,
     m::ProjectionTransport,
 )
+@decorator_transparent_signature vector_transport_to!(
+    M::AbstractDecoratorManifold,
+    Y,
+    p,
+    X,
+    q,
+    m::PoleLadderTransport,
+)
+@decorator_transparent_signature vector_transport_to!(
+    M::AbstractDecoratorManifold,
+    Y,
+    p,
+    X,
+    q,
+    m::SchildsLadderTransport,
+)
 
+@decorator_transparent_signature zero_tangent_vector(M::AbstractDecoratorManifold, p)
 @decorator_transparent_signature zero_tangent_vector!(M::AbstractDecoratorManifold, X, p)

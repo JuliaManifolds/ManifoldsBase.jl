@@ -101,7 +101,14 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEm
             @test_throws ErrorException project!(M2, A, [1, 2])
             @test_throws ErrorException project(M2, [1, 2], [2, 3])
             @test_throws ErrorException project!(M2, A, [1, 2], [2, 3])
-            @test_throws ErrorException vector_transport_along(M2, [1, 2], [2, 3], [])
+            @test_throws ErrorException vector_transport_along(M2, [1, 2], [2, 3], [[1, 2]])
+            @test_throws ErrorException vector_transport_along(
+                M2,
+                [1, 2],
+                [2, 3],
+                [[1, 2]],
+                ParallelTransport(),
+            )
             @test_throws ErrorException vector_transport_along!(M2, A, [1, 2], [2, 3], [])
             @test_throws ErrorException vector_transport_direction(
                 M2,
@@ -133,59 +140,75 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEm
         IM = NotImplementedEmbeddedManifold2() # iso
         AM = NotImplementedEmbeddedManifold3() # general
         for f in [embed, exp, get_basis, get_coordinates, get_vector, inverse_retract, log]
-            @test ManifoldsBase.decorator_transparent_dispatch(f, AM) === Val{:parent}()
+            @test ManifoldsBase.decorator_transparent_dispatch(f, AM) === Val(:parent)
         end
         for f in
             [project, retract, inverse_retract!, retract!, get_coordinates!, get_vector!]
-            @test ManifoldsBase.decorator_transparent_dispatch(f, AM) === Val{:parent}()
+            @test ManifoldsBase.decorator_transparent_dispatch(f, AM) === Val(:parent)
         end
         for f in [vector_transport_along, vector_transport_direction, vector_transport_to]
-            @test ManifoldsBase.decorator_transparent_dispatch(f, AM) === Val{:parent}()
+            @test ManifoldsBase.decorator_transparent_dispatch(f, AM) === Val(:parent)
+        end
+        for f in [mid_point, mid_point!]
+            @test ManifoldsBase.decorator_transparent_dispatch(f, AM) === Val(:parent)
         end
         for f in [check_manifold_point, check_tangent_vector, exp!, inner, embed!]
             @test ManifoldsBase.decorator_transparent_dispatch(f, AM) ===
-                  Val{:intransparent}()
+                  Val(:intransparent)
         end
         for f in [log!, norm, manifold_dimension, project!]
             @test ManifoldsBase.decorator_transparent_dispatch(f, AM) ===
-                  Val{:intransparent}()
+                  Val(:intransparent)
         end
-        for f in [vector_transport_along!, vector_transport_to!]
-            @test ManifoldsBase.decorator_transparent_dispatch(f, AM) ===
-                  Val{:intransparent}()
-        end
+        @test ManifoldsBase.decorator_transparent_dispatch(vector_transport_along!, AM) ===
+              Val(:intransparent)
+        @test ManifoldsBase.decorator_transparent_dispatch(
+            vector_transport_to!,
+            AM,
+            1,
+            1,
+            1,
+            1,
+            1,
+        ) === Val(:intransparent)
         @test ManifoldsBase.decorator_transparent_dispatch(
             vector_transport_direction!,
             AM,
-        ) === Val{:parent}()
+        ) === Val(:parent)
 
         for f in [inner, norm]
-            @test ManifoldsBase.decorator_transparent_dispatch(f, IM) ===
-                  Val{:transparent}()
+            @test ManifoldsBase.decorator_transparent_dispatch(f, IM) === Val(:transparent)
         end
-        for f in [inverse_retract!, retract!]
-            @test ManifoldsBase.decorator_transparent_dispatch(f, IM) === Val{:parent}()
+        for f in [inverse_retract!, retract!, mid_point!]
+            @test ManifoldsBase.decorator_transparent_dispatch(f, IM) === Val(:parent)
         end
 
-        for f in [exp, inverse_retract, log, project, retract]
-            @test ManifoldsBase.decorator_transparent_dispatch(f, TM) ===
-                  Val{:transparent}()
+        for f in [exp, inverse_retract, log, project, retract, mid_point]
+            @test ManifoldsBase.decorator_transparent_dispatch(f, TM) === Val(:transparent)
         end
-        for f in [exp!, inverse_retract!, log!, project!, retract!]
-            @test ManifoldsBase.decorator_transparent_dispatch(f, TM) ===
-                  Val{:transparent}()
+        for f in [exp!, inverse_retract!, log!, project!, retract!, mid_point!]
+            @test ManifoldsBase.decorator_transparent_dispatch(f, TM) === Val(:transparent)
         end
         for f in [vector_transport_along, vector_transport_direction, vector_transport_to]
-            @test ManifoldsBase.decorator_transparent_dispatch(f, TM) ===
-                  Val{:transparent}()
+            @test ManifoldsBase.decorator_transparent_dispatch(f, TM) === Val(:transparent)
         end
         for f in
             [vector_transport_along!, vector_transport_direction!, vector_transport_to!]
-            @test ManifoldsBase.decorator_transparent_dispatch(f, TM) ===
-                  Val{:transparent}()
+            @test ManifoldsBase.decorator_transparent_dispatch(f, TM) === Val(:transparent)
+        end
+        for t in [PoleLadderTransport(), SchildsLadderTransport()], M in [AM, TM, IM]
+            @test ManifoldsBase.decorator_transparent_dispatch(
+                vector_transport_to!,
+                M,
+                1,
+                1,
+                1,
+                1,
+                PoleLadderTransport(),
+            ) === Val(:parent)
         end
         @test ManifoldsBase.decorator_transparent_dispatch(embed, TM) === Val{:parent}()
         @test ManifoldsBase.decorator_transparent_dispatch(embed!, TM) ===
-              Val{:intransparent}()
+              Val(:intransparent)
     end
 end

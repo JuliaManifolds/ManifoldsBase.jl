@@ -366,6 +366,22 @@ function log!(M::ValidationManifold, X, p, q; kwargs...)
     return X
 end
 
+function mid_point(M::ValidationManifold, p1, p2; kwargs...)
+    is_manifold_point(M, p1, true; kwargs...)
+    is_manifold_point(M, p2, true; kwargs...)
+    q = mid_point(M.manifold, array_value(p1), array_value(p2))
+    is_manifold_point(M, q, true; kwargs...)
+    return q
+end
+
+function mid_point!(M::ValidationManifold, q, p1, p2; kwargs...)
+    is_manifold_point(M, p1, true; kwargs...)
+    is_manifold_point(M, p2, true; kwargs...)
+    mid_point!(M.manifold, array_value(q), array_value(p1), array_value(p2))
+    is_manifold_point(M, q, true; kwargs...)
+    return q
+end
+
 number_eltype(::Type{ValidationMPoint{V}}) where {V} = number_eltype(V)
 number_eltype(p::ValidationMPoint) = number_eltype(p.value)
 number_eltype(::Type{ValidationCoTVector{V}}) where {V} = number_eltype(V)
@@ -394,7 +410,7 @@ function vector_transport_along!(
     Y,
     p,
     X,
-    c,
+    c::AbstractVector,
     m::AbstractVectorTransportMethod;
     kwargs...,
 )
@@ -407,8 +423,22 @@ function vector_transport_along!(
         c,
         m,
     )
-    is_tangent_vector(M, c(1), Y, true; kwargs...)
+    is_tangent_vector(M, c[end], Y, true; kwargs...)
     return Y
+end
+for VT in VECTOR_TRANSPORT_DISAMBIGUATION
+    eval(
+        quote
+            @invoke_maker 6 AbstractVectorTransportMethod vector_transport_along!(
+                M::ValidationManifold,
+                vto,
+                x,
+                v,
+                c::AbstractVector,
+                B::$VT,
+            )
+        end,
+    )
 end
 
 function vector_transport_to!(
@@ -441,6 +471,52 @@ function vector_transport_to!(
     X,
     q,
     m::ProjectionTransport;
+    kwargs...,
+)
+    is_manifold_point(M, q, true; kwargs...)
+    is_tangent_vector(M, p, X, true; kwargs...)
+    vector_transport_to!(
+        M.manifold,
+        array_value(Y),
+        array_value(p),
+        array_value(X),
+        array_value(q),
+        m,
+    )
+    is_tangent_vector(M, q, Y, true; kwargs...)
+    return Y
+end
+
+function vector_transport_to!(
+    M::ValidationManifold,
+    Y,
+    p,
+    X,
+    q,
+    m::PoleLadderTransport;
+    kwargs...,
+)
+    is_manifold_point(M, q, true; kwargs...)
+    is_tangent_vector(M, p, X, true; kwargs...)
+    vector_transport_to!(
+        M.manifold,
+        array_value(Y),
+        array_value(p),
+        array_value(X),
+        array_value(q),
+        m,
+    )
+    is_tangent_vector(M, q, Y, true; kwargs...)
+    return Y
+end
+
+function vector_transport_to!(
+    M::ValidationManifold,
+    Y,
+    p,
+    X,
+    q,
+    m::SchildsLadderTransport;
     kwargs...,
 )
     is_manifold_point(M, q, true; kwargs...)

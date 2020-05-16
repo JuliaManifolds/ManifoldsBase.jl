@@ -45,13 +45,6 @@ Abstract type for methods for [`retract`](@ref)ing a tangent vector to a manifol
 abstract type AbstractRetractionMethod end
 
 """
-    AbstractVectorTransportMethod
-
-Abstract type for methods for transporting vectors.
-"""
-abstract type AbstractVectorTransportMethod end
-
-"""
     ExponentialRetraction
 
 Retraction using the exponential map.
@@ -128,24 +121,6 @@ An error thrown when a function (for example [`log`](@ref)arithmic map or
 [`inverse_retract`](@ref)) is given arguments outside of its [`injectivity_radius`](@ref).
 """
 struct OutOfInjectivityRadiusError <: Exception end
-
-"""
-    ParallelTransport <: AbstractVectorTransportMethod
-
-Specify to use parallel transport as vector transport method within
-[`vector_transport_to`](@ref), [`vector_transport_direction`](@ref), or
-[`vector_transport_along`](@ref).
-"""
-struct ParallelTransport <: AbstractVectorTransportMethod end
-
-"""
-    ProjectionTransport <: AbstractVectorTransportMethod
-
-Specify to use projection onto tangent space as vector transport method within
-[`vector_transport_to`](@ref), [`vector_transport_direction`](@ref), or
-[`vector_transport_along`](@ref). See [`project`](@ref) for details.
-"""
-struct ProjectionTransport <: AbstractVectorTransportMethod end
 
 """
     TVector
@@ -571,6 +546,30 @@ function manifold_function_not_implemented_message(M::Manifold, f, x...)
 end
 
 """
+    mid_point(M::Manifold, p1, p2)
+
+Calculate the middle between the two point `p1` and `p2` from manifold `M`.
+By default uses [`log`](@ref), divides the vector by 2 and uses [`exp`](@ref).
+"""
+function mid_point(M::Manifold, p1, p2)
+    q = allocate(p1)
+    return mid_point!(M, q, p1, p2)
+end
+
+"""
+    mid_point!(M::Manifold, q, p1, p2)
+
+Calculate the middle between the two point `p1` and `p2` from manifold `M`.
+By default uses [`log`](@ref), divides the vector by 2 and uses [`exp!`](@ref).
+Saves the result in `q`.
+"""
+function mid_point!(M::Manifold, q, p1, p2)
+    X = log(M, p1, p2)
+    X /= 2
+    return exp!(M, q, p1, X)
+end
+
+"""
     norm(M::Manifold, p, X)
 
 Compute the norm of tangent vector `X` at point `p` from a [`Manifold`](@ref) `M`.
@@ -727,6 +726,7 @@ end
 function retract!(M::Manifold, q, p, X, method::AbstractRetractionMethod)
     return error(manifold_function_not_implemented_message(M, retract!, q, p, method))
 end
+
 @doc doc"""
     shortest_geodesic(M::Manifold, p, q) -> Function
 
@@ -744,162 +744,6 @@ Return the point at time `t` or points at times `t` in `T` along the shortest ge
 shortest_geodesic(M::Manifold, p, q) = geodesic(M, p, log(M, p, q))
 shortest_geodesic(M::Manifold, p, q, t::Real) = geodesic(M, p, log(M, p, q), t)
 shortest_geodesic(M::Manifold, p, q, T::AbstractVector) = geodesic(M, p, log(M, p, q), T)
-
-"""
-    vector_transport_along(M::Manifold, p, X, c)
-    vector_transport_along(M::Manifold, p, X, c, method::AbstractVectorTransportMethod)
-
-Transport a vector `X` from the tangent space at a point `p` on the [`Manifold`](@ref) `M`
-along the curve `c` such that `c(0)` is equal to `p` to the point `c(1)` using the `method`,
-which defaults to [`ParallelTransport`](@ref).
-"""
-function vector_transport_along(M::Manifold, p, X, c)
-    return vector_transport_along(M, p, X, c, ParallelTransport())
-end
-function vector_transport_along(M::Manifold, p, X, c, m::AbstractVectorTransportMethod)
-    Y = allocate_result(M, vector_transport_along, X, p)
-    vector_transport_along!(M, Y, p, X, c, m)
-    return Y
-end
-
-"""
-    vector_transport_along!(M::Manifold, Y, p, X, c)
-    vector_transport_along!(M::Manifold, Y, p, X, c, method::AbstractVectorTransportMethod)
-
-Transport a vector `X` from the tangent space at a point `p` on the [`Manifold`](@ref) `M`
-along the curve `c` such that `c(0)` is equal to `p` to the point `c(1)` using the `method`,
-which defaults to [`ParallelTransport`](@ref). The result is saved to `Y`.
-"""
-function vector_transport_along!(M::Manifold, Y, p, X, c)
-    return vector_transport_along!(M, Y, p, X, c, ParallelTransport())
-end
-function vector_transport_along!(
-    M::Manifold,
-    Y,
-    p,
-    X,
-    c,
-    method::AbstractVectorTransportMethod,
-)
-    return error(manifold_function_not_implemented_message(
-        M,
-        vector_transport_along!,
-        M,
-        Y,
-        p,
-        X,
-        c,
-        method,
-    ))
-end
-
-
-"""
-    vector_transport_direction(M::Manifold, p, X, d)
-    vector_transport_direction(M::Manifold, p, X, d, method::AbstractVectorTransportMethod)
-
-Transport a vector `X` from the tangent space at a point `p` on the [`Manifold`](@ref) `M`
-in the direction indicated by the tangent vector `d` at `p`. By default, [`exp`](@ref) and
-[`vector_transport_to!`](@ref) are used with the `method`, which defaults
-to [`ParallelTransport`](@ref).
-"""
-function vector_transport_direction(M::Manifold, p, X, d)
-    return vector_transport_direction(M, p, X, d, ParallelTransport())
-end
-function vector_transport_direction(
-    M::Manifold,
-    p,
-    X,
-    d,
-    method::AbstractVectorTransportMethod,
-)
-    Y = allocate_result(M, vector_transport_direction, X, p, d)
-    vector_transport_direction!(M, Y, p, X, d, method)
-    return Y
-end
-
-"""
-    vector_transport_direction!(M::Manifold, Y, p, X, d)
-    vector_transport_direction!(M::Manifold, Y, p, X, d, method::AbstractVectorTransportMethod)
-
-Transport a vector `X` from the tangent space at a point `p` on the [`Manifold`](@ref) `M`
-in the direction indicated by the tangent vector `d` at `p`. By default, [`exp`](@ref) and
-[`vector_transport_to!`](@ref) are used with the `method`, which defaults
-to [`ParallelTransport`](@ref). The result is saved to `Y`.
-"""
-function vector_transport_direction!(M::Manifold, Y, p, X, d)
-    return vector_transport_direction!(M, Y, p, X, d, ParallelTransport())
-end
-function vector_transport_direction!(
-    M::Manifold,
-    Y,
-    p,
-    X,
-    d,
-    method::AbstractVectorTransportMethod,
-)
-    y = exp(M, p, d)
-    return vector_transport_to!(M, Y, p, X, y, method)
-end
-
-"""
-    vector_transport_to(M::Manifold, p, X, q)
-    vector_transport_to(M::Manifold, p, X, q, method::AbstractVectorTransportMethod)
-
-Transport a vector `X` from the tangent space at a point `p` on the [`Manifold`](@ref) `M`
-along the [`shortest_geodesic`](@ref) to the tangent space at another point `q`.
-By default, the [`AbstractVectorTransportMethod`](@ref) `method` is
-[`ParallelTransport`](@ref).
-"""
-function vector_transport_to(M::Manifold, p, X, q)
-    return vector_transport_to(M, p, X, q, ParallelTransport())
-end
-function vector_transport_to(M::Manifold, p, X, q, method::AbstractVectorTransportMethod)
-    Y = allocate_result(M, vector_transport_to, X, p, q)
-    vector_transport_to!(M, Y, p, X, q, method)
-    return Y
-end
-
-"""
-    vector_transport_to!(M::Manifold, Y, p, X, q)
-    vector_transport_to!(M::Manifold, Y, p, X, q, method::AbstractVectorTransportMethod)
-
-Transport a vector `X` from the tangent space at a point `p` on the [`Manifold`](@ref) `M`
-along the [`shortest_geodesic`](@ref) to the tangent space at another point `q`.
-By default, the [`AbstractVectorTransportMethod`](@ref) `method` is
-[`ParallelTransport`](@ref). The result is saved to `Y`.
-"""
-function vector_transport_to!(M::Manifold, Y, p, q, X)
-    return vector_transport_to!(M, Y, p, q, X, ParallelTransport())
-end
-"""
-    vector_transport_to!(M::Manifold, Y, p, X, q, method::ProjectionTransport)
-
-Transport a vector `X` from the tangent space at `p` on the [`Manifold`](@ref) `M` by
-interpreting it as an element of the embedding and then projecting it onto the tangent space
-at `q`. This method requires  [`project`](@ref project(M::Manifold, p, X)).
-"""
-function vector_transport_to!(M::Manifold, Y, p, X, q, ::ProjectionTransport)
-    return project!(M, Y, q, X)
-end
-function vector_transport_to!(
-    M::Manifold,
-    Y,
-    p,
-    X,
-    q,
-    method::AbstractVectorTransportMethod,
-)
-    return error(manifold_function_not_implemented_message(
-        M,
-        vector_transport_to!,
-        Y,
-        p,
-        X,
-        q,
-        method,
-    ))
-end
 
 """
     zero_tangent_vector!(M::Manifold, X, p)
@@ -922,6 +766,7 @@ function zero_tangent_vector(M::Manifold, p)
 end
 
 include("numbers.jl")
+include("vector_transport.jl")
 include("DecoratorManifold.jl")
 include("bases.jl")
 include("ValidationManifold.jl")
@@ -938,7 +783,12 @@ export AbstractEmbeddedManifold, EmbeddedManifold, TransparentIsometricEmbedding
 export OutOfInjectivityRadiusError
 
 export AbstractRetractionMethod,
-    ExponentialRetraction, QRRetraction, PolarRetraction, ProjectionRetraction
+    ExponentialRetraction,
+    QRRetraction,
+    PolarRetraction,
+    ProjectionRetraction,
+    SchildsLadderTransport,
+    PoleLadderTransport
 export AbstractInverseRetractionMethod,
     LogarithmicInverseRetraction,
     QRInverseRetraction,
@@ -985,6 +835,8 @@ export allocate,
     log,
     log!,
     manifold_dimension,
+    mid_point,
+    mid_point!,
     norm,
     number_eltype,
     number_of_coordinates,

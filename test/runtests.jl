@@ -15,4 +15,5 @@ using ManifoldsBase
     include("validation_manifold.jl")
     include("embedded_manifold.jl")
     include("domain_errors.jl")
+    include("vector_transport_along.jl")
 end
