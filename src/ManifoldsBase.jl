@@ -565,8 +565,19 @@ Saves the result in `q`.
 """
 function mid_point!(M::Manifold, q, p1, p2)
     X = log(M, p1, p2)
-    X /= 2
-    return exp!(M, q, p1, X)
+    return exp!(M, q, p1, X / 2)
+end
+
+@static if VERSION <= v"1.1"
+    function mid_point!(
+        M::Manifold,
+        q::AbstractArray{T1,0},
+        p1::AbstractArray{T2,0},
+        p2::AbstractArray{T3,0},
+    ) where {T1,T2,T3}
+        X = log(M, p1, p2)
+        return exp!(M, q, p1, fill(X / 2))
+    end
 end
 
 """
