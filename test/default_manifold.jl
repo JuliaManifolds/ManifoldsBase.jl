@@ -279,4 +279,11 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
             end
         end
     end
+
+    @testset "mid_point on 0-index arrays" begin
+        M = ManifoldsBase.DefaultManifold(1)
+        p1 = fill(0.0)
+        p2 = fill(1.0)
+        @test isapprox(M, fill(0.5), mid_point(M, p1, p2))
+    end
 end
