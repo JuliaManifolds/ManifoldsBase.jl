@@ -24,10 +24,10 @@ function ManifoldsBase.embed!(::AnotherPlaneManifold, Y, p, X)
     return Y
 end
 function ManifoldsBase.project!(::AnotherPlaneManifold, q, p)
-    q .= [p[1], p[2]]
+    return q .= [p[1], p[2]]
 end
 function ManifoldsBase.project!(::AnotherPlaneManifold, Y, p, X)
-    Y .= [X[1], X[2]]
+    return Y .= [X[1], X[2]]
 end
 
 struct NotImplementedEmbeddedManifold <:
