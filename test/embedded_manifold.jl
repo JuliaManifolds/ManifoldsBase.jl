@@ -5,8 +5,30 @@ ManifoldsBase.base_manifold(::PlaneManifold) = ManifoldsBase.DefaultManifold(2)
 
 ManifoldsBase.embed!(::PlaneManifold, q, p) = copyto!(q, p)
 ManifoldsBase.embed!(::PlaneManifold, Y, p, X) = copyto!(Y, X)
-ManifoldsBase.project!(::PlaneManifold, q, p) = (q .= [p[1] p[2] 0.0])
-ManifoldsBase.project!(::PlaneManifold, Y, p, X) = (Y .= [X[1] X[2] 0.0])
+ManifoldsBase.project!(::PlaneManifold, q, p) = (q .= [p[1], p[2], 0.0])
+ManifoldsBase.project!(::PlaneManifold, Y, p, X) = (Y .= [X[1], X[2], 0.0])
+
+struct AnotherPlaneManifold <: AbstractEmbeddedManifold{ℝ,DefaultIsometricEmbeddingType} end
+
+ManifoldsBase.decorated_manifold(::AnotherPlaneManifold) = ManifoldsBase.DefaultManifold(3)
+ManifoldsBase.base_manifold(::AnotherPlaneManifold) = ManifoldsBase.DefaultManifold(2)
+
+function ManifoldsBase.embed!(::AnotherPlaneManifold, q, p)
+    q[1:2] .= p
+    q[3] = 0
+    return q
+end
+function ManifoldsBase.embed!(::AnotherPlaneManifold, Y, p, X)
+    Y[1:2] .= X
+    Y[3] = 0
+    return Y
+end
+function ManifoldsBase.project!(::AnotherPlaneManifold, q, p)
+    q .= [p[1], p[2]]
+end
+function ManifoldsBase.project!(::AnotherPlaneManifold, Y, p, X)
+    Y .= [X[1], X[2]]
+end
 
 struct NotImplementedEmbeddedManifold <:
        AbstractEmbeddedManifold{ℝ,TransparentIsometricEmbedding} end
@@ -45,17 +67,17 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEm
         @test_throws DomainError is_manifold_point(M, [1, 0], true)
         @test_throws DomainError is_tangent_vector(M, [1, 0], [1, 0, 0], true)
         @test_throws DomainError is_tangent_vector(M, [1, 0, 0], [0, 0], true)
-        p = [1.0 1.0 0.0]
-        q = [1.0 0.0 0.0]
+        p = [1.0, 1.0, 0.0]
+        q = [1.0, 0.0, 0.0]
         X = q - p
         @test embed(M, p) == p
         pE = similar(p)
         embed!(M, pE, p)
         @test pE == p
-        P = [1.0 1.0 2.0]
+        P = [1.0, 1.0, 2.0]
         Q = similar(P)
         @test project!(M, Q, P) == project!(M, Q, P)
-        @test project!(M, Q, P) == [1.0 1.0 0.0]
+        @test project!(M, Q, P) == [1.0, 1.0, 0.0]
 
         @test log(M, p, q) == q - p
         Y = similar(p)
@@ -67,12 +89,22 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEm
         @test r == q
     end
 
+    @testset "AnotherPlaneManifold" begin
+        M = AnotherPlaneManifold()
+        p = [1.0, 2.0]
+        pe = embed(M, p)
+        @test pe == [1.0, 2.0, 0.0]
+        X = [2.0, 3.0]
+        Xe = embed(M, pe, X)
+        @test Xe == [2.0, 3.0, 0.0]
+        @test project(M, pe) == p
+        @test project(M, pe, Xe) == X
+    end
+
     @testset "Test nonimplemented fallbacks" begin
         @testset "Default Isometric Embedding Fallback Error Tests" begin
             M = NotImplementedEmbeddedManifold()
             A = zeros(2)
-            @test_throws ErrorException check_manifold_point(M, [1, 2])
-            @test_throws ErrorException check_tangent_vector(M, [1, 2], [3, 4])
             @test norm(M, [1, 2], [2, 3]) ≈ sqrt(13)
             @test inner(M, [1, 2], [2, 3], [2, 3]) ≈ 13
             @test_throws ErrorException manifold_dimension(M)

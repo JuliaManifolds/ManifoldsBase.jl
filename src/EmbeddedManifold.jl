@@ -89,6 +89,16 @@ function EmbeddedManifold(
     return EmbeddedManifold{𝔽,MT,NT,ET}(M, N)
 end
 
+function allocate_result(M::AbstractEmbeddedManifold, f::typeof(embed), x...)
+    T = allocate_result_type(M, f, x)
+    return allocate(x[end], T, representation_size(decorated_manifold(M)))
+end
+
+function allocate_result(M::AbstractEmbeddedManifold, f::typeof(project), x...)
+    T = allocate_result_type(M, f, x)
+    return allocate(x[end], T, representation_size(base_manifold(M)))
+end
+
 """
     base_manifold(M::AbstractEmbeddedManifold, d::Val{N} = Val(-1))
 
@@ -112,10 +122,10 @@ base_manifold(M::EmbeddedManifold, d::Val{N} = Val(-1)) where {N} = M.manifold
     check_manifold_point(M::AbstractEmbeddedManifold, p; kwargs)
 
 check whether a point `p` is a valid point on the [`AbstractEmbeddedManifold`](@ref),
-i.e. that `embed(M, p)` is a valid point on the embedded manifold.
+i.e. that `project(M, p)` is a valid point on the embedded manifold.
 """
 function check_manifold_point(M::AbstractEmbeddedManifold, p; kwargs...)
-    q = embed(M, p)
+    q = project(M, p)
     return invoke(
         check_manifold_point,
         Tuple{typeof(get_embedding(M)),typeof(q)},
@@ -128,7 +138,7 @@ end
 """
     check_tangent_vector(M::AbstractEmbeddedManifold, p, X; check_base_point = true, kwargs...)
 
-check that `embed(M,p,X)` is a valid tangent to `embed(p,X)`, where `check_base_point`
+check that `project(M, p, X)` is a valid tangent to `project(M, p)`, where `check_base_point`
 determines whether the validity of `p` is checked, too.
 """
 function check_tangent_vector(
@@ -142,8 +152,8 @@ function check_tangent_vector(
         mpe = check_manifold_point(M, p; kwargs...)
         mpe === nothing || return mpe
     end
-    q = embed(M, p)
-    Y = embed(M, p, X)
+    q = project(M, p)
+    Y = project(M, p, X)
     return invoke(
         check_tangent_vector,
         Tuple{typeof(get_embedding(M)),typeof(q),typeof(Y)},
