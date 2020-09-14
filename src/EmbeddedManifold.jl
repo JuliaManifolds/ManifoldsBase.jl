@@ -15,6 +15,12 @@ The embedding is further specified by an [`AbstractEmbeddingType`](@ref).
 This means, that technically an embedded manifold is a decorator for the embedding, i.e.
 functions of this type get, in the semi-transparent way of the
 [`AbstractDecoratorManifold`](@ref), passed on to the embedding.
+
+!!! note
+    
+    Points on an `AbstractEmbeddedManifold` are still represented using representation
+    of the embedded manifold. Use [`embed`](@ref) to go to the representation of the embedding
+    and [`project`](@ref) to go the other way.
 """
 abstract type AbstractEmbeddedManifold{𝔽,T<:AbstractEmbeddingType} <:
               AbstractDecoratorManifold{𝔽} end
@@ -122,10 +128,10 @@ base_manifold(M::EmbeddedManifold, d::Val{N} = Val(-1)) where {N} = M.manifold
     check_manifold_point(M::AbstractEmbeddedManifold, p; kwargs)
 
 check whether a point `p` is a valid point on the [`AbstractEmbeddedManifold`](@ref),
-i.e. that `project(M, p)` is a valid point on the embedded manifold.
+i.e. that `embed(M, p)` is a valid point on the embedded manifold.
 """
 function check_manifold_point(M::AbstractEmbeddedManifold, p; kwargs...)
-    q = project(M, p)
+    q = embed(M, p)
     return invoke(
         check_manifold_point,
         Tuple{typeof(get_embedding(M)),typeof(q)},
@@ -138,7 +144,7 @@ end
 """
     check_tangent_vector(M::AbstractEmbeddedManifold, p, X; check_base_point = true, kwargs...)
 
-check that `project(M, p, X)` is a valid tangent to `project(M, p)`, where `check_base_point`
+check that `embed(M, p, X)` is a valid tangent to `embed(M, p)`, where `check_base_point`
 determines whether the validity of `p` is checked, too.
 """
 function check_tangent_vector(
@@ -152,8 +158,8 @@ function check_tangent_vector(
         mpe = check_manifold_point(M, p; kwargs...)
         mpe === nothing || return mpe
     end
-    q = project(M, p)
-    Y = project(M, p, X)
+    q = embed(M, p)
+    Y = embed(M, p, X)
     return invoke(
         check_tangent_vector,
         Tuple{typeof(get_embedding(M)),typeof(q),typeof(Y)},

@@ -88,7 +88,7 @@ norm(::DefaultManifold, p, X) = norm(X)
 project!(::DefaultManifold, q, p) = copyto!(q, p)
 project!(::DefaultManifold, Y, p, X) = copyto!(Y, X)
 
-@generated representation_size(::DefaultManifold{T}) where {T} = Tuple(T.parameters...)
+@generated representation_size(::DefaultManifold{T}) where {T} = tuple(T.parameters...)
 
 function vector_transport_along!(
     ::DefaultManifold,
