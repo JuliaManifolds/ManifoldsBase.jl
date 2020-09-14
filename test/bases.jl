@@ -339,13 +339,12 @@ end
     @test sprint(show, ProjectedOrthonormalBasis(:gram_schmidt, ℂ)) ==
           "ProjectedOrthonormalBasis(:gram_schmidt, ℂ)"
 
-    @test sprint(show, "text/plain", DiagonalizingOrthonormalBasis(Float64[1, 2, 3])) ==
-          """
-DiagonalizingOrthonormalBasis(ℝ) with eigenvalue 0 in direction:
-3-element $(sprint(show, Vector{Float64})):
-  1.0
-  2.0
-  3.0"""
+    @test sprint(show, "text/plain", DiagonalizingOrthonormalBasis(Float64[1, 2, 3])) == """
+                                                                               DiagonalizingOrthonormalBasis(ℝ) with eigenvalue 0 in direction:
+                                                                               3-element $(sprint(show, Vector{Float64})):
+                                                                                 1.0
+                                                                                 2.0
+                                                                                 3.0"""
 
     M = DefaultManifold(2, 3)
     x = collect(reshape(1.0:6.0, (2, 3)))
@@ -412,7 +411,7 @@ DiagonalizingOrthonormalBasis(ℝ) with eigenvalue 0 in direction:
     @test sprint(show, "text/plain", pb) == """
     DefaultOrthonormalBasis(ℝ) with 1 basis vector:
      E1 =
-      1×1×1 Array{Float64,3}:
+      1×1×1 $(sprint(show, Array{Float64,3})):
       [:, :, 1] =
        1.0"""
 
@@ -429,7 +428,7 @@ DiagonalizingOrthonormalBasis(ℝ) with eigenvalue 0 in direction:
     and 1 basis vector.
     Basis vectors:
      E1 =
-      1×1×1 Array{Float64,3}:
+      1×1×1 $(sprint(show, Array{Float64,3})):
       [:, :, 1] =
        1.0
     Eigenvalues:
