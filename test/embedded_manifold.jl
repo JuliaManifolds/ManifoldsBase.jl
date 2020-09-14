@@ -51,7 +51,7 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEm
             ManifoldsBase.DefaultManifold(3),
         )
         @test repr(M) ==
-              "EmbeddedManifold(DefaultManifold{Tuple{2},ℝ}(), DefaultManifold{Tuple{3},ℝ}(), TransparentIsometricEmbedding())"
+              "EmbeddedManifold($(sprint(show, M.manifold)), $(sprint(show, M.embedding)), TransparentIsometricEmbedding())"
         @test base_manifold(M) == ManifoldsBase.DefaultManifold(2)
         @test ManifoldsBase.decorated_manifold(M) == ManifoldsBase.DefaultManifold(3)
         @test ManifoldsBase.default_embedding_dispatch(M) === Val{false}()
