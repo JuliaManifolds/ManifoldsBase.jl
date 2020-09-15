@@ -66,8 +66,10 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEm
         # Check fallbacks to check embed->check_manifoldpoint Defaults
         @test_throws DomainError is_manifold_point(M, [1, 0, 0], true)
         @test_throws DomainError is_manifold_point(M, [1 0], true)
+        @test is_manifold_point(M, [1 0 0], true)
         @test_throws DomainError is_tangent_vector(M, [1 0 0], [1], true)
         @test_throws DomainError is_tangent_vector(M, [1 0 0], [0 0 0 0], true)
+        @test is_tangent_vector(M, [1 0 0], [1 0 1], true)
         p = [1.0 1.0 0.0]
         q = [1.0 0.0 0.0]
         X = q - p
