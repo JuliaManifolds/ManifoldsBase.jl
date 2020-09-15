@@ -254,12 +254,15 @@ function check_size(M::Manifold, p)
     m = representation_size(M)
     if length(n) != length(m)
         return DomainError(
-            n,
-            "The point $(p) can not belong to the manifold $(M), since its size $(n) does not fit the required representation size ($(m)).",
+            length(n),
+            "The point $(p) can not belong to the manifold $(M), since its size $(n) is not equal to the manifolds representation size ($(m)).",
         )
     end
-    if any(n != m)
-        return DomainError("The point $(p) can not belong to the manifold $(M), since its size $(n) does not fit the required representation size ($(m)).")
+    if n != m
+        return DomainError(
+            n,
+            "The point $(p) can not belong to the manifold $(M), since its size $(n) is not equal to the manifolds representation size ($(m)).",
+        )
     end
 end
 function check_size(M::Manifold, p, X)
@@ -269,12 +272,15 @@ function check_size(M::Manifold, p, X)
     m = representation_size(M)
     if length(n) != length(m)
         return DomainError(
-            n,
-            "The tangent vector $(X) can not belong to the manifold $(M), since its size $(n) does not fit the required representation size ($(m)).",
+            length(n),
+            "The tangent vector $(X) can not belong to the manifold $(M), since its size $(n) is not equal to the manifolds representation size ($(m)).",
         )
     end
-    if any(n != m)
-        return DomainError("The tangent vector $(X) can not belong to the manifold $(M), since its size $(n) does not fit the required representation size ($(m)).")
+    if n != m
+        return DomainError(
+            n,
+            "The tangent vector $(X) can not belong to the manifold $(M), since its size $(n) is not equal to the manifodls representation size ($(m)).",
+        )
     end
 end
 
