@@ -15,6 +15,12 @@ The embedding is further specified by an [`AbstractEmbeddingType`](@ref).
 This means, that technically an embedded manifold is a decorator for the embedding, i.e.
 functions of this type get, in the semi-transparent way of the
 [`AbstractDecoratorManifold`](@ref), passed on to the embedding.
+
+!!! note
+    
+    Points on an `AbstractEmbeddedManifold` are still represented using representation
+    of the embedded manifold. Use [`embed`](@ref) to go to the representation of the embedding
+    and [`project`](@ref) to go the other way.
 """
 abstract type AbstractEmbeddedManifold{𝔽,T<:AbstractEmbeddingType} <:
               AbstractDecoratorManifold{𝔽} end
@@ -89,6 +95,16 @@ function EmbeddedManifold(
     return EmbeddedManifold{𝔽,MT,NT,ET}(M, N)
 end
 
+function allocate_result(M::AbstractEmbeddedManifold, f::typeof(embed), x...)
+    T = allocate_result_type(M, f, x)
+    return allocate(x[end], T, representation_size(decorated_manifold(M)))
+end
+
+function allocate_result(M::AbstractEmbeddedManifold, f::typeof(project), x...)
+    T = allocate_result_type(M, f, x)
+    return allocate(x[end], T, representation_size(base_manifold(M)))
+end
+
 """
     base_manifold(M::AbstractEmbeddedManifold, d::Val{N} = Val(-1))
 
@@ -128,7 +144,7 @@ end
 """
     check_tangent_vector(M::AbstractEmbeddedManifold, p, X; check_base_point = true, kwargs...)
 
-check that `embed(M,p,X)` is a valid tangent to `embed(p,X)`, where `check_base_point`
+check that `embed(M, p, X)` is a valid tangent to `embed(M, p)`, where `check_base_point`
 determines whether the validity of `p` is checked, too.
 """
 function check_tangent_vector(

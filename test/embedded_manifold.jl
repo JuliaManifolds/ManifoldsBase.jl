@@ -1,12 +1,34 @@
 struct PlaneManifold <: AbstractEmbeddedManifold{ℝ,TransparentIsometricEmbedding} end
 
-ManifoldsBase.decorated_manifold(::PlaneManifold) = ManifoldsBase.DefaultManifold(3)
+ManifoldsBase.decorated_manifold(::PlaneManifold) = ManifoldsBase.DefaultManifold(1, 3)
 ManifoldsBase.base_manifold(::PlaneManifold) = ManifoldsBase.DefaultManifold(2)
 
 ManifoldsBase.embed!(::PlaneManifold, q, p) = copyto!(q, p)
 ManifoldsBase.embed!(::PlaneManifold, Y, p, X) = copyto!(Y, X)
 ManifoldsBase.project!(::PlaneManifold, q, p) = (q .= [p[1] p[2] 0.0])
 ManifoldsBase.project!(::PlaneManifold, Y, p, X) = (Y .= [X[1] X[2] 0.0])
+
+struct AnotherPlaneManifold <: AbstractEmbeddedManifold{ℝ,DefaultIsometricEmbeddingType} end
+
+ManifoldsBase.decorated_manifold(::AnotherPlaneManifold) = ManifoldsBase.DefaultManifold(3)
+ManifoldsBase.base_manifold(::AnotherPlaneManifold) = ManifoldsBase.DefaultManifold(2)
+
+function ManifoldsBase.embed!(::AnotherPlaneManifold, q, p)
+    q[1:2] .= p
+    q[3] = 0
+    return q
+end
+function ManifoldsBase.embed!(::AnotherPlaneManifold, Y, p, X)
+    Y[1:2] .= X
+    Y[3] = 0
+    return Y
+end
+function ManifoldsBase.project!(::AnotherPlaneManifold, q, p)
+    return q .= [p[1], p[2]]
+end
+function ManifoldsBase.project!(::AnotherPlaneManifold, Y, p, X)
+    return Y .= [X[1], X[2]]
+end
 
 struct NotImplementedEmbeddedManifold <:
        AbstractEmbeddedManifold{ℝ,TransparentIsometricEmbedding} end
@@ -29,7 +51,7 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEm
             ManifoldsBase.DefaultManifold(3),
         )
         @test repr(M) ==
-              "EmbeddedManifold(DefaultManifold{Tuple{2},ℝ}(), DefaultManifold{Tuple{3},ℝ}(), TransparentIsometricEmbedding())"
+              "EmbeddedManifold($(sprint(show, M.manifold)), $(sprint(show, M.embedding)), TransparentIsometricEmbedding())"
         @test base_manifold(M) == ManifoldsBase.DefaultManifold(2)
         @test ManifoldsBase.decorated_manifold(M) == ManifoldsBase.DefaultManifold(3)
         @test ManifoldsBase.default_embedding_dispatch(M) === Val{false}()
@@ -40,11 +62,11 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEm
         M = PlaneManifold()
         @test repr(M) == "PlaneManifold()"
         @test ManifoldsBase.default_decorator_dispatch(M) === Val{false}()
-        @test get_embedding(M) == ManifoldsBase.DefaultManifold(3)
+        @test get_embedding(M) == ManifoldsBase.DefaultManifold(1, 3)
         # Check fallbacks to check embed->check_manifoldpoint Defaults
-        @test_throws DomainError is_manifold_point(M, [1, 0], true)
-        @test_throws DomainError is_tangent_vector(M, [1, 0], [1, 0, 0], true)
-        @test_throws DomainError is_tangent_vector(M, [1, 0, 0], [0, 0], true)
+        @test is_manifold_point(M, [1, 0], true)
+        @test is_tangent_vector(M, [1, 0], [1, 0, 0], true)
+        @test is_tangent_vector(M, [1, 0, 0], [0, 0], true)
         p = [1.0 1.0 0.0]
         q = [1.0 0.0 0.0]
         X = q - p
@@ -65,6 +87,18 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEm
         r = similar(p)
         exp!(M, r, p, X)
         @test r == q
+    end
+
+    @testset "AnotherPlaneManifold" begin
+        M = AnotherPlaneManifold()
+        p = [1.0, 2.0]
+        pe = embed(M, p)
+        @test pe == [1.0, 2.0, 0.0]
+        X = [2.0, 3.0]
+        Xe = embed(M, pe, X)
+        @test Xe == [2.0, 3.0, 0.0]
+        @test project(M, pe) == p
+        @test project(M, pe, Xe) == X
     end
 
     @testset "Test nonimplemented fallbacks" begin

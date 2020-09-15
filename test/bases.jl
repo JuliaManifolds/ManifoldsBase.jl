@@ -339,139 +339,71 @@ end
     @test sprint(show, ProjectedOrthonormalBasis(:gram_schmidt, ℂ)) ==
           "ProjectedOrthonormalBasis(:gram_schmidt, ℂ)"
 
-    if VERSION >= v"1.6.0-DEV.430"
-        @test sprint(show, "text/plain", DiagonalizingOrthonormalBasis(Float64[1, 2, 3])) ==
-              """
-DiagonalizingOrthonormalBasis(ℝ) with eigenvalue 0 in direction:
-3-element Vector{Float64}:
-  1.0
-  2.0
-  3.0"""
-    else
-        @test sprint(show, "text/plain", DiagonalizingOrthonormalBasis(Float64[1, 2, 3])) ==
-              """
-DiagonalizingOrthonormalBasis(ℝ) with eigenvalue 0 in direction:
-3-element Array{Float64,1}:
-  1.0
-  2.0
-  3.0"""
-    end
+    @test sprint(show, "text/plain", DiagonalizingOrthonormalBasis(Float64[1, 2, 3])) == """
+                                                                               DiagonalizingOrthonormalBasis(ℝ) with eigenvalue 0 in direction:
+                                                                               3-element $(sprint(show, Vector{Float64})):
+                                                                                 1.0
+                                                                                 2.0
+                                                                                 3.0"""
 
     M = DefaultManifold(2, 3)
     x = collect(reshape(1.0:6.0, (2, 3)))
     pb = get_basis(M, x, DefaultOrthonormalBasis())
-    if VERSION >= v"1.6.0-DEV.430"
-        @test sprint(show, "text/plain", pb) == """
-        DefaultOrthonormalBasis(ℝ) with 6 basis vectors:
-         E1 =
-          2×3 Matrix{Float64}:
-           1.0  0.0  0.0
-           0.0  0.0  0.0
-         E2 =
-          2×3 Matrix{Float64}:
-           0.0  0.0  0.0
-           1.0  0.0  0.0
-         ⋮
-         E5 =
-          2×3 Matrix{Float64}:
-           0.0  0.0  1.0
-           0.0  0.0  0.0
-         E6 =
-          2×3 Matrix{Float64}:
-           0.0  0.0  0.0
-           0.0  0.0  1.0"""
-    else
-        @test sprint(show, "text/plain", pb) == """
-        DefaultOrthonormalBasis(ℝ) with 6 basis vectors:
-         E1 =
-          2×3 Array{Float64,2}:
-           1.0  0.0  0.0
-           0.0  0.0  0.0
-         E2 =
-          2×3 Array{Float64,2}:
-           0.0  0.0  0.0
-           1.0  0.0  0.0
-         ⋮
-         E5 =
-          2×3 Array{Float64,2}:
-           0.0  0.0  1.0
-           0.0  0.0  0.0
-         E6 =
-          2×3 Array{Float64,2}:
-           0.0  0.0  0.0
-           0.0  0.0  1.0"""
-    end
+
+    @test sprint(show, "text/plain", pb) == """
+    DefaultOrthonormalBasis(ℝ) with 6 basis vectors:
+     E1 =
+      2×3 $(sprint(show, Matrix{Float64})):
+       1.0  0.0  0.0
+       0.0  0.0  0.0
+     E2 =
+      2×3 $(sprint(show, Matrix{Float64})):
+       0.0  0.0  0.0
+       1.0  0.0  0.0
+     ⋮
+     E5 =
+      2×3 $(sprint(show, Matrix{Float64})):
+       0.0  0.0  1.0
+       0.0  0.0  0.0
+     E6 =
+      2×3 $(sprint(show, Matrix{Float64})):
+       0.0  0.0  0.0
+       0.0  0.0  1.0"""
 
     b = DiagonalizingOrthonormalBasis(get_vectors(M, x, pb)[1])
     dpb = CachedBasis(b, Float64[1, 2, 3, 4, 5, 6], get_vectors(M, x, pb))
-    if VERSION >= v"1.6.0-DEV.430"
-        @test sprint(show, "text/plain", dpb) == """
-        DiagonalizingOrthonormalBasis(ℝ) with eigenvalue 0 in direction:
-         2×3 Matrix{Float64}:
-           1.0  0.0  0.0
-           0.0  0.0  0.0
-        and 6 basis vectors.
-        Basis vectors:
-         E1 =
-          2×3 Matrix{Float64}:
-           1.0  0.0  0.0
-           0.0  0.0  0.0
-         E2 =
-          2×3 Matrix{Float64}:
-           0.0  0.0  0.0
-           1.0  0.0  0.0
-         ⋮
-         E5 =
-          2×3 Matrix{Float64}:
-           0.0  0.0  1.0
-           0.0  0.0  0.0
-         E6 =
-          2×3 Matrix{Float64}:
-           0.0  0.0  0.0
-           0.0  0.0  1.0
-        Eigenvalues:
-         6-element Vector{Float64}:
-          1.0
-          2.0
-          3.0
-          4.0
-          5.0
-          6.0"""
-    else
-        @test sprint(show, "text/plain", dpb) == """
-        DiagonalizingOrthonormalBasis(ℝ) with eigenvalue 0 in direction:
-         2×3 Array{Float64,2}:
-           1.0  0.0  0.0
-           0.0  0.0  0.0
-        and 6 basis vectors.
-        Basis vectors:
-         E1 =
-          2×3 Array{Float64,2}:
-           1.0  0.0  0.0
-           0.0  0.0  0.0
-         E2 =
-          2×3 Array{Float64,2}:
-           0.0  0.0  0.0
-           1.0  0.0  0.0
-         ⋮
-         E5 =
-          2×3 Array{Float64,2}:
-           0.0  0.0  1.0
-           0.0  0.0  0.0
-         E6 =
-          2×3 Array{Float64,2}:
-           0.0  0.0  0.0
-           0.0  0.0  1.0
-        Eigenvalues:
-         6-element Array{Float64,1}:
-          1.0
-          2.0
-          3.0
-          4.0
-          5.0
-          6.0"""
-    end
-
+    @test sprint(show, "text/plain", dpb) == """
+    DiagonalizingOrthonormalBasis(ℝ) with eigenvalue 0 in direction:
+     2×3 $(sprint(show, Matrix{Float64})):
+       1.0  0.0  0.0
+       0.0  0.0  0.0
+    and 6 basis vectors.
+    Basis vectors:
+     E1 =
+      2×3 $(sprint(show, Matrix{Float64})):
+       1.0  0.0  0.0
+       0.0  0.0  0.0
+     E2 =
+      2×3 $(sprint(show, Matrix{Float64})):
+       0.0  0.0  0.0
+       1.0  0.0  0.0
+     ⋮
+     E5 =
+      2×3 $(sprint(show, Matrix{Float64})):
+       0.0  0.0  1.0
+       0.0  0.0  0.0
+     E6 =
+      2×3 $(sprint(show, Matrix{Float64})):
+       0.0  0.0  0.0
+       0.0  0.0  1.0
+    Eigenvalues:
+     6-element $(sprint(show, Vector{Float64})):
+      1.0
+      2.0
+      3.0
+      4.0
+      5.0
+      6.0"""
 
     M = DefaultManifold(1, 1, 1)
     x = reshape(Float64[1], (1, 1, 1))
@@ -479,7 +411,7 @@ DiagonalizingOrthonormalBasis(ℝ) with eigenvalue 0 in direction:
     @test sprint(show, "text/plain", pb) == """
     DefaultOrthonormalBasis(ℝ) with 1 basis vector:
      E1 =
-      1×1×1 Array{Float64,3}:
+      1×1×1 $(sprint(show, Array{Float64,3})):
       [:, :, 1] =
        1.0"""
 
@@ -488,33 +420,18 @@ DiagonalizingOrthonormalBasis(ℝ) with eigenvalue 0 in direction:
         Float64[1],
         get_vectors(M, x, pb),
     )
-    if VERSION >= v"1.6.0-DEV.430"
-        @test sprint(show, "text/plain", dpb) == """
-        DiagonalizingOrthonormalBasis(ℝ) with eigenvalue 0 in direction:
-         1-element Vector{Array{Float64,3}}:
-           [1.0]
-        and 1 basis vector.
-        Basis vectors:
-         E1 =
-          1×1×1 Array{Float64,3}:
-          [:, :, 1] =
-           1.0
-        Eigenvalues:
-         1-element Vector{Float64}:
-          1.0"""
-    else
-        @test sprint(show, "text/plain", dpb) == """
-        DiagonalizingOrthonormalBasis(ℝ) with eigenvalue 0 in direction:
-         1-element Array{Array{Float64,3},1}:
-           [1.0]
-        and 1 basis vector.
-        Basis vectors:
-         E1 =
-          1×1×1 Array{Float64,3}:
-          [:, :, 1] =
-           1.0
-        Eigenvalues:
-         1-element Array{Float64,1}:
-          1.0"""
-    end
+
+    @test sprint(show, "text/plain", dpb) == """
+    DiagonalizingOrthonormalBasis(ℝ) with eigenvalue 0 in direction:
+     1-element $(sprint(show, Vector{Array{Float64,3}})):
+       [1.0]
+    and 1 basis vector.
+    Basis vectors:
+     E1 =
+      1×1×1 $(sprint(show, Array{Float64,3})):
+      [:, :, 1] =
+       1.0
+    Eigenvalues:
+     1-element $(sprint(show, Vector{Float64})):
+      1.0"""
 end
