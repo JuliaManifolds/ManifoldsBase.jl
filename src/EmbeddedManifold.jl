@@ -131,7 +131,7 @@ check whether a point `p` is a valid point on the [`AbstractEmbeddedManifold`](@
 i.e. that `embed(M, p)` is a valid point on the embedded manifold.
 """
 function check_manifold_point(M::AbstractEmbeddedManifold, p; kwargs...)
-    mse = check_size(M,p)
+    mse = check_size(M, p)
     mse === nothing || return mse
     q = embed(M, p)
     return invoke(
@@ -161,7 +161,7 @@ function check_tangent_vector(
         mpe === nothing || return mpe
     end
     q = embed(M, p)
-    mse = check_size(M,p,X)
+    mse = check_size(M, p, X)
     mse === nothing || return mse
     Y = embed(M, p, X)
     return invoke(
