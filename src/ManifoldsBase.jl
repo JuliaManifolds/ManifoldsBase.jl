@@ -239,6 +239,40 @@ type.
 check_tangent_vector(M::Manifold, p, X; kwargs...) = nothing
 
 """
+    check_size(M::Manifold, p)
+    check_size(M::Manifold, p, X)
+
+Check whether `p` has the right [`representation_size`](@ref) for a [`Manifold`](@ref) `M`.
+Additionally if a tangent vector is given, both `p` and `X` are checked to be of
+corresponding correct representation sizes for points and tangent vectors on `M`.
+
+By default, `check_size` returns `nothing`, i.e. if no checks are implemented, the
+assumption is to be optimistic.
+"""
+function check_size(M::Manifold, p)
+    n = size(p)
+    m = representation_size(M)
+    if length(n) != length(m)
+        return DomainError(n, "The point $(p) can not belong to the manifold $(M), since its size $(n) does not fit the required representation size ($(m)).")
+    end
+    if any(n != m)
+        return DomainError("The point $(p) can not belong to the manifold $(M), since its size $(n) does not fit the required representation size ($(m)).")
+    end
+end
+function check_size(M::Manifold,p,X)
+    mse = check_size(M,p)
+    mse === nothing || return mse
+    n = size(X)
+    m = representation_size(M)
+    if length(n) != length(m)
+        return DomainError(n, "The tangent vector $(X) can not belong to the manifold $(M), since its size $(n) does not fit the required representation size ($(m)).")
+    end
+    if any(n != m)
+        return DomainError("The tangent vector $(X) can not belong to the manifold $(M), since its size $(n) does not fit the required representation size ($(m)).")
+    end
+end
+
+"""
     distance(M::Manifold, p, q)
 
 Shortest distance between the points `p` and `q` on the [`Manifold`](@ref) `M`.
@@ -820,6 +854,7 @@ export allocate,
     base_manifold,
     check_manifold_point,
     check_tangent_vector,
+    check_size,
     distance,
     exp,
     exp!,

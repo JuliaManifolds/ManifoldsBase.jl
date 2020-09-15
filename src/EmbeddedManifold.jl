@@ -17,7 +17,7 @@ functions of this type get, in the semi-transparent way of the
 [`AbstractDecoratorManifold`](@ref), passed on to the embedding.
 
 !!! note
-    
+
     Points on an `AbstractEmbeddedManifold` are still represented using representation
     of the embedded manifold. Use [`embed`](@ref) to go to the representation of the embedding
     and [`project`](@ref) to go the other way.
@@ -131,6 +131,8 @@ check whether a point `p` is a valid point on the [`AbstractEmbeddedManifold`](@
 i.e. that `embed(M, p)` is a valid point on the embedded manifold.
 """
 function check_manifold_point(M::AbstractEmbeddedManifold, p; kwargs...)
+    mse = check_size(M,p)
+    mse === nothing || return mse
     q = embed(M, p)
     return invoke(
         check_manifold_point,
@@ -159,6 +161,8 @@ function check_tangent_vector(
         mpe === nothing || return mpe
     end
     q = embed(M, p)
+    mse = check_size(M,p,X)
+    mse === nothing || return mse
     Y = embed(M, p, X)
     return invoke(
         check_tangent_vector,
