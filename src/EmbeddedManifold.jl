@@ -97,7 +97,7 @@ end
 
 function allocate_result(M::AbstractEmbeddedManifold, f::typeof(embed), x...)
     T = allocate_result_type(M, f, x)
-    return allocate(x[end], T, representation_size(get_embedding(M)))
+    return allocate(x[end], T, representation_size(decorated_manifold(M)))
 end
 
 function allocate_result(M::AbstractEmbeddedManifold, f::typeof(project), x...)
@@ -123,7 +123,52 @@ type the internally stored enhanced manifold `M.manifold` is returned.
 """
 base_manifold(M::EmbeddedManifold, d::Val{N} = Val(-1)) where {N} = M.manifold
 
-decorated_manifold(M::AbstractEmbeddedManifold) = base_manifold(M)
+
+"""
+    check_manifold_point(M::AbstractEmbeddedManifold, p; kwargs)
+
+check whether a point `p` is a valid point on the [`AbstractEmbeddedManifold`](@ref),
+i.e. that `embed(M, p)` is a valid point on the embedded manifold.
+"""
+function check_manifold_point(M::AbstractEmbeddedManifold, p; kwargs...)
+    return invoke(
+        check_manifold_point,
+        Tuple{typeof(get_embedding(M)),typeof(p)},
+        get_embedding(M),
+        p;
+        kwargs...,
+    )
+end
+
+"""
+    check_tangent_vector(M::AbstractEmbeddedManifold, p, X; check_base_point = true, kwargs...)
+
+check that `embed(M, p, X)` is a valid tangent to `embed(M, p)`, where `check_base_point`
+determines whether the validity of `p` is checked, too.
+"""
+function check_tangent_vector(
+    M::AbstractEmbeddedManifold,
+    p,
+    X;
+    check_base_point = true,
+    kwargs...,
+)
+    if check_base_point
+        mpe = check_manifold_point(M, p; kwargs...)
+        mpe === nothing || return mpe
+    end
+    return invoke(
+        check_tangent_vector,
+        Tuple{typeof(get_embedding(M)),typeof(p),typeof(X)},
+        get_embedding(M),
+        p,
+        X;
+        check_base_point = check_base_point,
+        kwargs...,
+    )
+end
+
+decorated_manifold(M::AbstractEmbeddedManifold) = M.embedding
 
 """
     get_embedding(M::AbstractEmbeddedManifold)
@@ -133,7 +178,7 @@ Return the [`Manifold`](@ref) `N` an [`AbstractEmbeddedManifold`](@ref) is embed
 get_embedding(::AbstractEmbeddedManifold)
 
 @decorator_transparent_function function get_embedding(M::AbstractEmbeddedManifold)
-    return M.embedding
+    return decorated_manifold(M)
 end
 
 function show(
@@ -163,17 +208,15 @@ function decorator_transparent_dispatch(
     ::AbstractEmbeddedManifold,
     args...,
 )
-    return Val(:transparent)
+    return Val(:intransparent)
 end
-
 function decorator_transparent_dispatch(
     ::typeof(check_tangent_vector),
     ::AbstractEmbeddedManifold,
     args...,
 )
-    return Val(:transparent)
+    return Val(:intransparent)
 end
-
 function decorator_transparent_dispatch(
     ::typeof(embed),
     ::AbstractEmbeddedManifold,
