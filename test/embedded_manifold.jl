@@ -73,6 +73,12 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEm
         p = [1.0 1.0 0.0]
         q = [1.0 0.0 0.0]
         X = q - p
+        @test check_size(M, p) === nothing
+        @test check_size(M, p, X) === nothing
+        @test check_size(M, [1, 2]) isa DomainError
+        @test check_size(M, [1 2 3 4]) isa DomainError
+        @test check_size(M, p, [1, 2]) isa DomainError
+        @test check_size(M, p, [1 2 3 4]) isa DomainError
         @test embed(M, p) == p
         pE = similar(p)
         embed!(M, pE, p)
