@@ -196,10 +196,7 @@ function get_embedding(M::EmbeddedManifold)
     return M.embedding
 end
 
-function show(
-    io::IO,
-    M::EmbeddedManifold{𝔽,MT,NT},
-) where {𝔽,MT<:Manifold{𝔽},NT<:Manifold}
+function show(io::IO, M::EmbeddedManifold{𝔽,MT,NT}) where {𝔽,MT<:Manifold{𝔽},NT<:Manifold}
     return print(io, "EmbeddedManifold($(M.manifold), $(M.embedding))")
 end
 
