@@ -1,16 +1,25 @@
+
 struct PlaneManifold <: AbstractEmbeddedManifold{ℝ,TransparentIsometricEmbedding} end
 
-ManifoldsBase.decorated_manifold(::PlaneManifold) = ManifoldsBase.DefaultManifold(1, 3)
+ManifoldsBase.get_embedding(::PlaneManifold) = ManifoldsBase.DefaultManifold(1, 3)
 ManifoldsBase.base_manifold(::PlaneManifold) = ManifoldsBase.DefaultManifold(2)
 
-ManifoldsBase.embed!(::PlaneManifold, q, p) = copyto!(q, p)
-ManifoldsBase.embed!(::PlaneManifold, Y, p, X) = copyto!(Y, X)
-ManifoldsBase.project!(::PlaneManifold, q, p) = (q .= [p[1] p[2] 0.0])
-ManifoldsBase.project!(::PlaneManifold, Y, p, X) = (Y .= [X[1] X[2] 0.0])
+function ManifoldsBase.embed!(::PlaneManifold, q, p)
+    q[1:2] = p
+    q[3] = 0
+    return q
+end
+function ManifoldsBase.embed!(::PlaneManifold, Y, p, X)
+    Y[1:2] = X
+    Y[3] = 0
+    return X
+end
+ManifoldsBase.project!(::PlaneManifold, q, p) = (q .= [p[1], p[2]])
+ManifoldsBase.project!(::PlaneManifold, Y, p, X) = (Y .= [X[1], X[2]])
 
 struct AnotherPlaneManifold <: AbstractEmbeddedManifold{ℝ,DefaultIsometricEmbeddingType} end
 
-ManifoldsBase.decorated_manifold(::AnotherPlaneManifold) = ManifoldsBase.DefaultManifold(3)
+ManifoldsBase.get_embedding(::AnotherPlaneManifold) = ManifoldsBase.DefaultManifold(3)
 ManifoldsBase.base_manifold(::AnotherPlaneManifold) = ManifoldsBase.DefaultManifold(2)
 
 function ManifoldsBase.embed!(::AnotherPlaneManifold, q, p)
@@ -32,7 +41,7 @@ end
 
 struct NotImplementedEmbeddedManifold <:
        AbstractEmbeddedManifold{ℝ,TransparentIsometricEmbedding} end
-function ManifoldsBase.decorated_manifold(::NotImplementedEmbeddedManifold)
+function ManifoldsBase.get_embedding(::NotImplementedEmbeddedManifold)
     return ManifoldsBase.DefaultManifold(2)
 end
 function ManifoldsBase.base_manifold(::NotImplementedEmbeddedManifold)
@@ -53,7 +62,7 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEm
         @test repr(M) ==
               "EmbeddedManifold($(sprint(show, M.manifold)), $(sprint(show, M.embedding)), TransparentIsometricEmbedding())"
         @test base_manifold(M) == ManifoldsBase.DefaultManifold(2)
-        @test ManifoldsBase.decorated_manifold(M) == ManifoldsBase.DefaultManifold(3)
+        @test ManifoldsBase.get_embedding(M) == ManifoldsBase.DefaultManifold(3)
         @test ManifoldsBase.default_embedding_dispatch(M) === Val{false}()
         @test ManifoldsBase.default_decorator_dispatch(M) ===
               ManifoldsBase.default_embedding_dispatch(M)
@@ -65,28 +74,28 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEm
         @test get_embedding(M) == ManifoldsBase.DefaultManifold(1, 3)
         # Check fallbacks to check embed->check_manifoldpoint Defaults
         @test_throws DomainError is_manifold_point(M, [1, 0, 0], true)
-        @test_throws DomainError is_manifold_point(M, [1 0], true)
-        @test is_manifold_point(M, [1 0 0], true)
+        @test is_manifold_point(M, [1, 0], true)
+        @test_throws DomainError is_manifold_point(M, [1 0 0], true)
         @test_throws DomainError is_tangent_vector(M, [1 0 0], [1], true)
-        @test_throws DomainError is_tangent_vector(M, [1 0 0], [0 0 0 0], true)
-        @test is_tangent_vector(M, [1 0 0], [1 0 1], true)
-        p = [1.0 1.0 0.0]
-        q = [1.0 0.0 0.0]
+        @test is_tangent_vector(M, [1, 0], [0, 2], true)
+        @test_throws DomainError is_tangent_vector(M, [1 0 0], [1 0 1], true)
+        p = [1.0, 0.0]
+        q = [1.0, 2.0]
         X = q - p
         @test check_size(M, p) === nothing
         @test check_size(M, p, X) === nothing
-        @test check_size(M, [1, 2]) isa DomainError
-        @test check_size(M, [1 2 3 4]) isa DomainError
-        @test check_size(M, p, [1, 2]) isa DomainError
-        @test check_size(M, p, [1 2 3 4]) isa DomainError
-        @test embed(M, p) == p
-        pE = similar(p)
+        @test check_size(M, [1 2 2]) isa DomainError
+        @test check_size(M, [1, 2, 3]) isa DomainError
+        @test check_size(M, p, [1 2 4]) isa DomainError
+        @test check_size(M, p, [1, 3, 4]) isa DomainError
+        @test embed(M, p) == vcat(p, 0.0)'
+        pE = similar(p, (1, 3))
         embed!(M, pE, p)
-        @test pE == p
+        @test pE == vcat(p, 0.0)'
         P = [1.0 1.0 2.0]
-        Q = similar(P)
+        Q = similar(P, (2,))
         @test project!(M, Q, P) == project!(M, Q, P)
-        @test project!(M, Q, P) == [1.0 1.0 0.0]
+        @test project!(M, Q, P) == [1.0, 1.0]
 
         @test log(M, p, q) == q - p
         Y = similar(p)
@@ -141,9 +150,9 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEm
             @test_throws ErrorException log(M2, [1, 2], [2, 3])
             @test_throws ErrorException log!(M2, A, [1, 2], [2, 3])
             @test_throws ErrorException manifold_dimension(M2)
-            @test_throws ErrorException project(M2, [1, 2])
+            @test_throws StackOverflowError project(M2, [1, 2])
             @test_throws ErrorException project!(M2, A, [1, 2])
-            @test_throws ErrorException project(M2, [1, 2], [2, 3])
+            @test_throws StackOverflowError project(M2, [1, 2], [2, 3])
             @test_throws ErrorException project!(M2, A, [1, 2], [2, 3])
             @test_throws ErrorException vector_transport_along(M2, [1, 2], [2, 3], [[1, 2]])
             @test_throws ErrorException vector_transport_along(
@@ -196,13 +205,17 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEm
         for f in [mid_point, mid_point!]
             @test ManifoldsBase.decorator_transparent_dispatch(f, AM) === Val(:parent)
         end
-        for f in [check_manifold_point, check_tangent_vector, exp!, inner, embed!]
+        for f in [exp!, inner, embed!]
             @test ManifoldsBase.decorator_transparent_dispatch(f, AM) ===
                   Val(:intransparent)
         end
         for f in [log!, norm, manifold_dimension, project!]
             @test ManifoldsBase.decorator_transparent_dispatch(f, AM) ===
                   Val(:intransparent)
+        end
+        for f in [check_manifold_point, check_tangent_vector]
+            @test ManifoldsBase.decorator_transparent_dispatch(f, AM) ===
+                  Val(:transparent)
         end
         @test ManifoldsBase.decorator_transparent_dispatch(vector_transport_along!, AM) ===
               Val(:intransparent)
