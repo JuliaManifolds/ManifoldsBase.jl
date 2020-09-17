@@ -19,7 +19,7 @@ functions of this type get, in the semi-transparent way of the
 !!! note
 
     Points on an `AbstractEmbeddedManifold` are represented using representation
-    of the embedded manifold. A [`check_manifold_point`](@ref) should first invoke
+    of the embedding. A [`check_manifold_point`](@ref) should first invoke
     the test of the embedding and then test further constraints for the embedded manifold.
 """
 abstract type AbstractEmbeddedManifold{𝔽,T<:AbstractEmbeddingType} <:
