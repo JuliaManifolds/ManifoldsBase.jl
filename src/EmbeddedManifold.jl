@@ -18,9 +18,9 @@ functions of this type get, in the semi-transparent way of the
 
 !!! note
 
-    Points on an `AbstractEmbeddedManifold` are still represented using representation
-    of the embedded manifold. Use [`embed`](@ref) to go to the representation of the embedding
-    and [`project`](@ref) to go the other way.
+    Points on an `AbstractEmbeddedManifold` are represented using representation
+    of the embedded manifold. A [`check_manifold_point`](@ref) should first invoke
+    the test of the embedding and then test further constraints for the embedded manifold.
 """
 abstract type AbstractEmbeddedManifold{𝔽,T<:AbstractEmbeddingType} <:
               AbstractDecoratorManifold{𝔽} end
@@ -131,14 +131,11 @@ check whether a point `p` is a valid point on the [`AbstractEmbeddedManifold`](@
 i.e. that `embed(M, p)` is a valid point on the embedded manifold.
 """
 function check_manifold_point(M::AbstractEmbeddedManifold, p; kwargs...)
-    mse = check_size(M, p)
-    mse === nothing || return mse
-    q = embed(M, p)
     return invoke(
         check_manifold_point,
-        Tuple{typeof(get_embedding(M)),typeof(q)},
+        Tuple{typeof(get_embedding(M)),typeof(p)},
         get_embedding(M),
-        q;
+        p;
         kwargs...,
     )
 end
@@ -160,16 +157,12 @@ function check_tangent_vector(
         mpe = check_manifold_point(M, p; kwargs...)
         mpe === nothing || return mpe
     end
-    q = embed(M, p)
-    mse = check_size(M, p, X)
-    mse === nothing || return mse
-    Y = embed(M, p, X)
     return invoke(
         check_tangent_vector,
-        Tuple{typeof(get_embedding(M)),typeof(q),typeof(Y)},
+        Tuple{typeof(get_embedding(M)),typeof(p),typeof(X)},
         get_embedding(M),
-        q,
-        Y;
+        p,
+        X;
         check_base_point = check_base_point,
         kwargs...,
     )
