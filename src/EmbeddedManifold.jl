@@ -63,12 +63,14 @@ and logarithmic maps.
 struct TransparentIsometricEmbedding <: AbstractIsometricEmbeddingType end
 
 """
-    EmbeddedManifold{𝔽, MT <: Manifold, NT <: Manifold, ET} <: AbstractEmbeddedManifold{𝔽, ET}
+    EmbeddedManifold{𝔽, MT <: Manifold, NT <: Manifold} <: AbstractDecoratorManifold{𝔽}
 
 A type to represent that a [`Manifold`](@ref) `M` of type `MT` is indeed an emebedded
 manifold and embedded into the manifold `N` of type `NT`.
-Based on the [`AbstractEmbeddingType`](@ref) `ET`, this introduces methods for `M` by
-passing them through to embedding `N`.
+Points and tangent vectors are still represented in the representation of `M` and the
+manifold `M` is being decorated (contrary to [`AbstractEmbeddedManifold`](@ref)).
+To go to the representation in the embedding, the function [`embed`](@ref) should be used.
+[`project`](@ref) can be used to go the other way.
 
 # Fields
 
@@ -77,22 +79,14 @@ passing them through to embedding `N`.
 
 # Constructor
 
-    EmbeddedManifold(M, N, e=TransparentIsometricEmbedding())
+    EmbeddedManifold(M, N)
 
 Generate the `EmbeddedManifold` of the [`Manifold`](@ref) `M` into the
-[`Manifold`](@ref) `N` with [`AbstractEmbeddingType`](@ref) `e` that by default is the most
-transparent [`TransparentIsometricEmbedding`](@ref)
+[`Manifold`](@ref) `N`.
 """
-struct EmbeddedManifold{𝔽,MT<:Manifold{𝔽},NT<:Manifold,ET} <: AbstractEmbeddedManifold{𝔽,ET}
+struct EmbeddedManifold{𝔽,MT<:Manifold{𝔽},NT<:Manifold} <: AbstractDecoratorManifold{𝔽}
     manifold::MT
     embedding::NT
-end
-function EmbeddedManifold(
-    M::MT,
-    N::NT,
-    e::ET = TransparentIsometricEmbedding(),
-) where {𝔽,MT<:Manifold{𝔽},NT<:Manifold,ET<:AbstractEmbeddingType}
-    return EmbeddedManifold{𝔽,MT,NT,ET}(M, N)
 end
 
 function allocate_result(M::AbstractEmbeddedManifold, f::typeof(embed), x...)
@@ -101,6 +95,16 @@ function allocate_result(M::AbstractEmbeddedManifold, f::typeof(embed), x...)
 end
 
 function allocate_result(M::AbstractEmbeddedManifold, f::typeof(project), x...)
+    T = allocate_result_type(M, f, x)
+    return allocate(x[end], T, representation_size(base_manifold(M)))
+end
+
+function allocate_result(M::EmbeddedManifold, f::typeof(embed), x...)
+    T = allocate_result_type(M, f, x)
+    return allocate(x[end], T, representation_size(get_embedding(M)))
+end
+
+function allocate_result(M::EmbeddedManifold, f::typeof(project), x...)
     T = allocate_result_type(M, f, x)
     return allocate(x[end], T, representation_size(base_manifold(M)))
 end
@@ -168,7 +172,7 @@ function check_tangent_vector(
     )
 end
 
-decorated_manifold(M::AbstractEmbeddedManifold) = M.embedding
+decorated_manifold(M::EmbeddedManifold) = M.embedding
 
 """
     get_embedding(M::AbstractEmbeddedManifold)
@@ -181,11 +185,22 @@ get_embedding(::AbstractEmbeddedManifold)
     return decorated_manifold(M)
 end
 
+"""
+    get_embedding(M::EmbeddedManifold)
+
+Return the [`Manifold`](@ref) `N` an [`EmbeddedManifold`](@ref) is embedded into.
+"""
+get_embedding(::EmbeddedManifold)
+
+function get_embedding(M::EmbeddedManifold)
+    return M.embedding
+end
+
 function show(
     io::IO,
-    M::EmbeddedManifold{𝔽,MT,NT,ET},
-) where {𝔽,MT<:Manifold{𝔽},NT<:Manifold,ET<:AbstractEmbeddingType}
-    return print(io, "EmbeddedManifold($(M.manifold), $(M.embedding), $(ET()))")
+    M::EmbeddedManifold{𝔽,MT,NT},
+) where {𝔽,MT<:Manifold{𝔽},NT<:Manifold}
+    return print(io, "EmbeddedManifold($(M.manifold), $(M.embedding))")
 end
 
 function default_decorator_dispatch(M::EmbeddedManifold)
@@ -202,6 +217,8 @@ This is used by the [`AbstractDecoratorManifold`](@ref) within
 By default this is set to `Val(false)`.
 """
 default_embedding_dispatch(M::AbstractEmbeddedManifold) = Val(false)
+
+default_embedding_dispatch(M::EmbeddedManifold) = Val(true)
 
 function decorator_transparent_dispatch(
     ::typeof(check_manifold_point),

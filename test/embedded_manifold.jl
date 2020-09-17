@@ -51,17 +51,17 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEm
             ManifoldsBase.DefaultManifold(3),
         )
         @test repr(M) ==
-              "EmbeddedManifold($(sprint(show, M.manifold)), $(sprint(show, M.embedding)), TransparentIsometricEmbedding())"
+              "EmbeddedManifold($(sprint(show, M.manifold)), $(sprint(show, M.embedding)))"
         @test base_manifold(M) == ManifoldsBase.DefaultManifold(2)
         @test ManifoldsBase.decorated_manifold(M) == ManifoldsBase.DefaultManifold(3)
-        @test ManifoldsBase.default_embedding_dispatch(M) === Val{false}()
+        @test ManifoldsBase.default_embedding_dispatch(M) === Val(true)
         @test ManifoldsBase.default_decorator_dispatch(M) ===
               ManifoldsBase.default_embedding_dispatch(M)
     end
     @testset "PlaneManifold" begin
         M = PlaneManifold()
         @test repr(M) == "PlaneManifold()"
-        @test ManifoldsBase.default_decorator_dispatch(M) === Val{false}()
+        @test ManifoldsBase.default_decorator_dispatch(M) === Val(false)
         @test get_embedding(M) == ManifoldsBase.DefaultManifold(1, 3)
         # Check fallbacks to check embed->check_manifoldpoint Defaults
         @test_throws DomainError is_manifold_point(M, [1, 0, 0], true)
