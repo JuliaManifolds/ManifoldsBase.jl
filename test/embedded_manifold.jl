@@ -62,6 +62,7 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEm
         M = PlaneManifold()
         @test repr(M) == "PlaneManifold()"
         @test ManifoldsBase.default_decorator_dispatch(M) === Val(false)
+        @test ManifoldsBase.default_embedding_dispatch(M) === Val(false)
         @test get_embedding(M) == ManifoldsBase.DefaultManifold(1, 3)
         # Check fallbacks to check embed->check_manifoldpoint Defaults
         @test_throws DomainError is_manifold_point(M, [1, 0, 0], true)
