@@ -165,17 +165,6 @@ end
 
 decorated_manifold(M::EmbeddedManifold) = M.embedding
 
-function embed(M::EmbeddedManifold, p)
-    q = allocate_result(M, embed, p)
-    embed!(M, q, p)
-    return q
-end
-function embed(M::EmbeddedManifold, p, X)
-    Y = allocate_result(M, embed, p, X)
-    embed!(M, Y, p, X)
-    return Y
-end
-
 """
     get_embedding(M::AbstractEmbeddedManifold)
 
