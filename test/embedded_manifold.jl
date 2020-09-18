@@ -53,9 +53,11 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEm
         @test repr(M) ==
               "EmbeddedManifold($(sprint(show, M.manifold)), $(sprint(show, M.embedding)))"
         @test base_manifold(M) == ManifoldsBase.DefaultManifold(2)
+        @test get_embedding(M) == ManifoldsBase.DefaultManifold(3)
         @test ManifoldsBase.decorated_manifold(M) == ManifoldsBase.DefaultManifold(3)
         @test ManifoldsBase.default_decorator_dispatch(M) === Val(true)
     end
+
     @testset "PlaneManifold" begin
         M = PlaneManifold()
         @test repr(M) == "PlaneManifold()"
@@ -177,6 +179,7 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEm
             @test_throws ErrorException embed(M3, [1, 2])
         end
     end
+
     @testset "EmbeddedManifold decorator dispatch" begin
         TM = NotImplementedEmbeddedManifold() # transparently iso
         IM = NotImplementedEmbeddedManifold2() # iso

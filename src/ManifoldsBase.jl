@@ -340,6 +340,8 @@ the tangent spaces of the embedded base points.
 See also: [`EmbeddedManifold`](@ref), [`project`](@ref project(M::Manifold, p, X))
 """
 function embed(M::Manifold, p, X)
+    # Note that the order is switched,
+    # since the allocation by default takes the type of the first.
     Y = allocate_result(M, embed, X, p)
     embed!(M, Y, p, X)
     return Y
@@ -697,7 +699,9 @@ Lie algebra is perfomed, too.
 See also: [`EmbeddedManifold`](@ref), [`embed`](@ref embed(M::Manifold, p, X))
 """
 function project(M::Manifold, p, X)
-    Y = allocate_result(M, project, p, X)
+    # Note that the order is switched,
+    # since the allocation by default takes the type of the first.
+    Y = allocate_result(M, project, X, p)
     project!(M, Y, p, X)
     return Y
 end

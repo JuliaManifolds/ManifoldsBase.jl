@@ -92,22 +92,12 @@ end
 
 function allocate_result(M::AbstractEmbeddedManifold, f::typeof(embed), x...)
     T = allocate_result_type(M, f, x)
-    return allocate(x[end], T, representation_size(decorated_manifold(M)))
+    return allocate(x[1], T, representation_size(decorated_manifold(M)))
 end
 
 function allocate_result(M::AbstractEmbeddedManifold, f::typeof(project), x...)
     T = allocate_result_type(M, f, x)
-    return allocate(x[end], T, representation_size(base_manifold(M)))
-end
-
-function allocate_result(M::EmbeddedManifold, f::typeof(embed), x...)
-    T = allocate_result_type(M, f, x)
-    return allocate(x[end], T, representation_size(get_embedding(M)))
-end
-
-function allocate_result(M::EmbeddedManifold, f::typeof(project), x...)
-    T = allocate_result_type(M, f, x)
-    return allocate(x[end], T, representation_size(base_manifold(M)))
+    return allocate(x[1], T, representation_size(base_manifold(M)))
 end
 
 """
@@ -207,18 +197,6 @@ get_embedding(::EmbeddedManifold)
 function get_embedding(M::EmbeddedManifold)
     return M.embedding
 end
-
-function project(M::EmbeddedManifold, p)
-    q = allocate_result(M, project, p)
-    project!(M, q, p)
-    return q
-end
-function project(M::EmbeddedManifold, p, X)
-    Y = allocate_result(M, project, p, X)
-    project!(M, Y, p, X)
-    return Y
-end
-
 
 function show(io::IO, M::EmbeddedManifold{𝔽,MT,NT}) where {𝔽,MT<:Manifold{𝔽},NT<:Manifold}
     return print(io, "EmbeddedManifold($(M.manifold), $(M.embedding))")
