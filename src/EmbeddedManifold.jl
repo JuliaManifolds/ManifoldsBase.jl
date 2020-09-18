@@ -238,6 +238,13 @@ function decorator_transparent_dispatch(
     return Val(:parent)
 end
 function decorator_transparent_dispatch(
+    ::typeof(embed),
+    ::EmbeddedManifold,
+    args...,
+)
+    return Val(:parent)
+end
+function decorator_transparent_dispatch(
     ::typeof(embed!),
     ::AbstractEmbeddedManifold,
     args...,
@@ -431,6 +438,13 @@ end
 function decorator_transparent_dispatch(
     ::typeof(project),
     ::AbstractEmbeddedManifold,
+    args...,
+)
+    return Val(:parent)
+end
+function decorator_transparent_dispatch(
+    ::typeof(project),
+    ::EmbeddedManifold,
     args...,
 )
     return Val(:parent)
