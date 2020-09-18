@@ -54,9 +54,7 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEm
               "EmbeddedManifold($(sprint(show, M.manifold)), $(sprint(show, M.embedding)))"
         @test base_manifold(M) == ManifoldsBase.DefaultManifold(2)
         @test ManifoldsBase.decorated_manifold(M) == ManifoldsBase.DefaultManifold(3)
-        @test ManifoldsBase.default_embedding_dispatch(M) === Val(true)
-        @test ManifoldsBase.default_decorator_dispatch(M) ===
-              ManifoldsBase.default_embedding_dispatch(M)
+        @test ManifoldsBase.default_decorator_dispatch(M) === Val(true)
     end
     @testset "PlaneManifold" begin
         M = PlaneManifold()

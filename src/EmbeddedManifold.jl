@@ -14,7 +14,8 @@ The embedding is further specified by an [`AbstractEmbeddingType`](@ref).
 
 This means, that technically an embedded manifold is a decorator for the embedding, i.e.
 functions of this type get, in the semi-transparent way of the
-[`AbstractDecoratorManifold`](@ref), passed on to the embedding.
+[`AbstractDecoratorManifold`](@ref), passed on to the embedding. This is in contrast with
+[`EmbeddedManifold`](@ref) that decorates the embedded manifold.
 
 !!! note
 
@@ -201,7 +202,7 @@ function show(io::IO, M::EmbeddedManifold{𝔽,MT,NT}) where {𝔽,MT<:Manifold{
 end
 
 function default_decorator_dispatch(M::EmbeddedManifold)
-    return default_embedding_dispatch(M)
+    return Val(true)
 end
 
 @doc doc"""
@@ -214,8 +215,6 @@ This is used by the [`AbstractDecoratorManifold`](@ref) within
 By default this is set to `Val(false)`.
 """
 default_embedding_dispatch(M::AbstractEmbeddedManifold) = Val(false)
-
-default_embedding_dispatch(M::EmbeddedManifold) = Val(true)
 
 function decorator_transparent_dispatch(
     ::typeof(check_manifold_point),
