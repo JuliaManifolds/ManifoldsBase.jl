@@ -697,7 +697,7 @@ Lie algebra is perfomed, too.
 See also: [`EmbeddedManifold`](@ref), [`embed`](@ref embed(M::Manifold, p, X))
 """
 function project(M::Manifold, p, X)
-    Y = allocate_result(M, project, X, p)
+    Y = allocate_result(M, project, p, X)
     project!(M, Y, p, X)
     return Y
 end
