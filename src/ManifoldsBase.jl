@@ -239,6 +239,52 @@ type.
 check_tangent_vector(M::Manifold, p, X; kwargs...) = nothing
 
 """
+    check_size(M::Manifold, p)
+    check_size(M::Manifold, p, X)
+
+Check whether `p` has the right [`representation_size`](@ref) for a [`Manifold`](@ref) `M`.
+Additionally if a tangent vector is given, both `p` and `X` are checked to be of
+corresponding correct representation sizes for points and tangent vectors on `M`.
+
+By default, `check_size` returns `nothing`, i.e. if no checks are implemented, the
+assumption is to be optimistic.
+"""
+function check_size(M::Manifold, p)
+    n = size(p)
+    m = representation_size(M)
+    if length(n) != length(m)
+        return DomainError(
+            length(n),
+            "The point $(p) can not belong to the manifold $(M), since its size $(n) is not equal to the manifolds representation size ($(m)).",
+        )
+    end
+    if n != m
+        return DomainError(
+            n,
+            "The point $(p) can not belong to the manifold $(M), since its size $(n) is not equal to the manifolds representation size ($(m)).",
+        )
+    end
+end
+function check_size(M::Manifold, p, X)
+    mse = check_size(M, p)
+    mse === nothing || return mse
+    n = size(X)
+    m = representation_size(M)
+    if length(n) != length(m)
+        return DomainError(
+            length(n),
+            "The tangent vector $(X) can not belong to the manifold $(M), since its size $(n) is not equal to the manifolds representation size ($(m)).",
+        )
+    end
+    if n != m
+        return DomainError(
+            n,
+            "The tangent vector $(X) can not belong to the manifold $(M), since its size $(n) is not equal to the manifodls representation size ($(m)).",
+        )
+    end
+end
+
+"""
     distance(M::Manifold, p, q)
 
 Shortest distance between the points `p` and `q` on the [`Manifold`](@ref) `M`.
@@ -294,6 +340,8 @@ the tangent spaces of the embedded base points.
 See also: [`EmbeddedManifold`](@ref), [`project`](@ref project(M::Manifold, p, X))
 """
 function embed(M::Manifold, p, X)
+    # Note that the order is switched,
+    # since the allocation by default takes the type of the first.
     Y = allocate_result(M, embed, X, p)
     embed!(M, Y, p, X)
     return Y
@@ -651,6 +699,8 @@ Lie algebra is perfomed, too.
 See also: [`EmbeddedManifold`](@ref), [`embed`](@ref embed(M::Manifold, p, X))
 """
 function project(M::Manifold, p, X)
+    # Note that the order is switched,
+    # since the allocation by default takes the type of the first.
     Y = allocate_result(M, project, X, p)
     project!(M, Y, p, X)
     return Y
@@ -820,6 +870,7 @@ export allocate,
     base_manifold,
     check_manifold_point,
     check_tangent_vector,
+    check_size,
     distance,
     exp,
     exp!,

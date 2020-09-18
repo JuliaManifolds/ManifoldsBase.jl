@@ -51,25 +51,35 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEm
             ManifoldsBase.DefaultManifold(3),
         )
         @test repr(M) ==
-              "EmbeddedManifold($(sprint(show, M.manifold)), $(sprint(show, M.embedding)), TransparentIsometricEmbedding())"
+              "EmbeddedManifold($(sprint(show, M.manifold)), $(sprint(show, M.embedding)))"
         @test base_manifold(M) == ManifoldsBase.DefaultManifold(2)
+        @test get_embedding(M) == ManifoldsBase.DefaultManifold(3)
         @test ManifoldsBase.decorated_manifold(M) == ManifoldsBase.DefaultManifold(3)
-        @test ManifoldsBase.default_embedding_dispatch(M) === Val{false}()
-        @test ManifoldsBase.default_decorator_dispatch(M) ===
-              ManifoldsBase.default_embedding_dispatch(M)
+        @test ManifoldsBase.default_decorator_dispatch(M) === Val(true)
     end
+
     @testset "PlaneManifold" begin
         M = PlaneManifold()
         @test repr(M) == "PlaneManifold()"
-        @test ManifoldsBase.default_decorator_dispatch(M) === Val{false}()
+        @test ManifoldsBase.default_decorator_dispatch(M) === Val(false)
+        @test ManifoldsBase.default_embedding_dispatch(M) === Val(false)
         @test get_embedding(M) == ManifoldsBase.DefaultManifold(1, 3)
         # Check fallbacks to check embed->check_manifoldpoint Defaults
-        @test is_manifold_point(M, [1, 0], true)
-        @test is_tangent_vector(M, [1, 0], [1, 0, 0], true)
-        @test is_tangent_vector(M, [1, 0, 0], [0, 0], true)
+        @test_throws DomainError is_manifold_point(M, [1, 0, 0], true)
+        @test_throws DomainError is_manifold_point(M, [1 0], true)
+        @test is_manifold_point(M, [1 0 0], true)
+        @test_throws DomainError is_tangent_vector(M, [1 0 0], [1], true)
+        @test_throws DomainError is_tangent_vector(M, [1 0 0], [0 0 0 0], true)
+        @test is_tangent_vector(M, [1 0 0], [1 0 1], true)
         p = [1.0 1.0 0.0]
         q = [1.0 0.0 0.0]
         X = q - p
+        @test check_size(M, p) === nothing
+        @test check_size(M, p, X) === nothing
+        @test check_size(M, [1, 2]) isa DomainError
+        @test check_size(M, [1 2 3 4]) isa DomainError
+        @test check_size(M, p, [1, 2]) isa DomainError
+        @test check_size(M, p, [1 2 3 4]) isa DomainError
         @test embed(M, p) == p
         pE = similar(p)
         embed!(M, pE, p)
@@ -105,8 +115,9 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEm
         @testset "Default Isometric Embedding Fallback Error Tests" begin
             M = NotImplementedEmbeddedManifold()
             A = zeros(2)
-            @test_throws ErrorException check_manifold_point(M, [1, 2])
-            @test_throws ErrorException check_tangent_vector(M, [1, 2], [3, 4])
+            # without any extra tests just the embedding is asked
+            @test check_manifold_point(M, [1, 2]) === nothing
+            @test check_tangent_vector(M, [1, 2], [3, 4]) === nothing
             @test norm(M, [1, 2], [2, 3]) ≈ sqrt(13)
             @test inner(M, [1, 2], [2, 3], [2, 3]) ≈ 13
             @test_throws ErrorException manifold_dimension(M)
@@ -169,6 +180,7 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEm
             @test_throws ErrorException embed(M3, [1, 2])
         end
     end
+
     @testset "EmbeddedManifold decorator dispatch" begin
         TM = NotImplementedEmbeddedManifold() # transparently iso
         IM = NotImplementedEmbeddedManifold2() # iso
