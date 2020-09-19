@@ -323,5 +323,8 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEm
         @test_throws DomainError embed!(O, zeros(3, 3), zeros(4, 4))
         @test_throws DomainError project!(O, zeros(3, 3, 5), zeros(3, 3))
         @test_throws DomainError project!(O, zeros(4, 4), zeros(3, 3))
+        for f in [embed, project]
+            @test ManifoldsBase.decorator_transparent_dispatch(f, O) === Val(:intransparent)
+        end
     end
 end

@@ -251,11 +251,7 @@ function decorator_transparent_dispatch(
 )
     return Val(:parent)
 end
-function decorator_transparent_dispatch(
-    ::typeof(embed),
-    ::EmbeddedManifold,
-    args...,
-)
+function decorator_transparent_dispatch(::typeof(embed), ::EmbeddedManifold, args...)
     return Val(:intransparent)
 end
 function decorator_transparent_dispatch(
@@ -462,6 +458,9 @@ function decorator_transparent_dispatch(
     args...,
 ) where {𝔽}
     return Val(:transparent)
+end
+function decorator_transparent_dispatch(::typeof(project), ::EmbeddedManifold, args...)
+    return Val(:intransparent)
 end
 function decorator_transparent_dispatch(
     ::typeof(retract),
