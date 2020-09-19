@@ -30,6 +30,43 @@ function ManifoldsBase.project!(::AnotherPlaneManifold, Y, p, X)
     return Y .= [X[1], X[2]]
 end
 
+
+function ManifoldsBase.embed!(
+    ::EmbeddedManifold{𝔽,DefaultManifold{nL,𝔽},DefaultManifold{mL,𝔽2}},
+    q,
+    p,
+) where {nL,mL,𝔽,𝔽2}
+    n = size(p)
+    ln = length(n)
+    m = size(q)
+    lm = length(m)
+    (length(n) > length(m)) &&
+        throw(DomainError("Invalid embedding, since Euclidean dimension ($(n)) is longer than embedding dimension $(m)."))
+    any(n .> m[1:ln]) &&
+        throw(DomainError("Invalid embedding, since Euclidean dimension ($(n)) has entry larger than embedding dimensions ($(m))."))
+    fill!(q, 0)
+    q[map(ind_n -> Base.OneTo(ind_n), n)..., ntuple(_ -> 1, lm - ln)...] .= p
+    return q
+end
+
+function ManifoldsBase.project!(
+    ::EmbeddedManifold{𝔽,DefaultManifold{nL,𝔽},DefaultManifold{mL,𝔽2}},
+    q,
+    p,
+) where {nL,mL,𝔽,𝔽2}
+    n = size(p)
+    ln = length(n)
+    m = size(q)
+    lm = length(m)
+    (length(n) < length(m)) &&
+        throw(DomainError("Invalid embedding, since Euclidean dimension ($(n)) is longer than embedding dimension $(m)."))
+    any(n .< m[1:ln]) &&
+        throw(DomainError("Invalid embedding, since Euclidean dimension ($(n)) has entry larger than embedding dimensions ($(m))."))
+    #  fill q with the „top left edge“ of p.
+    q .= p[map(i -> Base.OneTo(i), m)..., ntuple(_ -> 1, lm - ln)...]
+    return q
+end
+
 struct NotImplementedEmbeddedManifold <:
        AbstractEmbeddedManifold{ℝ,TransparentIsometricEmbedding} end
 function ManifoldsBase.decorated_manifold(::NotImplementedEmbeddedManifold)
@@ -256,5 +293,35 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEm
         @test ManifoldsBase.decorator_transparent_dispatch(embed, TM) === Val{:parent}()
         @test ManifoldsBase.decorator_transparent_dispatch(embed!, TM) ===
               Val(:intransparent)
+    end
+
+    @testset "Explicit Embeddings using AmbeddedManifold" begin
+        M = DefaultManifold(3, 3)
+        N = DefaultManifold(4, 4)
+        O = EmbeddedManifold(M, N)
+        # first test with same length of sizes
+        p = ones(3, 3)
+        q = zeros(4, 4)
+        qT = zeros(4, 4)
+        qT[1:3, 1:3] .= 1.0
+        embed!(O, q, p)
+        @test norm(qT - q) == 0
+        qM = embed(O, p)
+        @test norm(project(O, qM) - p) == 0
+        @test norm(qT - qM) == 0
+        # test with different sizes, check that it only fills first element
+        q2 = zeros(4, 4, 3)
+        q2T = zeros(4, 4, 3)
+        q2T[1:3, 1:3, 1] .= 1.0
+        embed!(O, q2, p)
+        @test norm(q2T - q2) == 0
+        O2 = EmbeddedManifold(M, DefaultManifold(4, 4, 3))
+        q2M = embed(O2, p)
+        @test norm(q2T - q2M) == 0
+        # wrong size error checks
+        @test_throws DomainError embed!(O, zeros(3, 3), zeros(3, 3, 5))
+        @test_throws DomainError embed!(O, zeros(3, 3), zeros(4, 4))
+        @test_throws DomainError project!(O, zeros(3, 3, 5), zeros(3, 3))
+        @test_throws DomainError project!(O, zeros(4, 4), zeros(3, 3))
     end
 end

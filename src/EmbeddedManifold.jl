@@ -100,6 +100,17 @@ function allocate_result(M::AbstractEmbeddedManifold, f::typeof(project), x...)
     return allocate(x[1], T, representation_size(base_manifold(M)))
 end
 
+function allocate_result(M::EmbeddedManifold, f::typeof(embed), x...)
+    T = allocate_result_type(M, f, x)
+    return allocate(x[1], T, representation_size(get_embedding(M)))
+end
+
+function allocate_result(M::EmbeddedManifold, f::typeof(project), x...)
+    T = allocate_result_type(M, f, x)
+    return allocate(x[1], T, representation_size(base_manifold(M)))
+end
+
+
 """
     base_manifold(M::AbstractEmbeddedManifold, d::Val{N} = Val(-1))
 
@@ -165,6 +176,13 @@ end
 
 decorated_manifold(M::EmbeddedManifold) = M.embedding
 
+function embed(M::EmbeddedManifold, p)
+    q = allocate_result(M, embed, p)
+    embed!(M, q, p)
+    return q
+end
+
+
 """
     get_embedding(M::AbstractEmbeddedManifold)
 
@@ -185,6 +203,12 @@ get_embedding(::EmbeddedManifold)
 
 function get_embedding(M::EmbeddedManifold)
     return M.embedding
+end
+
+function project(M::EmbeddedManifold, p)
+    q = allocate_result(M, project, p)
+    project!(M, q, p)
+    return q
 end
 
 function show(io::IO, M::EmbeddedManifold{𝔽,MT,NT}) where {𝔽,MT<:Manifold{𝔽},NT<:Manifold}
@@ -226,6 +250,13 @@ function decorator_transparent_dispatch(
     args...,
 )
     return Val(:parent)
+end
+function decorator_transparent_dispatch(
+    ::typeof(embed),
+    ::EmbeddedManifold,
+    args...,
+)
+    return Val(:intransparent)
 end
 function decorator_transparent_dispatch(
     ::typeof(embed!),
