@@ -57,8 +57,8 @@ ManifoldsBase.manifold_dimension(::ProjectionTestManifold) = 100
 @testset "Projected and arbitrary orthonormal basis" begin
     M = ProjManifold()
     x = [
-        sqrt(2) / 2 0.0 0.0
-        0.0 sqrt(2) / 2 0.0
+        sqrt(2)/2 0.0 0.0
+        0.0 sqrt(2)/2 0.0
     ]
 
     for pb in (ProjectedOrthonormalBasis(:svd), ProjectedOrthonormalBasis(:gram_schmidt))
