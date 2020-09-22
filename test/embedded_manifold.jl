@@ -125,10 +125,10 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEm
         @test project!(M, Q, P) == [1.0 1.0 0.0]
 
         XE = similar(X)
-        embed!(M,XE,p,X)
-        XE2 = embed(M,p,X)
-        @test X==XE
-        @test XE==XE2
+        embed!(M, XE, p, X)
+        XE2 = embed(M, p, X)
+        @test X == XE
+        @test XE == XE2
 
         @test log(M, p, q) == q - p
         Y = similar(p)
