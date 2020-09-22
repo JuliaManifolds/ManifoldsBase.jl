@@ -312,7 +312,7 @@ end
 """
     embed!(M::Manifold, q, p)
 
-Embed point `p` from the [`Manifold`](@ref) `M` intointo an ambient space.
+Embed point `p` from the [`Manifold`](@ref) `M` into an ambient space.
 This method is only available for manifolds where implicitly an embedding or ambient space
 is given. Not implementing this function means, there is no proper embedding for your manifold.
 Additionally, `embed` might include changing data representation, if applicable, i.e.

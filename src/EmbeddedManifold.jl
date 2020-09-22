@@ -74,10 +74,10 @@ A type to represent an explicit embedding of a [`Manifold`](@ref) `M` of type `M
 into a manifold `N` of type `NT`.
 
 !!!note
-    for a first (default) embedding, this type is not required, one can just implement
-    [`embed!`](@ref) and [`project!`](@ref), only for a second –maybe considered non-default–
+    This type is not required if a manifold `M` is to be embedded in one specific manifold `N`. One can then just implement
+    [`embed!`](@ref) and [`project!`](@ref). Only for a second –maybe considered non-default–
     embedding, this type should be considered in order to dispatch on different embed
-    and project methods
+    and project methods for different embeddings `N`.
 
 # Fields
 
