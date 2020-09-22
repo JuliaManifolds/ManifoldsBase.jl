@@ -182,8 +182,8 @@ function embed(M::EmbeddedManifold, p)
     return q
 end
 
-embed!(::AbstractEmbeddedManifold, q, p) = copyto!(q,p)
-embed!(::AbstractEmbeddedManifold, Y, p, X) = copyto!(Y,X)
+embed!(::AbstractEmbeddedManifold, q, p) = copyto!(q, p)
+embed!(::AbstractEmbeddedManifold, Y, p, X) = copyto!(Y, X)
 
 """
     get_embedding(M::AbstractEmbeddedManifold)
