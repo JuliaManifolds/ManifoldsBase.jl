@@ -182,6 +182,8 @@ function embed(M::EmbeddedManifold, p)
     return q
 end
 
+embed!(::AbstractEmbeddedManifold, q, p) = copyto!(q,p)
+embed!(::AbstractEmbeddedManifold, Y, p, X) = copyto!(Y,X)
 
 """
     get_embedding(M::AbstractEmbeddedManifold)
@@ -215,7 +217,7 @@ function show(io::IO, M::EmbeddedManifold{𝔽,MT,NT}) where {𝔽,MT<:Manifold{
     return print(io, "EmbeddedManifold($(M.manifold), $(M.embedding))")
 end
 
-function default_decorator_dispatch(M::EmbeddedManifold)
+function default_decorator_dispatch(::EmbeddedManifold)
     return Val(true)
 end
 
