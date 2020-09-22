@@ -3,8 +3,6 @@ struct PlaneManifold <: AbstractEmbeddedManifold{ℝ,TransparentIsometricEmbeddi
 ManifoldsBase.decorated_manifold(::PlaneManifold) = ManifoldsBase.DefaultManifold(1, 3)
 ManifoldsBase.base_manifold(::PlaneManifold) = ManifoldsBase.DefaultManifold(2)
 
-ManifoldsBase.embed!(::PlaneManifold, q, p) = copyto!(q, p)
-ManifoldsBase.embed!(::PlaneManifold, Y, p, X) = copyto!(Y, X)
 ManifoldsBase.project!(::PlaneManifold, q, p) = (q .= [p[1] p[2] 0.0])
 ManifoldsBase.project!(::PlaneManifold, Y, p, X) = (Y .= [X[1] X[2] 0.0])
 
@@ -125,6 +123,12 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEm
         Q = similar(P)
         @test project!(M, Q, P) == project!(M, Q, P)
         @test project!(M, Q, P) == [1.0 1.0 0.0]
+
+        XE = similar(X)
+        embed!(M, XE, p, X)
+        XE2 = embed(M, p, X)
+        @test X == XE
+        @test XE == XE2
 
         @test log(M, p, q) == q - p
         Y = similar(p)

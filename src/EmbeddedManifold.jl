@@ -8,20 +8,24 @@ abstract type AbstractEmbeddingType end
 """
     AbstractEmbeddedManifold{𝔽,T<:AbstractEmbeddingType,𝔽} <: AbstractDecoratorManifold{𝔽}
 
-An abstract type for embedded manifolds, which acts as an [`AbstractDecoratorManifold`](@ref).
-The functions of the manifold that is embedded can hence be just passed on to the embedding.
-The embedding is further specified by an [`AbstractEmbeddingType`](@ref).
+This abstract type indicates that a concrete subtype is an embedded manifold with the
+additional property, that its points are given in the embedding. This also means, that
+the default implementation of [`embed`](@ref) is just the identity, since the points are
+already stored in the form suitable for this embedding specified. This also holds true for
+tangent vectors.
 
-This means, that technically an embedded manifold is a decorator for the embedding, i.e.
-functions of this type get, in the semi-transparent way of the
-[`AbstractDecoratorManifold`](@ref), passed on to the embedding. This is in contrast with
-[`EmbeddedManifold`](@ref) that decorates the embedded manifold.
+Furthermore, depending on the [`AbstractEmbeddingType`](@ref) different methods are
+transparently used from the embedding, for example the [`inner`](@ref) product or even the
+[`distance`](@ref) function. Specifying such an embedding type transparently passes the
+compuation onwards to the embedding (note again, that no [`embed`](@ref) is required)
+and hence avoids to reimplement these methods in the manifold that is embedded.
 
-!!! note
+This should be used for example for [`check_manifold_point`](@ref) or [`check_tangent_vector`](@ref),
+which should first invoke the test of the embedding and then test further constraints
+the representation in the embedding has for these points to be valid.
 
-    Points on an `AbstractEmbeddedManifold` are represented using representation
-    of the embedding. A [`check_manifold_point`](@ref) should first invoke
-    the test of the embedding and then test further constraints for the embedded manifold.
+Technically this is realised by making the [`AbstractEmbeddedManifold`](@ref) is a decorator
+for the [`Manifold`](@ref)s that are subtypes.
 """
 abstract type AbstractEmbeddedManifold{𝔽,T<:AbstractEmbeddingType} <:
               AbstractDecoratorManifold{𝔽} end
@@ -66,12 +70,14 @@ struct TransparentIsometricEmbedding <: AbstractIsometricEmbeddingType end
 """
     EmbeddedManifold{𝔽, MT <: Manifold, NT <: Manifold} <: AbstractDecoratorManifold{𝔽}
 
-A type to represent that a [`Manifold`](@ref) `M` of type `MT` is indeed an emebedded
-manifold and embedded into the manifold `N` of type `NT`.
-Points and tangent vectors are still represented in the representation of `M` and the
-manifold `M` is being decorated (contrary to [`AbstractEmbeddedManifold`](@ref)).
-To go to the representation in the embedding, the function [`embed`](@ref) should be used.
-[`project`](@ref) can be used to go the other way.
+A type to represent an explicit embedding of a [`Manifold`](@ref) `M` of type `MT` embedded
+into a manifold `N` of type `NT`.
+
+!!!note
+    This type is not required if a manifold `M` is to be embedded in one specific manifold `N`. One can then just implement
+    [`embed!`](@ref) and [`project!`](@ref). Only for a second –maybe considered non-default–
+    embedding, this type should be considered in order to dispatch on different embed
+    and project methods for different embeddings `N`.
 
 # Fields
 
@@ -182,6 +188,8 @@ function embed(M::EmbeddedManifold, p)
     return q
 end
 
+embed!(::AbstractEmbeddedManifold, q, p) = copyto!(q, p)
+embed!(::AbstractEmbeddedManifold, Y, p, X) = copyto!(Y, X)
 
 """
     get_embedding(M::AbstractEmbeddedManifold)
@@ -215,7 +223,7 @@ function show(io::IO, M::EmbeddedManifold{𝔽,MT,NT}) where {𝔽,MT<:Manifold{
     return print(io, "EmbeddedManifold($(M.manifold), $(M.embedding))")
 end
 
-function default_decorator_dispatch(M::EmbeddedManifold)
+function default_decorator_dispatch(::EmbeddedManifold)
     return Val(true)
 end
 

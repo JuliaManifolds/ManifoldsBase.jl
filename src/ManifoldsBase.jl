@@ -312,12 +312,16 @@ end
 """
     embed!(M::Manifold, q, p)
 
-Embed point `p` from the [`Manifold`](@ref) `M` into the ambient space and return the result in `q`.
+Embed point `p` from the [`Manifold`](@ref) `M` into an ambient space.
 This method is only available for manifolds where implicitly an embedding or ambient space
-is given.
-Additionally, `embed` includes changing data representation, if applicable, i.e.
-if the points on `M` are not represented in the same way as points on the embedding,
+is given. Not implementing this function means, there is no proper embedding for your manifold.
+Additionally, `embed` might include changing data representation, if applicable, i.e.
+if points on `M` are not represented in the same way as their counterparts in the embedding,
 the representation is changed accordingly.
+
+If you have more than one embedding, see [`EmbeddedManifold`](@ref) for defining a second
+embedding. If your point `p` is already represented in some embedding,
+see [`AbstractEmbeddedManifold`](@ref) how you can avoid reimplementing code from the embedded manifold
 
 See also: [`EmbeddedManifold`](@ref), [`project!`](@ref project!(M::Manifold, q, p))
 """
@@ -328,14 +332,17 @@ end
 """
     embed(M::Manifold, p, X)
 
-Embed a tangent vector `X` at a point `p` on the [`Manifold`](@ref) `M` into the ambient space.
+Embed a tangent vector `X` at a point `p` on the [`Manifold`](@ref) `M` into an ambient space.
 This method is only available for manifolds where implicitly an embedding or ambient space
-is given.
-Additionally, `embed` includes changing data representation, if applicable, i.e.
-if the tangents on `M` are not represented in the same way as tangents on the embedding,
-the representation is changed accordingly. This is the case for example for Lie groups,
-when tangent vectors are represented in the Lie algebra. The embedded tangents are then in
-the tangent spaces of the embedded base points.
+is given. Not implementing this function means, there is no proper embedding for your tangent space(s).
+
+Additionally, `embed` might include changing data representation, if applicable, i.e.
+if tangent vectors on `M` are not represented in the same way as their counterparts in the
+embedding, the representation is changed accordingly.
+
+If you have more than one embedding, see [`EmbeddedManifold`](@ref) for defining a second
+embedding. If your tangent vector `X` is already represented in some embedding,
+see [`AbstractEmbeddedManifold`](@ref) how you can avoid reimplementing code from the embedded manifold
 
 See also: [`EmbeddedManifold`](@ref), [`project`](@ref project(M::Manifold, p, X))
 """
