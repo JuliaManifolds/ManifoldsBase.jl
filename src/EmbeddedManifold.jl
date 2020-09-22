@@ -70,8 +70,8 @@ struct TransparentIsometricEmbedding <: AbstractIsometricEmbeddingType end
 """
     EmbeddedManifold{𝔽, MT <: Manifold, NT <: Manifold} <: AbstractDecoratorManifold{𝔽}
 
-A type to represent that a [`Manifold`](@ref) `M` of type `MT` can be embedded into a
-manifold `N` of type `NT`.
+A type to represent an explicit embedding of a [`Manifold`](@ref) `M` of type `MT` embedded
+into a manifold `N` of type `NT`.
 
 !!!note
     for a first (default) embedding, this type is not required, one can just implement
