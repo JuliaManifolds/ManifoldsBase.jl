@@ -140,11 +140,11 @@ end
 test14(::ManifoldsBase.DefaultManifold, a) = 14 * a
 
 test15(::ManifoldsBase.DefaultManifold, a) = 15.5 * a
-@decorate_function function test15(::AbstractDecoratorManifold, p)
+@decorate_function function test15(M::AbstractDecoratorManifold, p)
     return error("Not yet implemented")
 end
 test15(::AbstractParentDecorator, p) = 15 * p
-decorator_transparent_dispatch(::typeof(test15), ::ChildDecorator, args...) = Val(:inherit)
+decorator_transparent_dispatch(::typeof(test15), M::ChildDecorator, args...) = Val(:inherit)
 
 function test16(::AbstractParentDecorator, p)
     return 16 * p
@@ -201,8 +201,8 @@ decorator_transparent_dispatch(::typeof(test18), M::ChildDecorator, args...) = V
 
     p = [1.0, 0.0, 0.0]
     X = [2.0, 1.0, 3.0]
-    @test inner(A, p, X, X) ≈ ManifoldsBase.inner__transparent(A, p, X, X)
-    @test_throws ErrorException ManifoldsBase.inner__intransparent(A, p, X, X)
+    @test inner(A, p, X, X) ≈ ManifoldsBase.inner((A, :inherit), p, X, X)
+    @test_throws ErrorException ManifoldsBase.inner((A, :implement), p, X, X)
 
     TD = TestDecorator(M)
 
