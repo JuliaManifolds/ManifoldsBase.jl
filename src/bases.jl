@@ -226,7 +226,7 @@ See also: [`get_coordinates`](@ref), [`get_vector`](@ref)
 function get_basis(M::Manifold, p, B::AbstractBasis)
     return error("get_basis not implemented for manifold of type $(typeof(M)) a point of type $(typeof(p)) and basis of type $(typeof(B)).")
 end
-@decorator_transparent_signature get_basis(
+@decorate_signature get_basis(
     M::AbstractDecoratorManifold,
     p,
     B::AbstractBasis,
@@ -314,7 +314,7 @@ end
 for BT in DISAMBIGUATION_BASIS_TYPES
     eval(
         quote
-            @decorator_transparent_signature get_basis(
+            @decorate_signature get_basis(
                 M::AbstractDecoratorManifold,
                 p,
                 B::$BT,
@@ -344,7 +344,7 @@ function get_coordinates(M::Manifold, p, X, B::AbstractBasis)
     Y = allocate_result(M, get_coordinates, p, X, B)
     return get_coordinates!(M, Y, p, X, B)
 end
-@decorator_transparent_signature get_coordinates(
+@decorate_signature get_coordinates(
     M::AbstractDecoratorManifold,
     p,
     X,
@@ -357,7 +357,7 @@ end
 function get_coordinates!(M::Manifold, Y, p, X, B::AbstractBasis)
     return error("get_coordinates! not implemented for manifold of type $(typeof(M)) coordinates of type $(typeof(Y)), a point of type $(typeof(p)), tangent vector of type $(typeof(X)) and basis of type $(typeof(B)).")
 end
-@decorator_transparent_signature get_coordinates!(
+@decorate_signature get_coordinates!(
     M::AbstractDecoratorManifold,
     Y,
     p,
@@ -367,7 +367,7 @@ end
 for BT in DISAMBIGUATION_BASIS_TYPES
     eval(
         quote
-            @decorator_transparent_signature get_coordinates!(
+            @decorate_signature get_coordinates!(
                 M::AbstractDecoratorManifold,
                 Y,
                 p,
@@ -429,7 +429,7 @@ function get_vector(M::Manifold, p, X, B::AbstractBasis)
     Y = allocate_result(M, get_vector, p, X)
     return get_vector!(M, Y, p, X, B)
 end
-@decorator_transparent_signature get_vector(
+@decorate_signature get_vector(
     M::AbstractDecoratorManifold,
     p,
     X,
@@ -442,7 +442,7 @@ end
 function get_vector!(M::Manifold, Y, p, X, B::AbstractBasis)
     return error("get_vector! not implemented for manifold of type $(typeof(M)) vector of type $(typeof(Y)), a point of type $(typeof(p)), coordinates of type $(typeof(X)) and basis of type $(typeof(B)).")
 end
-@decorator_transparent_signature get_vector!(
+@decorate_signature get_vector!(
     M::AbstractDecoratorManifold,
     Y,
     p,
@@ -452,7 +452,7 @@ end
 for BT in DISAMBIGUATION_BASIS_TYPES
     eval(
         quote
-            @decorator_transparent_signature get_vector!(
+            @decorate_signature get_vector!(
                 M::AbstractDecoratorManifold,
                 Y,
                 p,

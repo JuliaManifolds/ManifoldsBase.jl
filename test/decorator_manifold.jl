@@ -1,9 +1,9 @@
 using ManifoldsBase
 using Test
 using ManifoldsBase:
-    @decorator_transparent_function,
-    @decorator_transparent_fallback,
-    @decorator_transparent_signature,
+    @decorate_function,
+    @decorate_case,
+    @decorate_signature,
     is_decorator_transparent
 import ManifoldsBase: decorator_transparent_dispatch
 
@@ -32,47 +32,47 @@ struct DefaultDecorator{M<:Manifold{ℝ}} <: AbstractDecoratorManifold{ℝ}
 end
 ManifoldsBase.default_decorator_dispatch(::DefaultDecorator) = Val(true)
 
-test1(M::Manifold, p; a = 0) = 101 + a
-test2(M::Manifold, p; a = 0) = 102 + a
-test3(M::Manifold, p; a = 0) = 103 + a
-function test4(M::Manifold, p; a = 0)
+test1(::Manifold, ::Any; a = 0) = 101 + a
+test2(::Manifold, ::Any; a = 0) = 102 + a
+test3(::Manifold, ::Any; a = 0) = 103 + a
+function test4(::Manifold, p; a = 0)
     return error(ManifoldsBase.manifold_function_not_implemented_message(M, test4, p))
 end
 
-function test1(M::TestDecorator, p; a = 0)
+function test1(::TestDecorator, p; a = 0)
     return 1 + a
 end
 
-function decorator_transparent_dispatch(::typeof(test1), M::TestDecorator, args...)
-    return Val(:intransparent)
+function decorator_transparent_dispatch(::typeof(test1), ::TestDecorator, ::Any...)
+    return Val(:implement)
 end
-function decorator_transparent_dispatch(::typeof(test2), M::TestDecorator, args...)
-    return Val(:transparent)
+function decorator_transparent_dispatch(::typeof(test2), ::TestDecorator, ::Any...)
+    return Val(:undecorate)
 end
-decorator_transparent_dispatch(::typeof(test3), M::TestDecorator, args...) = Val(:parent)
-function decorator_transparent_dispatch(::typeof(test4), M::TestDecorator, args...)
-    return Val(:intransparent)
+decorator_transparent_dispatch(::typeof(test3), ::TestDecorator, ::Any...) = Val(:parent)
+function decorator_transparent_dispatch(::typeof(test4), ::TestDecorator, ::Any...)
+    return Val(:implement)
 end
 
-@decorator_transparent_function :transparent function test5(M::AbstractDecoratorManifold, p)
+@decorate_function :transparent function test5(::AbstractDecoratorManifold, ::Any)
     return 5
 end
 
-@decorator_transparent_function @inline function test6(M::TestDecorator, p)
+@decorate_function @inline function test6(::TestDecorator, ::Any)
     return 6
 end
 
-@decorator_transparent_function :parent function test7(M::TestDecorator, p)
+@decorate_function :parent function test7(::TestDecorator, ::Any)
     return 7
 end
 
-@decorator_transparent_fallback :parent @inline function test7(M::TestDecorator, p)
+@decorate_function :parent @inline function test7(::TestDecorator, ::Any)
     return 17
 end
 
-test8(M::Manifold, p; a = 0) = 8 + a
+test8(::Manifold, p; a = 0) = 8 + a
 
-@decorator_transparent_function :parent function test9(
+@decorate_function :parent function test9(
     M::AbstractDecoratorManifold,
     p;
     a = 0,
@@ -95,13 +95,13 @@ function test9(M::TestDecorator3, p::TP; a = 0, kwargs...) where {TP}
 end
 
 test10(M::AbstractTestDecorator, p::TP; a = 0) where {TP} = 10 * a
-@decorator_transparent_function function test10(M::TestDecorator3, p::TP; a = 0) where {TP}
+@decorate_function function test10(M::TestDecorator3, p::TP; a = 0) where {TP}
     return 5 * a
 end
 # the following then ignores the previous definition and passes again to the parent above
 decorator_transparent_dispatch(::typeof(test10), M::TestDecorator3, args...) = Val(:parent)
 
-@decorator_transparent_function function test11(
+@decorate_function function test11(
     M::TestDecorator3,
     p::TP;
     a::Int = 0,
@@ -109,12 +109,12 @@ decorator_transparent_dispatch(::typeof(test10), M::TestDecorator3, args...) = V
     return 15 * a
 end
 
-@decorator_transparent_function function test12(M::ManifoldsBase.DefaultManifold, p)
+@decorate_function function test12(M::ManifoldsBase.DefaultManifold, p)
     return 12 * p
 end
 ManifoldsBase._acts_transparently(test12, TestDecorator3, p) = Val(:foo)
 
-@decorator_transparent_function :none function test13(M::TestDecorator3, p)
+@decorate_function :none function test13(M::TestDecorator3, p)
     return 13.5 * p
 end
 function decorator_transparent_dispatch(::typeof(test13), M::TestDecorator, args...)
@@ -128,7 +128,7 @@ test13(::ManifoldsBase.DefaultManifold, a) = 13 * a
 function test14(M::AbstractDecoratorManifold, p)
     return 14.5 * p
 end
-@decorator_transparent_signature test14(M::AbstractDecoratorManifold, p)
+@decorate_signature test14(M::AbstractDecoratorManifold, p)
 decorator_transparent_dispatch(::typeof(test14), M::TestDecorator3, args...) = Val(:none)
 function decorator_transparent_dispatch(::typeof(test14), M::TestDecorator, args...)
     return Val(:intransparent)
@@ -139,7 +139,7 @@ end
 test14(::ManifoldsBase.DefaultManifold, a) = 14 * a
 
 test15(::ManifoldsBase.DefaultManifold, a) = 15.5 * a
-@decorator_transparent_function function test15(M::AbstractDecoratorManifold, p)
+@decorate_function function test15(M::AbstractDecoratorManifold, p)
     return error("Not yet implemented")
 end
 test15(::AbstractParentDecorator, p) = 15 * p
@@ -149,13 +149,13 @@ function test16(::AbstractParentDecorator, p)
     return 16 * p
 end
 test16(::ManifoldsBase.DefaultManifold, a) = 16.5 * a
-@decorator_transparent_signature test16(M::AbstractDecoratorManifold, p)
+@decorate_signature test16(M::AbstractDecoratorManifold, p)
 decorator_transparent_dispatch(::typeof(test16), M::ChildDecorator, args...) = Val(:parent)
 
 function test17(M::ManifoldsBase.DefaultManifold, p)
     return 17 * p
 end
-@decorator_transparent_signature test17(M::AbstractDecoratorManifold, p)
+@decorate_signature test17(M::AbstractDecoratorManifold, p)
 function decorator_transparent_dispatch(
     ::typeof(test17),
     M::AbstractDecoratorManifold,
@@ -165,7 +165,7 @@ function decorator_transparent_dispatch(
 end
 default_decorator_dispatch(::DefaultDecorator) = Val(true)
 
-@decorator_transparent_function function test18(M::AbstractDecoratorManifold, p)
+@decorate_function function test18(M::AbstractDecoratorManifold, p)
     return 18.25 * p
 end
 decorator_transparent_dispatch(::typeof(test18), M::ChildDecorator, args...) = Val(:parent)
@@ -189,8 +189,8 @@ decorator_transparent_dispatch(::typeof(test18), M::ChildDecorator, args...) = V
 
     x = 0
     @test_throws LoadError eval(:(@decorator_transparent_fallback x = x + 1))
-    @test_throws LoadError eval(:(@decorator_transparent_function x = x + 1))
-    @test_throws LoadError eval(:(@decorator_transparent_signature x = x + 1))
+    @test_throws LoadError eval(:(@decorate_function x = x + 1))
+    @test_throws LoadError eval(:(@decorate_signature x = x + 1))
 
     @test representation_size(M) == (3,)
     @test representation_size(A) == (3,)

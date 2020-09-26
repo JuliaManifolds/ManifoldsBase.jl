@@ -198,7 +198,7 @@ Return the [`Manifold`](@ref) `N` an [`AbstractEmbeddedManifold`](@ref) is embed
 """
 get_embedding(::AbstractEmbeddedManifold)
 
-@decorator_transparent_function function get_embedding(M::AbstractEmbeddedManifold)
+function get_embedding(M::AbstractEmbeddedManifold)
     return decorated_manifold(M)
 end
 
