@@ -135,51 +135,6 @@ macro decorate_case(case, input_ex)
 end
 
 """
-    @decorate_function(ex)
-    @decorate_function(fallback_case = :implement, ex)
-
-Introduce the function specified by `ex` to be a decorated function.
-
-Inline-definitions are not yet covered – the function signature however may contain
-keyword arguments and a where clause.
-
-# Examples
-
-```julia
-@decorate_function log!(M::AbstractDecoratorManifold, X, p, q)
-    log!(decorated_manifold(M), X, p, Q)
-end
-@decorate_function :parent log!(M::AbstractDecoratorManifold, X, p, q)
-    log!(decorated_manifold(M), X, p, Q)
-end
-```
-"""
-macro decorate_function(ex)
-    return esc(quote
-        @decorate_function :implement ($ex)
-    end)
-end
-macro decorate_function(case, input_ex)
-    ex = macroexpand(__module__, input_ex)
-    parts = _split_function(ex)
-    callargs = parts[:callargs]
-    fname = parts[:fname]
-    where_exprs = parts[:where_exprs]
-    return esc(
-        quote
-            @decorate_signature $(input_ex)
-            @decorate_case $(case), $(input_ex)
-            function decorator_dispatch(
-                ::typeof($fname),
-                $(callargs...),
-            ) where {$(where_exprs...)}
-                return Val($case)
-            end
-        end,
-    )
-end
-
-"""
     @decorate_signature(ex)
 
 Introduces a given function to be transparent with respect to all decorators.
@@ -296,6 +251,52 @@ macro decorate_signature(input_ex)
         end,
     )
 end
+
+"""
+    @decorate_function(ex)
+    @decorate_function(fallback_case = :implement, ex)
+
+Introduce the function specified by `ex` to be a decorated function.
+
+Inline-definitions are not yet covered – the function signature however may contain
+keyword arguments and a where clause.
+
+# Examples
+
+```julia
+@decorate_function log!(M::AbstractDecoratorManifold, X, p, q)
+    log!(decorated_manifold(M), X, p, Q)
+end
+@decorate_function :parent log!(M::AbstractDecoratorManifold, X, p, q)
+    log!(decorated_manifold(M), X, p, Q)
+end
+```
+"""
+macro decorate_function(ex)
+    return esc(quote
+        @decorate_function :implement ($ex)
+    end)
+end
+macro decorate_function(case, input_ex)
+    ex = macroexpand(__module__, input_ex)
+    parts = _split_function(ex)
+    callargs = parts[:callargs]
+    fname = parts[:fname]
+    where_exprs = parts[:where_exprs]
+    return esc(
+        quote
+            @decorate_signature ($input_ex)
+            @decorate_case ($case) ($input_ex)
+            function decorator_dispatch(
+                ::typeof($fname),
+                $(callargs...),
+            ) where {$(where_exprs...)}
+                return Val($case)
+            end
+        end,
+    )
+end
+
 #! format: on
 
 #
