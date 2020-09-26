@@ -5,7 +5,7 @@ using ManifoldsBase:
     @decorate_case,
     @decorate_signature,
     is_decorator_transparent
-import ManifoldsBase: decorator_transparent_dispatch
+import ManifoldsBase: decorator_transparent_dispatch, ℝ
 
 struct TestDecorator{M<:Manifold{ℝ}} <: AbstractDecoratorManifold{ℝ}
     manifold::M

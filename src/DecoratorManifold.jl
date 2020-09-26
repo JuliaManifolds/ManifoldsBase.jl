@@ -162,24 +162,13 @@ end
 macro decorate_function(case, input_ex)
     ex = macroexpand(__module__, input_ex)
     parts = _split_function(ex)
-    fname = parts[:fname]
-    kwargs_list = parts[:kwargs_list]
     callargs = parts[:callargs]
     fname = parts[:fname]
     where_exprs = parts[:where_exprs]
-    body = parts[:body]
-    argnames = parts[:argnames]
-    argtypes = parts[:argtypes]
-    kwargs_call = parts[:kwargs_call]
     return esc(
-        # prequel - define the function on the parent type
-        # such that it can still be overwritten again if need be
         quote
-            # decorate original signature for the remaining cases
-            @decorate_signature($(input_ex))
-            # define this case using the body
-            @decorate_case($(case),$(input_ex))
-            # decorate original signature
+            @decorate_signature $(input_ex)
+            @decorate_case $(case), $(input_ex)
             function decorator_dispatch(
                 ::typeof($fname),
                 $(callargs...),
