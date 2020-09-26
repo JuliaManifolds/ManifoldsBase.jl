@@ -19,7 +19,6 @@ this method splits a function signature and returns a named tuple containing
 - `kwargs_call` - ?
 """
 function _split_signature(sig::Expr)
-    print(sig.head)
     if sig.head == :where
         where_exprs = sig.args[2:end]
         call_expr = sig.args[1]
@@ -120,7 +119,9 @@ macro decorate_case(case, input_ex)
     body = parts[:body]
     argnames = parts[:argnames]
     argtypes = parts[:argtypes]
+    fname = parts[:fname]
     where_exprs = parts[:where_exprs]
+    kwargs_list = parts[:kwargs_list]
     return esc(
         quote
             function ($(fname))(
@@ -285,8 +286,8 @@ macro decorate_function(case, input_ex)
     where_exprs = parts[:where_exprs]
     return esc(
         quote
-            @decorate_signature ($input_ex)
-            @decorate_case ($case) ($input_ex)
+            @decorate_signature ($(ex.args[1]))
+            @decorate_case ($case) ($ex)
             function decorator_dispatch(
                 ::typeof($fname),
                 $(callargs...),
