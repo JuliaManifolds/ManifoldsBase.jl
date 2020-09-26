@@ -125,11 +125,11 @@ macro decorate_case(case, input_ex)
     return esc(
         quote
             function ($(fname))(
-                ($(argnames[1]),s)::Tuple{$(argtypes[1]),Val{$(case)}},
+                ($(argnames[1]),dispatch_symbol)::Tuple{$(argtypes[1]),Val{$(case)}},
                 $(callargs[2:end]...);
                 $(kwargs_list...),
             ) where {$(where_exprs...)}
-                return ($body)
+                ($body)
             end
         end,
     )
@@ -227,7 +227,7 @@ macro decorate_signature(input_ex)
             end
             # (c) :undecorate act transparently and pass to decorator
             function ($(fname))(
-                ($(argnames[1]),s)::Tuple{$(argtypes[1]),Val{:undecorate}},
+                ($(argnames[1]),dispatch_symbol)::Tuple{$(argtypes[1]),Val{:undecorate}},
                 $(callargs[2:end]...);
                 $(kwargs_list...),
             ) where {$(where_exprs...)}
