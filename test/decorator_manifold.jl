@@ -102,11 +102,7 @@ end
 # the following then ignores the previous definition and passes again to the parent above
 decorator_transparent_dispatch(::typeof(test10), ::TestDecorator3, args...) = Val(:parent)
 
-@decorate_function function test11(
-    M::TestDecorator3,
-    p::TP;
-    i::Int = 0,
-) where {TP}
+@decorate_function function test11(M::TestDecorator3, p::TP; i::Int = 0) where {TP}
     return 15 * a
 end
 
@@ -126,10 +122,10 @@ function decorator_transparent_dispatch(::typeof(test13), M::TestDecorator2, arg
 end
 test13(::ManifoldsBase.DefaultManifold, a) = 13 * a
 
-function test14(M::AbstractDecoratorManifold, p)
+function test14(::AbstractDecoratorManifold, p)
     return 14.5 * p
 end
-@decorate_signature test14(M::AbstractDecoratorManifold, p)
+@decorate_signature test14(::AbstractDecoratorManifold, p)
 decorator_transparent_dispatch(::typeof(test14), M::TestDecorator3, args...) = Val(:none)
 function decorator_transparent_dispatch(::typeof(test14), M::TestDecorator, args...)
     return Val(:implement)

@@ -125,7 +125,7 @@ macro decorate_case(case, input_ex)
     return esc(
         quote
             function ($(fname))(
-                ($(argnames[1]),dispatch_symbol)::Tuple{$(argtypes[1]),Val{$(case)}},
+                ($(argnames[1]), dispatch_symbol)::Tuple{$(argtypes[1]),Val{$(case)}},
                 $(callargs[2:end]...);
                 $(kwargs_list...),
             ) where {$(where_exprs...)}
@@ -406,18 +406,9 @@ function base_manifold(M::AbstractDecoratorManifold, depth::Val{N} = Val(-1)) wh
     return base_manifold(decorated_manifold(M), Val(N - 1))
 end
 
-@decorate_signature check_manifold_point(
-    M::AbstractDecoratorManifold,
-    p;
-    kwargs...,
-)
+@decorate_signature check_manifold_point(M::AbstractDecoratorManifold, p; kwargs...)
 
-@decorate_signature check_tangent_vector(
-    M::AbstractDecoratorManifold,
-    p,
-    X;
-    kwargs...,
-)
+@decorate_signature check_tangent_vector(M::AbstractDecoratorManifold, p, X; kwargs...)
 
 """
     decorated_manifold(M::AbstractDecoratorManifold)
@@ -512,19 +503,9 @@ decorated_manifold(M::Manifold) = M.manifold
 
 @decorate_signature representation_size(M::AbstractDecoratorManifold)
 
-@decorate_signature retract(
-    M::AbstractDecoratorManifold,
-    p,
-    X,
-    m::AbstractRetractionMethod,
-)
+@decorate_signature retract(M::AbstractDecoratorManifold, p, X, m::AbstractRetractionMethod)
 
-@decorate_signature retract(
-    M::AbstractDecoratorManifold,
-    p,
-    X,
-    m::ExponentialRetraction,
-)
+@decorate_signature retract(M::AbstractDecoratorManifold, p, X, m::ExponentialRetraction)
 
 @decorate_signature retract!(
     M::AbstractDecoratorManifold,
@@ -542,19 +523,8 @@ decorated_manifold(M::Manifold) = M.manifold
     m::ExponentialRetraction,
 )
 
-@decorate_signature vector_transport_along(
-    M::AbstractDecoratorManifold,
-    p,
-    X,
-    c,
-)
-@decorate_signature vector_transport_along!(
-    M::AbstractDecoratorManifold,
-    Y,
-    p,
-    X,
-    c,
-)
+@decorate_signature vector_transport_along(M::AbstractDecoratorManifold, p, X, c)
+@decorate_signature vector_transport_along!(M::AbstractDecoratorManifold, Y, p, X, c)
 @decorate_signature vector_transport_along!(
     M::AbstractDecoratorManifold,
     Y,
@@ -580,19 +550,8 @@ decorated_manifold(M::Manifold) = M.manifold
     m::SchildsLadderTransport,
 )
 
-@decorate_signature vector_transport_direction(
-    M::AbstractDecoratorManifold,
-    p,
-    X,
-    d,
-)
-@decorate_signature vector_transport_direction!(
-    M::AbstractDecoratorManifold,
-    Y,
-    p,
-    X,
-    d,
-)
+@decorate_signature vector_transport_direction(M::AbstractDecoratorManifold, p, X, d)
+@decorate_signature vector_transport_direction!(M::AbstractDecoratorManifold, Y, p, X, d)
 
 @decorate_signature vector_transport_to(
     M::AbstractDecoratorManifold,
