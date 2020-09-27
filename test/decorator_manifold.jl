@@ -36,11 +36,11 @@ ManifoldsBase.default_decorator_dispatch(::DefaultDecorator) = Val(true)
 test1(::Manifold, ::Any; a = 0) = 101 + a
 test2(::Manifold, ::Any; a = 0) = 102 + a
 test3(::Manifold, ::Any; a = 0) = 103 + a
-function test4(::Manifold, p; a = 0)
+function test4(M::Manifold, p; a = 0)
     return error(ManifoldsBase.manifold_function_not_implemented_message(M, test4, p))
 end
 
-function test1(::TestDecorator, p; a = 0)
+function test1(::TestDecorator, ::Any; a = 0)
     return 1 + a
 end
 
@@ -74,7 +74,7 @@ end
 test8(::Manifold, p; a = 0) = 8 + a
 
 @decorate_function :inherit function test9(
-    M::AbstractDecoratorManifold,
+    ::AbstractDecoratorManifold,
     p;
     a = 0,
     kwargs...,
@@ -83,42 +83,42 @@ test8(::Manifold, p; a = 0) = 8 + a
 end
 
 @decorate_case :inherit @inline function test9(
-    M::AbstractTestDecorator,
-    p::TP;
+    ::AbstractTestDecorator,
+    ::TP;
     a = 0,
     kwargs...,
 ) where {TP}
     return 19 + a + (haskey(kwargs, :b) ? kwargs[:b] : 0)
 end
 
-function test9(M::TestDecorator3, p::TP; a = 0, kwargs...) where {TP}
+function test9(::TestDecorator3, ::TP; a = 0, kwargs...) where {TP}
     return 109 + a + (haskey(kwargs, :b) ? kwargs[:b] : 0)
 end
 
-test10(M::AbstractTestDecorator, p::TP; a = 0) where {TP} = 10 * a
+test10(::AbstractTestDecorator, ::TP; a = 0) where {TP} = 10 * a
 @decorate_function function test10(::TestDecorator3, p::TP; a = 0) where {TP}
     return 5 * a
 end
 # the following then ignores the previous definition and passes again to the parent above
-decorator_transparent_dispatch(::typeof(test10), ::TestDecorator3, args...) = Val(:parent)
+decorator_transparent_dispatch(::typeof(test10), ::TestDecorator3, ::Any...) = Val(:inherit)
 
-@decorate_function function test11(M::TestDecorator3, p::TP; i::Int = 0) where {TP}
+@decorate_function function test11(::TestDecorator3, ::TP; i::Int = 0) where {TP}
     return 15 * a
 end
 
-@decorate_function function test12(M::ManifoldsBase.DefaultManifold, p)
+@decorate_function function test12(M::ManifoldsBase.DefaultManifold, ::Any)
     return 12 * p
 end
-ManifoldsBase._acts_transparently(test12, TestDecorator3, p) = Val(:foo)
+ManifoldsBase._acts_transparently(::typeof(test12), ::TestDecorator3, ::Any...) = Val(:foo)
 
-@decorate_function :none function test13(M::TestDecorator3, p)
+@decorate_function :none function test13(::TestDecorator3, ::Any)
     return 13.5 * p
 end
-function decorator_transparent_dispatch(::typeof(test13), M::TestDecorator, args...)
-    return Val(:intransparent)
+function decorator_transparent_dispatch(::typeof(test13), ::TestDecorator, ::Any...)
+    return Val(:implement)
 end
-function decorator_transparent_dispatch(::typeof(test13), M::TestDecorator2, args...)
-    return Val(:transparent)
+function decorator_transparent_dispatch(::typeof(test13), ::TestDecorator2, ::Any...)
+    return Val(:undecorate)
 end
 test13(::ManifoldsBase.DefaultManifold, a) = 13 * a
 
@@ -197,8 +197,8 @@ decorator_transparent_dispatch(::typeof(test18), M::ChildDecorator, args...) = V
 
     p = [1.0, 0.0, 0.0]
     X = [2.0, 1.0, 3.0]
-    @test inner(A, p, X, X) ≈ ManifoldsBase.inner((A, :inherit), p, X, X)
-    @test_throws ErrorException ManifoldsBase.inner((A, :implement), p, X, X)
+    @test inner(A, p, X, X) ≈ ManifoldsBase.inner(M, p, X, X)
+    @test_throws ErrorException ManifoldsBase.inner((A, Val(:implement)), p, X, X)
 
     TD = TestDecorator(M)
 
@@ -215,13 +215,13 @@ decorator_transparent_dispatch(::typeof(test18), M::ChildDecorator, args...) = V
     @test test3(TD, p; a = 1000) == 1103
     @test_throws ErrorException test4(TD, p)
     @test_throws ErrorException test4(TD, p; a = 1000)
-    @test (@inferred decorator_transparent_dispatch(test5, TD, p)) === Val(:implement)
+    @test (@inferred decorator_transparent_dispatch(test5, TD, p)) === Val(:undecorate)
     @test is_decorator_transparent(test5, TD, p)
     @test test5(TD, p) == 5
     @test (@inferred decorator_transparent_dispatch(test6, TD, p)) === Val(:implement)
     @test_throws ErrorException test7(M, p)
     @test test7(TD, p) == 17
-    @test (@inferred decorator_transparent_dispatch(test8, M, p)) === Val(:implement)
+    @test (@inferred decorator_transparent_dispatch(test8, M, p)) === Val(:undcorate)
     @test is_decorator_transparent(test8, M, p)
     @test_throws ErrorException test9(M, p; a = 1000)
     @test test9(TD, p; a = 1000) == 1009

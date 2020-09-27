@@ -74,7 +74,6 @@ function _split_signature(sig::Expr)
         kwargs_call = kwargs_call,
     )
 end
-#! format: on
 function _split_function(ex::Expr)
     if ex.head == :function
         sig = ex.args[1]
@@ -190,17 +189,17 @@ macro decorate_signature(input_ex)
             ) where {$(where_exprs...)}
                 transparency = ManifoldsBase._acts_transparently($fname, $(argnames...))
                 $(parts.fname)(
-                    ($(argnames[1]),Val(transparency)),
+                    ($(argnames[1]), transparency),
                     $(argnames[2:end]...);
                     $(kwargs_call...),
                 )
             end
             # (a) :inherit (from parent)
             function ($(fname))(
-                ($(argnames[1]),s)::Tuple{$(argtypes[1]),Val{:inherit}},
+                ($(argnames[1]),s)::Tuple{decoT,Val{:inherit}},
                 $(callargs[2:end]...);
                 $(kwargs_list...),
-            ) where {$(where_exprs...)}
+            ) where {$(where_exprs...), decoT <: $(argtypes[1])}
                 return invoke(
                     $fname,
                     Tuple{supertype($(argtypes[1])),$(argtypes[2:end]...)},
@@ -210,10 +209,10 @@ macro decorate_signature(input_ex)
             end
             # (b) :implement (this function is not passed on anywhere and needs to be implemented)
             function ($(fname))(
-                ($(argnames[1]),s)::Tuple{$(argtypes[1]),Val{:implement}},
+                ($(argnames[1]),s)::Tuple{decoT,Val{:implement}},
                 $(callargs[2:end]...);
                 $(kwargs_list...),
-            ) where {$(where_exprs...)}
+            ) where {$(where_exprs...), decoT <: $(argtypes[1])}
                 return error(string(
                     ManifoldsBase.manifold_function_not_implemented_message(
                         $(argnames[1]),
@@ -227,10 +226,10 @@ macro decorate_signature(input_ex)
             end
             # (c) :undecorate act transparently and pass to decorator
             function ($(fname))(
-                ($(argnames[1]),dispatch_symbol)::Tuple{$(argtypes[1]),Val{:undecorate}},
+                ($(argnames[1]),dispatch_symbol)::Tuple{decoT,Val{:undecorate}},
                 $(callargs[2:end]...);
                 $(kwargs_list...),
-            ) where {$(where_exprs...)}
+            ) where {$(where_exprs...), decoT <: $(argtypes[1])}
                 return ($fname)(
                     ManifoldsBase.decorated_manifold($(argnames[1])),
                     $(argnames[2:end]...);
@@ -239,12 +238,12 @@ macro decorate_signature(input_ex)
             end
             # (e) :s dispatch on the field s of the first arg.
             function ($(fname))(
-                ($(argnames[1]),dispatch_symbol)::Tuple{$(argtypes[1]),Val{S}},
+                ($(argnames[1]),dispatch_symbol)::Tuple{decoT,Val{decoS}},
                 $(callargs[2:end]...);
                 $(kwargs_list...),
-            ) where {$(where_exprs...), S}
+            ) where {$(where_exprs...), decoS, decoT <: $(argtypes[1])}
                 return ($fname)(
-                    getproperty($(argnames[1]),_extract_val(S)),
+                    getproperty($(argnames[1]),_extract_val(decoS)),
                     $(argnames[2:end]...);
                     $(kwargs_call...),
                 )
@@ -372,19 +371,19 @@ If a decorator manifold is not in general transparent, it might still pass down
 for the case that a decorator is the default decorator, see [`is_default_decorator`](@ref).
 """
 function is_decorator_transparent(f, M::Manifold, args...)
-    return decorator_transparent_dispatch(f, M, args...) === Val(:transparent)
+    return decorator_transparent_dispatch(f, M, args...) === Val(:inherit)
 end
 
 """
     decorator_transparent_dispatch(f, M::Manifold, args...) -> Val
 
 Given a [`Manifold`](@ref) `M` and a function `f(M,args...)`, indicate, whether a
-function is `Val(:transparent)` or `Val(:intransparent)` for the (decorated)
-[`Manifold`](@ref) `M`. Another possibility is, that for `M` and given `args...`
-the function `f` should invoke `M`s `Val(:parent)` implementation, see
+function is `Val(:inherit)`ing this from its parent or needs to be `Val(:implement)`ed for
+the (decorated) [`Manifold`](@ref) `M`. Another possibility is, that for `M` and given
+`args...` the function `f` should invoke `M`s `Val(:parent)` implementation, see
 [`@decorate_function`](@ref) for details.
 """
-decorator_transparent_dispatch(f, M::Manifold, args...) = Val(:manifold)
+decorator_transparent_dispatch(f, M::Manifold, args...) = Val(:undecorate)
 
 function _acts_transparently(f, M::Manifold, args...)
     return _val_or(
@@ -393,7 +392,7 @@ function _acts_transparently(f, M::Manifold, args...)
     )
 end
 
-_val_or(::Val{true}, ::Val{T}) where {T} = Val(:manifold)
+_val_or(::Val{true}, ::Val{T}) where {T} = Val(:undecorate)
 _val_or(::Val{false}, val::Val) = val
 
 #
