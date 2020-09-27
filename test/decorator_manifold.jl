@@ -44,37 +44,37 @@ function test1(::TestDecorator, ::Any; a = 0)
     return 1 + a
 end
 
-function decorator_transparent_dispatch(::typeof(test1), ::TestDecorator, ::Any...)
+function decorator_transparent_dispatch(::typeof(test1), M::TestDecorator, ::Any...)
     return Val(:implement)
 end
-function decorator_transparent_dispatch(::typeof(test2), ::TestDecorator, ::Any...)
+function decorator_transparent_dispatch(::typeof(test2), M::TestDecorator, ::Any...)
     return Val(:undecorate)
 end
-decorator_transparent_dispatch(::typeof(test3), ::TestDecorator, ::Any...) = Val(:parent)
-function decorator_transparent_dispatch(::typeof(test4), ::TestDecorator, ::Any...)
+decorator_transparent_dispatch(::typeof(test3), M::TestDecorator, args...) = Val(:inherit)
+function decorator_transparent_dispatch(::typeof(test4), M::TestDecorator, args...)
     return Val(:implement)
 end
 
-@decorate_function :undecorate function test5(::AbstractDecoratorManifold, ::Any)
+@decorate_function :undecorate function test5(M::AbstractDecoratorManifold, p)
     return 5
 end
 
-@decorate_function @inline function test6(::TestDecorator, ::Any)
+@decorate_function @inline function test6(M::TestDecorator, p)
     return 6
 end
 
-@decorate_function :inherit function test7(::TestDecorator, ::Any)
+@decorate_function :inherit function test7(M::TestDecorator, p)
     return 7
 end
 
-@decorate_function :inherit @inline function test7(::TestDecorator, ::Any)
+@decorate_case :inherit @inline function test7(M::TestDecorator, p)
     return 17
 end
 
-test8(::Manifold, p; a = 0) = 8 + a
+test8(M::Manifold, p; a = 0) = 8 + a
 
 @decorate_function :inherit function test9(
-    ::AbstractDecoratorManifold,
+    M::AbstractDecoratorManifold,
     p;
     a = 0,
     kwargs...,
@@ -218,8 +218,8 @@ decorator_transparent_dispatch(::typeof(test18), M::ChildDecorator, args...) = V
     @test (@inferred decorator_transparent_dispatch(test5, TD, p)) === Val(:undecorate)
     @test is_decorator_transparent(test5, TD, p)
     @test test5(TD, p) == 5
-    @test (@inferred decorator_transparent_dispatch(test6, TD, p)) === Val(:implement)
-    @test_throws ErrorException test7(M, p)
+    @test (@inferred decorator_transparent_dispatch(test6, TD, p)) === Val(:undecorate)
+    @test_throws MethodError test7(M, p)
     @test test7(TD, p) == 17
     @test (@inferred decorator_transparent_dispatch(test8, M, p)) === Val(:undcorate)
     @test is_decorator_transparent(test8, M, p)

@@ -124,10 +124,10 @@ macro decorate_case(case, input_ex)
     return esc(
         quote
             function ($(fname))(
-                ($(argnames[1]), dispatch_symbol)::Tuple{$(argtypes[1]),Val{$(case)}},
+                ($(argnames[1]), dispatch_symbol)::Tuple{decoT,Val{$(case)}},
                 $(callargs[2:end]...);
                 $(kwargs_list...),
-            ) where {$(where_exprs...)}
+            ) where {$(where_exprs...), decoT <: $(argtypes[1])}
                 ($body)
             end
         end,
@@ -371,7 +371,7 @@ If a decorator manifold is not in general transparent, it might still pass down
 for the case that a decorator is the default decorator, see [`is_default_decorator`](@ref).
 """
 function is_decorator_transparent(f, M::Manifold, args...)
-    return decorator_transparent_dispatch(f, M, args...) === Val(:inherit)
+    return decorator_transparent_dispatch(f, M, args...) === Val(:undecorate)
 end
 
 """
