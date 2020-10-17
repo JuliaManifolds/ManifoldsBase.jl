@@ -295,6 +295,7 @@ function get_basis(
         number_system(B);
         warn_linearly_dependent = warn_linearly_dependent,
         return_incomplete_set = return_incomplete_set,
+        kwargs...
     )
     return CachedBasis(B, V)
 end
@@ -516,13 +517,19 @@ many vectors.
 The `number_system` is taken from the basis or manifold, but can also be set to indicate
 a different basis (i.e. a real basis on a complex manifold) for a set of vectors.
 
+The method always returns a basis, i.e. linearly dependent vectors are removed.
+
 # Keyword arguments
+
 * `warn_linearly_dependent` (`false`) – warn if the basis vectors are not linearly
   independent
 * `return_incomplete_set` (`false`) – throw an error if the resulting set of vectors is not
   a basis but contains less vectors
 
+further keyword arguments can be passed to set the accuracy of the independence test.
+
 # Return value
+
 When a set of vectors is orthonormalized a set of vectors is returned.
 When an [`AbstractBasis`](@ref) is orthonormalized, a [`CachedBasis`](@ref) is returned.
 """
@@ -532,6 +539,7 @@ function gram_schmidt(
     B::AbstractBasis{𝔽};
     warn_linearly_dependent = false,
     return_incomplete_set = false,
+    kwargs...
 ) where {𝔽}
     V = gram_schmidt(
         M,
@@ -540,6 +548,7 @@ function gram_schmidt(
         number_system(B);
         warn_linearly_dependent = warn_linearly_dependent,
         return_incomplete_set = return_incomplete_set,
+        kwargs...
     )
     return CachedBasis(GramSchmidtOrthonormalBasis(𝔽), V)
 end
@@ -550,14 +559,16 @@ function gram_schmidt(
     field = number_system(M);
     warn_linearly_dependent = false,
     return_incomplete_set = false,
+    kwargs...
 )
     N = length(V)
     Ξ = empty(V)
     dim = manifold_dimension(M)
     N < dim && @warn "Input only has $(N) vectors, but manifold dimension is $(dim)."
+    K = 0
     @inbounds for n in 1:N
         Ξₙ = V[n]
-        for k in 1:n
+        for k in 1:K
             Ξₙ .-= real(inner(M, p, Ξ[k], Ξₙ)) .* Ξ[k]
         end
         nrmΞₙ = norm(M, p, Ξₙ)
@@ -574,11 +585,15 @@ function gram_schmidt(
             end
         end
         push!(Ξ, Ξₙ)
-        n * real_dimension(field) == dim && return Ξ
+        K += 1
+        K * real_dimension(field) == dim && return Ξ
         @label skip
     end
-    return_incomplete_set && return Ξ
-    return error("gram_schmidt found only $(length(Ξ)) orthonormal basis vectors, but manifold dimension is $(dim).")
+    return if return_incomplete_set
+        return Ξ
+    else
+        error("gram_schmidt found only $(K) orthonormal basis vectors, but manifold dimension is $(dim).")
+    end
 end
 
 @doc raw"""
@@ -651,6 +666,9 @@ function show(io::IO, ::DefaultOrthogonalBasis{𝔽}) where {𝔽}
 end
 function show(io::IO, ::DefaultOrthonormalBasis{𝔽}) where {𝔽}
     return print(io, "DefaultOrthonormalBasis($(𝔽))")
+end
+function show(io::IO, ::GramSchmidtOrthonormalBasis{𝔽}) where {𝔽}
+    return print(io, "GramSchmidtOrthonormalBasis($(𝔽))")
 end
 function show(io::IO, ::ProjectedOrthonormalBasis{method,𝔽}) where {method,𝔽}
     return print(io, "ProjectedOrthonormalBasis($(repr(method)), $(𝔽))")
