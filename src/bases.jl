@@ -295,7 +295,7 @@ function get_basis(
         number_system(B);
         warn_linearly_dependent = warn_linearly_dependent,
         return_incomplete_set = return_incomplete_set,
-        kwargs...
+        kwargs...,
     )
     return CachedBasis(B, V)
 end
@@ -539,7 +539,7 @@ function gram_schmidt(
     B::AbstractBasis{𝔽};
     warn_linearly_dependent = false,
     return_incomplete_set = false,
-    kwargs...
+    kwargs...,
 ) where {𝔽}
     V = gram_schmidt(
         M,
@@ -548,7 +548,7 @@ function gram_schmidt(
         number_system(B);
         warn_linearly_dependent = warn_linearly_dependent,
         return_incomplete_set = return_incomplete_set,
-        kwargs...
+        kwargs...,
     )
     return CachedBasis(GramSchmidtOrthonormalBasis(𝔽), V)
 end
@@ -559,7 +559,7 @@ function gram_schmidt(
     field = number_system(M);
     warn_linearly_dependent = false,
     return_incomplete_set = false,
-    kwargs...
+    kwargs...,
 )
     N = length(V)
     Ξ = empty(V)
