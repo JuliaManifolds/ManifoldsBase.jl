@@ -544,7 +544,7 @@ function gram_schmidt(
     V = gram_schmidt(
         M,
         p,
-        get_vectors(B),
+        get_vectors(M, p, B),
         number_system(B);
         warn_linearly_dependent = warn_linearly_dependent,
         return_incomplete_set = return_incomplete_set,
@@ -565,10 +565,9 @@ function gram_schmidt(
     Ξ = empty(V)
     dim = manifold_dimension(M)
     N < dim && @warn "Input only has $(N) vectors, but manifold dimension is $(dim)."
-    K = 0
     @inbounds for n in 1:N
         Ξₙ = V[n]
-        for k in 1:K
+        for k in 1:length(Ξ)
             Ξₙ .-= real(inner(M, p, Ξ[k], Ξₙ)) .* Ξ[k]
         end
         nrmΞₙ = norm(M, p, Ξₙ)
@@ -577,7 +576,7 @@ function gram_schmidt(
             @goto skip
         end
         Ξₙ ./= nrmΞₙ
-        for k in 1:K
+        for k in 1:length(Ξ)
             if !isapprox(real(inner(M, p, Ξ[k], Ξₙ)), 0; kwargs...)
                 warn_linearly_dependent &&
                     @warn "Input vector $(n) is not linearly independent of output basis vector $(k)."
@@ -585,14 +584,13 @@ function gram_schmidt(
             end
         end
         push!(Ξ, Ξₙ)
-        K += 1
-        K * real_dimension(field) == dim && return Ξ
+        length(Ξ) * real_dimension(field) == dim && return Ξ
         @label skip
     end
     return if return_incomplete_set
         return Ξ
     else
-        error("gram_schmidt found only $(K) orthonormal basis vectors, but manifold dimension is $(dim).")
+        error("gram_schmidt found only $(length(Ξ)) orthonormal basis vectors, but manifold dimension is $(dim).")
     end
 end
 

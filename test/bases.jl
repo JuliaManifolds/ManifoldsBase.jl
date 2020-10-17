@@ -86,7 +86,15 @@ ManifoldsBase.manifold_dimension(::ProjectionTestManifold) = 100
     @test size(get_vectors(M, x, aonb)) == (5,)
     @test get_vectors(M, x, aonb)[1] ≈ [0, 0, 0, 0, 1]
 
-    @testset "Gram-Schmidt special cases" begin
+    @testset "Gram-Schmidt" begin
+        # for a basis
+        M = ManifoldsBase.DefaultManifold(3)
+        p = zeros(3)
+        V = [ [2.0, 0.0, 0.0], [1.1, 2.2, 0.0], [0.0, 3.3, 4.4] ]
+        b1 = gram_schmidt(M, p, V)
+        b2 = gram_schmidt(M, zeros(3), CachedBasis(DefaultBasis(), V))
+        @test b1 == get_vectors(M, p, b2)
+        # projected gram schmidt
         tm = ProjectionTestManifold()
         bt = ProjectedOrthonormalBasis(:gram_schmidt)
         p = [sqrt(2) / 2, 0.0, sqrt(2) / 2, 0.0, 0.0]
@@ -334,6 +342,7 @@ end
     @test sprint(show, DefaultOrthogonalBasis()) == "DefaultOrthogonalBasis(ℝ)"
     @test sprint(show, DefaultOrthonormalBasis()) == "DefaultOrthonormalBasis(ℝ)"
     @test sprint(show, DefaultOrthonormalBasis(ℂ)) == "DefaultOrthonormalBasis(ℂ)"
+    @test sprint(show, GramScmidtOrthonormalBasis(ℂ)) == "GramSchmidtOrthonormalBasis(ℂ)"
     @test sprint(show, ProjectedOrthonormalBasis(:svd)) ==
           "ProjectedOrthonormalBasis(:svd, ℝ)"
     @test sprint(show, ProjectedOrthonormalBasis(:gram_schmidt, ℂ)) ==
