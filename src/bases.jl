@@ -507,14 +507,14 @@ end
 
 
 @doc raw"""
-    gram_schmidt(M::Manifold, p, B::AbstractBasis)
-    gram_schmidt(M::Manifold, p, V::AbstractVector, field = number_system(M))
+    gram_schmidt(M::Manifold{𝔽}, p, B::AbstractBasis{𝔽}) where {𝔽}
+    gram_schmidt(M::Manifold, p, V::AbstractVector)
 
 Compute an ONB in the tangent space at `p` on the [`Manifold`](@ref} `M` from either an
 [`AbstractBasis`](@ref) basis ´B´ or a set of (at most) [`manifold_dimension`](@ref)`(M)`
 many vectors.
-The `number_system` is taken from the basis or manifold, but can also be set to indicate
-a different basis (i.e. a real basis on a complex manifold) for a set of vectors.
+Note that this method requires the manifold and basis to work on the same
+[`AbstractNumbers`](@ref) `𝔽`, i.e. with real coefficients.
 
 The method always returns a basis, i.e. linearly dependent vectors are removed.
 
