@@ -291,8 +291,7 @@ function get_basis(
     V = gram_schmidt(
         M,
         p,
-        E,
-        number_system(B);
+        E;
         warn_linearly_dependent = warn_linearly_dependent,
         return_incomplete_set = return_incomplete_set,
         kwargs...,
@@ -534,7 +533,7 @@ When a set of vectors is orthonormalized a set of vectors is returned.
 When an [`AbstractBasis`](@ref) is orthonormalized, a [`CachedBasis`](@ref) is returned.
 """
 function gram_schmidt(
-    M::Manifold,
+    M::Manifold{𝔽},
     p,
     B::AbstractBasis{𝔽};
     warn_linearly_dependent = false,
@@ -544,8 +543,7 @@ function gram_schmidt(
     V = gram_schmidt(
         M,
         p,
-        get_vectors(M, p, B),
-        number_system(B);
+        get_vectors(M, p, B);
         warn_linearly_dependent = warn_linearly_dependent,
         return_incomplete_set = return_incomplete_set,
         kwargs...,
@@ -555,8 +553,7 @@ end
 function gram_schmidt(
     M::Manifold,
     p,
-    V::AbstractVector,
-    field = number_system(M);
+    V::AbstractVector;
     warn_linearly_dependent = false,
     return_incomplete_set = false,
     kwargs...,
@@ -584,7 +581,7 @@ function gram_schmidt(
             end
         end
         push!(Ξ, Ξₙ)
-        length(Ξ) * real_dimension(field) == dim && return Ξ
+        length(Ξ) == dim && return Ξ
         @label skip
     end
     return if return_incomplete_set
