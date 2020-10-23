@@ -91,8 +91,8 @@ ManifoldsBase.manifold_dimension(::ProjectionTestManifold) = 100
         M = ManifoldsBase.DefaultManifold(3)
         p = zeros(3)
         V = [[2.0, 0.0, 0.0], [1.1, 2.2, 0.0], [0.0, 3.3, 4.4]]
-        b1 = gram_schmidt(M, p, V)
-        b2 = gram_schmidt(M, zeros(3), CachedBasis(DefaultBasis(), V))
+        b1 = ManifoldsBase.gram_schmidt(M, p, V)
+        b2 = ManifoldsBase.gram_schmidt(M, zeros(3), CachedBasis(DefaultBasis(), V))
         @test b1 == get_vectors(M, p, b2)
         # projected gram schmidt
         tm = ProjectionTestManifold()
