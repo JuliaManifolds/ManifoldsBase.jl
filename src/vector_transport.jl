@@ -587,8 +587,8 @@ along the [`shortest_geodesic`](@ref) to the tangent space at another point `q`.
 By default, the [`AbstractVectorTransportMethod`](@ref) `method` is
 [`ParallelTransport`](@ref). The result is saved to `Y`.
 """
-function vector_transport_to!(M::Manifold, Y, p, q, X)
-    return vector_transport_to!(M, Y, p, q, X, ParallelTransport())
+function vector_transport_to!(M::Manifold, Y, p, X, q)
+    return vector_transport_to!(M, Y, p, X, q, ParallelTransport())
 end
 """
     vector_transport_to!(M::Manifold, Y, p, X, q, method::ProjectionTransport)
