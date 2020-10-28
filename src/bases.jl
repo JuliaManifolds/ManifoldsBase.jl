@@ -93,6 +93,17 @@ function ProjectedOrthonormalBasis(method::Symbol, 𝔽::AbstractNumbers = ℝ)
 end
 
 @doc raw"""
+    GramSchmidtOrthonormalBasis{𝔽} <: AbstractOrthonormalBasis{𝔽}
+
+An orthonormal basis obtained from a basis.
+
+# Constructor
+    GramSchmidtOrthonormalBasis(𝔽::AbstractNumbers = ℝ)
+"""
+struct GramSchmidtOrthonormalBasis{𝔽} <: AbstractOrthonormalBasis{𝔽} end
+GramSchmidtOrthonormalBasis(𝔽::AbstractNumbers = ℝ) = GramSchmidtOrthonormalBasis{𝔽}()
+
+@doc raw"""
     DiagonalizingOrthonormalBasis{𝔽,TV} <: AbstractOrthonormalBasis{𝔽}
 
 An orthonormal basis `Ξ` as a vector of tangent vectors (of length determined by
@@ -276,40 +287,16 @@ function get_basis(
     return_incomplete_set = false,
     kwargs...,
 )
-    E = [_euclidean_basis_vector(p, i) for i in eachindex(p)]
-    N = length(E)
-    Ξ = empty(E)
-    dim = manifold_dimension(M)
-    N < dim && @warn "Input only has $(N) vectors, but manifold dimension is $(dim)."
-    K = 0
-    @inbounds for n in 1:N
-        Ξₙ = project(M, p, E[n])
-        for k in 1:K
-            Ξₙ .-= real(inner(M, p, Ξ[k], Ξₙ)) .* Ξ[k]
-        end
-        nrmΞₙ = norm(M, p, Ξₙ)
-        if nrmΞₙ == 0
-            warn_linearly_dependent && @warn "Input vector $(n) has length 0."
-            @goto skip
-        end
-        Ξₙ ./= nrmΞₙ
-        for k in 1:K
-            if !isapprox(real(inner(M, p, Ξ[k], Ξₙ)), 0; kwargs...)
-                warn_linearly_dependent &&
-                    @warn "Input vector $(n) is not linearly independent of output basis vector $(k)."
-                @goto skip
-            end
-        end
-        push!(Ξ, Ξₙ)
-        K += 1
-        K * real_dimension(number_system(B)) == dim && return CachedBasis(B, Ξ)
-        @label skip
-    end
-    return if return_incomplete_set
-        return CachedBasis(B, Ξ)
-    else
-        error("get_basis with bases $(typeof(B)) only found $(K) orthonormal basis vectors, but manifold dimension is $(dim).")
-    end
+    E = [project(M, p, _euclidean_basis_vector(p, i)) for i in eachindex(p)]
+    V = gram_schmidt(
+        M,
+        p,
+        E;
+        warn_linearly_dependent = warn_linearly_dependent,
+        return_incomplete_set = return_incomplete_set,
+        kwargs...,
+    )
+    return CachedBasis(B, V)
 end
 for BT in DISAMBIGUATION_BASIS_TYPES
     eval(
@@ -323,7 +310,7 @@ for BT in DISAMBIGUATION_BASIS_TYPES
     )
 end
 
-"""
+@doc raw"""
     get_coordinates(M::Manifold, p, X, B::AbstractBasis)
     get_coordinates(M::Manifold, p, X, B::CachedBasis)
 
@@ -518,6 +505,92 @@ function _get_vectors(B::CachedBasis{𝔽,<:AbstractBasis,<:DiagonalizingBasisDa
     return B.data.vectors
 end
 
+
+@doc raw"""
+    gram_schmidt(M::Manifold{𝔽}, p, B::AbstractBasis{𝔽}) where {𝔽}
+    gram_schmidt(M::Manifold, p, V::AbstractVector)
+
+Compute an ONB in the tangent space at `p` on the [`Manifold`](@ref} `M` from either an
+[`AbstractBasis`](@ref) basis ´B´ or a set of (at most) [`manifold_dimension`](@ref)`(M)`
+many vectors.
+Note that this method requires the manifold and basis to work on the same
+[`AbstractNumbers`](@ref) `𝔽`, i.e. with real coefficients.
+
+The method always returns a basis, i.e. linearly dependent vectors are removed.
+
+# Keyword arguments
+
+* `warn_linearly_dependent` (`false`) – warn if the basis vectors are not linearly
+  independent
+* `return_incomplete_set` (`false`) – throw an error if the resulting set of vectors is not
+  a basis but contains less vectors
+
+further keyword arguments can be passed to set the accuracy of the independence test.
+
+# Return value
+
+When a set of vectors is orthonormalized a set of vectors is returned.
+When an [`AbstractBasis`](@ref) is orthonormalized, a [`CachedBasis`](@ref) is returned.
+"""
+function gram_schmidt(
+    M::Manifold{𝔽},
+    p,
+    B::AbstractBasis{𝔽};
+    warn_linearly_dependent = false,
+    return_incomplete_set = false,
+    kwargs...,
+) where {𝔽}
+    V = gram_schmidt(
+        M,
+        p,
+        get_vectors(M, p, B);
+        warn_linearly_dependent = warn_linearly_dependent,
+        return_incomplete_set = return_incomplete_set,
+        kwargs...,
+    )
+    return CachedBasis(GramSchmidtOrthonormalBasis(𝔽), V)
+end
+function gram_schmidt(
+    M::Manifold,
+    p,
+    V::AbstractVector;
+    warn_linearly_dependent = false,
+    return_incomplete_set = false,
+    kwargs...,
+)
+    N = length(V)
+    Ξ = empty(V)
+    dim = manifold_dimension(M)
+    N < dim && @warn "Input only has $(N) vectors, but manifold dimension is $(dim)."
+    @inbounds for n in 1:N
+        Ξₙ = V[n]
+        for k in 1:length(Ξ)
+            Ξₙ .-= real(inner(M, p, Ξ[k], Ξₙ)) .* Ξ[k]
+        end
+        nrmΞₙ = norm(M, p, Ξₙ)
+        if nrmΞₙ == 0
+            warn_linearly_dependent && @warn "Input vector $(n) has length 0."
+            @goto skip
+        end
+        Ξₙ ./= nrmΞₙ
+        for k in 1:length(Ξ)
+            if !isapprox(real(inner(M, p, Ξ[k], Ξₙ)), 0; kwargs...)
+                warn_linearly_dependent &&
+                    @warn "Input vector $(n) is not linearly independent of output basis vector $(k)."
+                @goto skip
+            end
+        end
+        push!(Ξ, Ξₙ)
+        length(Ξ) == dim && return Ξ
+        @label skip
+    end
+    return if return_incomplete_set
+        return Ξ
+    else
+        error("gram_schmidt found only $(length(Ξ)) orthonormal basis vectors, but manifold dimension is $(dim).")
+    end
+end
+
 @doc raw"""
     hat(M::Manifold, p, Xⁱ)
 
@@ -588,6 +661,9 @@ function show(io::IO, ::DefaultOrthogonalBasis{𝔽}) where {𝔽}
 end
 function show(io::IO, ::DefaultOrthonormalBasis{𝔽}) where {𝔽}
     return print(io, "DefaultOrthonormalBasis($(𝔽))")
+end
+function show(io::IO, ::GramSchmidtOrthonormalBasis{𝔽}) where {𝔽}
+    return print(io, "GramSchmidtOrthonormalBasis($(𝔽))")
 end
 function show(io::IO, ::ProjectedOrthonormalBasis{method,𝔽}) where {method,𝔽}
     return print(io, "ProjectedOrthonormalBasis($(repr(method)), $(𝔽))")

@@ -871,6 +871,7 @@ export CachedBasis,
     DefaultOrthonormalBasis,
     DiagonalizingOrthonormalBasis,
     DefaultOrthonormalBasis,
+    GramSchmidtOrthonormalBasis,
     ProjectedOrthonormalBasis
 
 export allocate,
