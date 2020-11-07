@@ -186,12 +186,12 @@ function allocate_result(M::Manifold, f, x...)
 end
 
 """
-    allocate_result_type(M::Manifold, f, args::NTuple{N,Any}) where N
+    allocate_result_type(M::Manifold, f::TF, args::NTuple{N,Any}) where {TF,N}
 
 Return type of element of the array that will represent the result of function `f` and the
 [`Manifold`](@ref) `M` on given arguments `args` (passed as a tuple).
 """
-function allocate_result_type(M::Manifold, f, args::NTuple{N,Any}) where {N}
+function allocate_result_type(M::Manifold, f::TF, args::NTuple{N,Any}) where {TF,N}
     return typeof(mapreduce(eti -> one(number_eltype(eti)), +, args))
 end
 
