@@ -176,9 +176,6 @@ function allocate_result(M::PowerManifoldNested, f, x...)
     ]
 end
 
-function allocate_result(M::PowerManifoldNested, f::typeof(get_vector), p, X)
-    return [allocate_result(M.manifold, f, _access_nested(p, i)) for i in get_iterator(M)]
-end
 function allocate_result(
     M::PowerManifoldNested,
     f::typeof(get_coordinates),
@@ -195,6 +192,26 @@ function allocate_result(
         X,
         B,
     )
+end
+function allocate_result(
+    M::PowerManifoldNested,
+    f::typeof(get_coordinates),
+    p,
+    X,
+    B::CachedBasis,
+)
+    return invoke(
+        allocate_result,
+        Tuple{Manifold,typeof(get_coordinates),Any,Any,typeof(B)},
+        M,
+        f,
+        p,
+        X,
+        B,
+    )
+end
+function allocate_result(M::PowerManifoldNested, f::typeof(get_vector), p, X)
+    return [allocate_result(M.manifold, f, _access_nested(p, i)) for i in get_iterator(M)]
 end
 
 function allocation_promotion_function(M::AbstractPowerManifold, f, args::Tuple)
