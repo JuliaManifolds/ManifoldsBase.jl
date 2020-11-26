@@ -169,6 +169,13 @@ const PowerManifoldNested =
 _access_nested(x, i::Int) = x[i]
 _access_nested(x, i::Tuple) = x[i...]
 
+function Base.:^(
+    M::PowerManifold{𝔽,TM,TSize,NestedPowerRepresentation},
+    size::Integer...,
+) where {𝔽,TM<:Manifold{𝔽},TSize}
+    return PowerManifold(M, size...)
+end
+
 function allocate_result(M::PowerManifoldNested, f, x...)
     return [
         allocate_result(M.manifold, f, map(y -> _access_nested(y, i), x)...)
@@ -824,6 +831,13 @@ Base.@propagate_inbounds function Base.setindex!(
     I::Union{Integer,Colon,AbstractVector}...,
 )
     return set_component!(M, q, p, I...)
+end
+
+function Base.show(io::IO, M::PowerManifold{𝔽,TM,TSize,TPR}) where {𝔽,TM,TSize,TPR}
+    return print(
+        io,
+        "PowerManifold($(M.manifold), $(TPR()), $(join(TSize.parameters, ", ")))",
+    )
 end
 
 function Base.show(

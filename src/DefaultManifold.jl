@@ -90,6 +90,10 @@ project!(::DefaultManifold, Y, p, X) = copyto!(Y, X)
 
 @generated representation_size(::DefaultManifold{T}) where {T} = tuple(T.parameters...)
 
+function Base.show(io::IO, ::DefaultManifold{N,𝔽}) where {N,𝔽}
+    return print(io, "DefaultManifold($(join(N.parameters, ", ")); field = $(𝔽))")
+end
+
 function vector_transport_along!(
     ::DefaultManifold,
     Y,

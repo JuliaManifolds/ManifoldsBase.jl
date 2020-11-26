@@ -848,6 +848,9 @@ export ValidationManifold, ValidationMPoint, ValidationTVector, ValidationCoTVec
 export AbstractEmbeddingType,
     TransparentIsometricEmbedding, DefaultIsometricEmbeddingType, DefaultEmbeddingType
 export AbstractEmbeddedManifold, EmbeddedManifold, TransparentIsometricEmbedding
+export AbstractPowerManifold, PowerManifold
+export AbstractPowerRepresentation, NestedPowerRepresentation
+export NestedPowerManifold
 
 export OutOfInjectivityRadiusError
 
