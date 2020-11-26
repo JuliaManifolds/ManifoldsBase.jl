@@ -850,7 +850,6 @@ export AbstractEmbeddingType,
 export AbstractEmbeddedManifold, EmbeddedManifold, TransparentIsometricEmbedding
 export AbstractPowerManifold, PowerManifold
 export AbstractPowerRepresentation, NestedPowerRepresentation
-export NestedPowerManifold
 
 export OutOfInjectivityRadiusError
 
@@ -893,6 +892,7 @@ export allocate,
     get_coordinates,
     get_coordinates!,
     get_embedding,
+    get_iterator,
     get_vector,
     get_vector!,
     get_vectors,
