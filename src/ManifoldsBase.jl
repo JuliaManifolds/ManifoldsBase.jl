@@ -840,6 +840,7 @@ include("bases.jl")
 include("ValidationManifold.jl")
 include("EmbeddedManifold.jl")
 include("DefaultManifold.jl")
+include("PowerManifold.jl")
 
 export Manifold, MPoint, TVector, CoTVector
 export AbstractDecoratorManifold
