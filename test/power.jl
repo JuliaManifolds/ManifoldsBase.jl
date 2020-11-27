@@ -7,27 +7,27 @@ struct DummyPowerRepresentation <: AbstractPowerRepresentation end
 @testset "Power Manifold" begin
     M = ManifoldsBase.DefaultManifold(3)
     N = PowerManifold(M, NestedPowerRepresentation(), 2)
-    p = [ zeros(3), ones(3) ]
-    q = [ ones(3), zeros(3) ]
+    p = [zeros(3), ones(3)]
+    q = [ones(3), zeros(3)]
     @testset "Constructors" begin
         @test repr(N) ==
-            "PowerManifold(DefaultManifold(3; field = ℝ), NestedPowerRepresentation(), 2)"
+              "PowerManifold(DefaultManifold(3; field = ℝ), NestedPowerRepresentation(), 2)"
         # add to type
         @test repr(N^3) ==
-            "PowerManifold(DefaultManifold(3; field = ℝ), NestedPowerRepresentation(), 2, 3)"
+              "PowerManifold(DefaultManifold(3; field = ℝ), NestedPowerRepresentation(), 2, 3)"
         # add to type
-        @test repr(PowerManifold(N,3)) ==
-            "PowerManifold(DefaultManifold(3; field = ℝ), NestedPowerRepresentation(), 2, 3)"
+        @test repr(PowerManifold(N, 3)) ==
+              "PowerManifold(DefaultManifold(3; field = ℝ), NestedPowerRepresentation(), 2, 3)"
         # switch type
-        @test repr(PowerManifold(N,DummyPowerRepresentation(),3)) ==
-            "PowerManifold(DefaultManifold(3; field = ℝ), DummyPowerRepresentation(), 2, 3)"
+        @test repr(PowerManifold(N, DummyPowerRepresentation(), 3)) ==
+              "PowerManifold(DefaultManifold(3; field = ℝ), DummyPowerRepresentation(), 2, 3)"
         # nest
-        @test repr(PowerManifold(N,NestedPowerRepresentation(),3)) ==
-            "PowerManifold(PowerManifold(DefaultManifold(3; field = ℝ), NestedPowerRepresentation(), 2), NestedPowerRepresentation(), 3)"
+        @test repr(PowerManifold(N, NestedPowerRepresentation(), 3)) ==
+              "PowerManifold(PowerManifold(DefaultManifold(3; field = ℝ), NestedPowerRepresentation(), 2), NestedPowerRepresentation(), 3)"
     end
     @testset "checks" begin
-        pE1 = [ zeros(3), ones(2) ] # one component wrong
-        pE2 = [ zeros(2), ones(2) ] # both wrong
+        pE1 = [zeros(3), ones(2)] # one component wrong
+        pE2 = [zeros(2), ones(2)] # both wrong
         @test is_manifold_point(N, p)
         @test is_manifold_point(N, p, true)
         @test !is_manifold_point(N, pE1)
@@ -47,12 +47,12 @@ struct DummyPowerRepresentation <: AbstractPowerRepresentation end
         @test_throws CompositeManifoldError is_tangent_vector(N, p, pE2, true)
     end
     @testset "specific functions" begin
-        @test distance(N, p, q) == sqrt(sum(distance.(Ref(M), p, q).^2))
-        @test exp(N,p,q) == p .+ q
-        @test log(N,p,q) == q .- p
-        @test p[N,1] == p[1]
-        p[N,1] = 2 .* ones(3)
-        @test p[N,1] == 2 .* ones(3)
+        @test distance(N, p, q) == sqrt(sum(distance.(Ref(M), p, q) .^ 2))
+        @test exp(N, p, q) == p .+ q
+        @test log(N, p, q) == q .- p
+        @test p[N, 1] == p[1]
+        p[N, 1] = 2 .* ones(3)
+        @test p[N, 1] == 2 .* ones(3)
     end
 
 end

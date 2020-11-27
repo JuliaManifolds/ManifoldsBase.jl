@@ -1,6 +1,20 @@
 module ManifoldsBase
 
-import Base: isapprox, exp, log, convert, copyto!, angle, eltype, isempty, length, similar, show, +, -, *
+import Base:
+    isapprox,
+    exp,
+    log,
+    convert,
+    copyto!,
+    angle,
+    eltype,
+    isempty,
+    length,
+    similar,
+    show,
+    +,
+    -,
+    *
 import LinearAlgebra: dot, norm, det, cross, I, UniformScaling, Diagonal
 
 import Markdown: @doc_str
