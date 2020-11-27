@@ -43,22 +43,21 @@ power manifolds might be faster if they are represented as [`ProductManifold`](@
 
 # Constructor
 
-    PowerManifold(M, N_1, N_2, ..., N_d)
-    PowerManifold(M, NestedPowerRepresentation(), N_1, N_2, ..., N_d)
+    PowerManifold(M::PowerManifold, N_1, N_2, ..., N_d)
+    PowerManifold(M::Manifold, NestedPowerRepresentation(), N_1, N_2, ..., N_d)
     M^(N_1, N_2, ..., N_d)
 
 Generate the power manifold $M^{N_1 × N_2 × … × N_d}$.
-By default, the [`ArrayPowerRepresentation`](@ref) of points
-and tangent vectors is used, although a different one, for example
-[`NestedPowerRepresentation`](@ref), can be given as the second argument to the
-constructor.
-When `M` is a `PowerManifold` (not any [`AbstractPowerManifold`](@ref)) itself, given
-dimensions will be appended to the dimensions already present, for example
-`PowerManifold(PowerManifold(Sphere(2), 2), 3)` is equivalent to
-`PowerManifold(Sphere(2), 2, 3)`. This feature preserves the representation of the inner
-power manifold (unless it's explicitly overridden).
-If you specify `NestedPowerRepresentation()`, the sizes are not concatenated but you end up
-with a nested power manifold within a power manifold.
+By default, a [`PowerManifold`](@ref} is expanded further, i.e. for `M=PowerManifold(N,3)`
+`PowerManifold(M,2)` is equivalend to `PowerManifold(N,3,2)`. Points are then 3×2 matrices
+of points on `N`.
+Providing a [`NestedPowerRepresentation`](@ref) as the second argument to the constructor
+can be used to nest manifold, i.e. `PowerManifold(M,NestedPowerRepresentation(),2)`
+represents vectors of length 2 whose elements are vectors of length 3 of points on N
+in a nested array representation.
+
+Since there is no default [`AbstractPowerRepresentation`](@ref) within this interface, the
+`^` operator is only available for `PowerManifold`s and concatenates dimensions.
 """
 struct PowerManifold{𝔽,TM<:Manifold{𝔽},TSize,TPR<:AbstractPowerRepresentation} <:
        AbstractPowerManifold{𝔽,TM,TPR}

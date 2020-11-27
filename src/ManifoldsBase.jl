@@ -1,6 +1,6 @@
 module ManifoldsBase
 
-import Base: isapprox, exp, log, convert, copyto!, angle, eltype, similar, show, +, -, *
+import Base: isapprox, exp, log, convert, copyto!, angle, eltype, isempty, length, similar, show, +, -, *
 import LinearAlgebra: dot, norm, det, cross, I, UniformScaling, Diagonal
 
 import Markdown: @doc_str
@@ -814,6 +814,13 @@ shortest_geodesic(M::Manifold, p, q, t::Real) = geodesic(M, p, log(M, p, q), t)
 shortest_geodesic(M::Manifold, p, q, T::AbstractVector) = geodesic(M, p, log(M, p, q), T)
 
 """
+    size_to_tuple(::Type{S}) where S<:Tuple
+
+Converts a size given by `Tuple{N, M, ...}` into a tuple `(N, M, ...)`.
+"""
+Base.@pure size_to_tuple(::Type{S}) where {S<:Tuple} = tuple(S.parameters...)
+
+"""
     zero_tangent_vector!(M::Manifold, X, p)
 
 Save to `X` a vector such that retracting `X` to the [`Manifold`](@ref) `M` at `p`
@@ -908,6 +915,8 @@ export allocate,
     isapprox,
     is_manifold_point,
     is_tangent_vector,
+    isempty,
+    length,
     log,
     log!,
     manifold_dimension,
@@ -921,6 +930,7 @@ export allocate,
     project!,
     real_dimension,
     representation_size,
+    show,
     retract,
     retract!,
     vector_transport_along,
