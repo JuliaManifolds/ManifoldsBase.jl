@@ -93,6 +93,7 @@ struct DummyPowerRepresentation <: AbstractPowerRepresentation end
         v2 = zeros(size(v))
         get_coordinates!(N, v2, p, q, B)
         @test v2 == v
+        @test get_coordinates(N, p, q, DefaultOrthonormalBasis()) == v
         @test B.data.bases[1].data == get_basis(M, p[1], DefaultBasis()).data
         @test B.data.bases[2].data == get_basis(M, p[2], DefaultBasis()).data
         @test get_vector(N, p, v, B) == q
