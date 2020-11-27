@@ -145,7 +145,7 @@ are stored in `data`, either explicitly (like in cached variants of
 struct CachedBasis{𝔽,B,V} <: AbstractBasis{𝔽} where {B<:AbstractBasis{𝔽},V}
     data::V
 end
-function CachedBasis(basis::B, data::V) where {V,𝔽,B<:AbstractBasis{𝔽}}
+function CachedBasis(::B, data::V) where {V,𝔽,B<:AbstractBasis{𝔽}}
     return CachedBasis{𝔽,B,V}(data)
 end
 function CachedBasis(basis::CachedBasis) # avoid double encapsulation
