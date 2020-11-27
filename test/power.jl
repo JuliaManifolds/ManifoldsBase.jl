@@ -50,6 +50,7 @@ struct DummyPowerRepresentation <: AbstractPowerRepresentation end
         @test distance(N, p, q) == sqrt(sum(distance.(Ref(M), p, q) .^ 2))
         @test exp(N, p, q) == p .+ q
         @test retract(N, p, q) == p .+ q
+        @test ManifoldsBase.get_iterator(N) == Base.OneTo(2)
         @test injectivity_radius(N) == injectivity_radius(M)
         @test injectivity_radius(N, p) == injectivity_radius(M, p)
         @test inner(N, p, q, q) == sum(inner.(Ref(M), p, q, q))
@@ -70,9 +71,15 @@ struct DummyPowerRepresentation <: AbstractPowerRepresentation end
         @test vector_transport_to(N, p, p, q) == p
         @test vector_transport_to(N, p, p, q, m) == p
         @test vector_transport_to(N, p, p, q, PowerVectorTransport(m)) == p
+        q2 = [zeros(3), zeros(3)]
+        vector_transport_to!(N, q2, p, q, p)
+        @test q2 == q
         @test vector_transport_direction(N, p, p, q) == p
         @test vector_transport_direction(N, p, p, q, m) == p
         @test vector_transport_direction(N, p, p, q, PowerVectorTransport(m)) == p
+        q2 = [zeros(3), zeros(3)]
+        vector_transport_direction!(N, q2, p, q, p)
+        @test q2 == q
         @test p[N, 1] == p[1]
         p[N, 1] = 2 .* ones(3)
         @test p[N, 1] == 2 .* ones(3)
@@ -82,9 +89,21 @@ struct DummyPowerRepresentation <: AbstractPowerRepresentation end
         @test v == [q[1]..., q[2]...]
         @test get_vector(N, p, v, DefaultBasis()) == q
         B = get_basis(N, p, DefaultBasis())
+        @test get_coordinates(N, p, q, B) == v
+        v2 = zeros(size(v))
+        get_coordinates!(N, v2, p, q, B)
+        @test v2 == v
         @test B.data.bases[1].data == get_basis(M, p[1], DefaultBasis()).data
         @test B.data.bases[2].data == get_basis(M, p[2], DefaultBasis()).data
         @test get_vector(N, p, v, B) == q
+        B2 = DiagonalizingOrthonormalBasis([ones(3), ones(3)])
+        B3 = get_basis(N, p, B2)
+        @test sprint(show, "text/plain", B) == """$(DefaultBasis()) for a power manifold
+        Basis for component (1,):
+        $(sprint(show, "text/plain", B.data.bases[1]))
+        Basis for component (2,):
+        $(sprint(show, "text/plain", B.data.bases[2]))
+        """
     end
 
 end
