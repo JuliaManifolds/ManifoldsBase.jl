@@ -25,6 +25,9 @@ struct DummyPowerRepresentation <: AbstractPowerRepresentation end
         @test repr(PowerManifold(N, NestedPowerRepresentation(), 3)) ==
               "PowerManifold(PowerManifold(DefaultManifold(3; field = ℝ), NestedPowerRepresentation(), 2), NestedPowerRepresentation(), 3)"
     end
+    @test N^3 == PowerManifold(M, NestedPowerRepresentation(), 2, 3)
+    @test ManifoldsBase.get_iterator(N^3) == Base.product(Base.OneTo(2), Base.OneTo(3))
+
     @testset "point/tangent checks" begin
         pE1 = [zeros(3), ones(2)] # one component wrong
         pE2 = [zeros(2), ones(2)] # both wrong
@@ -83,6 +86,9 @@ struct DummyPowerRepresentation <: AbstractPowerRepresentation end
         @test p[N, 1] == p[1]
         p[N, 1] = 2 .* ones(3)
         @test p[N, 1] == 2 .* ones(3)
+        @test p[N, [2, 1]] == [p[2], p[1]]
+        @test view(p, N, 2) isa SubArray
+        @test view(p, N, 2) == p[2]
     end
     @testset "Basis, coordinates & vector" begin
         v = get_coordinates(N, p, q, DefaultBasis())
