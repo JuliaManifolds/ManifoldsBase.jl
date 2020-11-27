@@ -58,10 +58,10 @@ struct DummyPowerRepresentation <: AbstractPowerRepresentation end
         @test isapprox(N, p, p, p) == (all(isapprox.(Ref(M), p, p, p)))
         @test log(N, p, q) == q .- p
         @test inverse_retract(N, p, q) == q .- p
-        @test manifold_dimension(N) == 2*manifold_dimension(M)
+        @test manifold_dimension(N) == 2 * manifold_dimension(M)
         @test mid_point(N, p, q) == mid_point.(Ref(M), p, q)
         @test sqrt(inner(M, p, q, q)) == norm(M, p, q)
-        @test project(N,p) == p
+        @test project(N, p) == p
         @test project(N, p, q) == q
         @test power_dimensions(N) == (2,)
         @test power_dimensions(N^3) == (2, 3)

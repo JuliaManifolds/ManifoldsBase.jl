@@ -880,6 +880,7 @@ export AbstractRetractionMethod,
     PolarRetraction,
     ProjectionRetraction,
     PowerRetraction,
+    InversePowerRetraction,
     SchildsLadderTransport,
     PoleLadderTransport,
     PowerVectorTransport
