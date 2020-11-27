@@ -253,7 +253,7 @@ function get_basis(M::Manifold, p, B::DefaultOrthonormalBasis)
         [get_vector(M, p, [ifelse(i == j, 1, 0) for j in 1:dim], B) for i in 1:dim],
     )
 end
-function get_basis(M::Manifold, p, B::CachedBasis)
+function get_basis(::Manifold, ::Any, B::CachedBasis)
     return B
 end
 function get_basis(M::Manifold, p, B::ProjectedOrthonormalBasis{:svd,ℝ})
@@ -496,7 +496,7 @@ Get the basis vectors of basis `B` of the tangent space at point `p`.
 function get_vectors(M::Manifold, p, B::AbstractBasis)
     return error("get_vectors not implemented for manifold of type $(typeof(M)) a point of type $(typeof(p)) and basis of type $(typeof(B)).")
 end
-function get_vectors(M::Manifold, p, B::CachedBasis)
+function get_vectors(::Manifold, ::Any, B::CachedBasis)
     return _get_vectors(B)
 end
 #internal for directly cached basis i.e. those that are just arrays – used in show

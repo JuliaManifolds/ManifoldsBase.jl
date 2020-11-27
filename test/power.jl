@@ -25,7 +25,7 @@ struct DummyPowerRepresentation <: AbstractPowerRepresentation end
         @test repr(PowerManifold(N, NestedPowerRepresentation(), 3)) ==
               "PowerManifold(PowerManifold(DefaultManifold(3; field = ℝ), NestedPowerRepresentation(), 2), NestedPowerRepresentation(), 3)"
     end
-    @testset "checks" begin
+    @testset "point/tangent checks" begin
         pE1 = [zeros(3), ones(2)] # one component wrong
         pE2 = [zeros(2), ones(2)] # both wrong
         @test is_manifold_point(N, p)
@@ -49,10 +49,36 @@ struct DummyPowerRepresentation <: AbstractPowerRepresentation end
     @testset "specific functions" begin
         @test distance(N, p, q) == sqrt(sum(distance.(Ref(M), p, q) .^ 2))
         @test exp(N, p, q) == p .+ q
+        @test retract(N, p, q) == p .+ q
+        @test injectivity_radius(N) == injectivity_radius(M)
+        @test inner(N, p, q, q) == sum(inner.(Ref(M), p, q, q))
+        @test isapprox(N, p, q) == (all(isapprox.(Ref(M), p, q)))
+        @test isapprox(N, p, p) == (all(isapprox.(Ref(M), p, p)))
+        @test isapprox(N, p, q, p) == (all(isapprox.(Ref(M), p, q, p)))
+        @test isapprox(N, p, p, p) == (all(isapprox.(Ref(M), p, p, p)))
         @test log(N, p, q) == q .- p
+        @test inverse_retract(N, p, q) == q .- p
+        @test manifold_dimension(N) == 2*manifold_dimension(M)
+        @test mid_point(N, p, q) == mid_point.(Ref(M), p, q)
+        @test sqrt(inner(M, p, q, q)) == norm(M, p, q)
+        @test project(N,p) == p
+        @test project(N, p, q) == q
+        @test power_dimensions(N) == (2,)
+        @test power_dimensions(N^3) == (2, 3)
+        @test vector_transport_to(M, p, p, q) == p
+        @test vector_transport_direction(M, p, p, q) == p
         @test p[N, 1] == p[1]
         p[N, 1] = 2 .* ones(3)
         @test p[N, 1] == 2 .* ones(3)
+    end
+    @testset "Basis, coordinates & vector" begin
+        v = get_coordinates(N, p, q, DefaultBasis())
+        @test v == [q[1]..., q[2]...]
+        @test get_vector(N, p, v, DefaultBasis()) == q
+        B = get_basis(N, p, DefaultBasis())
+        @test B.data.bases[1].data == get_basis(M, p[1], DefaultBasis()).data
+        @test B.data.bases[2].data == get_basis(M, p[2], DefaultBasis()).data
+        @test get_vector(N, p, v, B) == q
     end
 
 end
