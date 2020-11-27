@@ -832,7 +832,7 @@ function zero_tangent_vector(M::Manifold, p)
     zero_tangent_vector!(M, X, p)
     return X
 end
-
+include("errors.jl")
 include("numbers.jl")
 include("vector_transport.jl")
 include("DecoratorManifold.jl")
@@ -876,6 +876,8 @@ export CachedBasis,
     DefaultOrthonormalBasis,
     GramSchmidtOrthonormalBasis,
     ProjectedOrthonormalBasis
+
+export CompositeManifoldError, ComponentManifoldError
 
 export allocate,
     base_manifold,
