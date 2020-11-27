@@ -51,6 +51,7 @@ struct DummyPowerRepresentation <: AbstractPowerRepresentation end
         @test exp(N, p, q) == p .+ q
         @test retract(N, p, q) == p .+ q
         @test injectivity_radius(N) == injectivity_radius(M)
+        @test injectivity_radius(N, p) == injectivity_radius(M, p)
         @test inner(N, p, q, q) == sum(inner.(Ref(M), p, q, q))
         @test isapprox(N, p, q) == (all(isapprox.(Ref(M), p, q)))
         @test isapprox(N, p, p) == (all(isapprox.(Ref(M), p, p)))
@@ -59,7 +60,6 @@ struct DummyPowerRepresentation <: AbstractPowerRepresentation end
         @test log(N, p, q) == q .- p
         @test inverse_retract(N, p, q) == q .- p
         @test manifold_dimension(N) == 2 * manifold_dimension(M)
-        @test manifold_dimension(N, p) == 2 * manifold_dimension(M, p)
         @test mid_point(N, p, q) == mid_point.(Ref(M), p, q)
         @test sqrt(inner(N, p, q, q)) == norm(N, p, q)
         @test project(N, p) == p
