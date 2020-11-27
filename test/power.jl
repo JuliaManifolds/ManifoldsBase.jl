@@ -59,14 +59,20 @@ struct DummyPowerRepresentation <: AbstractPowerRepresentation end
         @test log(N, p, q) == q .- p
         @test inverse_retract(N, p, q) == q .- p
         @test manifold_dimension(N) == 2 * manifold_dimension(M)
+        @test manifold_dimension(N, p) == 2 * manifold_dimension(M, p)
         @test mid_point(N, p, q) == mid_point.(Ref(M), p, q)
-        @test sqrt(inner(M, p, q, q)) == norm(M, p, q)
+        @test sqrt(inner(N, p, q, q)) == norm(N, p, q)
         @test project(N, p) == p
         @test project(N, p, q) == q
         @test power_dimensions(N) == (2,)
         @test power_dimensions(N^3) == (2, 3)
+        m = ParallelTransport()
         @test vector_transport_to(M, p, p, q) == p
+        @test vector_transport_to(M, p, p, q, m) == p
+        @test vector_transport_to(M, p, p, q, PowerVectorTransport(m)) == p
         @test vector_transport_direction(M, p, p, q) == p
+        @test vector_transport_direction(M, p, p, q, m) == p
+        @test vector_transport_direction(M, p, p, q, PowerVectorTransport(m)) == p
         @test p[N, 1] == p[1]
         p[N, 1] = 2 .* ones(3)
         @test p[N, 1] == 2 .* ones(3)
