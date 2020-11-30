@@ -39,6 +39,7 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
         SizedVector{3,Double64},
     ]
 
+    @test repr(M) == "DefaultManifold(3; field = ℝ)"
     @test isa(manifold_dimension(M), Integer)
     @test manifold_dimension(M) ≥ 0
     @test base_manifold(M) == M

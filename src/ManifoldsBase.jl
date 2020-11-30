@@ -1,6 +1,20 @@
 module ManifoldsBase
 
-import Base: isapprox, exp, log, convert, copyto!, angle, eltype, similar, show, +, -, *
+import Base:
+    isapprox,
+    exp,
+    log,
+    convert,
+    copyto!,
+    angle,
+    eltype,
+    isempty,
+    length,
+    similar,
+    show,
+    +,
+    -,
+    *
 import LinearAlgebra: dot, norm, det, cross, I, UniformScaling, Diagonal
 
 import Markdown: @doc_str
@@ -814,6 +828,13 @@ shortest_geodesic(M::Manifold, p, q, t::Real) = geodesic(M, p, log(M, p, q), t)
 shortest_geodesic(M::Manifold, p, q, T::AbstractVector) = geodesic(M, p, log(M, p, q), T)
 
 """
+    size_to_tuple(::Type{S}) where S<:Tuple
+
+Converts a size given by `Tuple{N, M, ...}` into a tuple `(N, M, ...)`.
+"""
+Base.@pure size_to_tuple(::Type{S}) where {S<:Tuple} = tuple(S.parameters...)
+
+"""
     zero_tangent_vector!(M::Manifold, X, p)
 
 Save to `X` a vector such that retracting `X` to the [`Manifold`](@ref) `M` at `p`
@@ -832,7 +853,7 @@ function zero_tangent_vector(M::Manifold, p)
     zero_tangent_vector!(M, X, p)
     return X
 end
-
+include("errors.jl")
 include("numbers.jl")
 include("vector_transport.jl")
 include("DecoratorManifold.jl")
@@ -840,6 +861,7 @@ include("bases.jl")
 include("ValidationManifold.jl")
 include("EmbeddedManifold.jl")
 include("DefaultManifold.jl")
+include("PowerManifold.jl")
 
 export Manifold, MPoint, TVector, CoTVector
 export AbstractDecoratorManifold
@@ -847,6 +869,8 @@ export ValidationManifold, ValidationMPoint, ValidationTVector, ValidationCoTVec
 export AbstractEmbeddingType,
     TransparentIsometricEmbedding, DefaultIsometricEmbeddingType, DefaultEmbeddingType
 export AbstractEmbeddedManifold, EmbeddedManifold, TransparentIsometricEmbedding
+export AbstractPowerManifold, PowerManifold
+export AbstractPowerRepresentation, NestedPowerRepresentation
 
 export OutOfInjectivityRadiusError
 
@@ -855,8 +879,12 @@ export AbstractRetractionMethod,
     QRRetraction,
     PolarRetraction,
     ProjectionRetraction,
+    PowerRetraction,
+    InversePowerRetraction,
     SchildsLadderTransport,
-    PoleLadderTransport
+    PoleLadderTransport,
+    PowerVectorTransport
+
 export AbstractInverseRetractionMethod,
     LogarithmicInverseRetraction,
     QRInverseRetraction,
@@ -874,6 +902,8 @@ export CachedBasis,
     GramSchmidtOrthonormalBasis,
     ProjectedOrthonormalBasis
 
+export CompositeManifoldError, ComponentManifoldError
+
 export allocate,
     base_manifold,
     check_manifold_point,
@@ -886,6 +916,8 @@ export allocate,
     embed!,
     geodesic,
     get_basis,
+    get_component,
+    get_component!,
     get_coordinates,
     get_coordinates!,
     get_embedding,
@@ -902,6 +934,8 @@ export allocate,
     isapprox,
     is_manifold_point,
     is_tangent_vector,
+    isempty,
+    length,
     log,
     log!,
     manifold_dimension,
@@ -911,10 +945,13 @@ export allocate,
     number_eltype,
     number_of_coordinates,
     number_system,
+    power_dimensions,
     project,
     project!,
     real_dimension,
     representation_size,
+    set_component!,
+    show,
     retract,
     retract!,
     vector_transport_along,
