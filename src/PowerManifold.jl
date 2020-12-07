@@ -11,8 +11,6 @@ abstract type AbstractPowerRepresentation end
 Representation of points and tangent vectors on a power manifold using arrays
 of size equal to `TSize` of a [`PowerManifold`](@ref).
 Each element of such array stores a single point or tangent vector.
-
-[`GraphManifold`](@ref) uses this representation.
 """
 struct NestedPowerRepresentation <: AbstractPowerRepresentation end
 
@@ -38,8 +36,7 @@ $d$ equal to 1 and $n_1$ equal to the number of samples. A manifold-valued image
 manifold ($d=2$) with $n_1$ and $n_2$ equal to width and height of the image.
 
 While the size of the manifold is static, points on the power manifold
-would not be represented by statically-sized arrays. Operations on small
-power manifolds might be faster if they are represented as [`ProductManifold`](@ref).
+would not be represented by statically-sized arrays.
 
 # Constructor
 
@@ -226,7 +223,7 @@ end
 
 
 """
-    check_manifold_point(M::AbstractProductManifold, p; kwargs...)
+    check_manifold_point(M::AbstractPowerManifold, p; kwargs...)
 
 Check whether `p` is a valid point on an [`AbstractPowerManifold`](@ref) `M`,
 i.e. each element of `p` has to be a valid point on the base manifold.
