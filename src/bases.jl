@@ -470,7 +470,6 @@ function get_vector!(M::Manifold, Y, p, X, B::CachedBasis)
     #  2) guarantees a reasonable array type `Y`
     #     (for example scalar * `SizedValidation` is an `SArray`)
     bvectors = get_vectors(M, p, B)
-    #print("hi.\nB:$(B)\n& X:$(X)\n\nyields\n $(bvectors).")
     return if _get_vector_cache_broadcast(bvectors[1]) === Val(false)
         Xt = X[1] * bvectors[1]
         copyto!(Y, Xt)
