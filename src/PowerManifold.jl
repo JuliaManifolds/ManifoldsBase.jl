@@ -227,7 +227,7 @@ end
 
 Check whether `p` is a valid point on an [`AbstractPowerManifold`](@ref) `M`,
 i.e. each element of `p` has to be a valid point on the base manifold.
-If `p` is not a point on `M` a `CompositeManifoldError` consisting of all error messages of the
+If `p` is not a point on `M` a [`CompositeManifoldError`](@ref) consisting of all error messages of the
 components, for which the tests fail is returned.
 
 The tolerance for the last test can be set using the `kwargs...`.
@@ -252,7 +252,7 @@ Check whether `X` is a tangent vector to `p` an the [`AbstractPowerManifold`](@r
 `M`, i.e. atfer [`check_manifold_point`](@ref)`(M, p)`, and all projections to
 base manifolds must be respective tangent vectors.
 The optional parameter `check_base_point` indicates, whether to call [`check_manifold_point`](@ref)  for `p`.
-If `X` is not a tangent vector to `p` on `M` a `CompositeManifoldError` consisting of all error
+If `X` is not a tangent vector to `p` on `M` a [`CompositeManifoldError`](@ref) consisting of all error
 messages of the components, for which the tests fail is returned.
 
 
