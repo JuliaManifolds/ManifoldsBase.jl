@@ -381,6 +381,13 @@ function schilds_ladder!(
     return retract!(M, sl, p, X, retraction)
 end
 
+function show(io::IO, ::ParallelTransport)
+    return print(io, "ParallelTransport()")
+end
+function show(io::IO, m::ScaledVectorTransport)
+    return print(io, "ScaledVectorTransport($(m.method))")
+end
+
 """
     vector_transport_along(M::Manifold, p, X, c)
     vector_transport_along(M::Manifold, p, X, c, method::AbstractVectorTransportMethod)
@@ -713,7 +720,7 @@ function vector_transport_to!(
     q,
     m::ScaledVectorTransport{T},
 ) where {T<:AbstractVectorTransportMethod}
-    vector_transport_to!(M, Y, X, q, m.method)
+    vector_transport_to!(M, Y, p, X, q, m.method)
     Y .*= norm(M, p, X) / norm(M, q, Y)
     return Y
 end
