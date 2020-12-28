@@ -166,9 +166,7 @@ struct ScaledVectorTransport{T<:AbstractVectorTransportMethod} <:
        AbstractVectorTransportMethod
     method::T
 end
-function ScaledVectorTransport(m::T) where {T<:AbstractVectorTransportMethod}
-    return ScaledVectorTransport{T}(m)
-end
+
 @doc raw"""
     SchildsLadderTransport <: AbstractVectorTransportMethod
 
@@ -714,7 +712,7 @@ function vector_transport_to!(
     X,
     q,
     m::ScaledVectorTransport{T},
-) where {T}
+) where {T<:AbstractVectorTransportMethod}
     vector_transport_to!(M, Y, X, q, m.method)
     Y .*= norm(M, p, X) / norm(M, q, Y)
     return Y
@@ -762,4 +760,5 @@ function vector_transport_to!(
     ))
 end
 
-const VECTOR_TRANSPORT_DISAMBIGUATION = [PoleLadderTransport, SchildsLadderTransport]
+const VECTOR_TRANSPORT_DISAMBIGUATION =
+    [PoleLadderTransport, ScaledVectorTransport, SchildsLadderTransport]
