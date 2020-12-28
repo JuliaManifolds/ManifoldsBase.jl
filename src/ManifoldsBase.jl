@@ -889,10 +889,10 @@ export AbstractInverseRetractionMethod,
     ProjectionInverseRetraction
 
 export AbstractVectorTransportMethod,
-    DifferentiatedRetractionVectorTransport
+    DifferentiatedRetractionVectorTransport,
     ParallelTransport,
     PoleLadderTransport,
-    PowerVectorTransport
+    PowerVectorTransport,
     ProjectionTransport,
     ScaledVectorTransport,
     SchildsLadderTransport

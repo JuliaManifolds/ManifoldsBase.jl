@@ -162,10 +162,11 @@ retraction). Therefore a default implementation is only provided for the [`vecto
     > doi: [10.1080/02331934.2013.836650](https://doi.org/10.1080/02331934.2013.836650),
     > arXiv: [1302.0125](https://arxiv.org/abs/1302.0125).
 """
-struct ScaledVectorTransport{T<:AbstractVectorTransportMethod} <: AbstractVectorTransportMethod
+struct ScaledVectorTransport{T<:AbstractVectorTransportMethod} <:
+       AbstractVectorTransportMethod
     method::T
 end
-function ScaledVectorTransport(m::T) where {T <: AbstractVectorTransportMethod}
+function ScaledVectorTransport(m::T) where {T<:AbstractVectorTransportMethod}
     return ScaledVectorTransport{T}(m)
 end
 @doc raw"""
@@ -714,8 +715,8 @@ function vector_transport_to!(
     q,
     m::ScaledVectorTransport{T},
 ) where {T}
-    vector_transport_to!(M,Y,X,q,m.method)
-    Y .*= norm(M,p,X)/norm(M,q,Y)
+    vector_transport_to!(M, Y, X, q, m.method)
+    Y .*= norm(M, p, X) / norm(M, q, Y)
     return Y
 end
 
