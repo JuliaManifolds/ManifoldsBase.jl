@@ -155,10 +155,10 @@ end
     ScaledVectorTransport{T} <: AbstractVectorTransportMethod
 
 Introduce a scaled variant of any [`AbstractVectorTransportMethod`](@ref) `T`,
-as introduced in [^SatoIwai2013] for some ``X\inT_p\mathcal M`` as
+as introduced in [^SatoIwai2013] for some ``X\in T_p\mathcal M`` as
 
 ```math
-    \mathcal T^{\mathrm{S}}(X) = \frac{\lVert X\rVert_p}{\lVert \mathcal T(x)\rVert_q}\mathcal T(x).
+    \mathcal T^{\mathrm{S}}(X) = \frac{\lVert X\rVert_p}{\lVert \mathcal T(X)\rVert_q}\mathcal T(X).
 ```
 
 Note that the resulting point `q` has to be known, i.e. for [`vector_transport_direction`](@ref)
