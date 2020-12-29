@@ -60,7 +60,7 @@ compute ``Y = \operatorname{retr}_p^{-1}q``.
     > [open access](http://press.princeton.edu/chapters/absil/)
 """
 struct DifferentiatedRetractionVectorTransport{R<:AbstractRetractionMethod} <:
-    AbstractLinearVectorTransportMethod end
+       AbstractLinearVectorTransportMethod end
 function DifferentiatedRetractionVectorTransport(::R) where {R<:AbstractRetractionMethod}
     return DifferentiatedRetractionVectorTransport{R}()
 end
