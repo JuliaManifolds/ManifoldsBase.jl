@@ -5,7 +5,11 @@ using ManifoldsBase
     if VERSION >= v"1.1"
         num_ambiguities = length(Test.detect_ambiguities(ManifoldsBase))
         #num_ambiguities > 0 && @warn "The number of ambiguities in ManifoldsBase is $(num_ambiguities)."
-        @test num_ambiguities == 0
+        if VERSION >= v"1.7-DEV"
+            @test num_ambiguities <= 1
+        else
+            @test num_ambiguities == 0
+        end
     end
     include("allocation.jl")
     include("numbers.jl")

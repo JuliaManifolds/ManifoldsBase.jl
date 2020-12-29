@@ -2,9 +2,22 @@
 """
     AbstractVectorTransportMethod
 
-Abstract type for methods for transporting vectors.
+Abstract type for methods for transporting vectors. Such vector transports are not
+necessarily linear.
+
+# See also
+
+[`AbstractLinearVectorTransportMethod`](@ref)
 """
 abstract type AbstractVectorTransportMethod end
+
+"""
+    AbstractLinearVectorTransportMethod <: AbstractVectorTransportMethod
+
+Abstract type for linear methods for transporting vectors, that is transport of a linear
+combination of vectors is a linear combination of transported vectors.
+"""
+abstract type AbstractLinearVectorTransportMethod <: AbstractVectorTransportMethod end
 
 @doc raw"""
     DifferentiatedRetractionVectorTransport{R<:AbstractRetractionMethod} <:
@@ -47,7 +60,7 @@ compute ``Y = \operatorname{retr}_p^{-1}q``.
     > [open access](http://press.princeton.edu/chapters/absil/)
 """
 struct DifferentiatedRetractionVectorTransport{R<:AbstractRetractionMethod} <:
-       AbstractVectorTransportMethod end
+    AbstractLinearVectorTransportMethod end
 function DifferentiatedRetractionVectorTransport(::R) where {R<:AbstractRetractionMethod}
     return DifferentiatedRetractionVectorTransport{R}()
 end
@@ -124,7 +137,7 @@ changed to an [`AbstractRetractionMethod`](@ref) `retraction` and an
 struct PoleLadderTransport{
     RT<:AbstractRetractionMethod,
     IRT<:AbstractInverseRetractionMethod,
-} <: AbstractVectorTransportMethod
+} <: AbstractLinearVectorTransportMethod
     retraction::RT
     inverse_retraction::IRT
     function PoleLadderTransport(
@@ -212,7 +225,7 @@ changed to an [`AbstractRetractionMethod`](@ref) `retraction` and an
 struct SchildsLadderTransport{
     RT<:AbstractRetractionMethod,
     IRT<:AbstractInverseRetractionMethod,
-} <: AbstractVectorTransportMethod
+} <: AbstractLinearVectorTransportMethod
     retraction::RT
     inverse_retraction::IRT
     function SchildsLadderTransport(
