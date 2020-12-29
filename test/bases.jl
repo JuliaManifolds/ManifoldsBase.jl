@@ -8,7 +8,7 @@ import ManifoldsBase: allocate
 struct ProjManifold <: Manifold{ℝ} end
 
 ManifoldsBase.inner(::ProjManifold, x, w, v) = dot(w, v)
-ManifoldsBase.project!(S::ProjManifold, w, x, v) = (w .= v .- dot(x, v) .* x)
+ManifoldsBase.project!(::ProjManifold, w, x, v) = (w .= v .- dot(x, v) .* x)
 ManifoldsBase.representation_size(::ProjManifold) = (2, 3)
 ManifoldsBase.manifold_dimension(::ProjManifold) = 5
 ManifoldsBase.get_vector(::ProjManifold, x, v, ::DefaultOrthonormalBasis) = reverse(v)

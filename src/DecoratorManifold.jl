@@ -712,6 +712,14 @@ decorated_manifold(M::Manifold) = M.manifold
     p,
     X,
     q,
+    m::ScaledVectorTransport,
+)
+@decorator_transparent_signature vector_transport_to!(
+    M::AbstractDecoratorManifold,
+    Y,
+    p,
+    X,
+    q,
     m::SchildsLadderTransport,
 )
 

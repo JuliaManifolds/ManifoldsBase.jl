@@ -530,7 +530,7 @@ Check if points `p` and `q` from [`Manifold`](@ref) `M` are approximately equal.
 
 Keyword arguments can be used to specify tolerances.
 """
-isapprox(M::Manifold, x, y; kwargs...) = isapprox(x, y; kwargs...)
+isapprox(::Manifold, x, y; kwargs...) = isapprox(x, y; kwargs...)
 
 """
     isapprox(M::Manifold, p, X, Y; kwargs...)
@@ -540,7 +540,7 @@ equal.
 
 Keyword arguments can be used to specify tolerances.
 """
-isapprox(M::Manifold, p, X, Y; kwargs...) = isapprox(X, Y; kwargs...)
+isapprox(::Manifold, p, X, Y; kwargs...) = isapprox(X, Y; kwargs...)
 
 
 """
@@ -880,10 +880,7 @@ export AbstractRetractionMethod,
     PolarRetraction,
     ProjectionRetraction,
     PowerRetraction,
-    InversePowerRetraction,
-    SchildsLadderTransport,
-    PoleLadderTransport,
-    PowerVectorTransport
+    InversePowerRetraction
 
 export AbstractInverseRetractionMethod,
     LogarithmicInverseRetraction,
@@ -891,7 +888,14 @@ export AbstractInverseRetractionMethod,
     PolarInverseRetraction,
     ProjectionInverseRetraction
 
-export ParallelTransport, ProjectionTransport
+export AbstractVectorTransportMethod,
+    DifferentiatedRetractionVectorTransport,
+    ParallelTransport,
+    PoleLadderTransport,
+    PowerVectorTransport,
+    ProjectionTransport,
+    ScaledVectorTransport,
+    SchildsLadderTransport
 
 export CachedBasis,
     DefaultBasis,

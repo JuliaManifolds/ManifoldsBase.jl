@@ -2,18 +2,81 @@
 """
     AbstractVectorTransportMethod
 
-Abstract type for methods for transporting vectors.
+Abstract type for methods for transporting vectors. Such vector transports are not
+necessarily linear.
+
+# See also
+
+[`AbstractLinearVectorTransportMethod`](@ref)
 """
 abstract type AbstractVectorTransportMethod end
 
 """
-    ParallelTransport <: AbstractVectorTransportMethod
+    AbstractLinearVectorTransportMethod <: AbstractVectorTransportMethod
+
+Abstract type for linear methods for transporting vectors, that is transport of a linear
+combination of vectors is a linear combination of transported vectors.
+"""
+abstract type AbstractLinearVectorTransportMethod <: AbstractVectorTransportMethod end
+
+@doc raw"""
+    DifferentiatedRetractionVectorTransport{R<:AbstractRetractionMethod} <:
+        AbstractVectorTransportMethod
+
+A type to specify a vector transport that is given by differentiating a retraction.
+This can be introduced in two ways. Let ``\mathcal M`` be a Riemannian manifold,
+``p\in\mathcal M`` a point, and ``X,Y\in T_p\mathcal M`` denote two tangent vectors at ``p``.
+
+Given a retraction (cf. [`AbstractRetractionMethod`](@ref)) ``\operatorname{retr}``,
+the vector transport of `X` in direction `Y` (cf. [`vector_transport_direction`](@ref))
+by differentiation this retraction, is given by
+
+```math
+\mathcal T^{\operatorname{retr}}_{p,Y}X
+= D_Y\operatorname{retr}_p(Y)[X]
+= \frac{\mathrm{d}}{\mathrm{d}t}\operatorname{retr}_p(Y+tX)\Bigr|_{t=0}.
+```
+see [^AbsilMahonySepulchre2008], Section 8.1.2 for more details.
+
+This can be phrased similarly as a [`vector_transport_to`](@ref) by introducing
+``q=\operatorname{retr}_pX`` and defining
+
+```math
+\mathcal T^{\operatorname{retr}}_{q \gets p}X = \mathcal T^{\operatorname{retr}}_{p,Y}X
+```
+
+which in practice usually requires the [`inverse_retract`](@ref) to exists in order to
+compute ``Y = \operatorname{retr}_p^{-1}q``.
+
+# Constructor
+
+    DifferentiatedRetractionVectorTransport(m::AbstractRetractionMethod)
+
+[^AbsilMahonySepulchre2008]:
+    > Absil, P.-A., Mahony, R. and Sepulchre R.,
+    > _Optimization Algorithms on Matrix Manifolds_
+    > Princeton University Press, 2008,
+    > doi: [10.1515/9781400830244](https://doi.org/10.1515/9781400830244)
+    > [open access](http://press.princeton.edu/chapters/absil/)
+"""
+struct DifferentiatedRetractionVectorTransport{R<:AbstractRetractionMethod} <:
+       AbstractLinearVectorTransportMethod end
+function DifferentiatedRetractionVectorTransport(::R) where {R<:AbstractRetractionMethod}
+    return DifferentiatedRetractionVectorTransport{R}()
+end
+
+"""
+    ParallelTransport = DifferentiatedRetractionVectorTransport{ExponentialRetraction}
 
 Specify to use parallel transport as vector transport method within
 [`vector_transport_to`](@ref), [`vector_transport_direction`](@ref), or
 [`vector_transport_along`](@ref).
+
+Note that since it is technically the [`DifferentiatedRetractionVectorTransport`](@ref) of
+the [`exp`](@ref exp(M::Manifold, p, X)) (cf. [`ExponentialRetraction`](@ref)), we define
+`ParallelTransport` as an alias.
 """
-struct ParallelTransport <: AbstractVectorTransportMethod end
+const ParallelTransport = DifferentiatedRetractionVectorTransport{ExponentialRetraction}
 
 """
     ProjectionTransport <: AbstractVectorTransportMethod
@@ -74,7 +137,7 @@ changed to an [`AbstractRetractionMethod`](@ref) `retraction` and an
 struct PoleLadderTransport{
     RT<:AbstractRetractionMethod,
     IRT<:AbstractInverseRetractionMethod,
-} <: AbstractVectorTransportMethod
+} <: AbstractLinearVectorTransportMethod
     retraction::RT
     inverse_retraction::IRT
     function PoleLadderTransport(
@@ -86,6 +149,35 @@ struct PoleLadderTransport{
             inverse_retraction,
         )
     end
+end
+
+@doc raw"""
+    ScaledVectorTransport{T} <: AbstractVectorTransportMethod
+
+Introduce a scaled variant of any [`AbstractVectorTransportMethod`](@ref) `T`,
+as introduced in [^SatoIwai2013] for some ``X\inT_p\mathcal M`` as
+
+```math
+    \mathcal T^{\mathrm{S}}(X) = \frac{\lVert X\rVert_p}{\lVert \mathcal T(x)\rVert_q}\mathcal T(x).
+```
+
+Note that the resulting point `q` has to be known, i.e. for [`vector_transport_direction`](@ref)
+the curve or more precisely its end point has to be known (via an exponential map or a
+retraction). Therefore a default implementation is only provided for the [`vector_transport_to`](@ref)
+
+# Constructor
+
+    ScaledVectorTransport(m::AbstractVectorTransportMethod)
+
+[^SatoIwai2013]:
+    > Sato, H., Iwai, T.: _A new, globally convergent Riemannian conjugate gradient method_,
+    > Optimization, 2013, Volume 64(4), pp. 1011–1031.
+    > doi: [10.1080/02331934.2013.836650](https://doi.org/10.1080/02331934.2013.836650),
+    > arXiv: [1302.0125](https://arxiv.org/abs/1302.0125).
+"""
+struct ScaledVectorTransport{T<:AbstractVectorTransportMethod} <:
+       AbstractVectorTransportMethod
+    method::T
 end
 
 @doc raw"""
@@ -133,7 +225,7 @@ changed to an [`AbstractRetractionMethod`](@ref) `retraction` and an
 struct SchildsLadderTransport{
     RT<:AbstractRetractionMethod,
     IRT<:AbstractInverseRetractionMethod,
-} <: AbstractVectorTransportMethod
+} <: AbstractLinearVectorTransportMethod
     retraction::RT
     inverse_retraction::IRT
     function SchildsLadderTransport(
@@ -300,6 +392,13 @@ function schilds_ladder!(
     inverse_retract!(M, X, p, c, inverse_retraction)
     X *= 2
     return retract!(M, sl, p, X, retraction)
+end
+
+function show(io::IO, ::ParallelTransport)
+    return print(io, "ParallelTransport()")
+end
+function show(io::IO, m::ScaledVectorTransport)
+    return print(io, "ScaledVectorTransport($(m.method))")
 end
 
 """
@@ -626,6 +725,19 @@ function vector_transport_to!(M::Manifold, Y, p, X, q, m::PoleLadderTransport)
     return Y
 end
 
+function vector_transport_to!(
+    M::Manifold,
+    Y,
+    p,
+    X,
+    q,
+    m::ScaledVectorTransport{T},
+) where {T<:AbstractVectorTransportMethod}
+    vector_transport_to!(M, Y, p, X, q, m.method)
+    Y .*= norm(M, p, X) / norm(M, q, Y)
+    return Y
+end
+
 @doc raw"""
     vector_transport_to!(M::Manifold, Y, p, X, q, method::SchildsLadderTransport)
 
@@ -648,6 +760,7 @@ function vector_transport_to!(M::Manifold, Y, p, X, q, m::SchildsLadderTransport
     )
 end
 
+
 function vector_transport_to!(
     M::Manifold,
     Y,
@@ -667,4 +780,5 @@ function vector_transport_to!(
     ))
 end
 
-const VECTOR_TRANSPORT_DISAMBIGUATION = [PoleLadderTransport, SchildsLadderTransport]
+const VECTOR_TRANSPORT_DISAMBIGUATION =
+    [PoleLadderTransport, ScaledVectorTransport, SchildsLadderTransport]

@@ -204,6 +204,9 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
             end
 
             @testset "vector transport" begin
+                # test constructor and alias
+                @test DifferentiatedRetractionVectorTransport(ExponentialRetraction()) ==
+                      ParallelTransport()
                 v1 = log(M, pts[1], pts[2])
                 v2 = log(M, pts[1], pts[3])
                 v1t1 = vector_transport_to(M, pts[1], v1, pts[3])
@@ -238,6 +241,14 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
                 ) == v2
                 @test vector_transport_to(M, pts[1], v2, pts[2], PoleLadderTransport()) ==
                       v2
+                @test vector_transport_to(
+                    M,
+                    pts[1],
+                    v2,
+                    pts[2],
+                    ScaledVectorTransport(ParallelTransport()),
+                ) == v2
+
                 # along is also the identity
                 c = [0.5 * (pts[1] + pts[2]), pts[2], 0.5 * (pts[2] + pts[3]), pts[3]]
                 @test vector_transport_along(M, pts[1], v2, c, SchildsLadderTransport()) ==
@@ -251,6 +262,10 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
                 @test isapprox(M, -log(M, pts[3], p), log(M, pts[1], pts[2]))
                 ManifoldsBase.schilds_ladder!(M, p, pts[1], pts[2], pts[3])
                 @test isapprox(M, log(M, pts[3], p), log(M, pts[1], pts[2]))
+
+                @test repr(ParallelTransport()) == "ParallelTransport()"
+                @test repr(ScaledVectorTransport(ParallelTransport())) ==
+                      "ScaledVectorTransport(ParallelTransport())"
             end
 
             @testset "ForwardDiff support" begin
