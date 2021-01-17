@@ -1,15 +1,52 @@
 """
-    AbstractBasis{𝔽}
+    VectorSpaceType
 
-Abstract type that represents a basis on a manifold or a subset of it.
+Abstract type for tangent spaces, cotangent spaces, their tensor products,
+exterior products, etc.
+
+Every vector space `fiber` is supposed to provide:
+* a method of constructing vectors,
+* basic operations: addition, subtraction, multiplication by a scalar
+  and negation (unary minus),
+* [`zero_vector!(fiber, X, p)`](@ref) to construct zero vectors at point `p`,
+* `allocate(X)` and `allocate(X, T)` for vector `X` and type `T`,
+* `copyto!(X, Y)` for vectors `X` and `Y`,
+* `number_eltype(v)` for vector `v`,
+* [`vector_space_dimension(::VectorBundleFibers{<:typeof(fiber)}) where fiber`](@ref).
+
+Optionally:
+* inner product via `inner` (used to provide Riemannian metric on vector
+  bundles),
+* [`flat`](@ref) and [`sharp`](@ref),
+* `norm` (by default uses `inner`),
+* [`project`](@ref) (for embedded vector spaces),
+* [`representation_size`](@ref) (if support for [`ProductArray`](@ref) is desired),
+* broadcasting for basic operations.
+"""
+abstract type VectorSpaceType end
+
+struct TangentSpaceType <: VectorSpaceType end
+
+struct CotangentSpaceType <: VectorSpaceType end
+
+TCoTSpaceType = Union{TangentSpaceType,CotangentSpaceType}
+
+const TangentSpace = TangentSpaceType()
+const CotangentSpace = CotangentSpaceType()
+
+"""
+    AbstractBasis{𝔽,VST<:VectorSpaceType}
+
+Abstract type that represents a basis of vector space of type `VST` on a manifold or
+a subset of it.
 
 The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used
 for the vectors elements.
 """
-abstract type AbstractBasis{𝔽} end
+abstract type AbstractBasis{𝔽,VST<:VectorSpaceType} end
 
 """
-    DefaultBasis{𝔽}
+    DefaultBasis{𝔽,VST<:VectorSpaceType}
 
 An arbitrary basis on a manifold. This will usually
 be the fastest basis available for a manifold.
@@ -17,18 +54,28 @@ be the fastest basis available for a manifold.
 The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used
 for the vectors elements
 """
-struct DefaultBasis{𝔽} <: AbstractBasis{𝔽} end
-DefaultBasis(𝔽::AbstractNumbers = ℝ) = DefaultBasis{𝔽}()
+struct DefaultBasis{𝔽,VST<:VectorSpaceType} <: AbstractBasis{𝔽,VST}
+    vector_space::VST
+end
+function DefaultBasis(𝔽::AbstractNumbers = ℝ, vs::VectorSpaceType = TangentSpace)
+    return DefaultBasis{𝔽,typeof(vs)}(vs)
+end
+function DefaultBasis{𝔽}(vs::VectorSpaceType = TangentSpace) where {𝔽}
+    return DefaultBasis{𝔽,typeof(vs)}(vs)
+end
+function DefaultBasis{𝔽,TangentSpaceType}() where {𝔽}
+    return DefaultBasis{𝔽,TangentSpaceType}(TangentSpace)
+end
 
 """
-    AbstractOrthogonalBasis{𝔽}
+    AbstractOrthogonalBasis{𝔽,VST<:VectorSpaceType}
 
 Abstract type that represents an orthonormal basis on a manifold or a subset of it.
 
 The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used
 for the vectors elements.
 """
-abstract type AbstractOrthogonalBasis{𝔽} <: AbstractBasis{𝔽} end
+abstract type AbstractOrthogonalBasis{𝔽,VST<:VectorSpaceType} <: AbstractBasis{𝔽,VST} end
 
 """
     DefaultOrthogonalBasis{𝔽}
@@ -39,11 +86,21 @@ be the fastest orthogonal basis available for a manifold.
 The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used
 for the vectors elements.
 """
-struct DefaultOrthogonalBasis{𝔽} <: AbstractOrthogonalBasis{𝔽} end
-DefaultOrthogonalBasis(𝔽::AbstractNumbers = ℝ) = DefaultOrthogonalBasis{𝔽}()
+struct DefaultOrthogonalBasis{𝔽,VST<:VectorSpaceType} <: AbstractOrthogonalBasis{𝔽,VST}
+    vector_space::VST
+end
+function DefaultOrthogonalBasis(𝔽::AbstractNumbers = ℝ, vs::VectorSpaceType = TangentSpace)
+    return DefaultOrthogonalBasis{𝔽,typeof(vs)}(vs)
+end
+function DefaultOrthogonalBasis{𝔽}(vs::VectorSpaceType = TangentSpace) where {𝔽}
+    return DefaultOrthogonalBasis{𝔽,typeof(vs)}(vs)
+end
+function DefaultOrthogonalBasis{𝔽,TangentSpaceType}() where {𝔽}
+    return DefaultOrthogonalBasis{𝔽,TangentSpaceType}(TangentSpace)
+end
 
 
-struct VeeOrthogonalBasis{𝔽} <: AbstractOrthogonalBasis{𝔽} end
+struct VeeOrthogonalBasis{𝔽} <: AbstractOrthogonalBasis{𝔽,TangentSpaceType} end
 VeeOrthogonalBasis(𝔽::AbstractNumbers = ℝ) = VeeOrthogonalBasis{𝔽}()
 
 """
@@ -54,7 +111,8 @@ Abstract type that represents an orthonormal basis on a manifold or a subset of 
 The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used
 for the vectors elements.
 """
-abstract type AbstractOrthonormalBasis{𝔽} <: AbstractOrthogonalBasis{𝔽} end
+abstract type AbstractOrthonormalBasis{𝔽,VST<:VectorSpaceType} <:
+              AbstractOrthogonalBasis{𝔽,VST} end
 
 """
     DefaultOrthonormalBasis(𝔽::AbstractNumbers = ℝ)
@@ -65,9 +123,19 @@ be the fastest orthonormal basis available for a manifold.
 The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used
 for the vectors elements.
 """
-struct DefaultOrthonormalBasis{𝔽} <: AbstractOrthonormalBasis{𝔽} end
+struct DefaultOrthonormalBasis{𝔽,VST<:VectorSpaceType} <: AbstractOrthonormalBasis{𝔽,VST}
+    vector_space::VST
+end
 
-DefaultOrthonormalBasis(𝔽::AbstractNumbers = ℝ) = DefaultOrthonormalBasis{𝔽}()
+function DefaultOrthonormalBasis(𝔽::AbstractNumbers = ℝ, vs::VectorSpaceType = TangentSpace)
+    return DefaultOrthonormalBasis{𝔽,typeof(vs)}(vs)
+end
+function DefaultOrthonormalBasis{𝔽}(vs::VectorSpaceType = TangentSpace) where {𝔽}
+    return DefaultOrthonormalBasis{𝔽,typeof(vs)}(vs)
+end
+function DefaultOrthonormalBasis{𝔽,TangentSpaceType}() where {𝔽}
+    return DefaultOrthonormalBasis{𝔽,TangentSpaceType}(TangentSpace)
+end
 
 """
     ProjectedOrthonormalBasis(method::Symbol, 𝔽::AbstractNumbers = ℝ)
@@ -86,7 +154,7 @@ Available methods:
     an additional assumption (local metric tensor at a point where the
     basis is calculated has to be diagonal).
 """
-struct ProjectedOrthonormalBasis{Method,𝔽} <: AbstractOrthonormalBasis{𝔽} end
+struct ProjectedOrthonormalBasis{Method,𝔽} <: AbstractOrthonormalBasis{𝔽,TangentSpaceType} end
 
 function ProjectedOrthonormalBasis(method::Symbol, 𝔽::AbstractNumbers = ℝ)
     return ProjectedOrthonormalBasis{method,𝔽}()
@@ -100,7 +168,7 @@ An orthonormal basis obtained from a basis.
 # Constructor
     GramSchmidtOrthonormalBasis(𝔽::AbstractNumbers = ℝ)
 """
-struct GramSchmidtOrthonormalBasis{𝔽} <: AbstractOrthonormalBasis{𝔽} end
+struct GramSchmidtOrthonormalBasis{𝔽} <: AbstractOrthonormalBasis{𝔽,TangentSpaceType} end
 GramSchmidtOrthonormalBasis(𝔽::AbstractNumbers = ℝ) = GramSchmidtOrthonormalBasis{𝔽}()
 
 @doc raw"""
@@ -116,7 +184,7 @@ for the vectors elements.
 # Constructor
     DiagonalizingOrthonormalBasis(frame_direction, 𝔽::AbstractNumbers = ℝ)
 """
-struct DiagonalizingOrthonormalBasis{𝔽,TV} <: AbstractOrthonormalBasis{𝔽}
+struct DiagonalizingOrthonormalBasis{𝔽,TV} <: AbstractOrthonormalBasis{𝔽,TangentSpaceType}
     frame_direction::TV
 end
 function DiagonalizingOrthonormalBasis(X, 𝔽::AbstractNumbers = ℝ)
@@ -142,10 +210,11 @@ are stored in `data`, either explicitly (like in cached variants of
 
     CachedBasis(basis::AbstractBasis, data)
 """
-struct CachedBasis{𝔽,B,V} <: AbstractBasis{𝔽} where {B<:AbstractBasis{𝔽},V}
+struct CachedBasis{𝔽,B,V} <:
+       AbstractBasis{𝔽,TangentSpaceType} where {B<:AbstractBasis{𝔽,TangentSpaceType},V}
     data::V
 end
-function CachedBasis(::B, data::V) where {V,𝔽,B<:AbstractBasis{𝔽}}
+function CachedBasis(::B, data::V) where {V,𝔽,B<:AbstractBasis{𝔽,TangentSpaceType}}
     return CachedBasis{𝔽,B,V}(data)
 end
 function CachedBasis(basis::CachedBasis) # avoid double encapsulation
@@ -235,7 +304,9 @@ the function [`get_vectors`](@ref) needs to be used to retrieve the basis vector
 See also: [`get_coordinates`](@ref), [`get_vector`](@ref)
 """
 function get_basis(M::Manifold, p, B::AbstractBasis)
-    return error("get_basis not implemented for manifold of type $(typeof(M)) a point of type $(typeof(p)) and basis of type $(typeof(B)).")
+    return error(
+        "get_basis not implemented for manifold of type $(typeof(M)) a point of type $(typeof(p)) and basis of type $(typeof(B)).",
+    )
 end
 @decorator_transparent_signature get_basis(
     M::AbstractDecoratorManifold,
@@ -263,8 +334,8 @@ function get_basis(M::Manifold, p, B::ProjectedOrthonormalBasis{:svd,ℝ})
     # projection
     # TODO: find a better way to obtain a basis of the ambient space
     Xs = [
-        convert(Vector, reshape(project(M, p, _euclidean_basis_vector(p, i)), PS))
-        for i in eachindex(p)
+        convert(Vector, reshape(project(M, p, _euclidean_basis_vector(p, i)), PS)) for
+        i in eachindex(p)
     ]
     O = reduce(hcat, Xs)
     # orthogonalization
@@ -342,7 +413,9 @@ function decorator_transparent_dispatch(::typeof(get_coordinates), ::Manifold, a
 end
 
 function get_coordinates!(M::Manifold, Y, p, X, B::AbstractBasis)
-    return error("get_coordinates! not implemented for manifold of type $(typeof(M)) coordinates of type $(typeof(Y)), a point of type $(typeof(p)), tangent vector of type $(typeof(X)) and basis of type $(typeof(B)).")
+    return error(
+        "get_coordinates! not implemented for manifold of type $(typeof(M)) coordinates of type $(typeof(Y)), a point of type $(typeof(p)), tangent vector of type $(typeof(X)) and basis of type $(typeof(B)).",
+    )
 end
 @decorator_transparent_signature get_coordinates!(
     M::AbstractDecoratorManifold,
@@ -427,7 +500,9 @@ function decorator_transparent_dispatch(::typeof(get_vector), ::Manifold, args..
 end
 
 function get_vector!(M::Manifold, Y, p, X, B::AbstractBasis)
-    return error("get_vector! not implemented for manifold of type $(typeof(M)) vector of type $(typeof(Y)), a point of type $(typeof(p)), coordinates of type $(typeof(X)) and basis of type $(typeof(B)).")
+    return error(
+        "get_vector! not implemented for manifold of type $(typeof(M)) vector of type $(typeof(Y)), a point of type $(typeof(p)), coordinates of type $(typeof(X)) and basis of type $(typeof(B)).",
+    )
 end
 @decorator_transparent_signature get_vector!(
     M::AbstractDecoratorManifold,
@@ -493,7 +568,9 @@ end
 Get the basis vectors of basis `B` of the tangent space at point `p`.
 """
 function get_vectors(M::Manifold, p, B::AbstractBasis)
-    return error("get_vectors not implemented for manifold of type $(typeof(M)) a point of type $(typeof(p)) and basis of type $(typeof(B)).")
+    return error(
+        "get_vectors not implemented for manifold of type $(typeof(M)) a point of type $(typeof(p)) and basis of type $(typeof(B)).",
+    )
 end
 function get_vectors(::Manifold, ::Any, B::CachedBasis)
     return _get_vectors(B)
@@ -586,7 +663,9 @@ function gram_schmidt(
     return if return_incomplete_set
         return Ξ
     else
-        error("gram_schmidt found only $(length(Ξ)) orthonormal basis vectors, but manifold dimension is $(dim).")
+        error(
+            "gram_schmidt found only $(length(Ξ)) orthonormal basis vectors, but manifold dimension is $(dim).",
+        )
     end
 end
 

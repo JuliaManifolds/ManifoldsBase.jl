@@ -3,7 +3,7 @@ using ManifoldsBase
 using ManifoldsBase: DefaultManifold, ℝ, ℂ
 using Test
 import Base: +, -, *, copyto!, isapprox
-import ManifoldsBase: allocate
+import ManifoldsBase: allocate, TangentSpace, TangentSpaceType
 
 struct ProjManifold <: Manifold{ℝ} end
 
@@ -111,7 +111,7 @@ ManifoldsBase.manifold_dimension(::ProjectionTestManifold) = 100
 end
 
 struct NonManifold <: Manifold{ℝ} end
-struct NonBasis <: ManifoldsBase.AbstractBasis{ℝ} end
+struct NonBasis <: ManifoldsBase.AbstractBasis{ℝ,TangentSpaceType} end
 
 struct NonBroadcastBasisThing{T}
     v::T
@@ -164,8 +164,8 @@ function ManifoldsBase.get_basis(
     return CachedBasis(
         B,
         [
-            NonBroadcastBasisThing(ManifoldsBase._euclidean_basis_vector(p.v, i))
-            for i in eachindex(p.v)
+            NonBroadcastBasisThing(ManifoldsBase._euclidean_basis_vector(p.v, i)) for
+            i in eachindex(p.v)
         ],
     )
 end
@@ -177,8 +177,8 @@ function ManifoldsBase.get_basis(
     return CachedBasis(
         B,
         [
-            NonBroadcastBasisThing(ManifoldsBase._euclidean_basis_vector(p.v, i))
-            for i in eachindex(p.v)
+            NonBroadcastBasisThing(ManifoldsBase._euclidean_basis_vector(p.v, i)) for
+            i in eachindex(p.v)
         ],
     )
 end
@@ -190,8 +190,8 @@ function ManifoldsBase.get_basis(
     return CachedBasis(
         B,
         [
-            NonBroadcastBasisThing(ManifoldsBase._euclidean_basis_vector(p.v, i))
-            for i in eachindex(p.v)
+            NonBroadcastBasisThing(ManifoldsBase._euclidean_basis_vector(p.v, i)) for
+            i in eachindex(p.v)
         ],
     )
 end
@@ -273,11 +273,15 @@ DiagonalizingBasisProxy() = DiagonalizingOrthonormalBasis([1.0, 0.0, 0.0])
         b = get_basis(M, pts[1], BT())
         if BT != DiagonalizingBasisProxy
             if pts[1] isa Array
-                @test isa(b, CachedBasis{ℝ,BT{ℝ},Vector{Vector{Float64}}})
+                @test isa(b, CachedBasis{ℝ,BT{ℝ,TangentSpaceType},Vector{Vector{Float64}}})
             else
                 @test isa(
                     b,
-                    CachedBasis{ℝ,BT{ℝ},Vector{NonBroadcastBasisThing{Vector{Float64}}}},
+                    CachedBasis{
+                        ℝ,
+                        BT{ℝ,TangentSpaceType},
+                        Vector{NonBroadcastBasisThing{Vector{Float64}}},
+                    },
                 )
             end
         end

@@ -268,16 +268,18 @@ macro decorator_transparent_function(fallback_case, input_ex)
                 $(callargs[2:end]...);
                 $(kwargs_list...),
             ) where {$(where_exprs...)}
-                return error(string(
-                    ManifoldsBase.manifold_function_not_implemented_message(
-                        $(argnames[1]),
-                        $fname,
-                        $(argnames[2:end]...),
+                return error(
+                    string(
+                        ManifoldsBase.manifold_function_not_implemented_message(
+                            $(argnames[1]),
+                            $fname,
+                            $(argnames[2:end]...),
+                        ),
+                        " Usually this is implemented for a ",
+                        $(argtypes[1]),
+                        ". Maybe you missed to implement this function for a default?",
                     ),
-                    " Usually this is implemented for a ",
-                    $(argtypes[1]),
-                    ". Maybe you missed to implement this function for a default?",
-                ))
+                )
             end
             function ($(parts[:fname__parent]))(
                 $(argnames[1])::AbstractDecoratorManifold,

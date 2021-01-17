@@ -174,8 +174,8 @@ end
 
 function allocate_result(M::PowerManifoldNested, f, x...)
     return [
-        allocate_result(M.manifold, f, map(y -> _access_nested(y, i), x)...)
-        for i in get_iterator(M)
+        allocate_result(M.manifold, f, map(y -> _access_nested(y, i), x)...) for
+        i in get_iterator(M)
     ]
 end
 
@@ -235,8 +235,8 @@ The tolerance for the last test can be set using the `kwargs...`.
 function check_manifold_point(M::AbstractPowerManifold, p; kwargs...)
     rep_size = representation_size(M.manifold)
     e = [
-        (i, check_manifold_point(M.manifold, _read(M, rep_size, p, i); kwargs...))
-        for i in get_iterator(M)
+        (i, check_manifold_point(M.manifold, _read(M, rep_size, p, i); kwargs...)) for
+        i in get_iterator(M)
     ]
     errors = filter((x) -> !(x[2] === nothing), e)
     cerr = [ComponentManifoldError(er...) for er in errors]

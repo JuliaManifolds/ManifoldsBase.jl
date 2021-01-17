@@ -38,10 +38,16 @@ function ManifoldsBase.embed!(
     ln = length(n)
     m = size(q)
     lm = length(m)
-    (length(n) > length(m)) &&
-        throw(DomainError("Invalid embedding, since Euclidean dimension ($(n)) is longer than embedding dimension $(m)."))
-    any(n .> m[1:ln]) &&
-        throw(DomainError("Invalid embedding, since Euclidean dimension ($(n)) has entry larger than embedding dimensions ($(m))."))
+    (length(n) > length(m)) && throw(
+        DomainError(
+            "Invalid embedding, since Euclidean dimension ($(n)) is longer than embedding dimension $(m).",
+        ),
+    )
+    any(n .> m[1:ln]) && throw(
+        DomainError(
+            "Invalid embedding, since Euclidean dimension ($(n)) has entry larger than embedding dimensions ($(m)).",
+        ),
+    )
     fill!(q, 0)
     q[map(ind_n -> Base.OneTo(ind_n), n)..., ntuple(_ -> 1, lm - ln)...] .= p
     return q
@@ -56,10 +62,16 @@ function ManifoldsBase.project!(
     ln = length(n)
     m = size(q)
     lm = length(m)
-    (length(n) < length(m)) &&
-        throw(DomainError("Invalid embedding, since Euclidean dimension ($(n)) is longer than embedding dimension $(m)."))
-    any(n .< m[1:ln]) &&
-        throw(DomainError("Invalid embedding, since Euclidean dimension ($(n)) has entry larger than embedding dimensions ($(m))."))
+    (length(n) < length(m)) && throw(
+        DomainError(
+            "Invalid embedding, since Euclidean dimension ($(n)) is longer than embedding dimension $(m).",
+        ),
+    )
+    any(n .< m[1:ln]) && throw(
+        DomainError(
+            "Invalid embedding, since Euclidean dimension ($(n)) has entry larger than embedding dimensions ($(m)).",
+        ),
+    )
     #  fill q with the „top left edge“ of p.
     q .= p[map(i -> Base.OneTo(i), m)..., ntuple(_ -> 1, lm - ln)...]
     return q
