@@ -15,7 +15,7 @@ struct FVector{TType<:VectorSpaceType,TData,TBasis}
 end
 
 function FVector(type::VectorSpaceType, data)
-    return FVector{typeof(type),typeof(data),typeof(basis)}(type, data, nothing)
+    return FVector{typeof(type),typeof(data),Nothing}(type, data, nothing)
 end
 
 const TFVector = FVector{TangentSpaceType}
