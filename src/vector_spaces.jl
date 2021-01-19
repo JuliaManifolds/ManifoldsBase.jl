@@ -22,10 +22,10 @@ const TFVector = FVector{TangentSpaceType}
 const CoTFVector = FVector{CotangentSpaceType}
 
 function TFVector(data, basis = nothing)
-    return TFVector{typeof(data),typeof(basis)}(type, data, basis)
+    return TFVector{typeof(data),typeof(basis)}(TangentSpace, data, basis)
 end
 function CoTFVector(data, basis = nothing)
-    return CoTFVector{typeof(data),typeof(basis)}(type, data, basis)
+    return CoTFVector{typeof(data),typeof(basis)}(CotangentSpace, data, basis)
 end
 
 Base.:+(X::FVector, Y::FVector) = FVector(X.type, X.data + Y.data, X.basis)

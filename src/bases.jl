@@ -285,6 +285,29 @@ function combine_allocation_promotion_functions(::typeof(identity), ::typeof(com
     return complex
 end
 
+@doc raw"""
+    dual_basis(M::Manifold, p, B::AbstractBasis) 
+
+Get the dual basis to `B`, a basis of a vector space at point `p` from manifold `M`.
+
+The dual to the $i$th vector $v_i$ from basis `B` is a vector $v^i$ from the dual space
+such that $v^i(v_j) = δ^i_j$, where $δ^i_j$ is the Kronecker delta symbol:
+````math
+δ^i_j = \begin{cases}
+1 & \text{ if } i=j, \\
+0 & \text{ otherwise.}
+\end{cases}
+````
+"""
+dual_basis(M::Manifold, p, B::AbstractBasis)
+
+function dual_basis(::Manifold, p, ::DefaultOrthonormalBasis{𝔽,TangentSpaceType}) where {𝔽}
+    return DefaultOrthonormalBasis{𝔽}(CotangentSpace)
+end
+function dual_basis(::Manifold, p, ::DefaultOrthonormalBasis{𝔽,CotangentSpaceType}) where {𝔽}
+    return DefaultOrthonormalBasis{𝔽}(TangentSpace)
+end
+
 function _euclidean_basis_vector(p, i)
     X = zero(p)
     X[i] = 1
