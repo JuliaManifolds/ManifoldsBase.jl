@@ -2,6 +2,7 @@ using LinearAlgebra
 using ManifoldsBase
 using ManifoldsBase: DefaultManifold, ℝ, ℂ
 using ManifoldsBase: CotangentSpace, CotangentSpaceType, TangentSpace, TangentSpaceType
+using ManifoldsBase: FVector, CoTFVector, TFVector
 using Test
 import Base: +, -, *, copyto!, isapprox
 import ManifoldsBase: allocate
@@ -461,4 +462,26 @@ end
 
     b3 = DefaultBasis(ℝ, CotangentSpace)
     @test b3.vector_space == CotangentSpace
+end
+
+@testset "FVector" begin
+    @test sprint(show, TangentSpace) == "TangentSpace"
+    @test sprint(show, CotangentSpace) == "CotangentSpace"
+    tvs = ([1.0, 0.0, 0.0], [0.0, 1.0, 0.0])
+    fv_tvs = map(v -> TFVector(v, DefaultOrthonormalBasis()), tvs)
+    fv1 = fv_tvs[1]
+    tv1s = allocate(fv_tvs[1])
+    @test isa(tv1s, FVector)
+    @test tv1s.type == TangentSpace
+    @test size(tv1s.data) == size(tvs[1])
+    @test number_eltype(tv1s) == number_eltype(tvs[1])
+    @test number_eltype(tv1s) == number_eltype(typeof(tv1s))
+    @test isa(fv1 + fv1, FVector)
+    @test (fv1 + fv1).type == TangentSpace
+    @test isa(fv1 - fv1, FVector)
+    @test (fv1 - fv1).type == TangentSpace
+    @test isa(-fv1, FVector)
+    @test (-fv1).type == TangentSpace
+    @test isa(2 * fv1, FVector)
+    @test (2 * fv1).type == TangentSpace
 end

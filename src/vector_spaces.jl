@@ -28,6 +28,9 @@ Base.:-(X::FVector) = FVector(X.type, -X.data, X.basis)
 
 Base.:*(a::Number, X::FVector) = FVector(X.type, a * X.data, X.basis)
 
+allocate(x::FVector) = FVector(x.type, allocate(x.data), x.basis)
+allocate(x::FVector, ::Type{T}) where {T} = FVector(x.type, allocate(x.data, T), x.basis)
+
 function Base.copyto!(X::FVector, Y::FVector)
     copyto!(X.data, Y.data)
     return X
@@ -39,3 +42,6 @@ function number_eltype(
     return number_eltype(TData)
 end
 number_eltype(v::FVector) = number_eltype(v.data)
+
+Base.show(io::IO, ::TangentSpaceType) = print(io, "TangentSpace")
+Base.show(io::IO, ::CotangentSpaceType) = print(io, "CotangentSpace")
