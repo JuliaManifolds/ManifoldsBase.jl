@@ -304,7 +304,11 @@ dual_basis(M::Manifold, p, B::AbstractBasis)
 function dual_basis(::Manifold, p, ::DefaultOrthonormalBasis{𝔽,TangentSpaceType}) where {𝔽}
     return DefaultOrthonormalBasis{𝔽}(CotangentSpace)
 end
-function dual_basis(::Manifold, p, ::DefaultOrthonormalBasis{𝔽,CotangentSpaceType}) where {𝔽}
+function dual_basis(
+    ::Manifold,
+    p,
+    ::DefaultOrthonormalBasis{𝔽,CotangentSpaceType},
+) where {𝔽}
     return DefaultOrthonormalBasis{𝔽}(TangentSpace)
 end
 
