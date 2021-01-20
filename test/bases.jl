@@ -1,9 +1,11 @@
 using LinearAlgebra
 using ManifoldsBase
 using ManifoldsBase: DefaultManifold, ℝ, ℂ
+using ManifoldsBase: CotangentSpace, CotangentSpaceType, TangentSpace, TangentSpaceType
 using Test
 import Base: +, -, *, copyto!, isapprox
-import ManifoldsBase: allocate, TangentSpace, TangentSpaceType
+import ManifoldsBase: allocate
+
 
 struct ProjManifold <: Manifold{ℝ} end
 
@@ -352,7 +354,8 @@ end
     @test sprint(show, ProjectedOrthonormalBasis(:gram_schmidt, ℂ)) ==
           "ProjectedOrthonormalBasis(:gram_schmidt, ℂ)"
 
-    @test sprint(show, "text/plain", DiagonalizingOrthonormalBasis(Float64[1, 2, 3])) == """
+    diag_onb = DiagonalizingOrthonormalBasis(Float64[1, 2, 3])
+    @test sprint(show, "text/plain", diag_onb) == """
                                                                                DiagonalizingOrthonormalBasis(ℝ) with eigenvalue 0 in direction:
                                                                                3-element $(sprint(show, Vector{Float64})):
                                                                                  1.0
@@ -448,3 +451,15 @@ end
      1-element $(sprint(show, Vector{Float64})):
       1.0"""
 end
+
+@testset "Bases of cotangent spaces" begin
+    b1 = DefaultOrthonormalBasis(ℝ, CotangentSpace)
+    @test b1.vector_space == CotangentSpace
+
+    b2 = DefaultOrthogonalBasis(ℝ, CotangentSpace)
+    @test b2.vector_space == CotangentSpace
+
+    b3 = DefaultBasis(ℝ, CotangentSpace)
+    @test b3.vector_space == CotangentSpace
+end
+
