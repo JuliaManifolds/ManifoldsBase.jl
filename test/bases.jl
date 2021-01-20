@@ -356,11 +356,11 @@ end
 
     diag_onb = DiagonalizingOrthonormalBasis(Float64[1, 2, 3])
     @test sprint(show, "text/plain", diag_onb) == """
-        DiagonalizingOrthonormalBasis(ℝ) with eigenvalue 0 in direction:
-        3-element $(sprint(show, Vector{Float64})):
-            1.0
-            2.0
-            3.0"""
+    DiagonalizingOrthonormalBasis(ℝ) with eigenvalue 0 in direction:
+    3-element $(sprint(show, Vector{Float64})):
+      1.0
+      2.0
+      3.0"""
 
     M = DefaultManifold(2, 3)
     x = collect(reshape(1.0:6.0, (2, 3)))
