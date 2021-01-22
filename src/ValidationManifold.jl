@@ -255,7 +255,7 @@ function get_coordinates!(M::ValidationManifold, Y, p, X, B::AbstractBasis; kwar
     get_coordinates!(M.manifold, Y, p, X, B)
     return Y
 end
-for BT in DISAMBIGUATION_BASIS_TYPES
+for BT in [DISAMBIGUATION_BASIS_TYPES..., DISAMBIGUATION_COTANGENT_BASIS_TYPES...]
     eval(
         quote
             @invoke_maker 5 AbstractBasis get_coordinates!(
@@ -298,7 +298,7 @@ function get_vector!(M::ValidationManifold, Y, p, X, B::AbstractBasis; kwargs...
     size(Y) == representation_size(M) || error("Incorrect size of tangent vector Y")
     return Y
 end
-for BT in DISAMBIGUATION_BASIS_TYPES
+for BT in [DISAMBIGUATION_BASIS_TYPES..., DISAMBIGUATION_COTANGENT_BASIS_TYPES...]
     eval(
         quote
             @invoke_maker 5 AbstractBasis get_vector!(

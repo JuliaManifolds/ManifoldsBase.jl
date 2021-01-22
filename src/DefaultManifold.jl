@@ -46,13 +46,13 @@ embed!(::DefaultManifold, Y, p, X) = copyto!(Y, X)
 
 exp!(::DefaultManifold, q, p, X) = (q .= p .+ X)
 
-function get_basis(M::DefaultManifold, p, B::DefaultOrthonormalBasis)
+function get_basis(::DefaultManifold, p, B::DefaultOrthonormalBasis{<:Any,TangentSpaceType})
     return CachedBasis(B, [_euclidean_basis_vector(p, i) for i in eachindex(p)])
 end
-function get_basis(M::DefaultManifold, p, B::DefaultOrthogonalBasis)
+function get_basis(::DefaultManifold, p, B::DefaultOrthogonalBasis{<:Any,TangentSpaceType})
     return CachedBasis(B, [_euclidean_basis_vector(p, i) for i in eachindex(p)])
 end
-function get_basis(M::DefaultManifold, p, B::DefaultBasis)
+function get_basis(::DefaultManifold, p, B::DefaultBasis{<:Any,TangentSpaceType})
     return CachedBasis(B, [_euclidean_basis_vector(p, i) for i in eachindex(p)])
 end
 function get_basis(M::DefaultManifold, p, B::DiagonalizingOrthonormalBasis)
@@ -61,12 +61,24 @@ function get_basis(M::DefaultManifold, p, B::DiagonalizingOrthonormalBasis)
     return CachedBasis(B, DiagonalizingBasisData(B.frame_direction, eigenvalues, vecs))
 end
 
-function get_coordinates!(M::DefaultManifold, Y, p, X, B::DefaultOrthonormalBasis)
+function get_coordinates!(
+    M::DefaultManifold,
+    Y,
+    p,
+    X,
+    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
+)
     copyto!(Y, reshape(X, manifold_dimension(M)))
     return Y
 end
 
-function get_vector!(M::DefaultManifold, Y, p, X, B::DefaultOrthonormalBasis)
+function get_vector!(
+    M::DefaultManifold,
+    Y,
+    p,
+    X,
+    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
+)
     copyto!(Y, reshape(X, representation_size(M)))
     return Y
 end

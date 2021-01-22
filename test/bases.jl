@@ -160,9 +160,9 @@ function ManifoldsBase.exp!(
 end
 
 function ManifoldsBase.get_basis(
-    M::DefaultManifold,
+    ::DefaultManifold,
     p::NonBroadcastBasisThing,
-    B::DefaultOrthonormalBasis,
+    B::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
 )
     return CachedBasis(
         B,
@@ -173,9 +173,9 @@ function ManifoldsBase.get_basis(
     )
 end
 function ManifoldsBase.get_basis(
-    M::DefaultManifold,
+    ::DefaultManifold,
     p::NonBroadcastBasisThing,
-    B::DefaultOrthogonalBasis,
+    B::DefaultOrthogonalBasis{ℝ,TangentSpaceType},
 )
     return CachedBasis(
         B,
@@ -186,9 +186,9 @@ function ManifoldsBase.get_basis(
     )
 end
 function ManifoldsBase.get_basis(
-    M::DefaultManifold,
+    ::DefaultManifold,
     p::NonBroadcastBasisThing,
-    B::DefaultBasis,
+    B::DefaultBasis{ℝ,TangentSpaceType},
 )
     return CachedBasis(
         B,
@@ -202,9 +202,9 @@ end
 function ManifoldsBase.get_coordinates!(
     M::DefaultManifold,
     Y,
-    p::NonBroadcastBasisThing,
+    ::NonBroadcastBasisThing,
     X::NonBroadcastBasisThing,
-    B::DefaultOrthonormalBasis,
+    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
 )
     copyto!(Y, reshape(X.v, manifold_dimension(M)))
     return Y
@@ -213,9 +213,9 @@ end
 function ManifoldsBase.get_vector!(
     M::DefaultManifold,
     Y::NonBroadcastBasisThing,
-    p::NonBroadcastBasisThing,
+    ::NonBroadcastBasisThing,
     X,
-    B::DefaultOrthonormalBasis,
+    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
 )
     copyto!(Y.v, reshape(X, representation_size(M)))
     return Y
@@ -223,11 +223,11 @@ end
 
 function ManifoldsBase.inner(
     ::DefaultManifold,
-    x::NonBroadcastBasisThing,
-    v::NonBroadcastBasisThing,
-    w::NonBroadcastBasisThing,
+    ::NonBroadcastBasisThing,
+    X::NonBroadcastBasisThing,
+    Y::NonBroadcastBasisThing,
 )
-    return dot(v.v, w.v)
+    return dot(X.v, Y.v)
 end
 
 ManifoldsBase._get_vector_cache_broadcast(::NonBroadcastBasisThing) = Val(false)

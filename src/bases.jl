@@ -172,7 +172,7 @@ struct GramSchmidtOrthonormalBasis{𝔽} <: AbstractOrthonormalBasis{𝔽,Tangen
 GramSchmidtOrthonormalBasis(𝔽::AbstractNumbers = ℝ) = GramSchmidtOrthonormalBasis{𝔽}()
 
 @doc raw"""
-    DiagonalizingOrthonormalBasis{𝔽,TV} <: AbstractOrthonormalBasis{𝔽}
+    DiagonalizingOrthonormalBasis{𝔽,TV} <: AbstractOrthonormalBasis{𝔽,TangentSpaceType}
 
 An orthonormal basis `Ξ` as a vector of tangent vectors (of length determined by
 [`manifold_dimension`](@ref)) in the tangent space that diagonalizes the curvature
@@ -197,7 +197,7 @@ struct DiagonalizingBasisData{D,V,ET}
 end
 
 const DefaultOrDiagonalizingBasis{𝔽} =
-    Union{DefaultOrthonormalBasis{𝔽},DiagonalizingOrthonormalBasis{𝔽}}
+    Union{DefaultOrthonormalBasis{𝔽,TangentSpaceType},DiagonalizingOrthonormalBasis{𝔽}}
 
 """
     CachedBasis{𝔽,V,<:AbstractBasis{𝔽}} <: AbstractBasis{𝔽}
@@ -238,13 +238,22 @@ const all_uncached_bases =
 const DISAMBIGUATION_BASIS_TYPES = [
     CachedBasis,
     DefaultBasis,
+    DefaultBasis{<:Any,TangentSpaceType},
     DefaultOrthonormalBasis,
+    DefaultOrthonormalBasis{<:Any,TangentSpaceType},
     DefaultOrthogonalBasis,
+    DefaultOrthogonalBasis{<:Any,TangentSpaceType},
     DiagonalizingOrthonormalBasis,
     ProjectedOrthonormalBasis{:svd,ℝ},
     ProjectedOrthonormalBasis{:gram_schmidt,ℝ},
     VeeOrthogonalBasis,
 ]
+const DISAMBIGUATION_COTANGENT_BASIS_TYPES = [
+    DefaultBasis{<:Any,CotangentSpaceType},
+    DefaultOrthonormalBasis{<:Any,CotangentSpaceType},
+    DefaultOrthogonalBasis{<:Any,CotangentSpaceType},
+]
+
 
 function allocate_result(M::Manifold, f::typeof(get_coordinates), p, X, B::AbstractBasis)
     T = allocate_result_type(M, f, (p, X))
@@ -344,7 +353,7 @@ function decorator_transparent_dispatch(::typeof(get_basis), ::Manifold, args...
     return Val(:parent)
 end
 
-function get_basis(M::Manifold, p, B::DefaultOrthonormalBasis)
+function get_basis(M::Manifold, p, B::DefaultOrthonormalBasis{<:Any,TangentSpaceType})
     dim = manifold_dimension(M)
     return CachedBasis(
         B,
@@ -451,7 +460,7 @@ end
     X,
     B::AbstractBasis,
 )
-for BT in DISAMBIGUATION_BASIS_TYPES
+for BT in [DISAMBIGUATION_BASIS_TYPES..., DISAMBIGUATION_COTANGENT_BASIS_TYPES...]
     eval(
         quote
             @decorator_transparent_signature get_coordinates!(
@@ -538,7 +547,7 @@ end
     X,
     B::AbstractBasis,
 )
-for BT in DISAMBIGUATION_BASIS_TYPES
+for BT in [DISAMBIGUATION_BASIS_TYPES..., DISAMBIGUATION_COTANGENT_BASIS_TYPES...]
     eval(
         quote
             @decorator_transparent_signature get_vector!(
