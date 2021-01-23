@@ -46,10 +46,18 @@ embed!(::DefaultManifold, Y, p, X) = copyto!(Y, X)
 
 exp!(::DefaultManifold, q, p, X) = (q .= p .+ X)
 
-function get_basis(::DefaultManifold, p, B::DefaultOrthonormalBasis{𝔽,TangentSpaceType}) where {𝔽}
+function get_basis(
+    ::DefaultManifold,
+    p,
+    B::DefaultOrthonormalBasis{𝔽,TangentSpaceType},
+) where {𝔽}
     return CachedBasis(B, [_euclidean_basis_vector(p, i) for i in eachindex(p)])
 end
-function get_basis(::DefaultManifold, p, B::DefaultOrthogonalBasis{𝔽,TangentSpaceType}) where {𝔽}
+function get_basis(
+    ::DefaultManifold,
+    p,
+    B::DefaultOrthogonalBasis{𝔽,TangentSpaceType},
+) where {𝔽}
     return CachedBasis(B, [_euclidean_basis_vector(p, i) for i in eachindex(p)])
 end
 function get_basis(::DefaultManifold, p, B::DefaultBasis{𝔽,TangentSpaceType}) where {𝔽}
