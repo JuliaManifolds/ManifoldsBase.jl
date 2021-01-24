@@ -506,4 +506,12 @@ end
     @test (-fv1).type == TangentSpace
     @test isa(2 * fv1, FVector)
     @test (2 * fv1).type == TangentSpace
+    tv1s_32 = allocate(fv_tvs[1], Float32)
+    @test isa(tv1s, FVector)
+    @test eltype(tv1s_32.data) === Float32
+    copyto!(tv1s, fv_tvs[2])
+    @test isapprox(tv1s.data, fv_tvs[2].data)
+
+    cofv1 = CoTFVector(tvs[1], DefaultOrthonormalBasis(ℝ, CotangentSpace))
+    @test cofv1 isa CoTFVector
 end
