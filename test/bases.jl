@@ -257,8 +257,10 @@ DiagonalizingBasisProxy() = DiagonalizingOrthonormalBasis([1.0, 0.0, 0.0])
         @test DefaultOrthonormalBasis{ℂ,TangentSpaceType}() === DefaultOrthonormalBasis(ℂ)
 
         @test DefaultBasis{ℂ}(CotangentSpace) === DefaultBasis(ℂ, CotangentSpace)
-        @test DefaultOrthogonalBasis{ℂ}(CotangentSpace) === DefaultOrthogonalBasis(ℂ, CotangentSpace)
-        @test DefaultOrthonormalBasis{ℂ}(CotangentSpace) === DefaultOrthonormalBasis(ℂ, CotangentSpace)
+        @test DefaultOrthogonalBasis{ℂ}(CotangentSpace) ===
+              DefaultOrthogonalBasis(ℂ, CotangentSpace)
+        @test DefaultOrthonormalBasis{ℂ}(CotangentSpace) ===
+              DefaultOrthonormalBasis(ℂ, CotangentSpace)
     end
 
     _pts = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
