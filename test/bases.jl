@@ -251,6 +251,16 @@ DiagonalizingBasisProxy() = DiagonalizingOrthonormalBasis([1.0, 0.0, 0.0])
 
     M = DefaultManifold(3)
 
+    @testset "Constructors" begin
+        @test DefaultBasis{ℂ,TangentSpaceType}() === DefaultBasis(ℂ)
+        @test DefaultOrthogonalBasis{ℂ,TangentSpaceType}() === DefaultOrthogonalBasis(ℂ)
+        @test DefaultOrthonormalBasis{ℂ,TangentSpaceType}() === DefaultOrthonormalBasis(ℂ)
+
+        @test DefaultBasis{ℂ}(CotangentSpace) === DefaultBasis(ℂ, CotangentSpace)
+        @test DefaultOrthogonalBasis{ℂ}(CotangentSpace) === DefaultOrthogonalBasis(ℂ, CotangentSpace)
+        @test DefaultOrthonormalBasis{ℂ}(CotangentSpace) === DefaultOrthonormalBasis(ℂ, CotangentSpace)
+    end
+
     _pts = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
     @testset "basis representation" for BT in (
             DefaultBasis,
@@ -462,6 +472,16 @@ end
 
     b3 = DefaultBasis(ℝ, CotangentSpace)
     @test b3.vector_space == CotangentSpace
+
+    M = DefaultManifold(2; field = ℂ)
+    p = [1.0, 2.0im]
+    b1_d = ManifoldsBase.dual_basis(M, p, b1)
+    @test b1_d isa DefaultOrthonormalBasis
+    @test b1_d.vector_space == TangentSpace
+
+    b1_d_d = ManifoldsBase.dual_basis(M, p, b1_d)
+    @test b1_d_d isa DefaultOrthonormalBasis
+    @test b1_d_d.vector_space == CotangentSpace
 end
 
 @testset "FVector" begin
