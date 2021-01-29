@@ -241,7 +241,7 @@ DiagonalizingBasisProxy() = DiagonalizingOrthonormalBasis([1.0, 0.0, 0.0])
         onb = DefaultOrthonormalBasis()
 
         @test_throws ErrorException get_basis(m, [0], onb)
-        @test_throws ErrorException get_basis(m, [0], NonBasis())
+        @test_throws MethodError get_basis(m, [0], NonBasis())
         @test_throws ErrorException get_coordinates(m, [0], [0], onb)
         @test_throws ErrorException get_coordinates!(m, [0], [0], [0], onb)
         @test_throws ErrorException get_vector(m, [0], [0], onb)

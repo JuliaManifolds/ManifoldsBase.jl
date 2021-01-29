@@ -233,8 +233,12 @@ end
 function get_coordinates end
 function get_vector end
 
-const all_uncached_bases =
-    Union{AbstractBasis,DefaultBasis,DefaultOrthogonalBasis,DefaultOrthonormalBasis}
+const all_uncached_bases{T} = Union{
+    AbstractBasis{<:Any,T},
+    DefaultBasis{<:Any,T},
+    DefaultOrthogonalBasis{<:Any,T},
+    DefaultOrthonormalBasis{<:Any,T},
+}
 const DISAMBIGUATION_BASIS_TYPES = [
     CachedBasis,
     DefaultBasis,
@@ -339,11 +343,7 @@ the function [`get_vectors`](@ref) needs to be used to retrieve the basis vector
 
 See also: [`get_coordinates`](@ref), [`get_vector`](@ref)
 """
-function get_basis(M::Manifold, p, B::AbstractBasis)
-    return error(
-        "get_basis not implemented for manifold of type $(typeof(M)) a point of type $(typeof(p)) and basis of type $(typeof(B)).",
-    )
-end
+get_basis(M::Manifold, p, B::AbstractBasis)
 @decorator_transparent_signature get_basis(
     M::AbstractDecoratorManifold,
     p,
