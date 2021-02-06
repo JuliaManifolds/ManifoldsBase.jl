@@ -131,16 +131,20 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
                 @test isapprox(M, shortest_geodesic(M, pts[1], pts[2])(1.0), pts[2])
                 @test isapprox(M, shortest_geodesic(M, pts[1], pts[2], 0.0), pts[1])
                 @test isapprox(M, shortest_geodesic(M, pts[1], pts[2], 1.0), pts[2])
-                @test all(isapprox.(
-                    Ref(M),
-                    geodesic(M, pts[1], tv1, [0.0, 1.0 / 2, 1.0]),
-                    [pts[1], (pts[1] + pts[2]) / 2, pts[2]],
-                ))
-                @test all(isapprox.(
-                    Ref(M),
-                    shortest_geodesic(M, pts[1], pts[2], [0.0, 1.0 / 2, 1.0]),
-                    [pts[1], (pts[1] + pts[2]) / 2, pts[2]],
-                ))
+                @test all(
+                    isapprox.(
+                        Ref(M),
+                        geodesic(M, pts[1], tv1, [0.0, 1.0 / 2, 1.0]),
+                        [pts[1], (pts[1] + pts[2]) / 2, pts[2]],
+                    ),
+                )
+                @test all(
+                    isapprox.(
+                        Ref(M),
+                        shortest_geodesic(M, pts[1], pts[2], [0.0, 1.0 / 2, 1.0]),
+                        [pts[1], (pts[1] + pts[2]) / 2, pts[2]],
+                    ),
+                )
             end
 
             @testset "basic linear algebra in tangent space" begin

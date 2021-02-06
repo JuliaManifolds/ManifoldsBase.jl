@@ -437,16 +437,18 @@ function vector_transport_along!(
     c,
     method::AbstractVectorTransportMethod,
 )
-    return error(manifold_function_not_implemented_message(
-        M,
-        vector_transport_along!,
-        M,
-        Y,
-        p,
-        X,
-        c,
-        method,
-    ))
+    return error(
+        manifold_function_not_implemented_message(
+            M,
+            vector_transport_along!,
+            M,
+            Y,
+            p,
+            X,
+            c,
+            method,
+        ),
+    )
 end
 @doc raw"""
     vector_transport_along!(
@@ -769,15 +771,17 @@ function vector_transport_to!(
     q,
     method::AbstractVectorTransportMethod,
 )
-    return error(manifold_function_not_implemented_message(
-        M,
-        vector_transport_to!,
-        Y,
-        p,
-        X,
-        q,
-        method,
-    ))
+    return error(
+        manifold_function_not_implemented_message(
+            M,
+            vector_transport_to!,
+            Y,
+            p,
+            X,
+            q,
+            method,
+        ),
+    )
 end
 
 const VECTOR_TRANSPORT_DISAMBIGUATION =
