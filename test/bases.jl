@@ -164,8 +164,8 @@ function ManifoldsBase.get_basis(
     return CachedBasis(
         B,
         [
-            NonBroadcastBasisThing(ManifoldsBase._euclidean_basis_vector(p.v, i))
-            for i in eachindex(p.v)
+            NonBroadcastBasisThing(ManifoldsBase._euclidean_basis_vector(p.v, i)) for
+            i in eachindex(p.v)
         ],
     )
 end
@@ -177,8 +177,8 @@ function ManifoldsBase.get_basis(
     return CachedBasis(
         B,
         [
-            NonBroadcastBasisThing(ManifoldsBase._euclidean_basis_vector(p.v, i))
-            for i in eachindex(p.v)
+            NonBroadcastBasisThing(ManifoldsBase._euclidean_basis_vector(p.v, i)) for
+            i in eachindex(p.v)
         ],
     )
 end
@@ -190,8 +190,8 @@ function ManifoldsBase.get_basis(
     return CachedBasis(
         B,
         [
-            NonBroadcastBasisThing(ManifoldsBase._euclidean_basis_vector(p.v, i))
-            for i in eachindex(p.v)
+            NonBroadcastBasisThing(ManifoldsBase._euclidean_basis_vector(p.v, i)) for
+            i in eachindex(p.v)
         ],
     )
 end

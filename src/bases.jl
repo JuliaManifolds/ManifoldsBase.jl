@@ -235,7 +235,9 @@ the function [`get_vectors`](@ref) needs to be used to retrieve the basis vector
 See also: [`get_coordinates`](@ref), [`get_vector`](@ref)
 """
 function get_basis(M::Manifold, p, B::AbstractBasis)
-    return error("get_basis not implemented for manifold of type $(typeof(M)) a point of type $(typeof(p)) and basis of type $(typeof(B)).")
+    return error(
+        "get_basis not implemented for manifold of type $(typeof(M)) a point of type $(typeof(p)) and basis of type $(typeof(B)).",
+    )
 end
 @decorator_transparent_signature get_basis(
     M::AbstractDecoratorManifold,
@@ -263,8 +265,8 @@ function get_basis(M::Manifold, p, B::ProjectedOrthonormalBasis{:svd,ℝ})
     # projection
     # TODO: find a better way to obtain a basis of the ambient space
     Xs = [
-        convert(Vector, reshape(project(M, p, _euclidean_basis_vector(p, i)), PS))
-        for i in eachindex(p)
+        convert(Vector, reshape(project(M, p, _euclidean_basis_vector(p, i)), PS)) for
+        i in eachindex(p)
     ]
     O = reduce(hcat, Xs)
     # orthogonalization
@@ -342,7 +344,9 @@ function decorator_transparent_dispatch(::typeof(get_coordinates), ::Manifold, a
 end
 
 function get_coordinates!(M::Manifold, Y, p, X, B::AbstractBasis)
-    return error("get_coordinates! not implemented for manifold of type $(typeof(M)) coordinates of type $(typeof(Y)), a point of type $(typeof(p)), tangent vector of type $(typeof(X)) and basis of type $(typeof(B)).")
+    return error(
+        "get_coordinates! not implemented for manifold of type $(typeof(M)) coordinates of type $(typeof(Y)), a point of type $(typeof(p)), tangent vector of type $(typeof(X)) and basis of type $(typeof(B)).",
+    )
 end
 @decorator_transparent_signature get_coordinates!(
     M::AbstractDecoratorManifold,
@@ -427,7 +431,9 @@ function decorator_transparent_dispatch(::typeof(get_vector), ::Manifold, args..
 end
 
 function get_vector!(M::Manifold, Y, p, X, B::AbstractBasis)
-    return error("get_vector! not implemented for manifold of type $(typeof(M)) vector of type $(typeof(Y)), a point of type $(typeof(p)), coordinates of type $(typeof(X)) and basis of type $(typeof(B)).")
+    return error(
+        "get_vector! not implemented for manifold of type $(typeof(M)) vector of type $(typeof(Y)), a point of type $(typeof(p)), coordinates of type $(typeof(X)) and basis of type $(typeof(B)).",
+    )
 end
 @decorator_transparent_signature get_vector!(
     M::AbstractDecoratorManifold,
@@ -493,7 +499,9 @@ end
 Get the basis vectors of basis `B` of the tangent space at point `p`.
 """
 function get_vectors(M::Manifold, p, B::AbstractBasis)
-    return error("get_vectors not implemented for manifold of type $(typeof(M)) a point of type $(typeof(p)) and basis of type $(typeof(B)).")
+    return error(
+        "get_vectors not implemented for manifold of type $(typeof(M)) a point of type $(typeof(p)) and basis of type $(typeof(B)).",
+    )
 end
 function get_vectors(::Manifold, ::Any, B::CachedBasis)
     return _get_vectors(B)
@@ -586,7 +594,9 @@ function gram_schmidt(
     return if return_incomplete_set
         return Ξ
     else
-        error("gram_schmidt found only $(length(Ξ)) orthonormal basis vectors, but manifold dimension is $(dim).")
+        error(
+            "gram_schmidt found only $(length(Ξ)) orthonormal basis vectors, but manifold dimension is $(dim).",
+        )
     end
 end
 
