@@ -974,3 +974,15 @@ end
 @inline function _write(M::PowerManifoldNested, rep_size::Tuple, x::AbstractArray, i::Tuple)
     return view(x[i...], rep_size_to_colons(rep_size)...)
 end
+
+function zero_tangent_vector!(M::AbstractPowerManifold, X, p)
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        zero_tangent_vector!(
+            M.manifold,
+            _write(M, rep_size, X, i),
+            _read(M, rep_size, p, i),
+        )
+    end
+    return X
+end
