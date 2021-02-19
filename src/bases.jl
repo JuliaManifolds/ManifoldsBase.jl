@@ -12,7 +12,7 @@ Every vector space `fiber` is supposed to provide:
 * `allocate(X)` and `allocate(X, T)` for vector `X` and type `T`,
 * `copyto!(X, Y)` for vectors `X` and `Y`,
 * `number_eltype(v)` for vector `v`,
-* [`vector_space_dimension(::VectorBundleFibers{<:typeof(fiber)}) where fiber`](@ref).
+* [`vector_space_dimension(::Manifolds.VectorBundleFibers{<:typeof(fiber)}) where fiber`](@ref).
 
 Optionally:
 * inner product via `inner` (used to provide Riemannian metric on vector
@@ -42,17 +42,25 @@ a subset of it.
 
 The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used
 for the vectors elements.
+
+# See also
+
+[`VectorSpaceType`](@ref)
 """
 abstract type AbstractBasis{𝔽,VST<:VectorSpaceType} end
 
 """
     DefaultBasis{𝔽,VST<:VectorSpaceType}
 
-An arbitrary basis on a manifold. This will usually
+An arbitrary basis of vector space of type `VST` on a manifold. This will usually
 be the fastest basis available for a manifold.
 
 The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used
-for the vectors elements
+for the vectors elements.
+
+# See also
+
+[`VectorSpaceType`](@ref)
 """
 struct DefaultBasis{𝔽,VST<:VectorSpaceType} <: AbstractBasis{𝔽,VST}
     vector_space::VST
@@ -70,21 +78,30 @@ end
 """
     AbstractOrthogonalBasis{𝔽,VST<:VectorSpaceType}
 
-Abstract type that represents an orthonormal basis on a manifold or a subset of it.
+Abstract type that represents an orthonormal basis of vector space of type `VST` on a
+manifold or a subset of it.
 
 The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used
 for the vectors elements.
+
+# See also
+
+[`VectorSpaceType`](@ref)
 """
 abstract type AbstractOrthogonalBasis{𝔽,VST<:VectorSpaceType} <: AbstractBasis{𝔽,VST} end
 
 """
-    DefaultOrthogonalBasis{𝔽}
+    DefaultOrthogonalBasis{𝔽,VST<:VectorSpaceType}
 
-An arbitrary orthogonal basis on a manifold. This will usually
+An arbitrary orthogonal basis of vector space of type `VST` on a manifold. This will usually
 be the fastest orthogonal basis available for a manifold.
 
 The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used
 for the vectors elements.
+
+# See also
+
+[`VectorSpaceType`](@ref)
 """
 struct DefaultOrthogonalBasis{𝔽,VST<:VectorSpaceType} <: AbstractOrthogonalBasis{𝔽,VST}
     vector_space::VST
@@ -104,24 +121,33 @@ struct VeeOrthogonalBasis{𝔽} <: AbstractOrthogonalBasis{𝔽,TangentSpaceType
 VeeOrthogonalBasis(𝔽::AbstractNumbers = ℝ) = VeeOrthogonalBasis{𝔽}()
 
 """
-    AbstractOrthonormalBasis{𝔽}
+    AbstractOrthonormalBasis{𝔽,VST<:VectorSpaceType}
 
-Abstract type that represents an orthonormal basis on a manifold or a subset of it.
+Abstract type that represents an orthonormal basis of vector space of type `VST` on a
+manifold or a subset of it.
 
 The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used
 for the vectors elements.
+
+# See also
+
+[`VectorSpaceType`](@ref)
 """
 abstract type AbstractOrthonormalBasis{𝔽,VST<:VectorSpaceType} <:
               AbstractOrthogonalBasis{𝔽,VST} end
 
 """
-    DefaultOrthonormalBasis(𝔽::AbstractNumbers = ℝ)
+    DefaultOrthonormalBasis(𝔽::AbstractNumbers = ℝ, vs::VectorSpaceType = TangentSpace)
 
-An arbitrary orthonormal basis on a manifold. This will usually
+An arbitrary orthonormal basis of vector space of type `VST` on a manifold. This will usually
 be the fastest orthonormal basis available for a manifold.
 
 The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used
 for the vectors elements.
+
+# See also
+
+[`VectorSpaceType`](@ref)
 """
 struct DefaultOrthonormalBasis{𝔽,VST<:VectorSpaceType} <: AbstractOrthonormalBasis{𝔽,VST}
     vector_space::VST
@@ -182,6 +208,7 @@ The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be use
 for the vectors elements.
 
 # Constructor
+
     DiagonalizingOrthonormalBasis(frame_direction, 𝔽::AbstractNumbers = ℝ)
 """
 struct DiagonalizingOrthonormalBasis{𝔽,TV} <: AbstractOrthonormalBasis{𝔽,TangentSpaceType}
