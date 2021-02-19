@@ -5,7 +5,7 @@ using ManifoldsBase
     if VERSION >= v"1.1"
         num_ambiguities = length(Test.detect_ambiguities(ManifoldsBase))
         #num_ambiguities > 0 && @warn "The number of ambiguities in ManifoldsBase is $(num_ambiguities)."
-        if VERSION >= v"1.7-DEV"
+        if VERSION >= v"1.6-DEV"
             @test num_ambiguities <= 1
         else
             @test num_ambiguities == 0
