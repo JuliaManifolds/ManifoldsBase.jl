@@ -2,8 +2,9 @@
 """
     FVector(type::VectorSpaceType, data, basis::AbstractBasis)
 
-Decorator indicating that the vector `data` is from a fiber of a vector bundle
-of type `type`. `basis` is an object describing the basis of that space.
+Decorator indicating that the vector `data` contains coordinates of a vector from a fiber
+of a vector bundle of type `type`. `basis` is an object describing the basis of that space
+in which the coordinates are given.
 """
 struct FVector{TType<:VectorSpaceType,TData,TBasis<:AbstractBasis}
     type::TType
