@@ -46,3 +46,14 @@ number_eltype(v::FVector) = number_eltype(v.data)
 
 Base.show(io::IO, ::TangentSpaceType) = print(io, "TangentSpace")
 Base.show(io::IO, ::CotangentSpaceType) = print(io, "CotangentSpace")
+
+"""
+    vector_space_dimension(M::Manifold, V::VectorSpaceType)
+
+Dimension of the vector space of type `V` on manifold `M`.
+"""
+vector_space_dimension(::Manifold, ::VectorSpaceType)
+
+function vector_space_dimension(M::Manifold, ::TCoTSpaceType)
+    return manifold_dimension(M)
+end

@@ -12,7 +12,7 @@ Every vector space `fiber` is supposed to provide:
 * `allocate(X)` and `allocate(X, T)` for vector `X` and type `T`,
 * `copyto!(X, Y)` for vectors `X` and `Y`,
 * `number_eltype(v)` for vector `v`,
-* [`vector_space_dimension(::Manifolds.VectorBundleFibers{<:typeof(fiber)}) where fiber`](@ref).
+* [`vector_space_dimension`](@ref).
 
 Optionally:
 * inner product via `inner` (used to provide Riemannian metric on vector

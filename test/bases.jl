@@ -515,3 +515,12 @@ end
     cofv1 = CoTFVector(tvs[1], DefaultOrthonormalBasis(ℝ, CotangentSpace))
     @test cofv1 isa CoTFVector
 end
+
+@testset "vector_space_dimension" begin
+    M = ManifoldsBase.DefaultManifold(3)
+    MC = ManifoldsBase.DefaultManifold(3; field = ℂ)
+    @test ManifoldsBase.vector_space_dimension(M, TangentSpace) == 3
+    @test ManifoldsBase.vector_space_dimension(M, CotangentSpace) == 3
+    @test ManifoldsBase.vector_space_dimension(MC, TangentSpace) == 6
+    @test ManifoldsBase.vector_space_dimension(MC, CotangentSpace) == 6
+end
