@@ -495,6 +495,15 @@ Base.@propagate_inbounds function Base.getindex(
 )
     return collect(get_component(M, p, I...))
 end
+Base.@propagate_inbounds function Base.getindex(
+    p::AbstractArray,
+    M::PowerManifoldNested,
+    I::Integer...,
+)
+    # for a single element of the nested Power manifold, return just an element
+    # otherwise do just as for the default case above.
+    return ndims(p) == length(I) ? p[I...] : collect(get_component(M, p, I...))
+end
 
 @doc raw"""
     injectivity_radius(M::AbstractPowerManifold[, p])
