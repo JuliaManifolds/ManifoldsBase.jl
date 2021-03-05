@@ -491,7 +491,7 @@ end
 Base.@propagate_inbounds function Base.getindex(
     p::AbstractArray,
     M::AbstractPowerManifold,
-    I::Integer,
+    I::Integer...,
 )
     return collect(get_component(M, p, I...))
 end
