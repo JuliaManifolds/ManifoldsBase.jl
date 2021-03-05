@@ -173,10 +173,14 @@ function Base.:^(
 end
 
 function allocate_result(M::PowerManifoldNested, f, x...)
-    return [
-        allocate_result(M.manifold, f, map(y -> _access_nested(y, i), x)...) for
-        i in get_iterator(M)
-    ]
+    if representation_size(M.manifold) === ()
+        return allocate(x[1])
+    else
+        return [
+            allocate_result(M.manifold, f, map(y -> _access_nested(y, i), x)...) for
+            i in get_iterator(M)
+        ]
+    end
 end
 
 function allocate_result(
@@ -984,6 +988,9 @@ end
 
 @inline function _write(M::PowerManifoldNested, rep_size::Tuple, x::AbstractArray, i::Tuple)
     return view(x[i...], rep_size_to_colons(rep_size)...)
+end
+@inline function _write(M::PowerManifoldNested, rep_size::Tuple{}, x::AbstractArray, i::Tuple)
+    return view(x, i...)
 end
 
 function zero_tangent_vector!(M::AbstractPowerManifold, X, p)

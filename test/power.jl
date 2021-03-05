@@ -120,6 +120,7 @@ struct DummyPowerRepresentation <: AbstractPowerRepresentation end
         p = [1.0, 2.0, 3.0]
 
         @test p[N, 1] == 1.0
+        @test zero_tangent_vector(N, p) == zero(p)
     end
 
 end
