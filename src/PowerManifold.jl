@@ -489,11 +489,15 @@ Base.@propagate_inbounds function Base.getindex(
     return get_component(M, p, I...)
 end
 Base.@propagate_inbounds function Base.getindex(
-    p::AbstractArray,
+    p::AbstractArray{T,N},
     M::AbstractPowerManifold,
     I::Integer...,
-)
-    return collect(get_component(M, p, I...))
+) where {T,N}
+    if length(I) == N
+        return get_component(M, p, I...)
+    else
+        return collect(get_component(M, p, I...))
+    end
 end
 
 @doc raw"""
@@ -754,10 +758,14 @@ end
 Base.@propagate_inbounds @inline function _read(
     ::PowerManifoldNested,
     rep_size::Tuple,
-    x::AbstractArray,
+    x::AbstractArray{T,N},
     i::Tuple,
-)
-    return view(x[i...], rep_size_to_colons(rep_size)...)
+) where {T,N}
+    if N == length(i)
+        return x[i...]
+    else
+        return view(x[i...], rep_size_to_colons(rep_size)...)
+    end
 end
 
 @generated function rep_size_to_colons(rep_size::Tuple)

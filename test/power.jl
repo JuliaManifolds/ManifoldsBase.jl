@@ -114,4 +114,12 @@ struct DummyPowerRepresentation <: AbstractPowerRepresentation end
         """
     end
 
+    @testset "Zero index manifold" begin
+        M = ManifoldsBase.DefaultManifold()
+        N = PowerManifold(M, NestedPowerRepresentation(), 3)
+        p = [1.0, 2.0, 3.0]
+
+        @test p[N, 1] == 1.0
+    end
+
 end
