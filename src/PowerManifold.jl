@@ -488,17 +488,6 @@ Base.@propagate_inbounds function Base.getindex(
 )
     return get_component(M, p, I...)
 end
-Base.@propagate_inbounds function Base.getindex(
-    p::AbstractArray{T,N},
-    M::AbstractPowerManifold,
-    I::Integer...,
-) where {T,N}
-    if length(I) == N
-        return get_component(M, p, I...)
-    else
-        return collect(get_component(M, p, I...))
-    end
-end
 
 @doc raw"""
     injectivity_radius(M::AbstractPowerManifold[, p])
