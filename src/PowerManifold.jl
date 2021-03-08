@@ -492,20 +492,6 @@ Base.@propagate_inbounds function Base.getindex(
 )
     return get_component(M, p, I...)
 end
-Base.@propagate_inbounds function Base.getindex(
-    p::AbstractArray,
-    M::AbstractPowerManifold,
-    I::Integer...,
-)
-    return collect(get_component(M, p, I...))
-end
-Base.@propagate_inbounds function Base.getindex(
-    p::AbstractArray{T,N},
-    M::AbstractPowerManifold,
-    I::Vararg{Integer,N},
-) where {T,N}
-    return get_component(M, p, I...)
-end
 
 @doc raw"""
     injectivity_radius(M::AbstractPowerManifold[, p])
@@ -765,14 +751,10 @@ end
 Base.@propagate_inbounds @inline function _read(
     ::PowerManifoldNested,
     rep_size::Tuple,
-    x::AbstractArray{T,N},
+    x::AbstractArray,
     i::Tuple,
-) where {T,N}
-    if N == length(i)
-        return x[i...]
-    else
-        return view(x[i...], rep_size_to_colons(rep_size)...)
-    end
+)
+    return x[i...]
 end
 
 @generated function rep_size_to_colons(rep_size::Tuple)
