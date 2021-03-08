@@ -173,10 +173,14 @@ function Base.:^(
 end
 
 function allocate_result(M::PowerManifoldNested, f, x...)
-    return [
-        allocate_result(M.manifold, f, map(y -> _access_nested(y, i), x)...) for
-        i in get_iterator(M)
-    ]
+    if representation_size(M.manifold) === ()
+        return allocate(x[1])
+    else
+        return [
+            allocate_result(M.manifold, f, map(y -> _access_nested(y, i), x)...) for
+            i in get_iterator(M)
+        ]
+    end
 end
 
 function allocate_result(
@@ -488,13 +492,6 @@ Base.@propagate_inbounds function Base.getindex(
 )
     return get_component(M, p, I...)
 end
-Base.@propagate_inbounds function Base.getindex(
-    p::AbstractArray,
-    M::AbstractPowerManifold,
-    I::Integer...,
-)
-    return collect(get_component(M, p, I...))
-end
 
 @doc raw"""
     injectivity_radius(M::AbstractPowerManifold[, p])
@@ -757,7 +754,7 @@ Base.@propagate_inbounds @inline function _read(
     x::AbstractArray,
     i::Tuple,
 )
-    return view(x[i...], rep_size_to_colons(rep_size)...)
+    return x[i...]
 end
 
 @generated function rep_size_to_colons(rep_size::Tuple)
@@ -973,6 +970,14 @@ end
 
 @inline function _write(M::PowerManifoldNested, rep_size::Tuple, x::AbstractArray, i::Tuple)
     return view(x[i...], rep_size_to_colons(rep_size)...)
+end
+@inline function _write(
+    M::PowerManifoldNested,
+    rep_size::Tuple{},
+    x::AbstractArray,
+    i::Tuple,
+)
+    return view(x, i...)
 end
 
 function zero_tangent_vector!(M::AbstractPowerManifold, X, p)
