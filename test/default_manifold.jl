@@ -88,12 +88,7 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
             retract!(M, new_pt, pts[1], tv1)
             @test is_manifold_point(M, new_pt)
             for x in pts
-                @test isapprox(
-                    M,
-                    zero_vector(M, x),
-                    log(M, x, x);
-                    atol = eps(eltype(x)),
-                )
+                @test isapprox(M, zero_vector(M, x), log(M, x, x); atol = eps(eltype(x)))
                 @test isapprox(
                     M,
                     zero_vector(M, x),

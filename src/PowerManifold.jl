@@ -983,11 +983,7 @@ end
 function zero_vector!(M::AbstractPowerManifold, X, p)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
-        zero_vector!(
-            M.manifold,
-            _write(M, rep_size, X, i),
-            _read(M, rep_size, p, i),
-        )
+        zero_vector!(M.manifold, _write(M, rep_size, X, i), _read(M, rep_size, p, i))
     end
     return X
 end
