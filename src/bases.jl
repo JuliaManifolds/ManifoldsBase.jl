@@ -8,7 +8,7 @@ Every vector space `fiber` is supposed to provide:
 * a method of constructing vectors,
 * basic operations: addition, subtraction, multiplication by a scalar
   and negation (unary minus),
-* [`zero_vector(fiber, X, p)`](@ref Main.Manifolds.zero_vector) to construct zero vectors at point `p`,
+* [`zero_vector(fiber, p)`](@ref Main.Manifolds.zero_vector) to construct zero vectors at point `p`,
 * `allocate(X)` and `allocate(X, T)` for vector `X` and type `T`,
 * `copyto!(X, Y)` for vectors `X` and `Y`,
 * `number_eltype(v)` for vector `v`,

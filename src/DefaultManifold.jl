@@ -146,4 +146,4 @@ function vector_transport_to!(M::DefaultManifold, Y, p, X, q, ::ProjectionTransp
     return project!(M, Y, q, X)
 end
 
-zero_tangent_vector!(::DefaultManifold, Y, p) = fill!(Y, 0)
+zero_vector!(::DefaultManifold, Y, p) = fill!(Y, 0)

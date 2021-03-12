@@ -103,7 +103,7 @@ struct DummyPowerRepresentation <: AbstractPowerRepresentation end
         @test B.data.bases[1].data == get_basis(M, p[1], DefaultBasis()).data
         @test B.data.bases[2].data == get_basis(M, p[2], DefaultBasis()).data
         @test get_vector(N, p, v, B) == q
-        @test zero_tangent_vector(N, p) == [zeros(3), zeros(3)]
+        @test zero_vector(N, p) == [zeros(3), zeros(3)]
         B2 = DiagonalizingOrthonormalBasis([ones(3), ones(3)])
         B3 = get_basis(N, p, B2)
         @test sprint(show, "text/plain", B) == """$(DefaultBasis()) for a power manifold
@@ -120,6 +120,6 @@ struct DummyPowerRepresentation <: AbstractPowerRepresentation end
         p = [1.0, 2.0, 3.0]
 
         @test p[N, 1] == 1.0
-        @test zero_tangent_vector(N, p) == zero(p)
+        @test zero_vector(N, p) == zero(p)
     end
 end

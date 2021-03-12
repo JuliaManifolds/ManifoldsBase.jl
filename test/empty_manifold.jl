@@ -133,8 +133,8 @@ struct NotImplementedInverseRetraction <: AbstractInverseRetractionMethod end
     @test_throws ErrorException injectivity_radius(M, [0])
     @test_throws ErrorException injectivity_radius(M, [0], exp_retr)
 
-    @test_throws ErrorException zero_tangent_vector!(M, [0], [0])
-    @test_throws ErrorException zero_tangent_vector(M, [0])
+    @test_throws ErrorException zero_vector!(M, [0], [0])
+    @test_throws ErrorException zero_vector(M, [0])
 
     @test check_manifold_point(M, [0]) === nothing
     @test check_manifold_point(M, p) === nothing

@@ -90,25 +90,25 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
             for x in pts
                 @test isapprox(
                     M,
-                    zero_tangent_vector(M, x),
+                    zero_vector(M, x),
                     log(M, x, x);
                     atol = eps(eltype(x)),
                 )
                 @test isapprox(
                     M,
-                    zero_tangent_vector(M, x),
+                    zero_vector(M, x),
                     inverse_retract(M, x, x);
                     atol = eps(eltype(x)),
                 )
                 @test isapprox(
                     M,
-                    zero_tangent_vector(M, x),
+                    zero_vector(M, x),
                     inverse_retract(M, x, x, irm);
                     atol = eps(eltype(x)),
                 )
             end
-            zero_tangent_vector!(M, tv1, pts[1])
-            @test isapprox(M, pts[1], tv1, zero_tangent_vector(M, pts[1]))
+            zero_vector!(M, tv1, pts[1])
+            @test isapprox(M, pts[1], tv1, zero_vector(M, pts[1]))
             log!(M, tv1, pts[1], pts[2])
             @test norm(M, pts[1], tv1) ≈ sqrt(inner(M, pts[1], tv1, tv1))
 
@@ -152,7 +152,7 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
                     M,
                     pts[1],
                     0 * tv1,
-                    zero_tangent_vector(M, pts[1]);
+                    zero_vector(M, pts[1]);
                     atol = eps(eltype(pts[1])),
                 )
                 @test isapprox(M, pts[1], 2 * tv1, tv1 + tv1)

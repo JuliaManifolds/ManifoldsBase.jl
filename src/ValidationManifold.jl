@@ -500,16 +500,16 @@ for T in [
     end
 end
 
-function zero_tangent_vector(M::ValidationManifold, p; kwargs...)
+function zero_vector(M::ValidationManifold, p; kwargs...)
     is_manifold_point(M, p, true; kwargs...)
-    w = zero_tangent_vector(M.manifold, array_value(p))
+    w = zero_vector(M.manifold, array_value(p))
     is_tangent_vector(M, p, w, true; kwargs...)
     return w
 end
 
-function zero_tangent_vector!(M::ValidationManifold, X, p; kwargs...)
+function zero_vector!(M::ValidationManifold, X, p; kwargs...)
     is_manifold_point(M, p, true; kwargs...)
-    zero_tangent_vector!(M.manifold, array_value(X), array_value(p); kwargs...)
+    zero_vector!(M.manifold, array_value(X), array_value(p); kwargs...)
     is_tangent_vector(M, p, X, true; kwargs...)
     return X
 end

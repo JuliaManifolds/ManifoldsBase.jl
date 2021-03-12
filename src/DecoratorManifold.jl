@@ -725,5 +725,5 @@ decorated_manifold(M::Manifold) = M.manifold
     m::SchildsLadderTransport,
 )
 
-@decorator_transparent_signature zero_tangent_vector(M::AbstractDecoratorManifold, p)
-@decorator_transparent_signature zero_tangent_vector!(M::AbstractDecoratorManifold, X, p)
+@decorator_transparent_signature zero_vector(M::AbstractDecoratorManifold, p)
+@decorator_transparent_signature zero_vector!(M::AbstractDecoratorManifold, X, p)
