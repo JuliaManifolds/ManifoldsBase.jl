@@ -832,7 +832,7 @@ Base.@pure size_to_tuple(::Type{S}) where {S<:Tuple} = tuple(S.parameters...)
 """
     zero_vector!(M::Manifold, X, p)
 
-Save to `X` a vector such that retracting `X` to the [`Manifold`](@ref) `M` at `p`
+Save to `X` the tangent vector from the tangent space ``T_p\mathcal M`` at `p`,  that represents the zero vecto, i.e. such that retracting `X` to the [`Manifold`](@ref) `M` at `p`
 produces `p`.
 """
 zero_vector!(M::Manifold, X, p) = log!(M, X, p, p)
@@ -840,7 +840,7 @@ zero_vector!(M::Manifold, X, p) = log!(M, X, p, p)
 """
     zero_vector(M::Manifold, p)
 
-Return the tangent vector from the tangent space at `p` on the [`Manifold`](@ref) `M`, that
+Return the tangent vector from the tangent space ``T_p\mathcal M`` at  `p` on the [`Manifold`](@ref) `M`, that
 represents the zero vector, i.e. such that a retraction at `p` produces `p`.
 """
 function zero_vector(M::Manifold, p)
