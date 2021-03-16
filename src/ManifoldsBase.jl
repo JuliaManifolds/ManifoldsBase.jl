@@ -430,7 +430,7 @@ geodesic(M::Manifold, p, X) = t -> exp(M, p, X, t)
 geodesic(M::Manifold, p, X, t::Real) = exp(M, p, X, t)
 geodesic(M::Manifold, p, X, T::AbstractVector) = map(t -> exp(M, p, X, t), T)
 
-@doc doc"""
+@doc raw"""
     injectivity_radius(M::Manifold, p)
 
 Return the distance $d$ such that [`exp(M, p, X)`](@ref exp(::Manifold, ::Any, ::Any)) is
@@ -592,7 +592,7 @@ function log!(M::Manifold, X, p, q)
     return error(manifold_function_not_implemented_message(M, log!, X, p, q))
 end
 
-@doc doc"""
+@doc raw"""
     manifold_dimension(M::Manifold)
 
 The dimension $n=\dim_{\mathcal M}$ of real space $\mathbb R^n$ to which the neighborhood of
@@ -741,7 +741,7 @@ function project!(M::Manifold, Y, p, X)
     return error(manifold_function_not_implemented_message(M, project!, Y, p, X))
 end
 
-@doc doc"""
+@doc raw"""
     representation_size(M::Manifold)
 
 The size of an array representing a point on [`Manifold`](@ref) `M`.
@@ -804,7 +804,7 @@ function retract!(M::Manifold, q, p, X, method::AbstractRetractionMethod)
     return error(manifold_function_not_implemented_message(M, retract!, q, p, method))
 end
 
-@doc doc"""
+@doc raw"""
     shortest_geodesic(M::Manifold, p, q) -> Function
 
 Get a [`geodesic`](@ref) $\gamma_{p,q}(t)$ whose length is the shortest path between the
@@ -829,7 +829,7 @@ Converts a size given by `Tuple{N, M, ...}` into a tuple `(N, M, ...)`.
 """
 Base.@pure size_to_tuple(::Type{S}) where {S<:Tuple} = tuple(S.parameters...)
 
-@doc doc"""
+@doc raw"""
     zero_vector!(M::Manifold, X, p)
 
 Save to `X` the tangent vector from the tangent space ``T_p\mathcal M`` at `p` that
@@ -838,7 +838,7 @@ represents the zero vector, i.e. such that retracting `X` to the [`Manifold`](@r
 """
 zero_vector!(M::Manifold, X, p) = log!(M, X, p, p)
 
-@doc doc"""
+@doc raw"""
     zero_vector(M::Manifold, p)
 
 Return the tangent vector from the tangent space ``T_p\mathcal M`` at `p` on the

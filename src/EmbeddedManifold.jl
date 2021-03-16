@@ -227,7 +227,7 @@ function default_decorator_dispatch(::EmbeddedManifold)
     return Val(true)
 end
 
-@doc doc"""
+@doc raw"""
     default_embedding_dispatch(M::AbstractEmbeddedManifold)
 
 This method indicates that an [`AbstractEmbeddedManifold`](@ref) is the default
