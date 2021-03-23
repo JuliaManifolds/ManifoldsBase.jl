@@ -261,7 +261,7 @@ function decorator_transparent_dispatch(
 end
 function decorator_transparent_dispatch(
     ::typeof(distance),
-    ::AbstractEmbeddedManifold{𝔽,TransparentIsometricEmbedding},
+    ::AbstractEmbeddedManifold{𝔽,<:AbstractIsometricEmbeddingType},
     args...,
 ) where {𝔽}
     return Val(:transparent)
