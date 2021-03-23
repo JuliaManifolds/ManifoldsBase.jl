@@ -244,7 +244,16 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEm
         TM = NotImplementedEmbeddedManifold() # transparently iso
         IM = NotImplementedEmbeddedManifold2() # iso
         AM = NotImplementedEmbeddedManifold3() # general
-        for f in [embed, exp, get_basis, get_coordinates, get_vector, inverse_retract, log, distance]
+        for f in [
+            embed,
+            exp,
+            get_basis,
+            get_coordinates,
+            get_vector,
+            inverse_retract,
+            log,
+            distance,
+        ]
             @test ManifoldsBase.decorator_transparent_dispatch(f, AM) === Val(:parent)
         end
         for f in

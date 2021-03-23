@@ -252,7 +252,11 @@ function decorator_transparent_dispatch(
 )
     return Val(:intransparent)
 end
-function decorator_transparent_dispatch(::typeof(distance), ::AbstractEmbeddedManifold, args...)
+function decorator_transparent_dispatch(
+    ::typeof(distance),
+    ::AbstractEmbeddedManifold,
+    args...,
+)
     return Val(:parent)
 end
 function decorator_transparent_dispatch(
