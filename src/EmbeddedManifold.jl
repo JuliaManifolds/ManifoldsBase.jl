@@ -437,7 +437,7 @@ function decorator_transparent_dispatch(
     return Val(:transparent)
 end
 function decorator_transparent_dispatch(::typeof(norm), ::AbstractEmbeddedManifold, args...)
-    return Val(:intransparent)
+    return Val(:parent)
 end
 function decorator_transparent_dispatch(
     ::typeof(norm),

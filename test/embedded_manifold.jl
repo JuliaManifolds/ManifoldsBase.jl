@@ -252,6 +252,7 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEm
             get_vector,
             inverse_retract,
             log,
+            norm,
             distance,
         ]
             @test ManifoldsBase.decorator_transparent_dispatch(f, AM) === Val(:parent)
@@ -270,7 +271,7 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEm
             @test ManifoldsBase.decorator_transparent_dispatch(f, AM) ===
                   Val(:intransparent)
         end
-        for f in [log!, norm, manifold_dimension, project!]
+        for f in [log!, manifold_dimension, project!]
             @test ManifoldsBase.decorator_transparent_dispatch(f, AM) ===
                   Val(:intransparent)
         end
