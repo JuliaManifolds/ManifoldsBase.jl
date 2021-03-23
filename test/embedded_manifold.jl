@@ -1,3 +1,5 @@
+using ManifoldsBase: DefaultManifold, ℝ
+
 struct PlaneManifold <: AbstractEmbeddedManifold{ℝ,TransparentIsometricEmbedding} end
 
 ManifoldsBase.decorated_manifold(::PlaneManifold) = ManifoldsBase.DefaultManifold(1, 3)
