@@ -315,7 +315,7 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEm
               Val(:intransparent)
     end
 
-    @testset "Explicit Embeddings using AmbeddedManifold" begin
+    @testset "Explicit Embeddings using EmbeddedManifold" begin
         M = DefaultManifold(3, 3)
         N = DefaultManifold(4, 4)
         O = EmbeddedManifold(M, N)
