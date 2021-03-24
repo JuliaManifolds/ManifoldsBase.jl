@@ -291,10 +291,10 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEm
             AM,
         ) === Val(:parent)
 
-        for f in [inner, norm, distance]
+        for f in [inner, norm]
             @test ManifoldsBase.decorator_transparent_dispatch(f, IM) === Val(:transparent)
         end
-        for f in [inverse_retract!, retract!, mid_point!]
+        for f in [inverse_retract!, retract!, mid_point!, distance]
             @test ManifoldsBase.decorator_transparent_dispatch(f, IM) === Val(:parent)
         end
 
