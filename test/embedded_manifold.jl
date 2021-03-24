@@ -1,3 +1,5 @@
+using ManifoldsBase: DefaultManifold, ℝ
+
 struct PlaneManifold <: AbstractEmbeddedManifold{ℝ,TransparentIsometricEmbedding} end
 
 ManifoldsBase.decorated_manifold(::PlaneManifold) = ManifoldsBase.DefaultManifold(1, 3)
@@ -150,6 +152,7 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEm
         r = similar(p)
         exp!(M, r, p, X)
         @test r == q
+        @test distance(M, p, r) == norm(r - p)
     end
 
     @testset "AnotherPlaneManifold" begin
@@ -172,6 +175,7 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEm
             @test check_manifold_point(M, [1, 2]) === nothing
             @test check_tangent_vector(M, [1, 2], [3, 4]) === nothing
             @test norm(M, [1, 2], [2, 3]) ≈ sqrt(13)
+            @test distance(M, [1, 2], [3, 4]) ≈ sqrt(8)
             @test inner(M, [1, 2], [2, 3], [2, 3]) ≈ 13
             @test_throws ErrorException manifold_dimension(M)
             # without any implementation the projections are the identity
@@ -194,6 +198,7 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEm
             @test_throws ErrorException exp!(M2, A, [1, 2], [2, 3])
             @test_throws ErrorException log(M2, [1, 2], [2, 3])
             @test_throws ErrorException log!(M2, A, [1, 2], [2, 3])
+            @test_throws ErrorException distance(M2, [1, 2], [2, 3])
             @test_throws ErrorException manifold_dimension(M2)
             @test_throws ErrorException project(M2, [1, 2])
             @test_throws ErrorException project!(M2, A, [1, 2])
@@ -228,6 +233,7 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEm
             M3 = NotImplementedEmbeddedManifold3()
             @test_throws ErrorException inner(M3, [1, 2], [2, 3], [2, 3])
             @test_throws ErrorException manifold_dimension(M3)
+            @test_throws ErrorException distance(M3, [1, 2], [2, 3])
             @test_throws ErrorException norm(M3, [1, 2], [2, 3])
             @test_throws ErrorException embed(M3, [1, 2], [2, 3])
             @test_throws ErrorException embed(M3, [1, 2])
@@ -238,7 +244,17 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEm
         TM = NotImplementedEmbeddedManifold() # transparently iso
         IM = NotImplementedEmbeddedManifold2() # iso
         AM = NotImplementedEmbeddedManifold3() # general
-        for f in [embed, exp, get_basis, get_coordinates, get_vector, inverse_retract, log]
+        for f in [
+            embed,
+            exp,
+            get_basis,
+            get_coordinates,
+            get_vector,
+            inverse_retract,
+            log,
+            norm,
+            distance,
+        ]
             @test ManifoldsBase.decorator_transparent_dispatch(f, AM) === Val(:parent)
         end
         for f in
@@ -255,7 +271,7 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEm
             @test ManifoldsBase.decorator_transparent_dispatch(f, AM) ===
                   Val(:intransparent)
         end
-        for f in [log!, norm, manifold_dimension, project!]
+        for f in [log!, manifold_dimension, project!]
             @test ManifoldsBase.decorator_transparent_dispatch(f, AM) ===
                   Val(:intransparent)
         end
@@ -278,11 +294,11 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEm
         for f in [inner, norm]
             @test ManifoldsBase.decorator_transparent_dispatch(f, IM) === Val(:transparent)
         end
-        for f in [inverse_retract!, retract!, mid_point!]
+        for f in [inverse_retract!, retract!, mid_point!, distance]
             @test ManifoldsBase.decorator_transparent_dispatch(f, IM) === Val(:parent)
         end
 
-        for f in [exp, inverse_retract, log, project, retract, mid_point]
+        for f in [exp, inverse_retract, log, project, retract, mid_point, distance]
             @test ManifoldsBase.decorator_transparent_dispatch(f, TM) === Val(:transparent)
         end
         for f in [exp!, inverse_retract!, log!, project!, retract!, mid_point!]
@@ -311,7 +327,7 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEm
               Val(:intransparent)
     end
 
-    @testset "Explicit Embeddings using AmbeddedManifold" begin
+    @testset "Explicit Embeddings using EmbeddedManifold" begin
         M = DefaultManifold(3, 3)
         N = DefaultManifold(4, 4)
         O = EmbeddedManifold(M, N)
