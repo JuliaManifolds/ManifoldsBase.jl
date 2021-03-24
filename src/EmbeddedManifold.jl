@@ -49,7 +49,7 @@ abstract type AbstractIsometricEmbeddingType <: AbstractEmbeddingType end
 """
     DefaultIsometricEmbeddingType <: AbstractIsometricEmbeddingType
 
-An isometric embedding type that acts as a default, i.e. it has no specifig properties
+An isometric embedding type that acts as a default, i.e. it has no specific properties
 beyond its isometric property.
 """
 struct DefaultIsometricEmbeddingType <: AbstractIsometricEmbeddingType end
