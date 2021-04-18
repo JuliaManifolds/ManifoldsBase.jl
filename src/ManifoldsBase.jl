@@ -298,6 +298,25 @@ function check_size(M::Manifold, p, X)
     end
 end
 
+@doc raw"""
+    copyto!(M::Manifold, q, p)
+
+Copy the value(s) from `p` to `q`, where both are points on the [`Manifold`](@ref) `M`.
+This function defaults to calling `copyto!(q, p)`, but it might be useful to overwrite the
+function at the level, where also information from `M` can be accessed.
+"""
+copyto!(::Manifold, q, p) = copyto!(q, p)
+
+@doc raw"""
+    copyto!(M::Manifold, Y, X)
+
+Copy the value(s) from `X` to `Y`, where both are tangent vector from the tangent space at
+`p` on the [`Manifold`](@ref) `M`.
+This function defaults to calling `copyto!(Y, X)`, but it might be useful to overwrite the
+function at the level, where also information from `p` and `M` can be accessed.
+"""
+copyto!(::Manifold, Y, p, X) = copyto!(Y, X)
+
 """
     distance(M::Manifold, p, q)
 
