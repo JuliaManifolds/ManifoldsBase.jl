@@ -55,7 +55,7 @@ end
             @test similar(p, Float32) isa T
             @test number_eltype(similar(p, Float32)) == Float32
             q = allocate(p)
-            copyto!(q, p)
+            copyto!(A, q, p)
             @test isapprox(A, q, p)
             @test ManifoldsBase.array_value(p) == x
             @test ManifoldsBase.array_value(x) == x

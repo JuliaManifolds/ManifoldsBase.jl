@@ -107,16 +107,16 @@ function convert(::Type{ValidationTVector{V}}, X::V) where {V<:AbstractArray{<:N
     return ValidationTVector{V}(X)
 end
 
-function copyto!(p::ValidationMPoint, q::ValidationMPoint)
-    copyto!(p.value, q.value)
+function copyto!(M::ValidationManifold, p::ValidationMPoint, q::ValidationMPoint)
+    copyto!(M.manifold, p.value, q.value)
     return p
 end
-function copyto!(p::ValidationCoTVector, q::ValidationCoTVector)
-    copyto!(p.value, q.value)
+function copyto!(M::ValidationManifold, p::ValidationCoTVector, q::ValidationCoTVector)
+    copyto!(M.manifold, p.value, q.value)
     return p
 end
-function copyto!(Y::ValidationTVector, X::ValidationTVector)
-    copyto!(Y.value, X.value)
+function copyto!(M::ValidationManifold, Y::ValidationTVector, X::ValidationTVector)
+    copyto!(M.manifold, Y.value, X.value)
     return Y
 end
 
