@@ -1003,12 +1003,7 @@ end
 @inline function _write(::PowerManifoldNested, rep_size::Tuple, x::AbstractArray, i::Tuple)
     return view(x[i...], rep_size_to_colons(rep_size)...)
 end
-@inline function _write(
-    ::PowerManifoldNested,
-    ::Tuple{},
-    x::AbstractArray,
-    i::Tuple,
-)
+@inline function _write(::PowerManifoldNested, ::Tuple{}, x::AbstractArray, i::Tuple)
     return view(x, i...)
 end
 
