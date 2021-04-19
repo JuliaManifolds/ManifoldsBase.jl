@@ -4,7 +4,7 @@ using ManifoldsBase: AbstractNumbers, ℝ, ℂ
 
 struct DummyPowerRepresentation <: AbstractPowerRepresentation end
 
-@testset "Power Manifold" begin
+@testset "Power AbstractManifold" begin
     M = ManifoldsBase.DefaultManifold(3)
     N = PowerManifold(M, NestedPowerRepresentation(), 2)
     p = [zeros(3), ones(3)]

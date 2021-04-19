@@ -1,7 +1,7 @@
 using ManifoldsBase
 using Test
 
-struct ErrorTestManifold <: Manifold{ℝ} end
+struct ErrorTestManifold <: AbstractManifold{ℝ} end
 
 function ManifoldsBase.check_manifold_point(::ErrorTestManifold, x)
     if any(u -> u < 0, x)

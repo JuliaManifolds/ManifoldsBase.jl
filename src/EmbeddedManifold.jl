@@ -25,7 +25,7 @@ which should first invoke the test of the embedding and then test further constr
 the representation in the embedding has for these points to be valid.
 
 Technically this is realised by making the [`AbstractEmbeddedManifold`](@ref) is a decorator
-for the [`Manifold`](@ref)s that are subtypes.
+for the [`AbstractManifold`](@ref)s that are subtypes.
 """
 abstract type AbstractEmbeddedManifold{𝔽,T<:AbstractEmbeddingType} <:
               AbstractDecoratorManifold{𝔽} end
@@ -68,9 +68,9 @@ and logarithmic maps.
 struct TransparentIsometricEmbedding <: AbstractIsometricEmbeddingType end
 
 """
-    EmbeddedManifold{𝔽, MT <: Manifold, NT <: Manifold} <: AbstractDecoratorManifold{𝔽}
+    EmbeddedManifold{𝔽, MT <: AbstractManifold, NT <: AbstractManifold} <: AbstractDecoratorManifold{𝔽}
 
-A type to represent an explicit embedding of a [`Manifold`](@ref) `M` of type `MT` embedded
+A type to represent an explicit embedding of a [`AbstractManifold`](@ref) `M` of type `MT` embedded
 into a manifold `N` of type `NT`.
 
 !!!note
@@ -88,10 +88,11 @@ into a manifold `N` of type `NT`.
 
     EmbeddedManifold(M, N)
 
-Generate the `EmbeddedManifold` of the [`Manifold`](@ref) `M` into the
-[`Manifold`](@ref) `N`.
+Generate the `EmbeddedManifold` of the [`AbstractManifold`](@ref) `M` into the
+[`AbstractManifold`](@ref) `N`.
 """
-struct EmbeddedManifold{𝔽,MT<:Manifold{𝔽},NT<:Manifold} <: AbstractDecoratorManifold{𝔽}
+struct EmbeddedManifold{𝔽,MT<:AbstractManifold{𝔽},NT<:AbstractManifold} <:
+       AbstractDecoratorManifold{𝔽}
     manifold::MT
     embedding::NT
 end
@@ -194,7 +195,7 @@ embed!(::AbstractEmbeddedManifold, Y, p, X) = copyto!(Y, X)
 """
     get_embedding(M::AbstractEmbeddedManifold)
 
-Return the [`Manifold`](@ref) `N` an [`AbstractEmbeddedManifold`](@ref) is embedded into.
+Return the [`AbstractManifold`](@ref) `N` an [`AbstractEmbeddedManifold`](@ref) is embedded into.
 """
 get_embedding(::AbstractEmbeddedManifold)
 
@@ -205,7 +206,7 @@ end
 """
     get_embedding(M::EmbeddedManifold)
 
-Return the [`Manifold`](@ref) `N` an [`EmbeddedManifold`](@ref) is embedded into.
+Return the [`AbstractManifold`](@ref) `N` an [`EmbeddedManifold`](@ref) is embedded into.
 """
 get_embedding(::EmbeddedManifold)
 
@@ -219,7 +220,10 @@ function project(M::EmbeddedManifold, p)
     return q
 end
 
-function show(io::IO, M::EmbeddedManifold{𝔽,MT,NT}) where {𝔽,MT<:Manifold{𝔽},NT<:Manifold}
+function show(
+    io::IO,
+    M::EmbeddedManifold{𝔽,MT,NT},
+) where {𝔽,MT<:AbstractManifold{𝔽},NT<:AbstractManifold}
     return print(io, "EmbeddedManifold($(M.manifold), $(M.embedding))")
 end
 

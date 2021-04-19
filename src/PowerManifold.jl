@@ -15,17 +15,20 @@ Each element of such array stores a single point or tangent vector.
 struct NestedPowerRepresentation <: AbstractPowerRepresentation end
 
 @doc raw"""
-    AbstractPowerManifold{𝔽,M,TPR} <: Manifold{𝔽}
+    AbstractPowerManifold{𝔽,M,TPR} <: AbstractManifold{𝔽}
 
-An abstract [`Manifold`](@ref) to represent manifolds that are build as powers
-of another [`Manifold`](@ref) `M` with representation type `TPR`, a subtype of
+An abstract [`AbstractManifold`](@ref) to represent manifolds that are build as powers
+of another [`AbstractManifold`](@ref) `M` with representation type `TPR`, a subtype of
 [`AbstractPowerRepresentation`](@ref).
 """
-abstract type AbstractPowerManifold{𝔽,M<:Manifold{𝔽},TPR<:AbstractPowerRepresentation} <:
-              Manifold{𝔽} end
+abstract type AbstractPowerManifold{
+    𝔽,
+    M<:AbstractManifold{𝔽},
+    TPR<:AbstractPowerRepresentation,
+} <: AbstractManifold{𝔽} end
 
 @doc raw"""
-    PowerManifold{𝔽,TM<:Manifold,TSize<:Tuple,TPR<:AbstractPowerRepresentation} <: AbstractPowerManifold{𝔽,TM}
+    PowerManifold{𝔽,TM<:AbstractManifold,TSize<:Tuple,TPR<:AbstractPowerRepresentation} <: AbstractPowerManifold{𝔽,TM}
 
 The power manifold $\mathcal M^{n_1× n_2 × … × n_d}$ with power geometry
  `TSize` statically defines the number of elements along each axis.
@@ -41,7 +44,7 @@ would not be represented by statically-sized arrays.
 # Constructor
 
     PowerManifold(M::PowerManifold, N_1, N_2, ..., N_d)
-    PowerManifold(M::Manifold, NestedPowerRepresentation(), N_1, N_2, ..., N_d)
+    PowerManifold(M::AbstractManifold, NestedPowerRepresentation(), N_1, N_2, ..., N_d)
     M^(N_1, N_2, ..., N_d)
 
 Generate the power manifold $M^{N_1 × N_2 × … × N_d}$.
@@ -56,13 +59,13 @@ in a nested array representation.
 Since there is no default [`AbstractPowerRepresentation`](@ref) within this interface, the
 `^` operator is only available for `PowerManifold`s and concatenates dimensions.
 """
-struct PowerManifold{𝔽,TM<:Manifold{𝔽},TSize,TPR<:AbstractPowerRepresentation} <:
+struct PowerManifold{𝔽,TM<:AbstractManifold{𝔽},TSize,TPR<:AbstractPowerRepresentation} <:
        AbstractPowerManifold{𝔽,TM,TPR}
     manifold::TM
 end
 
 function PowerManifold(
-    M::Manifold{𝔽},
+    M::AbstractManifold{𝔽},
     ::TPR,
     size::Integer...,
 ) where {𝔽,TPR<:AbstractPowerRepresentation}
@@ -71,21 +74,21 @@ end
 function PowerManifold(
     M::PowerManifold{𝔽,TM,TSize,TPR},
     size::Integer...,
-) where {𝔽,TM<:Manifold{𝔽},TSize,TPR<:AbstractPowerRepresentation}
+) where {𝔽,TM<:AbstractManifold{𝔽},TSize,TPR<:AbstractPowerRepresentation}
     return PowerManifold{𝔽,TM,Tuple{TSize.parameters...,size...},TPR}(M.manifold)
 end
 function PowerManifold(
     M::PowerManifold{𝔽,TM,TSize},
     ::TPR,
     size::Integer...,
-) where {𝔽,TM<:Manifold{𝔽},TSize,TPR<:AbstractPowerRepresentation}
+) where {𝔽,TM<:AbstractManifold{𝔽},TSize,TPR<:AbstractPowerRepresentation}
     return PowerManifold{𝔽,TM,Tuple{TSize.parameters...,size...},TPR}(M.manifold)
 end
 function PowerManifold(
     M::PowerManifold{𝔽,TM,TSize},
     ::NestedPowerRepresentation,
     size::Integer...,
-) where {𝔽,TM<:Manifold{𝔽},TSize}
+) where {𝔽,TM<:AbstractManifold{𝔽},TSize}
     return PowerManifold{
         𝔽,
         PowerManifold{𝔽,TM,TSize},
@@ -160,7 +163,7 @@ struct PowerBasisData{TB<:AbstractArray}
 end
 
 const PowerManifoldNested =
-    AbstractPowerManifold{𝔽,<:Manifold{𝔽},NestedPowerRepresentation} where {𝔽}
+    AbstractPowerManifold{𝔽,<:AbstractManifold{𝔽},NestedPowerRepresentation} where {𝔽}
 
 _access_nested(x, i::Int) = x[i]
 _access_nested(x, i::Tuple) = x[i...]
@@ -168,7 +171,7 @@ _access_nested(x, i::Tuple) = x[i...]
 function Base.:^(
     M::PowerManifold{𝔽,TM,TSize,NestedPowerRepresentation},
     size::Integer...,
-) where {𝔽,TM<:Manifold{𝔽},TSize}
+) where {𝔽,TM<:AbstractManifold{𝔽},TSize}
     return PowerManifold(M, size...)
 end
 
@@ -192,7 +195,7 @@ function allocate_result(
 )
     return invoke(
         allocate_result,
-        Tuple{Manifold,typeof(get_coordinates),Any,Any,typeof(B)},
+        Tuple{AbstractManifold,typeof(get_coordinates),Any,Any,typeof(B)},
         M,
         f,
         p,
@@ -209,7 +212,7 @@ function allocate_result(
 )
     return invoke(
         allocate_result,
-        Tuple{Manifold,typeof(get_coordinates),Any,Any,typeof(B)},
+        Tuple{AbstractManifold,typeof(get_coordinates),Any,Any,typeof(B)},
         M,
         f,
         p,
@@ -430,9 +433,9 @@ function get_coordinates!(
     return Y
 end
 
-get_iterator(M::PowerManifold{𝔽,<:Manifold{𝔽},Tuple{N}}) where {𝔽,N} = Base.OneTo(N)
+get_iterator(M::PowerManifold{𝔽,<:AbstractManifold{𝔽},Tuple{N}}) where {𝔽,N} = Base.OneTo(N)
 @generated function get_iterator(
-    M::PowerManifold{𝔽,<:Manifold{𝔽},SizeTuple},
+    M::PowerManifold{𝔽,<:AbstractManifold{𝔽},SizeTuple},
 ) where {𝔽,SizeTuple}
     size_tuple = size_to_tuple(SizeTuple)
     return Base.product(map(Base.OneTo, size_tuple)...)
@@ -518,7 +521,7 @@ end
 injectivity_radius(M::AbstractPowerManifold) = injectivity_radius(M.manifold)
 eval(
     quote
-        @invoke_maker 1 Manifold injectivity_radius(
+        @invoke_maker 1 AbstractManifold injectivity_radius(
             M::AbstractPowerManifold,
             rm::AbstractRetractionMethod,
         )
@@ -526,7 +529,7 @@ eval(
 )
 eval(
     quote
-        @invoke_maker 1 Manifold injectivity_radius(
+        @invoke_maker 1 AbstractManifold injectivity_radius(
             M::AbstractPowerManifold,
             rm::ExponentialRetraction,
         )
@@ -590,7 +593,7 @@ end
 Compute the inverse retraction from `p` with respect to `q` on an [`AbstractPowerManifold`](@ref) `M`
 using an [`InversePowerRetraction`](@ref), which by default encapsulates a inverse retraction
 of the base manifold. Then this method is performed elementwise, so the encapsulated inverse
-retraction method has to be one that is available on the base [`Manifold`](@ref).
+retraction method has to be one that is available on the base [`AbstractManifold`](@ref).
 """
 inverse_retract(::AbstractPowerManifold, ::Any...)
 
@@ -659,7 +662,7 @@ $\mathcal M$, the manifold is of dimension
 \dim(\mathcal N) = \dim(\mathcal M)\prod_{i=1}^d n_i = n_1n_2\cdot…\cdot n_d \dim(\mathcal M).
 ````
 """
-function manifold_dimension(M::PowerManifold{𝔽,<:Manifold,TSize}) where {𝔽,TSize}
+function manifold_dimension(M::PowerManifold{𝔽,<:AbstractManifold,TSize}) where {𝔽,TSize}
     return manifold_dimension(M.manifold) * prod(size_to_tuple(TSize))
 end
 
@@ -698,7 +701,7 @@ end
 
 return the power of `M`,
 """
-function power_dimensions(::PowerManifold{𝔽,<:Manifold,TSize}) where {𝔽,TSize}
+function power_dimensions(::PowerManifold{𝔽,<:AbstractManifold,TSize}) where {𝔽,TSize}
     return size_to_tuple(TSize)
 end
 
@@ -769,7 +772,7 @@ end
 Compute the retraction from `p` with tangent vector `X` on an [`AbstractPowerManifold`](@ref) `M`
 using a [`PowerRetraction`](@ref), which by default encapsulates a retraction of the
 base manifold. Then this method is performed elementwise, so the encapsulated retraction
-method has to be one that is available on the base [`Manifold`](@ref).
+method has to be one that is available on the base [`AbstractManifold`](@ref).
 """
 retract(::AbstractPowerManifold, ::Any...)
 
@@ -803,7 +806,7 @@ end
     set_component!(M::AbstractPowerManifold, q, p, idx...)
 
 Set the component of a point `q` on an [`AbstractPowerManifold`](@ref) `M` at index `idx`
-to `p`, which itself is a point on the [`Manifold`](@ref) the power manifold is build on.
+to `p`, which itself is a point on the [`AbstractManifold`](@ref) the power manifold is build on.
 """
 function set_component!(M::AbstractPowerManifold, q, p, idx...)
     rep_size = representation_size(M.manifold)

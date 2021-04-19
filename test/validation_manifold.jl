@@ -71,7 +71,7 @@ end
             @test isapprox(A, 2 * a, T(2 .* v))
         end
     end
-    @testset "Manifold functions" begin
+    @testset "AbstractManifold functions" begin
         @test manifold_dimension(A) == manifold_dimension(M)
         @test isapprox(y2.value, y)
         @test distance(A, x, y) == distance(M, x, y)

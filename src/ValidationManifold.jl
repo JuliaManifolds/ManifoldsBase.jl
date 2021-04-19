@@ -1,37 +1,37 @@
 """
-    ValidationManifold{𝔽,M<:Manifold{𝔽}} <: AbstractDecoratorManifold{𝔽}
+    ValidationManifold{𝔽,M<:AbstractManifold{𝔽}} <: AbstractDecoratorManifold{𝔽}
 
-A manifold to encapsulate manifolds working on array representations of [`MPoint`](@ref)s
+A manifold to encapsulate manifolds working on array representations of [`AbstractManifoldPoint`](@ref)s
 and [`TVector`](@ref)s in a transparent way, such that for these manifolds it's not
 necessary to introduce explicit types for the points and tangent vectors, but they are
 encapsulated/stripped automatically when needed.
 
-This manifold is a decorator for a manifold, i.e. it decorates a [`Manifold`](@ref) `M`
+This manifold is a decorator for a manifold, i.e. it decorates a [`AbstractManifold`](@ref) `M`
 with types points, vectors, and covectors.
 """
-struct ValidationManifold{𝔽,M<:Manifold{𝔽}} <: AbstractDecoratorManifold{𝔽}
+struct ValidationManifold{𝔽,M<:AbstractManifold{𝔽}} <: AbstractDecoratorManifold{𝔽}
     manifold::M
 end
 
 """
-    ValidationMPoint <: MPoint
+    ValidationMPoint <: AbstractManifoldPoint
 
 Represent a point on an [`ValidationManifold`](@ref), i.e. on a manifold where data can be
 represented by arrays. The array is stored internally and semantically. This distinguished
 the value from [`ValidationTVector`](@ref)s and [`ValidationCoTVector`](@ref)s.
 """
-struct ValidationMPoint{V} <: MPoint
+struct ValidationMPoint{V} <: AbstractManifoldPoint
     value::V
 end
 
 """
-    ValidationMVector{TType<:VectorSpaceType} <: AbstractMVector{TType}
+    ValidationMVector{TType<:VectorSpaceType} <: AbstractFibreVector{TType}
 
 Represent a tangent vector to a point on an [`ValidationManifold`](@ref), i.e. on a manifold
 where data can be represented by arrays. The array is stored internally and semantically.
 This distinguished the value from [`ValidationMPoint`](@ref)s vectors of other types
 """
-struct ValidationMVector{TType<:VectorSpaceType,V} <: AbstractMVector{TType}
+struct ValidationMVector{TType<:VectorSpaceType,V} <: AbstractFibreVector{TType}
     value::V
 end
 function ValidationMVector{TType}(value::V) where {TType,V}
@@ -76,19 +76,24 @@ array_value(X::ValidationMVector) = X.value
 function check_manifold_point(M::ValidationManifold, p; kwargs...)
     return check_manifold_point(M.manifold, array_value(p); kwargs...)
 end
-function check_manifold_point(M::ValidationManifold, p::MPoint; kwargs...)
+function check_manifold_point(M::ValidationManifold, p::AbstractManifoldPoint; kwargs...)
     return check_manifold_point(M.manifold, array_value(p); kwargs...)
 end
 
 function check_tangent_vector(M::ValidationManifold, p, X; kwargs...)
     return check_tangent_vector(M.manifold, array_value(p), array_value(X); kwargs...)
 end
-function check_tangent_vector(M::ValidationManifold, p::MPoint, X::TVector; kwargs...)
+function check_tangent_vector(
+    M::ValidationManifold,
+    p::AbstractManifoldPoint,
+    X::TVector;
+    kwargs...,
+)
     return check_tangent_vector(M.manifold, array_value(p), array_value(X); kwargs...)
 end
 
-convert(::Type{M}, m::ValidationManifold{𝔽,M}) where {𝔽,M<:Manifold{𝔽}} = m.manifold
-function convert(::Type{ValidationManifold{𝔽,M}}, m::M) where {𝔽,M<:Manifold{𝔽}}
+convert(::Type{M}, m::ValidationManifold{𝔽,M}) where {𝔽,M<:AbstractManifold{𝔽}} = m.manifold
+function convert(::Type{ValidationManifold{𝔽,M}}, m::M) where {𝔽,M<:AbstractManifold{𝔽}}
     return ValidationManifold(m)
 end
 convert(::Type{V}, p::ValidationMPoint{V}) where {V<:AbstractArray} = p.value

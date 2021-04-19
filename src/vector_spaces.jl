@@ -24,19 +24,19 @@ end
 
 
 """
-    AbstractMVector{TType<:VectorSpaceType}
+    AbstractFibreVector{TType<:VectorSpaceType}
 
-Type for a vector from a vector space of type `TType` of a manifold.
-While a [`Manifold`](@ref) does not necessarily require this type, for example when it is
+Type for a vector from a vector space (fibre of a vector bundle) of type `TType` of a manifold.
+While a [`AbstractManifold`](@ref) does not necessarily require this type, for example when it is
 implemented for `Vector`s or `Matrix` type elements, this type can be used for more
 complicated representations, semantic verification, or even dispatch for different
 representations of tangent vectors and their types on a manifold.
 """
-abstract type AbstractMVector{TType<:VectorSpaceType} end
+abstract type AbstractFibreVector{TType<:VectorSpaceType} end
 
-const TVector = AbstractMVector{TangentSpaceType}
+const TVector = AbstractFibreVector{TangentSpaceType}
 
-const CoTVector = AbstractMVector{CotangentSpaceType}
+const CoTVector = AbstractFibreVector{CotangentSpaceType}
 
 Base.:+(X::FVector, Y::FVector) = FVector(X.type, X.data + Y.data, X.basis)
 
@@ -64,12 +64,12 @@ Base.show(io::IO, ::TangentSpaceType) = print(io, "TangentSpace")
 Base.show(io::IO, ::CotangentSpaceType) = print(io, "CotangentSpace")
 
 """
-    vector_space_dimension(M::Manifold, V::VectorSpaceType)
+    vector_space_dimension(M::AbstractManifold, V::VectorSpaceType)
 
 Dimension of the vector space of type `V` on manifold `M`.
 """
-vector_space_dimension(::Manifold, ::VectorSpaceType)
+vector_space_dimension(::AbstractManifold, ::VectorSpaceType)
 
-function vector_space_dimension(M::Manifold, ::TCoTSpaceType)
+function vector_space_dimension(M::AbstractManifold, ::TCoTSpaceType)
     return manifold_dimension(M)
 end

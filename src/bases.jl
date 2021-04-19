@@ -286,34 +286,48 @@ const DISAMBIGUATION_COTANGENT_BASIS_TYPES = [
 ]
 
 
-function allocate_result(M::Manifold, f::typeof(get_coordinates), p, X, B::AbstractBasis)
+function allocate_result(
+    M::AbstractManifold,
+    f::typeof(get_coordinates),
+    p,
+    X,
+    B::AbstractBasis,
+)
     T = allocate_result_type(M, f, (p, X))
     return allocate(p, T, number_of_coordinates(M, B))
 end
 
-function allocate_result(M::Manifold, f::typeof(get_coordinates), p, X, B::CachedBasis)
+function allocate_result(
+    M::AbstractManifold,
+    f::typeof(get_coordinates),
+    p,
+    X,
+    B::CachedBasis,
+)
     T = allocate_result_type(M, f, (p, X))
     return allocate(p, T, number_of_coordinates(M, B))
 end
 
 @inline function allocate_result_type(
-    M::Manifold,
+    M::AbstractManifold,
     f::Union{typeof(get_coordinates),typeof(get_vector)},
     args::Tuple,
 )
     apf = allocation_promotion_function(M, f, args)
-    return apf(invoke(allocate_result_type, Tuple{Manifold,Any,typeof(args)}, M, f, args))
+    return apf(
+        invoke(allocate_result_type, Tuple{AbstractManifold,Any,typeof(args)}, M, f, args),
+    )
 end
 
 """
-    allocation_promotion_function(M::Manifold, f, args::Tuple)
+    allocation_promotion_function(M::AbstractManifold, f, args::Tuple)
 
 Determine the function that must be used to ensure that the allocated representation is of
 the right type. This is needed for [`get_vector`](@ref) when a point on a complex manifold
 is represented by a real-valued vectors with a real-coefficient basis, so that
 a complex-valued vector representation is allocated.
 """
-allocation_promotion_function(M::Manifold, f, args::Tuple) = identity
+allocation_promotion_function(M::AbstractManifold, f, args::Tuple) = identity
 
 function combine_allocation_promotion_functions(f::T, ::T) where {T}
     return f
@@ -326,7 +340,7 @@ function combine_allocation_promotion_functions(::typeof(identity), ::typeof(com
 end
 
 @doc raw"""
-    dual_basis(M::Manifold, p, B::AbstractBasis) 
+    dual_basis(M::AbstractManifold, p, B::AbstractBasis) 
 
 Get the dual basis to `B`, a basis of a vector space at point `p` from manifold `M`.
 
@@ -339,13 +353,17 @@ such that $v^i(v_j) = δ^i_j$, where $δ^i_j$ is the Kronecker delta symbol:
 \end{cases}
 ````
 """
-dual_basis(M::Manifold, p, B::AbstractBasis)
+dual_basis(M::AbstractManifold, p, B::AbstractBasis)
 
-function dual_basis(::Manifold, p, ::DefaultOrthonormalBasis{𝔽,TangentSpaceType}) where {𝔽}
+function dual_basis(
+    ::AbstractManifold,
+    p,
+    ::DefaultOrthonormalBasis{𝔽,TangentSpaceType},
+) where {𝔽}
     return DefaultOrthonormalBasis{𝔽}(CotangentSpace)
 end
 function dual_basis(
-    ::Manifold,
+    ::AbstractManifold,
     p,
     ::DefaultOrthonormalBasis{𝔽,CotangentSpaceType},
 ) where {𝔽}
@@ -359,7 +377,7 @@ function _euclidean_basis_vector(p, i)
 end
 
 """
-    get_basis(M::Manifold, p, B::AbstractBasis) -> CachedBasis
+    get_basis(M::AbstractManifold, p, B::AbstractBasis) -> CachedBasis
 
 Compute the basis vectors of the tangent space at a point on manifold `M`
 represented by `p`.
@@ -370,27 +388,31 @@ the function [`get_vectors`](@ref) needs to be used to retrieve the basis vector
 
 See also: [`get_coordinates`](@ref), [`get_vector`](@ref)
 """
-get_basis(M::Manifold, p, B::AbstractBasis)
+get_basis(M::AbstractManifold, p, B::AbstractBasis)
 @decorator_transparent_signature get_basis(
     M::AbstractDecoratorManifold,
     p,
     B::AbstractBasis,
 )
-function decorator_transparent_dispatch(::typeof(get_basis), ::Manifold, args...)
+function decorator_transparent_dispatch(::typeof(get_basis), ::AbstractManifold, args...)
     return Val(:parent)
 end
 
-function get_basis(M::Manifold, p, B::DefaultOrthonormalBasis{<:Any,TangentSpaceType})
+function get_basis(
+    M::AbstractManifold,
+    p,
+    B::DefaultOrthonormalBasis{<:Any,TangentSpaceType},
+)
     dim = manifold_dimension(M)
     return CachedBasis(
         B,
         [get_vector(M, p, [ifelse(i == j, 1, 0) for j in 1:dim], B) for i in 1:dim],
     )
 end
-function get_basis(::Manifold, ::Any, B::CachedBasis)
+function get_basis(::AbstractManifold, ::Any, B::CachedBasis)
     return B
 end
-function get_basis(M::Manifold, p, B::ProjectedOrthonormalBasis{:svd,ℝ})
+function get_basis(M::AbstractManifold, p, B::ProjectedOrthonormalBasis{:svd,ℝ})
     S = representation_size(M)
     PS = prod(S)
     dim = manifold_dimension(M)
@@ -414,7 +436,7 @@ function get_basis(M::Manifold, p, B::ProjectedOrthonormalBasis{:svd,ℝ})
     return CachedBasis(B, vecs)
 end
 function get_basis(
-    M::Manifold,
+    M::AbstractManifold,
     p,
     B::ProjectedOrthonormalBasis{:gram_schmidt,ℝ};
     warn_linearly_dependent = false,
@@ -445,8 +467,8 @@ for BT in DISAMBIGUATION_BASIS_TYPES
 end
 
 @doc raw"""
-    get_coordinates(M::Manifold, p, X, B::AbstractBasis)
-    get_coordinates(M::Manifold, p, X, B::CachedBasis)
+    get_coordinates(M::AbstractManifold, p, X, B::AbstractBasis)
+    get_coordinates(M::AbstractManifold, p, X, B::CachedBasis)
 
 Compute a one-dimensional vector of coefficients of the tangent vector `X`
 at point denoted by `p` on manifold `M` in basis `B`.
@@ -461,7 +483,7 @@ requires either a dual basis or the cached basis to be selfdual, for example ort
 
 See also: [`get_vector`](@ref), [`get_basis`](@ref)
 """
-function get_coordinates(M::Manifold, p, X, B::AbstractBasis)
+function get_coordinates(M::AbstractManifold, p, X, B::AbstractBasis)
     Y = allocate_result(M, get_coordinates, p, X, B)
     return get_coordinates!(M, Y, p, X, B)
 end
@@ -471,11 +493,15 @@ end
     X,
     B::AbstractBasis,
 )
-function decorator_transparent_dispatch(::typeof(get_coordinates), ::Manifold, args...)
+function decorator_transparent_dispatch(
+    ::typeof(get_coordinates),
+    ::AbstractManifold,
+    args...,
+)
     return Val(:parent)
 end
 
-function get_coordinates!(M::Manifold, Y, p, X, B::AbstractBasis)
+function get_coordinates!(M::AbstractManifold, Y, p, X, B::AbstractBasis)
     return error(
         "get_coordinates! not implemented for manifold of type $(typeof(M)) coordinates of type $(typeof(Y)), a point of type $(typeof(p)), tangent vector of type $(typeof(X)) and basis of type $(typeof(B)).",
     )
@@ -500,24 +526,28 @@ for BT in [DISAMBIGUATION_BASIS_TYPES..., DISAMBIGUATION_COTANGENT_BASIS_TYPES..
         end,
     )
 end
-function decorator_transparent_dispatch(::typeof(get_coordinates!), ::Manifold, args...)
+function decorator_transparent_dispatch(
+    ::typeof(get_coordinates!),
+    ::AbstractManifold,
+    args...,
+)
     return Val(:transparent)
 end
 
-function get_coordinates!(M::Manifold, Y, p, X, B::VeeOrthogonalBasis)
+function get_coordinates!(M::AbstractManifold, Y, p, X, B::VeeOrthogonalBasis)
     return get_coordinates!(M, Y, p, X, DefaultOrthogonalBasis(number_system(B)))
 end
-function get_coordinates!(M::Manifold, Y, p, X, B::DefaultBasis)
+function get_coordinates!(M::AbstractManifold, Y, p, X, B::DefaultBasis)
     return get_coordinates!(M, Y, p, X, DefaultOrthogonalBasis(number_system(B)))
 end
-function get_coordinates!(M::Manifold, Y, p, X, B::DefaultOrthogonalBasis)
+function get_coordinates!(M::AbstractManifold, Y, p, X, B::DefaultOrthogonalBasis)
     return get_coordinates!(M, Y, p, X, DefaultOrthonormalBasis(number_system(B)))
 end
-function get_coordinates!(M::Manifold, Y, p, X, B::CachedBasis)
+function get_coordinates!(M::AbstractManifold, Y, p, X, B::CachedBasis)
     return _get_coordinates!(M, number_system(M), Y, p, X, B, number_system(B))
 end
 function _get_coordinates!(
-    M::Manifold,
+    M::AbstractManifold,
     ::ComplexNumbers,
     Y,
     p,
@@ -528,13 +558,21 @@ function _get_coordinates!(
     map!(vb -> conj(inner(M, p, X, vb)), Y, get_vectors(M, p, B))
     return Y
 end
-function _get_coordinates!(M::Manifold, a::𝔽, Y, p, X, C::CachedBasis, b::𝔽) where {𝔽}
+function _get_coordinates!(
+    M::AbstractManifold,
+    a::𝔽,
+    Y,
+    p,
+    X,
+    C::CachedBasis,
+    b::𝔽,
+) where {𝔽}
     map!(vb -> real(inner(M, p, X, vb)), Y, get_vectors(M, p, C))
     return Y
 end
 
 """
-    get_vector(M::Manifold, p, X, B::AbstractBasis)
+    get_vector(M::AbstractManifold, p, X, B::AbstractBasis)
 
 Convert a one-dimensional vector of coefficients in a basis `B` of
 the tangent space at `p` on manifold `M` to a tangent vector `X` at `p`.
@@ -548,7 +586,7 @@ requires either a dual basis or the cached basis to be selfdual, for example ort
 
 See also: [`get_coordinates`](@ref), [`get_basis`](@ref)
 """
-function get_vector(M::Manifold, p, X, B::AbstractBasis)
+function get_vector(M::AbstractManifold, p, X, B::AbstractBasis)
     Y = allocate_result(M, get_vector, p, X)
     return get_vector!(M, Y, p, X, B)
 end
@@ -558,11 +596,11 @@ end
     X,
     B::AbstractBasis,
 )
-function decorator_transparent_dispatch(::typeof(get_vector), ::Manifold, args...)
+function decorator_transparent_dispatch(::typeof(get_vector), ::AbstractManifold, args...)
     return Val(:parent)
 end
 
-function get_vector!(M::Manifold, Y, p, X, B::AbstractBasis)
+function get_vector!(M::AbstractManifold, Y, p, X, B::AbstractBasis)
     return error(
         "get_vector! not implemented for manifold of type $(typeof(M)) vector of type $(typeof(Y)), a point of type $(typeof(p)), coordinates of type $(typeof(X)) and basis of type $(typeof(B)).",
     )
@@ -587,22 +625,22 @@ for BT in [DISAMBIGUATION_BASIS_TYPES..., DISAMBIGUATION_COTANGENT_BASIS_TYPES..
         end,
     )
 end
-function decorator_transparent_dispatch(::typeof(get_vector!), ::Manifold, args...)
+function decorator_transparent_dispatch(::typeof(get_vector!), ::AbstractManifold, args...)
     return Val(:transparent)
 end
 
 _get_vector_cache_broadcast(::Any) = Val(true)
 
-function get_vector!(M::Manifold, Y, p, X, B::VeeOrthogonalBasis)
+function get_vector!(M::AbstractManifold, Y, p, X, B::VeeOrthogonalBasis)
     return get_vector!(M, Y, p, X, DefaultOrthogonalBasis(number_system(B)))
 end
-function get_vector!(M::Manifold, Y, p, X, B::DefaultBasis)
+function get_vector!(M::AbstractManifold, Y, p, X, B::DefaultBasis)
     return get_vector!(M, Y, p, X, DefaultOrthogonalBasis(number_system(B)))
 end
-function get_vector!(M::Manifold, Y, p, X, B::DefaultOrthogonalBasis)
+function get_vector!(M::AbstractManifold, Y, p, X, B::DefaultOrthogonalBasis)
     return get_vector!(M, Y, p, X, DefaultOrthonormalBasis(number_system(B)))
 end
-function get_vector!(M::Manifold, Y, p, X, B::CachedBasis)
+function get_vector!(M::AbstractManifold, Y, p, X, B::CachedBasis)
     # quite convoluted but:
     #  1) preserves the correct `eltype`
     #  2) guarantees a reasonable array type `Y`
@@ -626,16 +664,16 @@ function get_vector!(M::Manifold, Y, p, X, B::CachedBasis)
 end
 
 """
-    get_vectors(M::Manifold, p, B::AbstractBasis)
+    get_vectors(M::AbstractManifold, p, B::AbstractBasis)
 
 Get the basis vectors of basis `B` of the tangent space at point `p`.
 """
-function get_vectors(M::Manifold, p, B::AbstractBasis)
+function get_vectors(M::AbstractManifold, p, B::AbstractBasis)
     return error(
         "get_vectors not implemented for manifold of type $(typeof(M)) a point of type $(typeof(p)) and basis of type $(typeof(B)).",
     )
 end
-function get_vectors(::Manifold, ::Any, B::CachedBasis)
+function get_vectors(::AbstractManifold, ::Any, B::CachedBasis)
     return _get_vectors(B)
 end
 #internal for directly cached basis i.e. those that are just arrays – used in show
@@ -646,10 +684,10 @@ end
 
 
 @doc raw"""
-    gram_schmidt(M::Manifold{𝔽}, p, B::AbstractBasis{𝔽}) where {𝔽}
-    gram_schmidt(M::Manifold, p, V::AbstractVector)
+    gram_schmidt(M::AbstractManifold{𝔽}, p, B::AbstractBasis{𝔽}) where {𝔽}
+    gram_schmidt(M::AbstractManifold, p, V::AbstractVector)
 
-Compute an ONB in the tangent space at `p` on the [`Manifold`](@ref} `M` from either an
+Compute an ONB in the tangent space at `p` on the [`AbstractManifold`](@ref} `M` from either an
 [`AbstractBasis`](@ref) basis ´B´ or a set of (at most) [`manifold_dimension`](@ref)`(M)`
 many vectors.
 Note that this method requires the manifold and basis to work on the same
@@ -672,7 +710,7 @@ When a set of vectors is orthonormalized a set of vectors is returned.
 When an [`AbstractBasis`](@ref) is orthonormalized, a [`CachedBasis`](@ref) is returned.
 """
 function gram_schmidt(
-    M::Manifold{𝔽},
+    M::AbstractManifold{𝔽},
     p,
     B::AbstractBasis{𝔽};
     warn_linearly_dependent = false,
@@ -690,7 +728,7 @@ function gram_schmidt(
     return CachedBasis(GramSchmidtOrthonormalBasis(𝔽), V)
 end
 function gram_schmidt(
-    M::Manifold,
+    M::AbstractManifold,
     p,
     V::AbstractVector;
     warn_linearly_dependent = false,
@@ -733,7 +771,7 @@ function gram_schmidt(
 end
 
 @doc raw"""
-    hat(M::Manifold, p, Xⁱ)
+    hat(M::AbstractManifold, p, Xⁱ)
 
 Given a basis $e_i$ on the tangent space at a point `p` and tangent
 component vector $X^i$, compute the equivalent vector representation
@@ -747,20 +785,20 @@ For array manifolds, this converts a vector representation of the tangent
 vector to an array representation. The [`vee`](@ref) map is the `hat` map's
 inverse.
 """
-hat(M::Manifold, p, X) = get_vector(M, p, X, VeeOrthogonalBasis())
-hat!(M::Manifold, Y, p, X) = get_vector!(M, Y, p, X, VeeOrthogonalBasis())
+hat(M::AbstractManifold, p, X) = get_vector(M, p, X, VeeOrthogonalBasis())
+hat!(M::AbstractManifold, Y, p, X) = get_vector!(M, Y, p, X, VeeOrthogonalBasis())
 
 """
-    number_of_coordinates(M::Manifold, B::AbstractBasis)
+    number_of_coordinates(M::AbstractManifold, B::AbstractBasis)
 
 Compute the number of coordinates in basis `B` of manifold `M`.
 This also corresponds to the number of vectors represented by `B`,
 or stored within `B` in case of a [`CachedBasis`](@ref).
 """
-function number_of_coordinates(M::Manifold{𝔽}, B::AbstractBasis{𝔾}) where {𝔽,𝔾}
+function number_of_coordinates(M::AbstractManifold{𝔽}, B::AbstractBasis{𝔾}) where {𝔽,𝔾}
     return div(manifold_dimension(M), real_dimension(𝔽)) * real_dimension(𝔾)
 end
-function number_of_coordinates(M::Manifold{𝔽}, B::AbstractBasis{𝔽}) where {𝔽}
+function number_of_coordinates(M::AbstractManifold{𝔽}, B::AbstractBasis{𝔽}) where {𝔽}
     return manifold_dimension(M)
 end
 
@@ -855,7 +893,7 @@ function show(
 end
 
 @doc raw"""
-    vee(M::Manifold, p, X)
+    vee(M::AbstractManifold, p, X)
 
 Given a basis $e_i$ on the tangent space at a point `p` and tangent
 vector `X`, compute the vector components $X^i$, such that $X = X^i e_i$, where
@@ -869,8 +907,8 @@ For array manifolds, this converts an array representation of the tangent
 vector to a vector representation. The [`hat`](@ref) map is the `vee` map's
 inverse.
 """
-vee(M::Manifold, p, X) = get_coordinates(M, p, X, VeeOrthogonalBasis())
-vee!(M::Manifold, Y, p, X) = get_coordinates!(M, Y, p, X, VeeOrthogonalBasis())
+vee(M::AbstractManifold, p, X) = get_coordinates(M, p, X, VeeOrthogonalBasis())
+vee!(M::AbstractManifold, Y, p, X) = get_coordinates!(M, Y, p, X, VeeOrthogonalBasis())
 
 macro invoke_maker(argnum, type, sig)
     parts = ManifoldsBase._split_signature(sig)

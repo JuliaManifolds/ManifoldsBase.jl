@@ -82,15 +82,15 @@ end
 # Type
 #
 """
-    AbstractDecoratorManifold{𝔽} <: Manifold{𝔽}
+    AbstractDecoratorManifold{𝔽} <: AbstractManifold{𝔽}
 
 An `AbstractDecoratorManifold` indicates that to some extent a manifold subtype
-decorates another [`Manifold`](@ref) in the sense that it either
+decorates another [`AbstractManifold`](@ref) in the sense that it either
 
 * it extends the functionality of a manifold with further features
 * it defines a new manifold that internally uses functions from the decorated manifold
 
-with the main intent that several or most functions of [`Manifold`](@ref) are transparently
+with the main intent that several or most functions of [`AbstractManifold`](@ref) are transparently
 passed through to the manifold that is decorated. This way a function implemented for a
 decorator acts transparent on all other decorators, i.e. they just pass them through. If
 the decorator the function is implemented for is not among the decorators, an error is
@@ -101,7 +101,7 @@ Transparency of functions with respect to decorators can be specified using the 
 [`@decorator_transparent_fallback`](@ref), [`@decorator_transparent_function`](@ref) and
 [`@decorator_transparent_signature`](@ref).
 """
-abstract type AbstractDecoratorManifold{𝔽} <: Manifold{𝔽} end
+abstract type AbstractDecoratorManifold{𝔽} <: AbstractManifold{𝔽} end
 
 #
 # Macros
@@ -264,7 +264,7 @@ macro decorator_transparent_function(fallback_case, input_ex)
                 return error(error_msg)
             end
             function ($fname)(
-                $(argnames[1])::Manifold,
+                $(argnames[1])::AbstractManifold,
                 $(callargs[2:end]...);
                 $(kwargs_list...),
             ) where {$(where_exprs...)}
@@ -418,7 +418,7 @@ end
 For any manifold that is a subtype of [`AbstractDecoratorManifold`](@ref), this function
 indicates whether a certain manifold `M` acts as a default decorator.
 
-This yields that _all_ functions are passed through to the decorated [`Manifold`](@ref)
+This yields that _all_ functions are passed through to the decorated [`AbstractManifold`](@ref)
 if `M` is indicated as default. This overwrites all [`is_decorator_transparent`](@ref)
 values.
 
@@ -430,7 +430,7 @@ the undecorated case.
 Value returned by this function is determined by [`default_decorator_dispatch`](@ref),
 which returns a `Val`-wrapped boolean for type stability of certain functions.
 """
-is_default_decorator(M::Manifold) = _extract_val(default_decorator_dispatch(M))
+is_default_decorator(M::AbstractManifold) = _extract_val(default_decorator_dispatch(M))
 
 """
     default_decorator_dispatch(M) -> Val
@@ -439,12 +439,12 @@ Return whether by default to dispatch the the inner manifold of
 a decorator (`Val(true)`) or not (`Val(false`). For more details see
 [`is_decorator_transparent`](@ref).
 """
-default_decorator_dispatch(M::Manifold) = Val(false)
+default_decorator_dispatch(M::AbstractManifold) = Val(false)
 
 """
-    is_decorator_transparent(f, M::Manifold, args...) -> Bool
+    is_decorator_transparent(f, M::AbstractManifold, args...) -> Bool
 
-Given a [`Manifold`](@ref) `M` and a function `f(M, args...)`, indicate, whether an
+Given a [`AbstractManifold`](@ref) `M` and a function `f(M, args...)`, indicate, whether an
 [`AbstractDecoratorManifold`](@ref) acts transparently for `f`. This means, it
 just passes through down to the internally stored manifold.
 Transparency is only defined for decorator manifolds and by default all decorators are transparent.
@@ -454,22 +454,22 @@ this behaviour, see [`decorator_transparent_dispatch`](@ref).
 If a decorator manifold is not in general transparent, it might still pass down
 for the case that a decorator is the default decorator, see [`is_default_decorator`](@ref).
 """
-function is_decorator_transparent(f, M::Manifold, args...)
+function is_decorator_transparent(f, M::AbstractManifold, args...)
     return decorator_transparent_dispatch(f, M, args...) === Val(:transparent)
 end
 
 """
-    decorator_transparent_dispatch(f, M::Manifold, args...) -> Val
+    decorator_transparent_dispatch(f, M::AbstractManifold, args...) -> Val
 
-Given a [`Manifold`](@ref) `M` and a function `f(M,args...)`, indicate, whether a
+Given a [`AbstractManifold`](@ref) `M` and a function `f(M,args...)`, indicate, whether a
 function is `Val(:transparent)` or `Val(:intransparent)` for the (decorated)
-[`Manifold`](@ref) `M`. Another possibility is, that for `M` and given `args...`
+[`AbstractManifold`](@ref) `M`. Another possibility is, that for `M` and given `args...`
 the function `f` should invoke `M`s `Val(:parent)` implementation, see
 [`@decorator_transparent_function`](@ref) for details.
 """
-decorator_transparent_dispatch(f, M::Manifold, args...) = Val(:transparent)
+decorator_transparent_dispatch(f, M::AbstractManifold, args...) = Val(:transparent)
 
-function _acts_transparently(f, M::Manifold, args...)
+function _acts_transparently(f, M::AbstractManifold, args...)
     return _val_or(
         default_decorator_dispatch(M),
         decorator_transparent_dispatch(f, M, args...),
@@ -507,7 +507,7 @@ end
 
 Return the manifold decorated by the decorator `M`. Defaults to `M.manifold`.
 """
-decorated_manifold(M::Manifold) = M.manifold
+decorated_manifold(M::AbstractManifold) = M.manifold
 
 @decorator_transparent_signature distance(M::AbstractDecoratorManifold, p, q)
 

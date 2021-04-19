@@ -21,9 +21,9 @@ import Markdown: @doc_str
 using LinearAlgebra
 
 """
-    Manifold{F}
+    AbstractManifold{F}
 
-A manifold type. The `Manifold` is used to dispatch to different functions on a manifold,
+A manifold type. The `AbstractManifold` is used to dispatch to different functions on a manifold,
 usually as the first argument of the function. Examples are the [`exp`](@ref)onential and
 [`log`](@ref)arithmic maps as well as more general functions that are built on them like the
 [`geodesic`](@ref).
@@ -35,7 +35,7 @@ For subtypes the preferred order of parameters is: size and simple value paramet
 followed by the [`AbstractNumbers`](@ref) `field`, followed by data type parameters,
 which might depend on the abstract number field type.
 """
-abstract type Manifold{𝔽} end
+abstract type AbstractManifold{𝔽} end
 
 """
     AbstractEstimationMethod
@@ -69,7 +69,7 @@ struct ExponentialRetraction <: AbstractRetractionMethod end
     PolarRetraction <: AbstractRetractionMethod
 
 Retractions that are based on singular value decompositions of the matrix / matrices
-for point and tangent vector on a [`Manifold`](@ref)
+for point and tangent vector on a [`AbstractManifold`](@ref)
 """
 struct PolarRetraction <: AbstractRetractionMethod end
 
@@ -84,7 +84,7 @@ struct ProjectionRetraction <: AbstractRetractionMethod end
     QRRetraction <: AbstractRetractionMethod
 
 Retractions that are based on a QR decomposition of the
-matrix / matrices for point and tangent vector on a [`Manifold`](@ref)
+matrix / matrices for point and tangent vector on a [`AbstractManifold`](@ref)
 """
 struct QRRetraction <: AbstractRetractionMethod end
 
@@ -99,7 +99,7 @@ struct LogarithmicInverseRetraction <: AbstractInverseRetractionMethod end
     PolarInverseRetraction <: AbstractInverseRetractionMethod
 
 Inverse retractions that are based on a singular value decomposition of the
-matrix / matrices for point and tangent vector on a [`Manifold`](@ref)
+matrix / matrices for point and tangent vector on a [`AbstractManifold`](@ref)
 """
 struct PolarInverseRetraction <: AbstractInverseRetractionMethod end
 
@@ -114,19 +114,19 @@ struct ProjectionInverseRetraction <: AbstractInverseRetractionMethod end
     QRInverseRetraction <: AbstractInverseRetractionMethod
 
 Inverse retractions that are based on a QR decomposition of the
-matrix / matrices for point and tangent vector on a [`Manifold`](@ref)
+matrix / matrices for point and tangent vector on a [`AbstractManifold`](@ref)
 """
 struct QRInverseRetraction <: AbstractInverseRetractionMethod end
 
 """
-    MPoint
+    AbstractManifoldPoint
 
-Type for a point on a manifold. While a [`Manifold`](@ref) does not necessarily require this
+Type for a point on a manifold. While a [`AbstractManifold`](@ref) does not necessarily require this
 type, for example when it is implemented for `Vector`s or `Matrix` type elements, this type
 can be used for more complicated representations, semantic verification, or even dispatch
 for different representations of points on a manifold.
 """
-abstract type MPoint end
+abstract type AbstractManifoldPoint end
 
 """
     OutOfInjectivityRadiusError
@@ -164,63 +164,65 @@ allocate(a::NTuple{N,AbstractArray} where {N}) = map(allocate, a)
 allocate(a::NTuple{N,AbstractArray} where {N}, T::Type) = map(t -> allocate(t, T), a)
 
 """
-    allocate_result(M::Manifold, f, x...)
+    allocate_result(M::AbstractManifold, f, x...)
 
-Allocate an array for the result of function `f` on [`Manifold`](@ref) `M` and arguments
+Allocate an array for the result of function `f` on [`AbstractManifold`](@ref) `M` and arguments
 `x...` for implementing the non-modifying operation using the modifying operation.
 
 Usefulness of passing a function is demonstrated by methods that allocate results of musical
 isomorphisms.
 """
-function allocate_result(M::Manifold, f, x...)
+function allocate_result(M::AbstractManifold, f, x...)
     T = allocate_result_type(M, f, x)
     return allocate(x[1], T)
 end
 
 """
-    allocate_result_type(M::Manifold, f, args::NTuple{N,Any}) where N
+    allocate_result_type(M::AbstractManifold, f, args::NTuple{N,Any}) where N
 
 Return type of element of the array that will represent the result of function `f` and the
-[`Manifold`](@ref) `M` on given arguments `args` (passed as a tuple).
+[`AbstractManifold`](@ref) `M` on given arguments `args` (passed as a tuple).
 """
-function allocate_result_type(M::Manifold, f, args::NTuple{N,Any}) where {N}
+function allocate_result_type(M::AbstractManifold, f, args::NTuple{N,Any}) where {N}
     return typeof(mapreduce(eti -> one(number_eltype(eti)), +, args))
 end
 
 """
-    angle(M::Manifold, p, X, Y)
+    angle(M::AbstractManifold, p, X, Y)
 
 Compute the angle between tangent vectors `X` and `Y` at point `p` from the
-[`Manifold`](@ref) `M` with respect to the inner product from [`inner`](@ref).
+[`AbstractManifold`](@ref) `M` with respect to the inner product from [`inner`](@ref).
 """
-angle(M::Manifold, p, X, Y) = acos(real(inner(M, p, X, Y)) / norm(M, p, X) / norm(M, p, Y))
+function angle(M::AbstractManifold, p, X, Y)
+    return acos(real(inner(M, p, X, Y)) / norm(M, p, X) / norm(M, p, Y))
+end
 
 """
-    base_manifold(M::Manifold, depth = Val(-1))
+    base_manifold(M::AbstractManifold, depth = Val(-1))
 
-Return the internally stored [`Manifold`](@ref) for decorated manifold `M` and the base
+Return the internally stored [`AbstractManifold`](@ref) for decorated manifold `M` and the base
 manifold for vector bundles or power manifolds. The optional parameter `depth` can be used
-to remove only the first `depth` many decorators and return the [`Manifold`](@ref) from that
+to remove only the first `depth` many decorators and return the [`AbstractManifold`](@ref) from that
 level, whether its decorated or not. Any negative value deactivates this depth limit.
 """
-base_manifold(M::Manifold, depth = Val(-1)) = M
+base_manifold(M::AbstractManifold, depth = Val(-1)) = M
 
 """
-    check_manifold_point(M::Manifold, p; kwargs...) -> Union{Nothing,String}
+    check_manifold_point(M::AbstractManifold, p; kwargs...) -> Union{Nothing,String}
 
-Return `nothing` when `p` is a point on the [`Manifold`](@ref) `M`. Otherwise, return an
+Return `nothing` when `p` is a point on the [`AbstractManifold`](@ref) `M`. Otherwise, return an
 error with description why the point does not belong to manifold `M`.
 
 By default, `check_manifold_point` returns `nothing`, i.e. if no checks are implemented, the
-assumption is to be optimistic for a point not deriving from the [`MPoint`](@ref) type.
+assumption is to be optimistic for a point not deriving from the [`AbstractManifoldPoint`](@ref) type.
 """
-check_manifold_point(M::Manifold, p; kwargs...) = nothing
+check_manifold_point(M::AbstractManifold, p; kwargs...) = nothing
 
 """
-    check_tangent_vector(M::Manifold, p, X; kwargs...) -> Union{Nothing,String}
+    check_tangent_vector(M::AbstractManifold, p, X; kwargs...) -> Union{Nothing,String}
 
 Check whether `X` is a valid tangent vector in the tangent space of `p` on the
-[`Manifold`](@ref) `M`. An implementation should first call [`check_manifold_point(M, p;
+[`AbstractManifold`](@ref) `M`. An implementation should first call [`check_manifold_point(M, p;
 kwargs...)`](@ref) and then validate `X`. If it is not a tangent vector, an error string
 should be returned.
 
@@ -228,20 +230,20 @@ By default, `check_tangent_vector` returns `nothing`, i.e. if no checks are impl
 assumption is to be optimistic for tangent vectors not deriving from the [`TVector`](@ref)
 type.
 """
-check_tangent_vector(M::Manifold, p, X; kwargs...) = nothing
+check_tangent_vector(M::AbstractManifold, p, X; kwargs...) = nothing
 
 """
-    check_size(M::Manifold, p)
-    check_size(M::Manifold, p, X)
+    check_size(M::AbstractManifold, p)
+    check_size(M::AbstractManifold, p, X)
 
-Check whether `p` has the right [`representation_size`](@ref) for a [`Manifold`](@ref) `M`.
+Check whether `p` has the right [`representation_size`](@ref) for a [`AbstractManifold`](@ref) `M`.
 Additionally if a tangent vector is given, both `p` and `X` are checked to be of
 corresponding correct representation sizes for points and tangent vectors on `M`.
 
 By default, `check_size` returns `nothing`, i.e. if no checks are implemented, the
 assumption is to be optimistic.
 """
-function check_size(M::Manifold, p)
+function check_size(M::AbstractManifold, p)
     n = size(p)
     m = representation_size(M)
     if length(n) != length(m)
@@ -257,7 +259,7 @@ function check_size(M::Manifold, p)
         )
     end
 end
-function check_size(M::Manifold, p, X)
+function check_size(M::AbstractManifold, p, X)
     mse = check_size(M, p)
     mse === nothing || return mse
     n = size(X)
@@ -277,34 +279,34 @@ function check_size(M::Manifold, p, X)
 end
 
 """
-    distance(M::Manifold, p, q)
+    distance(M::AbstractManifold, p, q)
 
-Shortest distance between the points `p` and `q` on the [`Manifold`](@ref) `M`.
+Shortest distance between the points `p` and `q` on the [`AbstractManifold`](@ref) `M`.
 """
-distance(M::Manifold, p, q) = norm(M, p, log(M, p, q))
+distance(M::AbstractManifold, p, q) = norm(M, p, log(M, p, q))
 
 """
-    embed(M::Manifold, p)
+    embed(M::AbstractManifold, p)
 
-Embed point `p` from the [`Manifold`](@ref) `M` into the ambient space.
+Embed point `p` from the [`AbstractManifold`](@ref) `M` into the ambient space.
 This method is only available for manifolds where implicitly an embedding or ambient space
 is given.
 Additionally, `embed` includes changing data representation, if applicable, i.e.
 if the points on `M` are not represented in the same way as points on the embedding,
 the representation is changed accordingly.
 
-See also: [`EmbeddedManifold`](@ref), [`project`](@ref project(M::Manifold,p))
+See also: [`EmbeddedManifold`](@ref), [`project`](@ref project(M::AbstractManifold,p))
 """
-function embed(M::Manifold, p)
+function embed(M::AbstractManifold, p)
     q = allocate_result(M, embed, p)
     embed!(M, q, p)
     return q
 end
 
 """
-    embed!(M::Manifold, q, p)
+    embed!(M::AbstractManifold, q, p)
 
-Embed point `p` from the [`Manifold`](@ref) `M` into an ambient space.
+Embed point `p` from the [`AbstractManifold`](@ref) `M` into an ambient space.
 This method is only available for manifolds where implicitly an embedding or ambient space
 is given. Not implementing this function means, there is no proper embedding for your manifold.
 Additionally, `embed` might include changing data representation, if applicable, i.e.
@@ -315,16 +317,16 @@ If you have more than one embedding, see [`EmbeddedManifold`](@ref) for defining
 embedding. If your point `p` is already represented in some embedding,
 see [`AbstractEmbeddedManifold`](@ref) how you can avoid reimplementing code from the embedded manifold
 
-See also: [`EmbeddedManifold`](@ref), [`project!`](@ref project!(M::Manifold, q, p))
+See also: [`EmbeddedManifold`](@ref), [`project!`](@ref project!(M::AbstractManifold, q, p))
 """
-function embed!(M::Manifold, q, p)
+function embed!(M::AbstractManifold, q, p)
     return error(manifold_function_not_implemented_message(M, embed!, q, p))
 end
 
 """
-    embed(M::Manifold, p, X)
+    embed(M::AbstractManifold, p, X)
 
-Embed a tangent vector `X` at a point `p` on the [`Manifold`](@ref) `M` into an ambient space.
+Embed a tangent vector `X` at a point `p` on the [`AbstractManifold`](@ref) `M` into an ambient space.
 This method is only available for manifolds where implicitly an embedding or ambient space
 is given. Not implementing this function means, there is no proper embedding for your tangent space(s).
 
@@ -336,9 +338,9 @@ If you have more than one embedding, see [`EmbeddedManifold`](@ref) for defining
 embedding. If your tangent vector `X` is already represented in some embedding,
 see [`AbstractEmbeddedManifold`](@ref) how you can avoid reimplementing code from the embedded manifold
 
-See also: [`EmbeddedManifold`](@ref), [`project`](@ref project(M::Manifold, p, X))
+See also: [`EmbeddedManifold`](@ref), [`project`](@ref project(M::AbstractManifold, p, X))
 """
-function embed(M::Manifold, p, X)
+function embed(M::AbstractManifold, p, X)
     # Note that the order is switched,
     # since the allocation by default takes the type of the first.
     Y = allocate_result(M, embed, X, p)
@@ -347,9 +349,9 @@ function embed(M::Manifold, p, X)
 end
 
 """
-    embed!(M::Manifold, Y, p, X)
+    embed!(M::AbstractManifold, Y, p, X)
 
-Embed a tangent vector `X` at a point `p` on the [`Manifold`](@ref) `M` into the ambient
+Embed a tangent vector `X` at a point `p` on the [`AbstractManifold`](@ref) `M` into the ambient
 space and return the result in `Y`.
 This method is only available for manifolds where implicitly an embedding or ambient space
 is given.
@@ -359,183 +361,197 @@ the representation is changed accordingly. This is the case for example for Lie 
 when tangent vectors are represented in the Lie algebra. The embedded tangents are then in
 the tangent spaces of the embedded base points.
 
-See also: [`EmbeddedManifold`](@ref), [`project!`](@ref project!(M::Manifold, Y, p, X))
+See also: [`EmbeddedManifold`](@ref), [`project!`](@ref project!(M::AbstractManifold, Y, p, X))
 """
-function embed!(M::Manifold, Y, p, X)
+function embed!(M::AbstractManifold, Y, p, X)
     return error(manifold_function_not_implemented_message(M, embed!, Y, p, X))
 end
 
 """
-    exp(M::Manifold, p, X)
-    exp(M::Manifold, p, X, t::Real = 1)
+    exp(M::AbstractManifold, p, X)
+    exp(M::AbstractManifold, p, X, t::Real = 1)
 
 Compute the exponential map of tangent vector `X`, optionally scaled by `t`,  at point `p`
-from manifold the [`Manifold`](@ref) `M`.
+from manifold the [`AbstractManifold`](@ref) `M`.
 """
-function exp(M::Manifold, p, X)
+function exp(M::AbstractManifold, p, X)
     q = allocate_result(M, exp, p, X)
     exp!(M, q, p, X)
     return q
 end
-exp(M::Manifold, p, X, t::Real) = exp(M, p, t * X)
+exp(M::AbstractManifold, p, X, t::Real) = exp(M, p, t * X)
 
 """
-    exp!(M::Manifold, q, p, X)
-    exp!(M::Manifold, q, p, X, t::Real = 1)
+    exp!(M::AbstractManifold, q, p, X)
+    exp!(M::AbstractManifold, q, p, X, t::Real = 1)
 
 Compute the exponential map of tangent vector `X`, optionally scaled by `t`,  at point `p`
-from manifold the [`Manifold`](@ref) `M`.
+from manifold the [`AbstractManifold`](@ref) `M`.
 The result is saved to `q`.
 """
-function exp!(M::Manifold, q, p, X)
+function exp!(M::AbstractManifold, q, p, X)
     return error(manifold_function_not_implemented_message(M, exp!, q, p, X))
 end
-exp!(M::Manifold, q, p, X, t::Real) = exp!(M, q, p, t * X)
+exp!(M::AbstractManifold, q, p, X, t::Real) = exp!(M, q, p, t * X)
 
 """
-    geodesic(M::Manifold, p, X) -> Function
+    geodesic(M::AbstractManifold, p, X) -> Function
 
-Get the geodesic with initial point `p` and velocity `X` on the [`Manifold`](@ref) `M`.
+Get the geodesic with initial point `p` and velocity `X` on the [`AbstractManifold`](@ref) `M`.
  The geodesic is the curve of constant velocity that is locally distance-minimizing.
  This function returns a function of (time) `t`.
 
-    geodesic(M::Manifold, x, v, t::Real)
-    geodesic(M::Manifold, x, v, T::AbstractVector) -> AbstractVector
+    geodesic(M::AbstractManifold, x, v, t::Real)
+    geodesic(M::AbstractManifold, x, v, T::AbstractVector) -> AbstractVector
 
 Return the point at time `t` or points at times `t` in `T` along the geodesic.
 """
-geodesic(M::Manifold, p, X) = t -> exp(M, p, X, t)
-geodesic(M::Manifold, p, X, t::Real) = exp(M, p, X, t)
-geodesic(M::Manifold, p, X, T::AbstractVector) = map(t -> exp(M, p, X, t), T)
+geodesic(M::AbstractManifold, p, X) = t -> exp(M, p, X, t)
+geodesic(M::AbstractManifold, p, X, t::Real) = exp(M, p, X, t)
+geodesic(M::AbstractManifold, p, X, T::AbstractVector) = map(t -> exp(M, p, X, t), T)
 
 @doc raw"""
-    injectivity_radius(M::Manifold, p)
+    injectivity_radius(M::AbstractManifold, p)
 
-Return the distance $d$ such that [`exp(M, p, X)`](@ref exp(::Manifold, ::Any, ::Any)) is
+Return the distance $d$ such that [`exp(M, p, X)`](@ref exp(::AbstractManifold, ::Any, ::Any)) is
 injective for all tangent vectors shorter than $d$ (i.e. has an inverse).
 
-    injectivity_radius(M::Manifold)
+    injectivity_radius(M::AbstractManifold)
 
 Infimum of the injectivity radius of all manifold points.
 
-    injectivity_radius(M::Manifold[, x], method::AbstractRetractionMethod)
-    injectivity_radius(M::Manifold, x, method::AbstractRetractionMethod)
+    injectivity_radius(M::AbstractManifold[, x], method::AbstractRetractionMethod)
+    injectivity_radius(M::AbstractManifold, x, method::AbstractRetractionMethod)
 
 Distance $d$ such that
-[`retract(M, p, X, method)`](@ref retract(::Manifold, ::Any, ::Any, ::AbstractRetractionMethod))
+[`retract(M, p, X, method)`](@ref retract(::AbstractManifold, ::Any, ::Any, ::AbstractRetractionMethod))
 is injective for all tangent vectors shorter than $d$ (i.e. has an inverse) for point `p`
 if provided or all manifold points otherwise.
 """
-function injectivity_radius(M::Manifold)
+function injectivity_radius(M::AbstractManifold)
     return error(manifold_function_not_implemented_message(M, injectivity_radius))
 end
-injectivity_radius(M::Manifold, p) = injectivity_radius(M)
-function injectivity_radius(M::Manifold, p, method::AbstractRetractionMethod)
+injectivity_radius(M::AbstractManifold, p) = injectivity_radius(M)
+function injectivity_radius(M::AbstractManifold, p, method::AbstractRetractionMethod)
     return injectivity_radius(M, method)
 end
-function injectivity_radius(M::Manifold, method::AbstractRetractionMethod)
+function injectivity_radius(M::AbstractManifold, method::AbstractRetractionMethod)
     return error(manifold_function_not_implemented_message(M, injectivity_radius, method))
 end
-injectivity_radius(M::Manifold, p, ::ExponentialRetraction) = injectivity_radius(M, p)
-injectivity_radius(M::Manifold, ::ExponentialRetraction) = injectivity_radius(M)
+function injectivity_radius(M::AbstractManifold, p, ::ExponentialRetraction)
+    return injectivity_radius(M, p)
+end
+injectivity_radius(M::AbstractManifold, ::ExponentialRetraction) = injectivity_radius(M)
 
 """
-    inner(M::Manifold, p, X, Y)
+    inner(M::AbstractManifold, p, X, Y)
 
 Compute the inner product of tangent vectors `X` and `Y` at point `p` from the
-[`Manifold`](@ref) `M`.
+[`AbstractManifold`](@ref) `M`.
 
 See also: [`MetricManifold`](@ref Main.Manifolds.MetricManifold)
 """
-function inner(M::Manifold, p, X, Y)
+function inner(M::AbstractManifold, p, X, Y)
     return error(manifold_function_not_implemented_message(M, inner, p, X, Y))
 end
 
 """
-    inverse_retract!(M::Manifold, X, p, q[, method::AbstractInverseRetractionMethod])
+    inverse_retract!(M::AbstractManifold, X, p, q[, method::AbstractInverseRetractionMethod])
 
 Compute the inverse retraction, a cheaper, approximate version of the
-[`log`](@ref)arithmic map), of points `p` and `q` on the [`Manifold`](@ref) `M`.
+[`log`](@ref)arithmic map), of points `p` and `q` on the [`AbstractManifold`](@ref) `M`.
 Result is saved to `X`.
 
 Inverse retraction method can be specified by the last argument, defaulting to
 [`LogarithmicInverseRetraction`](@ref). See the documentation of respective manifolds for
 available methods.
 """
-function inverse_retract!(M::Manifold, X, p, q)
+function inverse_retract!(M::AbstractManifold, X, p, q)
     return inverse_retract!(M, X, p, q, LogarithmicInverseRetraction())
 end
-function inverse_retract!(M::Manifold, X, p, q, method::LogarithmicInverseRetraction)
+function inverse_retract!(
+    M::AbstractManifold,
+    X,
+    p,
+    q,
+    method::LogarithmicInverseRetraction,
+)
     return log!(M, X, p, q)
 end
-function inverse_retract!(M::Manifold, X, p, q, method::AbstractInverseRetractionMethod)
+function inverse_retract!(
+    M::AbstractManifold,
+    X,
+    p,
+    q,
+    method::AbstractInverseRetractionMethod,
+)
     return error(
         manifold_function_not_implemented_message(M, inverse_retract!, X, p, q, method),
     )
 end
 
 """
-    inverse_retract(M::Manifold, x, y)
-    inverse_retract(M::Manifold, x, y, method::AbstractInverseRetractionMethod
+    inverse_retract(M::AbstractManifold, x, y)
+    inverse_retract(M::AbstractManifold, x, y, method::AbstractInverseRetractionMethod
 
 Compute the inverse retraction, a cheaper, approximate version of the
-[`log`](@ref)arithmic map), of points `p` and `q` on the [`Manifold`](@ref) `M`.
+[`log`](@ref)arithmic map), of points `p` and `q` on the [`AbstractManifold`](@ref) `M`.
 
 Inverse retraction method can be specified by the last argument, defaulting to
 [`LogarithmicInverseRetraction`](@ref). See the documentation of respective manifolds for
 available methods.
 """
-function inverse_retract(M::Manifold, p, q)
+function inverse_retract(M::AbstractManifold, p, q)
     X = allocate_result(M, inverse_retract, p, q)
     inverse_retract!(M, X, p, q)
     return X
 end
-function inverse_retract(M::Manifold, p, q, method::AbstractInverseRetractionMethod)
+function inverse_retract(M::AbstractManifold, p, q, method::AbstractInverseRetractionMethod)
     X = allocate_result(M, inverse_retract, p, q)
     inverse_retract!(M, X, p, q, method)
     return X
 end
 
 """
-    isapprox(M::Manifold, p, q; kwargs...)
+    isapprox(M::AbstractManifold, p, q; kwargs...)
 
-Check if points `p` and `q` from [`Manifold`](@ref) `M` are approximately equal.
+Check if points `p` and `q` from [`AbstractManifold`](@ref) `M` are approximately equal.
 
 Keyword arguments can be used to specify tolerances.
 """
-isapprox(::Manifold, x, y; kwargs...) = isapprox(x, y; kwargs...)
+isapprox(::AbstractManifold, x, y; kwargs...) = isapprox(x, y; kwargs...)
 
 """
-    isapprox(M::Manifold, p, X, Y; kwargs...)
+    isapprox(M::AbstractManifold, p, X, Y; kwargs...)
 
-Check if vectors `X` and `Y` tangent at `p` from [`Manifold`](@ref) `M` are approximately
+Check if vectors `X` and `Y` tangent at `p` from [`AbstractManifold`](@ref) `M` are approximately
 equal.
 
 Keyword arguments can be used to specify tolerances.
 """
-isapprox(::Manifold, p, X, Y; kwargs...) = isapprox(X, Y; kwargs...)
+isapprox(::AbstractManifold, p, X, Y; kwargs...) = isapprox(X, Y; kwargs...)
 
 
 """
-    is_manifold_point(M::Manifold, p, throw_error = false; kwargs...)
+    is_manifold_point(M::AbstractManifold, p, throw_error = false; kwargs...)
 
-Return whether `p` is a valid point on the [`Manifold`](@ref) `M`.
+Return whether `p` is a valid point on the [`AbstractManifold`](@ref) `M`.
 
 If `throw_error` is `false`, the function returns either `true` or `false`. If `throw_error`
 is `true`, the function either returns `true` or throws an error. By default the function
 calls [`check_manifold_point(M, p; kwargs...)`](@ref) and checks whether the returned value
 is `nothing` or an error.
 """
-function is_manifold_point(M::Manifold, p, throw_error = false; kwargs...)
+function is_manifold_point(M::AbstractManifold, p, throw_error = false; kwargs...)
     mpe = check_manifold_point(M, p; kwargs...)
     mpe === nothing && return true
     return throw_error ? throw(mpe) : false
 end
 
 """
-    is_tangent_vector(M::Manifold, p, X, throw_error = false; kwargs...)
+    is_tangent_vector(M::AbstractManifold, p, X, throw_error = false; kwargs...)
 
-Return whether `X` is a valid tangent vector at point `p` on the [`Manifold`](@ref) `M`.
+Return whether `X` is a valid tangent vector at point `p` on the [`AbstractManifold`](@ref) `M`.
 Returns either `true` or `false`.
 
 If `throw_error` is `false`, the function returns either `true` or `false`. If `throw_error`
@@ -543,44 +559,44 @@ is `true`, the function either returns `true` or throws an error. By default the
 calls [`check_tangent_vector(M, p, X; kwargs...)`](@ref) and checks whether the returned
 value is `nothing` or an error.
 """
-function is_tangent_vector(M::Manifold, p, X, throw_error = false; kwargs...)
+function is_tangent_vector(M::AbstractManifold, p, X, throw_error = false; kwargs...)
     mtve = check_tangent_vector(M, p, X; kwargs...)
     mtve === nothing && return true
     return throw_error ? throw(mtve) : false
 end
 
 """
-    log(M::Manifold, p, q)
+    log(M::AbstractManifold, p, q)
 
-Compute the logarithmic map of point `q` at base point `p` on the [`Manifold`](@ref) `M`.
+Compute the logarithmic map of point `q` at base point `p` on the [`AbstractManifold`](@ref) `M`.
 """
-function log(M::Manifold, p, q)
+function log(M::AbstractManifold, p, q)
     X = allocate_result(M, log, p, q)
     log!(M, X, p, q)
     return X
 end
 
 """
-    log!(M::Manifold, X, p, q)
+    log!(M::AbstractManifold, X, p, q)
 
-Compute the logarithmic map of point `q` at base point `p` on the [`Manifold`](@ref) `M`.
+Compute the logarithmic map of point `q` at base point `p` on the [`AbstractManifold`](@ref) `M`.
 The result is saved to `X`.
 """
-function log!(M::Manifold, X, p, q)
+function log!(M::AbstractManifold, X, p, q)
     return error(manifold_function_not_implemented_message(M, log!, X, p, q))
 end
 
 @doc raw"""
-    manifold_dimension(M::Manifold)
+    manifold_dimension(M::AbstractManifold)
 
 The dimension $n=\dim_{\mathcal M}$ of real space $\mathbb R^n$ to which the neighborhood of
-each point of the [`Manifold`](@ref) `M` is homeomorphic.
+each point of the [`AbstractManifold`](@ref) `M` is homeomorphic.
 """
-function manifold_dimension(M::Manifold)
+function manifold_dimension(M::AbstractManifold)
     return error(manifold_function_not_implemented_message(M, manifold_dimension))
 end
 
-function manifold_function_not_implemented_message(M::Manifold, f, x...)
+function manifold_function_not_implemented_message(M::AbstractManifold, f, x...)
     s = join(map(string, map(typeof, x)), ", ", " and ")
     a = length(x) > 1 ? "arguments" : "argument"
     m = length(x) > 0 ? " for $(a) $(s)." : "."
@@ -588,31 +604,31 @@ function manifold_function_not_implemented_message(M::Manifold, f, x...)
 end
 
 """
-    mid_point(M::Manifold, p1, p2)
+    mid_point(M::AbstractManifold, p1, p2)
 
 Calculate the middle between the two point `p1` and `p2` from manifold `M`.
 By default uses [`log`](@ref), divides the vector by 2 and uses [`exp`](@ref).
 """
-function mid_point(M::Manifold, p1, p2)
+function mid_point(M::AbstractManifold, p1, p2)
     q = allocate(p1)
     return mid_point!(M, q, p1, p2)
 end
 
 """
-    mid_point!(M::Manifold, q, p1, p2)
+    mid_point!(M::AbstractManifold, q, p1, p2)
 
 Calculate the middle between the two point `p1` and `p2` from manifold `M`.
 By default uses [`log`](@ref), divides the vector by 2 and uses [`exp!`](@ref).
 Saves the result in `q`.
 """
-function mid_point!(M::Manifold, q, p1, p2)
+function mid_point!(M::AbstractManifold, q, p1, p2)
     X = log(M, p1, p2)
     return exp!(M, q, p1, X / 2)
 end
 
 @static if VERSION <= v"1.1"
     function mid_point!(
-        M::Manifold,
+        M::AbstractManifold,
         q::AbstractArray{T1,0},
         p1::AbstractArray{T2,0},
         p2::AbstractArray{T3,0},
@@ -623,12 +639,12 @@ end
 end
 
 """
-    norm(M::Manifold, p, X)
+    norm(M::AbstractManifold, p, X)
 
-Compute the norm of tangent vector `X` at point `p` from a [`Manifold`](@ref) `M`.
+Compute the norm of tangent vector `X` at point `p` from a [`AbstractManifold`](@ref) `M`.
 By default this is computed using [`inner`](@ref).
 """
-norm(M::Manifold, p, X) = sqrt(real(inner(M, p, X, X)))
+norm(M::AbstractManifold, p, X) = sqrt(real(inner(M, p, X, X)))
 
 """
     number_eltype(x)
@@ -645,43 +661,43 @@ function number_eltype(x::Tuple)
 end
 
 """
-    project(M::Manifold, p)
+    project(M::AbstractManifold, p)
 
-Project point `p` from the ambient space of the [`Manifold`](@ref) `M` to `M`.
+Project point `p` from the ambient space of the [`AbstractManifold`](@ref) `M` to `M`.
 This method is only available for manifolds where implicitly an embedding or ambient space
 is given. Additionally, the projection includes changing data representation, if applicable,
 i.e. if the points on `M` are not represented in the same array data, the data is changed
 accordingly.
 
-See also: [`EmbeddedManifold`](@ref), [`embed`](@ref embed(M::Manifold, p))
+See also: [`EmbeddedManifold`](@ref), [`embed`](@ref embed(M::AbstractManifold, p))
 """
-function project(M::Manifold, p)
+function project(M::AbstractManifold, p)
     q = allocate_result(M, project, p)
     project!(M, q, p)
     return q
 end
 
 """
-    project!(M::Manifold, q, p)
+    project!(M::AbstractManifold, q, p)
 
-Project point `p` from the ambient space onto the [`Manifold`](@ref) `M`. The result is
+Project point `p` from the ambient space onto the [`AbstractManifold`](@ref) `M`. The result is
 storedin `q`.
 This method is only available for manifolds where implicitly an embedding or ambient space
 is given. Additionally, the projection includes changing data representation, if applicable,
 i.e. if the points on `M` are not represented in the same array data, the data is changed
 accordingly.
 
-See also: [`EmbeddedManifold`](@ref), [`embed!`](@ref embed!(M::Manifold, q, p))
+See also: [`EmbeddedManifold`](@ref), [`embed!`](@ref embed!(M::AbstractManifold, q, p))
 """
-function project!(M::Manifold, q, p)
+function project!(M::AbstractManifold, q, p)
     return error(manifold_function_not_implemented_message(M, project!, q, p))
 end
 
 """
-    project(M::Manifold, p, X)
+    project(M::AbstractManifold, p, X)
 
 Project ambient space representation of a vector `X` to a tangent vector at point `p` on
-the [`Manifold`](@ref) `M`.
+the [`AbstractManifold`](@ref) `M`.
 This method is only available for manifolds where implicitly an embedding or ambient space
 is given.
 Additionally, `project` includes changing data representation, if applicable, i.e.
@@ -690,9 +706,9 @@ the representation is changed accordingly. This is the case for example for Lie 
 when tangent vectors are represented in the Lie algebra. after projection the change to the
 Lie algebra is perfomed, too.
 
-See also: [`EmbeddedManifold`](@ref), [`embed`](@ref embed(M::Manifold, p, X))
+See also: [`EmbeddedManifold`](@ref), [`embed`](@ref embed(M::AbstractManifold, p, X))
 """
-function project(M::Manifold, p, X)
+function project(M::AbstractManifold, p, X)
     # Note that the order is switched,
     # since the allocation by default takes the type of the first.
     Y = allocate_result(M, project, X, p)
@@ -701,10 +717,10 @@ function project(M::Manifold, p, X)
 end
 
 """
-    project!(M::Manifold, Y, p, X)
+    project!(M::AbstractManifold, Y, p, X)
 
 Project ambient space representation of a vector `X` to a tangent vector at point `p` on
-the [`Manifold`](@ref) `M`. The result is saved in vector `Y`.
+the [`AbstractManifold`](@ref) `M`. The result is saved in vector `Y`.
 This method is only available for manifolds where implicitly an embedding or ambient space
 is given.
 Additionally, `project!` includes changing data representation, if applicable, i.e.
@@ -713,77 +729,77 @@ the representation is changed accordingly. This is the case for example for Lie 
 when tangent vectors are represented in the Lie algebra. after projection the change to the
 Lie algebra is perfomed, too.
 
-See also: [`EmbeddedManifold`](@ref), [`embed!`](@ref embed!(M::Manifold, Y, p, X))
+See also: [`EmbeddedManifold`](@ref), [`embed!`](@ref embed!(M::AbstractManifold, Y, p, X))
 """
-function project!(M::Manifold, Y, p, X)
+function project!(M::AbstractManifold, Y, p, X)
     return error(manifold_function_not_implemented_message(M, project!, Y, p, X))
 end
 
 @doc raw"""
-    representation_size(M::Manifold)
+    representation_size(M::AbstractManifold)
 
-The size of an array representing a point on [`Manifold`](@ref) `M`.
+The size of an array representing a point on [`AbstractManifold`](@ref) `M`.
 Returns `nothing` by default indicating that points are not represented using an
 `AbstractArray`.
 """
-function representation_size(M::Manifold)
+function representation_size(M::AbstractManifold)
     return nothing
 end
 
 """
-    retract(M::Manifold, p, X)
-    retract(M::Manifold, p, X, t::Real=1)
-    retract(M::Manifold, p, X, method::AbstractRetractionMethod)
-    retract(M::Manifold, p, X, t::Real=1, method::AbstractRetractionMethod)
+    retract(M::AbstractManifold, p, X)
+    retract(M::AbstractManifold, p, X, t::Real=1)
+    retract(M::AbstractManifold, p, X, method::AbstractRetractionMethod)
+    retract(M::AbstractManifold, p, X, t::Real=1, method::AbstractRetractionMethod)
 
 Compute a retraction, a cheaper, approximate version of the [`exp`](@ref)onential map,
-from `p` into direction `X`, scaled by `t`, on the [`Manifold`](@ref) `M`.
+from `p` into direction `X`, scaled by `t`, on the [`AbstractManifold`](@ref) `M`.
 
 Retraction method can be specified by the last argument, defaulting to
 [`ExponentialRetraction`](@ref). See the documentation of respective manifolds for available
 methods.
 """
-function retract(M::Manifold, p, X)
+function retract(M::AbstractManifold, p, X)
     q = allocate_result(M, retract, p, X)
     retract!(M, q, p, X)
     return q
 end
-retract(M::Manifold, p, X, t::Real) = retract(M, p, t * X)
-function retract(M::Manifold, p, X, method::AbstractRetractionMethod)
+retract(M::AbstractManifold, p, X, t::Real) = retract(M, p, t * X)
+function retract(M::AbstractManifold, p, X, method::AbstractRetractionMethod)
     q = allocate_result(M, retract, p, X)
     retract!(M, q, p, X, method)
     return q
 end
-function retract(M::Manifold, p, X, t::Real, method::AbstractRetractionMethod)
+function retract(M::AbstractManifold, p, X, t::Real, method::AbstractRetractionMethod)
     return retract(M, p, t * X, method)
 end
 
 """
-    retract!(M::Manifold, q, p, X)
-    retract!(M::Manifold, q, p, X, t::Real=1)
-    retract!(M::Manifold, q, p, X, method::AbstractRetractionMethod)
-    retract!(M::Manifold, q, p, X, t::Real=1, method::AbstractRetractionMethod)
+    retract!(M::AbstractManifold, q, p, X)
+    retract!(M::AbstractManifold, q, p, X, t::Real=1)
+    retract!(M::AbstractManifold, q, p, X, method::AbstractRetractionMethod)
+    retract!(M::AbstractManifold, q, p, X, t::Real=1, method::AbstractRetractionMethod)
 
 Compute a retraction, a cheaper, approximate version of the [`exp`](@ref)onential map,
-from `p` into direction `X`, scaled by `t`, on the [`Manifold`](@ref) manifold `M`.
+from `p` into direction `X`, scaled by `t`, on the [`AbstractManifold`](@ref) manifold `M`.
 Result is saved to `q`.
 
 Retraction method can be specified by the last argument, defaulting to
 [`ExponentialRetraction`](@ref). See the documentation of respective manifolds for available
 methods.
 """
-retract!(M::Manifold, q, p, X) = retract!(M, q, p, X, ExponentialRetraction())
-retract!(M::Manifold, q, p, X, t::Real) = retract!(M, q, p, t * X)
-retract!(M::Manifold, q, p, X, method::ExponentialRetraction) = exp!(M, q, p, X)
-function retract!(M::Manifold, q, p, X, t::Real, method::AbstractRetractionMethod)
+retract!(M::AbstractManifold, q, p, X) = retract!(M, q, p, X, ExponentialRetraction())
+retract!(M::AbstractManifold, q, p, X, t::Real) = retract!(M, q, p, t * X)
+retract!(M::AbstractManifold, q, p, X, method::ExponentialRetraction) = exp!(M, q, p, X)
+function retract!(M::AbstractManifold, q, p, X, t::Real, method::AbstractRetractionMethod)
     return retract!(M, q, p, t * X, method)
 end
-function retract!(M::Manifold, q, p, X, method::AbstractRetractionMethod)
+function retract!(M::AbstractManifold, q, p, X, method::AbstractRetractionMethod)
     return error(manifold_function_not_implemented_message(M, retract!, q, p, method))
 end
 
 @doc raw"""
-    shortest_geodesic(M::Manifold, p, q) -> Function
+    shortest_geodesic(M::AbstractManifold, p, q) -> Function
 
 Get a [`geodesic`](@ref) $\gamma_{p,q}(t)$ whose length is the shortest path between the
 points `p`and `q`, where $\gamma_{p,q}(0)=p$ and $\gamma_{p,q}(1)=q$. When there are
@@ -791,14 +807,16 @@ multiple shortest geodesics, there is no guarantee which will be returned.
 
 This function returns a function of time, which may be a `Real` or an `AbstractVector`.
 
-    shortest_geodesic(M::Manifold, p, q, t::Real)
-    shortest_geodesic(M::Manifold, p, q, T::AbstractVector) -> AbstractVector
+    shortest_geodesic(M::AbstractManifold, p, q, t::Real)
+    shortest_geodesic(M::AbstractManifold, p, q, T::AbstractVector) -> AbstractVector
 
 Return the point at time `t` or points at times `t` in `T` along the shortest geodesic.
 """
-shortest_geodesic(M::Manifold, p, q) = geodesic(M, p, log(M, p, q))
-shortest_geodesic(M::Manifold, p, q, t::Real) = geodesic(M, p, log(M, p, q), t)
-shortest_geodesic(M::Manifold, p, q, T::AbstractVector) = geodesic(M, p, log(M, p, q), T)
+shortest_geodesic(M::AbstractManifold, p, q) = geodesic(M, p, log(M, p, q))
+shortest_geodesic(M::AbstractManifold, p, q, t::Real) = geodesic(M, p, log(M, p, q), t)
+function shortest_geodesic(M::AbstractManifold, p, q, T::AbstractVector)
+    return geodesic(M, p, log(M, p, q), T)
+end
 
 """
     size_to_tuple(::Type{S}) where S<:Tuple
@@ -808,22 +826,22 @@ Converts a size given by `Tuple{N, M, ...}` into a tuple `(N, M, ...)`.
 Base.@pure size_to_tuple(::Type{S}) where {S<:Tuple} = tuple(S.parameters...)
 
 @doc raw"""
-    zero_vector!(M::Manifold, X, p)
+    zero_vector!(M::AbstractManifold, X, p)
 
 Save to `X` the tangent vector from the tangent space ``T_p\mathcal M`` at `p` that
-represents the zero vector, i.e. such that retracting `X` to the [`Manifold`](@ref) `M` at
+represents the zero vector, i.e. such that retracting `X` to the [`AbstractManifold`](@ref) `M` at
 `p` produces `p`.
 """
-zero_vector!(M::Manifold, X, p) = log!(M, X, p, p)
+zero_vector!(M::AbstractManifold, X, p) = log!(M, X, p, p)
 
 @doc raw"""
-    zero_vector(M::Manifold, p)
+    zero_vector(M::AbstractManifold, p)
 
 Return the tangent vector from the tangent space ``T_p\mathcal M`` at `p` on the
-[`Manifold`](@ref) `M`, that represents the zero vector, i.e. such that a retraction at
+[`AbstractManifold`](@ref) `M`, that represents the zero vector, i.e. such that a retraction at
 `p` produces `p`.
 """
-function zero_vector(M::Manifold, p)
+function zero_vector(M::AbstractManifold, p)
     X = allocate_result(M, zero_vector, p)
     zero_vector!(M, X, p)
     return X
@@ -839,7 +857,7 @@ include("EmbeddedManifold.jl")
 include("DefaultManifold.jl")
 include("PowerManifold.jl")
 
-export Manifold, MPoint, TVector, CoTVector
+export AbstractManifold, AbstractManifoldPoint, TVector, CoTVector
 export AbstractDecoratorManifold
 export ValidationManifold, ValidationMPoint, ValidationTVector, ValidationCoTVector
 export AbstractEmbeddingType,

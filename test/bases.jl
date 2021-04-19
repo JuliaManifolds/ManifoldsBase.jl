@@ -8,7 +8,7 @@ import Base: +, -, *, copyto!, isapprox
 import ManifoldsBase: allocate
 
 
-struct ProjManifold <: Manifold{ℝ} end
+struct ProjManifold <: AbstractManifold{ℝ} end
 
 ManifoldsBase.inner(::ProjManifold, x, w, v) = dot(w, v)
 ManifoldsBase.project!(::ProjManifold, w, x, v) = (w .= v .- dot(x, v) .* x)
@@ -47,7 +47,7 @@ ManifoldsBase.get_vector(::ProjManifold, x, v, ::DefaultOrthonormalBasis) = reve
     ) === Val(:transparent)
 end
 
-struct ProjectionTestManifold <: Manifold{ℝ} end
+struct ProjectionTestManifold <: AbstractManifold{ℝ} end
 
 ManifoldsBase.inner(::ProjectionTestManifold, ::Any, X, Y) = dot(X, Y)
 function ManifoldsBase.project!(::ProjectionTestManifold, Y, p, X)
@@ -113,7 +113,7 @@ ManifoldsBase.manifold_dimension(::ProjectionTestManifold) = 100
     end
 end
 
-struct NonManifold <: Manifold{ℝ} end
+struct NonManifold <: AbstractManifold{ℝ} end
 struct NonBasis <: ManifoldsBase.AbstractBasis{ℝ,TangentSpaceType} end
 
 struct NonBroadcastBasisThing{T}

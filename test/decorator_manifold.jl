@@ -7,35 +7,35 @@ using ManifoldsBase:
     is_decorator_transparent
 import ManifoldsBase: decorator_transparent_dispatch
 
-struct TestDecorator{M<:Manifold{ℝ}} <: AbstractDecoratorManifold{ℝ}
+struct TestDecorator{M<:AbstractManifold{ℝ}} <: AbstractDecoratorManifold{ℝ}
     manifold::M
 end
 
 abstract type AbstractTestDecorator <: AbstractDecoratorManifold{ℝ} end
 
-struct TestDecorator2{M<:Manifold{ℝ}} <: AbstractTestDecorator
+struct TestDecorator2{M<:AbstractManifold{ℝ}} <: AbstractTestDecorator
     manifold::M
 end
 
-struct TestDecorator3{M<:Manifold{ℝ}} <: AbstractTestDecorator
+struct TestDecorator3{M<:AbstractManifold{ℝ}} <: AbstractTestDecorator
     manifold::M
 end
 
 abstract type AbstractParentDecorator <: AbstractDecoratorManifold{ℝ} end
 
-struct ChildDecorator{M<:Manifold{ℝ}} <: AbstractParentDecorator
+struct ChildDecorator{M<:AbstractManifold{ℝ}} <: AbstractParentDecorator
     manifold::M
 end
 
-struct DefaultDecorator{M<:Manifold{ℝ}} <: AbstractDecoratorManifold{ℝ}
+struct DefaultDecorator{M<:AbstractManifold{ℝ}} <: AbstractDecoratorManifold{ℝ}
     manifold::M
 end
 ManifoldsBase.default_decorator_dispatch(::DefaultDecorator) = Val(true)
 
-test1(M::Manifold, p; a = 0) = 101 + a
-test2(M::Manifold, p; a = 0) = 102 + a
-test3(M::Manifold, p; a = 0) = 103 + a
-function test4(M::Manifold, p; a = 0)
+test1(M::AbstractManifold, p; a = 0) = 101 + a
+test2(M::AbstractManifold, p; a = 0) = 102 + a
+test3(M::AbstractManifold, p; a = 0) = 103 + a
+function test4(M::AbstractManifold, p; a = 0)
     return error(ManifoldsBase.manifold_function_not_implemented_message(M, test4, p))
 end
 
@@ -70,7 +70,7 @@ end
     return 17
 end
 
-test8(M::Manifold, p; a = 0) = 8 + a
+test8(M::AbstractManifold, p; a = 0) = 8 + a
 
 @decorator_transparent_function :parent function test9(
     M::AbstractDecoratorManifold,

@@ -5,7 +5,7 @@
 using ManifoldsBase, Test
 
 
-struct NonDefaultEuclidean <: Manifold{ManifoldsBase.ℝ} end
+struct NonDefaultEuclidean <: AbstractManifold{ManifoldsBase.ℝ} end
 ManifoldsBase.log!(::NonDefaultEuclidean, v, x, y) = (v .= y .- x)
 ManifoldsBase.exp!(::NonDefaultEuclidean, y, x, v) = (y .= x .+ v)
 function ManifoldsBase.vector_transport_to!(
