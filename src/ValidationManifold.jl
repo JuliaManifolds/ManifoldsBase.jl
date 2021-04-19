@@ -20,48 +20,46 @@ Represent a point on an [`ValidationManifold`](@ref), i.e. on a manifold where d
 represented by arrays. The array is stored internally and semantically. This distinguished
 the value from [`ValidationTVector`](@ref)s and [`ValidationCoTVector`](@ref)s.
 """
-struct ValidationMPoint{V<:AbstractArray{<:Number}} <: MPoint
+struct ValidationMPoint{V} <: MPoint
     value::V
 end
 
 """
-    ValidationTVector <: TVector
+    ValidationMVector{TType<:VectorSpaceType} <: AbstractMVector{TType}
 
 Represent a tangent vector to a point on an [`ValidationManifold`](@ref), i.e. on a manifold
 where data can be represented by arrays. The array is stored internally and semantically.
-This distinguished the value from [`ValidationMPoint`](@ref)s and [`ValidationCoTVector`](@ref)s.
+This distinguished the value from [`ValidationMPoint`](@ref)s vectors of other types
 """
-struct ValidationTVector{V<:AbstractArray{<:Number}} <: TVector
+struct ValidationMVector{TType<:VectorSpaceType,V} <: AbstractMVector{TType}
     value::V
 end
-
-"""
-    ValidationCoTVector <: CoTVector
-
-Represent a cotangent vector to a point on an [`ValidationManifold`](@ref), i.e. on a manifold
-where data can be represented by arrays. The array is stored internally and semantically.
-This distinguished the value from [`ValidationMPoint`](@ref)s and [`ValidationTVector`](@ref)s.
-"""
-struct ValidationCoTVector{V<:AbstractArray{<:Number}} <: TVector
-    value::V
+function ValidationMVector{TType}(value::V) where {TType,V}
+    return ValidationMVector{TType,V}(value)
 end
 
-(+)(X::ValidationCoTVector, Y::ValidationCoTVector) = ValidationCoTVector(X.value + Y.value)
-(-)(X::ValidationCoTVector, Y::ValidationCoTVector) = ValidationCoTVector(X.value - Y.value)
-(-)(X::ValidationCoTVector) = ValidationCoTVector(-X.value)
-(*)(a::Number, X::ValidationCoTVector) = ValidationCoTVector(a * X.value)
+const ValidationTVector = ValidationMVector{TangentSpaceType}
+const ValidationCoTVector = ValidationMVector{CotangentSpaceType}
 
-(+)(X::ValidationTVector, Y::ValidationTVector) = ValidationTVector(X.value + Y.value)
-(-)(X::ValidationTVector, Y::ValidationTVector) = ValidationTVector(X.value - Y.value)
-(-)(X::ValidationTVector) = ValidationTVector(-X.value)
-(*)(a::Number, X::ValidationTVector) = ValidationTVector(a * X.value)
 
+function (+)(X::ValidationMVector{TType}, Y::ValidationMVector{TType}) where {TType}
+    return ValidationMVector{TType}(X.value + Y.value)
+end
+function (-)(X::ValidationMVector{TType}, Y::ValidationMVector{TType}) where {TType}
+    return ValidationMVector{TType}(X.value - Y.value)
+end
+(-)(X::ValidationMVector{TType}) where {TType} = ValidationMVector{TType}(-X.value)
+function (*)(a::Number, X::ValidationMVector{TType}) where {TType}
+    return ValidationMVector{TType}(a * X.value)
+end
 
 allocate(p::ValidationMPoint) = ValidationMPoint(allocate(p.value))
 allocate(p::ValidationMPoint, ::Type{T}) where {T} = ValidationMPoint(allocate(p.value, T))
-allocate(X::ValidationTVector) = ValidationTVector(allocate(X.value))
-function allocate(X::ValidationTVector, ::Type{T}) where {T}
-    return ValidationTVector(allocate(X.value, T))
+function allocate(X::ValidationMVector{TType}) where {TType}
+    return ValidationMVector{TType}(allocate(X.value))
+end
+function allocate(X::ValidationMVector{TType}, ::Type{T}) where {TType,T}
+    return ValidationMVector{TType}(allocate(X.value, T))
 end
 
 """
@@ -73,8 +71,7 @@ already an array.
 """
 array_value(p::AbstractArray) = p
 array_value(p::ValidationMPoint) = p.value
-array_value(X::ValidationTVector) = X.value
-array_value(ξ::ValidationCoTVector) = ξ.value
+array_value(X::ValidationMVector) = X.value
 
 function check_manifold_point(M::ValidationManifold, p; kwargs...)
     return check_manifold_point(M.manifold, array_value(p); kwargs...)
@@ -90,34 +87,26 @@ function check_tangent_vector(M::ValidationManifold, p::MPoint, X::TVector; kwar
     return check_tangent_vector(M.manifold, array_value(p), array_value(X); kwargs...)
 end
 
-convert(::Type{V}, X::ValidationCoTVector{V}) where {V<:AbstractArray{<:Number}} = X.value
-function convert(::Type{ValidationCoTVector{V}}, X::V) where {V<:AbstractArray{<:Number}}
-    return ValidationCoTVector{V}(X)
-end
 convert(::Type{M}, m::ValidationManifold{𝔽,M}) where {𝔽,M<:Manifold{𝔽}} = m.manifold
 function convert(::Type{ValidationManifold{𝔽,M}}, m::M) where {𝔽,M<:Manifold{𝔽}}
     return ValidationManifold(m)
 end
-convert(::Type{V}, p::ValidationMPoint{V}) where {V<:AbstractArray{<:Number}} = p.value
-function convert(::Type{ValidationMPoint{V}}, x::V) where {V<:AbstractArray{<:Number}}
+convert(::Type{V}, p::ValidationMPoint{V}) where {V<:AbstractArray} = p.value
+function convert(::Type{ValidationMPoint{V}}, x::V) where {V<:AbstractArray}
     return ValidationMPoint{V}(x)
 end
-convert(::Type{V}, X::ValidationTVector{V}) where {V<:AbstractArray{<:Number}} = X.value
-function convert(::Type{ValidationTVector{V}}, X::V) where {V<:AbstractArray{<:Number}}
-    return ValidationTVector{V}(X)
+convert(::Type{V}, X::ValidationMVector{TType,V}) where {TType,V<:AbstractArray} = X.value
+function convert(::Type{ValidationMVector{TType,V}}, X::V) where {TType,V<:AbstractArray}
+    return ValidationMVector{TType,V}(X)
 end
 
 function copyto!(p::ValidationMPoint, q::ValidationMPoint)
     copyto!(p.value, q.value)
     return p
 end
-function copyto!(p::ValidationCoTVector, q::ValidationCoTVector)
+function copyto!(p::ValidationMVector{TType}, q::ValidationMVector{TType}) where {TType}
     copyto!(p.value, q.value)
     return p
-end
-function copyto!(Y::ValidationTVector, X::ValidationTVector)
-    copyto!(Y.value, X.value)
-    return Y
 end
 
 function distance(M::ValidationManifold, p, q; kwargs...)
@@ -396,10 +385,8 @@ end
 
 number_eltype(::Type{ValidationMPoint{V}}) where {V} = number_eltype(V)
 number_eltype(p::ValidationMPoint) = number_eltype(p.value)
-number_eltype(::Type{ValidationCoTVector{V}}) where {V} = number_eltype(V)
-number_eltype(p::ValidationCoTVector) = number_eltype(p.value)
-number_eltype(::Type{ValidationTVector{V}}) where {V} = number_eltype(V)
-number_eltype(X::ValidationTVector) = number_eltype(X.value)
+number_eltype(::Type{ValidationMVector{TType,V}}) where {TType,V} = number_eltype(V)
+number_eltype(X::ValidationMVector) = number_eltype(X.value)
 
 function project!(M::ValidationManifold, Y, p, X; kwargs...)
     is_manifold_point(M, p, true; kwargs...)
@@ -410,12 +397,12 @@ end
 
 similar(p::ValidationMPoint) = ValidationMPoint(similar(p.value))
 similar(p::ValidationMPoint, ::Type{T}) where {T} = ValidationMPoint(similar(p.value, T))
-similar(p::ValidationCoTVector) = ValidationCoTVector(similar(p.value))
-function similar(p::ValidationCoTVector, ::Type{T}) where {T}
-    return ValidationCoTVector(similar(p.value, T))
+function similar(X::ValidationMVector{TType}) where {TType}
+    return ValidationMVector{TType}(similar(X.value))
 end
-similar(X::ValidationTVector) = ValidationTVector(similar(X.value))
-similar(X::ValidationTVector, ::Type{T}) where {T} = ValidationTVector(similar(X.value, T))
+function similar(X::ValidationMVector{TType}, ::Type{T}) where {TType,T}
+    return ValidationMVector{TType}(similar(X.value, T))
+end
 
 function vector_transport_along!(
     M::ValidationManifold,
