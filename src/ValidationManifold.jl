@@ -25,41 +25,41 @@ struct ValidationMPoint{V} <: AbstractManifoldPoint
 end
 
 """
-    ValidationMVector{TType<:VectorSpaceType} <: AbstractFibreVector{TType}
+    ValidationFibreVector{TType<:VectorSpaceType} <: AbstractFibreVector{TType}
 
 Represent a tangent vector to a point on an [`ValidationManifold`](@ref), i.e. on a manifold
 where data can be represented by arrays. The array is stored internally and semantically.
 This distinguished the value from [`ValidationMPoint`](@ref)s vectors of other types
 """
-struct ValidationMVector{TType<:VectorSpaceType,V} <: AbstractFibreVector{TType}
+struct ValidationFibreVector{TType<:VectorSpaceType,V} <: AbstractFibreVector{TType}
     value::V
 end
-function ValidationMVector{TType}(value::V) where {TType,V}
-    return ValidationMVector{TType,V}(value)
+function ValidationFibreVector{TType}(value::V) where {TType,V}
+    return ValidationFibreVector{TType,V}(value)
 end
 
-const ValidationTVector = ValidationMVector{TangentSpaceType}
-const ValidationCoTVector = ValidationMVector{CotangentSpaceType}
+const ValidationTVector = ValidationFibreVector{TangentSpaceType}
+const ValidationCoTVector = ValidationFibreVector{CotangentSpaceType}
 
 
-function (+)(X::ValidationMVector{TType}, Y::ValidationMVector{TType}) where {TType}
-    return ValidationMVector{TType}(X.value + Y.value)
+function (+)(X::ValidationFibreVector{TType}, Y::ValidationFibreVector{TType}) where {TType}
+    return ValidationFibreVector{TType}(X.value + Y.value)
 end
-function (-)(X::ValidationMVector{TType}, Y::ValidationMVector{TType}) where {TType}
-    return ValidationMVector{TType}(X.value - Y.value)
+function (-)(X::ValidationFibreVector{TType}, Y::ValidationFibreVector{TType}) where {TType}
+    return ValidationFibreVector{TType}(X.value - Y.value)
 end
-(-)(X::ValidationMVector{TType}) where {TType} = ValidationMVector{TType}(-X.value)
-function (*)(a::Number, X::ValidationMVector{TType}) where {TType}
-    return ValidationMVector{TType}(a * X.value)
+(-)(X::ValidationFibreVector{TType}) where {TType} = ValidationFibreVector{TType}(-X.value)
+function (*)(a::Number, X::ValidationFibreVector{TType}) where {TType}
+    return ValidationFibreVector{TType}(a * X.value)
 end
 
 allocate(p::ValidationMPoint) = ValidationMPoint(allocate(p.value))
 allocate(p::ValidationMPoint, ::Type{T}) where {T} = ValidationMPoint(allocate(p.value, T))
-function allocate(X::ValidationMVector{TType}) where {TType}
-    return ValidationMVector{TType}(allocate(X.value))
+function allocate(X::ValidationFibreVector{TType}) where {TType}
+    return ValidationFibreVector{TType}(allocate(X.value))
 end
-function allocate(X::ValidationMVector{TType}, ::Type{T}) where {TType,T}
-    return ValidationMVector{TType}(allocate(X.value, T))
+function allocate(X::ValidationFibreVector{TType}, ::Type{T}) where {TType,T}
+    return ValidationFibreVector{TType}(allocate(X.value, T))
 end
 
 """
@@ -71,7 +71,7 @@ already an array.
 """
 array_value(p::AbstractArray) = p
 array_value(p::ValidationMPoint) = p.value
-array_value(X::ValidationMVector) = X.value
+array_value(X::ValidationFibreVector) = X.value
 
 function check_manifold_point(M::ValidationManifold, p; kwargs...)
     return check_manifold_point(M.manifold, array_value(p); kwargs...)
@@ -100,17 +100,34 @@ convert(::Type{V}, p::ValidationMPoint{V}) where {V<:AbstractArray} = p.value
 function convert(::Type{ValidationMPoint{V}}, x::V) where {V<:AbstractArray}
     return ValidationMPoint{V}(x)
 end
-convert(::Type{V}, X::ValidationMVector{TType,V}) where {TType,V<:AbstractArray} = X.value
-function convert(::Type{ValidationMVector{TType,V}}, X::V) where {TType,V<:AbstractArray}
-    return ValidationMVector{TType,V}(X)
+function convert(
+    ::Type{V},
+    X::ValidationFibreVector{TType,V},
+) where {TType,V<:AbstractArray}
+    return X.value
+end
+function convert(
+    ::Type{ValidationFibreVector{TType,V}},
+    X::V,
+) where {TType,V<:AbstractArray}
+    return ValidationFibreVector{TType,V}(X)
 end
 
-function copyto!(p::ValidationMPoint, q::ValidationMPoint)
-    copyto!(p.value, q.value)
-    return p
+function copyto!(M::ValidationManifold, q::ValidationMPoint, p::ValidationMPoint; kwargs...)
+    is_manifold_point(M, p, true; kwargs...)
+    copyto!(M.manifold, q.value, p.value)
+    is_manifold_point(M, q, true; kwargs...)
+    return q
 end
-function copyto!(p::ValidationMVector{TType}, q::ValidationMVector{TType}) where {TType}
-    copyto!(p.value, q.value)
+function copyto!(
+    M::ValidationManifold,
+    Y::ValidationFibreVector{TType},
+    p::ValidationMPoint,
+    X::ValidationFibreVector{TType};
+    kwargs...,
+) where {TType}
+    is_manifold_point(M, p, true; kwargs...)
+    copyto!(M.manifold, Y.value, p.value, X.value)
     return p
 end
 
@@ -390,8 +407,8 @@ end
 
 number_eltype(::Type{ValidationMPoint{V}}) where {V} = number_eltype(V)
 number_eltype(p::ValidationMPoint) = number_eltype(p.value)
-number_eltype(::Type{ValidationMVector{TType,V}}) where {TType,V} = number_eltype(V)
-number_eltype(X::ValidationMVector) = number_eltype(X.value)
+number_eltype(::Type{ValidationFibreVector{TType,V}}) where {TType,V} = number_eltype(V)
+number_eltype(X::ValidationFibreVector) = number_eltype(X.value)
 
 function project!(M::ValidationManifold, Y, p, X; kwargs...)
     is_manifold_point(M, p, true; kwargs...)
@@ -402,11 +419,11 @@ end
 
 similar(p::ValidationMPoint) = ValidationMPoint(similar(p.value))
 similar(p::ValidationMPoint, ::Type{T}) where {T} = ValidationMPoint(similar(p.value, T))
-function similar(X::ValidationMVector{TType}) where {TType}
-    return ValidationMVector{TType}(similar(X.value))
+function similar(X::ValidationFibreVector{TType}) where {TType}
+    return ValidationFibreVector{TType}(similar(X.value))
 end
-function similar(X::ValidationMVector{TType}, ::Type{T}) where {TType,T}
-    return ValidationMVector{TType}(similar(X.value, T))
+function similar(X::ValidationFibreVector{TType}, ::Type{T}) where {TType,T}
+    return ValidationFibreVector{TType}(similar(X.value, T))
 end
 
 function vector_transport_along!(

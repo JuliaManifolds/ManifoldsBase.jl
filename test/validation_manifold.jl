@@ -55,7 +55,11 @@ end
             @test similar(p, Float32) isa T
             @test number_eltype(similar(p, Float32)) == Float32
             q = allocate(p)
-            copyto!(q, p)
+            if T == ValidationMPoint
+                copyto!(A, q, p)
+            else
+                copyto!(A, q, ValidationMPoint(x), p) # generate base point “on the fly”
+            end
             @test isapprox(A, q, p)
             @test ManifoldsBase.array_value(p) == x
             @test ManifoldsBase.array_value(x) == x
