@@ -296,7 +296,7 @@ function check_tangent_vector(
 end
 
 @doc raw"""
-    copyto!(M::AbstractPowerManifold{𝔽,<:Manifold{𝔽},NestedPowerRepresentation}, q, p)
+    copyto!(M::AbstractPowerManifold{𝔽,<:AbstractManifold{𝔽},NestedPowerRepresentation}, q, p)
 
 Copy the values elementwise, i.e. call `copyto!(M.manifold, b, a)` for all elements `a` and
 `b` of `p` and `q`, respectively.
@@ -310,7 +310,7 @@ function copyto!(M::NestedPowerRepresentation, q, p)
 end
 
 @doc raw"""
-    copyto!(M::AbstractPowerManifold{𝔽,<:Manifold{𝔽},NestedPowerRepresentation}, Y, p, X)
+    copyto!(M::AbstractPowerManifold{𝔽,<:AbstractManifold{𝔽},NestedPowerRepresentation}, Y, p, X)
 
 Copy the values elementwise, i.e. call `copyto!(M.manifold, B, a, A)` for all elements
 `A`, `a` and `B` of `X`, `p`, and `Y`, respectively.

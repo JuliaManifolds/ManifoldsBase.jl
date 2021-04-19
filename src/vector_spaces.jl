@@ -34,8 +34,26 @@ representations of tangent vectors and their types on a manifold.
 """
 abstract type AbstractFibreVector{TType<:VectorSpaceType} end
 
+"""
+    TVector = AbstractFibreVector{TangentSpaceType}
+
+Type for a tangent vector of a manifold. While a [`AbstractManifold`](@ref) does not necessarily
+require this type, for example when it is implemented for `Vector`s or `Matrix` type
+elements, this type can be used for more complicated representations, semantic verification,
+or even dispatch for different representations of tangent vectors and their types on a
+manifold.
+"""
 const TVector = AbstractFibreVector{TangentSpaceType}
 
+"""
+    CoTVector = AbstractFibreVector{CotangentSpaceType}
+
+Type for a cotangent vector of a manifold. While a [`AbstractManifold`](@ref) does not necessarily
+require this type, for example when it is implemented for `Vector`s or `Matrix` type
+elements, this type can be used for more complicated representations, semantic verification,
+or even dispatch for different representations of cotangent vectors and their types on a
+manifold.
+"""
 const CoTVector = AbstractFibreVector{CotangentSpaceType}
 
 Base.:+(X::FVector, Y::FVector) = FVector(X.type, X.data + Y.data, X.basis)
