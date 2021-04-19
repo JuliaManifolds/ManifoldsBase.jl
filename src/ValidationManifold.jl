@@ -107,16 +107,22 @@ function convert(::Type{ValidationTVector{V}}, X::V) where {V<:AbstractArray{<:N
     return ValidationTVector{V}(X)
 end
 
-function copyto!(M::ValidationManifold, p::ValidationMPoint, q::ValidationMPoint)
-    copyto!(M.manifold, p.value, q.value)
+function copyto!(M::ValidationManifold, q::ValidationMPoint, p::ValidationMPoint; kwargs...)
+    is_manifold_point(M, p, true; kwargs...)
+    copyto!(M.manifold, q.value, p.value)
+    is_manifold_point(M, q, true; kwargs...)
+    return q
+end
+function copyto!(M::ValidationManifold, Y::ValidationCoTVector, p::ValidationMPoint, X::ValidationCoTVector; kwargs...)
+    is_manifold_point(M, p, true; kwargs...)
+    copyto!(M.manifold, Y.value, p.value, X.value)
     return p
 end
-function copyto!(M::ValidationManifold, p::ValidationCoTVector, q::ValidationCoTVector)
-    copyto!(M.manifold, p.value, q.value)
-    return p
-end
-function copyto!(M::ValidationManifold, Y::ValidationTVector, p::ValidationMPoint, X::ValidationTVector)
-    copyto!(M.manifold, Y.value, X.value)
+function copyto!(M::ValidationManifold, Y::ValidationTVector, p::ValidationMPoint, X::ValidationTVector; kwargs...)
+    is_manifold_point(M, p, true; kwargs...)
+    is_tangent_vector(M, p, X, true; kwargs...)
+    copyto!(M.manifold, Y.value, p.value, X.value)
+    is_tangent_vector(M, p, Y, true; kwargs...)
     return Y
 end
 
