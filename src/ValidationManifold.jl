@@ -115,7 +115,7 @@ function copyto!(M::ValidationManifold, p::ValidationCoTVector, q::ValidationCoT
     copyto!(M.manifold, p.value, q.value)
     return p
 end
-function copyto!(M::ValidationManifold, Y::ValidationTVector, X::ValidationTVector)
+function copyto!(M::ValidationManifold, Y::ValidationTVector, p::ValidationMPoint, X::ValidationTVector)
     copyto!(M.manifold, Y.value, X.value)
     return Y
 end
