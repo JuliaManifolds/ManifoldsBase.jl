@@ -292,6 +292,38 @@ function check_tangent_vector(
     return nothing
 end
 
+@doc raw"""
+    copyto!(M::AbstractPowerManifold{𝔽,<:Manifold{𝔽},NestedPowerRepresentation}, q, p)
+
+Copy the values elementwise, i.e. call `copyto!(M.manifold, b, a)` for all elements `a` and
+`b` of `p` and `q`, respectively.
+"""
+function copyto!(M::NestedPowerRepresentation, q, p)
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        copyto!(M.manifold, _write(M, rep_size, q, i), _read(M, rep_size, p, i))
+    end
+    return q
+end
+
+@doc raw"""
+    copyto!(M::AbstractPowerManifold{𝔽,<:Manifold{𝔽},NestedPowerRepresentation}, Y, p, X)
+
+Copy the values elementwise, i.e. call `copyto!(M.manifold, B, a, A)` for all elements
+`A`, `a` and `B` of `X`, `p`, and `Y`, respectively.
+"""
+function copyto!(M::NestedPowerRepresentation, Y, p, X)
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        copyto!(
+            M.manifold,
+            _write(M, rep_size, Y, i),
+            _read(M, rep_size, p, i),
+            _read(M, rep_size, X, i),
+        )
+    end
+    return Y
+end
 
 @doc raw"""
     distance(M::AbstractPowerManifold, p, q)
@@ -968,15 +1000,10 @@ end
     return _write(M, rep_size, x, (i,))
 end
 
-@inline function _write(M::PowerManifoldNested, rep_size::Tuple, x::AbstractArray, i::Tuple)
+@inline function _write(::PowerManifoldNested, rep_size::Tuple, x::AbstractArray, i::Tuple)
     return view(x[i...], rep_size_to_colons(rep_size)...)
 end
-@inline function _write(
-    M::PowerManifoldNested,
-    rep_size::Tuple{},
-    x::AbstractArray,
-    i::Tuple,
-)
+@inline function _write(::PowerManifoldNested, ::Tuple{}, x::AbstractArray, i::Tuple)
     return view(x, i...)
 end
 
