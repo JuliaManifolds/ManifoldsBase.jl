@@ -56,6 +56,14 @@ struct DummyPowerRepresentation <: AbstractPowerRepresentation end
         @test ManifoldsBase.get_iterator(N) == Base.OneTo(2)
         @test injectivity_radius(N) == injectivity_radius(M)
         @test injectivity_radius(N, p) == injectivity_radius(M, p)
+        p2 = allocate(p)
+        copyto!(N, p2, p)
+        @test !(p === p2)
+        @test p == p2
+        q2 = allocate(q)
+        copyto!(N, q2, p, q)
+        @test !(q === q2)
+        @test q == q2
         @test inner(N, p, q, q) == sum(inner.(Ref(M), p, q, q))
         @test isapprox(N, p, q) == (all(isapprox.(Ref(M), p, q)))
         @test isapprox(N, p, p) == (all(isapprox.(Ref(M), p, p)))
@@ -113,7 +121,6 @@ struct DummyPowerRepresentation <: AbstractPowerRepresentation end
         $(sprint(show, "text/plain", B.data.bases[2]))
         """
     end
-
     @testset "Zero index manifold" begin
         M = ManifoldsBase.DefaultManifold()
         N = PowerManifold(M, NestedPowerRepresentation(), 3)
