@@ -113,12 +113,24 @@ function copyto!(M::ValidationManifold, q::ValidationMPoint, p::ValidationMPoint
     is_manifold_point(M, q, true; kwargs...)
     return q
 end
-function copyto!(M::ValidationManifold, Y::ValidationCoTVector, p::ValidationMPoint, X::ValidationCoTVector; kwargs...)
+function copyto!(
+    M::ValidationManifold,
+    Y::ValidationCoTVector,
+    p::ValidationMPoint,
+    X::ValidationCoTVector;
+    kwargs...,
+)
     is_manifold_point(M, p, true; kwargs...)
     copyto!(M.manifold, Y.value, p.value, X.value)
     return p
 end
-function copyto!(M::ValidationManifold, Y::ValidationTVector, p::ValidationMPoint, X::ValidationTVector; kwargs...)
+function copyto!(
+    M::ValidationManifold,
+    Y::ValidationTVector,
+    p::ValidationMPoint,
+    X::ValidationTVector;
+    kwargs...,
+)
     is_manifold_point(M, p, true; kwargs...)
     is_tangent_vector(M, p, X, true; kwargs...)
     copyto!(M.manifold, Y.value, p.value, X.value)
