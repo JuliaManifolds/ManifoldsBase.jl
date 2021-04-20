@@ -218,9 +218,11 @@ function allocate_result(
     )
 end
 function allocate_result(M::PowerManifoldNested, f::typeof(get_vector), p, X)
-    return [allocate_result(M.manifold, f, _access_nested(p, i)) for i in get_iterator(M)]
+    return [
+        allocate_result(M.manifold, f, _access_nested(p, i), _access_nested(X, i)) for
+        i in get_iterator(M)
+    ]
 end
-
 function allocation_promotion_function(M::AbstractPowerManifold, f, args::Tuple)
     return allocation_promotion_function(M.manifold, f, args)
 end
@@ -298,7 +300,7 @@ end
 Copy the values elementwise, i.e. call `copyto!(M.manifold, b, a)` for all elements `a` and
 `b` of `p` and `q`, respectively.
 """
-function copyto!(M::NestedPowerRepresentation, q, p)
+function copyto!(M::PowerManifoldNested, q, p)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         copyto!(M.manifold, _write(M, rep_size, q, i), _read(M, rep_size, p, i))
@@ -312,7 +314,7 @@ end
 Copy the values elementwise, i.e. call `copyto!(M.manifold, B, a, A)` for all elements
 `A`, `a` and `B` of `X`, `p`, and `Y`, respectively.
 """
-function copyto!(M::NestedPowerRepresentation, Y, p, X)
+function copyto!(M::PowerManifoldNested, Y, p, X)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         copyto!(
