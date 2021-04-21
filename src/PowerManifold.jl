@@ -219,7 +219,7 @@ function allocate_result(
 end
 function allocate_result(M::PowerManifoldNested, f::typeof(get_vector), p, X)
     return [
-        allocate_result(M.manifold, f, _access_nested(p, i), _access_nested(X, i)) for
+        allocate_result(M.manifold, f, _access_nested(p, i)) for
         i in get_iterator(M)
     ]
 end
