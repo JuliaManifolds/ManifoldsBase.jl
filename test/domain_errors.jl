@@ -22,9 +22,9 @@ end
     M = ErrorTestManifold()
     @test isa(check_point(M, [-1, 1]), DomainError)
     @test check_point(M, [1, 1]) === nothing
-    @test !is_manifold_point(M, [-1, 1])
-    @test is_manifold_point(M, [1, 1])
-    @test_throws DomainError is_manifold_point(M, [-1, 1], true)
+    @test !is_point(M, [-1, 1])
+    @test is_point(M, [1, 1])
+    @test_throws DomainError is_point(M, [-1, 1], true)
 
     @test isa(check_tangent_vector(M, [1, 1], [-1, 1]), DomainError)
     @test check_tangent_vector(M, [1, 1], [1, 1]) === nothing

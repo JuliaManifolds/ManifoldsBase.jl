@@ -31,12 +31,12 @@ struct DummyPowerRepresentation <: AbstractPowerRepresentation end
     @testset "point/tangent checks" begin
         pE1 = [zeros(3), ones(2)] # one component wrong
         pE2 = [zeros(2), ones(2)] # both wrong
-        @test is_manifold_point(N, p)
-        @test is_manifold_point(N, p, true)
-        @test !is_manifold_point(N, pE1)
-        @test !is_manifold_point(N, pE2)
-        @test_throws ComponentManifoldError is_manifold_point(N, pE1, true)
-        @test_throws CompositeManifoldError is_manifold_point(N, pE2, true)
+        @test is_point(N, p)
+        @test is_point(N, p, true)
+        @test !is_point(N, pE1)
+        @test !is_point(N, pE2)
+        @test_throws ComponentManifoldError is_point(N, pE1, true)
+        @test_throws CompositeManifoldError is_point(N, pE2, true)
         # tangent - test base
         @test is_tangent_vector(N, p, p)
         @test is_tangent_vector(N, p, p, true)

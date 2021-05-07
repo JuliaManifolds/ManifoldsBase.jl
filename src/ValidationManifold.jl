@@ -129,9 +129,9 @@ function convert(
 end
 
 function copyto!(M::ValidationManifold, q::ValidationMPoint, p::ValidationMPoint; kwargs...)
-    is_manifold_point(M, p, true; kwargs...)
+    is_point(M, p, true; kwargs...)
     copyto!(M.manifold, q.value, p.value)
-    is_manifold_point(M, q, true; kwargs...)
+    is_point(M, q, true; kwargs...)
     return q
 end
 function copyto!(
@@ -141,35 +141,35 @@ function copyto!(
     X::ValidationFibreVector{TType};
     kwargs...,
 ) where {TType}
-    is_manifold_point(M, p, true; kwargs...)
+    is_point(M, p, true; kwargs...)
     copyto!(M.manifold, Y.value, p.value, X.value)
     return p
 end
 
 function distance(M::ValidationManifold, p, q; kwargs...)
-    is_manifold_point(M, p, true; kwargs...)
-    is_manifold_point(M, q, true; kwargs...)
+    is_point(M, p, true; kwargs...)
+    is_point(M, q, true; kwargs...)
     return distance(M.manifold, array_value(p), array_value(q))
 end
 
 function exp(M::ValidationManifold, p, X; kwargs...)
-    is_manifold_point(M, p, true; kwargs...)
+    is_point(M, p, true; kwargs...)
     is_tangent_vector(M, p, X, true; kwargs...)
     y = exp(M.manifold, array_value(p), array_value(X))
-    is_manifold_point(M, y, true; kwargs...)
+    is_point(M, y, true; kwargs...)
     return ValidationMPoint(y)
 end
 
 function exp!(M::ValidationManifold, q, p, X; kwargs...)
-    is_manifold_point(M, p, true; kwargs...)
+    is_point(M, p, true; kwargs...)
     is_tangent_vector(M, p, X, true; kwargs...)
     exp!(M.manifold, array_value(q), array_value(p), array_value(X))
-    is_manifold_point(M, q, true; kwargs...)
+    is_point(M, q, true; kwargs...)
     return q
 end
 
 function get_basis(M::ValidationManifold, p, B::AbstractBasis; kwargs...)
-    is_manifold_point(M, p, true; kwargs...)
+    is_point(M, p, true; kwargs...)
     Ξ = get_basis(M.manifold, array_value(p), B)
     bvectors = get_vectors(M, p, Ξ)
     N = length(bvectors)
@@ -198,7 +198,7 @@ function get_basis(
     B::Union{AbstractOrthogonalBasis,CachedBasis{𝔽,<:AbstractOrthogonalBasis{𝔽}}};
     kwargs...,
 ) where {𝔽}
-    is_manifold_point(M, p, true; kwargs...)
+    is_point(M, p, true; kwargs...)
     Ξ = invoke(get_basis, Tuple{ValidationManifold,Any,AbstractBasis}, M, p, B; kwargs...)
     bvectors = get_vectors(M, p, Ξ)
     N = length(bvectors)
@@ -222,7 +222,7 @@ function get_basis(
     B::Union{AbstractOrthonormalBasis,CachedBasis{𝔽,<:AbstractOrthonormalBasis{𝔽}}};
     kwargs...,
 ) where {𝔽}
-    is_manifold_point(M, p, true; kwargs...)
+    is_point(M, p, true; kwargs...)
     get_basis_invoke_types = Tuple{
         ValidationManifold,
         Any,
@@ -258,7 +258,7 @@ for BT in DISAMBIGUATION_BASIS_TYPES
 end
 
 function get_coordinates(M::ValidationManifold, p, X, B::AbstractBasis; kwargs...)
-    is_manifold_point(M, p, true; kwargs...)
+    is_point(M, p, true; kwargs...)
     is_tangent_vector(M, p, X, true; kwargs...)
     return get_coordinates(M.manifold, p, X, B)
 end
@@ -297,7 +297,7 @@ for BT in [DISAMBIGUATION_BASIS_TYPES..., DISAMBIGUATION_COTANGENT_BASIS_TYPES..
 end
 
 function get_vector(M::ValidationManifold, p, X, B::AbstractBasis; kwargs...)
-    is_manifold_point(M, p, true; kwargs...)
+    is_point(M, p, true; kwargs...)
     size(X) == (manifold_dimension(M),) || error("Incorrect size of coefficient vector X")
     Y = get_vector(M.manifold, p, X, B)
     size(Y) == representation_size(M) || error("Incorrect size of tangent vector Y")
@@ -318,7 +318,7 @@ for BT in DISAMBIGUATION_BASIS_TYPES
 end
 
 function get_vector!(M::ValidationManifold, Y, p, X, B::AbstractBasis; kwargs...)
-    is_manifold_point(M, p, true; kwargs...)
+    is_point(M, p, true; kwargs...)
     size(X) == (manifold_dimension(M),) || error("Incorrect size of coefficient vector X")
     get_vector!(M.manifold, Y, p, X, B)
     size(Y) == representation_size(M) || error("Incorrect size of tangent vector Y")
@@ -344,7 +344,7 @@ function injectivity_radius(M::ValidationManifold, method::AbstractRetractionMet
     return injectivity_radius(M.manifold, method)
 end
 function injectivity_radius(M::ValidationManifold, p; kwargs...)
-    is_manifold_point(M, p, true; kwargs...)
+    is_point(M, p, true; kwargs...)
     return injectivity_radius(M.manifold, array_value(p))
 end
 function injectivity_radius(
@@ -353,7 +353,7 @@ function injectivity_radius(
     method::AbstractRetractionMethod;
     kwargs...,
 )
-    is_manifold_point(M, p, true; kwargs...)
+    is_point(M, p, true; kwargs...)
     return injectivity_radius(M.manifold, array_value(p), method)
 end
 function injectivity_radius(M::ValidationManifold, method::ExponentialRetraction)
@@ -365,58 +365,58 @@ function injectivity_radius(
     method::ExponentialRetraction;
     kwargs...,
 )
-    is_manifold_point(M, p, true; kwargs...)
+    is_point(M, p, true; kwargs...)
     return injectivity_radius(M.manifold, array_value(p), method)
 end
 
 function inner(M::ValidationManifold, p, X, Y; kwargs...)
-    is_manifold_point(M, p, true; kwargs...)
+    is_point(M, p, true; kwargs...)
     is_tangent_vector(M, p, X, true; kwargs...)
     is_tangent_vector(M, p, Y, true; kwargs...)
     return inner(M.manifold, array_value(p), array_value(X), array_value(Y))
 end
 
 function isapprox(M::ValidationManifold, p, q; kwargs...)
-    is_manifold_point(M, p, true; kwargs...)
-    is_manifold_point(M, q, true; kwargs...)
+    is_point(M, p, true; kwargs...)
+    is_point(M, q, true; kwargs...)
     return isapprox(M.manifold, array_value(p), array_value(q); kwargs...)
 end
 function isapprox(M::ValidationManifold, p, X, Y; kwargs...)
-    is_manifold_point(M, p, true; kwargs...)
+    is_point(M, p, true; kwargs...)
     is_tangent_vector(M, p, X, true; kwargs...)
     is_tangent_vector(M, p, Y, true; kwargs...)
     return isapprox(M.manifold, array_value(p), array_value(X), array_value(Y); kwargs...)
 end
 
 function log(M::ValidationManifold, p, q; kwargs...)
-    is_manifold_point(M, p, true; kwargs...)
-    is_manifold_point(M, q, true; kwargs...)
+    is_point(M, p, true; kwargs...)
+    is_point(M, q, true; kwargs...)
     X = log(M.manifold, array_value(p), array_value(q))
     is_tangent_vector(M, p, X, true; kwargs...)
     return ValidationTVector(X)
 end
 
 function log!(M::ValidationManifold, X, p, q; kwargs...)
-    is_manifold_point(M, p, true; kwargs...)
-    is_manifold_point(M, q, true; kwargs...)
+    is_point(M, p, true; kwargs...)
+    is_point(M, q, true; kwargs...)
     log!(M.manifold, array_value(X), array_value(p), array_value(q))
     is_tangent_vector(M, p, X, true; kwargs...)
     return X
 end
 
 function mid_point(M::ValidationManifold, p1, p2; kwargs...)
-    is_manifold_point(M, p1, true; kwargs...)
-    is_manifold_point(M, p2, true; kwargs...)
+    is_point(M, p1, true; kwargs...)
+    is_point(M, p2, true; kwargs...)
     q = mid_point(M.manifold, array_value(p1), array_value(p2))
-    is_manifold_point(M, q, true; kwargs...)
+    is_point(M, q, true; kwargs...)
     return q
 end
 
 function mid_point!(M::ValidationManifold, q, p1, p2; kwargs...)
-    is_manifold_point(M, p1, true; kwargs...)
-    is_manifold_point(M, p2, true; kwargs...)
+    is_point(M, p1, true; kwargs...)
+    is_point(M, p2, true; kwargs...)
     mid_point!(M.manifold, array_value(q), array_value(p1), array_value(p2))
-    is_manifold_point(M, q, true; kwargs...)
+    is_point(M, q, true; kwargs...)
     return q
 end
 
@@ -426,7 +426,7 @@ number_eltype(::Type{ValidationFibreVector{TType,V}}) where {TType,V} = number_e
 number_eltype(X::ValidationFibreVector) = number_eltype(X.value)
 
 function project!(M::ValidationManifold, Y, p, X; kwargs...)
-    is_manifold_point(M, p, true; kwargs...)
+    is_point(M, p, true; kwargs...)
     project!(M.manifold, array_value(Y), array_value(p), array_value(X))
     is_tangent_vector(M, p, Y, true; kwargs...)
     return Y
@@ -486,7 +486,7 @@ function vector_transport_to!(
     m::AbstractVectorTransportMethod;
     kwargs...,
 )
-    is_manifold_point(M, q, true; kwargs...)
+    is_point(M, q, true; kwargs...)
     is_tangent_vector(M, p, X, true; kwargs...)
     vector_transport_to!(
         M.manifold,
@@ -508,7 +508,7 @@ for T in [
 ]
     @eval begin
         function vector_transport_to!(M::ValidationManifold, Y, p, X, q, m::$T; kwargs...)
-            is_manifold_point(M, q, true; kwargs...)
+            is_point(M, q, true; kwargs...)
             is_tangent_vector(M, p, X, true; kwargs...)
             vector_transport_to!(
                 M.manifold,
@@ -525,14 +525,14 @@ for T in [
 end
 
 function zero_vector(M::ValidationManifold, p; kwargs...)
-    is_manifold_point(M, p, true; kwargs...)
+    is_point(M, p, true; kwargs...)
     w = zero_vector(M.manifold, array_value(p))
     is_tangent_vector(M, p, w, true; kwargs...)
     return w
 end
 
 function zero_vector!(M::ValidationManifold, X, p; kwargs...)
-    is_manifold_point(M, p, true; kwargs...)
+    is_point(M, p, true; kwargs...)
     zero_vector!(M.manifold, array_value(X), array_value(p); kwargs...)
     is_tangent_vector(M, p, X, true; kwargs...)
     return X

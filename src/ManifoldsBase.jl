@@ -552,7 +552,7 @@ isapprox(::AbstractManifold, p, X, Y; kwargs...) = isapprox(X, Y; kwargs...)
 
 
 """
-    is_manifold_point(M::AbstractManifold, p, throw_error = false; kwargs...)
+    is_point(M::AbstractManifold, p, throw_error = false; kwargs...)
 
 Return whether `p` is a valid point on the [`AbstractManifold`](@ref) `M`.
 
@@ -561,7 +561,7 @@ is `true`, the function either returns `true` or throws an error. By default the
 calls [`check_point(M, p; kwargs...)`](@ref) and checks whether the returned value
 is `nothing` or an error.
 """
-function is_manifold_point(M::AbstractManifold, p, throw_error = false; kwargs...)
+function is_point(M::AbstractManifold, p, throw_error = false; kwargs...)
     mpe = check_point(M, p; kwargs...)
     mpe === nothing && return true
     return throw_error ? throw(mpe) : false
@@ -949,7 +949,7 @@ export allocate,
     inverse_retract,
     inverse_retract!,
     isapprox,
-    is_manifold_point,
+    is_point,
     is_tangent_vector,
     isempty,
     length,

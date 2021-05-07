@@ -138,7 +138,7 @@ struct NotImplementedInverseRetraction <: AbstractInverseRetractionMethod end
 
     @test check_point(M, [0]) === nothing
     @test check_point(M, p) === nothing
-    @test is_manifold_point(M, [0])
+    @test is_point(M, [0])
     @test check_point(M, [0]) === nothing
 
     @test check_tangent_vector(M, [0], [0]) === nothing
