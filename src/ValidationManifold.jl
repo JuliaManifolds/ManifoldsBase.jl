@@ -95,16 +95,16 @@ function check_point(M::ValidationManifold, p::AbstractManifoldPoint; kwargs...)
     return check_point(M.manifold, array_value(p); kwargs...)
 end
 
-function check_tangent_vector(M::ValidationManifold, p, X; kwargs...)
-    return check_tangent_vector(M.manifold, array_value(p), array_value(X); kwargs...)
+function check_vector(M::ValidationManifold, p, X; kwargs...)
+    return check_vector(M.manifold, array_value(p), array_value(X); kwargs...)
 end
-function check_tangent_vector(
+function check_vector(
     M::ValidationManifold,
     p::AbstractManifoldPoint,
     X::TVector;
     kwargs...,
 )
-    return check_tangent_vector(M.manifold, array_value(p), array_value(X); kwargs...)
+    return check_vector(M.manifold, array_value(p), array_value(X); kwargs...)
 end
 
 convert(::Type{M}, m::ValidationManifold{𝔽,M}) where {𝔽,M<:AbstractManifold{𝔽}} = m.manifold
@@ -154,7 +154,7 @@ end
 
 function exp(M::ValidationManifold, p, X; kwargs...)
     is_point(M, p, true; kwargs...)
-    is_tangent_vector(M, p, X, true; kwargs...)
+    is_vector(M, p, X, true; kwargs...)
     y = exp(M.manifold, array_value(p), array_value(X))
     is_point(M, y, true; kwargs...)
     return ValidationMPoint(y)
@@ -162,7 +162,7 @@ end
 
 function exp!(M::ValidationManifold, q, p, X; kwargs...)
     is_point(M, p, true; kwargs...)
-    is_tangent_vector(M, p, X, true; kwargs...)
+    is_vector(M, p, X, true; kwargs...)
     exp!(M.manifold, array_value(q), array_value(p), array_value(X))
     is_point(M, q, true; kwargs...)
     return q
@@ -189,7 +189,7 @@ function get_basis(M::ValidationManifold, p, B::AbstractBasis; kwargs...)
             ),
         )
     end
-    map(X -> is_tangent_vector(M, p, X, true; kwargs...), bvectors)
+    map(X -> is_vector(M, p, X, true; kwargs...), bvectors)
     return Ξ
 end
 function get_basis(
@@ -259,7 +259,7 @@ end
 
 function get_coordinates(M::ValidationManifold, p, X, B::AbstractBasis; kwargs...)
     is_point(M, p, true; kwargs...)
-    is_tangent_vector(M, p, X, true; kwargs...)
+    is_vector(M, p, X, true; kwargs...)
     return get_coordinates(M.manifold, p, X, B)
 end
 for BT in DISAMBIGUATION_BASIS_TYPES
@@ -277,7 +277,7 @@ for BT in DISAMBIGUATION_BASIS_TYPES
 end
 
 function get_coordinates!(M::ValidationManifold, Y, p, X, B::AbstractBasis; kwargs...)
-    is_tangent_vector(M, p, X, true; kwargs...)
+    is_vector(M, p, X, true; kwargs...)
     get_coordinates!(M.manifold, Y, p, X, B)
     return Y
 end
@@ -371,8 +371,8 @@ end
 
 function inner(M::ValidationManifold, p, X, Y; kwargs...)
     is_point(M, p, true; kwargs...)
-    is_tangent_vector(M, p, X, true; kwargs...)
-    is_tangent_vector(M, p, Y, true; kwargs...)
+    is_vector(M, p, X, true; kwargs...)
+    is_vector(M, p, Y, true; kwargs...)
     return inner(M.manifold, array_value(p), array_value(X), array_value(Y))
 end
 
@@ -383,8 +383,8 @@ function isapprox(M::ValidationManifold, p, q; kwargs...)
 end
 function isapprox(M::ValidationManifold, p, X, Y; kwargs...)
     is_point(M, p, true; kwargs...)
-    is_tangent_vector(M, p, X, true; kwargs...)
-    is_tangent_vector(M, p, Y, true; kwargs...)
+    is_vector(M, p, X, true; kwargs...)
+    is_vector(M, p, Y, true; kwargs...)
     return isapprox(M.manifold, array_value(p), array_value(X), array_value(Y); kwargs...)
 end
 
@@ -392,7 +392,7 @@ function log(M::ValidationManifold, p, q; kwargs...)
     is_point(M, p, true; kwargs...)
     is_point(M, q, true; kwargs...)
     X = log(M.manifold, array_value(p), array_value(q))
-    is_tangent_vector(M, p, X, true; kwargs...)
+    is_vector(M, p, X, true; kwargs...)
     return ValidationTVector(X)
 end
 
@@ -400,7 +400,7 @@ function log!(M::ValidationManifold, X, p, q; kwargs...)
     is_point(M, p, true; kwargs...)
     is_point(M, q, true; kwargs...)
     log!(M.manifold, array_value(X), array_value(p), array_value(q))
-    is_tangent_vector(M, p, X, true; kwargs...)
+    is_vector(M, p, X, true; kwargs...)
     return X
 end
 
@@ -428,7 +428,7 @@ number_eltype(X::ValidationFibreVector) = number_eltype(X.value)
 function project!(M::ValidationManifold, Y, p, X; kwargs...)
     is_point(M, p, true; kwargs...)
     project!(M.manifold, array_value(Y), array_value(p), array_value(X))
-    is_tangent_vector(M, p, Y, true; kwargs...)
+    is_vector(M, p, Y, true; kwargs...)
     return Y
 end
 
@@ -450,7 +450,7 @@ function vector_transport_along!(
     m::AbstractVectorTransportMethod;
     kwargs...,
 )
-    is_tangent_vector(M, p, X, true; kwargs...)
+    is_vector(M, p, X, true; kwargs...)
     vector_transport_along!(
         M.manifold,
         array_value(Y),
@@ -459,7 +459,7 @@ function vector_transport_along!(
         c,
         m,
     )
-    is_tangent_vector(M, c[end], Y, true; kwargs...)
+    is_vector(M, c[end], Y, true; kwargs...)
     return Y
 end
 for VT in VECTOR_TRANSPORT_DISAMBIGUATION
@@ -487,7 +487,7 @@ function vector_transport_to!(
     kwargs...,
 )
     is_point(M, q, true; kwargs...)
-    is_tangent_vector(M, p, X, true; kwargs...)
+    is_vector(M, p, X, true; kwargs...)
     vector_transport_to!(
         M.manifold,
         array_value(Y),
@@ -496,7 +496,7 @@ function vector_transport_to!(
         array_value(q),
         m,
     )
-    is_tangent_vector(M, q, Y, true; kwargs...)
+    is_vector(M, q, Y, true; kwargs...)
     return Y
 end
 
@@ -509,7 +509,7 @@ for T in [
     @eval begin
         function vector_transport_to!(M::ValidationManifold, Y, p, X, q, m::$T; kwargs...)
             is_point(M, q, true; kwargs...)
-            is_tangent_vector(M, p, X, true; kwargs...)
+            is_vector(M, p, X, true; kwargs...)
             vector_transport_to!(
                 M.manifold,
                 array_value(Y),
@@ -518,7 +518,7 @@ for T in [
                 array_value(q),
                 m,
             )
-            is_tangent_vector(M, q, Y, true; kwargs...)
+            is_vector(M, q, Y, true; kwargs...)
             return Y
         end
     end
@@ -527,13 +527,13 @@ end
 function zero_vector(M::ValidationManifold, p; kwargs...)
     is_point(M, p, true; kwargs...)
     w = zero_vector(M.manifold, array_value(p))
-    is_tangent_vector(M, p, w, true; kwargs...)
+    is_vector(M, p, w, true; kwargs...)
     return w
 end
 
 function zero_vector!(M::ValidationManifold, X, p; kwargs...)
     is_point(M, p, true; kwargs...)
     zero_vector!(M.manifold, array_value(X), array_value(p); kwargs...)
-    is_tangent_vector(M, p, X, true; kwargs...)
+    is_vector(M, p, X, true; kwargs...)
     return X
 end

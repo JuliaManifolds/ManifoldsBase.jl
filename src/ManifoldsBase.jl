@@ -219,18 +219,18 @@ assumption is to be optimistic for a point not deriving from the [`AbstractManif
 check_point(M::AbstractManifold, p; kwargs...) = nothing
 
 """
-    check_tangent_vector(M::AbstractManifold, p, X; kwargs...) -> Union{Nothing,String}
+    check_vector(M::AbstractManifold, p, X; kwargs...) -> Union{Nothing,String}
 
 Check whether `X` is a valid tangent vector in the tangent space of `p` on the
 [`AbstractManifold`](@ref) `M`. An implementation should first call [`check_point(M, p;
 kwargs...)`](@ref) and then validate `X`. If it is not a tangent vector, an error string
 should be returned.
 
-By default, `check_tangent_vector` returns `nothing`, i.e. if no checks are implemented, the
+By default, `check_vector` returns `nothing`, i.e. if no checks are implemented, the
 assumption is to be optimistic for tangent vectors not deriving from the [`TVector`](@ref)
 type.
 """
-check_tangent_vector(M::AbstractManifold, p, X; kwargs...) = nothing
+check_vector(M::AbstractManifold, p, X; kwargs...) = nothing
 
 """
     check_size(M::AbstractManifold, p)
@@ -568,18 +568,18 @@ function is_point(M::AbstractManifold, p, throw_error = false; kwargs...)
 end
 
 """
-    is_tangent_vector(M::AbstractManifold, p, X, throw_error = false; kwargs...)
+    is_vector(M::AbstractManifold, p, X, throw_error = false; kwargs...)
 
 Return whether `X` is a valid tangent vector at point `p` on the [`AbstractManifold`](@ref) `M`.
 Returns either `true` or `false`.
 
 If `throw_error` is `false`, the function returns either `true` or `false`. If `throw_error`
 is `true`, the function either returns `true` or throws an error. By default the function
-calls [`check_tangent_vector(M, p, X; kwargs...)`](@ref) and checks whether the returned
+calls [`check_vector(M, p, X; kwargs...)`](@ref) and checks whether the returned
 value is `nothing` or an error.
 """
-function is_tangent_vector(M::AbstractManifold, p, X, throw_error = false; kwargs...)
-    mtve = check_tangent_vector(M, p, X; kwargs...)
+function is_vector(M::AbstractManifold, p, X, throw_error = false; kwargs...)
+    mtve = check_vector(M, p, X; kwargs...)
     mtve === nothing && return true
     return throw_error ? throw(mtve) : false
 end
@@ -924,7 +924,7 @@ export CompositeManifoldError, ComponentManifoldError
 export allocate,
     base_manifold,
     check_point,
-    check_tangent_vector,
+    check_vector,
     check_size,
     distance,
     exp,
@@ -950,7 +950,7 @@ export allocate,
     inverse_retract!,
     isapprox,
     is_point,
-    is_tangent_vector,
+    is_vector,
     isempty,
     length,
     log,

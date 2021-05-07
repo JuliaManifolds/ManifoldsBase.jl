@@ -71,7 +71,7 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
             for pt in pts
                 @test is_point(M, pt)
             end
-            @test is_tangent_vector(M, pts[1], tv1; atol = eps(eltype(pts[1])))
+            @test is_vector(M, pts[1], tv1; atol = eps(eltype(pts[1])))
 
             tv2 = log(M, pts[2], pts[1])
             @test isapprox(M, pts[2], exp(M, pts[1], tv1))
@@ -212,8 +212,8 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
                 v1t2 = zero(v1t1)
                 vector_transport_to!(M, v1t2, pts[1], v1, v2, ProjectionTransport())
                 v1t3 = vector_transport_direction(M, pts[1], v1, v2)
-                @test is_tangent_vector(M, pts[3], v1t1)
-                @test is_tangent_vector(M, pts[3], v1t3)
+                @test is_vector(M, pts[3], v1t1)
+                @test is_vector(M, pts[3], v1t3)
                 @test isapprox(M, pts[3], v1t1, v1t3)
                 # along a `Vector` of points
                 c = [pts[1]]

@@ -9,7 +9,7 @@ function ManifoldsBase.check_point(::ErrorTestManifold, x)
     end
     return nothing
 end
-function ManifoldsBase.check_tangent_vector(M::ErrorTestManifold, x, v)
+function ManifoldsBase.check_vector(M::ErrorTestManifold, x, v)
     mpe = check_point(M, x)
     mpe === nothing || return mpe
     if any(u -> u < 0, v)
@@ -26,9 +26,9 @@ end
     @test is_point(M, [1, 1])
     @test_throws DomainError is_point(M, [-1, 1], true)
 
-    @test isa(check_tangent_vector(M, [1, 1], [-1, 1]), DomainError)
-    @test check_tangent_vector(M, [1, 1], [1, 1]) === nothing
-    @test !is_tangent_vector(M, [1, 1], [-1, 1])
-    @test is_tangent_vector(M, [1, 1], [1, 1])
-    @test_throws DomainError is_tangent_vector(M, [1, 1], [-1, 1], true)
+    @test isa(check_vector(M, [1, 1], [-1, 1]), DomainError)
+    @test check_vector(M, [1, 1], [1, 1]) === nothing
+    @test !is_vector(M, [1, 1], [-1, 1])
+    @test is_vector(M, [1, 1], [1, 1])
+    @test_throws DomainError is_vector(M, [1, 1], [-1, 1], true)
 end

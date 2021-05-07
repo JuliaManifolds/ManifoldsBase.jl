@@ -491,12 +491,7 @@ end
 
 @decorator_transparent_signature check_point(M::AbstractDecoratorManifold, p; kwargs...)
 
-@decorator_transparent_signature check_tangent_vector(
-    M::AbstractDecoratorManifold,
-    p,
-    X;
-    kwargs...,
-)
+@decorator_transparent_signature check_vector(M::AbstractDecoratorManifold, p, X; kwargs...)
 
 """
     decorated_manifold(M::AbstractDecoratorManifold)

@@ -24,7 +24,7 @@ function check_point(M::DefaultManifold, p; kwargs...)
     return nothing
 end
 
-function check_tangent_vector(M::DefaultManifold, p, X; check_base_point = true, kwargs...)
+function check_vector(M::DefaultManifold, p, X; check_base_point = true, kwargs...)
     if check_base_point
         perr = check_point(M, p)
         perr === nothing || return perr

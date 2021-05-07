@@ -38,16 +38,16 @@ struct DummyPowerRepresentation <: AbstractPowerRepresentation end
         @test_throws ComponentManifoldError is_point(N, pE1, true)
         @test_throws CompositeManifoldError is_point(N, pE2, true)
         # tangent - test base
-        @test is_tangent_vector(N, p, p)
-        @test is_tangent_vector(N, p, p, true)
-        @test !is_tangent_vector(N, pE1, p)
-        @test !is_tangent_vector(N, pE2, p)
+        @test is_vector(N, p, p)
+        @test is_vector(N, p, p, true)
+        @test !is_vector(N, pE1, p)
+        @test !is_vector(N, pE2, p)
         # tangents - with proper base
-        @test is_tangent_vector(N, p, p, true)
-        @test !is_tangent_vector(N, p, pE1)
-        @test !is_tangent_vector(N, p, pE2)
-        @test_throws ComponentManifoldError is_tangent_vector(N, p, pE1, true)
-        @test_throws CompositeManifoldError is_tangent_vector(N, p, pE2, true)
+        @test is_vector(N, p, p, true)
+        @test !is_vector(N, p, pE1)
+        @test !is_vector(N, p, pE2)
+        @test_throws ComponentManifoldError is_vector(N, p, pE1, true)
+        @test_throws CompositeManifoldError is_vector(N, p, pE2, true)
     end
     @testset "specific functions" begin
         @test distance(N, p, q) == sqrt(sum(distance.(Ref(M), p, q) .^ 2))
