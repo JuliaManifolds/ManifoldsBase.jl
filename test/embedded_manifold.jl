@@ -172,7 +172,7 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEm
             M = NotImplementedEmbeddedManifold()
             A = zeros(2)
             # without any extra tests just the embedding is asked
-            @test check_manifold_point(M, [1, 2]) === nothing
+            @test check_point(M, [1, 2]) === nothing
             @test check_tangent_vector(M, [1, 2], [3, 4]) === nothing
             @test norm(M, [1, 2], [2, 3]) ≈ sqrt(13)
             @test distance(M, [1, 2], [3, 4]) ≈ sqrt(8)
@@ -267,7 +267,7 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEm
         for f in [mid_point, mid_point!]
             @test ManifoldsBase.decorator_transparent_dispatch(f, AM) === Val(:parent)
         end
-        for f in [check_manifold_point, check_tangent_vector, exp!, inner, embed!]
+        for f in [check_point, check_tangent_vector, exp!, inner, embed!]
             @test ManifoldsBase.decorator_transparent_dispatch(f, AM) ===
                   Val(:intransparent)
         end

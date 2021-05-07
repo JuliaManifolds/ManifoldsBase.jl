@@ -14,7 +14,7 @@ function DefaultManifold(n::Vararg{Int,N}; field = ℝ) where {N}
     return DefaultManifold{Tuple{n...},field}()
 end
 
-function check_manifold_point(M::DefaultManifold, p; kwargs...)
+function check_point(M::DefaultManifold, p; kwargs...)
     if size(p) != representation_size(M)
         return DomainError(
             size(p),
@@ -26,7 +26,7 @@ end
 
 function check_tangent_vector(M::DefaultManifold, p, X; check_base_point = true, kwargs...)
     if check_base_point
-        perr = check_manifold_point(M, p)
+        perr = check_point(M, p)
         perr === nothing || return perr
     end
     if size(X) != representation_size(M)

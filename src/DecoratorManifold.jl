@@ -489,7 +489,7 @@ function base_manifold(M::AbstractDecoratorManifold, depth::Val{N} = Val(-1)) wh
     return base_manifold(decorated_manifold(M), Val(N - 1))
 end
 
-@decorator_transparent_signature check_manifold_point(
+@decorator_transparent_signature check_point(
     M::AbstractDecoratorManifold,
     p;
     kwargs...,

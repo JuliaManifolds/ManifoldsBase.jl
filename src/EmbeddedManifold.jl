@@ -20,7 +20,7 @@ transparently used from the embedding, for example the [`inner`](@ref) product o
 compuation onwards to the embedding (note again, that no [`embed`](@ref) is required)
 and hence avoids to reimplement these methods in the manifold that is embedded.
 
-This should be used for example for [`check_manifold_point`](@ref) or [`check_tangent_vector`](@ref),
+This should be used for example for [`check_point`](@ref) or [`check_tangent_vector`](@ref),
 which should first invoke the test of the embedding and then test further constraints
 the representation in the embedding has for these points to be valid.
 
@@ -138,14 +138,14 @@ base_manifold(M::EmbeddedManifold, d::Val{N} = Val(-1)) where {N} = M.manifold
 
 
 """
-    check_manifold_point(M::AbstractEmbeddedManifold, p; kwargs)
+    check_point(M::AbstractEmbeddedManifold, p; kwargs)
 
 check whether a point `p` is a valid point on the [`AbstractEmbeddedManifold`](@ref),
 i.e. that `embed(M, p)` is a valid point on the embedded manifold.
 """
-function check_manifold_point(M::AbstractEmbeddedManifold, p; kwargs...)
+function check_point(M::AbstractEmbeddedManifold, p; kwargs...)
     return invoke(
-        check_manifold_point,
+        check_point,
         Tuple{typeof(get_embedding(M)),typeof(p)},
         get_embedding(M),
         p;
@@ -167,7 +167,7 @@ function check_tangent_vector(
     kwargs...,
 )
     if check_base_point
-        mpe = check_manifold_point(M, p; kwargs...)
+        mpe = check_point(M, p; kwargs...)
         mpe === nothing || return mpe
     end
     return invoke(
@@ -243,7 +243,7 @@ By default this is set to `Val(false)`.
 default_embedding_dispatch(M::AbstractEmbeddedManifold) = Val(false)
 
 function decorator_transparent_dispatch(
-    ::typeof(check_manifold_point),
+    ::typeof(check_point),
     ::AbstractEmbeddedManifold,
     args...,
 )

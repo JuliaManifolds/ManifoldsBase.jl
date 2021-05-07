@@ -136,10 +136,10 @@ struct NotImplementedInverseRetraction <: AbstractInverseRetractionMethod end
     @test_throws ErrorException zero_vector!(M, [0], [0])
     @test_throws ErrorException zero_vector(M, [0])
 
-    @test check_manifold_point(M, [0]) === nothing
-    @test check_manifold_point(M, p) === nothing
+    @test check_point(M, [0]) === nothing
+    @test check_point(M, p) === nothing
     @test is_manifold_point(M, [0])
-    @test check_manifold_point(M, [0]) === nothing
+    @test check_point(M, [0]) === nothing
 
     @test check_tangent_vector(M, [0], [0]) === nothing
     @test check_tangent_vector(M, p, v) === nothing

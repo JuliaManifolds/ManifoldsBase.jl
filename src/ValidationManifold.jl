@@ -88,11 +88,11 @@ array_value(p::AbstractArray) = p
 array_value(p::ValidationMPoint) = p.value
 array_value(X::ValidationFibreVector) = X.value
 
-function check_manifold_point(M::ValidationManifold, p; kwargs...)
-    return check_manifold_point(M.manifold, array_value(p); kwargs...)
+function check_point(M::ValidationManifold, p; kwargs...)
+    return check_point(M.manifold, array_value(p); kwargs...)
 end
-function check_manifold_point(M::ValidationManifold, p::AbstractManifoldPoint; kwargs...)
-    return check_manifold_point(M.manifold, array_value(p); kwargs...)
+function check_point(M::ValidationManifold, p::AbstractManifoldPoint; kwargs...)
+    return check_point(M.manifold, array_value(p); kwargs...)
 end
 
 function check_tangent_vector(M::ValidationManifold, p, X; kwargs...)

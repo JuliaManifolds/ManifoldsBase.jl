@@ -208,21 +208,21 @@ level, whether its decorated or not. Any negative value deactivates this depth l
 base_manifold(M::AbstractManifold, depth = Val(-1)) = M
 
 """
-    check_manifold_point(M::AbstractManifold, p; kwargs...) -> Union{Nothing,String}
+    check_point(M::AbstractManifold, p; kwargs...) -> Union{Nothing,String}
 
 Return `nothing` when `p` is a point on the [`AbstractManifold`](@ref) `M`. Otherwise, return an
 error with description why the point does not belong to manifold `M`.
 
-By default, `check_manifold_point` returns `nothing`, i.e. if no checks are implemented, the
+By default, `check_point` returns `nothing`, i.e. if no checks are implemented, the
 assumption is to be optimistic for a point not deriving from the [`AbstractManifoldPoint`](@ref) type.
 """
-check_manifold_point(M::AbstractManifold, p; kwargs...) = nothing
+check_point(M::AbstractManifold, p; kwargs...) = nothing
 
 """
     check_tangent_vector(M::AbstractManifold, p, X; kwargs...) -> Union{Nothing,String}
 
 Check whether `X` is a valid tangent vector in the tangent space of `p` on the
-[`AbstractManifold`](@ref) `M`. An implementation should first call [`check_manifold_point(M, p;
+[`AbstractManifold`](@ref) `M`. An implementation should first call [`check_point(M, p;
 kwargs...)`](@ref) and then validate `X`. If it is not a tangent vector, an error string
 should be returned.
 
@@ -558,11 +558,11 @@ Return whether `p` is a valid point on the [`AbstractManifold`](@ref) `M`.
 
 If `throw_error` is `false`, the function returns either `true` or `false`. If `throw_error`
 is `true`, the function either returns `true` or throws an error. By default the function
-calls [`check_manifold_point(M, p; kwargs...)`](@ref) and checks whether the returned value
+calls [`check_point(M, p; kwargs...)`](@ref) and checks whether the returned value
 is `nothing` or an error.
 """
 function is_manifold_point(M::AbstractManifold, p, throw_error = false; kwargs...)
-    mpe = check_manifold_point(M, p; kwargs...)
+    mpe = check_point(M, p; kwargs...)
     mpe === nothing && return true
     return throw_error ? throw(mpe) : false
 end
@@ -923,7 +923,7 @@ export CompositeManifoldError, ComponentManifoldError
 
 export allocate,
     base_manifold,
-    check_manifold_point,
+    check_point,
     check_tangent_vector,
     check_size,
     distance,
