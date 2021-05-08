@@ -580,7 +580,14 @@ value is `nothing` or an error.
 If `check_base_point` is true, then the point `p` will be first checked using the
 [`check_point`](@ref) function.
 """
-function is_vector(M::AbstractManifold, p, X, throw_error = false; check_base_point=true, kwargs...)
+function is_vector(
+    M::AbstractManifold,
+    p,
+    X,
+    throw_error = false;
+    check_base_point = true,
+    kwargs...,
+)
     if check_base_point
         mpe = check_point(M, p; kwargs...)
         if mpe !== nothing
