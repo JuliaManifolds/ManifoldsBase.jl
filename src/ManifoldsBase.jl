@@ -222,9 +222,8 @@ check_point(M::AbstractManifold, p; kwargs...) = nothing
     check_vector(M::AbstractManifold, p, X; kwargs...) -> Union{Nothing,String}
 
 Check whether `X` is a valid tangent vector in the tangent space of `p` on the
-[`AbstractManifold`](@ref) `M`. An implementation should first call [`check_point(M, p;
-kwargs...)`](@ref) and then validate `X`. If it is not a tangent vector, an error string
-should be returned.
+[`AbstractManifold`](@ref) `M`. An implementation does not have to validate the point `p`.
+If it is not a tangent vector, an error string should be returned.
 
 By default, `check_vector` returns `nothing`, i.e. if no checks are implemented, the
 assumption is to be optimistic for tangent vectors not deriving from the [`TVector`](@ref)
@@ -568,7 +567,7 @@ function is_point(M::AbstractManifold, p, throw_error = false; kwargs...)
 end
 
 """
-    is_vector(M::AbstractManifold, p, X, throw_error = false; kwargs...)
+    is_vector(M::AbstractManifold, p, X, throw_error = false; check_base_point=true, kwargs...)
 
 Return whether `X` is a valid tangent vector at point `p` on the [`AbstractManifold`](@ref) `M`.
 Returns either `true` or `false`.
@@ -577,8 +576,21 @@ If `throw_error` is `false`, the function returns either `true` or `false`. If `
 is `true`, the function either returns `true` or throws an error. By default the function
 calls [`check_vector(M, p, X; kwargs...)`](@ref) and checks whether the returned
 value is `nothing` or an error.
+
+If `check_base_point` is true, then the point `p` will be first checked using the
+[`check_point`](@ref) function.
 """
-function is_vector(M::AbstractManifold, p, X, throw_error = false; kwargs...)
+function is_vector(M::AbstractManifold, p, X, throw_error = false; check_base_point=true, kwargs...)
+    if check_base_point
+        mpe = check_point(M, p; kwargs...)
+        if mpe !== nothing
+            if throw_error
+                throw(mpe)
+            else
+                return false
+            end
+        end
+    end
     mtve = check_vector(M, p, X; kwargs...)
     mtve === nothing && return true
     return throw_error ? throw(mtve) : false

@@ -154,23 +154,17 @@ function check_point(M::AbstractEmbeddedManifold, p; kwargs...)
 end
 
 """
-    check_vector(M::AbstractEmbeddedManifold, p, X; check_base_point = true, kwargs...)
+    check_vector(M::AbstractEmbeddedManifold, p, X; kwargs...)
 
-check that `embed(M, p, X)` is a valid tangent to `embed(M, p)`, where `check_base_point`
-determines whether the validity of `p` is checked, too.
+Check that `embed(M, p, X)` is a valid tangent to `embed(M, p)`.
 """
-function check_vector(M::AbstractEmbeddedManifold, p, X; check_base_point = true, kwargs...)
-    if check_base_point
-        mpe = check_point(M, p; kwargs...)
-        mpe === nothing || return mpe
-    end
+function check_vector(M::AbstractEmbeddedManifold, p, X; kwargs...)
     return invoke(
         check_vector,
         Tuple{typeof(get_embedding(M)),typeof(p),typeof(X)},
         get_embedding(M),
         p,
         X;
-        check_base_point = check_base_point,
         kwargs...,
     )
 end

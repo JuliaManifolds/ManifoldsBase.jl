@@ -24,11 +24,7 @@ function check_point(M::DefaultManifold, p; kwargs...)
     return nothing
 end
 
-function check_vector(M::DefaultManifold, p, X; check_base_point = true, kwargs...)
-    if check_base_point
-        perr = check_point(M, p)
-        perr === nothing || return perr
-    end
+function check_vector(M::DefaultManifold, p, X; kwargs...)
     if size(X) != representation_size(M)
         return DomainError(
             size(X),
