@@ -128,9 +128,9 @@ struct NLsolveInverseRetraction{TR<:AbstractRetractionMethod,TV,TK} <:
 end
 function NLsolveInverseRetraction(
     m,
-    X0=nothing;
-    project_tangent::Bool=false,
-    project_point::Bool=false,
+    X0 = nothing;
+    project_tangent::Bool = false,
+    project_point::Bool = false,
     nlsolve_kwargs...,
 )
     return NLsolveInverseRetraction(m, X0, project_point, project_tangent, nlsolve_kwargs)
