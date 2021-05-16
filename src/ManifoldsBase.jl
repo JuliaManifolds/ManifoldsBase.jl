@@ -530,7 +530,7 @@ export OutOfInjectivityRadiusError
 
 export AbstractRetractionMethod,
     ApproximateInverseRetraction,
-    NLsolveInverseRetraction
+    NLsolveInverseRetraction,
     ExponentialRetraction,
     QRRetraction,
     PolarRetraction,
