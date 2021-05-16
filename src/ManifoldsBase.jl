@@ -418,7 +418,7 @@ function embed!(M::Manifold, Y, p, X)
     return error(manifold_function_not_implemented_message(M, embed!, Y, p, X))
 end
 
-"""
+@doc raw"""
     exp(M::Manifold, p, X)
     exp(M::Manifold, p, X, t::Real = 1)
 
@@ -802,7 +802,7 @@ function representation_size(M::Manifold)
     return nothing
 end
 
-"""
+@doc raw"""
     retract(M::Manifold, p, X)
     retract(M::Manifold, p, X, t::Real=1)
     retract(M::Manifold, p, X, method::AbstractRetractionMethod)
@@ -813,7 +813,7 @@ from `p` into direction `X`, scaled by `t`, on the [`Manifold`](@ref) `M`.
 
 A retraction ``\operatorname{retr}_p: T_p\mathcal M`` is a smooth map that fulfills
 
-1. ``\operatorname{retr}_p(0) = p```
+1. ``\operatorname{retr}_p(0) = p``
 2. ``DR_p(0): T_p\mathcal M \to T_p\mathcal M`` is the identity map, i.e. ``DR_p(0)[X]=X``.
 
 The retraction is called of second order if for all ``X`` the curves ``c(t) = R_p(tX)``
