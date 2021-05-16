@@ -574,6 +574,21 @@ decorated_manifold(M::Manifold) = M.manifold
     m::LogarithmicInverseRetraction,
 )
 
+@decorator_transparent_signature inverse_retract(
+    M::AbstractDecoratorManifold,
+    p,
+    q,
+    m::NLsolveInverseRetraction,
+)
+
+@decorator_transparent_signature inverse_retract!(
+    M::AbstractDecoratorManifold,
+    X,
+    p,
+    q,
+    m::NLsolveInverseRetraction,
+)
+
 @decorator_transparent_signature isapprox(M::AbstractDecoratorManifold, p, q; kwargs...)
 @decorator_transparent_signature isapprox(M::AbstractDecoratorManifold, p, X, Y; kwargs...)
 

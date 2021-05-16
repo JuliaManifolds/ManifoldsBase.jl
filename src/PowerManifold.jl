@@ -655,6 +655,15 @@ function inverse_retract!(
 )
     return inverse_retract!(M, X, q, p, InversePowerRetraction(m))
 end
+function inverse_retract!(
+    M::AbstractPowerManifold,
+    X,
+    q,
+    p,
+    m::NLsolveInverseRetraction,
+)
+    return inverse_retract!(M, X, q, p, InversePowerRetraction(m))
+end
 
 @doc raw"""
     log(M::AbstractPowerManifold, p, q)
