@@ -59,6 +59,20 @@ Abstract type for methods for [`retract`](@ref)ing a tangent vector to a manifol
 abstract type AbstractRetractionMethod end
 
 """
+    ApproximateInverseRetraction <: AbstractInverseRetractionMethod
+
+An abstract type for representing approximate inverse retraction methods.
+"""
+abstract type ApproximateInverseRetraction <: AbstractInverseRetractionMethod end
+
+"""
+    ApproximateRetraction <: AbstractInverseRetractionMethod
+
+An abstract type for representing approximate retraction methods.
+"""
+abstract type ApproximateRetraction <: AbstractRetractionMethod end
+
+"""
     ExponentialRetraction
 
 Retraction using the exponential map.
@@ -941,6 +955,7 @@ export AbstractPowerRepresentation, NestedPowerRepresentation
 export OutOfInjectivityRadiusError
 
 export AbstractRetractionMethod,
+    ApproximateInverseRetraction,
     ExponentialRetraction,
     QRRetraction,
     PolarRetraction,
@@ -949,6 +964,7 @@ export AbstractRetractionMethod,
     InversePowerRetraction
 
 export AbstractInverseRetractionMethod,
+    ApproximateInverseRetraction,
     LogarithmicInverseRetraction,
     QRInverseRetraction,
     PolarInverseRetraction,
