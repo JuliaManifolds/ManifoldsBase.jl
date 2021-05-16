@@ -317,10 +317,22 @@ function at the level, where also information from `p` and `M` can be accessed.
 """
 copyto!(::Manifold, Y, p, X) = copyto!(Y, X)
 
-"""
+@doc raw"""
     distance(M::Manifold, p, q)
 
-Shortest distance between the points `p` and `q` on the [`Manifold`](@ref) `M`.
+Shortest distance between the points `p` and `q` on the [`Manifold`](@ref) `M`,
+i.e.
+
+```math
+d(p,q) = \inf_{γ} L(γ),
+```
+where the infimum is over all piecewise smooth curves ``γ: [a,b] \to \mathcal M``
+connecting ``γ(a)=p`` and ``γ(b)=q`` and
+
+```math
+L(γ) = \displaystyle\int_{a}^{b} \lVert \dotγ(t)\rVert_{γ(t)} \mathrm{d}t
+```
+is the length of the curve $γ$.
 """
 distance(M::Manifold, p, q) = norm(M, p, log(M, p, q))
 
@@ -411,7 +423,14 @@ end
     exp(M::Manifold, p, X, t::Real = 1)
 
 Compute the exponential map of tangent vector `X`, optionally scaled by `t`,  at point `p`
-from manifold the [`Manifold`](@ref) `M`.
+from manifold the [`Manifold`](@ref) `M`, i.e.
+
+```math
+\exp_pX = γ_{p,X}(1),
+```
+where ``γ_{p,X}`` is the unique (shortest) geodesic starting in ``γ(0)=p`` and ``\dot γ(0) = X`.
+
+See also [`shortest_geodesic`](@ref).
 """
 function exp(M::Manifold, p, X)
     q = allocate_result(M, exp, p, X)
@@ -427,6 +446,8 @@ exp(M::Manifold, p, X, t::Real) = exp(M, p, t * X)
 Compute the exponential map of tangent vector `X`, optionally scaled by `t`,  at point `p`
 from manifold the [`Manifold`](@ref) `M`.
 The result is saved to `q`.
+
+See also [`exp`](@ref).
 """
 function exp!(M::Manifold, q, p, X)
     return error(manifold_function_not_implemented_message(M, exp!, q, p, X))
@@ -502,6 +523,8 @@ Result is saved to `X`.
 Inverse retraction method can be specified by the last argument, defaulting to
 [`LogarithmicInverseRetraction`](@ref). See the documentation of respective manifolds for
 available methods.
+
+See also [`retract!`](@ref).
 """
 function inverse_retract!(M::Manifold, X, p, q)
     return inverse_retract!(M, X, p, q, LogarithmicInverseRetraction())
@@ -523,8 +546,12 @@ Compute the inverse retraction, a cheaper, approximate version of the
 [`log`](@ref)arithmic map), of points `p` and `q` on the [`Manifold`](@ref) `M`.
 
 Inverse retraction method can be specified by the last argument, defaulting to
-[`LogarithmicInverseRetraction`](@ref). See the documentation of respective manifolds for
-available methods.
+[`LogarithmicInverseRetraction`](@ref), since the [`log`](@ref)arithmic map is the inverse of a
+retraction, namely the [`exp`](@ref)onential map.
+For available invere retractions on certain manifolds see the documentation on the
+correspnonding manifold.
+
+See also [`retract`](@ref).
 """
 function inverse_retract(M::Manifold, p, q)
     X = allocate_result(M, inverse_retract, p, q)
@@ -594,6 +621,8 @@ end
     log(M::Manifold, p, q)
 
 Compute the logarithmic map of point `q` at base point `p` on the [`Manifold`](@ref) `M`.
+The logarithmic map is the inverse of the [`exp`](@ref)onential map.
+Note that the logarithmic map might not be globally defined.
 """
 function log(M::Manifold, p, q)
     X = allocate_result(M, log, p, q)
@@ -606,6 +635,8 @@ end
 
 Compute the logarithmic map of point `q` at base point `p` on the [`Manifold`](@ref) `M`.
 The result is saved to `X`.
+The logarithmic map is the inverse of the [`exp!`](@ref)onential map.
+Note that the logarithmic map might not be globally defined.
 """
 function log!(M::Manifold, X, p, q)
     return error(manifold_function_not_implemented_message(M, log!, X, p, q))
@@ -780,9 +811,19 @@ end
 Compute a retraction, a cheaper, approximate version of the [`exp`](@ref)onential map,
 from `p` into direction `X`, scaled by `t`, on the [`Manifold`](@ref) `M`.
 
+A retraction ``\operatorname{retr}_p: T_p\mathcal M`` is a smooth map that fulfills
+
+1. ``\operatorname{retr}_p(0) = p```
+2. ``DR_p(0): T_p\mathcal M \to T_p\mathcal M`` is the identity map, i.e. ``DR_p(0)[X]=X``.
+
+The retraction is called of second order if for all ``X`` the curves ``c(t) = R_p(tX)``
+have a zero acceleration at ``t=0``, i.e. ``c''(0) = 0``.
+
 Retraction method can be specified by the last argument, defaulting to
-[`ExponentialRetraction`](@ref). See the documentation of respective manifolds for available
-methods.
+[`ExponentialRetraction`](@ref), i.e. to use the [`exp`](@ref)onential map, which itself is
+a retraction. For further available retractions see the documentation of respective manifolds.
+
+Locally, the retraction is invertible. For the inverse operation, see [`inverse_retract`](@ref).
 """
 function retract(M::Manifold, p, X)
     q = allocate_result(M, retract, p, X)
@@ -812,6 +853,8 @@ Result is saved to `q`.
 Retraction method can be specified by the last argument, defaulting to
 [`ExponentialRetraction`](@ref). See the documentation of respective manifolds for available
 methods.
+
+See [`retract`](@ref) for more details.
 """
 retract!(M::Manifold, q, p, X) = retract!(M, q, p, X, ExponentialRetraction())
 retract!(M::Manifold, q, p, X, t::Real) = retract!(M, q, p, t * X)
@@ -826,8 +869,8 @@ end
 @doc doc"""
     shortest_geodesic(M::Manifold, p, q) -> Function
 
-Get a [`geodesic`](@ref) $\gamma_{p,q}(t)$ whose length is the shortest path between the
-points `p`and `q`, where $\gamma_{p,q}(0)=p$ and $\gamma_{p,q}(1)=q$. When there are
+Get a [`geodesic`](@ref) $γ_{p,q}(t)$ whose length is the shortest path between the
+points `p`and `q`, where $γ_{p,q}(0)=p$ and $γ_{p,q}(1)=q$. When there are
 multiple shortest geodesics, there is no guarantee which will be returned.
 
 This function returns a function of time, which may be a `Real` or an `AbstractVector`.
