@@ -454,12 +454,21 @@ function exp!(M::Manifold, q, p, X)
 end
 exp!(M::Manifold, q, p, X, t::Real) = exp!(M, q, p, t * X)
 
-"""
+@doc raw"""
     geodesic(M::Manifold, p, X) -> Function
 
 Get the geodesic with initial point `p` and velocity `X` on the [`Manifold`](@ref) `M`.
- The geodesic is the curve of constant velocity that is locally distance-minimizing.
- This function returns a function of (time) `t`.
+A geodesic is a curve of zero acceleration. That is for the curve ``γ_{p,X}: I → \mathcal M``,
+with ``γ_{p,X}(0) = p`` and ``\dot γ_{p,X}(0) = X`` a geodesic further fulfills
+
+```math
+∇_{\dot γ_{p,X}(t)} \dot γ_{p,X}(t) = 0,
+```
+
+i.e. the curve is acceleration free with respect to the Riemannian metric.
+This yields, that the curve has constant velocity that is locally distance-minimizing.
+
+This function returns a function of (time) `t`.
 
     geodesic(M::Manifold, x, v, t::Real)
     geodesic(M::Manifold, x, v, T::AbstractVector) -> AbstractVector
@@ -473,8 +482,8 @@ geodesic(M::Manifold, p, X, T::AbstractVector) = map(t -> exp(M, p, X, t), T)
 @doc doc"""
     injectivity_radius(M::Manifold, p)
 
-Return the distance $d$ such that [`exp(M, p, X)`](@ref exp(::Manifold, ::Any, ::Any)) is
-injective for all tangent vectors shorter than $d$ (i.e. has an inverse).
+Return the distance ``d`` such that [`exp(M, p, X)`](@ref exp(::Manifold, ::Any, ::Any)) is
+injective for all tangent vectors shorter than ``d`` (i.e. has an inverse).
 
     injectivity_radius(M::Manifold)
 
@@ -483,9 +492,9 @@ Infimum of the injectivity radius of all manifold points.
     injectivity_radius(M::Manifold[, x], method::AbstractRetractionMethod)
     injectivity_radius(M::Manifold, x, method::AbstractRetractionMethod)
 
-Distance $d$ such that
+Distance ``d`` such that
 [`retract(M, p, X, method)`](@ref retract(::Manifold, ::Any, ::Any, ::AbstractRetractionMethod))
-is injective for all tangent vectors shorter than $d$ (i.e. has an inverse) for point `p`
+is injective for all tangent vectors shorter than ``d`` (i.e. has an inverse) for point `p`
 if provided or all manifold points otherwise.
 """
 function injectivity_radius(M::Manifold)
@@ -871,14 +880,14 @@ end
 
 Get a [`geodesic`](@ref) $γ_{p,q}(t)$ whose length is the shortest path between the
 points `p`and `q`, where $γ_{p,q}(0)=p$ and $γ_{p,q}(1)=q$. When there are
-multiple shortest geodesics, there is no guarantee which will be returned.
+multiple shortest geodesics, a deterministic choice will be returned.
 
 This function returns a function of time, which may be a `Real` or an `AbstractVector`.
 
     shortest_geodesic(M::Manifold, p, q, t::Real)
     shortest_geodesic(M::Manifold, p, q, T::AbstractVector) -> AbstractVector
 
-Return the point at time `t` or points at times `t` in `T` along the shortest geodesic.
+Return the point at time `t` or points at times `t` in `T` along the shortest [`geodesic`](@ref).
 """
 shortest_geodesic(M::Manifold, p, q) = geodesic(M, p, log(M, p, q))
 shortest_geodesic(M::Manifold, p, q, t::Real) = geodesic(M, p, log(M, p, q), t)
