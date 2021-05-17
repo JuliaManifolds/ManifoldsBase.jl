@@ -244,7 +244,7 @@ See [`retract`](@ref) for more details.
 """
 retract!(M::Manifold, q, p, X) = retract!(M, q, p, X, ExponentialRetraction())
 retract!(M::Manifold, q, p, X, t::Real) = retract!(M, q, p, t * X)
-retract!(M::Manifold, q, p, X, method::ExponentialRetraction) = exp!(M, q, p, X)
+retract!(M::Manifold, q, p, X, ::ExponentialRetraction) = exp!(M, q, p, X)
 function retract!(M::Manifold, q, p, X, t::Real, method::AbstractRetractionMethod)
     return retract!(M, q, p, t * X, method)
 end
