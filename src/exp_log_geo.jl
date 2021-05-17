@@ -81,6 +81,8 @@ Compute the logarithmic map of point `q` at base point `p` on the [`Manifold`](@
 The result is saved to `X`.
 The logarithmic map is the inverse of the [`exp!`](@ref)onential map.
 Note that the logarithmic map might not be globally defined.
+
+see also [`log`](@ref) and [`inverse_retract!`](@ref),
 """
 function log!(M::Manifold, X, p, q)
     return error(manifold_function_not_implemented_message(M, log!, X, p, q))

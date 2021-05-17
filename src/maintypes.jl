@@ -12,6 +12,9 @@ real (ℝ) and complex (ℂ) manifolds.
 For subtypes the preferred order of parameters is: size and simple value parameters,
 followed by the [`AbstractNumbers`](@ref) `field`, followed by data type parameters,
 which might depend on the abstract number field type.
+
+For more details see [interface-types-and-functions](@ref) in the ManifoldsBase.jl documentation at
+[https://juliamanifolds.github.io/Manifolds.jl/stable/interface.html#Types-and-functions](https://juliamanifolds.github.io/Manifolds.jl/stable/interface.html#Types-and-functions).
 """
 abstract type Manifold{𝔽} end
 
