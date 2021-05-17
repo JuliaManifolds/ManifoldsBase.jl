@@ -3,7 +3,7 @@
     exp(M::Manifold, p, X, t::Real = 1)
 
 Compute the exponential map of tangent vector `X`, optionally scaled by `t`,  at point `p`
-from manifold the [`Manifold`](@ref) `M`, i.e.
+from the manifold [`Manifold`](@ref) `M`, i.e.
 
 ```math
 \exp_pX = γ_{p,X}(1),
