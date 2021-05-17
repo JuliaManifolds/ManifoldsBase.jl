@@ -8,7 +8,7 @@ from the manifold [`Manifold`](@ref) `M`, i.e.
 ```math
 \exp_pX = γ_{p,X}(1),
 ```
-where ``γ_{p,X}`` is the unique (shortest) geodesic starting in ``γ(0)=p`` and ``\dot γ(0) = X``.
+where ``γ_{p,X}`` is the unique geodesic starting in ``γ(0)=p`` and ``\dot γ(0) = X``.
 
 See also [`shortest_geodesic`](@ref), [`retract`](@ref).
 """
