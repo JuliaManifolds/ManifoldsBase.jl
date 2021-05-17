@@ -10,7 +10,7 @@ from manifold the [`Manifold`](@ref) `M`, i.e.
 ```
 where ``γ_{p,X}`` is the unique (shortest) geodesic starting in ``γ(0)=p`` and ``\dot γ(0) = X`.
 
-See also [`shortest_geodesic`](@ref).
+See also [`shortest_geodesic`](@ref), [`retract`](@ref).
 """
 function exp(M::Manifold, p, X)
     q = allocate_result(M, exp, p, X)
@@ -65,6 +65,8 @@ geodesic(M::Manifold, p, X, T::AbstractVector) = map(t -> exp(M, p, X, t), T)
 Compute the logarithmic map of point `q` at base point `p` on the [`Manifold`](@ref) `M`.
 The logarithmic map is the inverse of the [`exp`](@ref)onential map.
 Note that the logarithmic map might not be globally defined.
+
+See also [`inverse_retract`](@ref).
 """
 function log(M::Manifold, p, q)
     X = allocate_result(M, log, p, q)

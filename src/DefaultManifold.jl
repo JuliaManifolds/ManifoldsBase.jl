@@ -61,12 +61,12 @@ function get_basis(M::DefaultManifold, p, B::DiagonalizingOrthonormalBasis)
     return CachedBasis(B, DiagonalizingBasisData(B.frame_direction, eigenvalues, vecs))
 end
 
-function get_coordinates!(M::DefaultManifold, Y, ::Any, X, ::DefaultOrthonormalBasis)
+function get_coordinates!(M::DefaultManifold, Y, p, X, ::DefaultOrthonormalBasis)
     copyto!(Y, reshape(X, manifold_dimension(M)))
     return Y
 end
 
-function get_vector!(M::DefaultManifold, Y, ::Any, X, ::DefaultOrthonormalBasis)
+function get_vector!(M::DefaultManifold, Y, p, X, ::DefaultOrthonormalBasis)
     copyto!(Y, reshape(X, representation_size(M)))
     return Y
 end
