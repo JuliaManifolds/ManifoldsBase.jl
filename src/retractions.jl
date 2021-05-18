@@ -163,8 +163,8 @@ function inverse_retract!(M::Manifold, X, p, q, method::AbstractInverseRetractio
 end
 
 """
-    inverse_retract(M::Manifold, x, y)
-    inverse_retract(M::Manifold, x, y, method::AbstractInverseRetractionMethod
+    inverse_retract(M::Manifold, p, q)
+    inverse_retract(M::Manifold, p, q, method::AbstractInverseRetractionMethod
 
 Compute the inverse retraction, a cheaper, approximate version of the
 [`log`](@ref)arithmic map), of points `p` and `q` on the [`Manifold`](@ref) `M`.
@@ -172,7 +172,7 @@ Compute the inverse retraction, a cheaper, approximate version of the
 Inverse retraction method can be specified by the last argument, defaulting to
 [`LogarithmicInverseRetraction`](@ref), since the [`log`](@ref)arithmic map is the inverse of a
 retraction, namely the [`exp`](@ref)onential map.
-For available invere retractions on certain manifolds see the documentation on the
+For available inverse retractions on certain manifolds see the documentation on the
 correspnonding manifold.
 
 See also [`retract`](@ref).
