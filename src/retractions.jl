@@ -197,10 +197,12 @@ end
 Compute a retraction, a cheaper, approximate version of the [`exp`](@ref)onential map,
 from `p` into direction `X`, scaled by `t`, on the [`Manifold`](@ref) `M`.
 
-A retraction ``\operatorname{retr}_p: T_p\mathcal M`` is a smooth map that fulfills
+A retraction ``\operatorname{retr}_p: T_p\mathcal M → \mathcal M`` is a smooth map that fulfills
 
 1. ``\operatorname{retr}_p(0) = p``
-2. ``DR_p(0): T_p\mathcal M \to T_p\mathcal M`` is the identity map, i.e. ``DR_p(0)[X]=X``.
+2. ``D\operatorname{retr}_p(0): T_p\mathcal M \to T_p\mathcal M`` is the identity map, i.e. ``D\operatorname{retr}_p(0)[X]=X``,
+
+where ``D\operatorname{retr}_p`` denotes the differential of the retraction
 
 The retraction is called of second order if for all ``X`` the curves ``c(t) = R_p(tX)``
 have a zero acceleration at ``t=0``, i.e. ``c''(0) = 0``.
