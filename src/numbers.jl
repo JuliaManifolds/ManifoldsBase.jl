@@ -77,8 +77,8 @@ real_dimension(::ComplexNumbers) = 2
 real_dimension(::QuaternionNumbers) = 4
 
 @doc raw"""
-    number_system(M::Manifold{𝔽})
+    number_system(M::AbstractManifold{𝔽})
 
 Return the number system the manifold `M` is based on, i.e. the parameter `𝔽`.
 """
-number_system(M::Manifold{𝔽}) where {𝔽} = 𝔽
+number_system(M::AbstractManifold{𝔽}) where {𝔽} = 𝔽

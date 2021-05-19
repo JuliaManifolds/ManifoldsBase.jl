@@ -20,12 +20,12 @@ transparently used from the embedding, for example the [`inner`](@ref) product o
 compuation onwards to the embedding (note again, that no [`embed`](@ref) is required)
 and hence avoids to reimplement these methods in the manifold that is embedded.
 
-This should be used for example for [`check_manifold_point`](@ref) or [`check_tangent_vector`](@ref),
+This should be used for example for [`check_point`](@ref) or [`check_vector`](@ref),
 which should first invoke the test of the embedding and then test further constraints
 the representation in the embedding has for these points to be valid.
 
 Technically this is realised by making the [`AbstractEmbeddedManifold`](@ref) is a decorator
-for the [`Manifold`](@ref)s that are subtypes.
+for the [`AbstractManifold`](@ref)s that are subtypes.
 """
 abstract type AbstractEmbeddedManifold{𝔽,T<:AbstractEmbeddingType} <:
               AbstractDecoratorManifold{𝔽} end
@@ -68,9 +68,9 @@ and logarithmic maps.
 struct TransparentIsometricEmbedding <: AbstractIsometricEmbeddingType end
 
 """
-    EmbeddedManifold{𝔽, MT <: Manifold, NT <: Manifold} <: AbstractDecoratorManifold{𝔽}
+    EmbeddedManifold{𝔽, MT <: AbstractManifold, NT <: AbstractManifold} <: AbstractDecoratorManifold{𝔽}
 
-A type to represent an explicit embedding of a [`Manifold`](@ref) `M` of type `MT` embedded
+A type to represent an explicit embedding of a [`AbstractManifold`](@ref) `M` of type `MT` embedded
 into a manifold `N` of type `NT`.
 
 !!!note
@@ -88,10 +88,11 @@ into a manifold `N` of type `NT`.
 
     EmbeddedManifold(M, N)
 
-Generate the `EmbeddedManifold` of the [`Manifold`](@ref) `M` into the
-[`Manifold`](@ref) `N`.
+Generate the `EmbeddedManifold` of the [`AbstractManifold`](@ref) `M` into the
+[`AbstractManifold`](@ref) `N`.
 """
-struct EmbeddedManifold{𝔽,MT<:Manifold{𝔽},NT<:Manifold} <: AbstractDecoratorManifold{𝔽}
+struct EmbeddedManifold{𝔽,MT<:AbstractManifold{𝔽},NT<:AbstractManifold} <:
+       AbstractDecoratorManifold{𝔽}
     manifold::MT
     embedding::NT
 end
@@ -137,14 +138,14 @@ base_manifold(M::EmbeddedManifold, d::Val{N} = Val(-1)) where {N} = M.manifold
 
 
 """
-    check_manifold_point(M::AbstractEmbeddedManifold, p; kwargs)
+    check_point(M::AbstractEmbeddedManifold, p; kwargs)
 
 check whether a point `p` is a valid point on the [`AbstractEmbeddedManifold`](@ref),
 i.e. that `embed(M, p)` is a valid point on the embedded manifold.
 """
-function check_manifold_point(M::AbstractEmbeddedManifold, p; kwargs...)
+function check_point(M::AbstractEmbeddedManifold, p; kwargs...)
     return invoke(
-        check_manifold_point,
+        check_point,
         Tuple{typeof(get_embedding(M)),typeof(p)},
         get_embedding(M),
         p;
@@ -153,29 +154,17 @@ function check_manifold_point(M::AbstractEmbeddedManifold, p; kwargs...)
 end
 
 """
-    check_tangent_vector(M::AbstractEmbeddedManifold, p, X; check_base_point = true, kwargs...)
+    check_vector(M::AbstractEmbeddedManifold, p, X; kwargs...)
 
-check that `embed(M, p, X)` is a valid tangent to `embed(M, p)`, where `check_base_point`
-determines whether the validity of `p` is checked, too.
+Check that `embed(M, p, X)` is a valid tangent to `embed(M, p)`.
 """
-function check_tangent_vector(
-    M::AbstractEmbeddedManifold,
-    p,
-    X;
-    check_base_point = true,
-    kwargs...,
-)
-    if check_base_point
-        mpe = check_manifold_point(M, p; kwargs...)
-        mpe === nothing || return mpe
-    end
+function check_vector(M::AbstractEmbeddedManifold, p, X; kwargs...)
     return invoke(
-        check_tangent_vector,
+        check_vector,
         Tuple{typeof(get_embedding(M)),typeof(p),typeof(X)},
         get_embedding(M),
         p,
         X;
-        check_base_point = check_base_point,
         kwargs...,
     )
 end
@@ -194,7 +183,7 @@ embed!(::AbstractEmbeddedManifold, Y, p, X) = copyto!(Y, X)
 """
     get_embedding(M::AbstractEmbeddedManifold)
 
-Return the [`Manifold`](@ref) `N` an [`AbstractEmbeddedManifold`](@ref) is embedded into.
+Return the [`AbstractManifold`](@ref) `N` an [`AbstractEmbeddedManifold`](@ref) is embedded into.
 """
 get_embedding(::AbstractEmbeddedManifold)
 
@@ -205,7 +194,7 @@ end
 """
     get_embedding(M::EmbeddedManifold)
 
-Return the [`Manifold`](@ref) `N` an [`EmbeddedManifold`](@ref) is embedded into.
+Return the [`AbstractManifold`](@ref) `N` an [`EmbeddedManifold`](@ref) is embedded into.
 """
 get_embedding(::EmbeddedManifold)
 
@@ -219,7 +208,10 @@ function project(M::EmbeddedManifold, p)
     return q
 end
 
-function show(io::IO, M::EmbeddedManifold{𝔽,MT,NT}) where {𝔽,MT<:Manifold{𝔽},NT<:Manifold}
+function show(
+    io::IO,
+    M::EmbeddedManifold{𝔽,MT,NT},
+) where {𝔽,MT<:AbstractManifold{𝔽},NT<:AbstractManifold}
     return print(io, "EmbeddedManifold($(M.manifold), $(M.embedding))")
 end
 
@@ -227,7 +219,7 @@ function default_decorator_dispatch(::EmbeddedManifold)
     return Val(true)
 end
 
-@doc doc"""
+@doc raw"""
     default_embedding_dispatch(M::AbstractEmbeddedManifold)
 
 This method indicates that an [`AbstractEmbeddedManifold`](@ref) is the default
@@ -239,14 +231,14 @@ By default this is set to `Val(false)`.
 default_embedding_dispatch(M::AbstractEmbeddedManifold) = Val(false)
 
 function decorator_transparent_dispatch(
-    ::typeof(check_manifold_point),
+    ::typeof(check_point),
     ::AbstractEmbeddedManifold,
     args...,
 )
     return Val(:intransparent)
 end
 function decorator_transparent_dispatch(
-    ::typeof(check_tangent_vector),
+    ::typeof(check_vector),
     ::AbstractEmbeddedManifold,
     args...,
 )

@@ -4,7 +4,7 @@ using ManifoldsBase: AbstractNumbers, ℝ, ℂ
 
 struct DummyPowerRepresentation <: AbstractPowerRepresentation end
 
-@testset "Power Manifold" begin
+@testset "Power AbstractManifold" begin
     M = ManifoldsBase.DefaultManifold(3)
     N = PowerManifold(M, NestedPowerRepresentation(), 2)
     p = [zeros(3), ones(3)]
@@ -31,23 +31,23 @@ struct DummyPowerRepresentation <: AbstractPowerRepresentation end
     @testset "point/tangent checks" begin
         pE1 = [zeros(3), ones(2)] # one component wrong
         pE2 = [zeros(2), ones(2)] # both wrong
-        @test is_manifold_point(N, p)
-        @test is_manifold_point(N, p, true)
-        @test !is_manifold_point(N, pE1)
-        @test !is_manifold_point(N, pE2)
-        @test_throws ComponentManifoldError is_manifold_point(N, pE1, true)
-        @test_throws CompositeManifoldError is_manifold_point(N, pE2, true)
+        @test is_point(N, p)
+        @test is_point(N, p, true)
+        @test !is_point(N, pE1)
+        @test !is_point(N, pE2)
+        @test_throws ComponentManifoldError is_point(N, pE1, true)
+        @test_throws CompositeManifoldError is_point(N, pE2, true)
         # tangent - test base
-        @test is_tangent_vector(N, p, p)
-        @test is_tangent_vector(N, p, p, true)
-        @test !is_tangent_vector(N, pE1, p)
-        @test !is_tangent_vector(N, pE2, p)
+        @test is_vector(N, p, p)
+        @test is_vector(N, p, p, true)
+        @test !is_vector(N, pE1, p)
+        @test !is_vector(N, pE2, p)
         # tangents - with proper base
-        @test is_tangent_vector(N, p, p, true)
-        @test !is_tangent_vector(N, p, pE1)
-        @test !is_tangent_vector(N, p, pE2)
-        @test_throws ComponentManifoldError is_tangent_vector(N, p, pE1, true)
-        @test_throws CompositeManifoldError is_tangent_vector(N, p, pE2, true)
+        @test is_vector(N, p, p, true)
+        @test !is_vector(N, p, pE1)
+        @test !is_vector(N, p, pE2)
+        @test_throws ComponentManifoldError is_vector(N, p, pE1, true)
+        @test_throws CompositeManifoldError is_vector(N, p, pE2, true)
     end
     @testset "specific functions" begin
         @test distance(N, p, q) == sqrt(sum(distance.(Ref(M), p, q) .^ 2))
@@ -111,7 +111,7 @@ struct DummyPowerRepresentation <: AbstractPowerRepresentation end
         @test B.data.bases[1].data == get_basis(M, p[1], DefaultBasis()).data
         @test B.data.bases[2].data == get_basis(M, p[2], DefaultBasis()).data
         @test get_vector(N, p, v, B) == q
-        @test zero_tangent_vector(N, p) == [zeros(3), zeros(3)]
+        @test zero_vector(N, p) == [zeros(3), zeros(3)]
         B2 = DiagonalizingOrthonormalBasis([ones(3), ones(3)])
         B3 = get_basis(N, p, B2)
         @test sprint(show, "text/plain", B) == """$(DefaultBasis()) for a power manifold
@@ -127,6 +127,6 @@ struct DummyPowerRepresentation <: AbstractPowerRepresentation end
         p = [1.0, 2.0, 3.0]
 
         @test p[N, 1] == 1.0
-        @test zero_tangent_vector(N, p) == zero(p)
+        @test zero_vector(N, p) == zero(p)
     end
 end

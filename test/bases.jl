@@ -1,11 +1,14 @@
 using LinearAlgebra
 using ManifoldsBase
 using ManifoldsBase: DefaultManifold, ℝ, ℂ
+using ManifoldsBase: CotangentSpace, CotangentSpaceType, TangentSpace, TangentSpaceType
+using ManifoldsBase: FVector, CoTFVector, TFVector
 using Test
 import Base: +, -, *, copyto!, isapprox
 import ManifoldsBase: allocate
 
-struct ProjManifold <: Manifold{ℝ} end
+
+struct ProjManifold <: AbstractManifold{ℝ} end
 
 ManifoldsBase.inner(::ProjManifold, x, w, v) = dot(w, v)
 ManifoldsBase.project!(::ProjManifold, w, x, v) = (w .= v .- dot(x, v) .* x)
@@ -44,7 +47,7 @@ ManifoldsBase.get_vector(::ProjManifold, x, v, ::DefaultOrthonormalBasis) = reve
     ) === Val(:transparent)
 end
 
-struct ProjectionTestManifold <: Manifold{ℝ} end
+struct ProjectionTestManifold <: AbstractManifold{ℝ} end
 
 ManifoldsBase.inner(::ProjectionTestManifold, ::Any, X, Y) = dot(X, Y)
 function ManifoldsBase.project!(::ProjectionTestManifold, Y, p, X)
@@ -110,8 +113,8 @@ ManifoldsBase.manifold_dimension(::ProjectionTestManifold) = 100
     end
 end
 
-struct NonManifold <: Manifold{ℝ} end
-struct NonBasis <: ManifoldsBase.AbstractBasis{ℝ} end
+struct NonManifold <: AbstractManifold{ℝ} end
+struct NonBasis <: ManifoldsBase.AbstractBasis{ℝ,TangentSpaceType} end
 
 struct NonBroadcastBasisThing{T}
     v::T
@@ -157,9 +160,9 @@ function ManifoldsBase.exp!(
 end
 
 function ManifoldsBase.get_basis(
-    M::DefaultManifold,
+    ::DefaultManifold,
     p::NonBroadcastBasisThing,
-    B::DefaultOrthonormalBasis,
+    B::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
 )
     return CachedBasis(
         B,
@@ -170,9 +173,9 @@ function ManifoldsBase.get_basis(
     )
 end
 function ManifoldsBase.get_basis(
-    M::DefaultManifold,
+    ::DefaultManifold,
     p::NonBroadcastBasisThing,
-    B::DefaultOrthogonalBasis,
+    B::DefaultOrthogonalBasis{ℝ,TangentSpaceType},
 )
     return CachedBasis(
         B,
@@ -183,9 +186,9 @@ function ManifoldsBase.get_basis(
     )
 end
 function ManifoldsBase.get_basis(
-    M::DefaultManifold,
+    ::DefaultManifold,
     p::NonBroadcastBasisThing,
-    B::DefaultBasis,
+    B::DefaultBasis{ℝ,TangentSpaceType},
 )
     return CachedBasis(
         B,
@@ -199,9 +202,9 @@ end
 function ManifoldsBase.get_coordinates!(
     M::DefaultManifold,
     Y,
-    p::NonBroadcastBasisThing,
+    ::NonBroadcastBasisThing,
     X::NonBroadcastBasisThing,
-    B::DefaultOrthonormalBasis,
+    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
 )
     copyto!(Y, reshape(X.v, manifold_dimension(M)))
     return Y
@@ -210,9 +213,9 @@ end
 function ManifoldsBase.get_vector!(
     M::DefaultManifold,
     Y::NonBroadcastBasisThing,
-    p::NonBroadcastBasisThing,
+    ::NonBroadcastBasisThing,
     X,
-    B::DefaultOrthonormalBasis,
+    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
 )
     copyto!(Y.v, reshape(X, representation_size(M)))
     return Y
@@ -220,11 +223,11 @@ end
 
 function ManifoldsBase.inner(
     ::DefaultManifold,
-    x::NonBroadcastBasisThing,
-    v::NonBroadcastBasisThing,
-    w::NonBroadcastBasisThing,
+    ::NonBroadcastBasisThing,
+    X::NonBroadcastBasisThing,
+    Y::NonBroadcastBasisThing,
 )
-    return dot(v.v, w.v)
+    return dot(X.v, Y.v)
 end
 
 ManifoldsBase._get_vector_cache_broadcast(::NonBroadcastBasisThing) = Val(false)
@@ -238,7 +241,7 @@ DiagonalizingBasisProxy() = DiagonalizingOrthonormalBasis([1.0, 0.0, 0.0])
         onb = DefaultOrthonormalBasis()
 
         @test_throws ErrorException get_basis(m, [0], onb)
-        @test_throws ErrorException get_basis(m, [0], NonBasis())
+        @test_throws MethodError get_basis(m, [0], NonBasis())
         @test_throws ErrorException get_coordinates(m, [0], [0], onb)
         @test_throws ErrorException get_coordinates!(m, [0], [0], [0], onb)
         @test_throws ErrorException get_vector(m, [0], [0], onb)
@@ -247,6 +250,18 @@ DiagonalizingBasisProxy() = DiagonalizingOrthonormalBasis([1.0, 0.0, 0.0])
     end
 
     M = DefaultManifold(3)
+
+    @testset "Constructors" begin
+        @test DefaultBasis{ℂ,TangentSpaceType}() === DefaultBasis(ℂ)
+        @test DefaultOrthogonalBasis{ℂ,TangentSpaceType}() === DefaultOrthogonalBasis(ℂ)
+        @test DefaultOrthonormalBasis{ℂ,TangentSpaceType}() === DefaultOrthonormalBasis(ℂ)
+
+        @test DefaultBasis{ℂ}(CotangentSpace) === DefaultBasis(ℂ, CotangentSpace)
+        @test DefaultOrthogonalBasis{ℂ}(CotangentSpace) ===
+              DefaultOrthogonalBasis(ℂ, CotangentSpace)
+        @test DefaultOrthonormalBasis{ℂ}(CotangentSpace) ===
+              DefaultOrthonormalBasis(ℂ, CotangentSpace)
+    end
 
     _pts = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
     @testset "basis representation" for BT in (
@@ -273,11 +288,15 @@ DiagonalizingBasisProxy() = DiagonalizingOrthonormalBasis([1.0, 0.0, 0.0])
         b = get_basis(M, pts[1], BT())
         if BT != DiagonalizingBasisProxy
             if pts[1] isa Array
-                @test isa(b, CachedBasis{ℝ,BT{ℝ},Vector{Vector{Float64}}})
+                @test isa(b, CachedBasis{ℝ,BT{ℝ,TangentSpaceType},Vector{Vector{Float64}}})
             else
                 @test isa(
                     b,
-                    CachedBasis{ℝ,BT{ℝ},Vector{NonBroadcastBasisThing{Vector{Float64}}}},
+                    CachedBasis{
+                        ℝ,
+                        BT{ℝ,TangentSpaceType},
+                        Vector{NonBroadcastBasisThing{Vector{Float64}}},
+                    },
                 )
             end
         end
@@ -348,12 +367,13 @@ end
     @test sprint(show, ProjectedOrthonormalBasis(:gram_schmidt, ℂ)) ==
           "ProjectedOrthonormalBasis(:gram_schmidt, ℂ)"
 
-    @test sprint(show, "text/plain", DiagonalizingOrthonormalBasis(Float64[1, 2, 3])) == """
-                                                                               DiagonalizingOrthonormalBasis(ℝ) with eigenvalue 0 in direction:
-                                                                               3-element $(sprint(show, Vector{Float64})):
-                                                                                 1.0
-                                                                                 2.0
-                                                                                 3.0"""
+    diag_onb = DiagonalizingOrthonormalBasis(Float64[1, 2, 3])
+    @test sprint(show, "text/plain", diag_onb) == """
+    DiagonalizingOrthonormalBasis(ℝ) with eigenvalue 0 in direction:
+    3-element $(sprint(show, Vector{Float64})):
+      1.0
+      2.0
+      3.0"""
 
     M = DefaultManifold(2, 3)
     x = collect(reshape(1.0:6.0, (2, 3)))
@@ -443,4 +463,64 @@ end
     Eigenvalues:
      1-element $(sprint(show, Vector{Float64})):
       1.0"""
+end
+
+@testset "Bases of cotangent spaces" begin
+    b1 = DefaultOrthonormalBasis(ℝ, CotangentSpace)
+    @test b1.vector_space == CotangentSpace
+
+    b2 = DefaultOrthogonalBasis(ℝ, CotangentSpace)
+    @test b2.vector_space == CotangentSpace
+
+    b3 = DefaultBasis(ℝ, CotangentSpace)
+    @test b3.vector_space == CotangentSpace
+
+    M = DefaultManifold(2; field = ℂ)
+    p = [1.0, 2.0im]
+    b1_d = ManifoldsBase.dual_basis(M, p, b1)
+    @test b1_d isa DefaultOrthonormalBasis
+    @test b1_d.vector_space == TangentSpace
+
+    b1_d_d = ManifoldsBase.dual_basis(M, p, b1_d)
+    @test b1_d_d isa DefaultOrthonormalBasis
+    @test b1_d_d.vector_space == CotangentSpace
+end
+
+@testset "FVector" begin
+    @test sprint(show, TangentSpace) == "TangentSpace"
+    @test sprint(show, CotangentSpace) == "CotangentSpace"
+    tvs = ([1.0, 0.0, 0.0], [0.0, 1.0, 0.0])
+    fv_tvs = map(v -> TFVector(v, DefaultOrthonormalBasis()), tvs)
+    fv1 = fv_tvs[1]
+    tv1s = allocate(fv_tvs[1])
+    @test isa(tv1s, FVector)
+    @test tv1s.type == TangentSpace
+    @test size(tv1s.data) == size(tvs[1])
+    @test number_eltype(tv1s) == number_eltype(tvs[1])
+    @test number_eltype(tv1s) == number_eltype(typeof(tv1s))
+    @test isa(fv1 + fv1, FVector)
+    @test (fv1 + fv1).type == TangentSpace
+    @test isa(fv1 - fv1, FVector)
+    @test (fv1 - fv1).type == TangentSpace
+    @test isa(-fv1, FVector)
+    @test (-fv1).type == TangentSpace
+    @test isa(2 * fv1, FVector)
+    @test (2 * fv1).type == TangentSpace
+    tv1s_32 = allocate(fv_tvs[1], Float32)
+    @test isa(tv1s, FVector)
+    @test eltype(tv1s_32.data) === Float32
+    copyto!(tv1s, fv_tvs[2])
+    @test isapprox(tv1s.data, fv_tvs[2].data)
+
+    cofv1 = CoTFVector(tvs[1], DefaultOrthonormalBasis(ℝ, CotangentSpace))
+    @test cofv1 isa CoTFVector
+end
+
+@testset "vector_space_dimension" begin
+    M = ManifoldsBase.DefaultManifold(3)
+    MC = ManifoldsBase.DefaultManifold(3; field = ℂ)
+    @test ManifoldsBase.vector_space_dimension(M, TangentSpace) == 3
+    @test ManifoldsBase.vector_space_dimension(M, CotangentSpace) == 3
+    @test ManifoldsBase.vector_space_dimension(MC, TangentSpace) == 6
+    @test ManifoldsBase.vector_space_dimension(MC, CotangentSpace) == 6
 end

@@ -3,7 +3,7 @@ using Test
 using ManifoldsBase:
     combine_allocation_promotion_functions, allocation_promotion_function, ℝ
 
-struct AllocManifold{𝔽} <: Manifold{𝔽} end
+struct AllocManifold{𝔽} <: AbstractManifold{𝔽} end
 AllocManifold() = AllocManifold{ℝ}()
 
 function ManifoldsBase.exp!(::AllocManifold, v, x, y)
