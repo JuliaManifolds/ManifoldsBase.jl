@@ -27,7 +27,6 @@ include("projections.jl")
 
 
 """
->>>>>>> master
     OutOfInjectivityRadiusError
 
 An error thrown when a function (for example [`log`](@ref)arithmic map or
