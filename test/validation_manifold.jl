@@ -75,7 +75,7 @@ end
             @test isapprox(A, 2 * a, T(2 .* v))
         end
     end
-    @testset "Manifold functions" begin
+    @testset "AbstractManifold functions" begin
         @test manifold_dimension(A) == manifold_dimension(M)
         @test isapprox(y2.value, y)
         @test distance(A, x, y) == distance(M, x, y)
@@ -97,7 +97,7 @@ end
         @test mp == 0.5 * (x .+ y)
         @test isapprox(A, x, v2s, v2)
         @test isapprox(A, exp(A, x, v), y2)
-        @test isapprox(A, zero_tangent_vector(A, x), zero_tangent_vector(M, x))
+        @test isapprox(A, zero_vector(A, x), zero_vector(M, x))
         vector_transport_to!(A, v2s, x2, v2, y2)
         @test isapprox(A, x2, v2, v2s)
         vector_transport_to!(A, v2s, x2, v2, y2, ManifoldsBase.SchildsLadderTransport())
@@ -106,8 +106,8 @@ end
         @test isapprox(A, x2, v2, v2s)
         vector_transport_to!(A, v2s, x2, v2, y2, ManifoldsBase.ProjectionTransport())
         @test isapprox(A, x2, v2, v2s)
-        zero_tangent_vector!(A, v2s, x)
-        @test isapprox(A, x, v2s, zero_tangent_vector(M, x))
+        zero_vector!(A, v2s, x)
+        @test isapprox(A, x, v2s, zero_vector(M, x))
         c = [x2]
         v3 = similar(v2)
         @test isapprox(

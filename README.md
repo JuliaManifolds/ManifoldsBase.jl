@@ -18,7 +18,7 @@ A further type to represent the field of quaternions (`ℍ`) can also be used.
 
 ## Bases
 
-Several different types of bases for a tangent space at `p` on a [`Manifold`](https://juliamanifolds.github.io/Manifolds.jl/stable/interface.html#ManifoldsBase.Manifold) are provided.
+Several different types of bases for a tangent space at `p` on a [`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/stable/interface.html#ManifoldsBase.AbstractManifold) are provided.
 Methods are provided to obtain such a basis, to represent a tangent vector in a basis and to reconstruct a tangent vector from coefficients with respect to a basis.
 The last two can be performed without computing the complete basis.
 Further a basis can be cached and hence be reused, see [`CachedBasis`](https://juliamanifolds.github.io/Manifolds.jl/stable/interface.html#ManifoldsBase.CachedBasis).

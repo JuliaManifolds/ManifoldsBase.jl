@@ -2,14 +2,14 @@ using ManifoldsBase
 
 using Test
 import Base: *
-struct NonManifold <: Manifold{ManifoldsBase.ℝ} end
-struct NonMPoint <: MPoint end
+struct NonManifold <: AbstractManifold{ManifoldsBase.ℝ} end
+struct NonMPoint <: AbstractManifoldPoint end
 struct NonTVector <: TVector end
 struct NonCoTVector <: CoTVector end
 struct NotImplementedRetraction <: AbstractRetractionMethod end
 struct NotImplementedInverseRetraction <: AbstractInverseRetractionMethod end
 *(t::Float64, X::NonTVector) = X
-@testset "Manifold with empty implementation" begin
+@testset "AbstractManifold with empty implementation" begin
     M = NonManifold()
     p = NonMPoint()
     v = NonTVector()
@@ -133,18 +133,18 @@ struct NotImplementedInverseRetraction <: AbstractInverseRetractionMethod end
     @test_throws ErrorException injectivity_radius(M, [0])
     @test_throws ErrorException injectivity_radius(M, [0], exp_retr)
 
-    @test_throws ErrorException zero_tangent_vector!(M, [0], [0])
-    @test_throws ErrorException zero_tangent_vector(M, [0])
+    @test_throws ErrorException zero_vector!(M, [0], [0])
+    @test_throws ErrorException zero_vector(M, [0])
 
-    @test check_manifold_point(M, [0]) === nothing
-    @test check_manifold_point(M, p) === nothing
-    @test is_manifold_point(M, [0])
-    @test check_manifold_point(M, [0]) === nothing
+    @test check_point(M, [0]) === nothing
+    @test check_point(M, p) === nothing
+    @test is_point(M, [0])
+    @test check_point(M, [0]) === nothing
 
-    @test check_tangent_vector(M, [0], [0]) === nothing
-    @test check_tangent_vector(M, p, v) === nothing
-    @test is_tangent_vector(M, [0], [0])
-    @test check_tangent_vector(M, [0], [0]) === nothing
+    @test check_vector(M, [0], [0]) === nothing
+    @test check_vector(M, p, v) === nothing
+    @test is_vector(M, [0], [0])
+    @test check_vector(M, [0], [0]) === nothing
 
     @test_throws ErrorException hat!(M, [0], [0], [0])
     @test_throws ErrorException vee!(M, [0], [0], [0])

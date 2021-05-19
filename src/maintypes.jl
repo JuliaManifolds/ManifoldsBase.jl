@@ -1,7 +1,7 @@
 """
-    Manifold{F}
+    AbstractManifold{F}
 
-A manifold type. The `Manifold` is used to dispatch to different functions on a manifold,
+A manifold type. The `AbstractManifold` is used to dispatch to different functions on a manifold,
 usually as the first argument of the function. Examples are the [`exp`](@ref)onential and
 [`log`](@ref)arithmic maps as well as more general functions that are built on them like the
 [`geodesic`](@ref).
@@ -16,22 +16,22 @@ which might depend on the abstract number field type.
 For more details see [interface-types-and-functions](@ref) in the ManifoldsBase.jl documentation at
 [https://juliamanifolds.github.io/Manifolds.jl/stable/interface.html#Types-and-functions](https://juliamanifolds.github.io/Manifolds.jl/stable/interface.html#Types-and-functions).
 """
-abstract type Manifold{𝔽} end
+abstract type AbstractManifold{𝔽} end
 
 """
-    MPoint
+    AbstractManifoldPoint
 
-Type for a point on a manifold. While a [`Manifold`](@ref) does not necessarily require this
+Type for a point on a manifold. While a [`AbstractManifold`](@ref) does not necessarily require this
 type, for example when it is implemented for `Vector`s or `Matrix` type elements, this type
 can be used for more complicated representations, semantic verification, or even dispatch
 for different representations of points on a manifold.
 """
-abstract type MPoint end
+abstract type AbstractManifoldPoint end
 
 """
     TVector
 
-Type for a tangent vector of a manifold. While a [`Manifold`](@ref) does not necessarily
+Type for a tangent vector of a manifold. While a [`AbstractManifold`](@ref) does not necessarily
 require this type, for example when it is implemented for `Vector`s or `Matrix` type
 elements, this type can be used for more complicated representations, semantic verification,
 or even dispatch for different representations of tangent vectors and their types on a
@@ -42,7 +42,7 @@ abstract type TVector end
 """
     CoTVector
 
-Type for a cotangent vector of a manifold. While a [`Manifold`](@ref) does not necessarily
+Type for a cotangent vector of a manifold. While a [`AbstractManifold`](@ref) does not necessarily
 require this type, for example when it is implemented for `Vector`s or `Matrix` type
 elements, this type can be used for more complicated representations, semantic verification,
 or even dispatch for different representations of cotangent vectors and their types on a

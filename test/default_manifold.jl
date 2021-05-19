@@ -69,46 +69,41 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
             tv1 = log(M, pts[1], pts[2])
 
             for pt in pts
-                @test is_manifold_point(M, pt)
+                @test is_point(M, pt)
             end
-            @test is_tangent_vector(M, pts[1], tv1; atol = eps(eltype(pts[1])))
+            @test is_vector(M, pts[1], tv1; atol = eps(eltype(pts[1])))
 
             tv2 = log(M, pts[2], pts[1])
             @test isapprox(M, pts[2], exp(M, pts[1], tv1))
             @test isapprox(M, pts[1], exp(M, pts[1], tv1, 0))
             @test isapprox(M, pts[2], exp(M, pts[1], tv1, 1))
             @test isapprox(M, pts[1], exp(M, pts[2], tv2))
-            @test is_manifold_point(M, retract(M, pts[1], tv1))
+            @test is_point(M, retract(M, pts[1], tv1))
             @test isapprox(M, pts[1], retract(M, pts[1], tv1, 0))
 
-            @test is_manifold_point(M, retract(M, pts[1], tv1, rm))
+            @test is_point(M, retract(M, pts[1], tv1, rm))
             @test isapprox(M, pts[1], retract(M, pts[1], tv1, 0, rm))
 
             new_pt = exp(M, pts[1], tv1)
             retract!(M, new_pt, pts[1], tv1)
-            @test is_manifold_point(M, new_pt)
+            @test is_point(M, new_pt)
             for x in pts
+                @test isapprox(M, zero_vector(M, x), log(M, x, x); atol = eps(eltype(x)))
                 @test isapprox(
                     M,
-                    zero_tangent_vector(M, x),
-                    log(M, x, x);
-                    atol = eps(eltype(x)),
-                )
-                @test isapprox(
-                    M,
-                    zero_tangent_vector(M, x),
+                    zero_vector(M, x),
                     inverse_retract(M, x, x);
                     atol = eps(eltype(x)),
                 )
                 @test isapprox(
                     M,
-                    zero_tangent_vector(M, x),
+                    zero_vector(M, x),
                     inverse_retract(M, x, x, irm);
                     atol = eps(eltype(x)),
                 )
             end
-            zero_tangent_vector!(M, tv1, pts[1])
-            @test isapprox(M, pts[1], tv1, zero_tangent_vector(M, pts[1]))
+            zero_vector!(M, tv1, pts[1])
+            @test isapprox(M, pts[1], tv1, zero_vector(M, pts[1]))
             log!(M, tv1, pts[1], pts[2])
             @test norm(M, pts[1], tv1) ≈ sqrt(inner(M, pts[1], tv1, tv1))
 
@@ -152,7 +147,7 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
                     M,
                     pts[1],
                     0 * tv1,
-                    zero_tangent_vector(M, pts[1]);
+                    zero_vector(M, pts[1]);
                     atol = eps(eltype(pts[1])),
                 )
                 @test isapprox(M, pts[1], 2 * tv1, tv1 + tv1)
@@ -217,8 +212,8 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
                 v1t2 = zero(v1t1)
                 vector_transport_to!(M, v1t2, pts[1], v1, v2, ProjectionTransport())
                 v1t3 = vector_transport_direction(M, pts[1], v1, v2)
-                @test is_tangent_vector(M, pts[3], v1t1)
-                @test is_tangent_vector(M, pts[3], v1t3)
+                @test is_vector(M, pts[3], v1t1)
+                @test is_vector(M, pts[3], v1t3)
                 @test isapprox(M, pts[3], v1t1, v1t3)
                 # along a `Vector` of points
                 c = [pts[1]]
