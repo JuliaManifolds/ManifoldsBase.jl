@@ -104,4 +104,6 @@ Return the point at time `t` or points at times `t` in `T` along the shortest [`
 """
 shortest_geodesic(M::AbstractManifold, p, q) = geodesic(M, p, log(M, p, q))
 shortest_geodesic(M::AbstractManifold, p, q, t::Real) = geodesic(M, p, log(M, p, q), t)
-shortest_geodesic(M::AbstractManifold, p, q, T::AbstractVector) = geodesic(M, p, log(M, p, q), T)
+function shortest_geodesic(M::AbstractManifold, p, q, T::AbstractVector)
+    return geodesic(M, p, log(M, p, q), T)
+end

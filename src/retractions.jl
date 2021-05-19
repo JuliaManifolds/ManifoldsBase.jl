@@ -153,10 +153,22 @@ See also [`retract!`](@ref).
 function inverse_retract!(M::AbstractManifold, X, p, q)
     return inverse_retract!(M, X, p, q, LogarithmicInverseRetraction())
 end
-function inverse_retract!(M::AbstractManifold, X, p, q, method::LogarithmicInverseRetraction)
+function inverse_retract!(
+    M::AbstractManifold,
+    X,
+    p,
+    q,
+    method::LogarithmicInverseRetraction,
+)
     return log!(M, X, p, q)
 end
-function inverse_retract!(M::AbstractManifold, X, p, q, method::AbstractInverseRetractionMethod)
+function inverse_retract!(
+    M::AbstractManifold,
+    X,
+    p,
+    q,
+    method::AbstractInverseRetractionMethod,
+)
     return error(
         manifold_function_not_implemented_message(M, inverse_retract!, X, p, q, method),
     )
