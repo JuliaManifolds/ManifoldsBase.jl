@@ -5,6 +5,10 @@
 Decorator indicating that the vector `data` contains coordinates of a vector from a fiber
 of a vector bundle of type `type`. `basis` is an object describing the basis of that space
 in which the coordinates are given.
+
+Conversion between `FVector` representation and the default representation of an object
+(for example a tangent vector) for a manifold should be done using [`get_coordinates`](@ref)
+and [`get_vector`](@ref).
 """
 struct FVector{TType<:VectorSpaceType,TData,TBasis<:AbstractBasis}
     type::TType
