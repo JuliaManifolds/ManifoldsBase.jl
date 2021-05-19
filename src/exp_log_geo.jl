@@ -88,7 +88,7 @@ function log!(M::AbstractManifold, X, p, q)
     return error(manifold_function_not_implemented_message(M, log!, X, p, q))
 end
 
-@doc doc"""
+@doc raw"""
     shortest_geodesic(M::AbstractManifold, p, q) -> Function
 
 Get a [`geodesic`](@ref) $γ_{p,q}(t)$ whose length is the shortest path between the
