@@ -682,7 +682,7 @@ end
 Compute the norm of tangent vector `X` at point `p` from a [`AbstractManifold`](@ref) `M`.
 By default this is computed using [`inner`](@ref).
 """
-norm(M::AbstractManifold, p, X) = sqrt(real(inner(M, p, X, X)))
+norm(M::AbstractManifold, p, X) = sqrt(max(real(inner(M, p, X, X)), 0))
 
 """
     number_eltype(x)
