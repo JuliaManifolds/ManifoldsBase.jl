@@ -60,10 +60,10 @@ function CoTFVector(data, basis::AbstractBasis)
 end
 
 function Base.show(io::IO, fX::TFVector)
-    print(io, "TFVector(", fX.data, ", ", fX.basis, ")")
+    return print(io, "TFVector(", fX.data, ", ", fX.basis, ")")
 end
 function Base.show(io::IO, fX::CoTFVector)
-    print(io, "CoTFVector(", fX.data, ", ", fX.basis, ")")
+    return print(io, "CoTFVector(", fX.data, ", ", fX.basis, ")")
 end
 
 
