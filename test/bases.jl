@@ -2,7 +2,7 @@ using LinearAlgebra
 using ManifoldsBase
 using ManifoldsBase: DefaultManifold, ℝ, ℂ
 using ManifoldsBase: CotangentSpace, CotangentSpaceType, TangentSpace, TangentSpaceType
-using ManifoldsBase: FVector, CoTFVector, TFVector
+using ManifoldsBase: FVector
 using Test
 import Base: +, -, *, copyto!, isapprox
 import ManifoldsBase: allocate
@@ -512,8 +512,11 @@ end
     copyto!(tv1s, fv_tvs[2])
     @test isapprox(tv1s.data, fv_tvs[2].data)
 
+    @test sprint(show, fv1) == "TFVector([1.0, 0.0, 0.0], $(fv1.basis))"
+
     cofv1 = CoTFVector(tvs[1], DefaultOrthonormalBasis(ℝ, CotangentSpace))
     @test cofv1 isa CoTFVector
+    @test sprint(show, cofv1) == "CoTFVector([1.0, 0.0, 0.0], $(fv1.basis))"
 end
 
 @testset "vector_space_dimension" begin

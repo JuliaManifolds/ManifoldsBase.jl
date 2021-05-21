@@ -5,6 +5,43 @@
 Decorator indicating that the vector `data` contains coordinates of a vector from a fiber
 of a vector bundle of type `type`. `basis` is an object describing the basis of that space
 in which the coordinates are given.
+
+Conversion between `FVector` representation and the default representation of an object
+(for example a tangent vector) for a manifold should be done using [`get_coordinates`](@ref)
+and [`get_vector`](@ref).
+
+# Examples
+
+```julia-repl
+julia> using Manifolds
+
+julia> M = Sphere(2)
+Sphere(2, ℝ)
+
+julia> p = [1.0, 0.0, 0.0]
+3-element Vector{Float64}:
+ 1.0
+ 0.0
+ 0.0
+
+julia> X = [0.0, 2.0, -1.0]
+3-element Vector{Float64}:
+  0.0
+  2.0
+ -1.0
+
+julia> B = DefaultOrthonormalBasis()
+DefaultOrthonormalBasis(ℝ)
+
+julia> fX = TFVector(get_coordinates(M, p, X, B), B)
+TFVector([2.0, -1.0], DefaultOrthonormalBasis(ℝ))
+
+julia> X_back = get_vector(M, p, fX.data, fX.basis)
+3-element Vector{Float64}:
+ -0.0
+  2.0
+ -1.0
+```
 """
 struct FVector{TType<:VectorSpaceType,TData,TBasis<:AbstractBasis}
     type::TType
@@ -20,6 +57,13 @@ function TFVector(data, basis::AbstractBasis)
 end
 function CoTFVector(data, basis::AbstractBasis)
     return CoTFVector{typeof(data),typeof(basis)}(CotangentSpace, data, basis)
+end
+
+function Base.show(io::IO, fX::TFVector)
+    return print(io, "TFVector(", fX.data, ", ", fX.basis, ")")
+end
+function Base.show(io::IO, fX::CoTFVector)
+    return print(io, "CoTFVector(", fX.data, ", ", fX.basis, ")")
 end
 
 

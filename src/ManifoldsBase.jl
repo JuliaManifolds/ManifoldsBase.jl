@@ -540,7 +540,7 @@ include("EmbeddedManifold.jl")
 include("DefaultManifold.jl")
 include("PowerManifold.jl")
 
-export AbstractManifold, AbstractManifoldPoint, TVector, CoTVector
+export AbstractManifold, AbstractManifoldPoint, TVector, CoTVector, TFVector, CoTFVector
 export AbstractDecoratorManifold
 export ValidationManifold, ValidationMPoint, ValidationTVector, ValidationCoTVector
 export AbstractEmbeddingType,
