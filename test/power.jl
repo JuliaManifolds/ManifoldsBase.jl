@@ -3,6 +3,10 @@ using ManifoldsBase
 using ManifoldsBase: AbstractNumbers, ℝ, ℂ
 
 struct DummyPowerRepresentation <: AbstractPowerRepresentation end
+struct DummyDecorator{TM<:AbstractManifold{ManifoldsBase.ℝ}} <:
+       AbstractDecoratorManifold{ManifoldsBase.ℝ}
+    manifold::TM
+end
 
 @testset "Power AbstractManifold" begin
     M = ManifoldsBase.DefaultManifold(3)
@@ -130,10 +134,6 @@ struct DummyPowerRepresentation <: AbstractPowerRepresentation end
         @test zero_vector(N, p) == zero(p)
     end
     @testset "Decorator passthrough for getindex" begin
-        struct DummyDecorator{TM<:AbstractManifold{ManifoldsBase.ℝ}} <:
-               AbstractDecoratorManifold{ManifoldsBase.ℝ}
-            manifold::TM
-        end
         M = ManifoldsBase.DefaultManifold()
         N = PowerManifold(M, NestedPowerRepresentation(), 3)
         p = [1.0, 2.0, 3.0]
