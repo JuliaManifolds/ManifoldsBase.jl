@@ -718,3 +718,14 @@ decorated_manifold(M::AbstractManifold) = M.manifold
 
 @decorator_transparent_signature zero_vector(M::AbstractDecoratorManifold, p)
 @decorator_transparent_signature zero_vector!(M::AbstractDecoratorManifold, X, p)
+
+#
+# Manually patch getindex not using the whole machinery
+#
+Base.@propagate_inbounds function Base.getindex(
+    p::AbstractArray,
+    M::AbstractDecoratorManifold,
+    I::Union{Integer,Colon,AbstractVector}...,
+)
+    return getindex(p, decorated_manifold(M), I...)
+end

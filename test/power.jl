@@ -129,4 +129,15 @@ struct DummyPowerRepresentation <: AbstractPowerRepresentation end
         @test p[N, 1] == 1.0
         @test zero_vector(N, p) == zero(p)
     end
+    @testset "Decorator passthrough for getindex" begin
+        struct DummyDecorator{TM<:AbstractManifold{ManifoldsBase.ℝ}} <:
+               AbstractDecoratorManifold{ManifoldsBase.ℝ}
+            manifold::TM
+        end
+        M = ManifoldsBase.DefaultManifold()
+        N = PowerManifold(M, NestedPowerRepresentation(), 3)
+        p = [1.0, 2.0, 3.0]
+        DN = DummyDecorator(N)
+        @test p[DN, 1] == p[N, 1]
+    end
 end
