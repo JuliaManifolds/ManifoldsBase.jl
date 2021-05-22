@@ -115,8 +115,6 @@ struct NLsolveInverseRetraction{TR<:AbstractRetractionMethod,TV,TK} <:
     project_point::Bool
     nlsolve_kwargs::TK
     function NLsolveInverseRetraction(m, X0, project_point, project_tangent, nlsolve_kwargs)
-        isdefined(ManifoldsBase, :NLsolve) ||
-            @warn "To use NLsolveInverseRetraction, NLsolve must be loaded using `using NLsolve`."
         return new{typeof(m),typeof(X0),typeof(nlsolve_kwargs)}(
             m,
             X0,
