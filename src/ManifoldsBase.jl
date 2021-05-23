@@ -20,113 +20,11 @@ import LinearAlgebra: dot, norm, det, cross, I, UniformScaling, Diagonal
 import Markdown: @doc_str
 using LinearAlgebra
 
-"""
-    AbstractManifold{F}
+include("maintypes.jl")
+include("retractions.jl")
+include("exp_log_geo.jl")
+include("projections.jl")
 
-A manifold type. The `AbstractManifold` is used to dispatch to different functions on a manifold,
-usually as the first argument of the function. Examples are the [`exp`](@ref)onential and
-[`log`](@ref)arithmic maps as well as more general functions that are built on them like the
-[`geodesic`](@ref).
-
-The manifold is parametrized by an [`AbstractNumbers`](@ref) to distinguish for example
-real (ℝ) and complex (ℂ) manifolds.
-
-For subtypes the preferred order of parameters is: size and simple value parameters,
-followed by the [`AbstractNumbers`](@ref) `field`, followed by data type parameters,
-which might depend on the abstract number field type.
-"""
-abstract type AbstractManifold{𝔽} end
-
-"""
-    AbstractEstimationMethod
-
-Abstract type for defining statistical estimation methods.
-"""
-abstract type AbstractEstimationMethod end
-
-"""
-    AbstractInverseRetractionMethod
-
-Abstract type for methods for inverting a retraction (see [`inverse_retract`](@ref)).
-"""
-abstract type AbstractInverseRetractionMethod end
-
-"""
-    AbstractRetractionMethod
-
-Abstract type for methods for [`retract`](@ref)ing a tangent vector to a manifold.
-"""
-abstract type AbstractRetractionMethod end
-
-"""
-    ExponentialRetraction
-
-Retraction using the exponential map.
-"""
-struct ExponentialRetraction <: AbstractRetractionMethod end
-
-"""
-    PolarRetraction <: AbstractRetractionMethod
-
-Retractions that are based on singular value decompositions of the matrix / matrices
-for point and tangent vector on a [`AbstractManifold`](@ref)
-"""
-struct PolarRetraction <: AbstractRetractionMethod end
-
-"""
-    ProjectionRetraction <: AbstractRetractionMethod
-
-Retractions that are based on projection and usually addition in the embedding.
-"""
-struct ProjectionRetraction <: AbstractRetractionMethod end
-
-"""
-    QRRetraction <: AbstractRetractionMethod
-
-Retractions that are based on a QR decomposition of the
-matrix / matrices for point and tangent vector on a [`AbstractManifold`](@ref)
-"""
-struct QRRetraction <: AbstractRetractionMethod end
-
-"""
-    LogarithmicInverseRetraction
-
-Inverse retraction using the [`log`](@ref)arithmic map.
-"""
-struct LogarithmicInverseRetraction <: AbstractInverseRetractionMethod end
-
-"""
-    PolarInverseRetraction <: AbstractInverseRetractionMethod
-
-Inverse retractions that are based on a singular value decomposition of the
-matrix / matrices for point and tangent vector on a [`AbstractManifold`](@ref)
-"""
-struct PolarInverseRetraction <: AbstractInverseRetractionMethod end
-
-"""
-    ProjectionInverseRetraction <: AbstractInverseRetractionMethod
-
-Inverse retractions that are based on a projection (or its inversion).
-"""
-struct ProjectionInverseRetraction <: AbstractInverseRetractionMethod end
-
-"""
-    QRInverseRetraction <: AbstractInverseRetractionMethod
-
-Inverse retractions that are based on a QR decomposition of the
-matrix / matrices for point and tangent vector on a [`AbstractManifold`](@ref)
-"""
-struct QRInverseRetraction <: AbstractInverseRetractionMethod end
-
-"""
-    AbstractManifoldPoint
-
-Type for a point on a manifold. While a [`AbstractManifold`](@ref) does not necessarily require this
-type, for example when it is implemented for `Vector`s or `Matrix` type elements, this type
-can be used for more complicated representations, semantic verification, or even dispatch
-for different representations of points on a manifold.
-"""
-abstract type AbstractManifoldPoint end
 
 """
     OutOfInjectivityRadiusError
@@ -296,10 +194,25 @@ function at the level, where also information from `p` and `M` can be accessed.
 """
 copyto!(::AbstractManifold, Y, p, X) = copyto!(Y, X)
 
-"""
+@doc raw"""
     distance(M::AbstractManifold, p, q)
 
-Shortest distance between the points `p` and `q` on the [`AbstractManifold`](@ref) `M`.
+Shortest distance between the points `p` and `q` on the [`AbstractManifold`](@ref) `M`,
+i.e.
+
+```math
+d(p,q) = \inf_{γ} L(γ),
+```
+where the infimum is over all piecewise smooth curves ``γ: [a,b] \to \mathcal M``
+connecting ``γ(a)=p`` and ``γ(b)=q`` and
+
+```math
+L(γ) = \displaystyle\int_{a}^{b} \lVert \dotγ(t)\rVert_{γ(t)} \mathrm{d}t
+```
+is the length of the curve $γ$.
+
+If ``\mathcal M`` is not connected, i.e. consists of several disjoint components,
+the distance between two points from different components should be ``∞``.
 """
 distance(M::AbstractManifold, p, q) = norm(M, p, log(M, p, q))
 
@@ -385,49 +298,6 @@ function embed!(M::AbstractManifold, Y, p, X)
     return error(manifold_function_not_implemented_message(M, embed!, Y, p, X))
 end
 
-"""
-    exp(M::AbstractManifold, p, X)
-    exp(M::AbstractManifold, p, X, t::Real = 1)
-
-Compute the exponential map of tangent vector `X`, optionally scaled by `t`,  at point `p`
-from manifold the [`AbstractManifold`](@ref) `M`.
-"""
-function exp(M::AbstractManifold, p, X)
-    q = allocate_result(M, exp, p, X)
-    exp!(M, q, p, X)
-    return q
-end
-exp(M::AbstractManifold, p, X, t::Real) = exp(M, p, t * X)
-
-"""
-    exp!(M::AbstractManifold, q, p, X)
-    exp!(M::AbstractManifold, q, p, X, t::Real = 1)
-
-Compute the exponential map of tangent vector `X`, optionally scaled by `t`,  at point `p`
-from manifold the [`AbstractManifold`](@ref) `M`.
-The result is saved to `q`.
-"""
-function exp!(M::AbstractManifold, q, p, X)
-    return error(manifold_function_not_implemented_message(M, exp!, q, p, X))
-end
-exp!(M::AbstractManifold, q, p, X, t::Real) = exp!(M, q, p, t * X)
-
-"""
-    geodesic(M::AbstractManifold, p, X) -> Function
-
-Get the geodesic with initial point `p` and velocity `X` on the [`AbstractManifold`](@ref) `M`.
- The geodesic is the curve of constant velocity that is locally distance-minimizing.
- This function returns a function of (time) `t`.
-
-    geodesic(M::AbstractManifold, x, v, t::Real)
-    geodesic(M::AbstractManifold, x, v, T::AbstractVector) -> AbstractVector
-
-Return the point at time `t` or points at times `t` in `T` along the geodesic.
-"""
-geodesic(M::AbstractManifold, p, X) = t -> exp(M, p, X, t)
-geodesic(M::AbstractManifold, p, X, t::Real) = exp(M, p, X, t)
-geodesic(M::AbstractManifold, p, X, T::AbstractVector) = map(t -> exp(M, p, X, t), T)
-
 @doc raw"""
     injectivity_radius(M::AbstractManifold, p)
 
@@ -441,9 +311,9 @@ Infimum of the injectivity radius of all manifold points.
     injectivity_radius(M::AbstractManifold[, x], method::AbstractRetractionMethod)
     injectivity_radius(M::AbstractManifold, x, method::AbstractRetractionMethod)
 
-Distance $d$ such that
+Distance ``d`` such that
 [`retract(M, p, X, method)`](@ref retract(::AbstractManifold, ::Any, ::Any, ::AbstractRetractionMethod))
-is injective for all tangent vectors shorter than $d$ (i.e. has an inverse) for point `p`
+is injective for all tangent vectors shorter than ``d`` (i.e. has an inverse) for point `p`
 if provided or all manifold points otherwise.
 """
 function injectivity_radius(M::AbstractManifold)
@@ -471,63 +341,6 @@ See also: [`MetricManifold`](@ref Main.Manifolds.MetricManifold)
 """
 function inner(M::AbstractManifold, p, X, Y)
     return error(manifold_function_not_implemented_message(M, inner, p, X, Y))
-end
-
-"""
-    inverse_retract!(M::AbstractManifold, X, p, q[, method::AbstractInverseRetractionMethod])
-
-Compute the inverse retraction, a cheaper, approximate version of the
-[`log`](@ref)arithmic map), of points `p` and `q` on the [`AbstractManifold`](@ref) `M`.
-Result is saved to `X`.
-
-Inverse retraction method can be specified by the last argument, defaulting to
-[`LogarithmicInverseRetraction`](@ref). See the documentation of respective manifolds for
-available methods.
-"""
-function inverse_retract!(M::AbstractManifold, X, p, q)
-    return inverse_retract!(M, X, p, q, LogarithmicInverseRetraction())
-end
-function inverse_retract!(
-    M::AbstractManifold,
-    X,
-    p,
-    q,
-    method::LogarithmicInverseRetraction,
-)
-    return log!(M, X, p, q)
-end
-function inverse_retract!(
-    M::AbstractManifold,
-    X,
-    p,
-    q,
-    method::AbstractInverseRetractionMethod,
-)
-    return error(
-        manifold_function_not_implemented_message(M, inverse_retract!, X, p, q, method),
-    )
-end
-
-"""
-    inverse_retract(M::AbstractManifold, x, y)
-    inverse_retract(M::AbstractManifold, x, y, method::AbstractInverseRetractionMethod
-
-Compute the inverse retraction, a cheaper, approximate version of the
-[`log`](@ref)arithmic map), of points `p` and `q` on the [`AbstractManifold`](@ref) `M`.
-
-Inverse retraction method can be specified by the last argument, defaulting to
-[`LogarithmicInverseRetraction`](@ref). See the documentation of respective manifolds for
-available methods.
-"""
-function inverse_retract(M::AbstractManifold, p, q)
-    X = allocate_result(M, inverse_retract, p, q)
-    inverse_retract!(M, X, p, q)
-    return X
-end
-function inverse_retract(M::AbstractManifold, p, q, method::AbstractInverseRetractionMethod)
-    X = allocate_result(M, inverse_retract, p, q)
-    inverse_retract!(M, X, p, q, method)
-    return X
 end
 
 """
@@ -601,27 +414,6 @@ function is_vector(
     mtve = check_vector(M, p, X; kwargs...)
     mtve === nothing && return true
     return throw_error ? throw(mtve) : false
-end
-
-"""
-    log(M::AbstractManifold, p, q)
-
-Compute the logarithmic map of point `q` at base point `p` on the [`AbstractManifold`](@ref) `M`.
-"""
-function log(M::AbstractManifold, p, q)
-    X = allocate_result(M, log, p, q)
-    log!(M, X, p, q)
-    return X
-end
-
-"""
-    log!(M::AbstractManifold, X, p, q)
-
-Compute the logarithmic map of point `q` at base point `p` on the [`AbstractManifold`](@ref) `M`.
-The result is saved to `X`.
-"""
-function log!(M::AbstractManifold, X, p, q)
-    return error(manifold_function_not_implemented_message(M, log!, X, p, q))
 end
 
 @doc raw"""
@@ -698,81 +490,6 @@ function number_eltype(x::Tuple)
     return typeof(mapreduce(eti -> one(number_eltype(eti)), +, x))
 end
 
-"""
-    project(M::AbstractManifold, p)
-
-Project point `p` from the ambient space of the [`AbstractManifold`](@ref) `M` to `M`.
-This method is only available for manifolds where implicitly an embedding or ambient space
-is given. Additionally, the projection includes changing data representation, if applicable,
-i.e. if the points on `M` are not represented in the same array data, the data is changed
-accordingly.
-
-See also: [`EmbeddedManifold`](@ref), [`embed`](@ref embed(M::AbstractManifold, p))
-"""
-function project(M::AbstractManifold, p)
-    q = allocate_result(M, project, p)
-    project!(M, q, p)
-    return q
-end
-
-"""
-    project!(M::AbstractManifold, q, p)
-
-Project point `p` from the ambient space onto the [`AbstractManifold`](@ref) `M`. The result is
-storedin `q`.
-This method is only available for manifolds where implicitly an embedding or ambient space
-is given. Additionally, the projection includes changing data representation, if applicable,
-i.e. if the points on `M` are not represented in the same array data, the data is changed
-accordingly.
-
-See also: [`EmbeddedManifold`](@ref), [`embed!`](@ref embed!(M::AbstractManifold, q, p))
-"""
-function project!(M::AbstractManifold, q, p)
-    return error(manifold_function_not_implemented_message(M, project!, q, p))
-end
-
-"""
-    project(M::AbstractManifold, p, X)
-
-Project ambient space representation of a vector `X` to a tangent vector at point `p` on
-the [`AbstractManifold`](@ref) `M`.
-This method is only available for manifolds where implicitly an embedding or ambient space
-is given.
-Additionally, `project` includes changing data representation, if applicable, i.e.
-if the tangents on `M` are not represented in the same way as points on the embedding,
-the representation is changed accordingly. This is the case for example for Lie groups,
-when tangent vectors are represented in the Lie algebra. after projection the change to the
-Lie algebra is perfomed, too.
-
-See also: [`EmbeddedManifold`](@ref), [`embed`](@ref embed(M::AbstractManifold, p, X))
-"""
-function project(M::AbstractManifold, p, X)
-    # Note that the order is switched,
-    # since the allocation by default takes the type of the first.
-    Y = allocate_result(M, project, X, p)
-    project!(M, Y, p, X)
-    return Y
-end
-
-"""
-    project!(M::AbstractManifold, Y, p, X)
-
-Project ambient space representation of a vector `X` to a tangent vector at point `p` on
-the [`AbstractManifold`](@ref) `M`. The result is saved in vector `Y`.
-This method is only available for manifolds where implicitly an embedding or ambient space
-is given.
-Additionally, `project!` includes changing data representation, if applicable, i.e.
-if the tangents on `M` are not represented in the same way as points on the embedding,
-the representation is changed accordingly. This is the case for example for Lie groups,
-when tangent vectors are represented in the Lie algebra. after projection the change to the
-Lie algebra is perfomed, too.
-
-See also: [`EmbeddedManifold`](@ref), [`embed!`](@ref embed!(M::AbstractManifold, Y, p, X))
-"""
-function project!(M::AbstractManifold, Y, p, X)
-    return error(manifold_function_not_implemented_message(M, project!, Y, p, X))
-end
-
 @doc raw"""
     representation_size(M::AbstractManifold)
 
@@ -782,78 +499,6 @@ Returns `nothing` by default indicating that points are not represented using an
 """
 function representation_size(M::AbstractManifold)
     return nothing
-end
-
-"""
-    retract(M::AbstractManifold, p, X)
-    retract(M::AbstractManifold, p, X, t::Real=1)
-    retract(M::AbstractManifold, p, X, method::AbstractRetractionMethod)
-    retract(M::AbstractManifold, p, X, t::Real=1, method::AbstractRetractionMethod)
-
-Compute a retraction, a cheaper, approximate version of the [`exp`](@ref)onential map,
-from `p` into direction `X`, scaled by `t`, on the [`AbstractManifold`](@ref) `M`.
-
-Retraction method can be specified by the last argument, defaulting to
-[`ExponentialRetraction`](@ref). See the documentation of respective manifolds for available
-methods.
-"""
-function retract(M::AbstractManifold, p, X)
-    q = allocate_result(M, retract, p, X)
-    retract!(M, q, p, X)
-    return q
-end
-retract(M::AbstractManifold, p, X, t::Real) = retract(M, p, t * X)
-function retract(M::AbstractManifold, p, X, method::AbstractRetractionMethod)
-    q = allocate_result(M, retract, p, X)
-    retract!(M, q, p, X, method)
-    return q
-end
-function retract(M::AbstractManifold, p, X, t::Real, method::AbstractRetractionMethod)
-    return retract(M, p, t * X, method)
-end
-
-"""
-    retract!(M::AbstractManifold, q, p, X)
-    retract!(M::AbstractManifold, q, p, X, t::Real=1)
-    retract!(M::AbstractManifold, q, p, X, method::AbstractRetractionMethod)
-    retract!(M::AbstractManifold, q, p, X, t::Real=1, method::AbstractRetractionMethod)
-
-Compute a retraction, a cheaper, approximate version of the [`exp`](@ref)onential map,
-from `p` into direction `X`, scaled by `t`, on the [`AbstractManifold`](@ref) manifold `M`.
-Result is saved to `q`.
-
-Retraction method can be specified by the last argument, defaulting to
-[`ExponentialRetraction`](@ref). See the documentation of respective manifolds for available
-methods.
-"""
-retract!(M::AbstractManifold, q, p, X) = retract!(M, q, p, X, ExponentialRetraction())
-retract!(M::AbstractManifold, q, p, X, t::Real) = retract!(M, q, p, t * X)
-retract!(M::AbstractManifold, q, p, X, method::ExponentialRetraction) = exp!(M, q, p, X)
-function retract!(M::AbstractManifold, q, p, X, t::Real, method::AbstractRetractionMethod)
-    return retract!(M, q, p, t * X, method)
-end
-function retract!(M::AbstractManifold, q, p, X, method::AbstractRetractionMethod)
-    return error(manifold_function_not_implemented_message(M, retract!, q, p, method))
-end
-
-@doc raw"""
-    shortest_geodesic(M::AbstractManifold, p, q) -> Function
-
-Get a [`geodesic`](@ref) $\gamma_{p,q}(t)$ whose length is the shortest path between the
-points `p`and `q`, where $\gamma_{p,q}(0)=p$ and $\gamma_{p,q}(1)=q$. When there are
-multiple shortest geodesics, there is no guarantee which will be returned.
-
-This function returns a function of time, which may be a `Real` or an `AbstractVector`.
-
-    shortest_geodesic(M::AbstractManifold, p, q, t::Real)
-    shortest_geodesic(M::AbstractManifold, p, q, T::AbstractVector) -> AbstractVector
-
-Return the point at time `t` or points at times `t` in `T` along the shortest geodesic.
-"""
-shortest_geodesic(M::AbstractManifold, p, q) = geodesic(M, p, log(M, p, q))
-shortest_geodesic(M::AbstractManifold, p, q, t::Real) = geodesic(M, p, log(M, p, q), t)
-function shortest_geodesic(M::AbstractManifold, p, q, T::AbstractVector)
-    return geodesic(M, p, log(M, p, q), T)
 end
 
 """
@@ -907,6 +552,8 @@ export AbstractPowerRepresentation, NestedPowerRepresentation
 export OutOfInjectivityRadiusError
 
 export AbstractRetractionMethod,
+    ApproximateInverseRetraction,
+    NLsolveInverseRetraction,
     ExponentialRetraction,
     QRRetraction,
     PolarRetraction,
@@ -915,6 +562,7 @@ export AbstractRetractionMethod,
     InversePowerRetraction
 
 export AbstractInverseRetractionMethod,
+    ApproximateInverseRetraction,
     LogarithmicInverseRetraction,
     QRInverseRetraction,
     PolarInverseRetraction,

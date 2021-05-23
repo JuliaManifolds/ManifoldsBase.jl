@@ -65,12 +65,25 @@ function DifferentiatedRetractionVectorTransport(::R) where {R<:AbstractRetracti
     return DifferentiatedRetractionVectorTransport{R}()
 end
 
-"""
+@doc raw"""
     ParallelTransport = DifferentiatedRetractionVectorTransport{ExponentialRetraction}
 
-Specify to use parallel transport as vector transport method within
-[`vector_transport_to`](@ref), [`vector_transport_direction`](@ref), or
-[`vector_transport_along`](@ref).
+Specify to use parallel transport vector transport method.
+
+To be precise let ``c(t)`` be a curve depending on the method
+
+* the (assumed to be unique) geodesic ``c(t) = γ_{p,q}(t)`` from ``γ_{p,q}(0)=p`` to ``γ_{p,q}(1)=q`` for [`vector_transport_to`](@ref) ``\mathcal P_{q\gets p}Y``
+* the unique geodesic ``c(t)=γ_{p,X}(t)`` from ``γ_{p,X}(0)=p`` into direction ``\dot γ_{p,X}(0)=X`` for [`vector_transport_direction`](@ref) ``\mathcal P_{p,X}Y``
+* a given curve ``c(0)=p`` for [`vector_transport_along`](@ref) ``\mathcal P^cY``
+
+In these cases ``Y\in T_p\mathcal M`` is the vector that we would like to transport from
+the tangent space at ``p=c(0)`` to the tangent space at ``c(1)``.
+
+Let ``Z\colon [0,1] \to T\mathcal M``, ``Z(t)\in T_{c(t)}\mathcal M`` be a smooth vector field
+along the curve ``c`` with ``Z(0) = Y``, such that ``Z`` is _parallel_, i.e.
+its covariant derivative ``\frac{\mathrm{D}}{\mathrm{d}t}Z`` is zero. Note that such a ``Z`` always exists and is unique.
+
+Then the parallel transport is given by ``Z(1)``.
 
 Note that since it is technically the [`DifferentiatedRetractionVectorTransport`](@ref) of
 the [`exp`](@ref exp(M::AbstractManifold, p, X)) (cf. [`ExponentialRetraction`](@ref)), we define
