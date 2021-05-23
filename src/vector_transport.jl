@@ -81,7 +81,7 @@ the tangent space at ``p=c(0)`` to the tangent space at ``c(1)``.
 
 Let ``Z\colon [0,1] \to T\mathcal M``, ``Z(t)\in T_{c(t)}\mathcal M`` be a smooth vector field
 along the curve ``c`` with ``Z(0) = Y``, such that ``Z`` is _parallel_, i.e.
-its covariant derivative ``\frac{D}{dt}Z`` is zero. Note that such a ``Z`` always exists and is unique.
+its covariant derivative ``\frac{\mathrm{D}}{\mathrm{d}t}Z`` is zero. Note that such a ``Z`` always exists and is unique.
 
 Then the parallel transport is given by ``Z(1)``.
 
