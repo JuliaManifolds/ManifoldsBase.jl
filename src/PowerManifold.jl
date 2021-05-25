@@ -103,15 +103,13 @@ function PowerManifold(
     M::PowerManifold{𝔽,TM,TSize},
     ::TPR,
     size::Integer...,
-) where {𝔽,TM<:AbstractManifold{𝔽},TSize,TPR<:Union{NestedPowerRepresentation,NestedReplacingPowerRepresentation}}
-    return PowerManifold{
-        𝔽,
-        PowerManifold{𝔽,TM,TSize},
-        Tuple{size...},
-        TPR,
-    }(
-        M,
-    )
+) where {
+    𝔽,
+    TM<:AbstractManifold{𝔽},
+    TSize,
+    TPR<:Union{NestedPowerRepresentation,NestedReplacingPowerRepresentation},
+}
+    return PowerManifold{𝔽,PowerManifold{𝔽,TM,TSize},Tuple{size...},TPR}(M)
 end
 
 """
@@ -180,14 +178,22 @@ end
 const PowerManifoldNested =
     AbstractPowerManifold{𝔽,<:AbstractManifold{𝔽},NestedPowerRepresentation} where {𝔽}
 
-const PowerManifoldNestedReplacing =
-    AbstractPowerManifold{𝔽,<:AbstractManifold{𝔽},NestedReplacingPowerRepresentation} where {𝔽}
+const PowerManifoldNestedReplacing = AbstractPowerManifold{
+    𝔽,
+    <:AbstractManifold{𝔽},
+    NestedReplacingPowerRepresentation,
+} where {𝔽}
 
 _access_nested(x, i::Int) = x[i]
 _access_nested(x, i::Tuple) = x[i...]
 
 function Base.:^(
-    M::PowerManifold{𝔽,TM,TSize,<:Union{NestedPowerRepresentation,NestedReplacingPowerRepresentation}},
+    M::PowerManifold{
+        𝔽,
+        TM,
+        TSize,
+        <:Union{NestedPowerRepresentation,NestedReplacingPowerRepresentation},
+    },
     size::Integer...,
 ) where {𝔽,TM<:AbstractManifold{𝔽},TSize}
     return PowerManifold(M, size...)
@@ -383,11 +389,7 @@ end
 function exp!(M::PowerManifoldNestedReplacing, q, p, X)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
-        q[i...] = exp(
-            M.manifold,
-            _read(M, rep_size, p, i),
-            _read(M, rep_size, X, i),
-        )
+        q[i...] = exp(M.manifold, _read(M, rep_size, p, i), _read(M, rep_size, X, i))
     end
     return q
 end
@@ -705,7 +707,13 @@ function inverse_retract!(M::AbstractPowerManifold, X, p, q, method::InversePowe
     end
     return X
 end
-function inverse_retract!(M::PowerManifoldNestedReplacing, X, p, q, method::InversePowerRetraction)
+function inverse_retract!(
+    M::PowerManifoldNestedReplacing,
+    X,
+    p,
+    q,
+    method::InversePowerRetraction,
+)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         X[i...] = inverse_retract(
@@ -758,11 +766,7 @@ end
 function log!(M::PowerManifoldNestedReplacing, X, p, q)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
-        X[i...] = log(
-            M.manifold,
-            _read(M, rep_size, p, i),
-            _read(M, rep_size, q, i),
-        )
+        X[i...] = log(M.manifold, _read(M, rep_size, p, i), _read(M, rep_size, q, i))
     end
     return X
 end
@@ -798,11 +802,8 @@ end
 function mid_point!(M::PowerManifoldNestedReplacing, q, p1, p2)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
-        q[i...] = mid_point(
-            M.manifold,
-            _read(M, rep_size, p1, i),
-            _read(M, rep_size, p2, i),
-        )
+        q[i...] =
+            mid_point(M.manifold, _read(M, rep_size, p1, i), _read(M, rep_size, p2, i))
     end
     return q
 end
@@ -879,11 +880,7 @@ end
 function project!(M::PowerManifoldNestedReplacing, Z, q, Y)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
-        q[i...] = project(
-            M.manifold,
-            _read(M, rep_size, q, i),
-            _read(M, rep_size, Y, i),
-        )
+        q[i...] = project(M.manifold, _read(M, rep_size, q, i), _read(M, rep_size, Y, i))
     end
     return Z
 end
@@ -1107,7 +1104,14 @@ function vector_transport_to!(M::AbstractPowerManifold, Y, p, X, q, m::PowerVect
     end
     return Y
 end
-function vector_transport_to!(M::PowerManifoldNestedReplacing, Y, p, X, q, m::PowerVectorTransport)
+function vector_transport_to!(
+    M::PowerManifoldNestedReplacing,
+    Y,
+    p,
+    X,
+    q,
+    m::PowerVectorTransport,
+)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         Y[i...] = vector_transport_to(

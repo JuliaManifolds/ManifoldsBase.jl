@@ -20,7 +20,7 @@ power_array_wrapper(::Type{NestedReplacingPowerRepresentation}, i::Int) = SVecto
         wrapper_3 = power_array_wrapper(PowerRepr, 3)
         p = wrapper_3.([zeros(3), ones(3)])
         q = wrapper_3.([ones(3), zeros(3)])
-        
+
         @testset "Constructors" begin
             @test repr(N) ==
                   "PowerManifold(DefaultManifold(3; field = ℝ), $(PowerRepr)(), 2)"
@@ -141,7 +141,7 @@ power_array_wrapper(::Type{NestedReplacingPowerRepresentation}, i::Int) = SVecto
             Mzero = ManifoldsBase.DefaultManifold()
             N = PowerManifold(Mzero, PowerRepr(), 3)
             p = [1.0, 2.0, 3.0]
-    
+
             @test p[N, 1] == 1.0
             @test zero_vector(N, p) == zero(p)
         end
