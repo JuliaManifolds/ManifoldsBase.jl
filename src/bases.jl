@@ -370,8 +370,15 @@ function dual_basis(
     return DefaultOrthonormalBasis{𝔽}(TangentSpace)
 end
 
-function _euclidean_basis_vector(p, i)
+function _euclidean_basis_vector(p::StridedArray, i)
     X = zero(p)
+    X[i] = 1
+    return X
+end
+function _euclidean_basis_vector(p, i)
+    # when p is for example a SArray
+    X = similar(p)
+    copyto!(X, zero(p))
     X[i] = 1
     return X
 end

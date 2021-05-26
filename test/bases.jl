@@ -453,7 +453,7 @@ end
     @test sprint(show, "text/plain", dpb) == """
     DiagonalizingOrthonormalBasis(ℝ) with eigenvalue 0 in direction:
      1-element $(sprint(show, Vector{Array{Float64,3}})):
-       [1.0]
+       $(sprint(show, dpb.data.frame_direction[1]))
     and 1 basis vector.
     Basis vectors:
      E1 =
