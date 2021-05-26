@@ -547,7 +547,8 @@ export AbstractEmbeddingType,
     TransparentIsometricEmbedding, DefaultIsometricEmbeddingType, DefaultEmbeddingType
 export AbstractEmbeddedManifold, EmbeddedManifold, TransparentIsometricEmbedding
 export AbstractPowerManifold, PowerManifold
-export AbstractPowerRepresentation, NestedPowerRepresentation
+export AbstractPowerRepresentation,
+    NestedPowerRepresentation, NestedReplacingPowerRepresentation
 
 export OutOfInjectivityRadiusError
 
