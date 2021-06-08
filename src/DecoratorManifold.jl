@@ -79,10 +79,34 @@ function _split_function(ex::Expr)
 end
 
 #
+# Transparency types
+#
+"""
+    AbstractDecoratorType
+
+Decorator types can be used to specify a basic transparency for an [`AbstractDecoratorManifold`](@ref).
+This can be seen as an initial (rough) transparency pattern to start a type with.
+
+Note that for a function `f` and it's mutating variant `f!`
+* The function `f` is set to `:parent` to first invoke allocation and call of `f!`
+* The mutating function `f!` is set to `transparent`
+"""
+abstract type AbstractDecoratorType end
+
+
+
+"""
+    DefaultDecoratorType <: AbstractDecoratorType
+
+A default decorator type, where all new functions are transparent by default.
+"""
+struct DefaultDecoratorType <: AbstractDecoratorType end
+
+#
 # Type
 #
 """
-    AbstractDecoratorManifold{𝔽} <: AbstractManifold{𝔽}
+    AbstractDecoratorManifold{𝔽,T<:AbstractDecoratorType} <: AbstractManifold{𝔽}
 
 An `AbstractDecoratorManifold` indicates that to some extent a manifold subtype
 decorates another [`AbstractManifold`](@ref) in the sense that it either
@@ -100,8 +124,15 @@ are transparent for all decorators.
 Transparency of functions with respect to decorators can be specified using the macros
 [`@decorator_transparent_fallback`](@ref), [`@decorator_transparent_function`](@ref) and
 [`@decorator_transparent_signature`](@ref).
+
+There are currently three modes given a new `AbstractDecoratorManifold` `M`
+* `:intransparent` – this function has to be implmented for the new manifold `M`
+* `:transparent` – this function is transparent, in the sense that the function is invoked
+  on the decorated `M.manifold`
+* `:parent` specifies that (unless implemented) for this function, the classical inheritance
+  is issued, i.e. the function is invoked on `M`s supertype.
 """
-abstract type AbstractDecoratorManifold{𝔽} <: AbstractManifold{𝔽} end
+abstract type AbstractDecoratorManifold{𝔽,T<:AbstractDecoratorType} <: AbstractManifold{𝔽} end
 
 #
 # Macros
@@ -439,7 +470,7 @@ Return whether by default to dispatch the the inner manifold of
 a decorator (`Val(true)`) or not (`Val(false`). For more details see
 [`is_decorator_transparent`](@ref).
 """
-default_decorator_dispatch(M::AbstractManifold) = Val(false)
+default_decorator_dispatch(::AbstractManifold) = Val(false)
 
 """
     is_decorator_transparent(f, M::AbstractManifold, args...) -> Bool
@@ -467,7 +498,7 @@ function is `Val(:transparent)` or `Val(:intransparent)` for the (decorated)
 the function `f` should invoke `M`s `Val(:parent)` implementation, see
 [`@decorator_transparent_function`](@ref) for details.
 """
-decorator_transparent_dispatch(f, M::AbstractManifold, args...) = Val(:transparent)
+decorator_transparent_dispatch(::Any, ::AbstractManifold, args...) = Val(:transparent)
 
 function _acts_transparently(f, M::AbstractManifold, args...)
     return _val_or(
@@ -739,8 +770,40 @@ decorated_manifold(M::AbstractManifold) = M.manifold
 #
 Base.@propagate_inbounds function Base.getindex(
     p::AbstractArray,
-    M::AbstractDecoratorManifold,
+    M::AbstractDecoratorManifold{𝔽,<:AbstractDecoratorType},
     I::Union{Integer,Colon,AbstractVector}...,
-)
+) where {𝔽}
     return getindex(p, decorated_manifold(M), I...)
+end
+
+#
+# Dispatch rules
+#
+
+PARENT_FUNCTIONS = [
+    distance,
+    exp,
+    inner,
+    inverse_retract,
+    log,
+    mid_point,
+    norm,
+    retract,
+    vector_transport_along,
+    vector_transport_direction,
+    vector_transport_to,
+]
+
+for f in PARENT_FUNCTIONS
+    eval(
+        quote
+            function decorator_transparent_dispatch(
+                ::typeof($f),
+                ::AbstractDecoratorManifold{𝔽,<:AbstractDecoratorType},
+                args...,
+            ) where {𝔽}
+                return Val(:parent)
+            end
+        end,
+    )
 end
