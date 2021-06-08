@@ -5,7 +5,7 @@ using StaticArrays
 
 struct DummyPowerRepresentation <: AbstractPowerRepresentation end
 struct DummyDecorator{TM<:AbstractManifold{ManifoldsBase.ℝ}} <:
-       AbstractDecoratorManifold{ManifoldsBase.ℝ, DefaultDecoratorType}
+       AbstractDecoratorManifold{ManifoldsBase.ℝ,DefaultDecoratorType}
     manifold::TM
 end
 
