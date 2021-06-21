@@ -774,7 +774,7 @@ Base.@propagate_inbounds function Base.getindex(
     return getindex(p, decorated_manifold(M), I...)
 end
 
-PARENT_FUNCTIONS = [
+DEFAULT_PARENT_FUNCTIONS = [
     distance,
     exp,
     inner,
