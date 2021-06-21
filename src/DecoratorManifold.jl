@@ -93,8 +93,6 @@ Note that for a function `f` and it's mutating variant `f!`
 """
 abstract type AbstractDecoratorType end
 
-
-
 """
     DefaultDecoratorType <: AbstractDecoratorType
 
@@ -128,7 +126,7 @@ Transparency of functions with respect to decorators can be specified using the 
 There are currently three modes given a new `AbstractDecoratorManifold` `M`
 * `:intransparent` – this function has to be implmented for the new manifold `M`
 * `:transparent` – this function is transparent, in the sense that the function is invoked
-  on the decorated `M.manifold`
+  on the decorated `M.manifold`. This is the default, when introducing a function or signature.
 * `:parent` specifies that (unless implemented) for this function, the classical inheritance
   is issued, i.e. the function is invoked on `M`s supertype.
 """
@@ -775,10 +773,6 @@ Base.@propagate_inbounds function Base.getindex(
 ) where {𝔽}
     return getindex(p, decorated_manifold(M), I...)
 end
-
-#
-# Dispatch rules
-#
 
 PARENT_FUNCTIONS = [
     distance,
