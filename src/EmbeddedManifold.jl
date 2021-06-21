@@ -259,6 +259,9 @@ for f in [
     mid_point!,
     project,
     retract!,
+    vector_transport_along,
+    vector_transport_direction,
+    vector_transport_to,
 ]
     eval(
         quote
@@ -286,7 +289,7 @@ for f in [inverse_retract!, retract!]
         end,
     )
 end
-for f in [norm]
+for f in [norm, inner]
     eval(
         quote
             function decorator_transparent_dispatch(

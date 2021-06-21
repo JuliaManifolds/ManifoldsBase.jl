@@ -276,7 +276,7 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEm
                   Val(:intransparent)
         end
         @test ManifoldsBase.decorator_transparent_dispatch(vector_transport_along!, AM) ===
-              Val(:intransparent)
+              Val(:transparent)
         @test ManifoldsBase.decorator_transparent_dispatch(
             vector_transport_to!,
             AM,
@@ -289,7 +289,7 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEm
         @test ManifoldsBase.decorator_transparent_dispatch(
             vector_transport_direction!,
             AM,
-        ) === Val(:parent)
+        ) === Val(:transparent)
 
         for f in [inner, norm]
             @test ManifoldsBase.decorator_transparent_dispatch(f, IM) === Val(:transparent)
