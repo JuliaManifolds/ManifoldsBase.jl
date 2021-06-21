@@ -232,7 +232,8 @@ default_embedding_dispatch(::AbstractEmbeddedManifold) = Val(false)
 
 #
 # Abstract intransparent – i.e. new implementations necessary
-for f in [check_point,check_vector, embed!, exp!, inner, log!, manifold_dimension, project!]
+for f in
+    [check_point, check_vector, embed!, exp!, inner, log!, manifold_dimension, project!]
     eval(
         quote
             function decorator_transparent_dispatch(
@@ -242,12 +243,23 @@ for f in [check_point,check_vector, embed!, exp!, inner, log!, manifold_dimensio
             )
                 return Val(:intransparent)
             end
-        end
+        end,
     )
 end
 #
 # Abstract parent – i.e. pass to embedding
-for f in [embed, get_basis, get_coordinates, get_coordinates!, get_vector, get_vector!, inverse_retract!, mid_point!, project, retract!, vector_transport_along!, vector_transport_direction!, vector_transport_to!]
+for f in [
+    embed,
+    get_basis,
+    get_coordinates,
+    get_coordinates!,
+    get_vector,
+    get_vector!,
+    inverse_retract!,
+    mid_point!,
+    project,
+    retract!,
+]
     eval(
         quote
             function decorator_transparent_dispatch(
@@ -257,7 +269,7 @@ for f in [embed, get_basis, get_coordinates, get_coordinates!, get_vector, get_v
             )
                 return Val(:parent)
             end
-        end
+        end,
     )
 end
 # Abstract generic isometric
@@ -271,7 +283,7 @@ for f in [inverse_retract!, retract!]
             ) where {𝔽}
                 return Val(:parent)
             end
-        end
+        end,
     )
 end
 for f in [norm]
@@ -284,12 +296,30 @@ for f in [norm]
             ) where {𝔽}
                 return Val(:transparent)
             end
-        end
+        end,
     )
 end
 #
 # Transparent Isometric Embedding – additionally transparent
-for f in [distance, exp, exp!, inner, inverse_retract, inverse_retract!, log, log!, mid_point, mid_point!, project!, project, retract, retract!, vector_transport_along, vector_transport_along!, vector_transport_direction, vector_transport_direction!, vector_transport_to, vector_transport_to!]
+for f in [
+    distance,
+    exp,
+    exp!,
+    inner,
+    inverse_retract,
+    inverse_retract!,
+    log,
+    log!,
+    mid_point,
+    mid_point!,
+    project!,
+    project,
+    retract,
+    retract!,
+    vector_transport_along,
+    vector_transport_direction,
+    vector_transport_to,
+]
     eval(
         quote
             function decorator_transparent_dispatch(
@@ -299,7 +329,7 @@ for f in [distance, exp, exp!, inner, inverse_retract, inverse_retract!, log, lo
             ) where {𝔽}
                 return Val(:transparent)
             end
-        end
+        end,
     )
 end
 #
@@ -314,7 +344,7 @@ for f in [embed, project]
             )
                 return Val(:intransparent)
             end
-        end
+        end,
     )
 end
 
@@ -344,9 +374,9 @@ for f in [vector_transport_along!, vector_transport_direction!, vector_transport
             ) where {𝔽,T}
                 return Val(:transparent)
             end
-        end
+        end,
     )
-    for m in [PoleLadderTransport,SchildsLadderTransport, ScaledVectorTransport]
+    for m in [PoleLadderTransport, SchildsLadderTransport, ScaledVectorTransport]
         eval(
             quote
                 function decorator_transparent_dispatch(
@@ -356,8 +386,8 @@ for f in [vector_transport_along!, vector_transport_direction!, vector_transport
                     p,
                     X,
                     q,
-                    ::$m
-                    ) where {𝔽,E}
+                    ::$m,
+                ) where {𝔽,E}
                     return Val(:parent)
                 end
                 function decorator_transparent_dispatch(
@@ -367,11 +397,11 @@ for f in [vector_transport_along!, vector_transport_direction!, vector_transport
                     p,
                     X,
                     q,
-                    ::$m
+                    ::$m,
                 ) where {𝔽}
                     return Val(:parent)
                 end
-            end
+            end,
         )
     end
 end
