@@ -261,6 +261,7 @@ for f in [
     retract!,
     vector_transport_along,
     vector_transport_direction,
+    vector_transport_direction!,
     vector_transport_to,
 ]
     eval(
@@ -321,6 +322,7 @@ for f in [
     retract!,
     vector_transport_along,
     vector_transport_direction,
+    vector_transport_direction!,
     vector_transport_to,
 ]
     eval(
@@ -351,7 +353,8 @@ for f in [embed, project]
     )
 end
 
-# unified vector transports for the three already implemented cases.
+# unified vector transports for the three already implemented cases,
+# where _direction! still has its nice fallback
 for f in [vector_transport_along!, vector_transport_direction!, vector_transport_to!]
     eval(
         quote
