@@ -289,7 +289,7 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEm
         @test ManifoldsBase.decorator_transparent_dispatch(
             vector_transport_direction!,
             AM,
-        ) === Val(:transparent)
+        ) === Val(:parent)
 
         for f in [inner, norm]
             @test ManifoldsBase.decorator_transparent_dispatch(f, IM) === Val(:transparent)
