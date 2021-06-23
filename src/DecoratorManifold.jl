@@ -788,7 +788,7 @@ DEFAULT_PARENT_FUNCTIONS = [
     vector_transport_to,
 ]
 
-for f in PARENT_FUNCTIONS
+for f in DEFAULT_PARENT_FUNCTIONS
     eval(
         quote
             function decorator_transparent_dispatch(
