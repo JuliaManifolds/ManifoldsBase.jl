@@ -340,7 +340,7 @@ function combine_allocation_promotion_functions(::typeof(identity), ::typeof(com
 end
 
 @doc raw"""
-    dual_basis(M::AbstractManifold, p, B::AbstractBasis) 
+    dual_basis(M::AbstractManifold, p, B::AbstractBasis)
 
 Get the dual basis to `B`, a basis of a vector space at point `p` from manifold `M`.
 
@@ -533,13 +533,6 @@ for BT in [DISAMBIGUATION_BASIS_TYPES..., DISAMBIGUATION_COTANGENT_BASIS_TYPES..
         end,
     )
 end
-function decorator_transparent_dispatch(
-    ::typeof(get_coordinates!),
-    ::AbstractManifold,
-    args...,
-)
-    return Val(:transparent)
-end
 
 function get_coordinates!(M::AbstractManifold, Y, p, X, B::VeeOrthogonalBasis)
     return get_coordinates!(M, Y, p, X, DefaultOrthogonalBasis(number_system(B)))
@@ -631,9 +624,6 @@ for BT in [DISAMBIGUATION_BASIS_TYPES..., DISAMBIGUATION_COTANGENT_BASIS_TYPES..
             )
         end,
     )
-end
-function decorator_transparent_dispatch(::typeof(get_vector!), ::AbstractManifold, args...)
-    return Val(:transparent)
 end
 
 _get_vector_cache_broadcast(::Any) = Val(true)

@@ -550,6 +550,8 @@ export AbstractPowerManifold, PowerManifold
 export AbstractPowerRepresentation,
     NestedPowerRepresentation, NestedReplacingPowerRepresentation
 
+export AbstractDecoratorType, DefaultDecoratorType
+
 export OutOfInjectivityRadiusError
 
 export AbstractRetractionMethod,
