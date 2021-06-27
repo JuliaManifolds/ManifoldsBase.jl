@@ -306,4 +306,20 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
         a = NLsolveInverseRetraction(ExponentialRetraction())
         @test a.retraction isa ExponentialRetraction
     end
+
+    @testset "copy of points and vectors" begin
+        M = DefaultManifold(2)
+        p = [2.0, 3.0]
+        q = similar(p)
+        copyto!(M, q, p)
+        @test p == q
+        r = copy(M, p)
+        @test r == p
+        X = [4.0, 5.0]
+        Y = similar(X)
+        copyto!(M, Y, p, X)
+        @test Y == X
+        Z = copy(M, p, X)
+        @test Z == X
+    end
 end

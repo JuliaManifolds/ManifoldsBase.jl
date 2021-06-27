@@ -5,6 +5,7 @@ import Base:
     exp,
     log,
     convert,
+    copy,
     copyto!,
     angle,
     eltype,
@@ -81,7 +82,7 @@ end
 Return type of element of the array that will represent the result of function `f` and the
 [`AbstractManifold`](@ref) `M` on given arguments `args` (passed as a tuple).
 """
-function allocate_result_type(M::AbstractManifold, f, args::NTuple{N,Any}) where {N}
+function allocate_result_type(::AbstractManifold, f, args::NTuple{N,Any}) where {N}
     return typeof(mapreduce(eti -> one(number_eltype(eti)), +, args))
 end
 
@@ -174,6 +175,33 @@ function check_size(M::AbstractManifold, p, X)
         )
     end
 end
+
+@doc raw"""
+    copy(M, p)
+
+Copy the value(s) from the point `p` on the [`AbstractManifold`](@ref) `M` into a new point.
+See [`allocate_result`](@ref) for the allocation of new point memory and [`copyto!`](@ref) for the copying.
+"""
+function copy(M::AbstractManifold, p)
+    q = allocate_result(M, copy, p)
+    copyto!(M, q, p)
+    return q
+end
+
+@doc raw"""
+    copy(M, p, X)
+
+Copy the value(s) from the tangent vector `X` at a point `p` on the
+[`AbstractManifold`](@ref) `M` into a new tangent vector.
+See [`allocate_result`](@ref) for the allocation of new point memory and [`copyto!`](@ref) for the copying.
+"""
+function copy(M::AbstractManifold, p, X)
+    # the order of args switched, since the allocation by default takes the type of the first.
+    Y = allocate_result(M, copy, X, p)
+    copyto!(M, Y, p, X)
+    return Y
+end
+
 
 @doc raw"""
     copyto!(M::AbstractManifold, q, p)
@@ -272,8 +300,7 @@ see [`AbstractEmbeddedManifold`](@ref) how you can avoid reimplementing code fro
 See also: [`EmbeddedManifold`](@ref), [`project`](@ref project(M::AbstractManifold, p, X))
 """
 function embed(M::AbstractManifold, p, X)
-    # Note that the order is switched,
-    # since the allocation by default takes the type of the first.
+    # the order of args switched, since the allocation by default takes the type of the first.
     Y = allocate_result(M, embed, X, p)
     embed!(M, Y, p, X)
     return Y
@@ -596,6 +623,8 @@ export allocate,
     check_point,
     check_vector,
     check_size,
+    copy,
+    copyto!,
     distance,
     exp,
     exp!,
