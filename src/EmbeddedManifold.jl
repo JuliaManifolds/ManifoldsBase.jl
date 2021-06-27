@@ -73,7 +73,7 @@ struct TransparentIsometricEmbedding <: AbstractIsometricEmbeddingType end
 A type to represent an explicit embedding of a [`AbstractManifold`](@ref) `M` of type `MT` embedded
 into a manifold `N` of type `NT`.
 
-!!!note
+!!! note
     This type is not required if a manifold `M` is to be embedded in one specific manifold `N`. One can then just implement
     [`embed!`](@ref) and [`project!`](@ref). Only for a second –maybe considered non-default–
     embedding, this type should be considered in order to dispatch on different embed
