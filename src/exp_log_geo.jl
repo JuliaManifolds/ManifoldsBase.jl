@@ -13,7 +13,7 @@ where ``γ_{p,X}`` is the unique geodesic starting in ``γ(0)=p`` such that ``\d
 See also [`shortest_geodesic`](@ref), [`retract`](@ref).
 """
 function exp(M::AbstractManifold, p, X)
-    q = allocate_result(M, exp, p, X)
+    q = allocate_result_point(M, exp, p, X)
     exp!(M, q, p, X)
     return q
 end
@@ -69,7 +69,7 @@ Note that the logarithmic map might not be globally defined.
 See also [`inverse_retract`](@ref).
 """
 function log(M::AbstractManifold, p, q)
-    X = allocate_result(M, log, p, q)
+    X = allocate_result_vector(M, log, p, q)
     log!(M, X, p, q)
     return X
 end

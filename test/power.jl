@@ -121,7 +121,7 @@ power_array_wrapper(::Type{NestedReplacingPowerRepresentation}, i::Int) = SVecto
             @test get_coordinates(N, p, q, B) == v
             # the method tested below should not be used but it prevents ambiguities from occurring
             # and the test is here to make coverage happy
-            @test ManifoldsBase.allocate_result(N, get_coordinates, p, q, B) isa Vector
+            @test ManifoldsBase.allocate_result_coords_like(N, get_coordinates, p, q) isa Vector
             v2 = zeros(size(v))
             get_coordinates!(N, v2, p, q, B)
             @test v2 == v

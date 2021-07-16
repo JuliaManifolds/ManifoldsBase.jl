@@ -10,7 +10,7 @@ accordingly.
 See also: [`EmbeddedManifold`](@ref), [`embed`](@ref embed(M::AbstractManifold, p))
 """
 function project(M::AbstractManifold, p)
-    q = allocate_result(M, project, p)
+    q = allocate_result_point(M, project, p)
     project!(M, q, p)
     return q
 end
@@ -47,9 +47,7 @@ Lie algebra is perfomed, too.
 See also: [`EmbeddedManifold`](@ref), [`embed`](@ref embed(M::AbstractManifold, p, X))
 """
 function project(M::AbstractManifold, p, X)
-    # Note that the order is switched,
-    # since the allocation by default takes the type of the first.
-    Y = allocate_result(M, project, X, p)
+    Y = allocate_result_vector(M, project, p, X)
     project!(M, Y, p, X)
     return Y
 end

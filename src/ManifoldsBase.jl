@@ -63,17 +63,50 @@ allocate(a::NTuple{N,AbstractArray} where {N}) = map(allocate, a)
 allocate(a::NTuple{N,AbstractArray} where {N}, T::Type) = map(t -> allocate(t, T), a)
 
 """
-    allocate_result(M::AbstractManifold, f, x...)
+    allocate_result_vector(M::AbstractManifold, f, p, x...)
 
-Allocate an array for the result of function `f` on [`AbstractManifold`](@ref) `M` and arguments
-`x...` for implementing the non-modifying operation using the modifying operation.
-
-Usefulness of passing a function is demonstrated by methods that allocate results of musical
-isomorphisms.
+Allocate an array for the result of function `f` that returns a vector at point `p` on
+[`AbstractManifold`](@ref) `M` and arguments `x...` for implementing the non-modifying
+operation using the modifying operation.
 """
-function allocate_result(M::AbstractManifold, f, x...)
+function allocate_result_vector(M::AbstractManifold, f, p, x1, x...)
+    T = allocate_result_type(M, f, (x1, p, x...))
+    return allocate(x1, T)
+end
+function allocate_result_vector(M::AbstractManifold, f, p)
+    T = allocate_result_type(M, f, (p,))
+    return allocate(p, T)
+end
+
+"""
+    allocate_result_point(M::AbstractManifold, f, x...)
+
+Allocate an array for the result of function `f` that returns a point on
+[`AbstractManifold`](@ref) `M` and arguments `x...` for implementing the non-modifying
+operation using the modifying operation.
+"""
+function allocate_result_point(M::AbstractManifold, f, x...)
+    return _allocate_result_point(M, f, representation_size(M), x...)
+end
+function _allocate_result_point(M::AbstractManifold, f, ::Nothing, x...)
     T = allocate_result_type(M, f, x)
     return allocate(x[1], T)
+end
+function _allocate_result_point(M::AbstractManifold, f, rep_size::Tuple, x...)
+    T = allocate_result_type(M, f, x)
+    return allocate(x[1], T, rep_size...)
+end
+
+"""
+    allocate_result_coords_like(M::AbstractManifold, f, N, x...)
+
+Allocate an array for the result of function `f` that returns a flat array of `N`
+coordinates of an object on manifold [`AbstractManifold`](@ref) `M` and arguments `x...`
+for implementing the non-modifying operation using the modifying operation.
+"""
+function allocate_result_coords_like(M::AbstractManifold, f, x...; N = manifold_dimension(M))
+    T = allocate_result_type(M, f, x)
+    return allocate(x[1], T, N)
 end
 
 """
@@ -183,7 +216,7 @@ Copy the value(s) from the point `p` on the [`AbstractManifold`](@ref) `M` into 
 See [`allocate_result`](@ref) for the allocation of new point memory and [`copyto!`](@ref) for the copying.
 """
 function copy(M::AbstractManifold, p)
-    q = allocate_result(M, copy, p)
+    q = allocate_result_point(M, copy, p)
     copyto!(M, q, p)
     return q
 end
@@ -197,7 +230,7 @@ See [`allocate_result`](@ref) for the allocation of new point memory and [`copyt
 """
 function copy(M::AbstractManifold, p, X)
     # the order of args switched, since the allocation by default takes the type of the first.
-    Y = allocate_result(M, copy, X, p)
+    Y = allocate_result_vector(M, copy, p, X)
     copyto!(M, Y, p, X)
     return Y
 end
@@ -257,7 +290,7 @@ the representation is changed accordingly.
 See also: [`EmbeddedManifold`](@ref), [`project`](@ref project(M::AbstractManifold,p))
 """
 function embed(M::AbstractManifold, p)
-    q = allocate_result(M, embed, p)
+    q = allocate_result_point(get_embedding(M), embed, p)
     embed!(M, q, p)
     return q
 end
@@ -301,7 +334,7 @@ See also: [`EmbeddedManifold`](@ref), [`project`](@ref project(M::AbstractManifo
 """
 function embed(M::AbstractManifold, p, X)
     # the order of args switched, since the allocation by default takes the type of the first.
-    Y = allocate_result(M, embed, X, p)
+    Y = allocate_result_vector(M, embed, p, X)
     embed!(M, Y, p, X)
     return Y
 end
@@ -552,7 +585,7 @@ Return the tangent vector from the tangent space ``T_p\mathcal M`` at `p` on the
 `p` produces `p`.
 """
 function zero_vector(M::AbstractManifold, p)
-    X = allocate_result(M, zero_vector, p)
+    X = allocate_result_vector(M, zero_vector, p)
     zero_vector!(M, X, p)
     return X
 end

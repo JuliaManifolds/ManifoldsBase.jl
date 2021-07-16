@@ -188,12 +188,12 @@ correspnonding manifold.
 See also [`retract`](@ref).
 """
 function inverse_retract(M::AbstractManifold, p, q)
-    X = allocate_result(M, inverse_retract, p, q)
+    X = allocate_result_vector(M, inverse_retract, p, q)
     inverse_retract!(M, X, p, q)
     return X
 end
 function inverse_retract(M::AbstractManifold, p, q, method::AbstractInverseRetractionMethod)
-    X = allocate_result(M, inverse_retract, p, q)
+    X = allocate_result_vector(M, inverse_retract, p, q)
     inverse_retract!(M, X, p, q, method)
     return X
 end
@@ -224,13 +224,13 @@ a retraction. For further available retractions see the documentation of respect
 Locally, the retraction is invertible. For the inverse operation, see [`inverse_retract`](@ref).
 """
 function retract(M::AbstractManifold, p, X)
-    q = allocate_result(M, retract, p, X)
+    q = allocate_result_point(M, retract, p, X)
     retract!(M, q, p, X)
     return q
 end
 retract(M::AbstractManifold, p, X, t::Real) = retract(M, p, t * X)
 function retract(M::AbstractManifold, p, X, method::AbstractRetractionMethod)
-    q = allocate_result(M, retract, p, X)
+    q = allocate_result_point(M, retract, p, X)
     retract!(M, q, p, X, method)
     return q
 end

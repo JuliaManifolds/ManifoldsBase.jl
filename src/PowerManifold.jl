@@ -199,65 +199,24 @@ function Base.:^(
     return PowerManifold(M, size...)
 end
 
-function allocate_result(M::PowerManifoldNested, f, x...)
-    if representation_size(M.manifold) === ()
-        return allocate(x[1])
-    else
-        return [
-            allocate_result(M.manifold, f, map(y -> _access_nested(y, i), x)...) for
-            i in get_iterator(M)
-        ]
-    end
-end
-function allocate_result(::PowerManifoldNestedReplacing, f, x...)
-    return copy(x[1])
+for fname in [:allocate_result_point, :allocate_result_vector]
+    eval(quote
+        function $fname(M::PowerManifoldNested, f, x...)
+            if representation_size(M.manifold) === ()
+                return allocate(x[1])
+            else
+                return [
+                    $fname(M.manifold, f, map(y -> _access_nested(y, i), x)...) for
+                    i in get_iterator(M)
+                ]
+            end
+        end
+        function $fname(::PowerManifoldNestedReplacing, f, x...)
+            return copy(x[1])
+        end
+    end)
 end
 
-for PowerRepr in [PowerManifoldNested, PowerManifoldNestedReplacing]
-    @eval begin
-        function allocate_result(
-            M::$PowerRepr,
-            f::typeof(get_coordinates),
-            p,
-            X,
-            B::AbstractBasis,
-        )
-            return invoke(
-                allocate_result,
-                Tuple{AbstractManifold,typeof(get_coordinates),Any,Any,typeof(B)},
-                M,
-                f,
-                p,
-                X,
-                B,
-            )
-        end
-        function allocate_result(
-            M::$PowerRepr,
-            f::typeof(get_coordinates),
-            p,
-            X,
-            B::CachedBasis,
-        )
-            return invoke(
-                allocate_result,
-                Tuple{AbstractManifold,typeof(get_coordinates),Any,Any,typeof(B)},
-                M,
-                f,
-                p,
-                X,
-                B,
-            )
-        end
-    end
-end
-
-function allocate_result(M::PowerManifoldNested, f::typeof(get_vector), p, X)
-    return [allocate_result(M.manifold, f, _access_nested(p, i)) for i in get_iterator(M)]
-end
-function allocate_result(::PowerManifoldNestedReplacing, ::typeof(get_vector), p, X)
-    return copy(p)
-end
 function allocation_promotion_function(M::AbstractPowerManifold, f, args::Tuple)
     return allocation_promotion_function(M.manifold, f, args)
 end

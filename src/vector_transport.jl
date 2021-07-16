@@ -318,7 +318,7 @@ function pole_ladder!(
     d,
     q,
     c = mid_point(M, p, q),
-    X = allocate_result(M, log, d, c);
+    X = allocate_result_vector(M, log, d, c);
     retraction = ExponentialRetraction(),
     inverse_retraction = LogarithmicInverseRetraction(),
 )
@@ -398,7 +398,7 @@ function schilds_ladder!(
     d,
     q,
     c = mid_point(M, q, d),
-    X = allocate_result(M, log, d, c);
+    X = allocate_result_vector(M, log, d, c);
     retraction = ExponentialRetraction(),
     inverse_retraction = LogarithmicInverseRetraction(),
 )
@@ -432,7 +432,7 @@ function vector_transport_along(
     c,
     m::AbstractVectorTransportMethod,
 )
-    Y = allocate_result(M, vector_transport_along, X, p)
+    Y = allocate_result_vector(M, vector_transport_along, p, X)
     vector_transport_along!(M, Y, p, X, c, m)
     return Y
 end
@@ -651,7 +651,7 @@ function vector_transport_direction(
     d,
     method::AbstractVectorTransportMethod,
 )
-    Y = allocate_result(M, vector_transport_direction, X, p, d)
+    Y = allocate_result_vector(M, vector_transport_direction, p, X, d)
     vector_transport_direction!(M, Y, p, X, d, method)
     return Y
 end
@@ -699,7 +699,7 @@ function vector_transport_to(
     q,
     method::AbstractVectorTransportMethod,
 )
-    Y = allocate_result(M, vector_transport_to, X, p, q)
+    Y = allocate_result_vector(M, vector_transport_to, q, X, p)
     vector_transport_to!(M, Y, p, X, q, method)
     return Y
 end

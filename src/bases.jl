@@ -285,29 +285,6 @@ const DISAMBIGUATION_COTANGENT_BASIS_TYPES = [
     DefaultOrthogonalBasis{<:Any,CotangentSpaceType},
 ]
 
-
-function allocate_result(
-    M::AbstractManifold,
-    f::typeof(get_coordinates),
-    p,
-    X,
-    B::AbstractBasis,
-)
-    T = allocate_result_type(M, f, (p, X))
-    return allocate(p, T, number_of_coordinates(M, B))
-end
-
-function allocate_result(
-    M::AbstractManifold,
-    f::typeof(get_coordinates),
-    p,
-    X,
-    B::CachedBasis,
-)
-    T = allocate_result_type(M, f, (p, X))
-    return allocate(p, T, number_of_coordinates(M, B))
-end
-
 @inline function allocate_result_type(
     M::AbstractManifold,
     f::Union{typeof(get_coordinates),typeof(get_vector)},
@@ -491,7 +468,7 @@ requires either a dual basis or the cached basis to be selfdual, for example ort
 See also: [`get_vector`](@ref), [`get_basis`](@ref)
 """
 function get_coordinates(M::AbstractManifold, p, X, B::AbstractBasis)
-    Y = allocate_result(M, get_coordinates, p, X, B)
+    Y = allocate_result_coords_like(M, get_coordinates, p, X)
     return get_coordinates!(M, Y, p, X, B)
 end
 @decorator_transparent_signature get_coordinates(
@@ -587,7 +564,7 @@ requires either a dual basis or the cached basis to be selfdual, for example ort
 See also: [`get_coordinates`](@ref), [`get_basis`](@ref)
 """
 function get_vector(M::AbstractManifold, p, X, B::AbstractBasis)
-    Y = allocate_result(M, get_vector, p, X)
+    Y = allocate_result_vector(M, get_vector, p)
     return get_vector!(M, Y, p, X, B)
 end
 @decorator_transparent_signature get_vector(

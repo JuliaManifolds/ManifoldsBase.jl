@@ -97,24 +97,17 @@ struct EmbeddedManifold{𝔽,MT<:AbstractManifold{𝔽},NT<:AbstractManifold} <:
     embedding::NT
 end
 
-function allocate_result(M::AbstractEmbeddedManifold, f::typeof(embed), x...)
-    T = allocate_result_type(M, f, x)
-    return allocate(x[1], T, representation_size(decorated_manifold(M)))
-end
-
-function allocate_result(M::AbstractEmbeddedManifold, f::typeof(project), x...)
-    T = allocate_result_type(M, f, x)
-    return allocate(x[1], T, representation_size(base_manifold(M)))
-end
-
-function allocate_result(M::EmbeddedManifold, f::typeof(embed), x...)
-    T = allocate_result_type(M, f, x)
-    return allocate(x[1], T, representation_size(get_embedding(M)))
-end
-
-function allocate_result(M::EmbeddedManifold, f::typeof(project), x...)
-    T = allocate_result_type(M, f, x)
-    return allocate(x[1], T, representation_size(base_manifold(M)))
+for M in [AbstractEmbeddedManifold, EmbeddedManifold], fname in [:allocate_result_point, :allocate_result_vector, :allocate_result_coords_like]
+    eval(quote
+        function $fname(M::$M, f::typeof(embed), x...)
+            T = allocate_result_type(M, f, x)
+            return allocate(x[1], T, representation_size(decorated_manifold(M)))
+        end
+        function $fname(M::$M, f::typeof(project), x...)
+            T = allocate_result_type(M, f, x)
+            return allocate(x[1], T, representation_size(base_manifold(M)))
+        end
+    end)
 end
 
 
@@ -172,7 +165,7 @@ end
 decorated_manifold(M::EmbeddedManifold) = M.embedding
 
 function embed(M::EmbeddedManifold, p)
-    q = allocate_result(M, embed, p)
+    q = allocate_result_point(get_embedding(M), embed, p)
     embed!(M, q, p)
     return q
 end
@@ -203,7 +196,7 @@ function get_embedding(M::EmbeddedManifold)
 end
 
 function project(M::EmbeddedManifold, p)
-    q = allocate_result(M, project, p)
+    q = allocate_result_point(M.manifold, project, p)
     project!(M, q, p)
     return q
 end
