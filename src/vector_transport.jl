@@ -258,7 +258,7 @@ end
 The [`AbstractVectorTransportMethod`](@ref) that is used when calling
 [`vector_transport_along`](@ref), [`vector_transport_to`](@ref), or
 [`vector_transport_direction`](@ref) without specifying the vector transport method.
-By default, this is `DifferentiatedRetractionVectorTransport(default_retraction_method(M))`.
+By default, this is [`DifferentiatedRetractionVectorTransport`](@ref)([`default_retraction_method`](@ref)`(M))`.
 """
 function default_vector_transport_method(M::AbstractManifold)
     return DifferentiatedRetractionVectorTransport(default_retraction_method(M))
@@ -432,7 +432,7 @@ end
 
 Transport a vector `X` from the tangent space at a point `p` on the [`AbstractManifold`](@ref) `M`
 along the curve represented by `c` using the `method`, which defaults to
-`default_vector_transport_method(M)`.
+[`default_vector_transport_method`](@ref)`(M)`.
 """
 function vector_transport_along(M::AbstractManifold, p, X, c)
     return vector_transport_along(M, p, X, c, default_vector_transport_method(M))
@@ -455,7 +455,7 @@ end
 
 Transport a vector `X` from the tangent space at a point `p` on the [`AbstractManifold`](@ref) `M`
 along the curve represented by `c` using the `method`, which defaults to
-`default_vector_transport_method(M)`. The result is saved to `Y`.
+[`default_vector_transport_method`](@ref)`(M)`. The result is saved to `Y`.
 """
 function vector_transport_along!(M::AbstractManifold, Y, p, X, c)
     return vector_transport_along!(M, Y, p, X, c, default_vector_transport_method(M))
@@ -651,7 +651,7 @@ end
 Transport a vector `X` from the tangent space at a point `p` on the [`AbstractManifold`](@ref) `M`
 in the direction indicated by the tangent vector `d` at `p`. By default, [`retract`](@ref) and
 [`vector_transport_to!`](@ref) are used with the `method`, which defaults
-to `default_vector_transport_method(M)`.
+to [`default_vector_transport_method`](@ref)`(M)`.
 """
 function vector_transport_direction(M::AbstractManifold, p, X, d)
     return vector_transport_direction(M, p, X, d, default_vector_transport_method(M))
@@ -675,7 +675,7 @@ end
 Transport a vector `X` from the tangent space at a point `p` on the [`AbstractManifold`](@ref) `M`
 in the direction indicated by the tangent vector `d` at `p`. By default, [`retract`](@ref) and
 [`vector_transport_to!`](@ref) are used with the `method`, which defaults
-to `default_vector_transport_method(M)`. The result is saved to `Y`.
+to [`default_vector_transport_method`](@ref)`(M)`. The result is saved to `Y`.
 """
 function vector_transport_direction!(M::AbstractManifold, Y, p, X, d)
     return vector_transport_direction!(M, Y, p, X, d, default_vector_transport_method(M))
@@ -699,7 +699,7 @@ end
 Transport a vector `X` from the tangent space at a point `p` on the [`AbstractManifold`](@ref) `M`
 along the [`shortest_geodesic`](@ref) to the tangent space at another point `q`.
 By default, the [`AbstractVectorTransportMethod`](@ref) `method` is
-`default_vector_transport_method(M)`.
+[`default_vector_transport_method`](@ref)`(M)`.
 """
 function vector_transport_to(M::AbstractManifold, p, X, q)
     return vector_transport_to(M, p, X, q, default_vector_transport_method(M))
@@ -723,7 +723,7 @@ end
 Transport a vector `X` from the tangent space at a point `p` on the [`AbstractManifold`](@ref) `M`
 along the [`shortest_geodesic`](@ref) to the tangent space at another point `q`.
 By default, the [`AbstractVectorTransportMethod`](@ref) `method` is
-`default_vector_transport_method(M)`. The result is saved to `Y`.
+[`default_vector_transport_method`](@ref)`(M)`. The result is saved to `Y`.
 """
 function vector_transport_to!(M::AbstractManifold, Y, p, X, q)
     return vector_transport_to!(M, Y, p, X, q, default_vector_transport_method(M))

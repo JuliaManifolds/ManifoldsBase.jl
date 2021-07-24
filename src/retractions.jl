@@ -159,7 +159,7 @@ Compute the inverse retraction, a cheaper, approximate version of the
 Result is saved to `X`.
 
 Inverse retraction method can be specified by the last argument, defaulting to
-`default_inverse_retraction_method(M)`. See the documentation of respective manifolds for
+[`default_inverse_retraction_method`](@ref)`(M)`. See the documentation of respective manifolds for
 available methods.
 
 See also [`retract!`](@ref).
@@ -196,7 +196,7 @@ Compute the inverse retraction, a cheaper, approximate version of the
 [`log`](@ref)arithmic map), of points `p` and `q` on the [`AbstractManifold`](@ref) `M`.
 
 Inverse retraction method can be specified by the last argument, defaulting to
-`default_inverse_retraction_method(M)`.
+[`default_inverse_retraction_method`](@ref)`(M)`.
 For available inverse retractions on certain manifolds see the documentation on the
 corresponding manifold.
 
@@ -233,7 +233,7 @@ The retraction is called of second order if for all ``X`` the curves ``c(t) = R_
 have a zero acceleration at ``t=0``, i.e. ``c''(0) = 0``.
 
 Retraction method can be specified by the last argument, defaulting to
-`default_retraction_method(M)`. For further available retractions see the documentation of respective manifolds.
+[`default_retraction_method`](@ref)`(M)`. For further available retractions see the documentation of respective manifolds.
 
 Locally, the retraction is invertible. For the inverse operation, see [`inverse_retract`](@ref).
 """
@@ -263,7 +263,7 @@ from `p` into direction `X`, scaled by `t`, on the [`AbstractManifold`](@ref) ma
 Result is saved to `q`.
 
 Retraction method can be specified by the last argument, defaulting to
-`default_retraction_method(M)`. See the documentation of respective manifolds for available
+[`default_retraction_method`](@ref)`(M)`. See the documentation of respective manifolds for available
 methods.
 
 See [`retract`](@ref) for more details.
