@@ -134,6 +134,22 @@ function NLsolveInverseRetraction(
     return NLsolveInverseRetraction(m, X0, project_point, project_tangent, nlsolve_kwargs)
 end
 
+"""
+    default_inverse_retraction_method(M::AbstractManifold)
+
+The [`AbstractInverseRetractionMethod`](@ref) that is used when calling
+[`inverse_retract`](@ref) without specifying the inverse retraction method.
+By default, this is the [`LogarithmicInverseRetraction`](@ref).
+"""
+default_inverse_retraction_method(::AbstractManifold) = LogarithmicInverseRetraction()
+
+"""
+    default_retraction_method(M::AbstractManifold)
+
+The [`AbstractRetractionMethod`](@ref) that is used when calling [`retract`](@ref) without
+specifying the retraction method. By default, this is the [`ExponentialRetraction`](@ref).
+"""
+default_retraction_method(::AbstractManifold) = ExponentialRetraction()
 
 """
     inverse_retract!(M::AbstractManifold, X, p, q[, method::AbstractInverseRetractionMethod])
@@ -143,13 +159,13 @@ Compute the inverse retraction, a cheaper, approximate version of the
 Result is saved to `X`.
 
 Inverse retraction method can be specified by the last argument, defaulting to
-[`LogarithmicInverseRetraction`](@ref). See the documentation of respective manifolds for
+[`default_inverse_retraction_method`](@ref)`(M)`. See the documentation of respective manifolds for
 available methods.
 
 See also [`retract!`](@ref).
 """
 function inverse_retract!(M::AbstractManifold, X, p, q)
-    return inverse_retract!(M, X, p, q, LogarithmicInverseRetraction())
+    return inverse_retract!(M, X, p, q, default_inverse_retraction_method(M))
 end
 function inverse_retract!(
     M::AbstractManifold,
@@ -180,10 +196,9 @@ Compute the inverse retraction, a cheaper, approximate version of the
 [`log`](@ref)arithmic map), of points `p` and `q` on the [`AbstractManifold`](@ref) `M`.
 
 Inverse retraction method can be specified by the last argument, defaulting to
-[`LogarithmicInverseRetraction`](@ref), since the [`log`](@ref)arithmic map is the inverse of a
-retraction, namely the [`exp`](@ref)onential map.
+[`default_inverse_retraction_method`](@ref)`(M)`.
 For available inverse retractions on certain manifolds see the documentation on the
-correspnonding manifold.
+corresponding manifold.
 
 See also [`retract`](@ref).
 """
@@ -218,8 +233,7 @@ The retraction is called of second order if for all ``X`` the curves ``c(t) = R_
 have a zero acceleration at ``t=0``, i.e. ``c''(0) = 0``.
 
 Retraction method can be specified by the last argument, defaulting to
-[`ExponentialRetraction`](@ref), i.e. to use the [`exp`](@ref)onential map, which itself is
-a retraction. For further available retractions see the documentation of respective manifolds.
+[`default_retraction_method`](@ref)`(M)`. For further available retractions see the documentation of respective manifolds.
 
 Locally, the retraction is invertible. For the inverse operation, see [`inverse_retract`](@ref).
 """
@@ -249,12 +263,12 @@ from `p` into direction `X`, scaled by `t`, on the [`AbstractManifold`](@ref) ma
 Result is saved to `q`.
 
 Retraction method can be specified by the last argument, defaulting to
-[`ExponentialRetraction`](@ref). See the documentation of respective manifolds for available
+[`default_retraction_method`](@ref)`(M)`. See the documentation of respective manifolds for available
 methods.
 
 See [`retract`](@ref) for more details.
 """
-retract!(M::AbstractManifold, q, p, X) = retract!(M, q, p, X, ExponentialRetraction())
+retract!(M::AbstractManifold, q, p, X) = retract!(M, q, p, X, default_retraction_method(M))
 retract!(M::AbstractManifold, q, p, X, t::Real) = retract!(M, q, p, t * X)
 retract!(M::AbstractManifold, q, p, X, ::ExponentialRetraction) = exp!(M, q, p, X)
 function retract!(M::AbstractManifold, q, p, X, t::Real, method::AbstractRetractionMethod)

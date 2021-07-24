@@ -48,6 +48,9 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
 
     @test injectivity_radius(M) == Inf
 
+    @test default_retraction_method(M) == ExponentialRetraction()
+    @test default_inverse_retraction_method(M) == LogarithmicInverseRetraction()
+
     rm = ManifoldsBase.ExponentialRetraction()
     irm = ManifoldsBase.LogarithmicInverseRetraction()
 
@@ -204,6 +207,7 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
 
             @testset "vector transport" begin
                 # test constructor and alias
+                @test default_vector_transport_method(M) == ParallelTransport()
                 @test DifferentiatedRetractionVectorTransport(ExponentialRetraction()) ==
                       ParallelTransport()
                 v1 = log(M, pts[1], pts[2])
