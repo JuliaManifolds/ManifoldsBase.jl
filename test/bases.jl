@@ -76,13 +76,10 @@ ManifoldsBase.manifold_dimension(::ProjectionTestManifold) = 100
         for i in 1:N
             @test norm(M, x, get_vectors(M, x, pb)[i]) ≈ 1
             for j in (i + 1):N
+            println(i," -- ",j)
                 @test inner(M, x, get_vectors(M, x, pb)[i], get_vectors(M, x, pb)[j]) ≈ 0 atol =
                     1e-15
             end
-        end
-        # check projection idempotency
-        for i in 1:N
-            @test project(M, x, get_vectors(M, x, pb)[i]) ≈ get_vectors(M, x, pb)[i]
         end
     end
     aonb = get_basis(M, x, DefaultOrthonormalBasis())
@@ -109,7 +106,7 @@ ManifoldsBase.manifold_dimension(::ProjectionTestManifold) = 100
             return_incomplete_set = true,
             warn_linearly_dependent = true,
         )
-        @test length(get_vectors(tm, p, b)) == 3
+        @test length(get_vectors(tm, p, b)) == 4
     end
 end
 
