@@ -756,7 +756,7 @@ function gram_schmidt(
             end
             (!linear_independent) && break
         end
-        (!linear_independent || length(Ξ) == dim) && break
+        (!linear_independent || length(Ξ) == dim) && break
         linear_independent && push!(Ξ, Ξₙ)
     end
     if return_incomplete_set || length(Ξ) == dim
