@@ -707,24 +707,6 @@ When a set of vectors is orthonormalized a set of vectors is returned.
 When an [`AbstractBasis`](@ref) is orthonormalized, a [`CachedBasis`](@ref) is returned.
 """
 function gram_schmidt(
-    M::AbstractManifold{𝔽},
-    p,
-    B::AbstractBasis{𝔽};
-    warn_linearly_dependent = false,
-    return_incomplete_set = false,
-    kwargs...,
-) where {𝔽}
-    V = gram_schmidt(
-        M,
-        p,
-        get_vectors(M, p, B);
-        warn_linearly_dependent = warn_linearly_dependent,
-        return_incomplete_set = return_incomplete_set,
-        kwargs...,
-    )
-    return CachedBasis(GramSchmidtOrthonormalBasis(𝔽), V)
-end
-function gram_schmidt(
     M::AbstractManifold,
     p,
     V::AbstractVector;
@@ -736,29 +718,30 @@ function gram_schmidt(
     Ξ = empty(V)
     dim = manifold_dimension(M)
     N < dim && @warn "Input only has $(N) vectors, but manifold dimension is $(dim)."
+    linear_independent = true
     @inbounds for n in 1:N
-        Ξₙ = V[n]
+        Ξₙ = copy(M, p, V[n])
         for k in 1:length(Ξ)
             Ξₙ .-= real(inner(M, p, Ξ[k], Ξₙ)) .* Ξ[k]
         end
         nrmΞₙ = norm(M, p, Ξₙ)
         if nrmΞₙ == 0
             warn_linearly_dependent && @warn "Input vector $(n) has length 0."
-            @goto skip
+            linear_independent = false
         end
         Ξₙ ./= nrmΞₙ
         for k in 1:length(Ξ)
-            if !isapprox(real(inner(M, p, Ξ[k], Ξₙ)), 0; kwargs...)
+            if isapprox(abs(real(inner(M, p, Ξ[k], Ξₙ))), 1; kwargs...)
                 warn_linearly_dependent &&
                     @warn "Input vector $(n) is not linearly independent of output basis vector $(k)."
-                @goto skip
+                linear_independent = false
             end
+            (!linear_independent) && break
         end
-        push!(Ξ, Ξₙ)
-        length(Ξ) == dim && return Ξ
-        @label skip
+        (!linear_independent || length(Ξ) == dim) && break
+        linear_independent && push!(Ξ, Ξₙ)
     end
-    return if return_incomplete_set
+    if return_incomplete_set || length(Ξ) == dim
         return Ξ
     else
         error(
@@ -766,6 +749,7 @@ function gram_schmidt(
         )
     end
 end
+
 
 @doc raw"""
     hat(M::AbstractManifold, p, Xⁱ)
