@@ -744,20 +744,13 @@ function gram_schmidt(
         end
         nrmΞₙ = norm(M, p, Ξₙ)
         if nrmΞₙ == 0
-            warn_linearly_dependent && @warn "Input vector $(n) has length 0."
+            warn_linearly_dependent &&
+                @warn "Input vector $(n) lies in the span of the previous ones."
             linear_independent = false
         end
         Ξₙ ./= nrmΞₙ
-        for k in 1:length(Ξ)
-            if isapprox(abs(real(inner(M, p, Ξ[k], Ξₙ))), 1; kwargs...)
-                warn_linearly_dependent &&
-                    @warn "Input vector $(n) is not linearly independent of output basis vector $(k)."
-                linear_independent = false
-            end
-            (!linear_independent) && break
-        end
         (!linear_independent || length(Ξ) == dim) && break
-        linear_independent && push!(Ξ, Ξₙ)
+        push!(Ξ, Ξₙ)
     end
     if return_incomplete_set || length(Ξ) == dim
         return Ξ
