@@ -76,7 +76,6 @@ ManifoldsBase.manifold_dimension(::ProjectionTestManifold) = 100
         for i in 1:N
             @test norm(M, x, get_vectors(M, x, pb)[i]) ≈ 1
             for j in (i + 1):N
-            println(i," -- ",j)
                 @test inner(M, x, get_vectors(M, x, pb)[i], get_vectors(M, x, pb)[j]) ≈ 0 atol =
                     1e-15
             end
