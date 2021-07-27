@@ -707,6 +707,24 @@ When a set of vectors is orthonormalized a set of vectors is returned.
 When an [`AbstractBasis`](@ref) is orthonormalized, a [`CachedBasis`](@ref) is returned.
 """
 function gram_schmidt(
+    M::AbstractManifold{𝔽},
+    p,
+    B::AbstractBasis{𝔽};
+    warn_linearly_dependent = false,
+    return_incomplete_set = false,
+    kwargs...,
+) where {𝔽}
+    V = gram_schmidt(
+        M,
+        p,
+        get_vectors(M, p, B);
+        warn_linearly_dependent = warn_linearly_dependent,
+        return_incomplete_set = return_incomplete_set,
+        kwargs...,
+    )
+    return CachedBasis(GramSchmidtOrthonormalBasis(𝔽), V)
+end
+function gram_schmidt(
     M::AbstractManifold,
     p,
     V::AbstractVector;
