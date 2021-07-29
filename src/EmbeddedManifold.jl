@@ -249,6 +249,8 @@ end
 #
 # Abstract parent – i.e. pass to embedding
 for f in [
+    copy,
+    copyto!,
     embed,
     get_basis,
     get_coordinates,
