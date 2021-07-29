@@ -780,6 +780,8 @@ Base.@propagate_inbounds function Base.getindex(
 end
 
 DEFAULT_PARENT_FUNCTIONS = [
+    copy,
+    copyto!,
     distance,
     exp,
     inner,
