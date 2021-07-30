@@ -529,6 +529,11 @@ Return the manifold decorated by the decorator `M`. Defaults to `M.manifold`.
 """
 decorated_manifold(M::AbstractManifold) = M.manifold
 
+@decorator_transparent_signature copyto!(M::AbstractDecoratorManifold, q, p)
+@decorator_transparent_signature copyto!(M::AbstractDecoratorManifold, Y, p, X)
+@decorator_transparent_signature copy(M::AbstractDecoratorManifold, p)
+@decorator_transparent_signature copy(M::AbstractDecoratorManifold, p, X)
+
 @decorator_transparent_signature distance(M::AbstractDecoratorManifold, p, q)
 
 @decorator_transparent_signature embed(M::AbstractDecoratorManifold, p, X)
