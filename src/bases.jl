@@ -724,7 +724,7 @@ function gram_schmidt(
     M::AbstractManifold,
     p,
     V::AbstractVector;
-    atol = 5 * 1e-16,
+    atol = eps(number_eltype(first(V))),
     warn_linearly_dependent = false,
     return_incomplete_set = false,
     skip_linearly_dependent = false,
