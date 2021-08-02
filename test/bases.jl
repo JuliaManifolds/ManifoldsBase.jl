@@ -116,6 +116,13 @@ ManifoldsBase.manifold_dimension(::ProjectionTestManifold) = 100
             skip_linearly_dependent = true, #skips 3 and 5
         )
         @test length(get_vectors(tm, p, b)) == 3
+        @test_throws ErrorException ManifoldsBase.gram_schmidt(M, p, [V[1]])
+        @test_throws ErrorException ManifoldsBase.gram_schmidt(
+            M,
+            p,
+            [V[1], V[1], V[1]];
+            skip_linearly_dependent = true,
+        )
     end
 end
 
