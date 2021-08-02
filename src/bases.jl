@@ -687,7 +687,7 @@ The method always returns a basis, i.e. linearly dependent vectors are removed.
 
 * `warn_linearly_dependent` (`false`) – warn if the basis vectors are not linearly
   independent
-* `skip_linearly_dependent` (`false`) – whether to just skip (`true`) linear a vector that
+* `skip_linearly_dependent` (`false`) – whether to just skip (`true`) a vector that
   is linearly dependent to the previous ones or to stop (`false`, default) at that point
 * `return_incomplete_set` (`false`) – throw an error if the resulting set of vectors is not
   a basis but contains less vectors
