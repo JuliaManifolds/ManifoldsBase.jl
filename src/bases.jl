@@ -446,19 +446,10 @@ function get_basis(
     M::AbstractManifold,
     p,
     B::ProjectedOrthonormalBasis{:gram_schmidt,ℝ};
-    warn_linearly_dependent = false,
-    return_incomplete_set = false,
     kwargs...,
 )
     E = [project(M, p, _euclidean_basis_vector(p, i)) for i in eachindex(p)]
-    V = gram_schmidt(
-        M,
-        p,
-        E;
-        warn_linearly_dependent = warn_linearly_dependent,
-        return_incomplete_set = return_incomplete_set,
-        kwargs...,
-    )
+    V = gram_schmidt(M, p, E; kwargs...)
     return CachedBasis(B, V)
 end
 for BT in DISAMBIGUATION_BASIS_TYPES
@@ -696,10 +687,13 @@ The method always returns a basis, i.e. linearly dependent vectors are removed.
 
 * `warn_linearly_dependent` (`false`) – warn if the basis vectors are not linearly
   independent
+* `skip_linearly_dependent` (`false`) – whether to just skip (`true`) a vector that
+  is linearly dependent to the previous ones or to stop (`false`, default) at that point
 * `return_incomplete_set` (`false`) – throw an error if the resulting set of vectors is not
   a basis but contains less vectors
 
 further keyword arguments can be passed to set the accuracy of the independence test.
+Especially `atol` is raised slightly by default to `atol = 5*1e-16`.
 
 # Return value
 
@@ -712,6 +706,7 @@ function gram_schmidt(
     B::AbstractBasis{𝔽};
     warn_linearly_dependent = false,
     return_incomplete_set = false,
+    skip_linearly_dependent = false,
     kwargs...,
 ) where {𝔽}
     V = gram_schmidt(
@@ -719,6 +714,7 @@ function gram_schmidt(
         p,
         get_vectors(M, p, B);
         warn_linearly_dependent = warn_linearly_dependent,
+        skip_linearly_dependent = skip_linearly_dependent,
         return_incomplete_set = return_incomplete_set,
         kwargs...,
     )
@@ -728,8 +724,10 @@ function gram_schmidt(
     M::AbstractManifold,
     p,
     V::AbstractVector;
+    atol = eps(number_eltype(first(V))),
     warn_linearly_dependent = false,
     return_incomplete_set = false,
+    skip_linearly_dependent = false,
     kwargs...,
 )
     N = length(V)
@@ -737,35 +735,37 @@ function gram_schmidt(
     dim = manifold_dimension(M)
     N < dim && @warn "Input only has $(N) vectors, but manifold dimension is $(dim)."
     @inbounds for n in 1:N
-        Ξₙ = V[n]
+        Ξₙ = copy(M, p, V[n])
         for k in 1:length(Ξ)
             Ξₙ .-= real(inner(M, p, Ξ[k], Ξₙ)) .* Ξ[k]
         end
         nrmΞₙ = norm(M, p, Ξₙ)
-        if nrmΞₙ == 0
-            warn_linearly_dependent && @warn "Input vector $(n) has length 0."
-            @goto skip
+        if isapprox(nrmΞₙ / dim, 0; atol = atol, kwargs...)
+            warn_linearly_dependent &&
+                @warn "Input vector $(n) lies in the span of the previous ones."
+            !skip_linearly_dependent && throw(
+                ErrorException("Input vector $(n) lies in the span of the previous ones."),
+            )
+        else
+            push!(Ξ, Ξₙ ./ nrmΞₙ)
         end
-        Ξₙ ./= nrmΞₙ
-        for k in 1:length(Ξ)
-            if !isapprox(real(inner(M, p, Ξ[k], Ξₙ)), 0; kwargs...)
-                warn_linearly_dependent &&
-                    @warn "Input vector $(n) is not linearly independent of output basis vector $(k)."
-                @goto skip
-            end
+        if length(Ξ) == dim
+            (n < N) &&
+                @warn "More vectors ($(N)) entered than the dimension of the manifold ($dim). All vectors after the $n th ignored."
+            return Ξ
         end
-        push!(Ξ, Ξₙ)
-        length(Ξ) == dim && return Ξ
-        @label skip
     end
-    return if return_incomplete_set
+    if return_incomplete_set # if we rech this point - length(Ξ) < dim
         return Ξ
     else
-        error(
-            "gram_schmidt found only $(length(Ξ)) orthonormal basis vectors, but manifold dimension is $(dim).",
+        throw(
+            ErrorException(
+                "gram_schmidt found only $(length(Ξ)) orthonormal basis vectors, but manifold dimension is $(dim).",
+            ),
         )
     end
 end
+
 
 @doc raw"""
     hat(M::AbstractManifold, p, Xⁱ)

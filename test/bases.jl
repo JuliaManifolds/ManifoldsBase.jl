@@ -64,10 +64,20 @@ ManifoldsBase.manifold_dimension(::ProjectionTestManifold) = 100
         0.0 sqrt(2)/2 0.0
     ]
 
-    for pb in (ProjectedOrthonormalBasis(:svd), ProjectedOrthonormalBasis(:gram_schmidt))
-        pb = get_basis(M, x, pb)
+    for pB in (ProjectedOrthonormalBasis(:svd), ProjectedOrthonormalBasis(:gram_schmidt))
+        if pB isa ProjectedOrthonormalBasis{:gram_schmidt,ℝ}
+            pb = get_basis(
+                M,
+                x,
+                pB;
+                warn_linearly_dependent = true,
+                skip_linearly_dependent = true,
+            ) # skip V4, wich is -V1 after proj.
+            @test_throws ErrorException get_basis(M, x, pB) # error
+        else
+            pb = get_basis(M, x, pB) # skips V4 automatically
+        end
         @test number_system(pb) == ℝ
-        @test get_basis(M, x, pb) == pb
         N = manifold_dimension(M)
         @test isa(pb, CachedBasis)
         @test CachedBasis(pb) === pb
@@ -79,10 +89,6 @@ ManifoldsBase.manifold_dimension(::ProjectionTestManifold) = 100
                 @test inner(M, x, get_vectors(M, x, pb)[i], get_vectors(M, x, pb)[j]) ≈ 0 atol =
                     1e-15
             end
-        end
-        # check projection idempotency
-        for i in 1:N
-            @test project(M, x, get_vectors(M, x, pb)[i]) ≈ get_vectors(M, x, pb)[i]
         end
     end
     aonb = get_basis(M, x, DefaultOrthonormalBasis())
@@ -107,9 +113,16 @@ ManifoldsBase.manifold_dimension(::ProjectionTestManifold) = 100
             p,
             bt;
             return_incomplete_set = true,
-            warn_linearly_dependent = true,
+            skip_linearly_dependent = true, #skips 3 and 5
         )
         @test length(get_vectors(tm, p, b)) == 3
+        @test_throws ErrorException ManifoldsBase.gram_schmidt(M, p, [V[1]])
+        @test_throws ErrorException ManifoldsBase.gram_schmidt(
+            M,
+            p,
+            [V[1], V[1], V[1]];
+            skip_linearly_dependent = true,
+        )
     end
 end
 
