@@ -83,7 +83,8 @@ Return type of element of the array that will represent the result of function `
 [`AbstractManifold`](@ref) `M` on given arguments `args` (passed as a tuple).
 """
 function allocate_result_type(::AbstractManifold, f, args::NTuple{N,Any}) where {N}
-    return typeof(mapreduce(eti -> one(number_eltype(eti)), +, args))
+    @inline eti_to_one(eti) = one(number_eltype(eti))
+    return typeof(mapreduce(eti_to_one, +, args))
 end
 
 """
