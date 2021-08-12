@@ -71,7 +71,7 @@ Allocate an array for the result of function `f` on [`AbstractManifold`](@ref) `
 Usefulness of passing a function is demonstrated by methods that allocate results of musical
 isomorphisms.
 """
-function allocate_result(M::AbstractManifold, f, x...)
+@inline function allocate_result(M::AbstractManifold, f, x...)
     T = allocate_result_type(M, f, x)
     return allocate(x[1], T)
 end
@@ -82,9 +82,13 @@ end
 Return type of element of the array that will represent the result of function `f` and the
 [`AbstractManifold`](@ref) `M` on given arguments `args` (passed as a tuple).
 """
-function allocate_result_type(::AbstractManifold, f, args::NTuple{N,Any}) where {N}
+@inline function allocate_result_type(
+    ::AbstractManifold,
+    f::TF,
+    args::NTuple{N,Any},
+) where {N,TF}
     @inline eti_to_one(eti) = one(number_eltype(eti))
-    return typeof(mapreduce(eti_to_one, +, args))
+    return typeof(sum(map(eti_to_one, args)))
 end
 
 """
@@ -511,11 +515,13 @@ Numeric element type of the a nested representation of a point or a vector.
 To be used in conjuntion with [`allocate`](@ref) or [`allocate_result`](@ref).
 """
 number_eltype(x) = eltype(x)
-function number_eltype(x::AbstractArray)
+@inline function number_eltype(x::AbstractArray)
     return typeof(mapreduce(eti -> one(number_eltype(eti)), +, x))
 end
-function number_eltype(x::Tuple)
-    return typeof(mapreduce(eti -> one(number_eltype(eti)), +, x))
+@inline number_eltype(::AbstractArray{T}) where {T<:Number} = T
+@inline function number_eltype(x::Tuple)
+    @inline eti_to_one(eti) = one(number_eltype(eti))
+    return typeof(sum(map(eti_to_one, x)))
 end
 
 @doc raw"""
