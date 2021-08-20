@@ -573,6 +573,7 @@ include("ValidationManifold.jl")
 include("EmbeddedManifold.jl")
 include("DefaultManifold.jl")
 include("PowerManifold.jl")
+include("GroupManifold.jl")
 
 export AbstractManifold, AbstractManifoldPoint, TVector, CoTVector, TFVector, CoTFVector
 export AbstractDecoratorManifold
@@ -583,8 +584,10 @@ export AbstractEmbeddedManifold, EmbeddedManifold, TransparentIsometricEmbedding
 export AbstractPowerManifold, PowerManifold
 export AbstractPowerRepresentation,
     NestedPowerRepresentation, NestedReplacingPowerRepresentation
+export AbstractGroupDecoratorType, AbstractGroupManifold, GroupManifold
 
 export AbstractDecoratorType, DefaultDecoratorType
+export AbstractGroupDecoratorType, DefaultDecoratorType, TransparentGroupDecoratorType
 
 export OutOfInjectivityRadiusError
 
@@ -596,14 +599,16 @@ export AbstractRetractionMethod,
     PolarRetraction,
     ProjectionRetraction,
     PowerRetraction,
-    InversePowerRetraction
+    InversePowerRetraction,
+    GroupExponentialRetraction
 
 export AbstractInverseRetractionMethod,
     ApproximateInverseRetraction,
     LogarithmicInverseRetraction,
     QRInverseRetraction,
     PolarInverseRetraction,
-    ProjectionInverseRetraction
+    ProjectionInverseRetraction,
+    GroupLogarithmicInverseRetraction
 
 export AbstractVectorTransportMethod,
     DifferentiatedRetractionVectorTransport,
@@ -623,13 +628,21 @@ export CachedBasis,
     GramSchmidtOrthonormalBasis,
     ProjectedOrthonormalBasis
 
+export AbstractGroupOperation, Identity
+export ActionDirection, LeftAction, RightAction
+
 export CompositeManifoldError, ComponentManifoldError
 
-export allocate,
+export adjoint_action,
+    adjoint_action!,
+    allocate,
+    base_group,
     base_manifold,
     check_point,
     check_vector,
     check_size,
+    compose,
+    compose!,
     copy,
     copyto!,
     default_inverse_retraction_method,
@@ -638,6 +651,8 @@ export allocate,
     distance,
     exp,
     exp!,
+    exp_lie,
+    exp_lie!,
     embed,
     embed!,
     geodesic,
@@ -653,17 +668,28 @@ export allocate,
     hat,
     hat!,
     shortest_geodesic,
+    identity_element,
+    identity_element!,
     injectivity_radius,
     inner,
+    inv!,
     inverse_retract,
     inverse_retract!,
+    inverse_translate,
+    inverse_translate!,
+    inverse_translate_diff,
+    inverse_translate_diff!,
     isapprox,
+    is_identity,
     is_point,
     is_vector,
     isempty,
     length,
+    lie_bracket,
     log,
     log!,
+    log_lie,
+    log_lie!,
     manifold_dimension,
     mid_point,
     mid_point!,
@@ -680,6 +706,11 @@ export allocate,
     show,
     retract,
     retract!,
+    translate,
+    translate!,
+    translate_diff,
+    translate_diff!,
+    transpose,
     vector_transport_along,
     vector_transport_along!,
     vector_transport_direction,
