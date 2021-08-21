@@ -971,3 +971,385 @@ function inverse_retract!(
     Xₑ = log_lie(G, pinvq)
     return translate_diff!(G, X, p, Identity(G), Xₑ, conv)
 end
+
+@doc raw"""
+    get_vector_lie(G::AbstractGroupManifold, a, B::AbstractBasis)
+
+Reconstruct a tangent vector from the Lie algebra of `G` from cooordinates `a` of a basis `B`.
+This is similar to calling [`get_vector`](@ref) at the `p=`[`Identity`](@ref)`(G)`.
+"""
+function get_vector_lie(G::AbstractGroupManifold, X, B::AbstractBasis)
+    return get_vector(G, identity_element(G), X, B)
+end
+function get_vector_lie!(G::AbstractGroupManifold, Y, X, B::AbstractBasis)
+    return get_vector!(G, Y, identity_element(G), X, B)
+end
+
+@doc raw"""
+    get_coordinates_lie(G::AbstractGroupManifold, X, B::AbstractBasis)
+
+Get the coordinates of an element `X` from the Lie algebra og `G` with respect to a basis `B`.
+This is similar to calling [`get_coordinates`](@ref) at the `p=`[`Identity`](@ref)`(G)`.
+"""
+function get_coordinates_lie(G::AbstractGroupManifold, X, B::AbstractBasis)
+    return get_coordinates(G, identity_element(G), X, B)
+end
+function get_coordinates_lie!(G::AbstractGroupManifold, a, X, B::AbstractBasis)
+    return get_coordinates!(G, a, identity_element(G), X, B)
+end
+
+# (a) changes / parent.
+for f in [
+    embed,
+    get_basis,
+    get_coordinates,
+    get_coordinates!,
+    get_vector,
+    get_vector!,
+    inverse_retract!,
+    mid_point!,
+    project,
+    retract!,
+    vector_transport_along,
+    vector_transport_direction,
+    vector_transport_direction!,
+    vector_transport_to,
+]
+    eval(
+        quote
+            function decorator_transparent_dispatch(
+                ::typeof($f),
+                ::AbstractGroupManifold{𝔽,O,<:AbstractGroupDecoratorType},
+                args...,
+            ) where {𝔽,O}
+                return Val(:parent)
+            end
+        end,
+    )
+end
+# (b) changes / transparencies
+for f in [
+    check_point,
+    check_vector,
+    copy,
+    copyto!,
+    distance,
+    exp,
+    exp!,
+    embed!,
+    get_coordinates!,
+    get_vector!,
+    inner,
+    inverse_retract,
+    inverse_retract!,
+    isapprox,
+    log,
+    log!,
+    mid_point,
+    mid_point!,
+    project!,
+    project,
+    retract,
+    retract!,
+    vector_transport_along,
+    vector_transport_direction,
+]
+    eval(
+        quote
+            function decorator_transparent_dispatch(
+                ::typeof($f),
+                ::AbstractGroupManifold{𝔽,O,<:TransparentGroupDecoratorType},
+                args...,
+            ) where {𝔽,O}
+                return Val(:transparent)
+            end
+        end,
+    )
+end
+
+# (c) changes / intransparencies.
+for f in [
+    compose,
+    compose!,
+    exp_lie,
+    exp_lie!,
+    log_lie,
+    log_lie!,
+    translate,
+    translate!,
+    translate_diff,
+    translate_diff!,
+]
+    eval(
+        quote
+            function decorator_transparent_dispatch(
+                ::typeof($f),
+                ::AbstractGroupManifold,
+                args...,
+            )
+                return Val(:intransparent)
+            end
+        end,
+    )
+end
+# (d) specials
+for f in [vector_transport_along!, vector_transport_direction!, vector_transport_to!]
+    eval(
+        quote
+            function decorator_transparent_dispatch(
+                ::typeof($f),
+                ::AbstractGroupManifold{𝔽,O,<:TransparentGroupDecoratorType},
+                Y,
+                p,
+                X,
+                q,
+                ::T,
+            ) where {𝔽,O,T}
+                return Val(:transparent)
+            end
+            function decorator_transparent_dispatch(
+                ::typeof($f),
+                ::AbstractGroupManifold{𝔽,O,<:AbstractGroupDecoratorType},
+                Y,
+                p,
+                X,
+                q,
+                ::T,
+            ) where {𝔽,O,T}
+                return Val(:intransparent)
+            end
+        end,
+    )
+    for m in [PoleLadderTransport, SchildsLadderTransport, ScaledVectorTransport]
+        eval(
+            quote
+                function decorator_transparent_dispatch(
+                    ::typeof($f),
+                    ::AbstractGroupManifold{𝔽,O,<:TransparentGroupDecoratorType},
+                    Y,
+                    p,
+                    X,
+                    q,
+                    ::$m,
+                ) where {𝔽,O}
+                    return Val(:parent)
+                end
+                function decorator_transparent_dispatch(
+                    ::typeof($f),
+                    ::AbstractGroupManifold{𝔽,O,<:AbstractGroupDecoratorType},
+                    Y,
+                    p,
+                    X,
+                    q,
+                    ::$m,
+                ) where {𝔽,O}
+                    return Val(:parent)
+                end
+            end,
+        )
+    end
+end
+
+#
+# A generic addition group
+#
+"""
+    AdditionOperation <: AbstractGroupOperation
+
+Group operation that consists of simple addition.
+"""
+struct AdditionOperation <: AbstractGroupOperation end
+
+const AdditionGroup = AbstractGroupManifold{𝔽,AdditionOperation} where {𝔽}
+
+Base.:+(e::Identity{AdditionOperation}) = e
+Base.:+(e::Identity{AdditionOperation}, ::Identity{AdditionOperation}) = e
+Base.:+(::Identity{AdditionOperation}, p) = p
+Base.:+(p, ::Identity{AdditionOperation}) = p
+
+Base.:-(e::Identity{AdditionOperation}) = e
+Base.:-(e::Identity{AdditionOperation}, ::Identity{AdditionOperation}) = e
+Base.:-(::Identity{AdditionOperation}, p) = -p
+Base.:-(p, ::Identity{AdditionOperation}) = p
+
+Base.:*(e::Identity{AdditionOperation}, p) = e
+Base.:*(p, e::Identity{AdditionOperation}) = e
+Base.:*(e::Identity{AdditionOperation}, ::Identity{AdditionOperation}) = e
+
+adjoint_action(::AdditionGroup, p, X) = X
+
+adjoint_action!(G::AdditionGroup, Y, p, X) = copyto!(G, Y, p, X)
+
+function identity_element!(::AbstractGroupManifold{𝔽,<:AdditionOperation}, p) where {𝔽}
+    return fill!(p, zero(eltype(p)))
+end
+
+Base.inv(::AdditionGroup, p) = -p
+Base.inv(::AdditionGroup, e::Identity) = e
+
+inv!(G::AdditionGroup, q, p) = copyto!(G, q, -p)
+inv!(G::AdditionGroup, q, ::Identity{AdditionOperation}) = identity_element!(G, q)
+inv!(::AdditionGroup, q::Identity{AdditionOperation}, e::Identity{AdditionOperation}) = q
+
+function is_identity(G::AdditionGroup, q; kwargs...)
+    return isapprox(G, q, zero(q); kwargs...)
+end
+function is_identity(G::AdditionGroup, e::Identity; kwargs...)
+    return invoke(is_identity, Tuple{AbstractGroupManifold,typeof(e)}, G, e; kwargs...)
+end
+
+_compose(::AdditionGroup, p, q) = p + q
+
+function _compose!(::AdditionGroup, x, p, q)
+    x .= p .+ q
+    return x
+end
+
+translate_diff(::AdditionGroup, p, q, X, ::ActionDirection) = X
+
+translate_diff!(G::AdditionGroup, Y, p, q, X, ::ActionDirection) = copyto!(G, Y, p, X)
+
+inverse_translate_diff(::AdditionGroup, p, q, X, ::ActionDirection) = X
+
+function inverse_translate_diff!(G::AdditionGroup, Y, p, q, X, ::ActionDirection)
+    return copyto!(G, Y, p, X)
+end
+
+exp_lie(::AdditionGroup, X) = X
+
+exp_lie!(G::AdditionGroup, q, X) = copyto!(G, q, X)
+
+log_lie(::AdditionGroup, q) = q
+function log_lie(G::AdditionGroup, ::Identity{AdditionOperation})
+    return zero_vector(G, identity_element(G))
+end
+
+_log_lie!(G::AdditionGroup, X, q) = copyto!(G, X, q)
+
+lie_bracket(::AdditionGroup, X, Y) = zero(X)
+
+lie_bracket!(::AdditionGroup, Z, X, Y) = fill!(Z, 0)
+
+#
+# A generic multiplication group
+#
+"""
+    MultiplicationOperation <: AbstractGroupOperation
+
+Group operation that consists of multiplication.
+"""
+struct MultiplicationOperation <: AbstractGroupOperation end
+
+const MultiplicationGroup = AbstractGroupManifold{𝔽,MultiplicationOperation} where {𝔽}
+
+Base.:*(e::Identity{MultiplicationOperation}) = e
+Base.:*(::Identity{MultiplicationOperation}, p) = p
+Base.:*(p, ::Identity{MultiplicationOperation}) = p
+Base.:*(e::Identity{MultiplicationOperation}, ::Identity{MultiplicationOperation}) = e
+Base.:*(::Identity{MultiplicationOperation}, e::Identity{AdditionOperation}) = e
+Base.:*(e::Identity{AdditionOperation}, ::Identity{MultiplicationOperation}) = e
+
+Base.:/(p, ::Identity{MultiplicationOperation}) = p
+Base.:/(::Identity{MultiplicationOperation}, p) = inv(p)
+Base.:/(e::Identity{MultiplicationOperation}, ::Identity{MultiplicationOperation}) = e
+
+Base.:\(p, ::Identity{MultiplicationOperation}) = inv(p)
+Base.:\(::Identity{MultiplicationOperation}, p) = p
+Base.:\(e::Identity{MultiplicationOperation}, ::Identity{MultiplicationOperation}) = e
+
+LinearAlgebra.det(::Identity{MultiplicationOperation}) = true
+LinearAlgebra.adjoint(e::Identity{MultiplicationOperation}) = e
+
+function identity_element!(::MultiplicationGroup, p::AbstractMatrix)
+    return copyto!(p, I)
+end
+
+function identity_element!(G::MultiplicationGroup, p::AbstractArray)
+    if length(p) == 1
+        fill!(p, one(eltype(p)))
+    else
+        throw(DimensionMismatch("Array $p cannot be set to identity element of group $G"))
+    end
+    return p
+end
+
+function is_identity(G::MultiplicationGroup, q::Number; kwargs...)
+    return isapprox(G, q, one(q); kwargs...)
+end
+function is_identity(G::MultiplicationGroup, q::AbstractVector; kwargs...)
+    return length(q) == 1 && isapprox(G, q[], one(q[]); kwargs...)
+end
+function is_identity(G::MultiplicationGroup, q::AbstractMatrix; kwargs...)
+    return isapprox(G, q, I; kwargs...)
+end
+function is_identity(G::MultiplicationGroup, e::Identity; kwargs...)
+    return invoke(is_identity, Tuple{AbstractGroupManifold,typeof(e)}, G, e; kwargs...)
+end
+
+LinearAlgebra.mul!(q, ::Identity{MultiplicationOperation}, p) = copyto!(q, p)
+LinearAlgebra.mul!(q, p, ::Identity{MultiplicationOperation}) = copyto!(q, p)
+function LinearAlgebra.mul!(
+    q::AbstractMatrix,
+    ::Identity{MultiplicationOperation},
+    ::Identity{MultiplicationOperation},
+)
+    return copyto!(q, I)
+end
+function LinearAlgebra.mul!(
+    q,
+    ::Identity{MultiplicationOperation},
+    ::Identity{MultiplicationOperation},
+)
+    return copyto!(q, one(q))
+end
+function LinearAlgebra.mul!(
+    q::Identity{MultiplicationOperation},
+    ::Identity{MultiplicationOperation},
+    ::Identity{MultiplicationOperation},
+)
+    return q
+end
+Base.one(e::Identity{MultiplicationOperation}) = e
+
+Base.inv(::MultiplicationGroup, p) = inv(p)
+Base.inv(::MultiplicationGroup, e::Identity{MultiplicationOperation}) = e
+
+inv!(G::MultiplicationGroup, q, p) = copyto!(q, inv(G, p))
+function inv!(G::MultiplicationGroup, q, ::Identity{MultiplicationOperation})
+    return identity_element!(G, q)
+end
+function inv!(
+    ::MultiplicationGroup,
+    q::Identity{MultiplicationOperation},
+    e::Identity{MultiplicationOperation},
+)
+    return q
+end
+
+_compose(::MultiplicationGroup, p, q) = p * q
+
+_compose!(::MultiplicationGroup, x, p, q) = mul!_safe(x, p, q)
+
+inverse_translate(::MultiplicationGroup, p, q, ::LeftAction) = p \ q
+inverse_translate(::MultiplicationGroup, p, q, ::RightAction) = q / p
+
+function inverse_translate!(G::MultiplicationGroup, x, p, q, conv::ActionDirection)
+    return copyto!(x, inverse_translate(G, p, q, conv))
+end
+
+function exp_lie!(G::MultiplicationGroup, q, X)
+    X isa Union{Number,AbstractMatrix} && return copyto!(q, exp(X))
+    return error(
+        "exp_lie! not implemented on $(typeof(G)) for vector $(typeof(X)) and element $(typeof(q)).",
+    )
+end
+
+log_lie!(::MultiplicationGroup, X::AbstractMatrix, q::AbstractMatrix) = log_safe!(X, q)
+
+lie_bracket(::MultiplicationGroup, X, Y) = mul!(X * Y, Y, X, -1, true)
+
+function lie_bracket!(::MultiplicationGroup, Z, X, Y)
+    mul!(Z, X, Y)
+    mul!(Z, Y, X, -1, true)
+    return Z
+end
