@@ -45,6 +45,11 @@ ManifoldsBase.get_vector(::ProjManifold, x, v, ::DefaultOrthonormalBasis) = reve
         [0.0, 0.0, 0.0],
         [0.0, 0.0, 0.0],
     ) === Val(:transparent)
+    @test ManifoldsBase.decorator_transparent_dispatch(
+        number_of_coordinates,
+        DefaultManifold(3),
+        DefaultOrthonormalBasis(),
+    ) === Val(:transparent)
 end
 
 struct ProjectionTestManifold <: AbstractManifold{ℝ} end
