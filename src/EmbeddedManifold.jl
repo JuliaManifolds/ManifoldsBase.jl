@@ -259,6 +259,7 @@ for f in [
     get_vector!,
     inverse_retract!,
     mid_point!,
+    number_of_coordinates,
     project,
     retract!,
     vector_transport_along,

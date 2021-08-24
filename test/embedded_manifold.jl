@@ -264,7 +264,7 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEm
         for f in [vector_transport_along, vector_transport_direction, vector_transport_to]
             @test ManifoldsBase.decorator_transparent_dispatch(f, AM) === Val(:parent)
         end
-        for f in [mid_point, mid_point!]
+        for f in [mid_point, mid_point!, number_of_coordinates]
             @test ManifoldsBase.decorator_transparent_dispatch(f, AM) === Val(:parent)
         end
         for f in [check_point, check_vector, exp!, inner, embed!]
