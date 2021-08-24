@@ -798,6 +798,10 @@ end
 function number_of_coordinates(M::AbstractManifold{𝔽}, B::AbstractBasis{𝔽}) where {𝔽}
     return manifold_dimension(M)
 end
+@decorator_transparent_signature number_of_coordinates(
+    M::AbstractDecoratorManifold,
+    B::AbstractBasis,
+)
 
 """
     number_system(::AbstractBasis)
