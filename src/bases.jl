@@ -791,9 +791,6 @@ hat!(M::AbstractManifold, Y, p, X) = get_vector!(M, Y, p, X, VeeOrthogonalBasis(
 Compute the number of coordinates in basis `B` of manifold `M`.
 This also corresponds to the number of vectors represented by `B`,
 or stored within `B` in case of a [`CachedBasis`](@ref).
-
-For manifolds and bases over the real numbers, this is equal to [`manifold_dimension`](@ref)
-of `M` but may be different for complex or quaternionic manifolds and bases.
 """
 function number_of_coordinates(M::AbstractManifold{𝔽}, B::AbstractBasis{𝔾}) where {𝔽,𝔾}
     return div(manifold_dimension(M), real_dimension(𝔽)) * real_dimension(𝔾)
@@ -801,10 +798,6 @@ end
 function number_of_coordinates(M::AbstractManifold{𝔽}, B::AbstractBasis{𝔽}) where {𝔽}
     return manifold_dimension(M)
 end
-@decorator_transparent_signature number_of_coordinates(
-    M::AbstractDecoratorManifold,
-    B::AbstractBasis,
-)
 
 """
     number_system(::AbstractBasis)
