@@ -15,7 +15,8 @@ import Base:
     show,
     +,
     -,
-    *
+    *,
+    ==
 import LinearAlgebra: dot, norm, det, cross, I, UniformScaling, Diagonal
 
 import Markdown: @doc_str
@@ -62,6 +63,12 @@ allocate(a::AbstractArray{<:AbstractArray}, T::Type) = map(t -> allocate(t, T), 
 allocate(a::NTuple{N,AbstractArray} where {N}) = map(allocate, a)
 allocate(a::NTuple{N,AbstractArray} where {N}, T::Type) = map(t -> allocate(t, T), a)
 
+allocate(p::T) where {T<:AbstractManifoldPoint} = T(allocate(p.value))
+allocate(p::T, ::Type{P}) where {P,T<:AbstractManifoldPoint} = T(allocate(p.value, P))
+function allocate(p::T, ::Type{P}, dims::Tuple) where {P,T<:AbstractManifoldPoint}
+    return T(allocate(p.value, P, dims))
+end
+
 """
     allocate_result(M::AbstractManifold, f, x...)
 
@@ -100,7 +107,6 @@ Compute the angle between tangent vectors `X` and `Y` at point `p` from the
 function angle(M::AbstractManifold, p, X, Y)
     return acos(real(inner(M, p, X, Y)) / norm(M, p, X) / norm(M, p, Y))
 end
-
 """
     base_manifold(M::AbstractManifold, depth = Val(-1))
 
@@ -524,6 +530,8 @@ end
     return typeof(sum(map(eti_to_one, x)))
 end
 
+number_eltype(p::T) where {T<:AbstractManifoldPoint} = typeof(one(eltype(p.value)))
+
 @doc raw"""
     representation_size(M::AbstractManifold)
 
@@ -531,7 +539,7 @@ The size of an array representing a point on [`AbstractManifold`](@ref) `M`.
 Returns `nothing` by default indicating that points are not represented using an
 `AbstractArray`.
 """
-function representation_size(M::AbstractManifold)
+function representation_size(::AbstractManifold)
     return nothing
 end
 
@@ -569,6 +577,7 @@ include("vector_transport.jl")
 include("DecoratorManifold.jl")
 include("bases.jl")
 include("vector_spaces.jl")
+include("point-vector-fallbacks.jl")
 include("ValidationManifold.jl")
 include("EmbeddedManifold.jl")
 include("DefaultManifold.jl")

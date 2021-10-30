@@ -75,6 +75,9 @@ While a [`AbstractManifold`](@ref) does not necessarily require this type, for e
 implemented for `Vector`s or `Matrix` type elements, this type can be used for more
 complicated representations, semantic verification, or even dispatch for different
 representations of tangent vectors and their types on a manifold.
+
+Per default we assume that the data is represented by just one tensor in the field `.value`
+and overload all vector operations accordingly
 """
 abstract type AbstractFibreVector{TType<:VectorSpaceType} end
 
@@ -100,12 +103,95 @@ manifold.
 """
 const CoTVector = AbstractFibreVector{CotangentSpaceType}
 
+Base.:*(X::T, s::Number) where {T<:AbstractFibreVector} = T(X.value * s)
+Base.:*(s::Number, X::T) where {T<:AbstractFibreVector} = T(s * X.value)
+Base.:/(X::T, s::Number) where {T<:AbstractFibreVector} = T(X.value / s)
+Base.:\(s::Number, X::T) where {T<:AbstractFibreVector} = T(s \ X.value)
+Base.:+(X::T, Y::T) where {T<:AbstractFibreVector} = T(X.value + Y.value)
+Base.:-(X::T, Y::T) where {T<:AbstractFibreVector} = T(X.value - Y.value)
+Base.:-(X::T) where {T<:AbstractFibreVector} = T(-X.value)
+Base.:+(X::T) where {T<:AbstractFibreVector} = T(X.value)
+Base.:(==)(X::T, Y::T) where {T<:AbstractFibreVector} = (X.value == Y.value)
+
 Base.:+(X::FVector, Y::FVector) = FVector(X.type, X.data + Y.data, X.basis)
 
 Base.:-(X::FVector, Y::FVector) = FVector(X.type, X.data - Y.data, X.basis)
 Base.:-(X::FVector) = FVector(X.type, -X.data, X.basis)
 
 Base.:*(a::Number, X::FVector) = FVector(X.type, a * X.data, X.basis)
+
+allocate(p::T) where {T<:AbstractFibreVector} = T(allocate(p.value))
+allocate(p::T, ::Type{P}) where {P,T<:AbstractFibreVector} = T(allocate(p.value, P))
+function allocate(p::T, ::Type{P}, dims::Tuple) where {P,T<:AbstractFibreVector}
+    return T(allocate(p.value, P, dims))
+end
+
+Base.axes(X::T) where {T<:AbstractFibreVector} = axes(X.value)
+
+function Broadcast.BroadcastStyle(::Type{T}) where {T<:AbstractFibreVector}
+    return Broadcast.Style{T}()
+end
+function Broadcast.BroadcastStyle(
+    ::Broadcast.AbstractArrayStyle{0},
+    b::Broadcast.Style{T},
+) where {T<:AbstractFibreVector}
+    return b
+end
+
+@inline Base.copy(X::T) where {T<:AbstractFibreVector} = T(copy(X.value))
+
+function Base.copyto!(Y::T, X::T) where {T<:AbstractFibreVector}
+    copyto!(Y.value, X.value)
+    return Y
+end
+
+function Broadcast.instantiate(
+    bc::Broadcast.Broadcasted{Broadcast.Style{T},Nothing},
+) where {T<:AbstractFibreVector}
+    return bc
+end
+function Broadcast.instantiate(
+    bc::Broadcast.Broadcasted{Broadcast.Style{T}},
+) where {T<:AbstractFibreVector}
+    Broadcast.check_broadcast_axes(bc.axes, bc.args...)
+    return bc
+end
+
+Broadcast.broadcastable(X::T) where {T<:AbstractFibreVector} = X
+
+@inline function Base.copy(
+    bc::Broadcast.Broadcasted{Broadcast.Style{T}},
+) where {T<:AbstractFibreVector}
+    return T(Broadcast._broadcast_getindex(bc, 1))
+end
+
+Base.@propagate_inbounds function Broadcast._broadcast_getindex(
+    X::T,
+    I,
+) where {T<:AbstractFibreVector}
+    return X.value
+end
+
+Base.similar(p::T) where {T<:AbstractFibreVector} = T(similar(p.value))
+
+@inline function Base.copyto!(
+    dest::T,
+    bc::Broadcast.Broadcasted{Broadcast.Style{T}},
+) where {T<:AbstractFibreVector}
+    axes(dest) == axes(bc) || Broadcast.throwdm(axes(dest), axes(bc))
+    # Performance optimization: broadcast!(identity, dest, A) is equivalent to copyto!(dest, A) if indices match
+    if bc.f === identity && bc.args isa Tuple{T} # only a single input argument to broadcast!
+        A = bc.args[1]
+        if axes(dest) == axes(A)
+            return copyto!(dest, A)
+        end
+    end
+    bc′ = Broadcast.preprocess(dest, bc)
+    # Performance may vary depending on whether `@inbounds` is placed outside the
+    # for loop or not. (cf. https://github.com/JuliaLang/julia/issues/38086)
+    copyto!(dest.value, bc′[1])
+    return dest
+end
 
 allocate(x::FVector) = FVector(x.type, allocate(x.data), x.basis)
 allocate(x::FVector, ::Type{T}) where {T} = FVector(x.type, allocate(x.data, T), x.basis)
