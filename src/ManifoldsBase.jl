@@ -525,8 +525,6 @@ end
     return typeof(sum(map(eti_to_one, x)))
 end
 
-number_eltype(p::T) where {T<:AbstractManifoldPoint} = typeof(one(eltype(p.value)))
-
 @doc raw"""
     representation_size(M::AbstractManifold)
 
