@@ -57,26 +57,9 @@ This distinguished the value from [`ValidationMPoint`](@ref)s vectors of other t
 """
 const ValidationCoTVector = ValidationFibreVector{CotangentSpaceType}
 
+@eval @manifold_vector_forwards ValidationFibreVector{TType} TType value
 
-function (+)(X::ValidationFibreVector{TType}, Y::ValidationFibreVector{TType}) where {TType}
-    return ValidationFibreVector{TType}(X.value + Y.value)
-end
-function (-)(X::ValidationFibreVector{TType}, Y::ValidationFibreVector{TType}) where {TType}
-    return ValidationFibreVector{TType}(X.value - Y.value)
-end
-(-)(X::ValidationFibreVector{TType}) where {TType} = ValidationFibreVector{TType}(-X.value)
-function (*)(a::Number, X::ValidationFibreVector{TType}) where {TType}
-    return ValidationFibreVector{TType}(a * X.value)
-end
-
-allocate(p::ValidationMPoint) = ValidationMPoint(allocate(p.value))
-allocate(p::ValidationMPoint, ::Type{T}) where {T} = ValidationMPoint(allocate(p.value, T))
-function allocate(X::ValidationFibreVector{TType}) where {TType}
-    return ValidationFibreVector{TType}(allocate(X.value))
-end
-function allocate(X::ValidationFibreVector{TType}, ::Type{T}) where {TType,T}
-    return ValidationFibreVector{TType}(allocate(X.value, T))
-end
+@eval @manifold_thing_forwards ValidationMPoint _ value
 
 """
     array_value(p)
@@ -422,24 +405,13 @@ function mid_point!(M::ValidationManifold, q, p1, p2; kwargs...)
 end
 
 number_eltype(::Type{ValidationMPoint{V}}) where {V} = number_eltype(V)
-number_eltype(p::ValidationMPoint) = number_eltype(p.value)
 number_eltype(::Type{ValidationFibreVector{TType,V}}) where {TType,V} = number_eltype(V)
-number_eltype(X::ValidationFibreVector) = number_eltype(X.value)
 
 function project!(M::ValidationManifold, Y, p, X; kwargs...)
     is_point(M, p, true; kwargs...)
     project!(M.manifold, array_value(Y), array_value(p), array_value(X))
     is_vector(M, p, Y, true; kwargs...)
     return Y
-end
-
-similar(p::ValidationMPoint) = ValidationMPoint(similar(p.value))
-similar(p::ValidationMPoint, ::Type{T}) where {T} = ValidationMPoint(similar(p.value, T))
-function similar(X::ValidationFibreVector{TType}) where {TType}
-    return ValidationFibreVector{TType}(similar(X.value))
-end
-function similar(X::ValidationFibreVector{TType}, ::Type{T}) where {TType,T}
-    return ValidationFibreVector{TType}(similar(X.value, T))
 end
 
 function vector_transport_along!(

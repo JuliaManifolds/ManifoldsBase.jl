@@ -73,6 +73,10 @@ end
             @test isapprox(A, (a - b), T(v - w))
             @test isapprox(A, -b, T(-w))
             @test isapprox(A, 2 * a, T(2 .* v))
+            @test isapprox(A, 2 .* a .+ b, T(2 .* v .+ w))
+            c = similar(a)
+            c .= a .+ b
+            @test isapprox(A, c, a .+ b)
         end
     end
     @testset "AbstractManifold functions" begin

@@ -63,11 +63,6 @@ allocate(a::AbstractArray{<:AbstractArray}, T::Type) = map(t -> allocate(t, T), 
 allocate(a::NTuple{N,AbstractArray} where {N}) = map(allocate, a)
 allocate(a::NTuple{N,AbstractArray} where {N}, T::Type) = map(t -> allocate(t, T), a)
 
-allocate(p::T) where {T<:AbstractManifoldPoint} = T(allocate(p.value))
-allocate(p::T, ::Type{P}) where {P,T<:AbstractManifoldPoint} = T(allocate(p.value, P))
-function allocate(p::T, ::Type{P}, dims::Tuple) where {P,T<:AbstractManifoldPoint}
-    return T(allocate(p.value, P, dims))
-end
 
 """
     allocate_result(M::AbstractManifold, f, x...)
