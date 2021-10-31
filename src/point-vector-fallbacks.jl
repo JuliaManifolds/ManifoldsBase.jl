@@ -132,6 +132,8 @@ macro manifold_vector_forwards(T, Twhere, field::Symbol)
 
             @eval @manifold_thing_forwards $T $Twhere $field
 
+            Base.axes(p::$T) where {$Twhere} = axes(p.$field)
+
             function Broadcast.BroadcastStyle(::Type{<:$T}) where {$Twhere}
                 return Broadcast.Style{$T}()
             end
