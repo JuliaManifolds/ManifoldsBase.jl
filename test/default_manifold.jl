@@ -25,6 +25,20 @@ Base.getindex(x::MatrixVectorTransport, i) = x.m[:, i]
 
 Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
 
+struct DefaultPoint{T} <: AbstractManifoldPoint
+    value::T
+end
+DefaultPoint(v::T) where {T} = DefaultPoint{T}(v)
+
+struct DefaultTVector{T} <: TVector
+    value::T
+end
+DefaultTVector(v::T) where {T} = DefaultTVEctor{T}(v)
+
+ManifoldsBase.@manifold_element_forwards DefaultPoint value
+ManifoldsBase.@manifold_vector_forwards DefaultTVector value
+ManifoldsBase.@default_manifold_fallbacks DefaultManifold DefaultPoint DefaultTVector value value
+
 @testset "Testing Default (Euclidean)" begin
     M = ManifoldsBase.DefaultManifold(3)
     types = [
@@ -37,6 +51,7 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
         Vector{Double64},
         MVector{3,Double64},
         SizedVector{3,Double64},
+        DefaultPoint{VEctor{Float64}},
     ]
 
     @test repr(M) == "DefaultManifold(3; field = ℝ)"
