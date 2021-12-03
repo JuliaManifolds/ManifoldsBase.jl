@@ -1,9 +1,11 @@
 
 """
-    manifold_thing_forwards(T::Symbol, field::Symbol)
+    manifold_element_forwards(T, field::Symbol)
+    manifold_element_forwards(T, Twhere, field::Symbol)
 
-Introduce basic fallbacks for type `T` that represents points or vectors for a manifold.
-Fallbacks will work by forwarding to field passed in the second argument.
+Introduce basic fallbacks for type `T` (which can be a subtype of `Twhere`) that represents
+points or vectors for a manifold.
+Fallbacks will work by forwarding to the field passed in `field``
 
 List of forwarded functions:
 * [`allocate`](@ref),
@@ -13,7 +15,12 @@ List of forwarded functions:
 * `similar`,
 * `==`.
 """
-macro manifold_thing_forwards(T, Twhere, field::Symbol)
+macro manifold_element_forwards(T, field::Symbol)
+    return esc(quote
+        @manifold_element_forwards ($T) _ ($field)
+    end)
+end
+macro manifold_element_forwards(T, Twhere, field::Symbol)
     return esc(
         quote
             allocate(p::$T) where {$Twhere} = $T(allocate(p.$field))
@@ -45,7 +52,7 @@ end
 
 Introduce default fallbacks for all basic functions on manifolds, for manifold of type `TM`,
 points of type `TP`, tangent vectors of type `TV`, with forwarding to fields `pfield` and
-`vfield` for, respectively, point and tangent vector functions
+`vfield` for point and tangent vector functions, respectively.
 """
 macro default_manifold_fallbacks(
     TM::Symbol,
@@ -103,6 +110,7 @@ end
 
 
 @doc raw"""
+    manifold_vector_forwards(T, field::Symbol)
     manifold_vector_forwards(T, Twhere, field::Symbol)
 
 Introduce basic fallbacks for type `T` that represents vectors from a vector bundle for a
@@ -111,13 +119,18 @@ to field passed as `field`.
 
 List of forwarded functions:
 * basic arithmetic (`*`, `/`, `\`, `+`, `-`),
-* all things from [`@manifold_thing_forwards`](@ref),
+* all things from [`@manifold_element_forwards`](@ref),
 * broadcasting support.
 
 # example
 
     @eval @manifold_vector_forwards ValidationFibreVector{TType} TType value
 """
+macro manifold_vector_forwards(T, field::Symbol)
+    return esc(quote
+        @manifold_vector_forwards ($T) _ ($field)
+    end)
+end
 macro manifold_vector_forwards(T, Twhere, field::Symbol)
     return esc(
         quote
@@ -130,7 +143,7 @@ macro manifold_vector_forwards(T, Twhere, field::Symbol)
             Base.:-(X::$T) where {$Twhere} = $T(-X.$field)
             Base.:+(X::$T) where {$Twhere} = $T(X.$field)
 
-            @eval @manifold_thing_forwards $T $Twhere $field
+            @eval @manifold_element_forwards $T $Twhere $field
 
             Base.axes(p::$T) where {$Twhere} = axes(p.$field)
 

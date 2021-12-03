@@ -59,7 +59,7 @@ const ValidationCoTVector = ValidationFibreVector{CotangentSpaceType}
 
 @eval @manifold_vector_forwards ValidationFibreVector{TType} TType value
 
-@eval @manifold_thing_forwards ValidationMPoint _ value
+@eval @manifold_element_forwards ValidationMPoint value
 
 """
     array_value(p)

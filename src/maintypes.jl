@@ -29,7 +29,7 @@ can be used either
 * even dispatch for different representations of points on a manifold.
 
 Since semantic verification and different representations usually might still only store a
-matrix internally, it is possible to use [`@manifold_thing_forwards`](@ref) and
+matrix internally, it is possible to use [`@manifold_element_forwards`](@ref) and
 [`@default_manifold_fallbacks`](@ref) to reduce implementation overhead.
 """
 abstract type AbstractManifoldPoint end
