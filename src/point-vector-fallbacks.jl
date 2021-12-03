@@ -99,6 +99,7 @@ macro default_manifold_fallbacks(
             return isapprox(M, p.$pfield, X.$vfield, Y.$vfield; kwargs...)
         end
 
+        allocate_result_type(::$TM, ::typeof(log), ::Tuple{$TP,$TP}) = $TV
         function log!(M::$TM, X::$TV, p::$TP, q::$TP)
             log!(M, X.$vfield, p.$pfield, q.$pfield)
             return X
