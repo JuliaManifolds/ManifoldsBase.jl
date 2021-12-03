@@ -1,5 +1,20 @@
 using ManifoldsBase
-
+using ManifoldsBase:
+    @manifold_element_forwards,
+    @manifold_vector_forwards,
+    @default_manifold_fallbacks
+import ManifoldsBase:
+    number_eltype,
+    check_point,
+    distance,
+    embed!,
+    exp!,
+    inner,
+    isapprox,
+    log!
+import Base:
+    angle,
+    convert
 using LinearAlgebra
 using DoubleFloats
 using ForwardDiff
@@ -29,11 +44,12 @@ struct DefaultPoint{T} <: AbstractManifoldPoint
     value::T
 end
 DefaultPoint(v::T) where {T} = DefaultPoint{T}(v)
+convert(::Type{DefaultPoint{T}},v::T) where{T} = DefaultPoint(v)
 
 struct DefaultTVector{T} <: TVector
     value::T
 end
-DefaultTVector(v::T) where {T} = DefaultTVEctor{T}(v)
+DefaultTVector(v::T) where {T} = DefaultTVector{T}(v)
 
 ManifoldsBase.@manifold_element_forwards DefaultPoint value
 ManifoldsBase.@manifold_vector_forwards DefaultTVector value
@@ -51,7 +67,7 @@ ManifoldsBase.@default_manifold_fallbacks DefaultManifold DefaultPoint DefaultTV
         Vector{Double64},
         MVector{3,Double64},
         SizedVector{3,Double64},
-        DefaultPoint{VEctor{Float64}},
+        DefaultPoint{Vector{Float64}},
     ]
 
     @test repr(M) == "DefaultManifold(3; field = ℝ)"
