@@ -56,73 +56,115 @@ end
 
 
 """
-    default_manifold_fallbacks(TM::Symbol, TP::Symbol, TV::Symbol, pfield::Symbol, vfield::Symbol)
+    default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
 
 Introduce default fallbacks for all basic functions on manifolds, for manifold of type `TM`,
 points of type `TP`, tangent vectors of type `TV`, with forwarding to fields `pfield` and
 `vfield` for point and tangent vector functions, respectively.
 """
-macro default_manifold_fallbacks(
-    TM::Symbol,
-    TP::Symbol,
-    TV::Symbol,
-    pfield::Symbol,
-    vfield::Symbol,
-)
-    return esc(
-        quote
-            function ManifoldsBase.angle(M::$TM, p::$TP, X::$TV, Y::$TV)
-                return angle(M, p.$pfield, X.$vfield, Y.$vfield)
-            end
+macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
+    block = quote
+        function ManifoldsBase.allocate_coordinates(M::$TM, p::$TP, T, n::Int)
+            return ManifoldsBase.allocate_coordinates(M, p.$pfield, T, n)
+        end
 
-            function ManifoldsBase.check_point(M::$TM, p::$TP; kwargs...)
-                return check_point(M, p.$pfield; kwargs...)
-            end
+        function ManifoldsBase.angle(M::$TM, p::$TP, X::$TV, Y::$TV)
+            return angle(M, p.$pfield, X.$vfield, Y.$vfield)
+        end
 
-            function ManifoldsBase.check_vector(M::$TM, p::$TP, X::$TV; kwargs...)
-                return check_vector(M, p.$pfield, X.$vfield; kwargs...)
-            end
+        function ManifoldsBase.check_point(M::$TM, p::$TP; kwargs...)
+            return check_point(M, p.$pfield; kwargs...)
+        end
 
-            function ManifoldsBase.distance(M::$TM, p::$TP, q::$TP)
-                return distance(M, p.$pfield, q.$pfield)
-            end
+        function ManifoldsBase.check_vector(M::$TM, p::$TP, X::$TV; kwargs...)
+            return check_vector(M, p.$pfield, X.$vfield; kwargs...)
+        end
 
-            function ManifoldsBase.embed!(M::$TM, q, p::$TP)
-                return embed!(M, q, p.$pfield)
-            end
+        function ManifoldsBase.distance(M::$TM, p::$TP, q::$TP)
+            return distance(M, p.$pfield, q.$pfield)
+        end
 
-            function ManifoldsBase.embed!(M::$TM, Y, p::$TP, X::$TV)
-                return embed!(M, Y, p.$pfield, X.$vfield)
-            end
+        function ManifoldsBase.embed!(M::$TM, q, p::$TP)
+            return embed!(M, q, p.$pfield)
+        end
 
-            function ManifoldsBase.exp!(M::$TM, q::$TP, p::$TP, X::$TV)
-                exp!(M, q.$pfield, p.$pfield, X.$vfield)
-                return q
-            end
+        function ManifoldsBase.embed!(M::$TM, Y, p::$TP, X::$TV)
+            return embed!(M, Y, p.$pfield, X.$vfield)
+        end
 
-            function ManifoldsBase.inner(M::$TM, p::$TP, X::$TV, Y::$TV)
-                return inner(M, p.$pfield, X.$vfield, Y.$vfield)
-            end
+        function ManifoldsBase.exp!(M::$TM, q::$TP, p::$TP, X::$TV)
+            exp!(M, q.$pfield, p.$pfield, X.$vfield)
+            return q
+        end
 
-            function ManifoldsBase.isapprox(M::$TM, p::$TP, q::$TP; kwargs...)
-                return isapprox(M, p.$pfield, q.$pfield; kwargs...)
-            end
+        function ManifoldsBase.inner(M::$TM, p::$TP, X::$TV, Y::$TV)
+            return inner(M, p.$pfield, X.$vfield, Y.$vfield)
+        end
 
-            function ManifoldsBase.isapprox(M::$TM, p::$TP, X::$TV, Y::$TV; kwargs...)
-                return isapprox(M, p.$pfield, X.$vfield, Y.$vfield; kwargs...)
-            end
+        function ManifoldsBase.isapprox(M::$TM, p::$TP, q::$TP; kwargs...)
+            return isapprox(M, p.$pfield, q.$pfield; kwargs...)
+        end
 
-            function ManifoldsBase.allocate_result(::$TM, ::typeof(log), p::$TP, ::$TP)
-                a = allocate(p.$vfield)
-                return $TV(a)
-            end
-            function ManifoldsBase.log!(M::$TM, X::$TV, p::$TP, q::$TP)
-                log!(M, X.$vfield, p.$pfield, q.$pfield)
-                return X
-            end
+        function ManifoldsBase.isapprox(M::$TM, p::$TP, X::$TV, Y::$TV; kwargs...)
+            return isapprox(M, p.$pfield, X.$vfield, Y.$vfield; kwargs...)
+        end
 
-        end,
-    )
+        function ManifoldsBase.allocate_result(::$TM, ::typeof(log), p::$TP, ::$TP)
+            a = allocate(p.$vfield)
+            return $TV(a)
+        end
+        function ManifoldsBase.allocate_result(
+            ::$TM,
+            ::typeof(inverse_retract),
+            p::$TP,
+            ::$TP,
+        )
+            a = allocate(p.$vfield)
+            return $TV(a)
+        end
+
+        function ManifoldsBase.log!(M::$TM, X::$TV, p::$TP, q::$TP)
+            log!(M, X.$vfield, p.$pfield, q.$pfield)
+            return X
+        end
+
+        function ManifoldsBase.norm(M::$TM, p::$TP, X::$TV)
+            return norm(M, p.$pfield, X.$vfield)
+        end
+
+        function ManifoldsBase.zero_vector(M::$TM, p::$TP)
+            return $TV(zero_vector(M, p.$pfield))
+        end
+
+        function ManifoldsBase.zero_vector!(M::$TM, X::$TV, p::$TP)
+            zero_vector!(M, X.$vfield, p.$pfield)
+            return X
+        end
+    end
+
+    for BT in [
+        ManifoldsBase.DISAMBIGUATION_BASIS_TYPES...,
+        ManifoldsBase.DISAMBIGUATION_COTANGENT_BASIS_TYPES...,
+    ]
+        push!(
+            block.args,
+            quote
+                function ManifoldsBase.get_coordinates!(M::$TM, Y, p::$TP, X::$TV, B::$BT)
+                    return get_coordinates!(M, Y, p.$pfield, X.$vfield, B)
+                end
+
+                function ManifoldsBase.get_vector(M::$TM, p::$TP, X, B::$BT)
+                    return $TV(get_vector(M, p.$pfield, X, B))
+                end
+
+                function ManifoldsBase.get_vector!(M::$TM, Y::$TV, p::$TP, X, B::$BT)
+                    return get_vector!(M, Y.$vfield, p.$pfield, X, B)
+                end
+            end,
+        )
+    end
+
+    return esc(block)
 end
 
 
@@ -160,6 +202,7 @@ macro manifold_vector_forwards(T, Twhere, field::Symbol)
             Base.:-(X::$T, Y::$T) where {$Twhere} = $T(X.$field - Y.$field)
             Base.:-(X::$T) where {$Twhere} = $T(-X.$field)
             Base.:+(X::$T) where {$Twhere} = $T(X.$field)
+            Base.zero(X::$T) where {$Twhere} = $T(zero(X.$field))
 
             @eval @manifold_element_forwards $T $Twhere $field
 

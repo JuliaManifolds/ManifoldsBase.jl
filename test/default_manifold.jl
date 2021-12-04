@@ -46,7 +46,7 @@ Base.eltype(v::DefaultTVector) = eltype(v.value)
 
 ManifoldsBase.@manifold_element_forwards DefaultPoint value
 ManifoldsBase.@manifold_vector_forwards DefaultTVector value
-ManifoldsBase.@default_manifold_fallbacks DefaultManifold DefaultPoint DefaultTVector value value
+ManifoldsBase.@default_manifold_fallbacks ManifoldsBase.DefaultManifold DefaultPoint DefaultTVector value value
 
 @testset "Testing Default (Euclidean)" begin
     M = ManifoldsBase.DefaultManifold(3)
@@ -67,7 +67,7 @@ ManifoldsBase.@default_manifold_fallbacks DefaultManifold DefaultPoint DefaultTV
     @test isa(manifold_dimension(M), Integer)
     @test manifold_dimension(M) ≥ 0
     @test base_manifold(M) == M
-    @test number_system(M) == ℝ
+    @test number_system(M) == ManifoldsBase.ℝ
     @test ManifoldsBase.representation_size(M) == (3,)
 
     @test injectivity_radius(M) == Inf
@@ -115,15 +115,17 @@ ManifoldsBase.@default_manifold_fallbacks DefaultManifold DefaultPoint DefaultTV
             retract!(M, new_pt, pts[1], tv1)
             @test is_point(M, new_pt)
             for x in pts
-                @test isapprox(M, zero_vector(M, x), log(M, x, x); atol = eps(eltype(x)))
+                @test isapprox(M, x, zero_vector(M, x), log(M, x, x); atol = eps(eltype(x)))
                 @test isapprox(
                     M,
+                    x,
                     zero_vector(M, x),
                     inverse_retract(M, x, x);
                     atol = eps(eltype(x)),
                 )
                 @test isapprox(
                     M,
+                    x,
                     zero_vector(M, x),
                     inverse_retract(M, x, x, irm);
                     atol = eps(eltype(x)),
@@ -139,16 +141,16 @@ ManifoldsBase.@default_manifold_fallbacks DefaultManifold DefaultPoint DefaultTV
 
             @test distance(M, pts[1], pts[2]) ≈ norm(M, pts[1], tv1)
 
-            @test mid_point(M, pts[1], pts[2]) == [0.5, 0.5, 0.0]
+            @test mid_point(M, pts[1], pts[2]) == convert(T, [0.5, 0.5, 0.0])
             midp = allocate(pts[1])
             @test mid_point!(M, midp, pts[1], pts[2]) === midp
-            @test midp == [0.5, 0.5, 0.0]
+            @test midp == convert(T, [0.5, 0.5, 0.0])
 
             @testset "Geodesic interface test" begin
                 @test isapprox(M, geodesic(M, pts[1], tv1)(0.0), pts[1])
                 @test isapprox(M, geodesic(M, pts[1], tv1)(1.0), pts[2])
                 @test isapprox(M, geodesic(M, pts[1], tv1, 1.0), pts[2])
-                @test isapprox(M, geodesic(M, pts[1], tv1, 1.0 / 2), (pts[1] + pts[2]) / 2)
+                @test isapprox(M, geodesic(M, pts[1], tv1, 1.0 / 2), midp)
                 @test isapprox(M, shortest_geodesic(M, pts[1], pts[2])(0.0), pts[1])
                 @test isapprox(M, shortest_geodesic(M, pts[1], pts[2])(1.0), pts[2])
                 @test isapprox(M, shortest_geodesic(M, pts[1], pts[2], 0.0), pts[1])
@@ -157,14 +159,14 @@ ManifoldsBase.@default_manifold_fallbacks DefaultManifold DefaultPoint DefaultTV
                     isapprox.(
                         Ref(M),
                         geodesic(M, pts[1], tv1, [0.0, 1.0 / 2, 1.0]),
-                        [pts[1], (pts[1] + pts[2]) / 2, pts[2]],
+                        [pts[1], midp, pts[2]],
                     ),
                 )
                 @test all(
                     isapprox.(
                         Ref(M),
                         shortest_geodesic(M, pts[1], pts[2], [0.0, 1.0 / 2, 1.0]),
-                        [pts[1], (pts[1] + pts[2]) / 2, pts[2]],
+                        [pts[1], midp, pts[2]],
                     ),
                 )
             end
@@ -193,7 +195,7 @@ ManifoldsBase.@default_manifold_fallbacks DefaultManifold DefaultPoint DefaultTV
                 @test a == b
                 @test X == Y
                 @test Z == X
-                @test a == vec(X)
+                @test a == ((T <: DefaultPoint) ? vec(X.value) : vec(X))
             end
 
             @testset "broadcasted linear algebra in tangent space" begin
@@ -202,7 +204,7 @@ ManifoldsBase.@default_manifold_fallbacks DefaultManifold DefaultPoint DefaultTV
                 @test isapprox(M, pts[1], -tv1, .-tv1)
                 v = similar(tv1)
                 v .= 2 .* tv1 .+ tv1
-                @test v ≈ 3 * tv1
+                @test isapprox(M, pts[1], v, 3 * tv1)
             end
 
             @testset "project test" begin
