@@ -105,6 +105,16 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
             inverse_retract!(M, X.$vfield, p.$pfield, q.$pfield, m)
             return X
         end
+        function ManifoldsBase.inverse_retract!(
+            M::$TM,
+            X::$TV,
+            p::$TP,
+            q::$TP,
+            m::LogarithmicInverseRetraction,
+        )
+            inverse_retract!(M, X.$vfield, p.$pfield, q.$pfield, m)
+            return X
+        end
 
         function ManifoldsBase.isapprox(M::$TM, p::$TP, q::$TP; kwargs...)
             return isapprox(M, p.$pfield, q.$pfield; kwargs...)
@@ -138,6 +148,16 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
         end
 
         function ManifoldsBase.retract!(M::$TM, q::$TP, p::$TP, X::$TV, m)
+            retract!(M, q.$pfield, p.$pfield, X.$vfield, m)
+            return X
+        end
+        function ManifoldsBase.retract!(
+            M::$TM,
+            q::$TP,
+            p::$TP,
+            X::$TV,
+            m::ExponentialRetraction,
+        )
             retract!(M, q.$pfield, p.$pfield, X.$vfield, m)
             return X
         end
