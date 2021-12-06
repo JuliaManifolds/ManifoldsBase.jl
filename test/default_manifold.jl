@@ -253,7 +253,7 @@ ManifoldsBase.@default_manifold_fallbacks ManifoldsBase.DefaultManifold DefaultP
                 vector_transport_along!(M, v1t5, pts[1], v1, c)
                 @test isapprox(M, pts[1], v1, v1t5)
                 # along a custom type of points
-                if T == DefaultPoint
+                if T <: DefaultPoint
                     S = eltype(pts[1].value)
                     mat = reshape(pts[1].value, length(pts[1].value), 1)
                 else
@@ -285,7 +285,12 @@ ManifoldsBase.@default_manifold_fallbacks ManifoldsBase.DefaultManifold DefaultP
                 ) == v2
 
                 # along is also the identity
-                c = [0.5 * (pts[1] + pts[2]), pts[2], 0.5 * (pts[2] + pts[3]), pts[3]]
+                c = [
+                    mid_point(M, pts[1], pts[2]),
+                    pts[2],
+                    mid_point(M, pts[2], pts[3]),
+                    pts[3],
+                ]
                 @test vector_transport_along(M, pts[1], v2, c, SchildsLadderTransport()) ==
                       v2
                 @test vector_transport_along(M, pts[1], v2, c, PoleLadderTransport()) == v2
@@ -294,9 +299,9 @@ ManifoldsBase.@default_manifold_fallbacks ManifoldsBase.DefaultManifold DefaultP
                 p = allocate(pts[1])
                 ManifoldsBase.pole_ladder!(M, p, pts[1], pts[2], pts[3])
                 # -log_p3 p == log_p1 p2
-                @test isapprox(M, -log(M, pts[3], p), log(M, pts[1], pts[2]))
+                @test isapprox(M, pts[3], -log(M, pts[3], p), log(M, pts[1], pts[2]))
                 ManifoldsBase.schilds_ladder!(M, p, pts[1], pts[2], pts[3])
-                @test isapprox(M, log(M, pts[3], p), log(M, pts[1], pts[2]))
+                @test isapprox(M, pts[3], log(M, pts[3], p), log(M, pts[1], pts[2]))
 
                 @test repr(ParallelTransport()) == "ParallelTransport()"
                 @test repr(ScaledVectorTransport(ParallelTransport())) ==
