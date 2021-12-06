@@ -84,12 +84,12 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
             return distance(M, p.$pfield, q.$pfield)
         end
 
-        function ManifoldsBase.embed!(M::$TM, q, p::$TP)
-            return embed!(M, q, p.$pfield)
+        function ManifoldsBase.embed!(M::$TM, q::$TP, p::$TP)
+            return embed!(M, q.$pfield, p.$pfield)
         end
 
-        function ManifoldsBase.embed!(M::$TM, Y, p::$TP, X::$TV)
-            return embed!(M, Y, p.$pfield, X.$vfield)
+        function ManifoldsBase.embed!(M::$TM, Y::$TV, p::$TP, X::$TV)
+            return embed!(M, Y.$vfield, p.$pfield, X.$vfield)
         end
 
         function ManifoldsBase.exp!(M::$TM, q::$TP, p::$TP, X::$TV)
@@ -99,6 +99,11 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
 
         function ManifoldsBase.inner(M::$TM, p::$TP, X::$TV, Y::$TV)
             return inner(M, p.$pfield, X.$vfield, Y.$vfield)
+        end
+
+        function ManifoldsBase.inverse_retract!(M::$TM, X::$TV, p::$TP, q::$TP, m)
+            inverse_retract!(M, X.$vfield, p.$pfield, q.$pfield, m)
+            return X
         end
 
         function ManifoldsBase.isapprox(M::$TM, p::$TP, q::$TP; kwargs...)
@@ -130,6 +135,38 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
 
         function ManifoldsBase.norm(M::$TM, p::$TP, X::$TV)
             return norm(M, p.$pfield, X.$vfield)
+        end
+
+        function ManifoldsBase.retract!(M::$TM, q::$TP, p::$TP, X::$TV, m)
+            retract!(M, q.$pfield, p.$pfield, X.$vfield, m)
+            return X
+        end
+
+        function ManifoldsBase.vector_transport_along!(M::$TM, Y::$TV, p::$TP, X::$TV, c)
+            vector_transport_along!(M, Y.$vfield, p.$pfield, X.$vfield, c)
+            return Y
+        end
+        function ManifoldsBase.vector_transport_direction!(
+            M::$TM,
+            Y::$TV,
+            p::$TP,
+            X::$TV,
+            d::$TV,
+            m,
+        )
+            vector_transport_direction!(M, Y.$vfield, p.$pfield, X.$vfield, d.$vfield, m)
+            return Y
+        end
+        function ManifoldsBase.vector_transport_to!(
+            M::$TM,
+            Y::$TV,
+            p::$TP,
+            X::$TV,
+            q::$TP,
+            m,
+        )
+            vector_transport_to!(M, Y.$vfield, p.$pfield, X.$vfield, q.$pfield, m)
+            return Y
         end
 
         function ManifoldsBase.zero_vector(M::$TM, p::$TP)

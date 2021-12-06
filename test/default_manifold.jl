@@ -253,8 +253,14 @@ ManifoldsBase.@default_manifold_fallbacks ManifoldsBase.DefaultManifold DefaultP
                 vector_transport_along!(M, v1t5, pts[1], v1, c)
                 @test isapprox(M, pts[1], v1, v1t5)
                 # along a custom type of points
-                T = eltype(pts[1])
-                c2 = MatrixVectorTransport{T}(reshape(pts[1], length(pts[1]), 1))
+                if T == DefaultPoint
+                    S = eltype(pts[1].value)
+                    mat = reshape(pts[1].value, length(pts[1].value), 1)
+                else
+                    S = eltype(pts[1])
+                    mat = reshape(pts[1], length(pts[1]), 1)
+                end
+                c2 = MatrixVectorTransport{S}(mat)
                 v1t4c2 = vector_transport_along(M, pts[1], v1, c2)
                 @test isapprox(M, pts[1], v1, v1t4c2)
                 v1t5c2 = allocate(v1)
