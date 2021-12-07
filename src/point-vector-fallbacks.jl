@@ -101,7 +101,13 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
             return inner(M, p.$pfield, X.$vfield, Y.$vfield)
         end
 
-        function ManifoldsBase.inverse_retract!(M::$TM, X::$TV, p::$TP, q::$TP, m)
+        function ManifoldsBase.inverse_retract!(
+            M::$TM,
+            X::$TV,
+            p::$TP,
+            q::$TP,
+            m::AbstractInverseRetractionMethod,
+        )
             inverse_retract!(M, X.$vfield, p.$pfield, q.$pfield, m)
             return X
         end
@@ -147,7 +153,13 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
             return norm(M, p.$pfield, X.$vfield)
         end
 
-        function ManifoldsBase.retract!(M::$TM, q::$TP, p::$TP, X::$TV, m)
+        function ManifoldsBase.retract!(
+            M::$TM,
+            q::$TP,
+            p::$TP,
+            X::$TV,
+            m::AbstractRetractionMethod,
+        )
             retract!(M, q.$pfield, p.$pfield, X.$vfield, m)
             return X
         end

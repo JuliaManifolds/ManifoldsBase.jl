@@ -30,10 +30,16 @@ function ManifoldsBase.injectivity_radius(
 )
     return 10.0
 end
-function retract!(::ManifoldsBase.DefaultManifold, q, p, X, ::CustomDefinedRetraction)
+function ManifoldsBase.retract!(
+    ::ManifoldsBase.DefaultManifold,
+    q,
+    p,
+    X,
+    ::CustomDefinedRetraction,
+)
     return (q .= p .+ X)
 end
-function inverse_retract!(
+function ManifoldsBase.inverse_retract!(
     ::ManifoldsBase.DefaultManifold,
     X,
     p,
