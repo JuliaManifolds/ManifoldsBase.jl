@@ -2,7 +2,16 @@ using ManifoldsBase
 using ManifoldsBase:
     @manifold_element_forwards, @manifold_vector_forwards, @default_manifold_fallbacks
 import ManifoldsBase:
-    number_eltype, check_point, distance, embed!, exp!, inner, isapprox, log!
+    number_eltype,
+    check_point,
+    distance,
+    embed!,
+    exp!,
+    inner,
+    isapprox,
+    log!,
+    retract!,
+    inverse_retract!
 import Base: angle, convert
 using LinearAlgebra
 using DoubleFloats
@@ -13,6 +22,7 @@ using Test
 
 struct CustomDefinedRetraction <: ManifoldsBase.AbstractRetractionMethod end
 struct CustomUndefinedRetraction <: ManifoldsBase.AbstractRetractionMethod end
+struct CustomDefinedInverseRetraction <: ManifoldsBase.AbstractInverseRetractionMethod end
 
 function ManifoldsBase.injectivity_radius(
     ::ManifoldsBase.DefaultManifold,
@@ -20,6 +30,19 @@ function ManifoldsBase.injectivity_radius(
 )
     return 10.0
 end
+function retract!(::ManifoldsBase.DefaultManifold, q, p, X, ::CustomDefinedRetraction)
+    return (q .= p .+ X)
+end
+function inverse_retract!(
+    ::ManifoldsBase.DefaultManifold,
+    X,
+    p,
+    q,
+    ::CustomDefinedInverseRetraction,
+)
+    return (X .= q .- p)
+end
+
 
 struct MatrixVectorTransport{T} <: AbstractVector{T}
     m::Matrix{T}
@@ -343,13 +366,13 @@ ManifoldsBase.@default_manifold_fallbacks ManifoldsBase.DefaultManifold DefaultP
         @test isapprox(M, fill(0.5), mid_point(M, p1, p2))
     end
 
-    @testset "Retracion" begin
+    @testset "Retraction" begin
         a = NLsolveInverseRetraction(ExponentialRetraction())
         @test a.retraction isa ExponentialRetraction
     end
 
     @testset "copy of points and vectors" begin
-        M = DefaultManifold(2)
+        M = ManifoldsBase.DefaultManifold(2)
         p = [2.0, 3.0]
         q = similar(p)
         copyto!(M, q, p)
@@ -362,5 +385,20 @@ ManifoldsBase.@default_manifold_fallbacks ManifoldsBase.DefaultManifold DefaultP
         @test Y == X
         Z = copy(M, p, X)
         @test Z == X
+    end
+    @testset "further vector and point automatic forwards" begin
+        M = ManifoldsBase.DefaultManifold(3)
+        p = DefaultPoint([1.0, 0.0, 0.0])
+        q = DefaultPoint([0.0, 0.0, 0.0])
+        X = DefaultTVector([0.0, 1.0, 0.0])
+        Y = DefaultTVector([1.0, 0.0, 0.0])
+        @test angle(M, p, X, Y) ≈ π / 2
+        @test inverse_retract(M, p, q, LogarithmicInverseRetraction()) == -Y
+        @test retract(M, q, Y, ExponentialRetraction()) == p
+        # Dispatch on custom
+        @test_broken inverse_retract(M, p, q, CustomDefinedInverseRetraction()) == -Y
+        @test_broken retract(M, q, Y, CustomDefinedRetraction()) == p
+        @test 2.0 \ X == DefaultTVector(2.0 \ X.value)
+        @test X + Y == DefaultTVector(X.value + Y.value)
     end
 end
