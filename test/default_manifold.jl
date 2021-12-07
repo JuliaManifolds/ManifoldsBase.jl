@@ -379,18 +379,22 @@ ManifoldsBase.@default_manifold_fallbacks ManifoldsBase.DefaultManifold DefaultP
 
     @testset "copy of points and vectors" begin
         M = ManifoldsBase.DefaultManifold(2)
-        p = [2.0, 3.0]
-        q = similar(p)
-        copyto!(M, q, p)
-        @test p == q
-        r = copy(M, p)
-        @test r == p
-        X = [4.0, 5.0]
-        Y = similar(X)
-        copyto!(M, Y, p, X)
-        @test Y == X
-        Z = copy(M, p, X)
-        @test Z == X
+        for (p, X) in (
+            ([2.0, 3.0], [4.0, 5.0]),
+            (DefaultPoint([2.0, 3.0]), DefaultTVector([4.0, 5.0])),
+        )
+            q = similar(p)
+            copyto!(M, q, p)
+            @test p == q
+            r = copy(M, p)
+            @test r == p
+            Y = similar(X)
+            copyto!(M, Y, p, X)
+            @test Y == X
+            Z = copy(M, p, X)
+            @test Z == X
+        end
+
     end
     @testset "further vector and point automatic forwards" begin
         M = ManifoldsBase.DefaultManifold(3)
@@ -406,5 +410,7 @@ ManifoldsBase.@default_manifold_fallbacks ManifoldsBase.DefaultManifold DefaultP
         @test_broken retract(M, q, Y, CustomDefinedRetraction()) == p
         @test 2.0 \ X == DefaultTVector(2.0 \ X.value)
         @test X + Y == DefaultTVector(X.value + Y.value)
+        @test +X == X
+        @test (Y .= X) === Y
     end
 end

@@ -27,13 +27,6 @@ macro manifold_element_forwards(T, Twhere, field::Symbol)
             function ManifoldsBase.allocate(p::$T, ::Type{P}) where {P,$Twhere}
                 return $T(allocate(p.$field, P))
             end
-            function ManifoldsBase.allocate(
-                p::$T,
-                ::Type{P},
-                dims::Tuple,
-            ) where {P,$Twhere}
-                return $T(allocate(p.$field, P, dims))
-            end
 
             @inline Base.copy(p::$T) where {$Twhere} = $T(copy(p.$field))
 
@@ -357,7 +350,7 @@ macro manifold_vector_forwards(T, Twhere, field::Symbol)
             ) where {$Twhere}
                 axes(dest) == axes(bc) || Broadcast.throwdm(axes(dest), axes(bc))
                 # Performance optimization: broadcast!(identity, dest, A) is equivalent to copyto!(dest, A) if indices match
-                if bc.f === identity && bc.args isa Tuple{T} # only a single input argument to broadcast!
+                if bc.f === identity && bc.args isa Tuple{$T} # only a single input argument to broadcast!
                     A = bc.args[1]
                     if axes(dest) == axes(A)
                         return copyto!(dest, A)
