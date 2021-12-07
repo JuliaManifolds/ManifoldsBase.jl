@@ -395,6 +395,9 @@ ManifoldsBase.@default_manifold_fallbacks ManifoldsBase.DefaultManifold DefaultP
             @test Z == X
         end
 
+        p1 = DefaultPoint([2.0, 3.0])
+        p2 = copy(p1)
+        @test (p1 == p2) && (p1 !== p2)
     end
     @testset "further vector and point automatic forwards" begin
         M = ManifoldsBase.DefaultManifold(3)

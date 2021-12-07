@@ -99,16 +99,6 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
             X::$TV,
             p::$TP,
             q::$TP,
-            m::AbstractInverseRetractionMethod,
-        )
-            inverse_retract!(M, X.$vfield, p.$pfield, q.$pfield, m)
-            return X
-        end
-        function ManifoldsBase.inverse_retract!(
-            M::$TM,
-            X::$TV,
-            p::$TP,
-            q::$TP,
             m::LogarithmicInverseRetraction,
         )
             inverse_retract!(M, X.$vfield, p.$pfield, q.$pfield, m)
@@ -151,16 +141,6 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
             q::$TP,
             p::$TP,
             X::$TV,
-            m::AbstractRetractionMethod,
-        )
-            retract!(M, q.$pfield, p.$pfield, X.$vfield, m)
-            return X
-        end
-        function ManifoldsBase.retract!(
-            M::$TM,
-            q::$TP,
-            p::$TP,
-            X::$TV,
             m::ExponentialRetraction,
         )
             retract!(M, q.$pfield, p.$pfield, X.$vfield, m)
@@ -169,28 +149,6 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
 
         function ManifoldsBase.vector_transport_along!(M::$TM, Y::$TV, p::$TP, X::$TV, c)
             vector_transport_along!(M, Y.$vfield, p.$pfield, X.$vfield, c)
-            return Y
-        end
-        function ManifoldsBase.vector_transport_direction!(
-            M::$TM,
-            Y::$TV,
-            p::$TP,
-            X::$TV,
-            d::$TV,
-            m,
-        )
-            vector_transport_direction!(M, Y.$vfield, p.$pfield, X.$vfield, d.$vfield, m)
-            return Y
-        end
-        function ManifoldsBase.vector_transport_to!(
-            M::$TM,
-            Y::$TV,
-            p::$TP,
-            X::$TV,
-            q::$TP,
-            m,
-        )
-            vector_transport_to!(M, Y.$vfield, p.$pfield, X.$vfield, q.$pfield, m)
             return Y
         end
 
