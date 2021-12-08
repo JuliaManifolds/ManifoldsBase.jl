@@ -75,6 +75,9 @@ While a [`AbstractManifold`](@ref) does not necessarily require this type, for e
 implemented for `Vector`s or `Matrix` type elements, this type can be used for more
 complicated representations, semantic verification, or even dispatch for different
 representations of tangent vectors and their types on a manifold.
+
+You may use macro [`@manifold_vector_forwards`](@ref) to introduce commonly used method
+definitions for your subtype of `AbstractFibreVector`.
 """
 abstract type AbstractFibreVector{TType<:VectorSpaceType} end
 

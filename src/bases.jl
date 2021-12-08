@@ -285,6 +285,13 @@ const DISAMBIGUATION_COTANGENT_BASIS_TYPES = [
     DefaultOrthogonalBasis{<:Any,CotangentSpaceType},
 ]
 
+"""
+    allocate_coordinates(M::AbstractManifold, p, T, n::Int)
+
+Allocate vector of coordinates of length `n` of type `T` of a vector at point `p`
+on manifold `M`.
+"""
+allocate_coordinates(M::AbstractManifold, p, T, n::Int) = allocate(p, T, n)
 
 function allocate_result(
     M::AbstractManifold,
@@ -294,7 +301,7 @@ function allocate_result(
     B::AbstractBasis,
 )
     T = allocate_result_type(M, f, (p, X))
-    return allocate(p, T, number_of_coordinates(M, B))
+    return allocate_coordinates(M, p, T, number_of_coordinates(M, B))
 end
 
 function allocate_result(
@@ -305,7 +312,7 @@ function allocate_result(
     B::CachedBasis,
 )
     T = allocate_result_type(M, f, (p, X))
-    return allocate(p, T, number_of_coordinates(M, B))
+    return allocate_coordinates(M, p, T, number_of_coordinates(M, B))
 end
 
 @inline function allocate_result_type(
