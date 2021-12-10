@@ -408,7 +408,11 @@ ManifoldsBase.@default_manifold_fallbacks ManifoldsBase.DefaultManifold DefaultP
         @test angle(M, p, X, Y) ≈ π / 2
         @test inverse_retract(M, p, q, LogarithmicInverseRetraction()) == -Y
         @test retract(M, q, Y, ExponentialRetraction()) == p
-        # Dispatch on custom
+        p2 = allocate(p, eltype(p.value), size(p.value))
+        @test size(p2.value) == size(p.value)
+        X2 = allocate(X, eltype(X.value), size(X.value))
+        @test size(X2.value) == size(X.value)
+        # Dispatch on custom - dispatch not working, check for new scheme later.
         @test_broken inverse_retract(M, p, q, CustomDefinedInverseRetraction()) == -Y
         @test_broken retract(M, q, Y, CustomDefinedRetraction()) == p
         @test 2.0 \ X == DefaultTVector(2.0 \ X.value)
