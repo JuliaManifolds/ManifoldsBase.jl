@@ -8,10 +8,9 @@ This tutorial demonstrates how to easily set your own manifold up within `Manifo
 
 ## Introduction
 
-If you looked around a little and saw the [interface](../interface.md), the amount of functions and possibilities, it might seem that a manifold might take some time to implement.
-This tutorial demonstrates that you can get your first own manifold quite fast and you only have to implement the functions you actually need. For this tutorial it would be helpful if you take a look at our [notation](../misc/notation.md).
-This tutorial assumes that you heard of the exponential map, tangent vectors and the dimension of a manifold. If not, please read for example [[do Carmo, 1992](#doCarmo1992)],
-Chapter 3, first.
+This tutorial demonstrates that you can get your first own manifold quite fast and you only have to implement the functions you actually need.
+This tutorial assumes that you heard of the exponential map, tangent vectors and the dimension of a manifold.
+If not, please read for example [[do Carmo, 1992](#doCarmo1992)], Chapter 3, first.
 
 In general you need just a datatype (`struct`) that inherits from [`AbstractManifold`](@ref) to define a manifold. No function is _per se_ required to be implemented.
 However, it is a good idea to provide functions that might be useful to others, for example [`check_point`](@ref) and [`check_vector`](@ref), as we do in this tutorial.

@@ -8,7 +8,7 @@ Every vector space `fiber` is supposed to provide:
 * a method of constructing vectors,
 * basic operations: addition, subtraction, multiplication by a scalar
   and negation (unary minus),
-* [`zero_vector(fiber, p)`](@ref Main.Manifolds.zero_vector) to construct zero vectors at point `p`,
+* `zero_vector(fiber, p)` to construct zero vectors at point `p`,
 * `allocate(X)` and `allocate(X, T)` for vector `X` and type `T`,
 * `copyto!(X, Y)` for vectors `X` and `Y`,
 * `number_eltype(v)` for vector `v`,
@@ -17,10 +17,10 @@ Every vector space `fiber` is supposed to provide:
 Optionally:
 * inner product via `inner` (used to provide Riemannian metric on vector
   bundles),
-* [`flat`](@ref Main.Manifolds.flat) and [`sharp`](@ref Main.Manifolds.sharp),
+* `flat` and `sharp`,
 * `norm` (by default uses `inner`),
 * [`project`](@ref) (for embedded vector spaces),
-* [`representation_size`](@ref) (if support for [`ProductArray`](@ref Main.Manifolds.ProductArray) is desired),
+* [`representation_size`](@ref),
 * broadcasting for basic operations.
 """
 abstract type VectorSpaceType end

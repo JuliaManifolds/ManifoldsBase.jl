@@ -1,7 +1,7 @@
 # A Decorator for manifolds
 
 A decorator manifold extends the functionality of a [`AbstractManifold`](@ref) in a semi-transparent way.
-It internally stores the [`AbstractManifold`](@ref) it extends and by default for functions defined in the [`ManifoldsBase`](interface.md) it acts transparently in the sense that it passes all functions through to the base except those that it actually affects.
+It internally stores the [`AbstractManifold`](@ref) it extends and by default for functions defined in `ManifoldsBase.jl` it acts transparently in the sense that it passes all functions through to the base except those that it actually affects.
 For example, because the [`ValidationManifold`](@ref) affects nearly all functions, it overwrites nearly all functions, except a few like [`manifold_dimension`](@ref).
 
 By default, i.e. for a plain new decorator, all functions are transparent, i.e. passed down to the manifold the [`AbstractDecoratorManifold`](@ref) decorates.
