@@ -5,13 +5,19 @@
 You can easily implement your algorithms and even your own manifolds just using the interface.
 All manifolds from the package here are also based on this interface, so any project based on the interface can benefit from all manifolds, as soon as a certain manifold provides implementations of the functions a project requires.
 
-The main type is the [`AbstractManifold`](@ref). It represents the manifold per se.
-During the documentation we will use the [Euclidean Space](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/euclidean.html) and the [Sphere](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/sphere.html) (both implemented in [Manifolds.jl](https://github.com/JuliaManifolds/Manifolds.jl)) as easy examples to often illustrate properties and features of this interface
+## Citation
 
-```@autodocs
-Modules = [ManifoldsBase]
-Pages = ["maintypes.jl"]
-Order = [:type, :function]
+If you use `ManifoldsBase.jl` in your work, please cite the following paper,
+which covers both the basic interface as well as the performance for `Manifolds.jl`.
+
+```biblatex
+@online{2106.08777,
+    Author = {Seth D. Axen and Mateusz Baran and Ronny Bergmann and Krzysztof Rzecki},
+    Title = {Manifolds.jl: An Extensible Julia Framework for Data Analysis on Manifolds},
+    Year = {2021},
+    Eprint = {2106.08777},
+    Eprinttype = {arXiv},
+}
 ```
 
-which should store information about the manifold, for example parameters inherent to the manifold.
+Note that the citation is in [BibLaTeX](https://ctan.org/pkg/biblatex) format.

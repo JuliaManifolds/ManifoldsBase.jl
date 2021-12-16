@@ -1,4 +1,6 @@
-### The exponential and the logarithmic map, and geodesics
+# Functions on manifolds
+
+## The exponential and the logarithmic map, and geodesics
 
 Geodesics are the generalizations of a straight line to manifolds, i.e. their intrinsic acceleration is zero.
 Together with geodesics one also obtains the exponential map and its inverse, the logarithmic map.
@@ -6,12 +8,12 @@ Informally speaking, the exponential map takes a vector (think of a direction an
 which lies towards this direction at distance of the specified length. The logarithmic map does the inverse, i.e. given two points, it tells which vector “points towards” the other point.
 
 ```@autodocs
-Modules = [Manifolds, ManifoldsBase]
+Modules = [ManifoldsBase]
 Pages = ["exp_log_geo.jl"]
 Order = [:function]
 ```
 
-### Retractions and inverse Retractions
+## Retractions and inverse Retractions
 
 The exponential and logarithmic map might be too expensive to evaluate or not be available in a very stable numerical way. Retractions provide a possibly cheap, fast and stable alternative.
 
@@ -20,7 +22,7 @@ The following figure compares the exponential map [`exp`](@ref)`(M, p, X)` on th
 ![A comparson of the exponential map and a retraction on the Circle.](assets/images/retraction_illustration_600.png)
 
 ```@autodocs
-Modules = [Manifolds, ManifoldsBase]
+Modules = [ManifoldsBase]
 Pages = ["retractions.jl"]
 Order = [:function]
 ```
@@ -29,12 +31,33 @@ To distinguish different types of retractions, the last argument of the (inverse
 specifies a type. The following ones are available.
 
 ```@autodocs
-Modules = [Manifolds, ManifoldsBase]
+Modules = [ManifoldsBase]
 Pages = ["retractions.jl"]
 Order = [:type]
 ```
 
-### Projections
+## Vector transport
+
+There are three main functions for vector transport:
+
+* [`vector_transport_along`](@ref)
+* [`vector_transport_direction`](@ref)
+* [`vector_transport_to`](@ref)
+
+Different types of vector transport are implemented using subtypes of [`AbstractVectorTransportMethod`](@ref):
+
+* [`ParallelTransport`](@ref)
+* [`PoleLadderTransport`](@ref)
+* [`ProjectionTransport`](@ref)
+* [`SchildsLadderTransport`](@ref)
+
+```@autodocs
+Modules = [ManifoldsBase]
+Pages = ["vector_transport.jl"]
+Order = [:type, :function]
+```
+
+## Projections
 
 A manifold might be embedded in some space.
 Often this is implicitly assumed, for example the complex [`Circle`](@ref) is embedded in the complex plane.

@@ -7,7 +7,12 @@ makedocs(
     sitename="ManifoldsBase.jl",
     pages=[
         "Home" => "index.md",
-        "Basic functions" => "basicfunctions.md"
+        "How to write a Manifold" => "example.md",
+        "Design Principles" => "design.md",
+        "Basic functions" => "functions.md",
+        "Manifolds" => "manifolds.md",
+        "Extending Manifolds" => "decorator.md",
+        "Bases for tangent spaces" => "bases.md",
     ],
 )
 deploydocs(repo="github.com/JuliaManifolds/ManifoldsBase.jl.git", push_preview=true)
