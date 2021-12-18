@@ -662,6 +662,30 @@ decorated_manifold(M::AbstractManifold) = M.manifold
     q,
     p,
     X,
+    m::QRRetraction,
+)
+
+@decorator_transparent_signature retract!(
+    M::AbstractDecoratorManifold,
+    q,
+    p,
+    X,
+    m::ProjectionRetraction,
+)
+
+@decorator_transparent_signature retract!(
+    M::AbstractDecoratorManifold,
+    q,
+    p,
+    X,
+    m::PolarRetraction,
+)
+
+@decorator_transparent_signature retract!(
+    M::AbstractDecoratorManifold,
+    q,
+    p,
+    X,
     m::ExponentialRetraction,
 )
 

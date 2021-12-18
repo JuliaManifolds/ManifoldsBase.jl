@@ -944,18 +944,6 @@ function retract!(M::PowerManifoldNestedReplacing, q, p, X, method::PowerRetract
     end
     return q
 end
-# exp and power have to be explicitly stated, since the third case otherwise introduces and ambiguity.
-@invoke_maker 5 AbstractRetractionMethod retract!(
-    M::AbstractPowerManifold,
-    q,
-    p,
-    X,
-    m::ExponentialRetraction,
-)
-function retract!(M::AbstractPowerManifold, q, p, X, m::AbstractRetractionMethod)
-    return retract!(M, q, p, X, PowerRetraction(m))
-end
-
 
 """
     set_component!(M::AbstractPowerManifold, q, p, idx...)

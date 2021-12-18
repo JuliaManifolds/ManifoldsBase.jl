@@ -59,7 +59,7 @@ struct NotImplementedInverseRetraction <: AbstractInverseRetractionMethod end
     @test_throws ErrorException inverse_retract(M, [0], [0], log_invretr)
     @test_throws ErrorException inverse_retract(M, [0.0], [0.0])
     @test_throws ErrorException inverse_retract(M, [0.0], [0.0], log_invretr)
-    @test_throws ErrorException inverse_retract(
+    @test_throws MethodError inverse_retract(
         M,
         [0.0],
         [0.0],
