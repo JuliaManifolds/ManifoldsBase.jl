@@ -16,6 +16,7 @@ abstract type AbstractRetractionMethod end
     ApproximateInverseRetraction <: AbstractInverseRetractionMethod
 
 An abstract type for representing approximate inverse retraction methods.
+
 """
 abstract type ApproximateInverseRetraction <: AbstractInverseRetractionMethod end
 
@@ -167,25 +168,8 @@ See also [`retract!`](@ref).
 function inverse_retract!(M::AbstractManifold, X, p, q)
     return inverse_retract!(M, X, p, q, default_inverse_retraction_method(M))
 end
-function inverse_retract!(
-    M::AbstractManifold,
-    X,
-    p,
-    q,
-    method::LogarithmicInverseRetraction,
-)
+function inverse_retract!(M::AbstractManifold, X, p, q, ::LogarithmicInverseRetraction)
     return log!(M, X, p, q)
-end
-function inverse_retract!(
-    M::AbstractManifold,
-    X,
-    p,
-    q,
-    method::AbstractInverseRetractionMethod,
-)
-    return error(
-        manifold_function_not_implemented_message(M, inverse_retract!, X, p, q, method),
-    )
 end
 
 """
@@ -277,3 +261,9 @@ end
 function retract!(M::AbstractManifold, q, p, X, method::AbstractRetractionMethod)
     return error(manifold_function_not_implemented_message(M, retract!, q, p, method))
 end
+
+#
+# dispatch on lower level
+retract!(M::AbstractManifold, q, p, X, ::PolarRetraction) = retract_polar(M, q, p, X)
+retract!(M::AbstractManifold, q, p, X, ::ProjectionRetraction) = retract_porect(M, q, p, X)
+retract!(M::AbstractManifold, q, p, X, ::QRRetraction) = retract_qr(M, q, p, X)

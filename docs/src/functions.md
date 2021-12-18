@@ -77,7 +77,7 @@ the embedding can be chosen to be the manifold ``N = ℂ`` and due to our repres
 
 And this resulting ``q`` we call the projection of ``p`` onto the manifold ``\mathcal M``.
 
-2. Given a point ``p∈\mathcal M`` and a vector in ``X\inT_{i(p)}\mathcal N`` in the embedding we can similarly look for the closest point to ``Y∈ T_p\mathcal M`` using the pushforward ``\mathrm{d}i_p`` of the embedding.
+2. Given a point ``p∈\mathcal M`` and a vector in ``X\inT_{i(p)}\mathcal N`` in the embedding we can similarly look for the closest point to ``Y∈ T_p\mathcal M`` using the push forward ``\mathrm{d}i_p`` of the embedding.
 
 ```math
   \operatorname*{arg\,min}_{Y\in T_p\mathcal M} \lVert \mathrm{d}i(p)[Y] - X \rVert_{i(p)}

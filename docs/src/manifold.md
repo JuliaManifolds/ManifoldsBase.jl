@@ -23,7 +23,10 @@ which should store information about the manifold, for example parameters inhere
 
 ## Points and Tangent Vectors
 
-(TODO)
+Points and tangent vectors do not necessarily have to be typed. Usually
+one can just use any type. When a manifold has multiple representations, these should be distinguished by point and vector types. Then it might be that types just encapsulate a vector value.
+This is taken into account by the following macros, that forward several actions just to this field. Most prominently vector operations for the tangent vectors.
+If there is still a default case, a macro sets this type to be equivalent to calling the manifold functions just with the types field that carries the value.
 
 ```@autodocs
 Modules = [ManifoldsBase]
