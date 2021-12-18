@@ -172,6 +172,22 @@ function inverse_retract!(M::AbstractManifold, X, p, q, ::LogarithmicInverseRetr
     return log!(M, X, p, q)
 end
 
+#
+# dispatch to lower level
+function inverse_retract!(M::AbstractManifold, X, p, q, ::PolarInverseRetraction)
+    return inverse_retract_polar!(M, X, p, q)
+end
+function inverse_retract!(M::AbstractManifold, X, p, q, ::ProjectionInverseRetraction)
+    return inverse_retract_porect(M, X, p, q)
+end
+function inverse_retract!(M::AbstractManifold, X, p, q, ::QRInverseRetraction)
+    return inverse_retract_qr(M, X, p, q)
+end
+function inverse_retract!(M::AbstractManifold, X, p, q, m::NLsolveInverseRetraction)
+    return inverse_retract_ode(M, X, p, q, m)
+end
+
+
 """
     inverse_retract(M::AbstractManifold, p, q)
     inverse_retract(M::AbstractManifold, p, q, method::AbstractInverseRetractionMethod
@@ -258,12 +274,9 @@ retract!(M::AbstractManifold, q, p, X, ::ExponentialRetraction) = exp!(M, q, p, 
 function retract!(M::AbstractManifold, q, p, X, t::Real, method::AbstractRetractionMethod)
     return retract!(M, q, p, t * X, method)
 end
-function retract!(M::AbstractManifold, q, p, X, method::AbstractRetractionMethod)
-    return error(manifold_function_not_implemented_message(M, retract!, q, p, method))
-end
 
 #
-# dispatch on lower level
-retract!(M::AbstractManifold, q, p, X, ::PolarRetraction) = retract_polar(M, q, p, X)
-retract!(M::AbstractManifold, q, p, X, ::ProjectionRetraction) = retract_porect(M, q, p, X)
-retract!(M::AbstractManifold, q, p, X, ::QRRetraction) = retract_qr(M, q, p, X)
+# dispatch to lower level
+retract!(M::AbstractManifold, q, p, X, ::PolarRetraction) = retract_polar!(M, q, p, X)
+retract!(M::AbstractManifold, q, p, X, ::ProjectionRetraction) = retract_porect!(M, q, p, X)
+retract!(M::AbstractManifold, q, p, X, ::QRRetraction) = retract_qr!(M, q, p, X)

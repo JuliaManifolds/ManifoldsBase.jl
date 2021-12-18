@@ -725,23 +725,6 @@ function inverse_retract!(
     end
     return X
 end
-# log and power have to be explicitly stated to avoid an ambiguity in the third case with AbstractPower
-@invoke_maker 5 AbstractInverseRetractionMethod inverse_retract!(
-    M::AbstractPowerManifold,
-    X,
-    q,
-    p,
-    m::LogarithmicInverseRetraction,
-)
-function inverse_retract!(
-    M::AbstractPowerManifold,
-    X,
-    q,
-    p,
-    m::AbstractInverseRetractionMethod,
-)
-    return inverse_retract!(M, X, q, p, InversePowerRetraction(m))
-end
 
 @doc raw"""
     log(M::AbstractPowerManifold, p, q)

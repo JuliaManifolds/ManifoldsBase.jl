@@ -604,6 +604,7 @@ export AbstractRetractionMethod,
 export AbstractInverseRetractionMethod,
     ApproximateInverseRetraction,
     LogarithmicInverseRetraction,
+    NLSolveInverseRetraction,
     QRInverseRetraction,
     PolarInverseRetraction,
     ProjectionInverseRetraction
