@@ -27,9 +27,7 @@ accordingly.
 
 See also: [`EmbeddedManifold`](@ref), [`embed!`](@ref embed!(M::AbstractManifold, q, p))
 """
-function project!(M::AbstractManifold, q, p)
-    return error(manifold_function_not_implemented_message(M, project!, q, p))
-end
+project!(::AbstractManifold, q, p)
 
 """
     project(M::AbstractManifold, p, X)
@@ -69,6 +67,4 @@ Lie algebra is perfomed, too.
 
 See also: [`EmbeddedManifold`](@ref), [`embed!`](@ref embed!(M::AbstractManifold, Y, p, X))
 """
-function project!(M::AbstractManifold, Y, p, X)
-    return error(manifold_function_not_implemented_message(M, project!, Y, p, X))
-end
+project!(::AbstractManifold, Y, p, X)

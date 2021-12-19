@@ -21,6 +21,7 @@ abstract type AbstractManifold{𝔽} end
 Type for a point on a manifold. While a [`AbstractManifold`](@ref) does not necessarily require this
 type, for example when it is implemented for `Vector`s or `Matrix` type elements, this type
 can be used either
+
 * for more complicated representations,
 * semantic verification, or
 * even dispatch for different representations of points on a manifold.

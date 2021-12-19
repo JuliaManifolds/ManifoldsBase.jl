@@ -17,7 +17,7 @@ Every vector space `fiber` is supposed to provide:
 Optionally:
 * inner product via `inner` (used to provide Riemannian metric on vector
   bundles),
-* `flat` and `sharp`,
+* [`flat`](https://juliamanifolds.github.io/Manifolds.jl/stable/features/atlases.html#Manifolds.flat-Tuple{AbstractManifold,%20Any,%20Any}) and [`sharp`](https://juliamanifolds.github.io/Manifolds.jl/stable/features/atlases.html#Manifolds.sharp-Tuple{AbstractManifold,%20Any,%20Any}),
 * `norm` (by default uses `inner`),
 * [`project`](@ref) (for embedded vector spaces),
 * [`representation_size`](@ref),

@@ -130,26 +130,26 @@ The function [`is_point`](@ref) internally calls the lower level function [`chec
 ### [Inverse Retractions](@id subsec_appendix_inv_retr)
 
 The high level function `inverse_retract(::M, p, X, m::AbstractInverseRetractionMethod)`
-allocates the result before calling its mutating version, and this function, `inverse_retract!`, then dispatches onto the lower level.
+as well as its mutating variant first dispatch on the lower level, before the non-mutating variant (of the name below) allocates memory and calls its mutating variant.
 
 The following table provides an overview of the currently available types and their lower level functions.
 
 | Name | default lower level function | comment |
 | :--- | :----------------------------- | :----- |
-| [`PolarInverseRetraction`](@ref) | `inverse_retract_polar!` |
-| [`ProjectionInverseRetraction`](@ref) | `inverse_retract_project!` |
-| [`QRInverseRetraction`](@ref) | `inverse_retract_qr!` |
-| [`NLsolveInverseRetraction`](@ref) | `inverse_retract_ode!` | the `m` is also passed on here. |
+| [`PolarInverseRetraction`](@ref) | `inverse_retract_polar` |
+| [`ProjectionInverseRetraction`](@ref) | `inverse_retract_project` |
+| [`QRInverseRetraction`](@ref) | `inverse_retract_qr` |
+| [`NLsolveInverseRetraction`](@ref) | `inverse_retract_nlsolve` | the `m` is also passed on here. |
 
 ### [Retractions](@id subsec_appendix_retr)
 
 The high level function `retract(::M, p, X, m::AbstractRetractionMethod)`
-allocates the result before caling its mutating version, and this function, `retract!`, then dispatches onto the lower level.
+as well as its mutating variant first dispatch on the lower level, before the non-mutating variant (of the name below) allocates memory and calls its mutating variant.
 
 The following table provides an overview of the currently available types and their lower level functions.
 
 | Name | default lower level function | comment |
 | :--- | :----------------------------- | :----- |
-| [`PolarRetraction`](@ref) | `inverse_retract_ppolar!` |
-| [`ProjectionRetraction`](@ref) | `inverse_retract_project!` |
-| [`QRRetraction`](@ref) | `inverse_retract_qr!` |
+| [`PolarRetraction`](@ref) | `inverse_retract_polar` |
+| [`ProjectionRetraction`](@ref) | `inverse_retract_project` |
+| [`QRRetraction`](@ref) | `inverse_retract_qr` |
