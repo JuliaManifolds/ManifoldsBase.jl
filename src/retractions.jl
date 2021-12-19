@@ -178,7 +178,7 @@ function inverse_retract!(M::AbstractManifold, X, p, q, ::PolarInverseRetraction
     return inverse_retract_polar!(M, X, p, q)
 end
 function inverse_retract!(M::AbstractManifold, X, p, q, ::ProjectionInverseRetraction)
-    return inverse_retract_porect(M, X, p, q)
+    return inverse_retract_project!(M, X, p, q)
 end
 function inverse_retract!(M::AbstractManifold, X, p, q, ::QRInverseRetraction)
     return inverse_retract_qr(M, X, p, q)
@@ -278,5 +278,5 @@ end
 #
 # dispatch to lower level
 retract!(M::AbstractManifold, q, p, X, ::PolarRetraction) = retract_polar!(M, q, p, X)
-retract!(M::AbstractManifold, q, p, X, ::ProjectionRetraction) = retract_porect!(M, q, p, X)
+retract!(M::AbstractManifold, q, p, X, ::ProjectionRetraction) = retract_project!(M, q, p, X)
 retract!(M::AbstractManifold, q, p, X, ::QRRetraction) = retract_qr!(M, q, p, X)
