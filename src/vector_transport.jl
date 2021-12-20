@@ -460,27 +460,7 @@ along the curve represented by `c` using the `method`, which defaults to
 function vector_transport_along!(M::AbstractManifold, Y, p, X, c)
     return vector_transport_along!(M, Y, p, X, c, default_vector_transport_method(M))
 end
-function vector_transport_along!(
-    M::AbstractManifold,
-    Y,
-    p,
-    X,
-    c,
-    method::AbstractVectorTransportMethod,
-)
-    return error(
-        manifold_function_not_implemented_message(
-            M,
-            vector_transport_along!,
-            M,
-            Y,
-            p,
-            X,
-            c,
-            method,
-        ),
-    )
-end
+
 @doc raw"""
     vector_transport_along!(
         M::AbstractManifold,
@@ -796,28 +776,6 @@ function vector_transport_to!(M::AbstractManifold, Y, p, X, q, m::SchildsLadderT
             inverse_retraction = m.inverse_retraction,
         ),
         m.inverse_retraction,
-    )
-end
-
-
-function vector_transport_to!(
-    M::AbstractManifold,
-    Y,
-    p,
-    X,
-    q,
-    method::AbstractVectorTransportMethod,
-)
-    return error(
-        manifold_function_not_implemented_message(
-            M,
-            vector_transport_to!,
-            Y,
-            p,
-            X,
-            q,
-            method,
-        ),
     )
 end
 

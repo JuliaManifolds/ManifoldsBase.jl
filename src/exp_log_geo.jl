@@ -29,9 +29,7 @@ The result is saved to `q`.
 
 See also [`exp`](@ref).
 """
-function exp!(M::AbstractManifold, q, p, X)
-    return error(manifold_function_not_implemented_message(M, exp!, q, p, X))
-end
+exp!(M::AbstractManifold, q, p, X)
 exp!(M::AbstractManifold, q, p, X, t::Real) = exp!(M, q, p, t * X)
 
 @doc raw"""
@@ -84,9 +82,7 @@ Note that the logarithmic map might not be globally defined.
 
 see also [`log`](@ref) and [`inverse_retract!`](@ref),
 """
-function log!(M::AbstractManifold, X, p, q)
-    return error(manifold_function_not_implemented_message(M, log!, X, p, q))
-end
+log!(M::AbstractManifold, X, p, q)
 
 @doc raw"""
     shortest_geodesic(M::AbstractManifold, p, q) -> Function

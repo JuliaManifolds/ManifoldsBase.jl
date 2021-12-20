@@ -284,9 +284,7 @@ see [`AbstractEmbeddedManifold`](@ref) how you can avoid reimplementing code fro
 
 See also: [`EmbeddedManifold`](@ref), [`project!`](@ref project!(M::AbstractManifold, q, p))
 """
-function embed!(M::AbstractManifold, q, p)
-    return error(manifold_function_not_implemented_message(M, embed!, q, p))
-end
+embed!(M::AbstractManifold, q, p)
 
 """
     embed(M::AbstractManifold, p, X)
@@ -327,9 +325,7 @@ the tangent spaces of the embedded base points.
 
 See also: [`EmbeddedManifold`](@ref), [`project!`](@ref project!(M::AbstractManifold, Y, p, X))
 """
-function embed!(M::AbstractManifold, Y, p, X)
-    return error(manifold_function_not_implemented_message(M, embed!, Y, p, X))
-end
+embed!(M::AbstractManifold, Y, p, X)
 
 @doc raw"""
     injectivity_radius(M::AbstractManifold, p)
@@ -349,15 +345,10 @@ Distance ``d`` such that
 is injective for all tangent vectors shorter than ``d`` (i.e. has an inverse) for point `p`
 if provided or all manifold points otherwise.
 """
-function injectivity_radius(M::AbstractManifold)
-    return error(manifold_function_not_implemented_message(M, injectivity_radius))
-end
-injectivity_radius(M::AbstractManifold, p) = injectivity_radius(M)
+injectivity_radius(M::AbstractManifold)
+injectivity_radius(M::AbstractManifold, p) = injectivity_radius(M, ExponentialRetraction())
 function injectivity_radius(M::AbstractManifold, p, method::AbstractRetractionMethod)
     return injectivity_radius(M, method)
-end
-function injectivity_radius(M::AbstractManifold, method::AbstractRetractionMethod)
-    return error(manifold_function_not_implemented_message(M, injectivity_radius, method))
 end
 function injectivity_radius(M::AbstractManifold, p, ::ExponentialRetraction)
     return injectivity_radius(M, p)
@@ -370,9 +361,7 @@ injectivity_radius(M::AbstractManifold, ::ExponentialRetraction) = injectivity_r
 Compute the inner product of tangent vectors `X` and `Y` at point `p` from the
 [`AbstractManifold`](@ref) `M`.
 """
-function inner(M::AbstractManifold, p, X, Y)
-    return error(manifold_function_not_implemented_message(M, inner, p, X, Y))
-end
+inner(M::AbstractManifold, p, X, Y)
 
 """
     isapprox(M::AbstractManifold, p, q; kwargs...)
@@ -453,10 +442,9 @@ end
 The dimension $n=\dim_{\mathcal M}$ of real space $\mathbb R^n$ to which the neighborhood of
 each point of the [`AbstractManifold`](@ref) `M` is homeomorphic.
 """
-function manifold_dimension(M::AbstractManifold)
-    return error(manifold_function_not_implemented_message(M, manifold_dimension))
-end
+manifold_dimension(M::AbstractManifold)
 
+# TODO: GEt rid of this?
 function manifold_function_not_implemented_message(M::AbstractManifold, f, x...)
     s = join(map(string, map(typeof, x)), ", ", " and ")
     a = length(x) > 1 ? "arguments" : "argument"

@@ -119,8 +119,6 @@ ManifoldsBase.@default_manifold_fallbacks ManifoldsBase.DefaultManifold DefaultP
             @test injectivity_radius(M, rm) == Inf
             @test injectivity_radius(M, rm2) == 10
             @test injectivity_radius(M, pts[1], rm2) == 10
-            @test_throws ErrorException injectivity_radius(M, rm3)
-            @test_throws ErrorException injectivity_radius(M, pts[1], rm3)
 
             tv1 = log(M, pts[1], pts[2])
 

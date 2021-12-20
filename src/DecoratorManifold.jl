@@ -614,6 +614,51 @@ decorated_manifold(M::AbstractManifold) = M.manifold
     m::NLsolveInverseRetraction,
 )
 
+@decorator_transparent_signature inverse_retract(
+    M::AbstractDecoratorManifold,
+    p,
+    q,
+    m::PolarInverseRetraction,
+)
+
+@decorator_transparent_signature inverse_retract!(
+    M::AbstractDecoratorManifold,
+    X,
+    p,
+    q,
+    m::PolarInverseRetraction,
+)
+
+@decorator_transparent_signature inverse_retract(
+    M::AbstractDecoratorManifold,
+    p,
+    q,
+    m::ProjectionInverseRetraction,
+)
+
+@decorator_transparent_signature inverse_retract!(
+    M::AbstractDecoratorManifold,
+    X,
+    p,
+    q,
+    m::ProjectionInverseRetraction,
+)
+
+@decorator_transparent_signature inverse_retract(
+    M::AbstractDecoratorManifold,
+    p,
+    q,
+    m::QRInverseRetraction,
+)
+
+@decorator_transparent_signature inverse_retract!(
+    M::AbstractDecoratorManifold,
+    X,
+    p,
+    q,
+    m::QRInverseRetraction,
+)
+
 @decorator_transparent_signature isapprox(M::AbstractDecoratorManifold, p, q; kwargs...)
 @decorator_transparent_signature isapprox(M::AbstractDecoratorManifold, p, X, Y; kwargs...)
 
@@ -665,12 +710,33 @@ decorated_manifold(M::AbstractManifold) = M.manifold
     m::QRRetraction,
 )
 
+@decorator_transparent_signature retract(
+    M::AbstractDecoratorManifold,
+    p,
+    X,
+    m::QRRetraction,
+)
+
+@decorator_transparent_signature retract(
+    M::AbstractDecoratorManifold,
+    p,
+    X,
+    m::ProjectionRetraction,
+)
+
 @decorator_transparent_signature retract!(
     M::AbstractDecoratorManifold,
     q,
     p,
     X,
     m::ProjectionRetraction,
+)
+
+@decorator_transparent_signature retract(
+    M::AbstractDecoratorManifold,
+    p,
+    X,
+    m::PolarRetraction,
 )
 
 @decorator_transparent_signature retract!(

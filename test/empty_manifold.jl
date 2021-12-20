@@ -17,7 +17,7 @@ struct NotImplementedInverseRetraction <: AbstractInverseRetractionMethod end
     @test number_system(M) === ℝ
     @test representation_size(M) === nothing
 
-    @test_throws ErrorException manifold_dimension(M)
+    @test_throws MethodError manifold_dimension(M)
 
     # by default isapprox compares given points or vectors
     @test isapprox(M, [0], [0])
@@ -31,34 +31,34 @@ struct NotImplementedInverseRetraction <: AbstractInverseRetractionMethod end
 
     exp_retr = ManifoldsBase.ExponentialRetraction()
 
-    @test_throws ErrorException retract!(M, p, p, v)
-    @test_throws ErrorException retract!(M, p, p, v, exp_retr)
-    @test_throws ErrorException retract!(M, p, p, [0.0], 0.0)
-    @test_throws ErrorException retract!(M, p, p, [0.0], 0.0, exp_retr)
-    @test_throws ErrorException retract!(M, [0], [0], [0])
-    @test_throws ErrorException retract!(M, [0], [0], [0], exp_retr)
-    @test_throws ErrorException retract!(M, [0], [0], [0], 0.0)
-    @test_throws ErrorException retract!(M, [0], [0], [0], 0.0, exp_retr)
-    @test_throws ErrorException retract(M, [0], [0])
-    @test_throws ErrorException retract(M, [0], [0], exp_retr)
-    @test_throws ErrorException retract(M, [0], [0], 0.0)
-    @test_throws ErrorException retract(M, [0], [0], 0.0, exp_retr)
-    @test_throws ErrorException retract(M, [0.0], [0.0])
-    @test_throws ErrorException retract(M, [0.0], [0.0], exp_retr)
-    @test_throws ErrorException retract(M, [0.0], [0.0], 0.0)
-    @test_throws ErrorException retract(M, [0.0], [0.0], 0.0, exp_retr)
-    @test_throws ErrorException retract(M, [0.0], [0.0], NotImplementedRetraction())
+    @test_throws MethodError retract!(M, p, p, v)
+    @test_throws MethodError retract!(M, p, p, v, exp_retr)
+    @test_throws MethodError retract!(M, p, p, [0.0], 0.0)
+    @test_throws MethodError retract!(M, p, p, [0.0], 0.0, exp_retr)
+    @test_throws MethodError retract!(M, [0], [0], [0])
+    @test_throws MethodError retract!(M, [0], [0], [0], exp_retr)
+    @test_throws MethodError retract!(M, [0], [0], [0], 0.0)
+    @test_throws MethodError retract!(M, [0], [0], [0], 0.0, exp_retr)
+    @test_throws MethodError retract(M, [0], [0])
+    @test_throws MethodError retract(M, [0], [0], exp_retr)
+    @test_throws MethodError retract(M, [0], [0], 0.0)
+    @test_throws MethodError retract(M, [0], [0], 0.0, exp_retr)
+    @test_throws MethodError retract(M, [0.0], [0.0])
+    @test_throws MethodError retract(M, [0.0], [0.0], exp_retr)
+    @test_throws MethodError retract(M, [0.0], [0.0], 0.0)
+    @test_throws MethodError retract(M, [0.0], [0.0], 0.0, exp_retr)
+    @test_throws MethodError retract(M, [0.0], [0.0], NotImplementedRetraction())
 
     log_invretr = ManifoldsBase.LogarithmicInverseRetraction()
 
-    @test_throws ErrorException inverse_retract!(M, p, p, p)
-    @test_throws ErrorException inverse_retract!(M, p, p, p, log_invretr)
-    @test_throws ErrorException inverse_retract!(M, [0], [0], [0])
-    @test_throws ErrorException inverse_retract!(M, [0], [0], [0], log_invretr)
-    @test_throws ErrorException inverse_retract(M, [0], [0])
-    @test_throws ErrorException inverse_retract(M, [0], [0], log_invretr)
-    @test_throws ErrorException inverse_retract(M, [0.0], [0.0])
-    @test_throws ErrorException inverse_retract(M, [0.0], [0.0], log_invretr)
+    @test_throws MethodError inverse_retract!(M, p, p, p)
+    @test_throws MethodError inverse_retract!(M, p, p, p, log_invretr)
+    @test_throws MethodError inverse_retract!(M, [0], [0], [0])
+    @test_throws MethodError inverse_retract!(M, [0], [0], [0], log_invretr)
+    @test_throws MethodError inverse_retract(M, [0], [0])
+    @test_throws MethodError inverse_retract(M, [0], [0], log_invretr)
+    @test_throws MethodError inverse_retract(M, [0.0], [0.0])
+    @test_throws MethodError inverse_retract(M, [0.0], [0.0], log_invretr)
     @test_throws MethodError inverse_retract(
         M,
         [0.0],
@@ -66,75 +66,63 @@ struct NotImplementedInverseRetraction <: AbstractInverseRetractionMethod end
         NotImplementedInverseRetraction(),
     )
 
-    @test_throws ErrorException project!(M, p, [0])
-    @test_throws ErrorException project!(M, [0], [0])
-    @test_throws ErrorException project(M, [0])
+    @test_throws MethodError project!(M, p, [0])
+    @test_throws MethodError project!(M, [0], [0])
+    @test_throws MethodError project(M, [0])
 
-    @test_throws ErrorException project!(M, v, p, [0.0])
-    @test_throws ErrorException project!(M, [0], [0], [0])
-    @test_throws ErrorException project(M, [0], [0])
-    @test_throws ErrorException project(M, [0.0], [0.0])
+    @test_throws MethodError project!(M, v, p, [0.0])
+    @test_throws MethodError project!(M, [0], [0], [0])
+    @test_throws MethodError project(M, [0], [0])
+    @test_throws MethodError project(M, [0.0], [0.0])
 
-    @test_throws ErrorException inner(M, p, v, v)
-    @test_throws ErrorException inner(M, [0], [0], [0])
-    @test_throws ErrorException norm(M, p, v)
-    @test_throws ErrorException norm(M, [0], [0])
-    @test_throws ErrorException angle(M, p, v, v)
-    @test_throws ErrorException angle(M, [0], [0], [0])
+    @test_throws MethodError inner(M, p, v, v)
+    @test_throws MethodError inner(M, [0], [0], [0])
+    @test_throws MethodError norm(M, p, v)
+    @test_throws MethodError norm(M, [0], [0])
+    @test_throws MethodError angle(M, p, v, v)
+    @test_throws MethodError angle(M, [0], [0], [0])
 
-    @test_throws ErrorException distance(M, [0.0], [0.0])
+    @test_throws MethodError distance(M, [0.0], [0.0])
 
-    @test_throws ErrorException exp!(M, p, p, v)
-    @test_throws ErrorException exp!(M, p, p, v, 0.0)
-    @test_throws ErrorException exp!(M, [0], [0], [0])
-    @test_throws ErrorException exp!(M, [0], [0], [0], 0.0)
-    @test_throws ErrorException exp(M, [0], [0])
-    @test_throws ErrorException exp(M, [0], [0], 0.0)
-    @test_throws ErrorException exp(M, [0.0], [0.0])
-    @test_throws ErrorException exp(M, [0.0], [0.0], 0.0)
+    @test_throws MethodError exp!(M, p, p, v)
+    @test_throws MethodError exp!(M, p, p, v, 0.0)
+    @test_throws MethodError exp!(M, [0], [0], [0])
+    @test_throws MethodError exp!(M, [0], [0], [0], 0.0)
+    @test_throws MethodError exp(M, [0], [0])
+    @test_throws MethodError exp(M, [0], [0], 0.0)
+    @test_throws MethodError exp(M, [0.0], [0.0])
+    @test_throws MethodError exp(M, [0.0], [0.0], 0.0)
 
-    @test_throws ErrorException embed!(M, p, [0])
-    @test_throws ErrorException embed!(M, [0], [0])
-    @test_throws ErrorException embed(M, [0])
+    @test_throws MethodError embed!(M, p, [0])
+    @test_throws MethodError embed!(M, [0], [0])
+    @test_throws MethodError embed(M, [0])
 
-    @test_throws ErrorException embed!(M, v, p, [0.0])
-    @test_throws ErrorException embed!(M, [0], [0], [0])
-    @test_throws ErrorException embed(M, [0], [0])
-    @test_throws ErrorException embed(M, [0.0], [0.0])
+    @test_throws MethodError embed!(M, v, p, [0.0])
+    @test_throws MethodError embed!(M, [0], [0], [0])
+    @test_throws MethodError embed(M, [0], [0])
+    @test_throws MethodError embed(M, [0.0], [0.0])
 
 
-    @test_throws ErrorException log!(M, v, p, p)
-    @test_throws ErrorException log!(M, [0], [0], [0])
-    @test_throws ErrorException log(M, [0.0], [0.0])
+    @test_throws MethodError log!(M, v, p, p)
+    @test_throws MethodError log!(M, [0], [0], [0])
+    @test_throws MethodError log(M, [0.0], [0.0])
 
-    @test_throws ErrorException vector_transport_to!(M, [0], [0], [0], [0])
-    @test_throws ErrorException vector_transport_to(M, [0], [0], [0])
-    @test_throws ErrorException vector_transport_to!(
-        M,
-        [0],
-        [0],
-        [0],
-        ProjectionTransport(),
-    )
+    @test_throws MethodError vector_transport_to!(M, [0], [0], [0], [0])
+    @test_throws MethodError vector_transport_to(M, [0], [0], [0])
+    @test_throws MethodError vector_transport_to!(M, [0], [0], [0], ProjectionTransport())
 
-    @test_throws ErrorException vector_transport_direction!(M, [0], [0], [0], [0])
-    @test_throws ErrorException vector_transport_direction(M, [0], [0], [0])
+    @test_throws MethodError vector_transport_direction!(M, [0], [0], [0], [0])
+    @test_throws MethodError vector_transport_direction(M, [0], [0], [0])
 
-    @test_throws ErrorException ManifoldsBase.vector_transport_along!(
-        M,
-        [0],
-        [0],
-        [0],
-        x -> x,
-    )
-    @test_throws ErrorException ManifoldsBase.vector_transport_along(M, [0], [0], x -> x)
+    @test_throws MethodError ManifoldsBase.vector_transport_along!(M, [0], [0], [0], x -> x)
+    @test_throws MethodError ManifoldsBase.vector_transport_along(M, [0], [0], x -> x)
 
-    @test_throws ErrorException injectivity_radius(M)
-    @test_throws ErrorException injectivity_radius(M, [0])
-    @test_throws ErrorException injectivity_radius(M, [0], exp_retr)
+    @test_throws MethodError injectivity_radius(M)
+    @test_throws MethodError injectivity_radius(M, [0])
+    @test_throws MethodError injectivity_radius(M, [0], exp_retr)
 
-    @test_throws ErrorException zero_vector!(M, [0], [0])
-    @test_throws ErrorException zero_vector(M, [0])
+    @test_throws MethodError zero_vector!(M, [0], [0])
+    @test_throws MethodError zero_vector(M, [0])
 
     @test check_point(M, [0]) === nothing
     @test check_point(M, p) === nothing

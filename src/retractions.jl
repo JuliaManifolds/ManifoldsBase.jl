@@ -234,9 +234,9 @@ end
 function inverse_retract!(M::AbstractManifold, p, q, m::NLsolveInverseRetraction)
     return inverse_retract_nlsolve(M, p, q, m)
 end
-function inverse_retract_qr(M::AbstractManifold, p, q)
+function inverse_retract_nlsolve(M::AbstractManifold, p, q)
     X = allocate_result(M, inverse_retract, p, q)
-    inverse_retract_qr!(M, X, p, q, method)
+    inverse_retract_nlsolve!(M, X, p, q, method)
     return X
 end
 
