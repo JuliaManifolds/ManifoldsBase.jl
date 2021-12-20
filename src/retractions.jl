@@ -207,6 +207,7 @@ function inverse_retract(M::AbstractManifold, p, q)
     inverse_retract!(M, X, p, q)
     return X
 end
+inverse_retract(M::AbstractManifold, p, q, ::LogarithmicInverseRetraction) = log(M, p, q)
 function inverse_retract(M::AbstractManifold, p, q, ::PolarInverseRetraction)
     return inverse_retract_polar(M, p, q)
 end
@@ -270,6 +271,10 @@ function retract(M::AbstractManifold, p, X)
     return q
 end
 retract(M::AbstractManifold, p, X, t::Real) = retract(M, p, t * X)
+function retract(M::AbstractManifold, p, X, t::Real, m::AbstractRetractionMethod)
+    return retract(M, p, t * X, m)
+end
+retract(M::AbstractManifold, p, X, ::ExponentialRetraction) = exp(M, p, X)
 function retract(M::AbstractManifold, p, X, t::Real, method::AbstractRetractionMethod)
     return retract(M, p, t * X, method)
 end
