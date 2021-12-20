@@ -259,10 +259,8 @@ ManifoldsBase.@default_manifold_fallbacks ManifoldsBase.DefaultManifold DefaultP
             end
 
             @testset "vector transport" begin
-                # test constructor and alias
+                # test constructor
                 @test default_vector_transport_method(M) == ParallelTransport()
-                @test DifferentiatedRetractionVectorTransport(ExponentialRetraction()) ==
-                      ParallelTransport()
                 v1 = log(M, pts[1], pts[2])
                 v2 = log(M, pts[1], pts[3])
                 v1t1 = vector_transport_to(M, pts[1], v1, pts[3])

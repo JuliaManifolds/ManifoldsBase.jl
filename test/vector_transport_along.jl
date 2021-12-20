@@ -8,7 +8,7 @@ using ManifoldsBase, Test
 struct NonDefaultEuclidean <: AbstractManifold{ManifoldsBase.ℝ} end
 ManifoldsBase.log!(::NonDefaultEuclidean, v, x, y) = (v .= y .- x)
 ManifoldsBase.exp!(::NonDefaultEuclidean, y, x, v) = (y .= x .+ v)
-function ManifoldsBase.vector_transport_to!(
+function ManifoldsBAse.parallel_transport_to!(
     ::NonDefaultEuclidean,
     vto,
     x,

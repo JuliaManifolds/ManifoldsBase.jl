@@ -153,3 +153,13 @@ The following table provides an overview of the currently available types and th
 | [`PolarRetraction`](@ref) | `inverse_retract_polar` |
 | [`ProjectionRetraction`](@ref) | `inverse_retract_project` |
 | [`QRRetraction`](@ref) | `inverse_retract_qr` |
+
+### Vector transport
+
+In the follwing table the `V` in the function names stand for `along`, `to` or `direction`.
+
+| Name | default lower level function | comment |
+| :--- | :----------------------------- | :----- |
+| [`DifferentiazedRetractionVectorTransport`](@ref) | `vector_transport_V_diff` | the inner retraction is passed on as last argument |
+| [`ParallelTransport`](@ref) | `parallel_transport_X` |
+| [`ProjectionTransport`](@ref) | `vector_transport_X_project` |

@@ -761,6 +761,7 @@ decorated_manifold(M::AbstractManifold) = M.manifold
     X,
     c,
 )
+
 @decorator_transparent_signature vector_transport_along!(
     M::AbstractDecoratorManifold,
     Y,
@@ -791,6 +792,14 @@ decorated_manifold(M::AbstractManifold) = M.manifold
     X,
     c::AbstractVector,
     m::SchildsLadderTransport,
+)
+@decorator_transparent_signature vector_transport_along!(
+    M::AbstractDecoratorManifold,
+    Y,
+    p,
+    X,
+    c,
+    m::ParallelTransport,
 )
 
 @decorator_transparent_signature vector_transport_direction(

@@ -275,9 +275,6 @@ function retract(M::AbstractManifold, p, X, t::Real, m::AbstractRetractionMethod
     return retract(M, p, t * X, m)
 end
 retract(M::AbstractManifold, p, X, ::ExponentialRetraction) = exp(M, p, X)
-function retract(M::AbstractManifold, p, X, t::Real, method::AbstractRetractionMethod)
-    return retract(M, p, t * X, method)
-end
 retract(M::AbstractManifold, p, X, ::PolarRetraction) = retract_polar(M, p, X)
 function retract_polar(M::AbstractManifold, p, X)
     q = allocate_result(M, retract, p, X)

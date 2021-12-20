@@ -107,15 +107,21 @@ struct NotImplementedInverseRetraction <: AbstractInverseRetractionMethod end
     @test_throws MethodError log!(M, [0], [0], [0])
     @test_throws MethodError log(M, [0.0], [0.0])
 
-    @test_throws MethodError vector_transport_to!(M, [0], [0], [0], [0])
-    @test_throws MethodError vector_transport_to(M, [0], [0], [0])
-    @test_throws MethodError vector_transport_to!(M, [0], [0], [0], ProjectionTransport())
+    @test_throws UndefVarError vector_transport_to!(M, [0], [0], [0], [0])
+    @test_throws UndefVarError vector_transport_to(M, [0], [0], [0])
+    @test_throws UndefVarError vector_transport_to!(M, [0], [0], [0], ProjectionTransport())
 
     @test_throws MethodError vector_transport_direction!(M, [0], [0], [0], [0])
     @test_throws MethodError vector_transport_direction(M, [0], [0], [0])
 
-    @test_throws MethodError ManifoldsBase.vector_transport_along!(M, [0], [0], [0], x -> x)
-    @test_throws MethodError ManifoldsBase.vector_transport_along(M, [0], [0], x -> x)
+    @test_throws UndefVarError ManifoldsBase.vector_transport_along!(
+        M,
+        [0],
+        [0],
+        [0],
+        x -> x,
+    )
+    @test_throws UndefVarError ManifoldsBase.vector_transport_along(M, [0], [0], x -> x)
 
     @test_throws MethodError injectivity_radius(M)
     @test_throws MethodError injectivity_radius(M, [0])
