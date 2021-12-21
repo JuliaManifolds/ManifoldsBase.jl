@@ -403,14 +403,6 @@ the function [`get_vectors`](@ref) needs to be used to retrieve the basis vector
 See also: [`get_coordinates`](@ref), [`get_vector`](@ref)
 """
 get_basis(M::AbstractManifold, p, B::AbstractBasis)
-@decorator_transparent_signature get_basis(
-    M::AbstractDecoratorManifold,
-    p,
-    B::AbstractBasis,
-)
-function decorator_transparent_dispatch(::typeof(get_basis), ::AbstractManifold, args...)
-    return Val(:parent)
-end
 
 function get_basis(
     M::AbstractManifold,
@@ -459,17 +451,6 @@ function get_basis(
     V = gram_schmidt(M, p, E; kwargs...)
     return CachedBasis(B, V)
 end
-for BT in DISAMBIGUATION_BASIS_TYPES
-    eval(
-        quote
-            @decorator_transparent_signature get_basis(
-                M::AbstractDecoratorManifold,
-                p,
-                B::$BT,
-            )
-        end,
-    )
-end
 
 @doc raw"""
     get_coordinates(M::AbstractManifold, p, X, B::AbstractBasis)
@@ -492,43 +473,10 @@ function get_coordinates(M::AbstractManifold, p, X, B::AbstractBasis)
     Y = allocate_result(M, get_coordinates, p, X, B)
     return get_coordinates!(M, Y, p, X, B)
 end
-@decorator_transparent_signature get_coordinates(
-    M::AbstractDecoratorManifold,
-    p,
-    X,
-    B::AbstractBasis,
-)
-function decorator_transparent_dispatch(
-    ::typeof(get_coordinates),
-    ::AbstractManifold,
-    args...,
-)
-    return Val(:parent)
-end
 
 function get_coordinates!(M::AbstractManifold, Y, p, X, B::AbstractBasis)
     return error(
         "get_coordinates! not implemented for manifold of type $(typeof(M)) coordinates of type $(typeof(Y)), a point of type $(typeof(p)), tangent vector of type $(typeof(X)) and basis of type $(typeof(B)).",
-    )
-end
-@decorator_transparent_signature get_coordinates!(
-    M::AbstractDecoratorManifold,
-    Y,
-    p,
-    X,
-    B::AbstractBasis,
-)
-for BT in [DISAMBIGUATION_BASIS_TYPES..., DISAMBIGUATION_COTANGENT_BASIS_TYPES...]
-    eval(
-        quote
-            @decorator_transparent_signature get_coordinates!(
-                M::AbstractDecoratorManifold,
-                Y,
-                p,
-                X,
-                B::$BT,
-            )
-        end,
     )
 end
 
@@ -588,39 +536,10 @@ function get_vector(M::AbstractManifold, p, X, B::AbstractBasis)
     Y = allocate_result(M, get_vector, p, X)
     return get_vector!(M, Y, p, X, B)
 end
-@decorator_transparent_signature get_vector(
-    M::AbstractDecoratorManifold,
-    p,
-    X,
-    B::AbstractBasis,
-)
-function decorator_transparent_dispatch(::typeof(get_vector), ::AbstractManifold, args...)
-    return Val(:parent)
-end
 
 function get_vector!(M::AbstractManifold, Y, p, X, B::AbstractBasis)
     return error(
         "get_vector! not implemented for manifold of type $(typeof(M)) vector of type $(typeof(Y)), a point of type $(typeof(p)), coordinates of type $(typeof(X)) and basis of type $(typeof(B)).",
-    )
-end
-@decorator_transparent_signature get_vector!(
-    M::AbstractDecoratorManifold,
-    Y,
-    p,
-    X,
-    B::AbstractBasis,
-)
-for BT in [DISAMBIGUATION_BASIS_TYPES..., DISAMBIGUATION_COTANGENT_BASIS_TYPES...]
-    eval(
-        quote
-            @decorator_transparent_signature get_vector!(
-                M::AbstractDecoratorManifold,
-                Y,
-                p,
-                X,
-                B::$BT,
-            )
-        end,
     )
 end
 

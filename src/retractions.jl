@@ -274,26 +274,26 @@ retract(M::AbstractManifold, p, X, t::Real) = retract(M, p, t * X)
 function retract(M::AbstractManifold, p, X, t::Real, m::AbstractRetractionMethod)
     return retract(M, p, t * X, m)
 end
-retract(M::AbstractManifold, p, X, ::ExponentialRetraction) = exp(M, p, X)
-retract(M::AbstractManifold, p, X, ::PolarRetraction) = retract_polar(M, p, X)
+retract(M::AbstractManifold, p, X, m::AbstractRetractionMethod) = _retract(M, p, X, m)
+_retract(M::AbstractManifold, p, X, ::ExponentialRetraction) = exp(M, p, X)
+_retract(M::AbstractManifold, p, X, ::PolarRetraction) = retract_polar(M, p, X)
+_retract(M::AbstractManifold, p, X, ::ProjectionRetraction) = retract_project(M, p, X)
+_retract(M::AbstractManifold, p, X, ::QRRetraction) = retract_qr(M, p, X)
 function retract_polar(M::AbstractManifold, p, X)
     q = allocate_result(M, retract, p, X)
     retract_polar!(M, q, p, X, method)
     return q
 end
-retract(M::AbstractManifold, p, X, ::ProjectionRetraction) = retract_project(M, p, X)
 function retract_project(M::AbstractManifold, p, X)
     q = allocate_result(M, retract, p, X)
     retract_project!(M, q, p, X, method)
     return q
 end
-retract(M::AbstractManifold, p, X, ::QRRetraction) = retract_qr(M, p, X)
 function retract_qr(M::AbstractManifold, p, X)
     q = allocate_result(M, retract, p, X)
     retract_qr!(M, q, p, X, method)
     return q
 end
-
 
 """
     retract!(M::AbstractManifold, q, p, X)
@@ -313,15 +313,18 @@ See [`retract`](@ref) for more details.
 """
 retract!(M::AbstractManifold, q, p, X) = retract!(M, q, p, X, default_retraction_method(M))
 retract!(M::AbstractManifold, q, p, X, t::Real) = retract!(M, q, p, t * X)
-retract!(M::AbstractManifold, q, p, X, ::ExponentialRetraction) = exp!(M, q, p, X)
 function retract!(M::AbstractManifold, q, p, X, t::Real, method::AbstractRetractionMethod)
     return retract!(M, q, p, t * X, method)
 end
 
-#
+function retract!(M::AbstractManifold, q, p, X, m::AbstractRetractionMethod)
+    return retract!(M, q, p, X, m)
+end
+
 # dispatch to lower level
-retract!(M::AbstractManifold, q, p, X, ::PolarRetraction) = retract_polar!(M, q, p, X)
-function retract!(M::AbstractManifold, q, p, X, ::ProjectionRetraction)
+_retract!(M::AbstractManifold, q, p, X, ::ExponentialRetraction) = exp!(M, q, p, X)
+_retract!(M::AbstractManifold, q, p, X, ::PolarRetraction) = retract_polar!(M, q, p, X)
+function _retract!(M::AbstractManifold, q, p, X, ::ProjectionRetraction)
     return retract_project!(M, q, p, X)
 end
-retract!(M::AbstractManifold, q, p, X, ::QRRetraction) = retract_qr!(M, q, p, X)
+_retract!(M::AbstractManifold, q, p, X, ::QRRetraction) = retract_qr!(M, q, p, X)

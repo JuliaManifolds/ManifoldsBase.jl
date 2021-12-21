@@ -9,8 +9,7 @@ encapsulated/stripped automatically when needed.
 This manifold is a decorator for a manifold, i.e. it decorates a [`AbstractManifold`](@ref) `M`
 with types points, vectors, and covectors.
 """
-struct ValidationManifold{𝔽,M<:AbstractManifold{𝔽}} <:
-       AbstractDecoratorManifold{𝔽,DefaultDecoratorType}
+struct ValidationManifold{𝔽,M<:AbstractManifold{𝔽}} <: AbstractManifold{𝔽}
     manifold::M
 end
 
@@ -226,58 +225,17 @@ function get_basis(
     end
     return Ξ
 end
-for BT in DISAMBIGUATION_BASIS_TYPES
-    if BT <:
-       Union{AbstractOrthonormalBasis,CachedBasis{𝔽,<:AbstractOrthonormalBasis} where 𝔽}
-        CT = AbstractOrthonormalBasis
-    elseif BT <:
-           Union{AbstractOrthogonalBasis,CachedBasis{𝔽,<:AbstractOrthogonalBasis} where 𝔽}
-        CT = AbstractOrthogonalBasis
-    else
-        CT = AbstractBasis
-    end
-    eval(quote
-        @invoke_maker 3 $CT get_basis(M::ValidationManifold, p, B::$BT; kwargs...)
-    end)
-end
 
 function get_coordinates(M::ValidationManifold, p, X, B::AbstractBasis; kwargs...)
     is_point(M, p, true; kwargs...)
     is_vector(M, p, X, true; kwargs...)
     return get_coordinates(M.manifold, p, X, B)
 end
-for BT in DISAMBIGUATION_BASIS_TYPES
-    eval(
-        quote
-            @invoke_maker 4 AbstractBasis get_coordinates(
-                M::ValidationManifold,
-                p,
-                X,
-                B::$BT;
-                kwargs...,
-            )
-        end,
-    )
-end
 
 function get_coordinates!(M::ValidationManifold, Y, p, X, B::AbstractBasis; kwargs...)
     is_vector(M, p, X, true; kwargs...)
     get_coordinates!(M.manifold, Y, p, X, B)
     return Y
-end
-for BT in [DISAMBIGUATION_BASIS_TYPES..., DISAMBIGUATION_COTANGENT_BASIS_TYPES...]
-    eval(
-        quote
-            @invoke_maker 5 AbstractBasis get_coordinates!(
-                M::ValidationManifold,
-                Y,
-                p,
-                X,
-                B::$BT;
-                kwargs...,
-            )
-        end,
-    )
 end
 
 function get_vector(M::ValidationManifold, p, X, B::AbstractBasis; kwargs...)
@@ -287,19 +245,6 @@ function get_vector(M::ValidationManifold, p, X, B::AbstractBasis; kwargs...)
     size(Y) == representation_size(M) || error("Incorrect size of tangent vector Y")
     return Y
 end
-for BT in DISAMBIGUATION_BASIS_TYPES
-    eval(
-        quote
-            @invoke_maker 4 AbstractBasis get_vector(
-                M::ValidationManifold,
-                p,
-                X,
-                B::$BT;
-                kwargs...,
-            )
-        end,
-    )
-end
 
 function get_vector!(M::ValidationManifold, Y, p, X, B::AbstractBasis; kwargs...)
     is_point(M, p, true; kwargs...)
@@ -307,20 +252,6 @@ function get_vector!(M::ValidationManifold, Y, p, X, B::AbstractBasis; kwargs...
     get_vector!(M.manifold, Y, p, X, B)
     size(Y) == representation_size(M) || error("Incorrect size of tangent vector Y")
     return Y
-end
-for BT in [DISAMBIGUATION_BASIS_TYPES..., DISAMBIGUATION_COTANGENT_BASIS_TYPES...]
-    eval(
-        quote
-            @invoke_maker 5 AbstractBasis get_vector!(
-                M::ValidationManifold,
-                Y,
-                p,
-                X,
-                B::$BT;
-                kwargs...,
-            )
-        end,
-    )
 end
 
 injectivity_radius(M::ValidationManifold) = injectivity_radius(M.manifold)
@@ -435,20 +366,6 @@ function vector_transport_along!(
     is_vector(M, c[end], Y, true; kwargs...)
     return Y
 end
-for VT in VECTOR_TRANSPORT_DISAMBIGUATION
-    eval(
-        quote
-            @invoke_maker 6 AbstractVectorTransportMethod vector_transport_along!(
-                M::ValidationManifold,
-                vto,
-                x,
-                v,
-                c::AbstractVector,
-                B::$VT,
-            )
-        end,
-    )
-end
 
 function vector_transport_to!(
     M::ValidationManifold,
@@ -471,30 +388,6 @@ function vector_transport_to!(
     )
     is_vector(M, q, Y, true; kwargs...)
     return Y
-end
-
-for T in [
-    PoleLadderTransport,
-    ProjectionTransport,
-    ScaledVectorTransport,
-    SchildsLadderTransport,
-]
-    @eval begin
-        function vector_transport_to!(M::ValidationManifold, Y, p, X, q, m::$T; kwargs...)
-            is_point(M, q, true; kwargs...)
-            is_vector(M, p, X, true; kwargs...)
-            vector_transport_to!(
-                M.manifold,
-                array_value(Y),
-                array_value(p),
-                array_value(X),
-                array_value(q),
-                m,
-            )
-            is_vector(M, q, Y, true; kwargs...)
-            return Y
-        end
-    end
 end
 
 function zero_vector(M::ValidationManifold, p; kwargs...)

@@ -120,20 +120,6 @@ function vector_transport_along!(
 )
     return copyto!(Y, X)
 end
-for VT in VECTOR_TRANSPORT_DISAMBIGUATION
-    eval(
-        quote
-            @invoke_maker 6 AbstractVectorTransportMethod vector_transport_along!(
-                M::DefaultManifold,
-                Y,
-                p,
-                X,
-                c::AbstractVector,
-                B::$VT,
-            )
-        end,
-    )
-end
 
 function vector_transport_to!(::DefaultManifold, Y, p, X, q, ::ParallelTransport)
     return copyto!(Y, X)

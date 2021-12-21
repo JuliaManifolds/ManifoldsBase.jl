@@ -21,6 +21,7 @@ import LinearAlgebra: dot, norm, det, cross, I, UniformScaling, Diagonal
 
 import Markdown: @doc_str
 using LinearAlgebra
+using SimpleTraits
 
 include("maintypes.jl")
 include("retractions.jl")
@@ -553,10 +554,10 @@ end
 include("errors.jl")
 include("numbers.jl")
 include("vector_transport.jl")
-include("DecoratorManifold.jl")
 include("bases.jl")
 include("vector_spaces.jl")
 include("point_vector_fallbacks.jl")
+include("decorator_trait.jl")
 include("ValidationManifold.jl")
 include("EmbeddedManifold.jl")
 include("DefaultManifold.jl")

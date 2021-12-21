@@ -410,14 +410,6 @@ function get_basis(M::AbstractPowerManifold, p, B::DiagonalizingOrthonormalBasis
     ]
     return CachedBasis(B, PowerBasisData(vs))
 end
-for BT in ManifoldsBase.DISAMBIGUATION_BASIS_TYPES
-    if BT == DiagonalizingOrthonormalBasis
-        continue
-    end
-    eval(quote
-        @invoke_maker 3 AbstractBasis get_basis(M::AbstractPowerManifold, p, B::$BT)
-    end)
-end
 
 """
     get_component(M::AbstractPowerManifold, p, idx...)
@@ -616,22 +608,6 @@ function injectivity_radius(M::AbstractPowerManifold, p)
     return radius
 end
 injectivity_radius(M::AbstractPowerManifold) = injectivity_radius(M.manifold)
-eval(
-    quote
-        @invoke_maker 1 AbstractManifold injectivity_radius(
-            M::AbstractPowerManifold,
-            rm::AbstractRetractionMethod,
-        )
-    end,
-)
-eval(
-    quote
-        @invoke_maker 1 AbstractManifold injectivity_radius(
-            M::AbstractPowerManifold,
-            rm::ExponentialRetraction,
-        )
-    end,
-)
 
 @doc raw"""
     inner(M::AbstractPowerManifold, p, X, Y)
@@ -1105,20 +1081,6 @@ function vector_transport_to!(
     m::AbstractVectorTransportMethod,
 )
     return vector_transport_to!(M, Y, p, X, q, PowerVectorTransport(m))
-end
-for VT in ManifoldsBase.VECTOR_TRANSPORT_DISAMBIGUATION
-    eval(
-        quote
-            @invoke_maker 6 AbstractVectorTransportMethod vector_transport_to!(
-                M::AbstractPowerManifold,
-                Y,
-                p,
-                X,
-                q,
-                B::$VT,
-            )
-        end,
-    )
 end
 
 """
