@@ -166,24 +166,24 @@ available methods.
 See also [`retract!`](@ref).
 """
 function inverse_retract!(M::AbstractManifold, X, p, q)
-    return inverse_retract!(M, X, p, q, default_inverse_retraction_method(M))
+    return _inverse_retract!(M, X, p, q, default_inverse_retraction_method(M))
 end
-function inverse_retract!(M::AbstractManifold, X, p, q, ::LogarithmicInverseRetraction)
+function _inverse_retract!(M::AbstractManifold, X, p, q, ::LogarithmicInverseRetraction)
     return log!(M, X, p, q)
 end
 
 #
 # dispatch to lower level
-function inverse_retract!(M::AbstractManifold, X, p, q, ::PolarInverseRetraction)
+function _inverse_retract!(M::AbstractManifold, X, p, q, ::PolarInverseRetraction)
     return inverse_retract_polar!(M, X, p, q)
 end
-function inverse_retract!(M::AbstractManifold, X, p, q, ::ProjectionInverseRetraction)
+function _inverse_retract!(M::AbstractManifold, X, p, q, ::ProjectionInverseRetraction)
     return inverse_retract_project!(M, X, p, q)
 end
-function inverse_retract!(M::AbstractManifold, X, p, q, ::QRInverseRetraction)
+function _inverse_retract!(M::AbstractManifold, X, p, q, ::QRInverseRetraction)
     return inverse_retract_qr(M, X, p, q)
 end
-function inverse_retract!(M::AbstractManifold, X, p, q, m::NLsolveInverseRetraction)
+function _inverse_retract!(M::AbstractManifold, X, p, q, m::NLsolveInverseRetraction)
     return inverse_retract_nlsolve(M, X, p, q, m)
 end
 
@@ -202,13 +202,16 @@ corresponding manifold.
 
 See also [`retract`](@ref).
 """
-function inverse_retract(M::AbstractManifold, p, q)
-    X = allocate_result(M, inverse_retract, p, q)
-    inverse_retract!(M, X, p, q)
-    return X
+function inverse_retract(
+    M::AbstractManifold,
+    p,
+    q,
+    m::AbstractInverseRetractionMethod = default_inverse_retraction_method(M),
+)
+    return _inverse_retract(M, p, q, m)
 end
-inverse_retract(M::AbstractManifold, p, q, ::LogarithmicInverseRetraction) = log(M, p, q)
-function inverse_retract(M::AbstractManifold, p, q, ::PolarInverseRetraction)
+_inverse_retract(M::AbstractManifold, p, q, ::LogarithmicInverseRetraction) = log(M, p, q)
+function _inverse_retract(M::AbstractManifold, p, q, ::PolarInverseRetraction)
     return inverse_retract_polar(M, p, q)
 end
 function inverse_retract_polar(M::AbstractManifold, p, q)
@@ -216,7 +219,7 @@ function inverse_retract_polar(M::AbstractManifold, p, q)
     inverse_retract_polar!(M, X, p, q, method)
     return X
 end
-function inverse_retract!(M::AbstractManifold, p, q, ::ProjectionInverseRetraction)
+function _inverse_retract(M::AbstractManifold, p, q, ::ProjectionInverseRetraction)
     return inverse_retract_project(M, p, q)
 end
 function inverse_retract_project(M::AbstractManifold, p, q)
@@ -224,7 +227,7 @@ function inverse_retract_project(M::AbstractManifold, p, q)
     inverse_retract_project!(M, X, p, q, method)
     return X
 end
-function inverse_retract!(M::AbstractManifold, p, q, ::QRInverseRetraction)
+function _inverse_retract!(M::AbstractManifold, p, q, ::QRInverseRetraction)
     return inverse_retract_qr(M, p, q)
 end
 function inverse_retract_qr(M::AbstractManifold, p, q)
@@ -232,7 +235,7 @@ function inverse_retract_qr(M::AbstractManifold, p, q)
     inverse_retract_qr!(M, X, p, q, method)
     return X
 end
-function inverse_retract!(M::AbstractManifold, p, q, m::NLsolveInverseRetraction)
+function _inverse_retract!(M::AbstractManifold, p, q, m::NLsolveInverseRetraction)
     return inverse_retract_nlsolve(M, p, q, m)
 end
 function inverse_retract_nlsolve(M::AbstractManifold, p, q)
@@ -242,10 +245,8 @@ function inverse_retract_nlsolve(M::AbstractManifold, p, q)
 end
 
 @doc raw"""
-    retract(M::AbstractManifold, p, X)
-    retract(M::AbstractManifold, p, X, t::Real=1)
-    retract(M::AbstractManifold, p, X, method::AbstractRetractionMethod)
-    retract(M::AbstractManifold, p, X, t::Real=1, method::AbstractRetractionMethod)
+    retract(M::AbstractManifold, p, X, method::AbstractRetractionMethod=default_retraction_method(M))
+    retract(M::AbstractManifold, p, X, t::Real=1, method::AbstractRetractionMethod=default_retraction_method(M))
 
 Compute a retraction, a cheaper, approximate version of the [`exp`](@ref)onential map,
 from `p` into direction `X`, scaled by `t`, on the [`AbstractManifold`](@ref) `M`.
@@ -265,16 +266,23 @@ Retraction method can be specified by the last argument, defaulting to
 
 Locally, the retraction is invertible. For the inverse operation, see [`inverse_retract`](@ref).
 """
-function retract(M::AbstractManifold, p, X)
-    q = allocate_result(M, retract, p, X)
-    retract!(M, q, p, X)
-    return q
+function retract(
+    M::AbstractManifold,
+    p,
+    X,
+    m::AbstractRetractionMethod = default_retraction_method(M),
+)
+    return _retract(M, p, X, m)
 end
-retract(M::AbstractManifold, p, X, t::Real) = retract(M, p, t * X)
-function retract(M::AbstractManifold, p, X, t::Real, m::AbstractRetractionMethod)
-    return retract(M, p, t * X, m)
+function retract(
+    M::AbstractManifold,
+    p,
+    X,
+    t::Real,
+    m::AbstractRetractionMethod = default_retraction_method(M),
+)
+    return _retract(M, p, t * X, m)
 end
-retract(M::AbstractManifold, p, X, m::AbstractRetractionMethod) = _retract(M, p, X, m)
 _retract(M::AbstractManifold, p, X, ::ExponentialRetraction) = exp(M, p, X)
 _retract(M::AbstractManifold, p, X, ::PolarRetraction) = retract_polar(M, p, X)
 _retract(M::AbstractManifold, p, X, ::ProjectionRetraction) = retract_project(M, p, X)
@@ -311,16 +319,25 @@ methods.
 
 See [`retract`](@ref) for more details.
 """
-retract!(M::AbstractManifold, q, p, X) = retract!(M, q, p, X, default_retraction_method(M))
-retract!(M::AbstractManifold, q, p, X, t::Real) = retract!(M, q, p, t * X)
-function retract!(M::AbstractManifold, q, p, X, t::Real, method::AbstractRetractionMethod)
-    return retract!(M, q, p, t * X, method)
+function retract!(
+    M::AbstractManifold,
+    q,
+    p,
+    X,
+    m::AbstractRetractionMethod = default_retraction_method(M),
+)
+    return _retract!(M, q, p, X, m)
 end
-
-function retract!(M::AbstractManifold, q, p, X, m::AbstractRetractionMethod)
-    return retract!(M, q, p, X, m)
+function retract!(
+    M::AbstractManifold,
+    q,
+    p,
+    X,
+    t::Real,
+    method::AbstractRetractionMethod = default_retraction_method(M),
+)
+    return _retract!(M, q, p, t * X, method)
 end
-
 # dispatch to lower level
 _retract!(M::AbstractManifold, q, p, X, ::ExponentialRetraction) = exp!(M, q, p, X)
 _retract!(M::AbstractManifold, q, p, X, ::PolarRetraction) = retract_polar!(M, q, p, X)

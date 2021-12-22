@@ -165,6 +165,10 @@ log(::M, ::P, ::P)
 
 but the return type would be ``V``, whose internal sizes (fields/arrays) will depend on the concrete type of one of the points. This is accomplished by omplementing a `allocate_result(::M, ::typeof(log), ::P, ::P)`that returns the concrete variable for the return. This way, even with specific types, one just has to implement `log!` and the one line for the allocation.
 
+!!! note
+    This dispatch from the allocating to the mutating variant happens in Layer III, that is, functions like `exp` or `retract_polar` (but not `retract` itself) allocate their result (using `::typeof(retract)` for the second function)
+    and call the mutating variant `exp!` and `retract_polar!` afterwards.
+
 ## Appendix
 
 ### Validations
