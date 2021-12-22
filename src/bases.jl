@@ -260,31 +260,6 @@ end
 function get_coordinates end
 function get_vector end
 
-const all_uncached_bases{T} = Union{
-    AbstractBasis{<:Any,T},
-    DefaultBasis{<:Any,T},
-    DefaultOrthogonalBasis{<:Any,T},
-    DefaultOrthonormalBasis{<:Any,T},
-}
-const DISAMBIGUATION_BASIS_TYPES = [
-    CachedBasis,
-    DefaultBasis,
-    DefaultBasis{<:Any,TangentSpaceType},
-    DefaultOrthonormalBasis,
-    DefaultOrthonormalBasis{<:Any,TangentSpaceType},
-    DefaultOrthogonalBasis,
-    DefaultOrthogonalBasis{<:Any,TangentSpaceType},
-    DiagonalizingOrthonormalBasis,
-    ProjectedOrthonormalBasis{:svd,ℝ},
-    ProjectedOrthonormalBasis{:gram_schmidt,ℝ},
-    VeeOrthogonalBasis,
-]
-const DISAMBIGUATION_COTANGENT_BASIS_TYPES = [
-    DefaultBasis{<:Any,CotangentSpaceType},
-    DefaultOrthonormalBasis{<:Any,CotangentSpaceType},
-    DefaultOrthogonalBasis{<:Any,CotangentSpaceType},
-]
-
 """
     allocate_coordinates(M::AbstractManifold, p, T, n::Int)
 
@@ -360,16 +335,16 @@ such that $v^i(v_j) = δ^i_j$, where $δ^i_j$ is the Kronecker delta symbol:
 \end{cases}
 ````
 """
-dual_basis(M::AbstractManifold, p, B::AbstractBasis)
+dual_basis(M::AbstractManifold, p, B::AbstractBasis) = _dual_basis(M, p, B)
 
-function dual_basis(
+function _dual_basis(
     ::AbstractManifold,
     p,
     ::DefaultOrthonormalBasis{𝔽,TangentSpaceType},
 ) where {𝔽}
     return DefaultOrthonormalBasis{𝔽}(CotangentSpace)
 end
-function dual_basis(
+function _dual_basis(
     ::AbstractManifold,
     p,
     ::DefaultOrthonormalBasis{𝔽,CotangentSpaceType},
@@ -391,7 +366,7 @@ function _euclidean_basis_vector(p, i)
 end
 
 """
-    get_basis(M::AbstractManifold, p, B::AbstractBasis) -> CachedBasis
+    get_basis(M::AbstractManifold, p, B::AbstractBasis; kwargs...) -> CachedBasis
 
 Compute the basis vectors of the tangent space at a point on manifold `M`
 represented by `p`.
@@ -402,12 +377,15 @@ the function [`get_vectors`](@ref) needs to be used to retrieve the basis vector
 
 See also: [`get_coordinates`](@ref), [`get_vector`](@ref)
 """
-get_basis(M::AbstractManifold, p, B::AbstractBasis)
+function get_basis(M::AbstractManifold, p, B::AbstractBasis; kwargs...)
+    return _get_basis(M, p, B; kwargs...)
+end
 
-function get_basis(
+function _get_basis(
     M::AbstractManifold,
     p,
-    B::DefaultOrthonormalBasis{<:Any,TangentSpaceType},
+    B::DefaultOrthonormalBasis{<:Any,TangentSpaceType};
+    kwargs...,
 )
     dim = manifold_dimension(M)
     return CachedBasis(
@@ -415,10 +393,10 @@ function get_basis(
         [get_vector(M, p, [ifelse(i == j, 1, 0) for j in 1:dim], B) for i in 1:dim],
     )
 end
-function get_basis(::AbstractManifold, ::Any, B::CachedBasis)
+function _get_basis(::AbstractManifold, ::Any, B::CachedBasis)
     return B
 end
-function get_basis(M::AbstractManifold, p, B::ProjectedOrthonormalBasis{:svd,ℝ})
+function _get_basis(M::AbstractManifold, p, B::ProjectedOrthonormalBasis{:svd,ℝ})
     S = representation_size(M)
     PS = prod(S)
     dim = manifold_dimension(M)
@@ -441,7 +419,7 @@ function get_basis(M::AbstractManifold, p, B::ProjectedOrthonormalBasis{:svd,ℝ
     end
     return CachedBasis(B, vecs)
 end
-function get_basis(
+function _get_basis(
     M::AbstractManifold,
     p,
     B::ProjectedOrthonormalBasis{:gram_schmidt,ℝ};
@@ -470,29 +448,80 @@ requires either a dual basis or the cached basis to be selfdual, for example ort
 See also: [`get_vector`](@ref), [`get_basis`](@ref)
 """
 function get_coordinates(M::AbstractManifold, p, X, B::AbstractBasis)
-    Y = allocate_result(M, get_coordinates, p, X, B)
-    return get_coordinates!(M, Y, p, X, B)
+    return _get_coordinates(M, p, X, B)
+end
+
+function _get_coordinates(M::AbstractManifold, p, X, B::VeeOrthogonalBasis)
+    return get_coordinates_vee(M, p, X, number_system(B))
+end
+function get_coordinates_vee(M::AbstractManifold, p, X, N)
+    return get_coordinates(M, p, X, DefaultOrthogonalBasis(N))
+end
+
+function _get_coordinates(M::AbstractManifold, p, X, B::DefaultBasis)
+    return get_coordinates_default(M, p, X, number_system(B))
+end
+function get_coordinates_default(M::AbstractManifold, p, X, N)
+    return get_coordinates(M, p, X, DefaultOrthogonalBasis(N))
+end
+
+function _get_coordinates(M::AbstractManifold, p, X, B::DefaultOrthogonalBasis)
+    return get_coordinates_orthogonal(M, p, X, number_system(B))
+end
+function get_coordinates_orthogonal(M::AbstractManifold, p, X, N)
+    Y = allocate_result(M, typeof(get_coordinates), p, X, DefaultOrthogonalBasis(N))
+    return get_coordinates_orthogonal!(M, Y, p, X, N)
+end
+
+function _get_coordinates(M::AbstractManifold, p, X, B::CachedBasis)
+    return get_coordinates_cached(M, number_system(M), p, X, B, number_system(B))
+end
+function get_coordinates_cached(
+    M::AbstractManifold,
+    ::ComplexNumbers,
+    p,
+    X,
+    B::CachedBasis,
+    ::RealNumbers,
+)
+    return map(vb -> conj(inner(M, p, X, vb)), get_vectors(M, p, B))
+end
+function get_coordinates_cached(
+    M::AbstractManifold,
+    ::𝔽,
+    p,
+    X,
+    C::CachedBasis,
+    ::𝔽,
+) where {𝔽}
+    return map(vb -> real(inner(M, p, X, vb)), Y, get_vectors(M, p, C))
 end
 
 function get_coordinates!(M::AbstractManifold, Y, p, X, B::AbstractBasis)
-    return error(
-        "get_coordinates! not implemented for manifold of type $(typeof(M)) coordinates of type $(typeof(Y)), a point of type $(typeof(p)), tangent vector of type $(typeof(X)) and basis of type $(typeof(B)).",
-    )
+    return _get_coordinates!(M, Y, p, X, B)
+end
+function _get_coordinates!(M::AbstractManifold, Y, p, X, B::VeeOrthogonalBasis)
+    return get_coordinates_vee!(M, Y, p, X, number_system(B))
+end
+function get_coordinates_vee!(M::AbstractManifold, Y, p, X, N)
+    return get_coordinates!(M, Y, p, X, DefaultOrthogonalBasis(N))
 end
 
-function get_coordinates!(M::AbstractManifold, Y, p, X, B::VeeOrthogonalBasis)
-    return get_coordinates!(M, Y, p, X, DefaultOrthogonalBasis(number_system(B)))
+function _get_coordinates!(M::AbstractManifold, Y, p, X, B::DefaultBasis)
+    return get_coordinates_default!(M, Y, p, X, number_system(B))
 end
-function get_coordinates!(M::AbstractManifold, Y, p, X, B::DefaultBasis)
-    return get_coordinates!(M, Y, p, X, DefaultOrthogonalBasis(number_system(B)))
+function get_coordinates_default!(M::AbstractManifold, Y, p, X, N)
+    return get_coordinates!(M, Y, p, X, DefaultOrthogonalBasis(N))
 end
-function get_coordinates!(M::AbstractManifold, Y, p, X, B::DefaultOrthogonalBasis)
-    return get_coordinates!(M, Y, p, X, DefaultOrthonormalBasis(number_system(B)))
+
+function _get_coordinates!(M::AbstractManifold, Y, p, X, B::DefaultOrthogonalBasis)
+    return get_coordinates_orthogonal!(M, Y, p, X, number_system(B))
 end
-function get_coordinates!(M::AbstractManifold, Y, p, X, B::CachedBasis)
-    return _get_coordinates!(M, number_system(M), Y, p, X, B, number_system(B))
+
+function _get_coordinates!(M::AbstractManifold, Y, p, X, B::CachedBasis)
+    return get_coordinates_cached!(M, number_system(M), Y, p, X, B, number_system(B))
 end
-function _get_coordinates!(
+function get_coordinates_cached!(
     M::AbstractManifold,
     ::ComplexNumbers,
     Y,
@@ -504,21 +533,21 @@ function _get_coordinates!(
     map!(vb -> conj(inner(M, p, X, vb)), Y, get_vectors(M, p, B))
     return Y
 end
-function _get_coordinates!(
+function get_coordinates_cached!(
     M::AbstractManifold,
-    a::𝔽,
+    ::𝔽,
     Y,
     p,
     X,
     C::CachedBasis,
-    b::𝔽,
+    ::𝔽,
 ) where {𝔽}
     map!(vb -> real(inner(M, p, X, vb)), Y, get_vectors(M, p, C))
     return Y
 end
 
 """
-    get_vector(M::AbstractManifold, p, X, B::AbstractBasis)
+    X = get_vector(M::AbstractManifold, p, c, B::AbstractBasis)
 
 Convert a one-dimensional vector of coefficients in a basis `B` of
 the tangent space at `p` on manifold `M` to a tangent vector `X` at `p`.
@@ -532,29 +561,89 @@ requires either a dual basis or the cached basis to be selfdual, for example ort
 
 See also: [`get_coordinates`](@ref), [`get_basis`](@ref)
 """
-function get_vector(M::AbstractManifold, p, X, B::AbstractBasis)
-    Y = allocate_result(M, get_vector, p, X)
-    return get_vector!(M, Y, p, X, B)
+function get_vector(M::AbstractManifold, p, c, B::AbstractBasis)
+    return _get_vector(M, c, X, B)
 end
 
-function get_vector!(M::AbstractManifold, Y, p, X, B::AbstractBasis)
-    return error(
-        "get_vector! not implemented for manifold of type $(typeof(M)) vector of type $(typeof(Y)), a point of type $(typeof(p)), coordinates of type $(typeof(X)) and basis of type $(typeof(B)).",
-    )
+function _get_vector(M::AbstractManifold, p, c, B::VeeOrthogonalBasis)
+    return get_vector_vee(M, p, c, number_system(B))
+end
+get_vector_vee(M, p, c, N) = get_vector(M, p, c, DefaultOrthogonalBasis(N))
+
+function _get_vector(M::AbstractManifold, p, c, B::DefaultBasis)
+    return get_vector_default(M, p, c, number_system(B))
+end
+get_vector_default(M, p, c, N) = get_vector(M, p, c, DefaultOrthogonalBasis(N))
+
+function _get_vector(M::AbstractManifold, p, c, B::DefaultOrthogonalBasis)
+    return get_vector_orthogonal(M, p, c, number_system(B))
+end
+function get_vector_orthogonal(M::AbstractManifold, p, c, N)
+    Y = allocate_result(M, typeof(get_vector), p, c, DefaultOrthogonalBasis(N))
+    return get_vector_orthogonal!(M, Y, p, c, N)
 end
 
+function _get_vector(M::AbstractManifold, p, c, B::DefaultOrthonormalBasis)
+    return get_vector_orthonormal(M, p, c, number_system(B))
+end
+function get_vector_orthonormal(M::AbstractManifold, p, c, N)
+    B = DefaultOrthonormalBasis(N)
+    Y = allocate_result(M, typeof(get_vector), p, c, B)
+    return get_vector!(M, Y, p, c, B)
+end
+
+function _get_vector(M::AbstractManifold, p, c, B::CachedBasis)
+    return get_vector_cached(M, p, c, B)
+end
 _get_vector_cache_broadcast(::Any) = Val(true)
+function get_vector_cached(M::AbstractManifold, p, X, B::CachedBasis)
+    # quite convoluted but:
+    #  1) preserves the correct `eltype`
+    #  2) guarantees a reasonable array type `Y`
+    #     (for example scalar * `SizedValidation` is an `SArray`)
+    bvectors = get_vectors(M, p, B)
+    return if _get_vector_cache_broadcast(bvectors[1]) === Val(false)
+        Xt = X[1] * bvectors[1]
+        for i in 2:length(X)
+            copyto!(Xt, Xt + X[i] * bvectors[i])
+        end
+    else
+        Xt = X[1] .* bvectors[1]
+        for i in 2:length(X)
+            Xt .+= X[i] .* bvectors[i]
+        end
+    end
+    return Xt
+end
+function get_vector!(M::AbstractManifold, Y, p, c, B::AbstractBasis)
+    return _get_vector!(M, Y, p, c, B)
+end
 
-function get_vector!(M::AbstractManifold, Y, p, X, B::VeeOrthogonalBasis)
+function _get_vector!(M::AbstractManifold, Y, p, c, B::VeeOrthogonalBasis)
+    return get_vector_vee!(M, Y, p, c, number_system(B))
     return get_vector!(M, Y, p, X, DefaultOrthogonalBasis(number_system(B)))
 end
-function get_vector!(M::AbstractManifold, Y, p, X, B::DefaultBasis)
-    return get_vector!(M, Y, p, X, DefaultOrthogonalBasis(number_system(B)))
+get_vector_vee!(M, Y, p, c, N) = get_vector!(M, Y, p, c, DefaultOrthogonalBasis(N))
+
+function _get_vector!(M::AbstractManifold, Y, p, c, B::DefaultBasis)
+    return get_vector_default!(M, Y, p, c, number_system(B))
 end
-function get_vector!(M::AbstractManifold, Y, p, X, B::DefaultOrthogonalBasis)
-    return get_vector!(M, Y, p, X, DefaultOrthonormalBasis(number_system(B)))
+get_vector_default!(M, Y, p, c, N) = get_vector!(M, Y, p, c, DefaultOrthogonalBasis(N))
+
+function _get_vector!(M::AbstractManifold, Y, p, c, B::DefaultOrthogonalBasis)
+    return get_vector_orthogonal!(M, Y, p, X, DefaultOrthonormalBasis(number_system(B)))
 end
-function get_vector!(M::AbstractManifold, Y, p, X, B::CachedBasis)
+get_vector_orthogonal!(M, Y, p, c, N) = get_vector!(M, Y, p, c, DefaultOrthonormalBasis(N))
+
+function _get_vector!(M::AbstractManifold, Y, p, c, B::DefaultOrthonormalBasis)
+    return get_vector_orthonormal!(M, Y, p, c, number_system(B))
+end
+function get_vector_orthonormal! end
+
+function _get_vector!(M::AbstractManifold, Y, p, c, B::CachedBasis)
+    return get_vector_cached!(M, Y, p, c, B)
+end
+function get_vector_cached!(M::AbstractManifold, Y, p, X, B::CachedBasis)
     # quite convoluted but:
     #  1) preserves the correct `eltype`
     #  2) guarantees a reasonable array type `Y`
@@ -583,19 +672,15 @@ end
 Get the basis vectors of basis `B` of the tangent space at point `p`.
 """
 function get_vectors(M::AbstractManifold, p, B::AbstractBasis)
-    return error(
-        "get_vectors not implemented for manifold of type $(typeof(M)) a point of type $(typeof(p)) and basis of type $(typeof(B)).",
-    )
+    return _get_vectors(M, p, B)
 end
-function get_vectors(::AbstractManifold, ::Any, B::CachedBasis)
+function _get_vectors(::AbstractManifold, ::Any, B::CachedBasis)
     return _get_vectors(B)
 end
-#internal for directly cached basis i.e. those that are just arrays – used in show
 _get_vectors(B::CachedBasis{𝔽,<:AbstractBasis,<:AbstractArray}) where {𝔽} = B.data
 function _get_vectors(B::CachedBasis{𝔽,<:AbstractBasis,<:DiagonalizingBasisData}) where {𝔽}
     return B.data.vectors
 end
-
 
 @doc raw"""
     gram_schmidt(M::AbstractManifold{𝔽}, p, B::AbstractBasis{𝔽}) where {𝔽}
