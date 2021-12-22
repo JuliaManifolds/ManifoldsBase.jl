@@ -9,7 +9,7 @@ The main design criteria for the interface are:
 * Provide a high level interface that is easy to use.
 
 Therefore this interface has 3 main features, that we will explain using two (related)
-concepts, the [exponential map](https://en.wikipedia.org/wiki/Exponential_map_(Riemannian_geometry)) that maps a tangent vector ``X`` at a point ``p`` to a point ``q`` or mathematically ``\exp_p:T_p\mathcal M \to \mathcal M`` and its generalisation, a [`retract`](@ref)ion ``\operatorname{retr}_p`` with same domain and range.
+concepts, the [exponential map](https://en.wikipedia.org/wiki/Exponential_map_(Riemannian_geometry)) that maps a tangent vector ``X`` at a point ``p`` to a point ``q`` or mathematically ``\exp_p:T_p\mathcal M \to \mathcal M`` and its generalization, a [`retract`](@ref)ion ``\operatorname{retr}_p`` with same domain and range.
 
 You do not need to know their exact definition at this point, just that there is _one_ exponential map on a Riemannian manifold, and several retractions, where one of them is the exponential map (sometime called exponential retraction for completeness). Every retraction has its own subtype of the [`AbstractRetractionMethod`](@ref) that uniquely defines it.
 
@@ -18,42 +18,84 @@ also avoiding ambiguities in multiple dispatch using the [dispatch on one argume
 
 ## General order of parameters
 
-Since the central element for functions on a manifold is the manifold itself, it should always be the first parameter, even for mutating functions.
+Since the central element for functions on a manifold is the manifold itself, it should always be the first parameter, even for mutating functions. Then the classical parametzers of a function (for example a point and a tangent vector for the retraction) follow and the final part are parameters to further dispatch on, which usually have their defaults.
 
-## The higher level interface and ease of use
+## A 3-Layer architecture for dispatch
 
-The higher level interface should aim for a convenience layer that resolves defaults and
-creates fallbacks for certain input parameters, that have these properties.
-It usually should not dispatch on a certain manifold nor on certain point or (co- or tangent) vector types.
+The general architecture consists of three layers
 
-This layer should also not resolve/dispatch from the allocating to the mutating variant.
+* The high level interface for ease of use – and to dispatch on other manifolds
+* an interims layer to dispatch on different parameters in the last section
+* the lowest layer with a specific manifold and no optional parameters for performance
 
-This is maybe best illustrated by two examples of the expponential map and a retraction:
+These three layers are described in more detail in the following.
 
-The exponential map usually has a long form, where one can specify a fraction (of `X`) where the evaluation should be. This is generically implemented a
+### Layer I: The high level interface and ease of use
+
+THe highest layer for convenience of decorators.
+A usual scheme is, that a manifold might assume several things implicitly, for example the default implementation of the sphere $\mathbb S^n$ using unit vectors in $\mathbb R^{n+1}$.
+The embedding can be explicitly used to avoid reimplementations – the inner product can be “passed on” to its embedding.
+
+To do so, we “decorate” the manifold by making it an [`AbstractDecoratorManifold`](@ref) and activating the right traits see [the example](@ref example).
+
+The explicit case of the [`EmbeddedManifold`](@ref) can be used to distinguish different embeddings of a manifold, but also their dispatch (onto the manifold or its embedding, depending on the type of embedding) happens here.
+
+Note that all other parameters of a function should be as unspecific as possible on this layer.
+
+With respect to the [dispatch on one argument at a time](https://docs.julialang.org/en/v1/manual/methods/#Dispatch-on-one-argument-at-a-time) paradigm, this layer dispatches the _manifold first_, but here we stay oon an abstract type level.
+
+This layer ends usually in calling the same functions like `retract` but prefixed with a `_` to enter Layer II.
+
+### Layer II: An internal dispatch interface for parameters
+
+This layer is an interims layer to dispatch on the (optional/default) parameters of a function like the retraction:
+[`retract`](@ref) has a last parameter that determines the type.
+The last function in the previous layer calls `_retract`, which is an internal function.
+
+On this layer, e.g. for `_retract` only these last parameters should be typed, the manifold should stay at the [`AbstractManifold`](@ref) level. It dispatches on different functions per existing parameter type (and might pass this one further on, if it has fields).
+
+Note that this layer is an internal one. It is automatically called for functions with parameters to dispatch on.
+
+It should only be extended when introducing new such parameter types, for example when introducing a new type of a retraction.
+
+The functions from this layer should never be called directly, are hence also not exported and carry the `_` prefix.
+They should only be called as the final step in the previous layer.
+
+If the default parameters are not dispatched per type, using `_` might be skipped.
+The following resolution might even be seen as a last step in layer I or the resolution here in layer II.
 
 ```julia
-  exp(M::AbstractManifold, p, X, t::Real) = exp(M, p, t * X)
+exp(M::AbstractManifold, p, X, t::Real) = exp(M, p, t * X)
 ```
 
-On this level neither the manifold _nor_ the points should be too strictly typed, points and vectors should – for best of cases – never be types.
+When there is no dispatch for different types of the optional parameter (here `t`), the `_` might be skipped.
+One could hence see the last code line as a definition on Layer I that passes directly to Layer III, since there are not parameter to dispatch on.
 
-For the retraction, a default retraction (usually exp) is specified/defined via [`default_retraction_method`](@ref).
-This also means, that the last parameter of
+To close this section, let‘s look at an example. The high level (or level I) definition of the retraction is given by
 
 ```julia
-retract(M::AbstractManifold, p, X, ::AbstractRetractionMethod=default_retraction_method(M))
+retract(M::AbstractManifold, p, X, m::AbstractRetractionMethod=default_retraction_method(M)) = _retract(M,p,X,m)
 ```
 
-is optional and for a concrete type the dispatch on a certain retraction is done next.
-To avoid ambiguities, this concrete type should always be the first argument we dispatch on:
-The `ExponentialRetractionMethod` calls `exp`, any other retraction calls a function of different name without this last parameter, for example the `PolarRetractionMethod` by default calls `retract_polar(M,p,X)`, which is actualy a function from the lower level, see next section. See the [appendix](@ref subsec_appendix_retr) for an overview.
+This level now dispatches on different retraction types. It usually passes to specific functions implemented in Layer III,
+here for example
+
+```julia
+_retract(M::AbstractManifold, p, X, m::Exponentialretraction) = exp(M,p,X)
+_retract(M::AbstractManifold, p, X, m::PolarRetractionMethod) = retract_polar(M,p,X)
+```
+
+or the [`PolarRetractionMethod`](@ref) which dispatches to [`retract_polar`](@ref).
+
+For further details and dispatches, see the [appendix](@ref subsec_appendix_retr) for an overview.
 
 !!! note
     The documentation should be attached to the high level functions, since this again fosters ease of use.
     If yuo implement a polar retraction, you should write a function `polar_retract` but the doc string should be attached to `retract(::M, ::P, ::V, ::PolarRetraction)` for your types `::M, ::P, ::V` of the manifold, points and vectors, respectively.
 
-## The lower level interface to gain performance
+To summarize, with respect to the [dispatch on one argument at a time](https://docs.julialang.org/en/v1/manual/methods/#Dispatch-on-one-argument-at-a-time) paradigm, this layer dispatches the (optional) _parameters second_.
+
+### Layer III: The lower level interface to gain performance
 
 This lower level aims for performance, that is, any function should have as few as possible optional and keyword arguments
 and be typed as concrete as possible/necessary. This means
@@ -64,7 +106,9 @@ and be typed as concrete as possible/necessary. This means
 
 The first thing to do on this level is the aforementioned default to pass from allocating to mutating functions.
 
-Note that not all of these functions are exported.
+Note that not all of these functions are exported, but if you implement for example an existing retraction on a new manifold, you will have to import this function.
+
+To summarize, with respect to the [dispatch on one argument at a time](https://docs.julialang.org/en/v1/manual/methods/#Dispatch-on-one-argument-at-a-time) paradigm, this layer dispatches the _concrete manifold and point/vector types last_.
 
 ## Mutating and allocating functions
 
@@ -156,7 +200,7 @@ The following table provides an overview of the currently available types and th
 
 ### Vector transport
 
-In the follwing table the `V` in the function names stand for `along`, `to` or `direction`.
+In the follwing table the `V` in the function names stand for `along`, `to`. Nte that `vector_transport_direction` by default uses the default retraction and `to`.
 
 | Name | default lower level function | comment |
 | :--- | :----------------------------- | :----- |
