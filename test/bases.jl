@@ -5,47 +5,16 @@ using ManifoldsBase: CotangentSpace, CotangentSpaceType, TangentSpace, TangentSp
 using ManifoldsBase: FVector
 using Test
 import Base: +, -, *, copyto!, isapprox
-import ManifoldsBase: allocate
+import ManifoldsBase: allocate, get_vector_orthonormal!, get_coordinates_orthonormal!
 
 
 struct ProjManifold <: AbstractManifold{ℝ} end
 
-ManifoldsBase.inner(::ProjManifold, x, w, v) = dot(w, v)
-ManifoldsBase.project!(::ProjManifold, w, x, v) = (w .= v .- dot(x, v) .* x)
+ManifoldsBase.inner(::ProjManifold, p, X, Y) = dot(X, Y)
+ManifoldsBase.project!(::ProjManifold, Y, p, X) = (Y .= X .- dot(p, X) .* p)
 ManifoldsBase.representation_size(::ProjManifold) = (2, 3)
 ManifoldsBase.manifold_dimension(::ProjManifold) = 5
-ManifoldsBase.get_vector(::ProjManifold, x, v, ::DefaultOrthonormalBasis) = reverse(v)
-
-@testset "Dispatch" begin
-    @test ManifoldsBase.decorator_transparent_dispatch(
-        get_basis,
-        DefaultManifold(3),
-        [0.0, 0.0, 0.0],
-        DefaultBasis(),
-    ) === Val(:parent)
-    @test ManifoldsBase.decorator_transparent_dispatch(
-        get_coordinates,
-        DefaultManifold(3),
-        [0.0, 0.0, 0.0],
-    ) === Val(:parent)
-    @test ManifoldsBase.decorator_transparent_dispatch(
-        get_coordinates!,
-        DefaultManifold(3),
-        [0.0, 0.0, 0.0],
-        [0.0, 0.0, 0.0],
-    ) === Val(:transparent)
-    @test ManifoldsBase.decorator_transparent_dispatch(
-        get_vector,
-        DefaultManifold(3),
-        [0.0, 0.0, 0.0],
-    ) === Val(:parent)
-    @test ManifoldsBase.decorator_transparent_dispatch(
-        get_vector!,
-        DefaultManifold(3),
-        [0.0, 0.0, 0.0],
-        [0.0, 0.0, 0.0],
-    ) === Val(:transparent)
-end
+ManifoldsBase.get_vector_orthonormal(::ProjManifold, p, X, N) = reverse(X)
 
 struct ProjectionTestManifold <: AbstractManifold{ℝ} end
 
@@ -212,23 +181,23 @@ function ManifoldsBase.get_basis(
     )
 end
 
-function ManifoldsBase.get_coordinates!(
+function ManifoldsBase.get_coordinates_orthonormal!(
     M::DefaultManifold,
     Y,
     ::NonBroadcastBasisThing,
     X::NonBroadcastBasisThing,
-    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
+    𝔽,
 )
     copyto!(Y, reshape(X.v, manifold_dimension(M)))
     return Y
 end
 
-function ManifoldsBase.get_vector!(
+function ManifoldsBase.get_vector_orthonormal!(
     M::DefaultManifold,
     Y::NonBroadcastBasisThing,
     ::NonBroadcastBasisThing,
     X,
-    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
+    𝔽,
 )
     copyto!(Y.v, reshape(X, representation_size(M)))
     return Y
@@ -256,10 +225,10 @@ DiagonalizingBasisProxy() = DiagonalizingOrthonormalBasis([1.0, 0.0, 0.0])
         @test_throws MethodError get_basis(m, [0], onb)
         @test_throws MethodError get_basis(m, [0], NonBasis())
         @test_throws MethodError get_coordinates(m, [0], [0], onb)
-        @test_throws ErrorException get_coordinates!(m, [0], [0], [0], onb)
-        @test_throws ErrorException get_vector(m, [0], [0], onb)
-        @test_throws ErrorException get_vector!(m, [0], [0], [0], onb)
-        @test_throws ErrorException get_vectors(m, [0], NonBasis())
+        @test_throws MethodError get_coordinates!(m, [0], [0], [0], onb)
+        @test_throws MethodError get_vector(m, [0], [0], onb)
+        @test_throws MethodError get_vector!(m, [0], [0], [0], onb)
+        @test_throws MethodError get_vectors(m, [0], NonBasis())
     end
 
     M = DefaultManifold(3)

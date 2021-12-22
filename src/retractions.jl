@@ -177,15 +177,19 @@ end
 function _inverse_retract!(M::AbstractManifold, X, p, q, ::PolarInverseRetraction)
     return inverse_retract_polar!(M, X, p, q)
 end
+function inverse_retract_polar! end
 function _inverse_retract!(M::AbstractManifold, X, p, q, ::ProjectionInverseRetraction)
     return inverse_retract_project!(M, X, p, q)
 end
+function inverse_retract_project! end
 function _inverse_retract!(M::AbstractManifold, X, p, q, ::QRInverseRetraction)
     return inverse_retract_qr(M, X, p, q)
 end
+function inverse_retract_qr! end
 function _inverse_retract!(M::AbstractManifold, X, p, q, m::NLsolveInverseRetraction)
     return inverse_retract_nlsolve(M, X, p, q, m)
 end
+function inverse_retract_nlsolve! end
 
 
 """
@@ -227,7 +231,7 @@ function inverse_retract_project(M::AbstractManifold, p, q)
     inverse_retract_project!(M, X, p, q, method)
     return X
 end
-function _inverse_retract!(M::AbstractManifold, p, q, ::QRInverseRetraction)
+function _inverse_retract(M::AbstractManifold, p, q, ::QRInverseRetraction)
     return inverse_retract_qr(M, p, q)
 end
 function inverse_retract_qr(M::AbstractManifold, p, q)
@@ -235,7 +239,7 @@ function inverse_retract_qr(M::AbstractManifold, p, q)
     inverse_retract_qr!(M, X, p, q, method)
     return X
 end
-function _inverse_retract!(M::AbstractManifold, p, q, m::NLsolveInverseRetraction)
+function _inverse_retract(M::AbstractManifold, p, q, m::NLsolveInverseRetraction)
     return inverse_retract_nlsolve(M, p, q, m)
 end
 function inverse_retract_nlsolve(M::AbstractManifold, p, q)
@@ -345,3 +349,7 @@ function _retract!(M::AbstractManifold, q, p, X, ::ProjectionRetraction)
     return retract_project!(M, q, p, X)
 end
 _retract!(M::AbstractManifold, q, p, X, ::QRRetraction) = retract_qr!(M, q, p, X)
+
+function retract_project! end
+function retract_polar! end
+function retract_qr! end

@@ -165,64 +165,9 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
         end
     end
 
-    for BT in [
-        ManifoldsBase.DISAMBIGUATION_BASIS_TYPES...,
-        ManifoldsBase.DISAMBIGUATION_COTANGENT_BASIS_TYPES...,
-    ]
-        push!(
-            block.args,
-            quote
-                function ManifoldsBase.get_coordinates!(M::$TM, Y, p::$TP, X::$TV, B::$BT)
-                    return get_coordinates!(M, Y, p.$pfield, X.$vfield, B)
-                end
+    # TODO  forward retraction / inverse_retraction
 
-                function ManifoldsBase.get_vector(M::$TM, p::$TP, X, B::$BT)
-                    return $TV(get_vector(M, p.$pfield, X, B))
-                end
-
-                function ManifoldsBase.get_vector!(M::$TM, Y::$TV, p::$TP, X, B::$BT)
-                    return get_vector!(M, Y.$vfield, p.$pfield, X, B)
-                end
-            end,
-        )
-    end
-
-    for VTM in [ParallelTransport, VECTOR_TRANSPORT_DISAMBIGUATION...]
-        push!(
-            block.args,
-            quote
-                function ManifoldsBase.vector_transport_direction!(
-                    M::$TM,
-                    Y::$TV,
-                    p::$TP,
-                    X::$TV,
-                    d::$TV,
-                    m::$VTM,
-                )
-                    vector_transport_direction!(
-                        M,
-                        Y.$vfield,
-                        p.$pfield,
-                        X.$vfield,
-                        d.$vfield,
-                        m,
-                    )
-                    return Y
-                end
-                function ManifoldsBase.vector_transport_to!(
-                    M::$TM,
-                    Y::$TV,
-                    p::$TP,
-                    X::$TV,
-                    q::$TP,
-                    m::$VTM,
-                )
-                    vector_transport_to!(M, Y.$vfield, p.$pfield, X.$vfield, q.$pfield, m)
-                    return Y
-                end
-            end,
-        )
-    end
+    # TODO  forward vector transports
 
     return esc(block)
 end

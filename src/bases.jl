@@ -469,8 +469,15 @@ function _get_coordinates(M::AbstractManifold, p, X, B::DefaultOrthogonalBasis)
     return get_coordinates_orthogonal(M, p, X, number_system(B))
 end
 function get_coordinates_orthogonal(M::AbstractManifold, p, X, N)
-    Y = allocate_result(M, typeof(get_coordinates), p, X, DefaultOrthogonalBasis(N))
-    return get_coordinates_orthogonal!(M, Y, p, X, N)
+    return get_coordinates_orthonormal(M, p, X, N)
+end
+
+function _get_coordinates(M::AbstractManifold, p, X, B::DefaultOrthonormalBasis)
+    return get_coordinates_orthonormal(M, p, X, number_system(B))
+end
+function get_coordinates_orthonormal(M::AbstractManifold, p, X, N)
+    Y = allocate_result(M, typeof(get_coordinates), p, X)
+    return get_coordinates_orthonormal!(M, Y, p, X, N)
 end
 
 function _get_coordinates(M::AbstractManifold, p, X, B::CachedBasis)
@@ -494,7 +501,7 @@ function get_coordinates_cached(
     C::CachedBasis,
     ::𝔽,
 ) where {𝔽}
-    return map(vb -> real(inner(M, p, X, vb)), Y, get_vectors(M, p, C))
+    return map(vb -> real(inner(M, p, X, vb)), get_vectors(M, p, C))
 end
 
 function get_coordinates!(M::AbstractManifold, Y, p, X, B::AbstractBasis)
@@ -517,6 +524,14 @@ end
 function _get_coordinates!(M::AbstractManifold, Y, p, X, B::DefaultOrthogonalBasis)
     return get_coordinates_orthogonal!(M, Y, p, X, number_system(B))
 end
+function get_coordinates_orthogonal!(M::AbstractManifold, Y, p, X, N)
+    return get_coordinates!(M, Y, p, X, DefaultOrthonormalBasis(N))
+end
+
+function _get_coordinates!(M::AbstractManifold, Y, p, X, B::DefaultOrthonormalBasis)
+    return get_coordinates_orthonormal!(M, Y, p, X, number_system(B))
+end
+function get_coordinates_orthonormal! end
 
 function _get_coordinates!(M::AbstractManifold, Y, p, X, B::CachedBasis)
     return get_coordinates_cached!(M, number_system(M), Y, p, X, B, number_system(B))
@@ -562,7 +577,7 @@ requires either a dual basis or the cached basis to be selfdual, for example ort
 See also: [`get_coordinates`](@ref), [`get_basis`](@ref)
 """
 function get_vector(M::AbstractManifold, p, c, B::AbstractBasis)
-    return _get_vector(M, c, X, B)
+    return _get_vector(M, p, c, B)
 end
 
 function _get_vector(M::AbstractManifold, p, c, B::VeeOrthogonalBasis)
@@ -579,7 +594,7 @@ function _get_vector(M::AbstractManifold, p, c, B::DefaultOrthogonalBasis)
     return get_vector_orthogonal(M, p, c, number_system(B))
 end
 function get_vector_orthogonal(M::AbstractManifold, p, c, N)
-    Y = allocate_result(M, typeof(get_vector), p, c, DefaultOrthogonalBasis(N))
+    Y = allocate_result(M, typeof(get_vector), p, c)
     return get_vector_orthogonal!(M, Y, p, c, N)
 end
 
@@ -588,7 +603,7 @@ function _get_vector(M::AbstractManifold, p, c, B::DefaultOrthonormalBasis)
 end
 function get_vector_orthonormal(M::AbstractManifold, p, c, N)
     B = DefaultOrthonormalBasis(N)
-    Y = allocate_result(M, typeof(get_vector), p, c, B)
+    Y = allocate_result(M, typeof(get_vector), p, c)
     return get_vector!(M, Y, p, c, B)
 end
 
@@ -631,7 +646,7 @@ end
 get_vector_default!(M, Y, p, c, N) = get_vector!(M, Y, p, c, DefaultOrthogonalBasis(N))
 
 function _get_vector!(M::AbstractManifold, Y, p, c, B::DefaultOrthogonalBasis)
-    return get_vector_orthogonal!(M, Y, p, X, DefaultOrthonormalBasis(number_system(B)))
+    return get_vector_orthogonal!(M, Y, p, c, DefaultOrthonormalBasis(number_system(B)))
 end
 get_vector_orthogonal!(M, Y, p, c, N) = get_vector!(M, Y, p, c, DefaultOrthonormalBasis(N))
 

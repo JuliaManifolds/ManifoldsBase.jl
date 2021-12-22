@@ -107,21 +107,15 @@ struct NotImplementedInverseRetraction <: AbstractInverseRetractionMethod end
     @test_throws MethodError log!(M, [0], [0], [0])
     @test_throws MethodError log(M, [0.0], [0.0])
 
-    @test_throws UndefVarError vector_transport_to!(M, [0], [0], [0], [0])
-    @test_throws UndefVarError vector_transport_to(M, [0], [0], [0])
-    @test_throws UndefVarError vector_transport_to!(M, [0], [0], [0], ProjectionTransport())
+    @test_throws MethodError vector_transport_to!(M, [0], [0], [0], [0])
+    @test_throws MethodError vector_transport_to(M, [0], [0], [0])
+    @test_throws MethodError vector_transport_to!(M, [0], [0], [0], ProjectionTransport())
 
     @test_throws MethodError vector_transport_direction!(M, [0], [0], [0], [0])
     @test_throws MethodError vector_transport_direction(M, [0], [0], [0])
 
-    @test_throws UndefVarError ManifoldsBase.vector_transport_along!(
-        M,
-        [0],
-        [0],
-        [0],
-        x -> x,
-    )
-    @test_throws UndefVarError ManifoldsBase.vector_transport_along(M, [0], [0], x -> x)
+    @test_throws MethodError ManifoldsBase.vector_transport_along!(M, [0], [0], [0], x -> x)
+    @test_throws MethodError vector_transport_along(M, [0], [0], x -> x)
 
     @test_throws MethodError injectivity_radius(M)
     @test_throws MethodError injectivity_radius(M, [0])
@@ -140,6 +134,6 @@ struct NotImplementedInverseRetraction <: AbstractInverseRetractionMethod end
     @test is_vector(M, [0], [0])
     @test check_vector(M, [0], [0]) === nothing
 
-    @test_throws ErrorException hat!(M, [0], [0], [0])
-    @test_throws ErrorException vee!(M, [0], [0], [0])
+    @test_throws MethodError hat!(M, [0], [0], [0])
+    @test_throws MethodError vee!(M, [0], [0], [0])
 end

@@ -487,7 +487,7 @@ end
 function _vector_transport_along!(M::AbstractManifold, Y, p, X, c, ::ParallelTransport)
     return parallel_transport_along!(M, Y, p, X, c)
 end
-function parallel_transport_along!(M::AbstractManifold, Y, p, X, c) end
+function parallel_transport_along! end
 function _vector_transport_along!(
     M::AbstractManifold,
     Y,
@@ -775,7 +775,7 @@ end
 function _vector_transport_to!(M::AbstractManifold, Y, p, X, q, ::ParallelTransport)
     return parallel_transport_to!(M, Y, p, X, q)
 end
-function parallel_transport_to!(M::AbstractManifold, Y, p, X, q) end
+function parallel_transport_to! end
 function _vector_transport_to!(
     M::AbstractManifold,
     Y,
@@ -786,7 +786,7 @@ function _vector_transport_to!(
 )
     return _vector_transport_to_diff!(M, Y, p, X, q, m.retraction)
 end
-function vector_transport_to_diff!(M::AbstractManifold, Y, p, X, q, m) end
+function vector_transport_to_diff! end
 function _vector_transport_to!(M::AbstractManifold, Y, p, X, q, ::ProjectionTransport)
     return vector_transport_to_project!(M, Y, p, X, q)
 end
