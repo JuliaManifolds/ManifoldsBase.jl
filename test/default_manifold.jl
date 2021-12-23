@@ -10,7 +10,7 @@ import ManifoldsBase:
     inner,
     isapprox,
     log!,
-    retract!,
+    parallel_transport_to!.retract!,
     inverse_retract!
 import Base: angle, convert
 using LinearAlgebra

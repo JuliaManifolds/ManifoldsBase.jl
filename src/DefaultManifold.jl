@@ -65,24 +65,12 @@ function get_basis(M::DefaultManifold, p, B::DiagonalizingOrthonormalBasis)
     return CachedBasis(B, DiagonalizingBasisData(B.frame_direction, eigenvalues, vecs))
 end
 
-function get_coordinates!(
-    M::DefaultManifold,
-    Y,
-    p,
-    X,
-    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
-)
+function get_coordinates_orthonormal!(M::DefaultManifold, Y, p, X, N)
     copyto!(Y, reshape(X, manifold_dimension(M)))
     return Y
 end
 
-function get_vector!(
-    M::DefaultManifold,
-    Y,
-    p,
-    X,
-    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
-)
+function get_vector_orthonormal!(M::DefaultManifold, Y, p, X, N)
     copyto!(Y, reshape(X, representation_size(M)))
     return Y
 end
@@ -110,21 +98,13 @@ function Base.show(io::IO, ::DefaultManifold{N,𝔽}) where {N,𝔽}
     return print(io, "DefaultManifold($(join(N.parameters, ", ")); field = $(𝔽))")
 end
 
-function vector_transport_along!(
-    ::DefaultManifold,
-    Y,
-    p,
-    X,
-    c::AbstractVector,
-    ::AbstractVectorTransportMethod,
-)
+function parallel_transport_slong!(::DefaultManifold, Y, p, X, c::AbstractVector)
     return copyto!(Y, X)
 end
-
-function vector_transport_to!(::DefaultManifold, Y, p, X, q, ::ParallelTransport)
+function parallel_transport_to!(::DefaultManifold, Y, p, X, q)
     return copyto!(Y, X)
 end
-function vector_transport_to!(M::DefaultManifold, Y, p, X, q, ::ProjectionTransport)
+function vector_transport_to_project!(M::DefaultManifold, Y, p, X, q)
     return project!(M, Y, q, X)
 end
 

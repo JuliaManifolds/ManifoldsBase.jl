@@ -268,26 +268,9 @@ on manifold `M`.
 """
 allocate_coordinates(M::AbstractManifold, p, T, n::Int) = allocate(p, T, n)
 
-function allocate_result(
-    M::AbstractManifold,
-    f::typeof(get_coordinates),
-    p,
-    X,
-    B::AbstractBasis,
-)
+function allocate_result(M::AbstractManifold, f::typeof(get_coordinates), p, X, field)
     T = allocate_result_type(M, f, (p, X))
-    return allocate_coordinates(M, p, T, number_of_coordinates(M, B))
-end
-
-function allocate_result(
-    M::AbstractManifold,
-    f::typeof(get_coordinates),
-    p,
-    X,
-    B::CachedBasis,
-)
-    T = allocate_result_type(M, f, (p, X))
-    return allocate_coordinates(M, p, T, number_of_coordinates(M, B))
+    return allocate_coordinates(M, p, T, number_of_coordinates(M, field))
 end
 
 @inline function allocate_result_type(
@@ -429,6 +412,31 @@ function _get_basis(
     V = gram_schmidt(M, p, E; kwargs...)
     return CachedBasis(B, V)
 end
+function _get_basis(M::AbstractManifold, p, B::VeeOrthogonalBasis)
+    return get_basis_vee(M, p, number_system(B))
+end
+function get_basis_vee(M::AbstractManifold, p, N)
+    return get_basis(M, p, DefaultOrthogonalBasis(N))
+end
+
+function _get_basis(M::AbstractManifold, p, B::DefaultBasis)
+    return get_basis_default(M, p, number_system(B))
+end
+function get_basis_default(M::AbstractManifold, p, N)
+    return get_basis(M, p, X, DefaultOrthogonalBasis(N))
+end
+
+function _get_basis(M::AbstractManifold, p, B::DefaultOrthogonalBasis)
+    return get_basis_orthogonal(M, p, number_system(B))
+end
+function get_basis_orthogonal(M::AbstractManifold, p, N)
+    return get_basis_orthonormal(M, p, N)
+end
+
+function _get_basis(M::AbstractManifold, p, B::DefaultOrthonormalBasis)
+    return get_basis_orthonormal(M, p, number_system(B))
+end
+function get_basis_orthonormal end
 
 @doc raw"""
     get_coordinates(M::AbstractManifold, p, X, B::AbstractBasis)
@@ -476,7 +484,7 @@ function _get_coordinates(M::AbstractManifold, p, X, B::DefaultOrthonormalBasis)
     return get_coordinates_orthonormal(M, p, X, number_system(B))
 end
 function get_coordinates_orthonormal(M::AbstractManifold, p, X, N)
-    Y = allocate_result(M, typeof(get_coordinates), p, X)
+    Y = allocate_result(M, typeof(get_coordinates), p, X, N)
     return get_coordinates_orthonormal!(M, Y, p, X, N)
 end
 
@@ -812,16 +820,20 @@ hat(M::AbstractManifold, p, X) = get_vector(M, p, X, VeeOrthogonalBasis())
 hat!(M::AbstractManifold, Y, p, X) = get_vector!(M, Y, p, X, VeeOrthogonalBasis())
 
 """
-    number_of_coordinates(M::AbstractManifold, B::AbstractBasis)
+    number_of_coordinates(M::AbstractManifold{𝔽}, B::AbstractBasis)
+    number_of_coordinates(M::AbstractManifold{𝔽}, ::𝔾)
 
-Compute the number of coordinates in basis `B` of manifold `M`.
+Compute the number of coordinates in basis of field type `𝔾` on a manifold `M`.
 This also corresponds to the number of vectors represented by `B`,
 or stored within `B` in case of a [`CachedBasis`](@ref).
 """
 function number_of_coordinates(M::AbstractManifold{𝔽}, B::AbstractBasis{𝔾}) where {𝔽,𝔾}
+    return number_of_coordinates(M, 𝔾)
+end
+function number_of_coordinates(M::AbstractManifold{𝔽}, ::𝔾) where {𝔽,𝔾}
     return div(manifold_dimension(M), real_dimension(𝔽)) * real_dimension(𝔾)
 end
-function number_of_coordinates(M::AbstractManifold{𝔽}, B::AbstractBasis{𝔽}) where {𝔽}
+function number_of_coordinates(M::AbstractManifold{𝔽}, ::𝔽) where {𝔽}
     return manifold_dimension(M)
 end
 

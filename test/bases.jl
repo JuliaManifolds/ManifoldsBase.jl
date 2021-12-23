@@ -5,7 +5,12 @@ using ManifoldsBase: CotangentSpace, CotangentSpaceType, TangentSpace, TangentSp
 using ManifoldsBase: FVector
 using Test
 import Base: +, -, *, copyto!, isapprox
-import ManifoldsBase: allocate, get_vector_orthonormal!, get_coordinates_orthonormal!
+import ManifoldsBase:
+    allocate,
+    get_vector_orthonormal!,
+    get_coordinates_orthonormal!,
+    get_basis_orthogonal,
+    get_basis_orthonormal
 
 
 struct ProjManifold <: AbstractManifold{ℝ} end
@@ -141,10 +146,10 @@ function ManifoldsBase.exp!(
     return copyto!(y, x + v)
 end
 
-function ManifoldsBase.get_basis(
+function ManifoldsBase.get_basis_orthonormal(
     ::DefaultManifold,
     p::NonBroadcastBasisThing,
-    B::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
+    𝔽,
 )
     return CachedBasis(
         B,
@@ -154,11 +159,7 @@ function ManifoldsBase.get_basis(
         ],
     )
 end
-function ManifoldsBase.get_basis(
-    ::DefaultManifold,
-    p::NonBroadcastBasisThing,
-    B::DefaultOrthogonalBasis{ℝ,TangentSpaceType},
-)
+function ManifoldsBase.get_basis_orthogonal(::DefaultManifold, p::NonBroadcastBasisThing, 𝔽)
     return CachedBasis(
         B,
         [
@@ -167,7 +168,7 @@ function ManifoldsBase.get_basis(
         ],
     )
 end
-function ManifoldsBase.get_basis(
+function ManifoldsBase.get_basis_default(
     ::DefaultManifold,
     p::NonBroadcastBasisThing,
     B::DefaultBasis{ℝ,TangentSpaceType},
