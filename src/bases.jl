@@ -273,10 +273,10 @@ function allocate_result(
     f::typeof(get_coordinates),
     p,
     X,
-    field::AbstractNumbers,
+    basis::AbstractBasis,
 )
     T = allocate_result_type(M, f, (p, X))
-    return allocate_coordinates(M, p, T, number_of_coordinates(M, field))
+    return allocate_coordinates(M, p, T, number_of_coordinates(M, basis))
 end
 
 @inline function allocate_result_type(
@@ -444,6 +444,11 @@ function _get_basis(M::AbstractManifold, p, B::DefaultOrthonormalBasis)
 end
 function get_basis_orthonormal end
 
+function _get_basis(M::AbstractManifold, p, B::DiagonalizingOrthonormalBasis)
+    return get_basis_diagonalizing(M, p, B)
+end
+function get_basis_diagonalizing end
+
 @doc raw"""
     get_coordinates(M::AbstractManifold, p, X, B::AbstractBasis)
     get_coordinates(M::AbstractManifold, p, X, B::CachedBasis)
@@ -490,7 +495,7 @@ function _get_coordinates(M::AbstractManifold, p, X, B::DefaultOrthonormalBasis)
     return get_coordinates_orthonormal(M, p, X, number_system(B))
 end
 function get_coordinates_orthonormal(M::AbstractManifold, p, X, N)
-    Y = allocate_result(M, get_coordinates, p, X, N)
+    Y = allocate_result(M, get_coordinates, p, X, DefaultOrthonormalBasis(N))
     return get_coordinates_orthonormal!(M, Y, p, X, N)
 end
 
