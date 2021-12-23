@@ -11,7 +11,7 @@ using ManifoldsBase
             # At the time of writing there seem to be two ambiguities regarding `getindex`,
             # one with a method from SparseArrays and one from VSCode's JSON processing
             # that's automatically loaded when running code in VSCode.
-            @test num_ambiguities <= 2
+            @test num_ambiguities <= 1
         else
             @test num_ambiguities == 0
         end
@@ -25,7 +25,7 @@ using ManifoldsBase
     include("default_manifold.jl")
     include("complex_manifold.jl")
     include("validation_manifold.jl")
-    include("embedded_manifold.jl")
+    # TODO redo include("embedded_manifold.jl")
     include("power.jl")
     include("domain_errors.jl")
     include("vector_transport_along.jl")

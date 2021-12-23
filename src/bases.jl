@@ -266,9 +266,15 @@ function get_vector end
 Allocate vector of coordinates of length `n` of type `T` of a vector at point `p`
 on manifold `M`.
 """
-allocate_coordinates(M::AbstractManifold, p, T, n::Int) = allocate(p, T, n)
+allocate_coordinates(::AbstractManifold, p, T, n::Int) = allocate(p, T, n)
 
-function allocate_result(M::AbstractManifold, f::typeof(get_coordinates), p, X, field)
+function allocate_result(
+    M::AbstractManifold,
+    f::typeof(get_coordinates),
+    p,
+    X,
+    field::AbstractNumbers,
+)
     T = allocate_result_type(M, f, (p, X))
     return allocate_coordinates(M, p, T, number_of_coordinates(M, field))
 end
@@ -484,7 +490,7 @@ function _get_coordinates(M::AbstractManifold, p, X, B::DefaultOrthonormalBasis)
     return get_coordinates_orthonormal(M, p, X, number_system(B))
 end
 function get_coordinates_orthonormal(M::AbstractManifold, p, X, N)
-    Y = allocate_result(M, typeof(get_coordinates), p, X, N)
+    Y = allocate_result(M, get_coordinates, p, X, N)
     return get_coordinates_orthonormal!(M, Y, p, X, N)
 end
 
@@ -602,8 +608,7 @@ function _get_vector(M::AbstractManifold, p, c, B::DefaultOrthogonalBasis)
     return get_vector_orthogonal(M, p, c, number_system(B))
 end
 function get_vector_orthogonal(M::AbstractManifold, p, c, N)
-    Y = allocate_result(M, typeof(get_vector), p, c)
-    return get_vector_orthogonal!(M, Y, p, c, N)
+    return get_vector_orthonormal(M, p, c, N)
 end
 
 function _get_vector(M::AbstractManifold, p, c, B::DefaultOrthonormalBasis)
@@ -611,7 +616,7 @@ function _get_vector(M::AbstractManifold, p, c, B::DefaultOrthonormalBasis)
 end
 function get_vector_orthonormal(M::AbstractManifold, p, c, N)
     B = DefaultOrthonormalBasis(N)
-    Y = allocate_result(M, typeof(get_vector), p, c)
+    Y = allocate_result(M, get_vector, p, c)
     return get_vector!(M, Y, p, c, B)
 end
 
@@ -625,7 +630,7 @@ function get_vector_cached(M::AbstractManifold, p, X, B::CachedBasis)
     #  2) guarantees a reasonable array type `Y`
     #     (for example scalar * `SizedValidation` is an `SArray`)
     bvectors = get_vectors(M, p, B)
-    return if _get_vector_cache_broadcast(bvectors[1]) === Val(false)
+    if _get_vector_cache_broadcast(bvectors[1]) === Val(false)
         Xt = X[1] * bvectors[1]
         for i in 2:length(X)
             copyto!(Xt, Xt + X[i] * bvectors[i])
@@ -830,8 +835,8 @@ or stored within `B` in case of a [`CachedBasis`](@ref).
 function number_of_coordinates(M::AbstractManifold{𝔽}, B::AbstractBasis{𝔾}) where {𝔽,𝔾}
     return number_of_coordinates(M, 𝔾)
 end
-function number_of_coordinates(M::AbstractManifold{𝔽}, ::𝔾) where {𝔽,𝔾}
-    return div(manifold_dimension(M), real_dimension(𝔽)) * real_dimension(𝔾)
+function number_of_coordinates(M::AbstractManifold{𝔽}, f::𝔾) where {𝔽,𝔾}
+    return div(manifold_dimension(M), real_dimension(𝔽)) * real_dimension(f)
 end
 function number_of_coordinates(M::AbstractManifold{𝔽}, ::𝔽) where {𝔽}
     return manifold_dimension(M)
@@ -944,31 +949,3 @@ inverse.
 """
 vee(M::AbstractManifold, p, X) = get_coordinates(M, p, X, VeeOrthogonalBasis())
 vee!(M::AbstractManifold, Y, p, X) = get_coordinates!(M, Y, p, X, VeeOrthogonalBasis())
-
-macro invoke_maker(argnum, type, sig)
-    parts = ManifoldsBase._split_signature(sig)
-    kwargs_list = parts[:kwargs_list]
-    callargs = parts[:callargs]
-    fname = parts[:fname]
-    where_exprs = parts[:where_exprs]
-    argnames = parts[:argnames]
-    argtypes = parts[:argtypes]
-    kwargs_call = parts[:kwargs_call]
-
-    return esc(
-        quote
-            function ($fname)($(callargs...); $(kwargs_list...)) where {$(where_exprs...)}
-                return invoke(
-                    $fname,
-                    Tuple{
-                        $(argtypes[1:(argnum - 1)]...),
-                        $type,
-                        $(argtypes[(argnum + 1):end]...),
-                    },
-                    $(argnames...);
-                    $(kwargs_call...),
-                )
-            end
-        end,
-    )
-end

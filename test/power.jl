@@ -3,12 +3,6 @@ using ManifoldsBase
 using ManifoldsBase: AbstractNumbers, ℝ, ℂ, NestedReplacingPowerRepresentation
 using StaticArrays
 
-struct DummyPowerRepresentation <: AbstractPowerRepresentation end
-struct DummyDecorator{TM<:AbstractManifold{ManifoldsBase.ℝ}} <:
-       AbstractDecoratorManifold{ManifoldsBase.ℝ,DefaultDecoratorType}
-    manifold::TM
-end
-
 power_array_wrapper(::Type{NestedPowerRepresentation}, ::Int) = identity
 power_array_wrapper(::Type{NestedReplacingPowerRepresentation}, i::Int) = SVector{i}
 
@@ -30,9 +24,6 @@ power_array_wrapper(::Type{NestedReplacingPowerRepresentation}, i::Int) = SVecto
             # add to type
             @test repr(PowerManifold(N, 3)) ==
                   "PowerManifold(DefaultManifold(3; field = ℝ), $(PowerRepr)(), 2, 3)"
-            # switch type
-            @test repr(PowerManifold(N, DummyPowerRepresentation(), 3)) ==
-                  "PowerManifold(DefaultManifold(3; field = ℝ), DummyPowerRepresentation(), 2, 3)"
             # nest
             @test repr(PowerManifold(N, PowerRepr(), 3)) ==
                   "PowerManifold(PowerManifold(DefaultManifold(3; field = ℝ), $(PowerRepr)(), 2), $(PowerRepr)(), 3)"
@@ -148,12 +139,13 @@ power_array_wrapper(::Type{NestedReplacingPowerRepresentation}, i::Int) = SVecto
             @test p[N, 1] == 1.0
             @test zero_vector(N, p) == zero(p)
         end
-        @testset "Decorator passthrough for getindex" begin
-            Mzero = ManifoldsBase.DefaultManifold()
-            N = PowerManifold(Mzero, PowerRepr(), 3)
-            p = [1.0, 2.0, 3.0]
-            DN = DummyDecorator(N)
-            @test p[DN, 1] == p[N, 1]
-        end
+        # TODO redor after Deco is done
+        # @testset "Decorator passthrough for getindex" begin
+        #     Mzero = ManifoldsBase.DefaultManifold()
+        #    N = PowerManifold(Mzero, PowerRepr(), 3)
+        #    p = [1.0, 2.0, 3.0]
+        #    DN = DummyDecorator(N)
+        #    @test p[DN, 1] == p[N, 1]
+        # end
     end
 end

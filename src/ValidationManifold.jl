@@ -9,7 +9,7 @@ encapsulated/stripped automatically when needed.
 This manifold is a decorator for a manifold, i.e. it decorates a [`AbstractManifold`](@ref) `M`
 with types points, vectors, and covectors.
 """
-struct ValidationManifold{𝔽,M<:AbstractManifold{𝔽}} <: AbstractManifold{𝔽}
+struct ValidationManifold{𝔽,M<:AbstractManifold{𝔽}} <: AbstractDecoratorManifold{𝔽}
     manifold::M
 end
 

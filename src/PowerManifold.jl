@@ -220,33 +220,16 @@ for PowerRepr in [PowerManifoldNested, PowerManifoldNestedReplacing]
             f::typeof(get_coordinates),
             p,
             X,
-            B::AbstractBasis,
+            field::AbstractNumbers,
         )
             return invoke(
                 allocate_result,
-                Tuple{AbstractManifold,typeof(get_coordinates),Any,Any,typeof(B)},
+                Tuple{AbstractManifold,typeof(get_coordinates),Any,Any,typeof(field)},
                 M,
                 f,
                 p,
                 X,
-                B,
-            )
-        end
-        function allocate_result(
-            M::$PowerRepr,
-            f::typeof(get_coordinates),
-            p,
-            X,
-            B::CachedBasis,
-        )
-            return invoke(
-                allocate_result,
-                Tuple{AbstractManifold,typeof(get_coordinates),Any,Any,typeof(B)},
-                M,
-                f,
-                p,
-                X,
-                B,
+                field,
             )
         end
     end
@@ -421,7 +404,7 @@ function get_component(M::AbstractPowerManifold, p, idx...)
     return _read(M, rep_size, p, idx)
 end
 
-function get_coordinates(M::AbstractPowerManifold, p, X, B::DefaultOrthonormalBasis)
+function get_coordinates(M::AbstractPowerManifold, p, X, B::AbstractBasis)
     rep_size = representation_size(M.manifold)
     vs = [
         get_coordinates(M.manifold, _read(M, rep_size, p, i), _read(M, rep_size, X, i), B) for i in get_iterator(M)
@@ -446,7 +429,7 @@ function get_coordinates(
     return reduce(vcat, reshape(vs, length(vs)))
 end
 
-function get_coordinates!(M::AbstractPowerManifold, Y, p, X, B::DefaultOrthonormalBasis)
+function get_coordinates!(M::AbstractPowerManifold, Y, p, X, B)
     rep_size = representation_size(M.manifold)
     dim = manifold_dimension(M.manifold)
     v_iter = 1
@@ -606,6 +589,9 @@ function injectivity_radius(M::AbstractPowerManifold, p)
         end
     end
     return radius
+end
+function injectivity_radius(M::AbstractPowerManifold, ::ExponentialRetraction)
+    return injectivity_radius(M.manifold)
 end
 injectivity_radius(M::AbstractPowerManifold) = injectivity_radius(M.manifold)
 
@@ -992,6 +978,26 @@ function vector_transport_direction!(
         vector_transport_direction!(
             M.manifold,
             _write(M, rep_size, Y, i),
+            _read(M, rep_size, p, i),
+            _read(M, rep_size, X, i),
+            _read(M, rep_size, d, i),
+            m.method,
+        )
+    end
+    return Y
+end
+function vector_transport_direction(
+    M::PowerManifoldNestedReplacing,
+    p,
+    X,
+    d,
+    m::PowerVectorTransport,
+)
+    Y = allocate_result(M, vector_transport_direction, p, X, d)
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        Y[i...] = vector_transport_direction(
+            M.manifold,
             _read(M, rep_size, p, i),
             _read(M, rep_size, X, i),
             _read(M, rep_size, d, i),

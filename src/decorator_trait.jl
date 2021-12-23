@@ -24,6 +24,8 @@ end
 @traitdef IsGeodesicEmbeddedManifold{M}
 @traitimpl IsGeodesicEmbeddedManifold{M} < -is_geodesic_embedded_manifold(M)
 
+manifold_dimension(M::AbstractDecoratorManifold) = manifold_dimension(get_manifold(M))
+
 is_geodesic_embedded_manifold(::Type{<:AbstractDecoratorManifold}) = false
 
 @traitfn function inner(
