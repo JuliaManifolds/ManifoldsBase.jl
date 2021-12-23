@@ -465,6 +465,14 @@ function vector_transport_along_project(M::AbstractManifold, p, X, c)
     Y = allocate_result(M, vector_transport_along, X, p)
     return vector_transport_along_project!(M, Y, p, X, c)
 end
+function _vector_transport_along(M::AbstractManifold, p, X, c, m::PoleLadderTransport)
+    Y = allocate_result(M, vector_transport_along, X, p)
+    return _vector_transport_along!(M, Y, p, X, c, m)
+end
+function _vector_transport_along(M::AbstractManifold, p, X, c, m::SchildsLadderTransport)
+    Y = allocate_result(M, vector_transport_along, X, p)
+    return _vector_transport_along!(M, Y, p, X, c, m)
+end
 
 """
     vector_transport_along!(M::AbstractManifold, Y, p, X, c)
@@ -789,9 +797,13 @@ function _vector_transport_to!(M::AbstractManifold, Y, p, X, q, ::ProjectionTran
 end
 function vector_transport_to_project!(M::AbstractManifold, Y, p, X, q) end
 
+function _vector_transport_to(M::AbstractManifold, p, X, c, m::PoleLadderTransport)
+    Y = allocate_result(M, vector_transport_to, X, p)
+    return _vector_transport_to!(M, Y, p, X, c, m)
+end
 
 @doc raw"""
-    vector_transport_to!(M::AbstractManifold, Y, p, X, q, method::PoleLadderTransport)
+    _vector_transport_to!(M::AbstractManifold, Y, p, X, q, method::PoleLadderTransport)
 
 Perform a vector transport by using [`PoleLadderTransport`](@ref).
 """
@@ -814,21 +826,23 @@ function _vector_transport_to!(M::AbstractManifold, Y, p, X, q, m::PoleLadderTra
     return Y
 end
 
-function _vector_transport_to!(
-    M::AbstractManifold,
-    Y,
-    p,
-    X,
-    q,
-    m::ScaledVectorTransport{T},
-) where {T<:AbstractVectorTransportMethod}
+function _vector_transport_to(M::AbstractManifold, p, X, c, m::ScaledVectorTransport)
+    Y = allocate_result(M, vector_transport_to, X, p)
+    return _vector_transport_to!(M, Y, p, X, c, m)
+end
+function _vector_transport_to!(M::AbstractManifold, Y, p, X, q, m::ScaledVectorTransport)
     vector_transport_to!(M, Y, p, X, q, m.method)
     Y .*= norm(M, p, X) / norm(M, q, Y)
     return Y
 end
 
+function _vector_transport_to(M::AbstractManifold, p, X, c, m::SchildsLadderTransport)
+    Y = allocate_result(M, vector_transport_to, X, p)
+    return _vector_transport_to!(M, Y, p, X, c, m)
+end
+
 @doc raw"""
-    vector_transport_to!(M::AbstractManifold, Y, p, X, q, method::SchildsLadderTransport)
+    _vector_transport_to!(M::AbstractManifold, Y, p, X, q, method::SchildsLadderTransport)
 
 Perform a vector transport by using [`SchildsLadderTransport`](@ref).
 """

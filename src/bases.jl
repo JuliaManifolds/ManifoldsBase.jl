@@ -449,11 +449,6 @@ function _get_basis(M::AbstractManifold, p, B::DefaultOrthonormalBasis)
 end
 function get_basis_orthonormal end
 
-function _get_basis(M::AbstractManifold, p, B::DiagonalizingOrthonormalBasis)
-    return get_basis_diagonalizing(M, p, B)
-end
-function get_basis_diagonalizing end
-
 @doc raw"""
     get_coordinates(M::AbstractManifold, p, X, B::AbstractBasis)
     get_coordinates(M::AbstractManifold, p, X, B::CachedBasis)

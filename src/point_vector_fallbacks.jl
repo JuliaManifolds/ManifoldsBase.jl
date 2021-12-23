@@ -27,7 +27,11 @@ macro manifold_element_forwards(T, Twhere, field::Symbol)
             function ManifoldsBase.allocate(p::$T, ::Type{P}) where {P,$Twhere}
                 return $T(allocate(p.$field, P))
             end
-            function allocate(p::$T, ::Type{P}, dims::Tuple) where {P,$Twhere}
+            function ManifoldsBase.allocate(
+                p::$T,
+                ::Type{P},
+                dims::Tuple,
+            ) where {P,$Twhere}
                 return $T(allocate(p.$field, P, dims))
             end
 
