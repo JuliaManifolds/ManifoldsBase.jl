@@ -171,10 +171,10 @@ end
 function ManifoldsBase.get_basis_default(
     ::DefaultManifold,
     p::NonBroadcastBasisThing,
-    B::DefaultBasis{ℝ,TangentSpaceType},
+    N::ManifoldsBase.RealNumbers,
 )
     return CachedBasis(
-        B,
+        DefaultBasis(N),
         [
             NonBroadcastBasisThing(ManifoldsBase._euclidean_basis_vector(p.v, i)) for
             i in eachindex(p.v)
