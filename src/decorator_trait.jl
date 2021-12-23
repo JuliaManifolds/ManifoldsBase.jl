@@ -5,6 +5,12 @@
 abstract type AbstractDecoratorManifold{𝔽} <: AbstractManifold{𝔽} end
 
 #
+# Base passons
+#
+representation_size(M::AbstractDecoratorManifold) = representation_size(base_manifold(M))
+manifold_dimension(M::AbstractDecoratorManifold) = manifold_dimension(base_manifold(M))
+
+#
 # EmbeddedManifold Decorator
 #
 @traitdef IsEmbeddedManifold{M}
@@ -23,8 +29,6 @@ end
 
 @traitdef IsGeodesicEmbeddedManifold{M}
 @traitimpl IsGeodesicEmbeddedManifold{M} < -is_geodesic_embedded_manifold(M)
-
-manifold_dimension(M::AbstractDecoratorManifold) = manifold_dimension(get_manifold(M))
 
 is_geodesic_embedded_manifold(::Type{<:AbstractDecoratorManifold}) = false
 

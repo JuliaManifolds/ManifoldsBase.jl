@@ -3,20 +3,16 @@
 # also the Schild and pole special cases
 #
 using ManifoldsBase, Test
-
+import ManifoldsBase: parallel_transport_to!, parallel_transport_along!
 
 struct NonDefaultEuclidean <: AbstractManifold{ManifoldsBase.ℝ} end
 ManifoldsBase.log!(::NonDefaultEuclidean, v, x, y) = (v .= y .- x)
 ManifoldsBase.exp!(::NonDefaultEuclidean, y, x, v) = (y .= x .+ v)
-function ManifoldsBAse.parallel_transport_to!(
-    ::NonDefaultEuclidean,
-    vto,
-    x,
-    v,
-    y,
-    ::ParallelTransport,
-)
-    return copyto!(vto, v)
+function ManifoldsBase.parallel_transport_to!(::NonDefaultEuclidean, Y, p, X, q)
+    return copyto!(Y, X)
+end
+function ManifoldsBase.parallel_transport_along!(::NonDefaultEuclidean, Y, p, X, q)
+    return copyto!(Y, X)
 end
 
 @testset "vector_transport_along" begin

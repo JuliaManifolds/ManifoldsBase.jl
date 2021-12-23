@@ -429,7 +429,7 @@ function _get_basis(M::AbstractManifold, p, B::DefaultBasis)
     return get_basis_default(M, p, number_system(B))
 end
 function get_basis_default(M::AbstractManifold, p, N)
-    return get_basis(M, p, X, DefaultOrthogonalBasis(N))
+    return get_basis(M, p, DefaultOrthogonalBasis(N))
 end
 
 function _get_basis(M::AbstractManifold, p, B::DefaultOrthogonalBasis)
@@ -438,6 +438,11 @@ end
 function get_basis_orthogonal(M::AbstractManifold, p, N)
     return get_basis_orthonormal(M, p, N)
 end
+
+function _get_basis(M::AbstractManifold, p, B::DiagonalizingOrthonormalBasis)
+    return get_basis_diagonalizing(M, p, B)
+end
+function get_basis_diagonalizing end
 
 function _get_basis(M::AbstractManifold, p, B::DefaultOrthonormalBasis)
     return get_basis_orthonormal(M, p, number_system(B))
@@ -659,7 +664,7 @@ end
 get_vector_default!(M, Y, p, c, N) = get_vector!(M, Y, p, c, DefaultOrthogonalBasis(N))
 
 function _get_vector!(M::AbstractManifold, Y, p, c, B::DefaultOrthogonalBasis)
-    return get_vector_orthogonal!(M, Y, p, c, DefaultOrthonormalBasis(number_system(B)))
+    return get_vector_orthogonal!(M, Y, p, c, number_system(B))
 end
 get_vector_orthogonal!(M, Y, p, c, N) = get_vector!(M, Y, p, c, DefaultOrthonormalBasis(N))
 

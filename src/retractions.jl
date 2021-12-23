@@ -165,8 +165,14 @@ available methods.
 
 See also [`retract!`](@ref).
 """
-function inverse_retract!(M::AbstractManifold, X, p, q)
-    return _inverse_retract!(M, X, p, q, default_inverse_retraction_method(M))
+function inverse_retract!(
+    M::AbstractManifold,
+    X,
+    p,
+    q,
+    m::AbstractInverseRetractionMethod = default_inverse_retraction_method(M),
+)
+    return _inverse_retract!(M, X, p, q, m)
 end
 function _inverse_retract!(M::AbstractManifold, X, p, q, ::LogarithmicInverseRetraction)
     return log!(M, X, p, q)

@@ -71,6 +71,8 @@ array_value(p::AbstractArray) = p
 array_value(p::ValidationMPoint) = p.value
 array_value(X::ValidationFibreVector) = X.value
 
+base_manifold(M::ValidationManifold) = M.manifold
+
 function check_point(M::ValidationManifold, p; kwargs...)
     return check_point(M.manifold, array_value(p); kwargs...)
 end
@@ -345,6 +347,20 @@ function project!(M::ValidationManifold, Y, p, X; kwargs...)
     return Y
 end
 
+function vector_transport_along(
+    M::ValidationManifold,
+    p,
+    X,
+    c::AbstractVector,
+    m::AbstractVectorTransportMethod;
+    kwargs...,
+)
+    is_vector(M, p, X, true; kwargs...)
+    Y = vector_transport_along(M.manifold, array_value(p), array_value(X), c, m)
+    is_vector(M, c[end], Y, true; kwargs...)
+    return Y
+end
+
 function vector_transport_along!(
     M::ValidationManifold,
     Y,
@@ -367,6 +383,20 @@ function vector_transport_along!(
     return Y
 end
 
+function vector_transport_to(
+    M::ValidationManifold,
+    p,
+    X,
+    q,
+    m::AbstractVectorTransportMethod;
+    kwargs...,
+)
+    is_point(M, q, true; kwargs...)
+    is_vector(M, p, X, true; kwargs...)
+    Y = vector_transport_to(M.manifold, array_value(p), array_value(X), array_value(q), m)
+    is_vector(M, q, Y, true; kwargs...)
+    return Y
+end
 function vector_transport_to!(
     M::ValidationManifold,
     Y,

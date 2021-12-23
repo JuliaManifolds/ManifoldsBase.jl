@@ -482,7 +482,8 @@ function vector_transport_along!(
     c,
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
-    return _vector_transport_along!(M, Y, p, X, c, m)
+    _vector_transport_along!(M, Y, p, X, c, m)
+    return
 end
 function _vector_transport_along!(M::AbstractManifold, Y, p, X, c, ::ParallelTransport)
     return parallel_transport_along!(M, Y, p, X, c)
@@ -498,11 +499,11 @@ function _vector_transport_along!(
 )
     return vector_transport_along_diff!(M, Y, p, X, c, m.retraction)
 end
-function vector_transport_along_diff!(M::AbstractManifold, Y, p, X, c, m) end
+function vector_transport_along_diff! end
 function _vector_transport_along!(M::AbstractManifold, Y, p, X, c, ::ProjectionTransport)
     return vector_transport_along_project!(M, Y, p, X, c)
 end
-function vector_transport_along_project!(M::AbstractManifold, Y, p, X, c) end
+function vector_transport_along_project! end
 
 @doc raw"""
     vector_transport_along!(
@@ -529,17 +530,14 @@ function vector_transport_along!(
     if n == 0
         copyto!(Y, X)
     else
-        # we shouldn't assume that vector_transport_to! works when both input and output
-        # vectors are the same object
-        Y2 = allocate(X)
-        vector_transport_to!(M, Y2, p, X, c[1], method)
+        vector_transport_to!(M, Y, p, X, c[1], method)
         for i in 1:(length(c) - 1)
-            vector_transport_to!(M, Y, c[i], Y2, c[i + 1], method)
-            copyto!(Y2, Y)
+            vector_transport_to!(M, Y, c[i], Y, c[i + 1], method)
         end
     end
     return Y
 end
+
 @doc raw"""
     function vector_transport_along!(
         M::AbstractManifold,
@@ -665,7 +663,6 @@ function _vector_transport_along!(
     end
     return Y
 end
-
 
 """
     vector_transport_direction(M::AbstractManifold, p, X, d)

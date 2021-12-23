@@ -429,7 +429,7 @@ function get_coordinates(
     return reduce(vcat, reshape(vs, length(vs)))
 end
 
-function get_coordinates!(M::AbstractPowerManifold, Y, p, X, B)
+function get_coordinates!(M::AbstractPowerManifold, Y, p, X, B::AbstractBasis)
     rep_size = representation_size(M.manifold)
     dim = manifold_dimension(M.manifold)
     v_iter = 1
