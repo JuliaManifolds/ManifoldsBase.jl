@@ -458,7 +458,7 @@ function vector_transport_along_diff(M::AbstractManifold, p, X, c, m)
     Y = allocate_result(M, vector_transport_along, X, p)
     return vector_transport_along_diff!(M, Y, p, X, c, m)
 end
-function vector_transport_along(M::AbstractManifold, p, X, c, ::ProjectionTransport)
+function _vector_transport_along(M::AbstractManifold, p, X, c, ::ProjectionTransport)
     return vector_transport_along_project(M, p, X, c)
 end
 function vector_transport_along_project(M::AbstractManifold, p, X, c)
@@ -729,7 +729,7 @@ function parallel_transport_to(M::AbstractManifold, p, X, q)
     Y = allocate_result(M, vector_transport_to, X, p)
     return parallel_transport_to!(M, Y, p, X, q)
 end
-function vector_transport_to(
+function _vector_transport_to(
     M::AbstractManifold,
     p,
     X,
@@ -742,7 +742,7 @@ function vector_transport_to_diff(M::AbstractManifold, p, X, q, m)
     Y = allocate_result(M, vector_transport_to, X, p)
     return vector_transport_to_diff!(M, Y, p, X, q, m)
 end
-function vector_transport_to(M::AbstractManifold, p, X, q, ::ProjectionTransport)
+function _vector_transport_to(M::AbstractManifold, p, X, q, ::ProjectionTransport)
     return vector_transport_to_project(M, p, X, c)
 end
 function vector_transport_to_project(M::AbstractManifold, p, X, q)

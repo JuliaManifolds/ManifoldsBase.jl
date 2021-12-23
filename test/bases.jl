@@ -161,7 +161,7 @@ function ManifoldsBase.get_basis_orthonormal(
 end
 function ManifoldsBase.get_basis_orthogonal(::DefaultManifold, p::NonBroadcastBasisThing, 𝔽)
     return CachedBasis(
-        B,
+        DefaultOrthogonalBasis(𝔽),
         [
             NonBroadcastBasisThing(ManifoldsBase._euclidean_basis_vector(p.v, i)) for
             i in eachindex(p.v)

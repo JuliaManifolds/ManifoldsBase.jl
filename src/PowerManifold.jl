@@ -1039,16 +1039,12 @@ vector_transport_to(::AbstractPowerManifold, ::Any, ::Any, ::Any, ::PowerVectorT
 function vector_transport_to(M::AbstractPowerManifold, p, X, q)
     return vector_transport_to(M, p, X, q, PowerVectorTransport(ParallelTransport()))
 end
-
-function vector_transport_to!(M::AbstractPowerManifold, Y, p, X, q)
-    return vector_transport_to!(M, Y, p, X, q, PowerVectorTransport(ParallelTransport()))
-end
-function vector_transport_to!(M::AbstractPowerManifold, Y, p, X, q, m::PowerVectorTransport)
+function vector_transport_to(M::AbstractPowerManifold, Y, p, X, q, m::PowerVectorTransport)
     rep_size = representation_size(M.manifold)
+    Y = allocate_result(M, vector_transport_to, p, X)
     for i in get_iterator(M)
-        vector_transport_to!(
+        Y[i...] = vector_transport_to(
             M.manifold,
-            _write(M, rep_size, Y, i),
             _read(M, rep_size, p, i),
             _read(M, rep_size, X, i),
             _read(M, rep_size, q, i),
@@ -1056,6 +1052,10 @@ function vector_transport_to!(M::AbstractPowerManifold, Y, p, X, q, m::PowerVect
         )
     end
     return Y
+end
+
+function vector_transport_to!(M::AbstractPowerManifold, Y, p, X, q)
+    return vector_transport_to!(M, Y, p, X, q, PowerVectorTransport(ParallelTransport()))
 end
 function vector_transport_to!(
     M::PowerManifoldNestedReplacing,
@@ -1076,17 +1076,6 @@ function vector_transport_to!(
         )
     end
     return Y
-end
-
-function vector_transport_to!(
-    M::AbstractPowerManifold,
-    Y,
-    p,
-    X,
-    q,
-    m::AbstractVectorTransportMethod,
-)
-    return vector_transport_to!(M, Y, p, X, q, PowerVectorTransport(m))
 end
 
 """
