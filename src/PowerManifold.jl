@@ -209,21 +209,41 @@ function allocate_result(M::PowerManifoldNested, f, x...)
         ]
     end
 end
-function allocate_result(M::PowerManifoldNested, f::typeof(get_coordinates), p, X, B::AbstractBasis)
+function allocate_result(
+    M::PowerManifoldNested,
+    f::typeof(get_coordinates),
+    p,
+    X,
+    B::AbstractBasis,
+)
     if representation_size(M.manifold) === ()
         return allocate(x[1])
     else
         return [
-            allocate_result(M.manifold, f, _access_nested(p, i), _access_nested(X, i), B) for
-            i in get_iterator(M)
+            allocate_result(M.manifold, f, _access_nested(p, i), _access_nested(X, i), B)
+            for i in get_iterator(M)
         ]
     end
 end
 function allocate_result(::PowerManifoldNestedReplacing, f, x...)
     return copy(x[1])
 end
-function allocate_result(M::PowerManifoldNestedReplacing, f::typeof(get_coordinates), p, X, B::AbstractBasis)
-    return invoke(allocate_result, Tuple{AbstractManifold, Any, Any, AbstractBasis}, M, f, p, X, B)
+function allocate_result(
+    M::PowerManifoldNestedReplacing,
+    f::typeof(get_coordinates),
+    p,
+    X,
+    B::AbstractBasis,
+)
+    return invoke(
+        allocate_result,
+        Tuple{AbstractManifold,Any,Any,AbstractBasis},
+        M,
+        f,
+        p,
+        X,
+        B,
+    )
 end
 for PowerRepr in [PowerManifoldNested, PowerManifoldNestedReplacing]
     @eval begin
@@ -956,7 +976,9 @@ end
 function vector_transport_direction(M::AbstractPowerManifold, p, X, d)
     return vector_transport_direction(M, p, X, d, PowerVectorTransport(ParallelTransport()))
 end
-
+function vector_transport_direction(M::AbstractPowerManifold, p, X, d, m::AbstractBasis)
+    return vector_transport_direction(M, p, X, d, PowerVectorTransport(m))
+end
 function vector_transport_direction!(M::AbstractPowerManifold, Y, p, X, d)
     return vector_transport_direction!(
         M,

@@ -64,6 +64,19 @@ points of type `TP`, tangent vectors of type `TV`, with forwarding to fields `pf
 """
 macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
     block = quote
+        function ManifoldsBase.allocate_result(::$TM, ::typeof(log), p::$TP, ::$TP)
+            a = allocate(p.$vfield)
+            return $TV(a)
+        end
+        function ManifoldsBase.allocate_result(
+            ::$TM,
+            ::typeof(inverse_retract),
+            p::$TP,
+            ::$TP,
+        )
+            a = allocate(p.$vfield)
+            return $TV(a)
+        end
         function ManifoldsBase.allocate_coordinates(M::$TM, p::$TP, T, n::Int)
             return ManifoldsBase.allocate_coordinates(M, p.$pfield, T, n)
         end
@@ -120,20 +133,6 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
             return isapprox(M, p.$pfield, X.$vfield, Y.$vfield; kwargs...)
         end
 
-        function ManifoldsBase.allocate_result(::$TM, ::typeof(log), p::$TP, ::$TP)
-            a = allocate(p.$vfield)
-            return $TV(a)
-        end
-        function ManifoldsBase.allocate_result(
-            ::$TM,
-            ::typeof(inverse_retract),
-            p::$TP,
-            ::$TP,
-        )
-            a = allocate(p.$vfield)
-            return $TV(a)
-        end
-
         function ManifoldsBase.log!(M::$TM, X::$TV, p::$TP, q::$TP)
             log!(M, X.$vfield, p.$pfield, q.$pfield)
             return X
@@ -168,7 +167,43 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
             return X
         end
     end
-
+    for f_postfix in
+        ["default", "orthogonal", "orthonormal", "vee", "cached", "diagonalizing"]
+        push!(
+            block.args,
+            quote
+                function ManifoldsBase.("get_coordinates_$(f_postfix)")(
+                    M::$TM,
+                    p::$TP,
+                    X::$TV,
+                    B,
+                )
+                    return ("get_coordinates_$(f_postfix)")(M, Y, p.$pfield, X.$vfield, B)
+                end
+                function ManifoldsBase.("get_coordinates_$(f_postfix)!")(
+                    M::$TM,
+                    Y,
+                    p::$TP,
+                    X::$TV,
+                    B,
+                )
+                    return ("get_coordinates_$(f_postfix)!")(M, Y, p.$pfield, X.$vfield, B)
+                end
+                function ManifoldsBase.("get_vector_$(f_postfix)")(M::$TM, p::$TP, X, B)
+                    return $TV(("get_vector_$(f_postfix)")(M, p.$pfield, X, B))
+                end
+                function ManifoldsBase.("get_vector_$(f_postfix)!")(
+                    M::$TM,
+                    Y::$TV,
+                    p::$TP,
+                    X,
+                    B,
+                )
+                    return ("get_vector_$(f_postfix)!")(M, Y.$vfield, p.$pfield, X, B)
+                end
+            end,
+        )
+    end
     # TODO  forward retraction / inverse_retraction
 
     # TODO  forward vector transports
