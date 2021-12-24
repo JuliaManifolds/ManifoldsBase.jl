@@ -168,22 +168,22 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
         end
     end
     for f_postfix in [:default, :orthogonal, :orthonormal, :vee, :cached, :diagonalizing]
-        ca = Symbol("get_coordinates_$(f_postfix)")
-        cm = Symbol("get_coordinates_$(f_postfix)!")
-        va = Symbol("get_vector_$(f_postfix)")
-        vm = Symbol("get_vector_$(f_postfix)!")
+        ca = Symbol("ManifoldsBase.get_coordinates_$(f_postfix)")
+        cm = Symbol("ManifoldsBase.get_coordinates_$(f_postfix)!")
+        va = Symbol("ManifoldsBase.get_vector_$(f_postfix)")
+        vm = Symbol("ManifoldsBase.get_vector_$(f_postfix)!")
         push!(block.args, quote
-            function ManifoldsBase.($ca)(M::$TM, p::$TP, X::$TV, B)
-                return ($ca)(M, p.$pfield, X.$vfield, B)
+            function $ca(M::$TM, p::$TP, X::$TV, B)
+                return $ca(M, p.$pfield, X.$vfield, B)
             end
-            function ManifoldsBase.($cm)(M::$TM, Y, p::$TP, X::$TV, B)
-                return ($cm)(M, Y, p.$pfield, X.$vfield, B)
+            function $cm(M::$TM, Y, p::$TP, X::$TV, B)
+                return $cm(M, Y, p.$pfield, X.$vfield, B)
             end
-            function ManifoldsBase.($va)(M::$TM, p::$TP, X, B)
+            function $va(M::$TM, p::$TP, X, B)
                 return $TV(($va)(M, p.$pfield, X, B))
             end
-            function ManifoldsBase.($vm)(M::$TM, Y::$TV, p::$TP, X, B)
-                return ($vm)(M, Y.$vfield, p.$pfield, X, B)
+            function $vm(M::$TM, Y::$TV, p::$TP, X, B)
+                return $vm(M, Y.$vfield, p.$pfield, X, B)
             end
         end)
     end
