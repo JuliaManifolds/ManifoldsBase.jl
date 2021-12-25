@@ -490,19 +490,21 @@ get_iterator(::PowerManifold{𝔽,<:AbstractManifold{𝔽},Tuple{N}}) where {�
     return Base.product(map(Base.OneTo, size_tuple)...)
 end
 
-function get_vector(M::AbstractPowerManifold, p, X, B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:PowerBasisData}) where {𝔽}
+function get_vector(
+    M::AbstractPowerManifold,
+    p,
+    X,
+    B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:PowerBasisData},
+) where {𝔽}
     Y = allocate_result(M, get_vector, p, X)
-    dim = manifold_dimension(M.manifold)
     rep_size = representation_size(M.manifold)
-    v_iter = 1
     for i in get_iterator(M)
         Y[i...] = get_vector(
             M.manifold,
             _read(M, rep_size, p, i),
-            X[i...],
+            _read(M, rep_size, X, i),
             _access_nested(B.data.bases, i),
         )
-        v_iter += dim
     end
     return Y
 end
@@ -513,70 +515,37 @@ function get_vector!(
     X,
     B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:PowerBasisData},
 ) where {𝔽}
-    dim = manifold_dimension(M.manifold)
     rep_size = representation_size(M.manifold)
-    v_iter = 1
     for i in get_iterator(M)
         get_vector!(
             M.manifold,
             _write(M, rep_size, Y, i),
             _read(M, rep_size, p, i),
-            X[v_iter:(v_iter + dim - 1)],
+            _read(M, rep_size, X, i),
             _access_nested(B.data.bases, i),
         )
-        v_iter += dim
     end
     return Y
 end
-function get_vector!(M::AbstractPowerManifold, Y, p, X, B::DefaultOrthonormalBasis)
-    dim = manifold_dimension(M.manifold)
+function get_vector(M::AbstractPowerManifold, Y, p, X, B::AbstractBasis)
+    Y = allocate_result(M, get_vector, p, X)
     rep_size = representation_size(M.manifold)
-    v_iter = 1
+    for i in get_iterator(M)
+        Y[i...] =
+            get_vector(M.manifold, _read(M, rep_size, p, i), _read(M, rep_size, X, i), B)
+    end
+    return Y
+end
+function get_vector!(M::AbstractPowerManifold, Y, p, X, B::AbstractBasis)
+    rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         get_vector!(
             M.manifold,
             _write(M, rep_size, Y, i),
             _read(M, rep_size, p, i),
-            X[v_iter:(v_iter + dim - 1)],
+            _read(M, rep_size, X, i),
             B,
         )
-        v_iter += dim
-    end
-    return Y
-end
-function get_vector!(
-    M::PowerManifoldNestedReplacing,
-    Y,
-    p,
-    X,
-    B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:PowerBasisData},
-) where {𝔽}
-    dim = manifold_dimension(M.manifold)
-    rep_size = representation_size(M.manifold)
-    v_iter = 1
-    for i in get_iterator(M)
-        Y[i...] = get_vector(
-            M.manifold,
-            _read(M, rep_size, p, i),
-            X[v_iter:(v_iter + dim - 1)],
-            _access_nested(B.data.bases, i),
-        )
-        v_iter += dim
-    end
-    return Y
-end
-function get_vector!(M::PowerManifoldNestedReplacing, Y, p, X, B::DefaultOrthonormalBasis)
-    dim = manifold_dimension(M.manifold)
-    rep_size = representation_size(M.manifold)
-    v_iter = 1
-    for i in get_iterator(M)
-        Y[i...] = get_vector(
-            M.manifold,
-            _read(M, rep_size, p, i),
-            X[v_iter:(v_iter + dim - 1)],
-            B,
-        )
-        v_iter += dim
     end
     return Y
 end
