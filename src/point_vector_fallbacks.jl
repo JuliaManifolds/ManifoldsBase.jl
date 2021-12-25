@@ -17,7 +17,7 @@ List of forwarded functions:
 """
 macro manifold_element_forwards(T, field::Symbol)
     return esc(quote
-        @manifold_element_forwards ($T) _ ($field)
+        ManifoldsBase.@manifold_element_forwards ($T) _ ($field)
     end)
 end
 macro manifold_element_forwards(T, Twhere, field::Symbol)
@@ -168,11 +168,12 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
         end
     end
     for f_postfix in [:default, :orthogonal, :orthonormal, :vee, :cached, :diagonalizing]
-        ca = Symbol("ManifoldsBase.get_coordinates_$(f_postfix)")
-        cm = Symbol("ManifoldsBase.get_coordinates_$(f_postfix)!")
-        va = Symbol("ManifoldsBase.get_vector_$(f_postfix)")
-        vm = Symbol("ManifoldsBase.get_vector_$(f_postfix)!")
+        ca = Symbol("get_coordinates_$(f_postfix)")
+        cm = Symbol("get_coordinates_$(f_postfix)!")
+        va = Symbol("get_vector_$(f_postfix)")
+        vm = Symbol("get_vector_$(f_postfix)!")
         push!(block.args, quote
+            import ManifoldsBase: $ca, $cm, $va, $vm
             function ($ca)(M::$TM, p::$TP, X::$TV, B)
                 return ($ca)(M, p.$pfield, X.$vfield, B)
             end
@@ -214,7 +215,7 @@ List of forwarded functions:
 """
 macro manifold_vector_forwards(T, field::Symbol)
     return esc(quote
-        @manifold_vector_forwards ($T) _ ($field)
+        ManifoldsBase.@manifold_vector_forwards ($T) _ ($field)
     end)
 end
 macro manifold_vector_forwards(T, Twhere, field::Symbol)
@@ -230,7 +231,7 @@ macro manifold_vector_forwards(T, Twhere, field::Symbol)
             Base.:+(X::$T) where {$Twhere} = $T(X.$field)
             Base.zero(X::$T) where {$Twhere} = $T(zero(X.$field))
 
-            @eval @manifold_element_forwards $T $Twhere $field
+            @eval ManifoldsBase.@manifold_element_forwards $T $Twhere $field
 
             Base.axes(p::$T) where {$Twhere} = axes(p.$field)
 

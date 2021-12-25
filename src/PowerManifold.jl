@@ -960,7 +960,7 @@ function vector_transport_direction!(
     p,
     X,
     d,
-    m::AbstractVectorTransportMethod,
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
@@ -975,12 +975,13 @@ function vector_transport_direction!(
     end
     return Y
 end
-function vector_transport_direction(
-    M::PowerManifoldNestedReplacing,
+function vector_transport_direction!(
+    M::AbstractPowerManifold,
+    Y,
     p,
     X,
     d,
-    m::AbstractVectorTransportMethod,
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
     Y = allocate_result(M, vector_transport_direction, p, X, d)
     rep_size = representation_size(M.manifold)
@@ -995,14 +996,35 @@ function vector_transport_direction(
     end
     return Y
 end
+
 function vector_transport_direction!(
     M::PowerManifoldNestedReplacing,
     Y,
     p,
     X,
     d,
-    m::AbstractVectorTransportMethod,
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        Y[i...] = vector_transport_direction(
+            M.manifold,
+            _read(M, rep_size, p, i),
+            _read(M, rep_size, X, i),
+            _read(M, rep_size, d, i),
+            m,
+        )
+    end
+    return Y
+end
+function vector_transport_direction(
+    M::PowerManifoldNestedReplacing,
+    p,
+    X,
+    d,
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
+)
+    Y = allocate_result(M, vector_transport_direction, p, X, d)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         Y[i...] = vector_transport_direction(
@@ -1036,7 +1058,7 @@ function vector_transport_to(
     p,
     X,
     q,
-    m::AbstractVectorTransportMethod,
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
     rep_size = representation_size(M.manifold)
     Y = allocate_result(M, vector_transport_to, p, X)
@@ -1051,14 +1073,33 @@ function vector_transport_to(
     end
     return Y
 end
-
+function vector_transport_to!(
+    M::AbstractPowerManifold,
+    Y,
+    p,
+    X,
+    q,
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
+)
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        Y[i...] = vector_transport_to(
+            M.manifold,
+            _read(M, rep_size, p, i),
+            _read(M, rep_size, X, i),
+            _read(M, rep_size, q, i),
+            m,
+        )
+    end
+    return Y
+end
 function vector_transport_to!(
     M::PowerManifoldNestedReplacing,
     Y,
     p,
     X,
     q,
-    m::AbstractVectorTransportMethod,
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)

@@ -499,6 +499,11 @@ function get_coordinates_orthonormal(M::AbstractManifold, p, X, N)
     return get_coordinates_orthonormal!(M, Y, p, X, N)
 end
 
+function _get_coordinates(M::AbstractManifold, p, X, B::DiagonalizingOrthonormalBasis)
+    return get_coordinates_diagonalizing(M, p, X, number_system(B))
+end
+function get_coordinates_diagonalizing end
+
 function _get_coordinates(M::AbstractManifold, p, X, B::CachedBasis)
     return get_coordinates_cached(M, number_system(M), p, X, B, number_system(B))
 end
@@ -551,6 +556,11 @@ function _get_coordinates!(M::AbstractManifold, Y, p, X, B::DefaultOrthonormalBa
     return get_coordinates_orthonormal!(M, Y, p, X, number_system(B))
 end
 function get_coordinates_orthonormal! end
+
+function _get_coordinates!(M::AbstractManifold, Y, p, X, B::DiagonalizingOrthonormalBasis)
+    return get_coordinates_diagonalizing!(M, Y, p, X, number_system(B))
+end
+function get_coordinates_diagonalizing! end
 
 function _get_coordinates!(M::AbstractManifold, Y, p, X, B::CachedBasis)
     return get_coordinates_cached!(M, number_system(M), Y, p, X, B, number_system(B))
@@ -625,6 +635,11 @@ function get_vector_orthonormal(M::AbstractManifold, p, c, N)
     return get_vector!(M, Y, p, c, B)
 end
 
+function _get_vector!(M::AbstractManifold, p, c, B::DiagonalizingOrthonormalBasis)
+    return get_vector_diagonalizing(M, p, c, number_system(B))
+end
+function get_vector_diagonalizing end
+
 function _get_vector(M::AbstractManifold, p, c, B::CachedBasis)
     return get_vector_cached(M, p, c, B)
 end
@@ -672,6 +687,11 @@ function _get_vector!(M::AbstractManifold, Y, p, c, B::DefaultOrthonormalBasis)
     return get_vector_orthonormal!(M, Y, p, c, number_system(B))
 end
 function get_vector_orthonormal! end
+
+function _get_vector!(M::AbstractManifold, Y, p, c, B::DiagonalizingOrthonormalBasis)
+    return get_vector_diagonalizing!(M, Y, p, c, number_system(B))
+end
+function get_vector_diagonalizing! end
 
 function _get_vector!(M::AbstractManifold, Y, p, c, B::CachedBasis)
     return get_vector_cached!(M, Y, p, c, B)
