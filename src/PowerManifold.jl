@@ -442,44 +442,39 @@ function get_coordinates(
     return reduce(vcat, reshape(vs, length(vs)))
 end
 
-function get_coordinates!(M::AbstractPowerManifold, Y, p, X, B::AbstractBasis)
+function get_coordinates!(M::AbstractPowerManifold, c, p, X, B::AbstractBasis)
     rep_size = representation_size(M.manifold)
     dim = manifold_dimension(M.manifold)
-    v_iter = 1
     for i in get_iterator(M)
         # TODO: this view is really suboptimal when `dim` can be statically determined
         get_coordinates!(
             M.manifold,
-            view(Y, v_iter:(v_iter + dim - 1)),
+            _write_coordinates(M, c, i),
             _read(M, rep_size, p, i),
             _read(M, rep_size, X, i),
             B,
         )
-        v_iter += dim
     end
     return Y
 end
 function get_coordinates!(
     M::AbstractPowerManifold,
-    Y,
+    c,
     p,
     X,
     B::CachedBasis{𝔽,<:AbstractBasis,<:PowerBasisData},
 ) where {𝔽}
     rep_size = representation_size(M.manifold)
-    dim = manifold_dimension(M.manifold)
-    v_iter = 1
     for i in get_iterator(M)
         get_coordinates!(
             M.manifold,
-            view(Y, v_iter:(v_iter + dim - 1)),
+            _write_coordinates(M, c, i),
             _read(M, rep_size, p, i),
             _read(M, rep_size, X, i),
             _access_nested(B.data.bases, i),
         )
-        v_iter += dim
     end
-    return Y
+    return c
 end
 
 get_iterator(::PowerManifold{𝔽,<:AbstractManifold{𝔽},Tuple{N}}) where {𝔽,N} = Base.OneTo(N)
@@ -493,16 +488,16 @@ end
 function get_vector(
     M::AbstractPowerManifold,
     p,
-    X,
+    c,
     B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:PowerBasisData},
 ) where {𝔽}
-    Y = allocate_result(M, get_vector, p, X)
+    Y = allocate_result(M, get_vector, p, c)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         Y[i...] = get_vector(
             M.manifold,
             _read(M, rep_size, p, i),
-            _read(M, rep_size, X, i),
+            _read_coordinates(M, c, i),
             _access_nested(B.data.bases, i),
         )
     end
@@ -512,7 +507,7 @@ function get_vector!(
     M::AbstractPowerManifold,
     Y,
     p,
-    X,
+    c,
     B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:PowerBasisData},
 ) where {𝔽}
     rep_size = representation_size(M.manifold)
@@ -521,29 +516,29 @@ function get_vector!(
             M.manifold,
             _write(M, rep_size, Y, i),
             _read(M, rep_size, p, i),
-            _read(M, rep_size, X, i),
+            _read_coordinates(M, c, i),
             _access_nested(B.data.bases, i),
         )
     end
     return Y
 end
-function get_vector(M::AbstractPowerManifold, Y, p, X, B::AbstractBasis)
-    Y = allocate_result(M, get_vector, p, X)
+function get_vector(M::AbstractPowerManifold, p, c, B::AbstractBasis)
+    Y = allocate_result(M, get_vector, p, c)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         Y[i...] =
-            get_vector(M.manifold, _read(M, rep_size, p, i), _read(M, rep_size, X, i), B)
+            get_vector(M.manifold, _read(M, rep_size, p, i), _read_coordinates(M, c, i), B)
     end
     return Y
 end
-function get_vector!(M::AbstractPowerManifold, Y, p, X, B::AbstractBasis)
+function get_vector!(M::AbstractPowerManifold, Y, p, c, B::AbstractBasis)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         get_vector!(
             M.manifold,
             _write(M, rep_size, Y, i),
             _read(M, rep_size, p, i),
-            _read(M, rep_size, X, i),
+            _read_coordinates(M, rep_size, c, i),
             B,
         )
     end
@@ -837,6 +832,16 @@ Base.@propagate_inbounds @inline function _read(
     return _read(M, rep_size, x, (i,))
 end
 
+Base.@propagate_inbounds @inline function _read_coordinates(
+    M::AbstractPowerManifold,
+    c::AbstractArray,
+    i::Int,
+)
+    d = manifold_dimension(M.manifold)
+    k = LinearIndices(power_dimensions(M))[i]
+    return c[((k - 1) * d + 1):(k * d)]
+end
+
 Base.@propagate_inbounds @inline function _read(
     ::Union{PowerManifoldNested,PowerManifoldNestedReplacing},
     rep_size::Tuple,
@@ -1123,6 +1128,13 @@ end
 @inline function _write(::PowerManifoldNested, ::Tuple{}, x::AbstractArray, i::Tuple)
     return view(x, i...)
 end
+
+@inline function _write_coordinates(M::AbstractPowerManifold, c::AbstractVector, i::Int)
+    d = manifold_dimension(M.manifold)
+    k = LinearIndices(power_dimensions(M))[i]
+    return view(c, ((k - 1) * d + 1):(k * d))
+end
+
 
 function zero_vector!(M::AbstractPowerManifold, X, p)
     rep_size = representation_size(M.manifold)
