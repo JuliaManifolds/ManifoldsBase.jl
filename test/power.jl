@@ -6,9 +6,9 @@ using StaticArrays
 power_array_wrapper(::Type{NestedPowerRepresentation}, ::Int) = identity
 power_array_wrapper(::Type{NestedReplacingPowerRepresentation}, i::Int) = SVector{i}
 
-@testset "Power AbstractManifold" begin
-    M = ManifoldsBase.DefaultManifold(3)
-    for PowerRepr in [NestedPowerRepresentation, NestedReplacingPowerRepresentation]
+for PowerRepr in [NestedPowerRepresentation, NestedReplacingPowerRepresentation]
+    @testset "PowerManifold with $(PowerRepr)" begin
+        M = ManifoldsBase.DefaultManifold(3)
         N = PowerManifold(M, PowerRepr(), 2)
         wrapper_2 = power_array_wrapper(PowerRepr, 2)
         wrapper_3 = power_array_wrapper(PowerRepr, 3)
