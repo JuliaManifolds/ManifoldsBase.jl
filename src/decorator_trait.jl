@@ -136,7 +136,7 @@ end
     M::Mfld,
     p,
     q,
-    m = default_inverse_retraction_method(M),
+    m::AbstractInverseRetractionMethod = default_inverse_retraction_method(M),
 ) where {Mfld <: AbstractDecoratorManifold; IsEmbeddedSubmanifold{Mfld}}
     return inverse_retract(get_embedding(M), p, q, m)
 end
@@ -146,7 +146,7 @@ end
     X,
     p,
     q,
-    m = default_inverse_retraction_method(M),
+    m::AbstractInverseRetractionMethod = default_inverse_retraction_method(M),
 ) where {Mfld <: AbstractDecoratorManifold; IsEmbeddedSubmanifold{Mfld}}
     return inverse_retract!(get_embedding(M), X, p, q, m)
 end
@@ -182,7 +182,7 @@ end
     M::Mfld,
     p,
     X,
-    m = default_retraction_method(M),
+    m::AbstractVectorTransportMethod = default_retraction_method(M),
 ) where {Mfld <: AbstractDecoratorManifold; IsEmbeddedSubmanifold{Mfld}}
     return retract(get_embedding(M), p, X, m)
 end
@@ -192,7 +192,7 @@ end
     q,
     p,
     X,
-    m = default_retraction_method(M),
+    m::AbstractVectorTransportMethod = default_retraction_method(M),
 ) where {Mfld <: AbstractDecoratorManifold; IsEmbeddedSubmanifold{Mfld}}
     return retract!(get_embedding(M), q, p, X, m)
 end
@@ -202,7 +202,7 @@ end
     p,
     X,
     c,
-    m = default_vector_transport_method(M),
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 ) where {Mfld <: AbstractDecoratorManifold; IsEmbeddedSubmanifold{Mfld}}
     return vector_transport_along(get_embedding(M), p, X, c, m)
 end
@@ -213,7 +213,18 @@ end
     p,
     X,
     c,
-    m = default_vector_transport_method(M),
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
+) where {Mfld <: AbstractDecoratorManifold; IsEmbeddedSubmanifold{Mfld}}
+    return retract!(get_embedding(M), Y, p, X, c, m)
+end
+
+@traitfn function vector_transport_along!(
+    M::Mfld,
+    Y,
+    p,
+    X,
+    c::AbstractVector,
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 ) where {Mfld <: AbstractDecoratorManifold; IsEmbeddedSubmanifold{Mfld}}
     return retract!(get_embedding(M), Y, p, X, c, m)
 end
@@ -223,7 +234,7 @@ end
     p,
     X,
     d,
-    m = default_vector_transport_method(M),
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 ) where {Mfld <: AbstractDecoratorManifold; IsEmbeddedSubmanifold{Mfld}}
     return vector_transport_along(get_embedding(M), p, X, d, m)
 end
@@ -234,7 +245,7 @@ end
     p,
     X,
     d,
-    m = default_vector_transport_method(M),
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 ) where {Mfld <: AbstractDecoratorManifold; IsEmbeddedSubmanifold{Mfld}}
     return retract!(get_embedding(M), Y, p, X, d, m)
 end
@@ -244,7 +255,7 @@ end
     p,
     X,
     q,
-    m = default_vector_transport_method(M),
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 ) where {Mfld <: AbstractDecoratorManifold; IsEmbeddedSubmanifold{Mfld}}
     return vector_transport_along(get_embedding(M), p, X, q, m)
 end
@@ -255,7 +266,7 @@ end
     p,
     X,
     q,
-    m = default_vector_transport_method(M),
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 ) where {Mfld <: AbstractDecoratorManifold; IsEmbeddedSubmanifold{Mfld}}
     return retract!(get_embedding(M), Y, p, X, q, m)
 end
