@@ -173,24 +173,23 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
         va = Symbol("ManifoldsBase.get_vector_$(f_postfix)")
         vm = Symbol("ManifoldsBase.get_vector_$(f_postfix)!")
         push!(block.args, quote
-            function $ca(M::$TM, p::$TP, X::$TV, B)
-                return $ca(M, p.$pfield, X.$vfield, B)
+            function ($ca)(M::$TM, p::$TP, X::$TV, B)
+                return ($ca)(M, p.$pfield, X.$vfield, B)
             end
-            function $cm(M::$TM, Y, p::$TP, X::$TV, B)
-                return $cm(M, Y, p.$pfield, X.$vfield, B)
+            function ($cm)(M::$TM, Y, p::$TP, X::$TV, B)
+                return ($cm)(M, Y, p.$pfield, X.$vfield, B)
             end
-            function $va(M::$TM, p::$TP, X, B)
+            function ($va)(M::$TM, p::$TP, X, B)
                 return $TV(($va)(M, p.$pfield, X, B))
             end
-            function $vm(M::$TM, Y::$TV, p::$TP, X, B)
-                return $vm(M, Y.$vfield, p.$pfield, X, B)
+            function ($vm)(M::$TM, Y::$TV, p::$TP, X, B)
+                return ($vm)(M, Y.$vfield, p.$pfield, X, B)
             end
         end)
     end
     # TODO  forward retraction / inverse_retraction
 
     # TODO  forward vector transports
-
     return esc(block)
 end
 

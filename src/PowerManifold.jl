@@ -976,7 +976,7 @@ end
 function vector_transport_direction(M::AbstractPowerManifold, p, X, d)
     return vector_transport_direction(M, p, X, d, PowerVectorTransport(ParallelTransport()))
 end
-function vector_transport_direction(M::AbstractPowerManifold, p, X, d, m::AbstractBasis)
+function vector_transport_direction(M::AbstractPowerManifold, p, X, d, m::AbstractVectorTransportMethod)
     return vector_transport_direction(M, p, X, d, PowerVectorTransport(m))
 end
 function vector_transport_direction!(M::AbstractPowerManifold, Y, p, X, d)
@@ -1073,7 +1073,10 @@ vector_transport_to(::AbstractPowerManifold, ::Any, ::Any, ::Any, ::PowerVectorT
 function vector_transport_to(M::AbstractPowerManifold, p, X, q)
     return vector_transport_to(M, p, X, q, PowerVectorTransport(ParallelTransport()))
 end
-function vector_transport_to(M::AbstractPowerManifold, Y, p, X, q, m::PowerVectorTransport)
+function vector_transport_to(M::AbstractPowerManifold, p, X, d, m::AbstractVectorTransportMethod)
+    return vector_transport_to(M, p, X, d, PowerVectorTransport(m))
+end
+function vector_transport_to(M::AbstractPowerManifold, p, X, q, m::PowerVectorTransport)
     rep_size = representation_size(M.manifold)
     Y = allocate_result(M, vector_transport_to, p, X)
     for i in get_iterator(M)
