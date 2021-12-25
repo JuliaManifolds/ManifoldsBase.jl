@@ -3,10 +3,15 @@
 
 A type to represent an explicit embedding of a [`AbstractManifold`](@ref) `M` of type `MT` embedded
 into a manifold `N` of type `NT`.
+By default, an embedded manifold is set to be embedded, but neither isometrically embedded
+nor a submanifold, see [`is_isometic_embedded_manifold`](@ref) and [`is_embedded_submanifold`](@ref).
 
 !!! note
-    This type is not required if a manifold `M` is to be embedded in one specific manifold `N`. One can then just implement
-    [`embed!`](@ref) and [`project!`](@ref). Only for a second –maybe considered non-default–
+    This type is not required if a manifold `M` is to be embedded in one specific manifold `N`.
+     One can then just implement [`embed!`](@ref) and [`project!`](@ref).
+    You can further pass functions to the embedding, for example, when it is an isometric embedding,
+    by using an [`AbstractDecoratorManifold`](@ref).
+    Only for a second –maybe considered non-default–
     embedding, this type should be considered in order to dispatch on different embed
     and project methods for different embeddings `N`.
 
@@ -23,7 +28,7 @@ Generate the `EmbeddedManifold` of the [`AbstractManifold`](@ref) `M` into the
 [`AbstractManifold`](@ref) `N`.
 """
 struct EmbeddedManifold{𝔽,MT<:AbstractManifold{𝔽},NT<:AbstractManifold} <:
-       AbstractManifold{𝔽}
+       AbstractDecoratorManifold{𝔽}
     manifold::MT
     embedding::NT
 end
@@ -53,20 +58,15 @@ function embed(M::EmbeddedManifold, p)
 end
 
 """
-    get_embedding(M::AbstractEmbeddedManifold)
-
-Return the embedding [`AbstractManifold`](@ref) `N` of `M`, if it exists.
-"""
-get_embedding(::AbstractManifold)
-
-"""
     get_embedding(M::EmbeddedManifold)
 
-Return the [`AbstractManifold`](@ref) `N` an [`EmbeddedManifold`](@ref) is embedded into.
+Return the embedding [`AbstractManifold`](@ref) `N` of `M`, if it exists.
 """
 function get_embedding(M::EmbeddedManifold)
     return M.embedding
 end
+
+is_embedded_manifold(M::EmbeddedManifold) = true
 
 function project(M::EmbeddedManifold, p)
     q = allocate_result(M, project, p)
@@ -80,172 +80,3 @@ function show(
 ) where {𝔽,MT<:AbstractManifold{𝔽},NT<:AbstractManifold}
     return print(io, "EmbeddedManifold($(M.manifold), $(M.embedding))")
 end
-#=
-#
-# Abstract parent – i.e. pass to embedding
-for f in [
-    copy,
-    copyto!,
-    embed,
-    get_basis,
-    get_coordinates,
-    get_coordinates!,
-    get_vector,
-    get_vector!,
-    inverse_retract!,
-    mid_point!,
-    project,
-    retract!,
-    vector_transport_along,
-    vector_transport_direction,
-    vector_transport_direction!,
-    vector_transport_to,
-]
-    eval(
-        quote
-            function $f(M::decorator_transparent_dispatch(
-                ::typeof($f),
-                ::AbstractEmbeddedManifold,
-                args...,
-            )
-                return Val(:parent)
-            end
-        end,
-    )
-end
-# Abstract generic isometric
-for f in [inverse_retract!, retract!]
-    eval(
-        quote
-            function decorator_transparent_dispatch(
-                ::typeof($f),
-                ::AbstractEmbeddedManifold{𝔽,<:AbstractIsometricEmbeddingType},
-                args...,
-            ) where {𝔽}
-                return Val(:parent)
-            end
-        end,
-    )
-end
-for f in [norm, inner]
-    eval(
-        quote
-            function decorator_transparent_dispatch(
-                ::typeof($f),
-                ::AbstractEmbeddedManifold{𝔽,<:AbstractIsometricEmbeddingType},
-                args...,
-            ) where {𝔽}
-                return Val(:transparent)
-            end
-        end,
-    )
-end
-#
-# Transparent Isometric Embedding – additionally transparent
-for f in [
-    distance,
-    exp,
-    exp!,
-    inner,
-    inverse_retract,
-    inverse_retract!,
-    log,
-    log!,
-    mid_point,
-    mid_point!,
-    project!,
-    project,
-    retract,
-    retract!,
-    vector_transport_along,
-    vector_transport_direction,
-    vector_transport_direction!,
-    vector_transport_to,
-]
-    eval(
-        quote
-            function decorator_transparent_dispatch(
-                ::typeof($f),
-                ::AbstractEmbeddedManifold{𝔽,<:TransparentIsometricEmbedding},
-                args...,
-            ) where {𝔽}
-                return Val(:transparent)
-            end
-        end,
-    )
-end
-#
-# For explicit EmbeddingManifolds the following have to be reimplemented (:intransparent)
-for f in [embed, project]
-    eval(
-        quote
-            function decorator_transparent_dispatch(
-                ::typeof($f),
-                ::EmbeddedManifold,
-                args...,
-            )
-                return Val(:intransparent)
-            end
-        end,
-    )
-end
-
-# unified vector transports for the three already implemented cases,
-# where _direction! still has its nice fallback
-for f in [vector_transport_along!, vector_transport_to!]
-    eval(
-        quote
-            function decorator_transparent_dispatch(
-                ::typeof($f),
-                ::AbstractEmbeddedManifold{𝔽,<:E},
-                Y,
-                p,
-                X,
-                q,
-                ::T,
-            ) where {𝔽,T,E}
-                return Val(:intransparent)
-            end
-            function decorator_transparent_dispatch(
-                ::typeof($f),
-                ::AbstractEmbeddedManifold{𝔽,<:TransparentIsometricEmbedding},
-                Y,
-                p,
-                X,
-                q,
-                ::T,
-            ) where {𝔽,T}
-                return Val(:transparent)
-            end
-        end,
-    )
-    for m in [PoleLadderTransport, SchildsLadderTransport, ScaledVectorTransport]
-        eval(
-            quote
-                function decorator_transparent_dispatch(
-                    ::typeof($f),
-                    ::AbstractEmbeddedManifold{𝔽,<:E},
-                    Y,
-                    p,
-                    X,
-                    q,
-                    ::$m,
-                ) where {𝔽,E}
-                    return Val(:parent)
-                end
-                function decorator_transparent_dispatch(
-                    ::typeof($f),
-                    ::AbstractEmbeddedManifold{𝔽,<:TransparentIsometricEmbedding},
-                    Y,
-                    p,
-                    X,
-                    q,
-                    ::$m,
-                ) where {𝔽}
-                    return Val(:parent)
-                end
-            end,
-        )
-    end
-end
-=#
