@@ -85,13 +85,11 @@ power_array_wrapper(::Type{NestedReplacingPowerRepresentation}, i::Int) = SVecto
             m = ParallelTransport()
             @test vector_transport_to(N, p, p, q) == p
             @test vector_transport_to(N, p, p, q, m) == p
-            @test vector_transport_to(N, p, p, q, PowerVectorTransport(m)) == p
             q2 = [zeros(3), zeros(3)]
             vector_transport_to!(N, q2, p, q, p)
             @test q2 == q
             @test vector_transport_direction(N, p, p, q) == p
             @test vector_transport_direction(N, p, p, q, m) == p
-            @test vector_transport_direction(N, p, p, q, PowerVectorTransport(m)) == p
             q2 = [zeros(3), zeros(3)]
             vector_transport_direction!(N, q2, p, q, p)
             @test q2 == q

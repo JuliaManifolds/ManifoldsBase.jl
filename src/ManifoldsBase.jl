@@ -602,7 +602,6 @@ export AbstractVectorTransportMethod,
     DifferentiatedRetractionVectorTransport,
     ParallelTransport,
     PoleLadderTransport,
-    PowerVectorTransport,
     ProjectionTransport,
     ScaledVectorTransport,
     SchildsLadderTransport

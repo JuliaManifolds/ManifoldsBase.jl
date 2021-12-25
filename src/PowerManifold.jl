@@ -148,25 +148,6 @@ struct InversePowerRetraction{TR<:AbstractInverseRetractionMethod} <:
 end
 
 """
-    PowerVectorTransport{TR<:AbstractVectorTransportMethod} <:
-       AbstractVectorTransportMethod
-
-The `PowerVectorTransport` avoids ambiguities between dispatching on the [`AbstractPowerManifold`](@ref)
-and dispatching on the [`AbstractVectorTransportMethod`](@ref) and encapsulates this.
-This container should only be used in rare cases outside of this package. Usually a
-subtype of the [`AbstractPowerManifold`](@ref) should define a way how to treat
-its [`AbstractVectorTransportMethod`](@ref)s.
-
-# Constructor
-
-    PowerVectorTransport(method::AbstractVectorTransportMethod)
-"""
-struct PowerVectorTransport{TR<:AbstractVectorTransportMethod} <:
-       AbstractVectorTransportMethod
-    method::TR
-end
-
-"""
     PowerBasisData{TB<:AbstractArray}
 
 Data storage for an array of basis data.
@@ -973,28 +954,6 @@ function Base.show(
     return nothing
 end
 
-function vector_transport_direction(M::AbstractPowerManifold, p, X, d)
-    return vector_transport_direction(M, p, X, d, PowerVectorTransport(ParallelTransport()))
-end
-function vector_transport_direction(
-    M::AbstractPowerManifold,
-    p,
-    X,
-    d,
-    m::AbstractVectorTransportMethod,
-)
-    return vector_transport_direction(M, p, X, d, PowerVectorTransport(m))
-end
-function vector_transport_direction!(M::AbstractPowerManifold, Y, p, X, d)
-    return vector_transport_direction!(
-        M,
-        Y,
-        p,
-        X,
-        d,
-        PowerVectorTransport(ParallelTransport()),
-    )
-end
 function vector_transport_direction!(
     M::AbstractPowerManifold,
     Y,
@@ -1002,16 +961,6 @@ function vector_transport_direction!(
     X,
     d,
     m::AbstractVectorTransportMethod,
-)
-    return vector_transport_direction!(M, Y, p, X, d, PowerVectorTransport(m))
-end
-function vector_transport_direction!(
-    M::AbstractPowerManifold,
-    Y,
-    p,
-    X,
-    d,
-    m::PowerVectorTransport,
 )
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
@@ -1021,7 +970,7 @@ function vector_transport_direction!(
             _read(M, rep_size, p, i),
             _read(M, rep_size, X, i),
             _read(M, rep_size, d, i),
-            m.method,
+            m,
         )
     end
     return Y
@@ -1031,7 +980,7 @@ function vector_transport_direction(
     p,
     X,
     d,
-    m::PowerVectorTransport,
+    m::AbstractVectorTransportMethod,
 )
     Y = allocate_result(M, vector_transport_direction, p, X, d)
     rep_size = representation_size(M.manifold)
@@ -1041,7 +990,7 @@ function vector_transport_direction(
             _read(M, rep_size, p, i),
             _read(M, rep_size, X, i),
             _read(M, rep_size, d, i),
-            m.method,
+            m,
         )
     end
     return Y
@@ -1052,7 +1001,7 @@ function vector_transport_direction!(
     p,
     X,
     d,
-    m::PowerVectorTransport,
+    m::AbstractVectorTransportMethod,
 )
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
@@ -1061,34 +1010,34 @@ function vector_transport_direction!(
             _read(M, rep_size, p, i),
             _read(M, rep_size, X, i),
             _read(M, rep_size, d, i),
-            m.method,
+            m,
         )
     end
     return Y
 end
 
 @doc raw"""
-    vector_transport_to(M::AbstractPowerManifold, p, X, q, method::PowerVectorTransport)
+    vector_transport_to(M::AbstractPowerManifold, p, X, q, method::AbstractVectorTransportMethod)
 
 Compute the vector transport the tangent vector `X`at `p` to `q` on the
-[`PowerManifold`](@ref) `M` using an [`PowerVectorTransport`](@ref) `m`.
+[`PowerManifold`](@ref) `M` using an [`AbstractVectorTransportMethod`](@ref) `m`.
 This method is performed elementwise, i.e. the method `m` has to be implemented on the
 base manifold.
 """
-vector_transport_to(::AbstractPowerManifold, ::Any, ::Any, ::Any, ::PowerVectorTransport)
-function vector_transport_to(M::AbstractPowerManifold, p, X, q)
-    return vector_transport_to(M, p, X, q, PowerVectorTransport(ParallelTransport()))
-end
+vector_transport_to(
+    ::AbstractPowerManifold,
+    ::Any,
+    ::Any,
+    ::Any,
+    ::AbstractVectorTransportMethod,
+)
 function vector_transport_to(
     M::AbstractPowerManifold,
     p,
     X,
-    d,
+    q,
     m::AbstractVectorTransportMethod,
 )
-    return vector_transport_to(M, p, X, d, PowerVectorTransport(m))
-end
-function vector_transport_to(M::AbstractPowerManifold, p, X, q, m::PowerVectorTransport)
     rep_size = representation_size(M.manifold)
     Y = allocate_result(M, vector_transport_to, p, X)
     for i in get_iterator(M)
@@ -1097,22 +1046,19 @@ function vector_transport_to(M::AbstractPowerManifold, p, X, q, m::PowerVectorTr
             _read(M, rep_size, p, i),
             _read(M, rep_size, X, i),
             _read(M, rep_size, q, i),
-            m.method,
+            m,
         )
     end
     return Y
 end
 
-function vector_transport_to!(M::AbstractPowerManifold, Y, p, X, q)
-    return vector_transport_to!(M, Y, p, X, q, PowerVectorTransport(ParallelTransport()))
-end
 function vector_transport_to!(
     M::PowerManifoldNestedReplacing,
     Y,
     p,
     X,
     q,
-    m::PowerVectorTransport,
+    m::AbstractVectorTransportMethod,
 )
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
@@ -1121,7 +1067,7 @@ function vector_transport_to!(
             _read(M, rep_size, p, i),
             _read(M, rep_size, X, i),
             _read(M, rep_size, q, i),
-            m.method,
+            m,
         )
     end
     return Y
