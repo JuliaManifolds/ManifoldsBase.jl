@@ -1,17 +1,30 @@
+using ManifoldsBase, Test
+
 using ManifoldsBase: DefaultManifold, ℝ
+import ManifoldsBase:
+    is_embedded_manifold, is_embedded_submanifold, is_isometric_embedded_manifold
+#
+# A first manifold that is modelled as a submanifold
+#
+struct PlaneManifold <: AbstractDecoratorManifold{ℝ} end
 
-struct PlaneManifold <: AbstractEmbeddedManifold{ℝ,TransparentIsometricEmbedding} end
-
-ManifoldsBase.decorated_manifold(::PlaneManifold) = ManifoldsBase.DefaultManifold(1, 3)
+ManifoldsBase.get_embedding(::PlaneManifold) = ManifoldsBase.DefaultManifold(1, 3)
 ManifoldsBase.base_manifold(::PlaneManifold) = ManifoldsBase.DefaultManifold(2)
 
 ManifoldsBase.project!(::PlaneManifold, q, p) = (q .= [p[1] p[2] 0.0])
 ManifoldsBase.project!(::PlaneManifold, Y, p, X) = (Y .= [X[1] X[2] 0.0])
 
-struct AnotherPlaneManifold <: AbstractEmbeddedManifold{ℝ,DefaultIsometricEmbeddingType} end
+ManifoldsBase.is_embedded_submanifold(::Type{<:PlaneManifold}) = true
 
-ManifoldsBase.decorated_manifold(::AnotherPlaneManifold) = ManifoldsBase.DefaultManifold(3)
+#
+# A second manifold that is modelled as just isometrically embedded but not a submanifold
+#
+struct AnotherPlaneManifold <: AbstractDecoratorManifold{ℝ} end
+
+ManifoldsBase.get_embedding(::AnotherPlaneManifold) = ManifoldsBase.DefaultManifold(3)
 ManifoldsBase.base_manifold(::AnotherPlaneManifold) = ManifoldsBase.DefaultManifold(2)
+
+is_isometric_embedded_manifold(::Type{<:AnotherPlaneManifold}) = true
 
 function ManifoldsBase.embed!(::AnotherPlaneManifold, q, p)
     q[1:2] .= p
@@ -30,7 +43,9 @@ function ManifoldsBase.project!(::AnotherPlaneManifold, Y, p, X)
     return Y .= [X[1], X[2]]
 end
 
-
+#
+# This approach - explicitly mention an embedding.
+#
 function ManifoldsBase.embed!(
     ::EmbeddedManifold{𝔽,DefaultManifold{nL,𝔽},DefaultManifold{mL,𝔽2}},
     q,
@@ -79,19 +94,29 @@ function ManifoldsBase.project!(
     return q
 end
 
-struct NotImplementedEmbeddedManifold <:
-       AbstractEmbeddedManifold{ℝ,TransparentIsometricEmbedding} end
-function ManifoldsBase.decorated_manifold(::NotImplementedEmbeddedManifold)
-    return ManifoldsBase.DefaultManifold(2)
+#
+# A manifold that is a submanifold but otherwise has not implementations
+#
+struct NotImplementedEmbeddedManifold <: AbstractDecoratorManifold{ℝ} end
+function ManifoldsBase.get_embedding(::NotImplementedEmbeddedManifold)
+    return ManifoldsBase.DefaultManifold(3)
 end
 function ManifoldsBase.base_manifold(::NotImplementedEmbeddedManifold)
     return ManifoldsBase.DefaultManifold(2)
 end
+is_embedded_submanifold(::Type{<:NotImplementedEmbeddedManifold}) = true
 
-struct NotImplementedEmbeddedManifold2 <:
-       AbstractEmbeddedManifold{ℝ,DefaultIsometricEmbeddingType} end
+#
+# A manifold that is isometrically embedded but has no implementations
+#
+struct NotImplementedEmbeddedManifold2 <: AbstractDecoratorManifold{ℝ} end
+is_isometric_embedded_manifold(::Type{<:NotImplementedEmbeddedManifold2}) = true
 
-struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEmbeddingType} end
+#
+# A manifold that is an embedded manifold but not isometric and has no other implementation
+#
+struct NotImplementedEmbeddedManifold3 <: AbstractDecoratorManifold{ℝ} end
+is_embedded_manifold(::Type{<:NotImplementedEmbeddedManifold3}) = true
 
 @testset "Embedded Manifolds" begin
     @testset "EmbeddedManifold basic tests" begin
@@ -103,15 +128,11 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEm
               "EmbeddedManifold($(sprint(show, M.manifold)), $(sprint(show, M.embedding)))"
         @test base_manifold(M) == ManifoldsBase.DefaultManifold(2)
         @test get_embedding(M) == ManifoldsBase.DefaultManifold(3)
-        @test ManifoldsBase.decorated_manifold(M) == ManifoldsBase.DefaultManifold(3)
-        @test ManifoldsBase.default_decorator_dispatch(M) === Val(true)
     end
 
     @testset "PlaneManifold" begin
         M = PlaneManifold()
         @test repr(M) == "PlaneManifold()"
-        @test ManifoldsBase.default_decorator_dispatch(M) === Val(false)
-        @test ManifoldsBase.default_embedding_dispatch(M) === Val(false)
         @test get_embedding(M) == ManifoldsBase.DefaultManifold(1, 3)
         # Check fallbacks to check embed->check_manifoldpoint Defaults
         @test_throws DomainError is_point(M, [1, 0, 0], true)
@@ -177,12 +198,10 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEm
             @test norm(M, [1, 2], [2, 3]) ≈ sqrt(13)
             @test distance(M, [1, 2], [3, 4]) ≈ sqrt(8)
             @test inner(M, [1, 2], [2, 3], [2, 3]) ≈ 13
-            @test_throws ErrorException manifold_dimension(M)
-            # without any implementation the projections are the identity
-            @test project(M, [1, 2]) == [1, 2]
-            @test project(M, [1, 2], [2, 3]) == [2, 3]
-            project!(M, A, [1, 2], [2, 3])
-            @test A == [2, 3]
+            @test manifold_dimension(M) == 2 # since base is defined is defined
+            @test_throws MethodError project(M, [1, 2])
+            @test_throws MethodError project(M, [1, 2], [2, 3]) == [2, 3]
+            @test_throws MethodError project!(M, A, [1, 2], [2, 3])
             @test vector_transport_direction(M, [1, 2], [2, 3], [3, 4]) == [2, 3]
             vector_transport_direction!(M, A, [1, 2], [2, 3], [3, 4])
             @test A == [2, 3]
@@ -194,137 +213,46 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEm
             M2 = NotImplementedEmbeddedManifold2()
             @test base_manifold(M2) == M2
             A = zeros(2)
-            @test_throws ErrorException exp(M2, [1, 2], [2, 3])
-            @test_throws ErrorException exp!(M2, A, [1, 2], [2, 3])
-            @test_throws ErrorException log(M2, [1, 2], [2, 3])
-            @test_throws ErrorException log!(M2, A, [1, 2], [2, 3])
-            @test_throws ErrorException distance(M2, [1, 2], [2, 3])
-            @test_throws ErrorException manifold_dimension(M2)
-            @test_throws ErrorException project(M2, [1, 2])
-            @test_throws ErrorException project!(M2, A, [1, 2])
-            @test_throws ErrorException project(M2, [1, 2], [2, 3])
-            @test_throws ErrorException project!(M2, A, [1, 2], [2, 3])
-            @test_throws ErrorException vector_transport_along(M2, [1, 2], [2, 3], [[1, 2]])
-            @test_throws ErrorException vector_transport_along(
+            # Check that all of these report not to be implemented, i.e.
+            @test_throws MethodError exp(M2, [1, 2], [2, 3])
+            @test_throws MethodError exp!(M2, A, [1, 2], [2, 3])
+            @test_throws MethodError log(M2, [1, 2], [2, 3])
+            @test_throws MethodError log!(M2, A, [1, 2], [2, 3])
+            @test_throws MethodError distance(M2, [1, 2], [2, 3])
+            @test_throws StackOverflowError manifold_dimension(M2)
+            @test_throws MethodError project(M2, [1, 2])
+            @test_throws MethodError project!(M2, A, [1, 2])
+            @test_throws MethodError project(M2, [1, 2], [2, 3])
+            @test_throws MethodError project!(M2, A, [1, 2], [2, 3])
+            @test_throws MethodError vector_transport_along(M2, [1, 2], [2, 3], [[1, 2]])
+            @test_throws MethodError vector_transport_along(
                 M2,
                 [1, 2],
                 [2, 3],
                 [[1, 2]],
                 ParallelTransport(),
             )
-            @test_throws ErrorException vector_transport_along!(M2, A, [1, 2], [2, 3], [])
-            @test_throws ErrorException vector_transport_direction(
-                M2,
-                [1, 2],
-                [2, 3],
-                [3, 4],
-            )
-            @test_throws ErrorException vector_transport_direction!(
+            @test_throws MethodError vector_transport_along!(M2, A, [1, 2], [2, 3], [])
+            @test_throws MethodError vector_transport_direction(M2, [1, 2], [2, 3], [3, 4])
+            @test_throws MethodError vector_transport_direction!(
                 M2,
                 A,
                 [1, 2],
                 [2, 3],
                 [3, 4],
             )
-            @test_throws ErrorException vector_transport_to(M2, [1, 2], [2, 3], [3, 4])
-            @test_throws ErrorException vector_transport_to!(M2, A, [1, 2], [2, 3], [3, 4])
+            @test_throws MethodError vector_transport_to(M2, [1, 2], [2, 3], [3, 4])
+            @test_throws MethodError vector_transport_to!(M2, A, [1, 2], [2, 3], [3, 4])
         end
         @testset "Nonisometric Embedding Fallback Error Rests" begin
             M3 = NotImplementedEmbeddedManifold3()
-            @test_throws ErrorException inner(M3, [1, 2], [2, 3], [2, 3])
-            @test_throws ErrorException manifold_dimension(M3)
-            @test_throws ErrorException distance(M3, [1, 2], [2, 3])
-            @test_throws ErrorException norm(M3, [1, 2], [2, 3])
-            @test_throws ErrorException embed(M3, [1, 2], [2, 3])
-            @test_throws ErrorException embed(M3, [1, 2])
+            @test_throws MethodError inner(M3, [1, 2], [2, 3], [2, 3])
+            @test_throws StackOverflowError manifold_dimension(M3)
+            @test_throws MethodError distance(M3, [1, 2], [2, 3])
+            @test_throws MethodError norm(M3, [1, 2], [2, 3])
+            @test_throws MethodError embed(M3, [1, 2], [2, 3])
+            @test_throws MethodError embed(M3, [1, 2])
         end
-    end
-
-    @testset "EmbeddedManifold decorator dispatch" begin
-        TM = NotImplementedEmbeddedManifold() # transparently iso
-        IM = NotImplementedEmbeddedManifold2() # iso
-        AM = NotImplementedEmbeddedManifold3() # general
-        for f in [
-            embed,
-            exp,
-            get_basis,
-            get_coordinates,
-            get_vector,
-            inverse_retract,
-            log,
-            norm,
-            distance,
-        ]
-            @test ManifoldsBase.decorator_transparent_dispatch(f, AM) === Val(:parent)
-        end
-        for f in
-            [project, retract, inverse_retract!, retract!, get_coordinates!, get_vector!]
-            @test ManifoldsBase.decorator_transparent_dispatch(f, AM) === Val(:parent)
-        end
-        for f in [vector_transport_along, vector_transport_direction, vector_transport_to]
-            @test ManifoldsBase.decorator_transparent_dispatch(f, AM) === Val(:parent)
-        end
-        for f in [mid_point, mid_point!]
-            @test ManifoldsBase.decorator_transparent_dispatch(f, AM) === Val(:parent)
-        end
-        for f in [check_point, check_vector, exp!, inner, embed!]
-            @test ManifoldsBase.decorator_transparent_dispatch(f, AM) ===
-                  Val(:intransparent)
-        end
-        for f in [log!, manifold_dimension, project!]
-            @test ManifoldsBase.decorator_transparent_dispatch(f, AM) ===
-                  Val(:intransparent)
-        end
-        @test ManifoldsBase.decorator_transparent_dispatch(vector_transport_along!, AM) ===
-              Val(:transparent)
-        @test ManifoldsBase.decorator_transparent_dispatch(
-            vector_transport_to!,
-            AM,
-            1,
-            1,
-            1,
-            1,
-            1,
-        ) === Val(:intransparent)
-        @test ManifoldsBase.decorator_transparent_dispatch(
-            vector_transport_direction!,
-            AM,
-        ) === Val(:parent)
-
-        for f in [inner, norm]
-            @test ManifoldsBase.decorator_transparent_dispatch(f, IM) === Val(:transparent)
-        end
-        for f in [inverse_retract!, retract!, mid_point!, distance]
-            @test ManifoldsBase.decorator_transparent_dispatch(f, IM) === Val(:parent)
-        end
-
-        for f in [exp, inverse_retract, log, project, retract, mid_point, distance]
-            @test ManifoldsBase.decorator_transparent_dispatch(f, TM) === Val(:transparent)
-        end
-        for f in [exp!, inverse_retract!, log!, project!, retract!, mid_point!]
-            @test ManifoldsBase.decorator_transparent_dispatch(f, TM) === Val(:transparent)
-        end
-        for f in [vector_transport_along, vector_transport_direction, vector_transport_to]
-            @test ManifoldsBase.decorator_transparent_dispatch(f, TM) === Val(:transparent)
-        end
-        for f in
-            [vector_transport_along!, vector_transport_direction!, vector_transport_to!]
-            @test ManifoldsBase.decorator_transparent_dispatch(f, TM) === Val(:transparent)
-        end
-        for t in [PoleLadderTransport(), SchildsLadderTransport()], M in [AM, TM, IM]
-            @test ManifoldsBase.decorator_transparent_dispatch(
-                vector_transport_to!,
-                M,
-                1,
-                1,
-                1,
-                1,
-                PoleLadderTransport(),
-            ) === Val(:parent)
-        end
-        @test ManifoldsBase.decorator_transparent_dispatch(embed, TM) === Val{:parent}()
-        @test ManifoldsBase.decorator_transparent_dispatch(embed!, TM) ===
-              Val(:intransparent)
     end
 
     @testset "Explicit Embeddings using EmbeddedManifold" begin
@@ -355,8 +283,5 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{ℝ,DefaultEm
         @test_throws DomainError embed!(O, zeros(3, 3), zeros(4, 4))
         @test_throws DomainError project!(O, zeros(3, 3, 5), zeros(3, 3))
         @test_throws DomainError project!(O, zeros(4, 4), zeros(3, 3))
-        for f in [embed, project]
-            @test ManifoldsBase.decorator_transparent_dispatch(f, O) === Val(:intransparent)
-        end
     end
 end

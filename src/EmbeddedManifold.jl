@@ -4,7 +4,7 @@
 A type to represent an explicit embedding of a [`AbstractManifold`](@ref) `M` of type `MT` embedded
 into a manifold `N` of type `NT`.
 By default, an embedded manifold is set to be embedded, but neither isometrically embedded
-nor a submanifold, see [`is_isometic_embedded_manifold`](@ref) and [`is_embedded_submanifold`](@ref).
+nor a submanifold, see [`is_isometric_embedded_manifold`](@ref) and [`is_embedded_submanifold`](@ref).
 
 !!! note
     This type is not required if a manifold `M` is to be embedded in one specific manifold `N`.
@@ -33,29 +33,20 @@ struct EmbeddedManifold{𝔽,MT<:AbstractManifold{𝔽},NT<:AbstractManifold} <:
     embedding::NT
 end
 
-function allocate_result(M::EmbeddedManifold, f::typeof(embed), x...)
-    T = allocate_result_type(M, f, x)
-    return allocate(x[1], T, representation_size(get_embedding(M)))
-end
-
 function allocate_result(M::EmbeddedManifold, f::typeof(project), x...)
     T = allocate_result_type(M, f, x)
     return allocate(x[1], T, representation_size(base_manifold(M)))
 end
 
 """
-    base_manifold(M::EmbeddedManifold, d::Val{N} = Val(-1))
+    decorated_manifold(M::EmbeddedManifold, d::Val{N} = Val(-1))
 
-Return the base manifold of `M` that is enhanced with its embedding. For this specific
+Return the manifold of `M` that is decorated with its embedding. For this specific
 type the internally stored enhanced manifold `M.manifold` is returned.
-"""
-base_manifold(M::EmbeddedManifold, ::Val{N} = Val(-1)) where {N} = M.manifold
 
-function embed(M::EmbeddedManifold, p)
-    q = allocate_result(M, embed, p)
-    embed!(M, q, p)
-    return q
-end
+See also [`base_manifold`](@ref), where this is used to (potentially) completely undecorate the manifold.
+"""
+decorated_manifold(M::EmbeddedManifold) = M.manifold
 
 """
     get_embedding(M::EmbeddedManifold)
@@ -66,7 +57,8 @@ function get_embedding(M::EmbeddedManifold)
     return M.embedding
 end
 
-is_embedded_manifold(M::EmbeddedManifold) = true
+
+is_embedded_manifold(::Type{<:EmbeddedManifold}) = true
 
 function project(M::EmbeddedManifold, p)
     q = allocate_result(M, project, p)

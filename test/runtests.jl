@@ -25,7 +25,7 @@ using ManifoldsBase
     include("default_manifold.jl")
     include("complex_manifold.jl")
     include("validation_manifold.jl")
-    # TODO redo include("embedded_manifold.jl")
+    include("embedded_manifold.jl")
     include("power.jl")
     include("domain_errors.jl")
     include("vector_transport_along.jl")

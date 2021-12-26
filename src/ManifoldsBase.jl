@@ -281,7 +281,7 @@ the representation is changed accordingly.
 
 If you have more than one embedding, see [`EmbeddedManifold`](@ref) for defining a second
 embedding. If your point `p` is already represented in some embedding,
-see [`AbstractEmbeddedManifold`](@ref) how you can avoid reimplementing code from the embedded manifold
+see [`AbstractDecoratorManifold`](@ref) how you can avoid reimplementing code from the embedded manifold
 
 See also: [`EmbeddedManifold`](@ref), [`project!`](@ref project!(M::AbstractManifold, q, p))
 """
@@ -300,7 +300,7 @@ embedding, the representation is changed accordingly.
 
 If you have more than one embedding, see [`EmbeddedManifold`](@ref) for defining a second
 embedding. If your tangent vector `X` is already represented in some embedding,
-see [`AbstractEmbeddedManifold`](@ref) how you can avoid reimplementing code from the embedded manifold
+see [`AbstractDecoratorManifold`](@ref) how you can avoid reimplementing code from the embedded manifold
 
 See also: [`EmbeddedManifold`](@ref), [`project`](@ref project(M::AbstractManifold, p, X))
 """
@@ -558,8 +558,6 @@ include("PowerManifold.jl")
 export AbstractManifold, AbstractManifoldPoint, TVector, CoTVector, TFVector, CoTFVector
 export AbstractDecoratorManifold
 export ValidationManifold, ValidationMPoint, ValidationTVector, ValidationCoTVector
-export AbstractEmbedding,
-    DefaultEmbedding, IsometricEmbedding, TransparentIsometricEmbedding
 export EmbeddedManifold
 export AbstractPowerManifold, PowerManifold
 export AbstractPowerRepresentation,
@@ -613,7 +611,6 @@ export allocate,
     check_size,
     copy,
     copyto!,
-    decorated_manifold,
     default_inverse_retraction_method,
     default_retraction_method,
     default_vector_transport_method,
@@ -675,6 +672,9 @@ export allocate,
     inverse_retract_qr,
     inverse_retract_qr!,
     isapprox,
+    is_embedded_manifold,
+    is_embedded_submanifold,
+    is_isometric_embedded_manifold,
     is_point,
     is_vector,
     isempty,

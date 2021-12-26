@@ -208,6 +208,6 @@ In the follwing table the `V` in the function names stand for `along`, `to`. Nte
 
 | Name | default lower level function | comment |
 | :--- | :----------------------------- | :----- |
-| [`DifferentiazedRetractionVectorTransport`](@ref) | `vector_transport_V_diff` | the inner retraction is passed on as last argument |
-| [`ParallelTransport`](@ref) | `parallel_transport_X` |
-| [`ProjectionTransport`](@ref) | `vector_transport_X_project` |
+| [`DifferentiatedRetractionVectorTransport`](@ref) | `vector_transport_V_diff` | the inner retraction is passed on as last argument |
+| [`ParallelTransport`](@ref) | `parallel_transport_V` |
+| [`ProjectionTransport`](@ref) | `vector_transport_V_project` |
