@@ -25,36 +25,7 @@ Order = [:macro, :type, :function]
 
 ## [EmbeddedManifold](@id EmbeddedmanifoldSec)
 
-Some manifolds can easily be defined by using a certain embedding.
-For example the sphere ``\mathbb S`` is embedded in ``\mathbb R^{n+1}``.
-An embedding is often implicitly assumed.
-We introduce the embedded manifolds hence as an [`AbstractDecoratorManifold`](@ref).
-
-This decorator enables to use such an embedding in an transparent way.
-Different types of embeddings can be distinguished using the [`AbstractEmbeddingType`](@ref),
-which is an [`AbstractDecoratorType`](@ref).
-
-### Isometric Embeddings
-
-For isometric embeddings the type [`AbstractIsometricEmbeddingType`](@ref) can be used to avoid reimplementing the metric.
-Here, the exponential map, the logarithmic map, the retraction and its inverse
-are set to `:intransparent`, i.e. they have to be implemented.
-
-Furthermore, the [`TransparentIsometricEmbedding`](@ref) type even states that the exponential
-and logarithmic maps as well as retractions and vector transports of the embedding can be
-used for the embedded manifold as well.
-
-In both cases of course [`check_point`](@ref) and [`check_vector`](@ref) have to be implemented.
-
-### Further Embeddings
-
-A first embedding can also just be given implementing [`embed!`](@ref) ann [`project!`](@ref)
-for a manifold. This is considered to be the most usual or default embedding.
-
-If you have two different embeddings for your manifold, a second one can be specified using
-the [`EmbeddedManifold`](@ref), a type that “couples” two manifolds, more precisely a
-manifold and its embedding, to define embedding and projection functions between these
-two manifolds.
+__TODO__: Update
 
 ### Types
 

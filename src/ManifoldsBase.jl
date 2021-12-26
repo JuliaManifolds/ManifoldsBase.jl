@@ -445,14 +445,6 @@ each point of the [`AbstractManifold`](@ref) `M` is homeomorphic.
 """
 manifold_dimension(M::AbstractManifold)
 
-# TODO: GEt rid of this?
-function manifold_function_not_implemented_message(M::AbstractManifold, f, x...)
-    s = join(map(string, map(typeof, x)), ", ", " and ")
-    a = length(x) > 1 ? "arguments" : "argument"
-    m = length(x) > 0 ? " for $(a) $(s)." : "."
-    return "$(f) not implemented on $(M)$(m)"
-end
-
 """
     mid_point(M::AbstractManifold, p1, p2)
 
@@ -621,6 +613,7 @@ export allocate,
     check_size,
     copy,
     copyto!,
+    decorated_manifold,
     default_inverse_retraction_method,
     default_retraction_method,
     default_vector_transport_method,
