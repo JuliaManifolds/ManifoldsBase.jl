@@ -16,6 +16,10 @@ ManifoldsBase.project!(::PlaneManifold, Y, p, X) = (Y .= [X[1] X[2] 0.0])
 
 ManifoldsBase.is_embedded_submanifold(::Type{<:PlaneManifold}) = true
 
+function ManifoldsBase.activate_traits(::PlaneManifold, args...)
+    return merge_traits(IsEmbeddedSubManifold())
+end
+
 #
 # A second manifold that is modelled as just isometrically embedded but not a submanifold
 #
@@ -25,6 +29,9 @@ ManifoldsBase.get_embedding(::AnotherPlaneManifold) = ManifoldsBase.DefaultManif
 ManifoldsBase.base_manifold(::AnotherPlaneManifold) = ManifoldsBase.DefaultManifold(2)
 
 is_isometric_embedded_manifold(::Type{<:AnotherPlaneManifold}) = true
+function ManifoldsBase.activate_traits(::AnotherPlaneManifold, args...)
+    return merge_traits(IsIsometricEmbeddedManifold())
+end
 
 function ManifoldsBase.embed!(::AnotherPlaneManifold, q, p)
     q[1:2] .= p
