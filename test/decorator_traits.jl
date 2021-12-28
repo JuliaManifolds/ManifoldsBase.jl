@@ -3,7 +3,7 @@ using ManifoldsBase
 
 using ManifoldsBase: AbstractTrait, NestedTrait, EmptyTrait, trait, merge_traits
 using ManifoldsBase: expand_trait
-import ManifoldsBase: base_trait, parent_trait
+import ManifoldsBase: active_traits, parent_trait
 
 struct IsCool <: AbstractTrait end
 struct IsNice <: AbstractTrait end
@@ -26,10 +26,10 @@ g(::DecoA, x, y) = x + y
 struct IsGreat <: AbstractTrait end # a special case of IsNice
 parent_trait(::IsGreat) = IsNice()
 
-base_trait(::A1, ::Any) = merge_traits(IsNice())
-base_trait(::A2, ::Any) = merge_traits(IsCool())
-base_trait(::A3, ::Any) = merge_traits(IsCool(), IsNice())
-base_trait(::A5, ::Any) = merge_traits(IsGreat())
+active_traits(::A1, ::Any) = merge_traits(IsNice())
+active_traits(::A2, ::Any) = merge_traits(IsCool())
+active_traits(::A3, ::Any) = merge_traits(IsCool(), IsNice())
+active_traits(::A5, ::Any) = merge_traits(IsGreat())
 
 f(a::DecoA, b) = f(trait(a, b), a, b)
 

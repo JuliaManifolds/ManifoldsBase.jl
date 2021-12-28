@@ -54,7 +54,13 @@ function Base.show(io::IO, t::NestedTrait)
     return print(io, "NestedTrait(", t.head, ", ", t.tail, ")")
 end
 
-@inline base_trait(args...) = EmptyTrait()
+"""
+    active_traits(args...)
+
+Return the list of traits applicable to the given function call. This function should be
+overloaded for specific function calls.
+"""
+@inline active_traits(args...) = EmptyTrait()
 
 """
     merge_traits(t1, t2, trest...)
@@ -114,7 +120,7 @@ inherits as a fallback.
 @inline parent_trait(::AbstractTrait) = EmptyTrait()
 
 @inline function trait(args...)
-    bt = base_trait(args...)
+    bt = active_traits(args...)
     return expand_trait(bt)
 end
 
