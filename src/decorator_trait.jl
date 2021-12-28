@@ -21,6 +21,102 @@ see [`decorated_manifold`](@ref).
 """
 abstract type AbstractDecoratorManifold{𝔽} <: AbstractManifold{𝔽} end
 
+"""
+    AbstractTrait
+
+An abstract trait type to build a sequence of traits
+"""
+abstract type AbstractTrait end
+
+"""
+    EmptyTrait <: AbstractTrait
+
+A Trait indicating that no feature is present.
+"""
+struct EmptyTrait <: AbstractTrait end
+
+"""
+    NestedTrait <; AbstractTrait
+
+Combine two traits into a combined trait.  Note that this introduces a preceedence.
+the first of the traits takes preceedence if a trait is implemented for both functions.
+
+# Constructor
+
+    NestedTrait(t1::AbstractTrait, t2::AbstractTrait)
+"""
+struct NestedTrait{T1<:AbstractTrait,T2<:AbstractTrait} <: AbstractTrait
+    t1::T1
+    t2::T2
+end
+
+@inline base_trait(args...) = EmptyTrait()
+
+"""
+    merge_traits(t1,t2,...)
+
+Merge two traits into a nested trait. Note that this takes trait preceedence into account,
+i.e. t1 takes preceedence over t2 is any operations.
+
+This means that for
+* one argument it just returns the trait itself,
+* for two arguments it returns either `NestedTrait(t1,t2)` or if both are traits that are not [`EmptyTrait`](@ref)
+* if for two arguments one is nested, the nesting is changed to have the form `NEstedTrait(t1,(NestedTrait(t2,...))`
+
+"""
+merge_traits()
+
+@inline merge_traits() = EmptyTrait()
+@inline merge_traits(t::EmptyTrait) = t
+@inline merge_traits(t::NestedTrait) = t
+@inline merge_traits(t::AbstractTrait) = t # Maybe NestedTrait(t, EmptyTrait()) ?
+@inline merge_traits(t1::EmptyTrait, ::EmptyTrait) = t1
+@inline merge_traits(::EmptyTrait, t2::AbstractTrait) = t2
+@inline merge_traits(t1::AbstractTrait, ::EmptyTrait) = t1 #was NestedTrait(t1, t2)
+@inline merge_traits(t1::AbstractTrait, t2::AbstractTrait) = NestedTrait(t1, t2) # Maybe NestedTrait(t1, NestedTrait(t2, EmptyTrait()))
+@inline merge_traits(t1::NestedTrait, ::EmptyTrait) = t1
+@inline function merge_traits(t1::NestedTrait, t2::AbstractTrait)
+    return NestedTrait(t1.t1, merge_traits(t1.t2, t2))
+end
+@inline function merge_traits(
+    t1::AbstractTrait,
+    t2::AbstractTrait,
+    t3::AbstractTrait,
+    trest::AbstractTrait...,
+)
+    return merge_traits(merge_traits(t1, t2), t3, trest...)
+end
+
+@inline parent_trait(::AbstractTrait) = EmptyTrait()
+
+@inline function trait(args...)
+    bt = base_trait(args...)
+    return expand_trait(bt)
+end
+"""
+    expand_trait(::AbstractTrait)
+
+Expand a trait or two traits, such that the order is always
+`NestedTrait(t1, NestedTrait(t2,...))`.
+"""
+expand_trait(::AbstractTrait)
+
+@inline expand_trait(e::EmptyTrait) = e
+@inline expand_trait(t::AbstractTrait) = _expand_trait(t, parent_trait(t))
+@inline _expand_trait(t1::AbstractTrait, ::EmptyTrait) = t1
+@inline _expand_trait(t1::NestedTrait, ::EmptyTrait) = t1
+@inline function _expand_trait(t1::NestedTrait, t2::AbstractTrait)
+    et1 = expand_trait(t1.t1)
+    et2 = expand_trait(t1.t2)
+    return merge_traits(et1, et2, t2)
+end
+@inline function expand_trait(t::NestedTrait)
+    et1 = expand_trait(t.t1)
+    et2 = expand_trait(t.t2)
+    return merge_traits(et1, et2)
+end
+
+
 @doc raw"""
     decorated_manifold(M::AbstractDecoratorManifold)
 
