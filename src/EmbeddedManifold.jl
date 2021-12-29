@@ -33,10 +33,7 @@ struct EmbeddedManifold{𝔽,MT<:AbstractManifold{𝔽},NT<:AbstractManifold} <:
     embedding::NT
 end
 
-function allocate_result(M::EmbeddedManifold, f::typeof(embed), x...)
-    T = allocate_result_type(M, f, x)
-    return allocate(x[1], T, representation_size(get_embedding(M)))
-end
+active_traits(::EmbeddedManifold, ::Any...) = merge_traits(IsEmbeddedManifold())
 
 function allocate_result(M::EmbeddedManifold, f::typeof(project), x...)
     T = allocate_result_type(M, f, x)
