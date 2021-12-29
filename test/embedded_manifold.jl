@@ -17,7 +17,7 @@ ManifoldsBase.project!(::PlaneManifold, Y, p, X) = (Y .= [X[1] X[2] 0.0])
 ManifoldsBase.is_embedded_submanifold(::Type{<:PlaneManifold}) = true
 
 function ManifoldsBase.active_traits(::PlaneManifold, args...)
-    return merge_traits(IsEmbeddedSubManifold())
+    return ManifoldsBase.merge_traits(ManifoldsBase.IsEmbeddedSubmanifoldManifold())
 end
 
 #

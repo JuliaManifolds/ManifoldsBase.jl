@@ -88,8 +88,26 @@ get_embedding(M::AbstractDecoratorManifold)
 function allocate_result(M::AbstractDecoratorManifold, f, x...)
     return allocate_result(trait(M, f, x...), M, f, x...)
 end
+# disambiguation
+function allocate_result(
+    M::AbstractDecoratorManifold,
+    f::typeof(get_coordinates),
+    p,
+    X,
+    B::ManifoldsBase.AbstractBasis,
+)
+    return invoke(
+        allocate_result,
+        Tuple{AbstractManifold,typeof(get_coordinates),Any,Any,AbstractBasis},
+        M,
+        f,
+        p,
+        X,
+        B,
+    )
+end
 # Introduce fallback
-function allocate_result(::EmptyTrait, M, f, x...)
+@inline function allocate_result(::EmptyTrait, M::AbstractManifold, f, x...)
     return invoke(
         allocate_result,
         Tuple{AbstractManifold,typeof(f),typeof(x).parameters...},
@@ -99,7 +117,9 @@ function allocate_result(::EmptyTrait, M, f, x...)
     )
 end
 # Introduce automatic forward
-# ----
+@inline function allocate_result(t::NestedTrait, M::AbstractManifold, f, x...)
+    return allocate_result(t.tail, M, f, x...)
+end
 
 function allocate_result(
     ::NestedTrait{IsEmbeddedManifold},
