@@ -669,7 +669,6 @@ end
 
 function _get_vector!(M::AbstractManifold, Y, p, c, B::VeeOrthogonalBasis)
     return get_vector_vee!(M, Y, p, c, number_system(B))
-    return get_vector!(M, Y, p, X, DefaultOrthogonalBasis(number_system(B)))
 end
 get_vector_vee!(M, Y, p, c, N) = get_vector!(M, Y, p, c, DefaultOrthogonalBasis(N))
 

@@ -376,7 +376,7 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
     end
 
     @testset "Retraction" begin
-        a = NLsolveInverseRetraction(ExponentialRetraction())
+        a = NLSolveInverseRetraction(ExponentialRetraction())
         @test a.retraction isa ExponentialRetraction
     end
 

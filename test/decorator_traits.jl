@@ -43,9 +43,11 @@ f(::EmptyTrait, a, b) = invoke(f, Tuple{AbstractA,typeof(b)}, a, b)
 
 @testset "Decorator trait tests" begin
     t = ManifoldsBase.EmptyTrait()
+    t2 = ManifoldsBase.NestedTrait(t, t)
     @test merge_traits() == t
     @test merge_traits(t) == t
     @test merge_traits(t, t) == t
+    @test merge_traits(t2) == t2
     @test merge_traits(
         merge_traits(IsGreat(), IsNice()),
         merge_traits(IsGreat(), IsNice()),

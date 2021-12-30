@@ -187,7 +187,7 @@ The following table provides an overview of the currently available types and th
 | [`PolarInverseRetraction`](@ref) | `inverse_retract_polar` |
 | [`ProjectionInverseRetraction`](@ref) | `inverse_retract_project` |
 | [`QRInverseRetraction`](@ref) | `inverse_retract_qr` |
-| [`NLsolveInverseRetraction`](@ref) | `inverse_retract_nlsolve` | the `m` is also passed on here. |
+| [`NLSolveInverseRetraction`](@ref) | `inverse_retract_nlsolve` | the `m` is also passed on here. |
 
 ### [Retractions](@id subsec_appendix_retr)
 

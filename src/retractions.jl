@@ -88,14 +88,14 @@ matrix / matrices for point and tangent vector on a [`AbstractManifold`](@ref)
 struct QRInverseRetraction <: AbstractInverseRetractionMethod end
 
 """
-    NLsolveInverseRetraction{T<:AbstractRetractionMethod,TV,TK} <:
+    NLSolveInverseRetraction{T<:AbstractRetractionMethod,TV,TK} <:
         ApproximateInverseRetraction
 
 An inverse retraction method for approximating the inverse of a retraction using `NLsolve`.
 
 # Constructor
 
-    NLsolveInverseRetraction(
+    NLSolveInverseRetraction(
         method::AbstractRetractionMethod[, X0];
         project_tangent=false,
         project_point=false,
@@ -108,14 +108,14 @@ vector is projected before the retraction using `project`. If `project_point` is
 then the resulting point is projected after the retraction. `nlsolve_kwargs` are keyword
 arguments passed to `NLsolve.nlsolve`.
 """
-struct NLsolveInverseRetraction{TR<:AbstractRetractionMethod,TV,TK} <:
+struct NLSolveInverseRetraction{TR<:AbstractRetractionMethod,TV,TK} <:
        ApproximateInverseRetraction
     retraction::TR
     X0::TV
     project_tangent::Bool
     project_point::Bool
     nlsolve_kwargs::TK
-    function NLsolveInverseRetraction(m, X0, project_point, project_tangent, nlsolve_kwargs)
+    function NLSolveInverseRetraction(m, X0, project_point, project_tangent, nlsolve_kwargs)
         return new{typeof(m),typeof(X0),typeof(nlsolve_kwargs)}(
             m,
             X0,
@@ -125,14 +125,14 @@ struct NLsolveInverseRetraction{TR<:AbstractRetractionMethod,TV,TK} <:
         )
     end
 end
-function NLsolveInverseRetraction(
+function NLSolveInverseRetraction(
     m,
     X0 = nothing;
     project_tangent::Bool = false,
     project_point::Bool = false,
     nlsolve_kwargs...,
 )
-    return NLsolveInverseRetraction(m, X0, project_point, project_tangent, nlsolve_kwargs)
+    return NLSolveInverseRetraction(m, X0, project_point, project_tangent, nlsolve_kwargs)
 end
 
 """
@@ -192,7 +192,7 @@ function _inverse_retract!(M::AbstractManifold, X, p, q, ::QRInverseRetraction)
     return inverse_retract_qr!(M, X, p, q)
 end
 function inverse_retract_qr! end
-function _inverse_retract!(M::AbstractManifold, X, p, q, m::NLsolveInverseRetraction)
+function _inverse_retract!(M::AbstractManifold, X, p, q, m::NLSolveInverseRetraction)
     return inverse_retract_nlsolve(M, X, p, q, m)
 end
 function inverse_retract_nlsolve! end
@@ -245,13 +245,12 @@ function inverse_retract_qr(M::AbstractManifold, p, q)
     inverse_retract_qr!(M, X, p, q)
     return X
 end
-function _inverse_retract(M::AbstractManifold, p, q, m::NLsolveInverseRetraction)
+function _inverse_retract(M::AbstractManifold, p, q, m::NLSolveInverseRetraction)
     return inverse_retract_nlsolve(M, p, q, m)
 end
 function inverse_retract_nlsolve(M::AbstractManifold, p, q, m)
     X = allocate_result(M, inverse_retract, p, q)
-    inverse_retract_nlsolve!(M, X, p, q, m)
-    return X
+    return inverse_retract_nlsolve!(M, X, p, q, m)
 end
 
 @doc raw"""
@@ -299,18 +298,15 @@ _retract(M::AbstractManifold, p, X, ::ProjectionRetraction) = retract_project(M,
 _retract(M::AbstractManifold, p, X, ::QRRetraction) = retract_qr(M, p, X)
 function retract_polar(M::AbstractManifold, p, X)
     q = allocate_result(M, retract, p, X)
-    retract_polar!(M, q, p, X)
-    return q
+    return retract_polar!(M, q, p, X)
 end
 function retract_project(M::AbstractManifold, p, X)
     q = allocate_result(M, retract, p, X)
-    retract_project!(M, q, p, X)
-    return q
+    return retract_project!(M, q, p, X)
 end
 function retract_qr(M::AbstractManifold, p, X)
     q = allocate_result(M, retract, p, X)
-    retract_qr!(M, q, p, X)
-    return q
+    return retract_qr!(M, q, p, X)
 end
 
 """
