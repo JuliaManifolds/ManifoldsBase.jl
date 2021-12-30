@@ -1,8 +1,6 @@
 using ManifoldsBase, Test
 
 using ManifoldsBase: DefaultManifold, ℝ
-import ManifoldsBase:
-    is_embedded_manifold, is_embedded_submanifold, is_isometric_embedded_manifold
 #
 # A first manifold that is modelled as a submanifold
 #
@@ -13,8 +11,6 @@ ManifoldsBase.base_manifold(::PlaneManifold) = ManifoldsBase.DefaultManifold(2)
 
 ManifoldsBase.project!(::PlaneManifold, q, p) = (q .= [p[1] p[2] 0.0])
 ManifoldsBase.project!(::PlaneManifold, Y, p, X) = (Y .= [X[1] X[2] 0.0])
-
-ManifoldsBase.is_embedded_submanifold(::Type{<:PlaneManifold}) = true
 
 function ManifoldsBase.active_traits(::PlaneManifold, args...)
     return ManifoldsBase.merge_traits(ManifoldsBase.IsEmbeddedSubmanifoldManifold())
@@ -51,7 +47,7 @@ function ManifoldsBase.project!(::AnotherPlaneManifold, Y, p, X)
 end
 
 #
-# This approach - explicitly mention an embedding.
+# Third example - explicitly mention an embedding.
 #
 function ManifoldsBase.embed!(
     ::EmbeddedManifold{𝔽,DefaultManifold{nL,𝔽},DefaultManifold{mL,𝔽2}},
@@ -111,19 +107,25 @@ end
 function ManifoldsBase.base_manifold(::NotImplementedEmbeddedManifold)
     return ManifoldsBase.DefaultManifold(2)
 end
-is_embedded_submanifold(::Type{<:NotImplementedEmbeddedManifold}) = true
+function ManifoldsBase.active_traits(::NotImplementedEmbeddedManifold, args...)
+    return ManifoldsBase.merge_traits(ManifoldsBase.IsEmbeddedSubmanifoldManifold())
+end
 
 #
 # A manifold that is isometrically embedded but has no implementations
 #
 struct NotImplementedEmbeddedManifold2 <: AbstractDecoratorManifold{ℝ} end
-is_isometric_embedded_manifold(::Type{<:NotImplementedEmbeddedManifold2}) = true
+function ManifoldsBase.active_traits(::NotImplementedEmbeddedManifold, args...)
+    return ManifoldsBase.merge_traits(ManifoldsBase.IsIsometricEmbeddedManifold())
+end
 
 #
 # A manifold that is an embedded manifold but not isometric and has no other implementation
 #
 struct NotImplementedEmbeddedManifold3 <: AbstractDecoratorManifold{ℝ} end
-is_embedded_manifold(::Type{<:NotImplementedEmbeddedManifold3}) = true
+function ManifoldsBase.active_traits(::NotImplementedEmbeddedManifold, args...)
+    return ManifoldsBase.merge_traits(ManifoldsBase.IsEmbeddedManifold())
+end
 
 @testset "Embedded Manifolds" begin
     @testset "EmbeddedManifold basic tests" begin

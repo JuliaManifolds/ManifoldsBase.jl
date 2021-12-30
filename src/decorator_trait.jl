@@ -120,7 +120,6 @@ end
 @inline function allocate_result(t::NestedTrait, M::AbstractManifold, f, x...)
     return allocate_result(t.tail, M, f, x...)
 end
-
 function allocate_result(
     ::NestedTrait{IsEmbeddedManifold},
     M::AbstractDecoratorManifold,
@@ -131,311 +130,672 @@ function allocate_result(
     return allocate(x[1], T, representation_size(get_embedding(M)))
 end
 
-# -----------------------------------------------------------------------------------------
-# old sruff for hisory / functions still need to be adapted
-@traitdef TIsEmbeddedManifold{M}
-@traitimpl TIsEmbeddedManifold{M} < -is_embedded_manifold(M)
-
-"""
-    TIsEmbeddedManifold{M}
-    is_embedded_manifold(M::Type{<:AbstractDecoratorManifold})
-
-Determine whether an [`AbstractDecoratorManifold`](@ref) `M` is an embedded manifold.
-To activate this for your manifold, set `isembedded_manifold` for your manifold type to true.
-Manifolds that are [`is_isometric_embedded_manifold`](@ref)s set this to true as well.
-"""
-function is_embedded_manifold(M::Type{<:AbstractDecoratorManifold})
-    return is_isometric_embedded_manifold(M)
+# Introduce Deco Trait | automatic foward | fallback
+function check_size(M::AbstractDecoratorManifold, p)
+    return check_size(trait(M, p), M, p)
 end
-
-@traitdef TIsIsometricEmbeddedManifold{M}
-@traitimpl TIsIsometricEmbeddedManifold{M} < -is_isometric_embedded_manifold(M)
-
-"""
-    IsIsometricEmbeddedManifold{M}
-    is_isometric_embedded_manifold(M::Type{<:AbstractDecoratorManifold})
-
-Determine whether an [`AbstractDecoratorManifold`](@ref) `M` is an isometrically embedded manifold.
-To activate this for your manifold, set `is_isometric_embedded_manifold` for your manifold type to true.
-
-Here, for example [`inner`](@ref) and [`norm`](@ref) are passed to the embedding
-
-This is automatically set to true, when we have an [`is_embedded_submanifold`](@ref).
-"""
-function is_isometric_embedded_manifold(Mfld::Type{<:AbstractDecoratorManifold})
-    return is_embedded_submanifold(Mfld)
+check_size(t::NestedTrait, M::AbstractManifold, p) = check_size(t.tail, M, p)
+function check_size(::EmptyTrait, M::AbstractManifold, p)
+    return invoke(check_size, Tuple{AbstractManifold,typeof(p)}, M, p)
 end
-
-@traitdef TIsEmbeddedSubmanifold{M}
-@traitimpl TIsEmbeddedSubmanifold{M} < -is_embedded_submanifold(M)
-
-"""
-    IsEmbeddedSubmanifold{M}
-    is_embedded_submanifold(M::Type{<:AbstractDecoratorManifold})
-
-Determine whether an [`AbstractDecoratorManifold`](@ref) `M` is an embedded submanifold.
-To activate this for your manifold, set `is_embedded_submanifold` for your manifold type to true.
-
-Here, all retraction, inverse retractions and vectors transports, especially
-[`exp`](@ref), [`log`](@ref), and [`parallel_transport_to`](@ref) are passed to the embedding.
-"""
-is_embedded_submanifold(::Type{<:AbstractDecoratorManifold}) = false
-
-@traitfn function allocate_result(
-    M::Mfld,
-    f::typeof(project),
-    x...,
-) where {Mfld <: AbstractDecoratorManifold; TIsEmbeddedManifold{Mfld}}
-    T = allocate_result_type(get_embedding(M), f, x)
-    return allocate(x[1], T, representation_size(M))
-end
-
-@traitfn function check_size(
-    M::Mfld,
-    p,
-) where {Mfld <: AbstractDecoratorManifold; TIsEmbeddedManifold{Mfld}}
+# Embedded
+function check_size(::NestedTrait{IsEmbeddedManifold}, M::AbstractDecoratorManifold, p)
     return check_size(get_embedding(M), p)
 end
 
-@traitfn function check_size(
-    M::Mfld,
-    p,
-    X,
-) where {Mfld <: AbstractDecoratorManifold; TIsEmbeddedManifold{Mfld}}
-    return check_size(get_embedding(M), p, X)
+# Introduce Deco Trait | automatic foward | fallback
+function embed(M::AbstractDecoratorManifold, p)
+    return embed(trait(M, p), M, p)
+end
+embed(t::NestedTrait, M::AbstractManifold, p) = embed(t.tail, M, p)
+function embed(::EmptyTrait, M::AbstractManifold, p)
+    return invoke(embed, Tuple{AbstractManifold,typeof(p)}, M, p)
+end
+# EmbeddedManifold
+function embed(::NestedTrait{IsEmbeddedManifold}, M::AbstractDecoratorManifold, p)
+    q = allocate_result(M, embed, p)
+    return embed!(M, q, p)
 end
 
-@traitfn function distance(
-    M::Mfld,
-    p,
-    q,
-) where {Mfld <: AbstractDecoratorManifold; TIsEmbeddedSubmanifold{Mfld}}
-    return distance(get_embedding(M), p, q)
+# Introduce Deco Trait | automatic foward | fallback
+function embed!(M::AbstractDecoratorManifold, q, p)
+    return embed!(trait(M, q, p), M, q, p)
 end
-
-@traitfn function embed!(
-    M::Mfld,
-    q,
-    p,
-) where {Mfld <: AbstractDecoratorManifold; TIsEmbeddedSubmanifold{Mfld}}
+embed!(::NestedTrait, M::AbstractManifold, q, p) = embed!(t.tail, M, q, p)
+function embed!(::EmptyTrait, M::AbstractManifold, p)
+    return invoke(embed!, Tuple{AbstractManifold,typeof(q),typeof(p)}, M, q, p)
+end
+# EmbeddedManifold
+function embed!(::NestedTrait{IsEmbeddedManifold}, M::AbstractDecoratorManifold, q, p)
     return copyto!(M, q, p)
 end
 
-@traitfn function embed!(
-    M::Mfld,
-    Y,
-    p,
-    X,
-) where {Mfld <: AbstractDecoratorManifold; TIsEmbeddedSubmanifold{Mfld}}
-    return copyto!(M, Y, p, X)
+# Introduce Deco Trait | automatic foward | fallback
+function exp(M::AbstractDecoratorManifold, p, X)
+    return exp(trait(M, p, X), M, p, X)
 end
-
-@traitfn function exp(
-    M::Mfld,
-    p,
-    X,
-) where {Mfld <: AbstractDecoratorManifold; TIsEmbeddedSubmanifold{Mfld}}
+exp(t::NestedTrait, M::AbstractManifold, p, X) = exp(t.tail, M, p, X)
+function exp(::EmptyTrait, M::AbstractManifold, p, X)
+    return invoke(exp, Tuple{AbstractManifold,typeof(p),typeof(X)}, M, p, X)
+end
+# EmbeddedSubManifold
+function exp(::NestedTrait{IsEmbeddedManifold}, M::AbstractDecoratorManifold, p, X)
     return exp(get_embedding(M), p, X)
 end
 
-@traitfn function exp!(
-    M::Mfld,
-    q,
-    p,
-    X,
-) where {Mfld <: AbstractDecoratorManifold; TIsEmbeddedSubmanifold{Mfld}}
+# Introduce Deco Trait | automatic foward | fallback
+function exp!(M::AbstractDecoratorManifold, q, p, X)
+    return exp!(trait(M, q, p, X), M, q, p, X)
+end
+exp!(t::NestedTrait, M::AbstractManifold, q, p, X) = exp!(t.tail, M, q, p, X)
+function exp!(::EmptyTrait, M::AbstractManifold, q, p, X)
+    return invoke(exp!, Tuple{AbstractManifold,typeof(q),typeof(p),typeof(X)}, M, q, p, X)
+end
+# EmbeddedSubManifold
+function exp!(::NestedTrait{IsEmbeddedManifold}, M::AbstractDecoratorManifold, q, p, X)
     return exp!(get_embedding(M), q, p, X)
 end
 
-@traitfn function inner(
-    M::Mfld,
+# Introduce Deco Trait | automatic foward | fallback
+function inner(M::AbstractDecoratorManifold, p, X, Y)
+    return inner(trait(M, p, X, Y), M, p, X, Y)
+end
+inner(t::NestedTrait, M::AbstractManifold, p, X, Y) = inner(t.tail, M, p, X, Y)
+function inner(::EmptyTrait, M::AbstractManifold, p, X, Y)
+    return invoke(inner, Tuple{AbstractManifold,typeof(p),typeof(X),typeof(Y)}, M, p, X, Y)
+end
+# Isometric Embedded submanifold
+function inner(
+    ::NestedTrait{IsIsometricEmbeddedManifold},
+    M::AbstractDecoratorManifold,
     p,
     X,
     Y,
-) where {Mfld <: AbstractDecoratorManifold; TIsIsometricEmbeddedManifold{Mfld}}
+)
     return inner(get_embedding(M), p, X, Y)
 end
 
-@traitfn function inverse_retract(
-    M::Mfld,
+# Introduce Deco Trait | automatic foward | fallback
+function inverse_retract(M::AbstractDecoratorManifold, p, q)
+    return inverse_retract(trait(M, q, X), M, p, q)
+end
+function inverse_retract(
+    t::NestedTrait,
+    M::AbstractManifold,
     p,
     q,
     m::AbstractInverseRetractionMethod = default_inverse_retraction_method(M),
-) where {Mfld <: AbstractDecoratorManifold; TIsEmbeddedSubmanifold{Mfld}}
+)
+    return inverse_retract(t.tail, M, p, q)
+end
+function inverse_retract(
+    ::EmptyTrait,
+    M::AbstractManifold,
+    p,
+    q,
+    m::AbstractInverseRetractionMethod = default_inverse_retraction_method(M),
+)
+    return invoke(
+        inverse_retract,
+        Tuple{AbstractManifold,typeof(p),typeof(q),typeof(m)},
+        M,
+        p,
+        q,
+        m,
+    )
+end
+# Transparent for Submanifolds
+function inverse_retract(
+    ::NestedTrait{IsEmbeddedSubmanifoldManifold},
+    M::AbstractDecoratorManifold,
+    p,
+    q,
+    m::AbstractInverseRetractionMethod = default_inverse_retraction_method(M),
+)
     return inverse_retract(get_embedding(M), p, q, m)
 end
 
-@traitfn function inverse_retract!(
-    M::Mfld,
+# Introduce Deco Trait | automatic foward | fallback
+function inverse_retract!(M::AbstractDecoratorManifold, X, p, q)
+    return inverse_retract!(trait(M, X, p, q), M, p, p, q)
+end
+function inverse_retract!(
+    t::NestedTrait,
+    M::AbstractManifold,
     X,
     p,
     q,
     m::AbstractInverseRetractionMethod = default_inverse_retraction_method(M),
-) where {Mfld <: AbstractDecoratorManifold; TIsEmbeddedSubmanifold{Mfld}}
+)
+    return exp!(t.tail, M, X, p, q, m)
+end
+function inverse_retract!(
+    ::EmptyTrait,
+    M::AbstractManifold,
+    X,
+    p,
+    q,
+    m::AbstractInverseRetractionMethod = default_inverse_retraction_method(M),
+)
+    return invoke(
+        inverse_retract!,
+        Tuple{AbstractManifold,typeof(X),typeof(p),typeof(q),typeof(m)},
+        M,
+        X,
+        p,
+        q,
+        m,
+    )
+end
+function inverse_retract!(
+    ::NestedTrait{IsEmbeddedSubmanifoldManifold},
+    M::AbstractDecoratorManifold,
+    X,
+    p,
+    q,
+    m::AbstractInverseRetractionMethod = default_inverse_retraction_method(M),
+)
     return inverse_retract!(get_embedding(M), X, p, q, m)
 end
 
-@traitfn function is_point(
-    M::Mfld,
-    p,
-    throw_error = false;
-    kwargs...,
-) where {Mfld <: AbstractDecoratorManifold; TIsEmbeddedManifold{Mfld}}
-    return is_point(get_embedding(M), p, throw_error; kwargs...)
+function is_point(M::AbstractDecoratorManifold, p, te = false; kwargs...)
+    return is_point(trait(M, p), M, p, te; kwargs...)
 end
-
-@traitfn function is_point(
-    M::Mfld,
-    p,
-    throw_error = false;
-    kwargs...,
-) where {Mfld <: AbstractDecoratorManifold; !TIsEmbeddedManifold{Mfld}}
-    return invoke(is_point, Tuple{AbstractManifold,Any,Any}, M, p, throw_error; kwargs...)
+function is_point(t::NestedTrait, M::AbstractManifold, p, te = false; kwargs...)
+    return is_point(t.tail, M, p, te; kwargs...)
 end
-
-@traitfn function is_vector(
-    M::Mfld,
-    p,
-    X,
-    throw_error = false;
-    kwargs...,
-) where {Mfld <: AbstractDecoratorManifold; TIsEmbeddedManifold{Mfld}}
-    return is_vector(get_embedding(M), p, X, throw_error; kwargs...)
-end
-
-@traitfn function is_vector(
-    M::Mfld,
-    p,
-    X,
-    throw_error = false;
-    kwargs...,
-) where {Mfld <: AbstractDecoratorManifold; !TIsEmbeddedManifold{Mfld}}
+function is_point(::EmptyTrait, M::AbstractManifold, p, te = false; kwargs...)
     return invoke(
-        is_vector,
-        Tuple{AbstractManifold,Any,Any,Any},
+        is_point,
+        Tuple{AbstractManifold,typeof(p),typeof(te)},
         M,
         p,
-        X,
-        throw_error;
+        te;
         kwargs...,
     )
 end
-
-@traitfn function norm(
-    M::Mfld,
+# EmbeddedManifold
+function is_point(
+    ::NestedTrait{IsEmbeddedManifold},
+    M::AbstractDecoratorManifold,
     p,
-    X,
-    Y,
-) where {Mfld <: AbstractDecoratorManifold; TIsIsometricEmbeddedManifold{Mfld}}
-    return inner(get_embedding(M), p, X, Y)
+    throw_error = false;
+    kwargs...,
+)
+    return is_point(get_embedding(M), p, throw_error; kwargs...)
 end
 
-@traitfn function log(
-    M::Mfld,
+function is_vector(M::AbstractDecoratorManifold, p, X, te = false; kwargs...)
+    return is_vector(trait(M, p, X), M, p, X, te; kwargs...)
+end
+function is_vector(t::NestedTrait, M::AbstractManifold, p, X, te = false; kwargs...)
+    return is_vector(t.tail, M, p, X, te; kwargs...)
+end
+function is_vector(::EmptyTrait, M::AbstractManifold, p, X, te = false; kwargs...)
+    return invoke(
+        is_vector,
+        Tuple{AbstractManifold,typeof(p),typeof(X),typeof(te)},
+        M,
+        p,
+        X,
+        te;
+        kwargs...,
+    )
+end
+# EmbeddedManifold
+function is_vector(
+    ::NestedTrait{IsEmbeddedManifold},
+    M::AbstractDecoratorManifold,
+    p,
+    X,
+    throw_error = false;
+    kwargs...,
+)
+    return is_vector(get_embedding(M), p, X, throw_error; kwargs...)
+end
+
+function norm(M::AbstractDecoratorManifold, p, X)
+    return norm(trait(M, p, X), M, p, X)
+end
+norm(t::NestedTrait, M::AbstractManifold, p, X) = norm(t.tail, M, p, X)
+function norm(::EmptyTrait, M::AbstractManifold, p, X)
+    return invoke(norm, Tuple{AbstractManifold,typeof(p),typeof(X)}, M, p, X)
+end
+function norm(
+    ::NestedTrait{IsIsometricEmbeddedManifold},
+    M::AbstractDecoratorManifold,
+    p,
+    X,
+)
+    return norm(get_embedding(M), p, X)
+end
+
+function log(M::AbstractDecoratorManifold, p, q)
+    return log(trait(M, p, q), M, p, q)
+end
+log(t::NestedTrait, M::AbstractManifold, p, q) = log(t.tail, M, p, q)
+function log(::EmptyTrait, M::AbstractManifold, p, q)
+    return invoke(log, Tuple{AbstractManifold,typeof(p),typeof(q)}, M, p, q)
+end
+function log(
+    ::NestedTrait{IsEmbeddedSubmanifoldManifold},
+    M::AbstractDecoratorManifold,
     p,
     q,
-) where {Mfld <: AbstractDecoratorManifold; TIsEmbeddedSubmanifold{Mfld}}
+)
     return log(get_embedding(M), p, q)
 end
 
-@traitfn function log!(
-    M::Mfld,
+# Introduce Deco Trait | automatic foward | fallback
+function log!(M::AbstractDecoratorManifold, X, p, q)
+    return log!(trait(M, X, p, q), M, X, p, q)
+end
+log!(t::NestedTrait, M::AbstractManifold, q, p, X) = log!(t.tail, M, q, p, X)
+function log!(::EmptyTrait, M::AbstractManifold, q, p, X)
+    return invoke(log!, Tuple{AbstractManifold,typeof(X),typeof(p),typeof(q)}, M, X, p, q)
+end
+function log!(
+    ::NestedTrait{IsEmbeddedSubmanifoldManifold},
+    M::AbstractDecoratorManifold,
     X,
     p,
     q,
-) where {Mfld <: AbstractDecoratorManifold; TIsEmbeddedSubmanifold{Mfld}}
+)
     return log!(get_embedding(M), X, p, q)
 end
 
-@traitfn function retract(
-    M::Mfld,
+# Introduce Deco Trait | automatic foward | fallback
+function retract(
+    M::AbstractDecoratorManifold,
     p,
     X,
     m::AbstractVectorTransportMethod = default_retraction_method(M),
-) where {Mfld <: AbstractDecoratorManifold; TIsEmbeddedSubmanifold{Mfld}}
+)
+    return retract(trait(M, p, X, m), M, p, X, m)
+end
+function retract(
+    t::NestedTrait,
+    M::AbstractManifold,
+    p,
+    X,
+    m::AbstractRetractionMethod = default_retraction_method(M),
+)
+    return retract(t.tail, M, p, X, m)
+end
+function retract(
+    ::EmptyTrait,
+    M::AbstractManifold,
+    p,
+    X,
+    m::AbstractRetractionMethod = default_retraction_method(M),
+)
+    return invoke(
+        retract,
+        Tuple{AbstractManifold,typeof(p),typeof(X),typeof(m)},
+        M,
+        p,
+        X,
+        m,
+    )
+end
+function retract(
+    ::NestedTrait{IsEmbeddedSubmanifoldManifold},
+    M::AbstractDecoratorManifold,
+    p,
+    X,
+    m::AbstractRetractionMethod = default_retraction_method(M),
+)
     return retract(get_embedding(M), p, X, m)
 end
 
-@traitfn function retract!(
-    M::Mfld,
+function retract!(
+    M::AbstractDecoratorManifold,
     q,
     p,
     X,
-    m::AbstractVectorTransportMethod = default_retraction_method(M),
-) where {Mfld <: AbstractDecoratorManifold; TIsEmbeddedSubmanifold{Mfld}}
+    m::AbstractRetractionMethod = default_retraction_method(M),
+)
+    return retract!(trait(M, q, p, X), M, q, p, X, m)
+end
+function retract!(
+    t::NestedTrait,
+    M::AbstractManifold,
+    q,
+    p,
+    X,
+    m::AbstractRetractionMethod = default_retraction_method(M),
+)
+    return retract!(t.tail, M, q, p, X, m)
+end
+function retract!(
+    ::EmptyTrait,
+    M::AbstractManifold,
+    q,
+    p,
+    X,
+    m::AbstractRetractionMethod = default_retraction_method(M),
+)
+    return invoke(
+        retract!,
+        Tuple{AbstractManifold,typeof(q),typeof(p),typeof(X),typeof(m)},
+        M,
+        q,
+        p,
+        X,
+        m,
+    )
+end
+function retract!(
+    ::NestedTrait{IsEmbeddedSubmanifoldManifold},
+    M::AbstractDecoratorManifold,
+    q,
+    p,
+    X,
+    m::AbstractRetractionMethod = default_retraction_method(M),
+)
     return retract!(get_embedding(M), q, p, X, m)
 end
 
-@traitfn function vector_transport_along(
-    M::Mfld,
+function vector_transport_along(
+    M::AbstractDecoratorManifold,
+    q,
+    p,
+    X,
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
+)
+    return vector_transport_along(trait(M, q, p, X), M, q, p, X, m)
+end
+function vector_transport_along(
+    t::NestedTrait,
+    M::AbstractManifold,
+    q,
+    p,
+    X,
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
+)
+    return vector_transport_along(t.tail, M, q, p, X, m)
+end
+function vector_transport_along(
+    ::EmptyTrait,
+    M::AbstractManifold,
+    q,
+    p,
+    X,
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
+)
+    return invoke(
+        vector_transport_along,
+        Tuple{AbstractManifold,typeof(q),typeof(p),typeof(X),typeof(m)},
+        M,
+        q,
+        p,
+        X,
+        m,
+    )
+end
+function vector_transport_along(
+    ::NestedTrait{IsEmbeddedSubmanifoldManifold},
+    M::AbstractDecoratorManifold,
     p,
     X,
     c,
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
-) where {Mfld <: AbstractDecoratorManifold; TIsEmbeddedSubmanifold{Mfld}}
+)
     return vector_transport_along(get_embedding(M), p, X, c, m)
 end
 
-@traitfn function vector_transport_along!(
-    M::Mfld,
+function vector_transport_along!(
+    M::AbstractDecoratorManifold,
+    Y,
+    q,
+    p,
+    X,
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
+)
+    return vector_transport_along!(trait(M, Y, q, p, X), M, Y, q, p, X, m)
+end
+function vector_transport_along!(
+    t::NestedTrait,
+    M::AbstractManifold,
+    Y,
+    q,
+    p,
+    X,
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
+)
+    return vector_transport_along!(t.tail, M, Y, q, p, X, m)
+end
+function vector_transport_along!(
+    ::EmptyTrait,
+    M::AbstractManifold,
+    Y,
+    q,
+    p,
+    X,
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
+)
+    return invoke(
+        vector_transport_along!,
+        Tuple{AbstractManifold,typeof(X),typeof(q),typeof(p),typeof(X),typeof(m)},
+        M,
+        Y,
+        q,
+        p,
+        X,
+        m,
+    )
+end
+function vector_transport_along!(
+    ::NestedTrait{IsEmbeddedSubmanifoldManifold},
+    M::AbstractDecoratorManifold,
     Y,
     p,
     X,
     c,
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
-) where {Mfld <: AbstractDecoratorManifold; TIsEmbeddedSubmanifold{Mfld}}
+)
     return vector_transport_along!(get_embedding(M), Y, p, X, c, m)
 end
 
-@traitfn function vector_transport_along!(
-    M::Mfld,
-    Y,
+
+function vector_transport_direction(
+    M::AbstractDecoratorManifold,
+    q,
     p,
     X,
-    c::AbstractVector,
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
-) where {Mfld <: AbstractDecoratorManifold; TIsEmbeddedSubmanifold{Mfld}}
-    return vector_transport_along!(get_embedding(M), Y, p, X, c, m)
+)
+    return vector_transport_direction(trait(M, q, p, X), M, q, p, X, m)
 end
-
-@traitfn function vector_transport_direction(
-    M::Mfld,
+function vector_transport_direction(
+    t::NestedTrait,
+    M::AbstractManifold,
+    q,
+    p,
+    X,
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
+)
+    return vector_transport_direction(t.tail, M, q, p, X, m)
+end
+function vector_transport_direction(
+    ::EmptyTrait,
+    M::AbstractManifold,
+    q,
+    p,
+    X,
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
+)
+    return invoke(
+        vector_transport_direction,
+        Tuple{AbstractManifold,typeof(q),typeof(p),typeof(X),typeof(m)},
+        M,
+        q,
+        p,
+        X,
+        m,
+    )
+end
+function vector_transport_direction(
+    ::NestedTrait{IsEmbeddedSubmanifoldManifold},
+    M::AbstractDecoratorManifold,
     p,
     X,
     d,
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
-) where {Mfld <: AbstractDecoratorManifold; TIsEmbeddedSubmanifold{Mfld}}
+)
     return vector_transport_direction(get_embedding(M), p, X, d, m)
 end
 
-@traitfn function vector_transport_direction!(
-    M::Mfld,
+function vector_transport_direction!(
+    M::AbstractDecoratorManifold,
+    Y,
+    q,
+    p,
+    X,
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
+)
+    return vector_transport_direction!(trait(M, Y, q, p, X), M, Y, q, p, X, m)
+end
+function vector_transport_direction!(
+    t::NestedTrait,
+    M::AbstractManifold,
+    Y,
+    q,
+    p,
+    X,
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
+)
+    return vector_transport_direction!(t.tail, M, Y, q, p, X, m)
+end
+function vector_transport_direction!(
+    ::EmptyTrait,
+    M::AbstractManifold,
+    Y,
+    q,
+    p,
+    X,
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
+)
+    return invoke(
+        vector_transport_direction!,
+        Tuple{AbstractManifold,typeof(X),typeof(q),typeof(p),typeof(X),typeof(m)},
+        M,
+        Y,
+        q,
+        p,
+        X,
+        m,
+    )
+end
+function vector_transport_direction!(
+    ::NestedTrait{IsEmbeddedSubmanifoldManifold},
+    M::AbstractDecoratorManifold,
     Y,
     p,
     X,
     d,
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
-) where {Mfld <: AbstractDecoratorManifold; TIsEmbeddedSubmanifold{Mfld}}
+)
     return vector_transport_direction!(get_embedding(M), Y, p, X, d, m)
 end
 
-@traitfn function vector_transport_to(
-    M::Mfld,
+function vector_transport_to(
+    M::AbstractDecoratorManifold,
+    q,
+    p,
+    X,
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
+)
+    return vector_transport_to(trait(M, q, p, X), M, q, p, X, m)
+end
+function vector_transport_to(
+    t::NestedTrait,
+    M::AbstractManifold,
+    q,
+    p,
+    X,
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
+)
+    return vector_transport_to(t.tail, M, q, p, X, m)
+end
+function vector_transport_to(
+    ::EmptyTrait,
+    M::AbstractManifold,
+    q,
+    p,
+    X,
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
+)
+    return invoke(
+        vector_transport_to,
+        Tuple{AbstractManifold,typeof(q),typeof(p),typeof(X),typeof(m)},
+        M,
+        q,
+        p,
+        X,
+        m,
+    )
+end
+function vector_transport_to(
+    ::NestedTrait{IsEmbeddedSubmanifoldManifold},
+    M::AbstractDecoratorManifold,
     p,
     X,
     q,
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
-) where {Mfld <: AbstractDecoratorManifold; TIsEmbeddedSubmanifold{Mfld}}
+)
     return vector_transport_to(get_embedding(M), p, X, q, m)
 end
 
-@traitfn function vector_transport_to!(
-    M::Mfld,
+function vector_transport_to!(
+    M::AbstractDecoratorManifold,
+    Y,
+    q,
+    p,
+    X,
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
+)
+    return vector_transport_to!(trait(M, Y, q, p, X), M, Y, q, p, X, m)
+end
+function vector_transport_to!(
+    t::NestedTrait,
+    M::AbstractManifold,
+    Y,
+    q,
+    p,
+    X,
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
+)
+    return vector_transport_to!(t.tail, M, Y, q, p, X, m)
+end
+function vector_transport_to!(
+    ::EmptyTrait,
+    M::AbstractManifold,
+    Y,
+    q,
+    p,
+    X,
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
+)
+    return invoke(
+        vector_transport_to!,
+        Tuple{AbstractManifold,typeof(X),typeof(q),typeof(p),typeof(X),typeof(m)},
+        M,
+        Y,
+        q,
+        p,
+        X,
+        m,
+    )
+end
+function vector_transport_to!(
+    ::NestedTrait{IsEmbeddedSubmanifoldManifold},
+    M::AbstractDecoratorManifold,
     Y,
     p,
     X,
     q,
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
-) where {Mfld <: AbstractDecoratorManifold; TIsEmbeddedSubmanifold{Mfld}}
+)
     return vector_transport_to!(get_embedding(M), Y, p, X, q, m)
 end

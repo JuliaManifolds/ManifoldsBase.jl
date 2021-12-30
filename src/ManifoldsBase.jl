@@ -21,7 +21,6 @@ import LinearAlgebra: dot, norm, det, cross, I, UniformScaling, Diagonal
 
 import Markdown: @doc_str
 using LinearAlgebra
-using SimpleTraits
 
 include("maintypes.jl")
 include("retractions.jl")
@@ -558,6 +557,8 @@ include("PowerManifold.jl")
 
 export AbstractManifold, AbstractManifoldPoint, TVector, CoTVector, TFVector, CoTFVector
 export AbstractDecoratorManifold
+export AbstractTrait,
+    IsEmbeddedManifold, IsEmbeddedSubmanifoldManifold, IsIsometricEmbeddedManifold
 export ValidationManifold, ValidationMPoint, ValidationTVector, ValidationCoTVector
 export EmbeddedManifold
 export AbstractPowerManifold, PowerManifold
