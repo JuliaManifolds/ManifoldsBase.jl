@@ -204,9 +204,9 @@ end
             # without any extra tests just the embedding is asked
             @test check_point(M, [1, 2]) === nothing
             @test check_vector(M, [1, 2], [3, 4]) === nothing
-            @test norm(M, [1, 2], [2, 3]) ≈ sqrt(13)
-            @test distance(M, [1, 2], [3, 4]) ≈ sqrt(8)
-            @test inner(M, [1, 2], [2, 3], [2, 3]) ≈ 13
+            @test_throws MethodError norm(M, [1, 2], [2, 3])
+            @test_throws MethodError distance(M, [1, 2], [3, 4])
+            @test_throws MethodError inner(M, [1, 2], [2, 3], [2, 3])
             @test manifold_dimension(M) == 2 # since base is defined is defined
             @test_throws MethodError project(M, [1, 2])
             @test_throws MethodError project(M, [1, 2], [2, 3]) == [2, 3]

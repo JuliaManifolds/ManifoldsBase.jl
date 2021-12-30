@@ -140,3 +140,93 @@ expand_trait(::AbstractTrait)
     et2 = expand_trait(t.tail)
     return merge_traits(et1, et2)
 end
+
+#! format: off
+# turn formatting for for the following functions
+# due to the if with returns inside (formatter puts a return upfront the if)
+function _split_signature(sig::Expr)
+    if sig.head == :where
+        where_exprs = sig.args[2:end]
+        call_expr = sig.args[1]
+    elseif sig.head == :call
+        where_exprs = []
+        call_expr = sig
+    else
+        error("Incorrect syntax in $ex. Expected a :where or :call expression.")
+    end
+    fname = call_expr.args[1]
+    if isa(call_expr.args[2], Expr) && call_expr.args[2].head == :parameters
+        # we have keyword arguments
+        callargs = call_expr.args[3:end]
+        kwargs_list = call_expr.args[2].args
+    else
+        callargs = call_expr.args[2:end]
+        kwargs_list = []
+    end
+    argnames = map(callargs) do arg
+        if isa(arg, Expr)
+            return arg.args[1]
+        else
+            return arg
+        end
+    end
+    argtypes = map(callargs) do arg
+        if isa(arg, Expr)
+            return arg.args[2]
+        else
+            return Any
+        end
+    end
+
+    kwargs_call = map(kwargs_list) do kwarg
+        if kwarg.head === :...
+            return kwarg
+        else
+            if isa(kwarg.args[1], Symbol)
+                kwargname = kwarg.args[1]
+            else
+                kwargname = kwarg.args[1].args[1]
+            end
+            return :($kwargname = $kwargname)
+        end
+    end
+
+    return (;
+        fname = fname,
+        where_exprs = where_exprs,
+        callargs = callargs,
+        kwargs_list = kwargs_list,
+        argnames = argnames,
+        argtypes = argtypes,
+        kwargs_call = kwargs_call,
+    )
+end
+#! format: on
+
+macro invoke_maker(argnum, type, sig)
+    parts = ManifoldsBase._split_signature(sig)
+    kwargs_list = parts[:kwargs_list]
+    callargs = parts[:callargs]
+    fname = parts[:fname]
+    where_exprs = parts[:where_exprs]
+    argnames = parts[:argnames]
+    argtypes = parts[:argtypes]
+    kwargs_call = parts[:kwargs_call]
+
+    return esc(
+        quote
+            function ($fname)($(callargs...); $(kwargs_list...)) where {$(where_exprs...)}
+                return invoke(
+                    $fname,
+                    Tuple{
+                        $(argtypes[1:(argnum - 1)]...),
+                        $type,
+                        $(argtypes[(argnum + 1):end]...),
+                    },
+                    $(argnames...);
+                    $(kwargs_call...),
+                )
+            end
+        end,
+    )
+end
