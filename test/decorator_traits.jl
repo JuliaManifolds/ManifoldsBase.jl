@@ -2,7 +2,7 @@ using Test
 using ManifoldsBase
 
 using ManifoldsBase: AbstractTrait, NestedTrait, EmptyTrait, trait, merge_traits
-using ManifoldsBase: expand_trait
+using ManifoldsBase: expand_trait, next_trait
 import ManifoldsBase: active_traits, parent_trait
 
 struct IsCool <: AbstractTrait end
@@ -37,7 +37,7 @@ f(::NestedTrait{IsNice}, a, b) = g(a, b, 3)
 f(::NestedTrait{IsCool}, a, b) = g(a, b, 5)
 
 # generic forward to the next trait to be looked at
-f(t::NestedTrait, a, b) = f(t.tail, a, b)
+f(t::NestedTrait, a, b) = f(next_trait(t), a, b)
 # generic fallback when no traits are defined
 f(::EmptyTrait, a, b) = invoke(f, Tuple{AbstractA,typeof(b)}, a, b)
 

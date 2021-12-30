@@ -141,6 +141,15 @@ expand_trait(::AbstractTrait)
     return merge_traits(et1, et2)
 end
 
+"""
+    next_trait(t::AbstractTrait)
+
+Return the next trait to be considered after `t`.
+"""
+next_trait(t::AbstractTrait)
+
+@inline next_trait(t::NestedTrait) = t.tail
+
 #! format: off
 # turn formatting for for the following functions
 # due to the if with returns inside (formatter puts a return upfront the if)
