@@ -459,11 +459,6 @@ project(t::NestedTrait, M::AbstractManifold, p) = project(next_trait(t), M, p)
 function project(::EmptyTrait, M::AbstractManifold, p)
     return invoke(project, Tuple{AbstractManifold,typeof(p)}, M, p)
 end
-# EmbeddedManifold
-function project(::NestedTrait{IsEmbeddedManifold}, M::AbstractDecoratorManifold, p)
-    q = allocate_result(M, project, p)
-    return project!(M, q, p)
-end
 
 # Introduce Deco Trait | automatic foward | fallback
 function project!(M::AbstractDecoratorManifold, q, p)
@@ -473,10 +468,6 @@ project!(t::NestedTrait, M::AbstractManifold, q, p) = project!(next_trait(t), M,
 function project!(::EmptyTrait, M::AbstractManifold, q, p)
     return invoke(project!, Tuple{AbstractManifold,typeof(q),typeof(p)}, M, q, p)
 end
-# EmbeddedManifold
-function project!(::NestedTrait{IsEmbeddedManifold}, M::AbstractDecoratorManifold, q, p)
-    return copyto!(M, q, p)
-end
 
 # Introduce Deco Trait | automatic foward | fallback
 function project(M::AbstractDecoratorManifold, p, X)
@@ -485,11 +476,6 @@ end
 project(t::NestedTrait, M::AbstractManifold, p, X) = project(next_trait(t), M, p, X)
 function project(::EmptyTrait, M::AbstractManifold, p, X)
     return invoke(project, Tuple{AbstractManifold,typeof(p),typeof(X)}, M, p, X)
-end
-# EmbeddedManifold
-function project(::NestedTrait{IsEmbeddedManifold}, M::AbstractDecoratorManifold, p, X)
-    q = allocate_result(M, project, p, X)
-    return project!(M, q, p, X)
 end
 
 # Introduce Deco Trait | automatic foward | fallback
@@ -506,10 +492,6 @@ function project!(::EmptyTrait, M::AbstractManifold, Y, p, X)
         p,
         X,
     )
-end
-# EmbeddedManifold
-function project!(::NestedTrait{IsEmbeddedManifold}, M::AbstractDecoratorManifold, Y, p, X)
-    return copyto!(M, Y, p, X)
 end
 
 # Introduce Deco Trait | automatic foward | fallback
@@ -655,41 +637,51 @@ end
 function vector_transport_along!(
     M::AbstractDecoratorManifold,
     Y,
-    q,
     p,
     X,
+    c,
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
-    return vector_transport_along!(trait(M, Y, q, p, X), M, Y, q, p, X, m)
+    return vector_transport_along!(trait(M, Y, p, X, c, m), M, Y, p, X, c, m)
+end
+function vector_transport_along!(
+    M::AbstractDecoratorManifold,
+    Y,
+    p,
+    X,
+    c::AbstractVector,
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
+)
+    return vector_transport_along!(trait(M, Y, p, X, c, m), M, Y, p, X, c, m)
 end
 function vector_transport_along!(
     t::NestedTrait,
     M::AbstractManifold,
     Y,
-    q,
     p,
     X,
+    c,
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
-    return vector_transport_along!(next_trait(t), M, Y, q, p, X, m)
+    return vector_transport_along!(next_trait(t), M, Y, p, X, c, m)
 end
 function vector_transport_along!(
     ::EmptyTrait,
     M::AbstractManifold,
     Y,
-    q,
     p,
     X,
+    c,
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
     return invoke(
         vector_transport_along!,
-        Tuple{AbstractManifold,typeof(Y),typeof(q),typeof(p),typeof(X),typeof(m)},
+        Tuple{AbstractManifold,typeof(Y),typeof(p),typeof(X),typeof(c),typeof(m)},
         M,
         Y,
-        q,
         p,
         X,
+        c,
         m,
     )
 end
@@ -705,49 +697,40 @@ function vector_transport_along!(
     return vector_transport_along!(get_embedding(M), Y, p, X, c, m)
 end
 
-@invoke_maker 1 AbstractManifold vector_transport_along!(
-    M::AbstractDecoratorManifold,
-    Y,
-    p,
-    X,
-    c::AbstractVector,
-    method::AbstractVectorTransportMethod,
-)
-
 function vector_transport_direction(
     M::AbstractDecoratorManifold,
-    q,
     p,
     X,
+    d,
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
-    return vector_transport_direction(trait(M, q, p, X), M, q, p, X, m)
+    return vector_transport_direction(trait(M, p, X, d, m), M, p, X, d, m)
 end
 function vector_transport_direction(
     t::NestedTrait,
     M::AbstractManifold,
-    q,
     p,
     X,
+    d,
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
-    return vector_transport_direction(next_trait(t), M, q, p, X, m)
+    return vector_transport_direction(next_trait(t), M, p, X, d, m)
 end
 function vector_transport_direction(
     ::EmptyTrait,
     M::AbstractManifold,
-    q,
     p,
     X,
+    d,
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
     return invoke(
         vector_transport_direction,
-        Tuple{AbstractManifold,typeof(q),typeof(p),typeof(X),typeof(m)},
+        Tuple{AbstractManifold,typeof(p),typeof(X),typeof(d),typeof(m)},
         M,
-        q,
         p,
         X,
+        d,
         m,
     )
 end
@@ -765,41 +748,41 @@ end
 function vector_transport_direction!(
     M::AbstractDecoratorManifold,
     Y,
-    q,
     p,
     X,
+    d,
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
-    return vector_transport_direction!(trait(M, Y, q, p, X), M, Y, q, p, X, m)
+    return vector_transport_direction!(trait(M, Y, p, X, d, m), M, Y, p, X, d, m)
 end
 function vector_transport_direction!(
     t::NestedTrait,
     M::AbstractManifold,
     Y,
-    q,
     p,
     X,
+    d,
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
-    return vector_transport_direction!(next_trait(t), M, Y, q, p, X, m)
+    return vector_transport_direction!(next_trait(t), M, Y, p, X, d, m)
 end
 function vector_transport_direction!(
     ::EmptyTrait,
     M::AbstractManifold,
     Y,
-    q,
     p,
     X,
+    d,
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
     return invoke(
         vector_transport_direction!,
-        Tuple{AbstractManifold,typeof(Y),typeof(q),typeof(p),typeof(X),typeof(m)},
+        Tuple{AbstractManifold,typeof(Y),typeof(p),typeof(X),typeof(d),typeof(m)},
         M,
         Y,
-        q,
         p,
         X,
+        d,
         m,
     )
 end
@@ -817,38 +800,38 @@ end
 
 function vector_transport_to(
     M::AbstractDecoratorManifold,
-    q,
     p,
     X,
+    q,
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
-    return vector_transport_to(trait(M, q, p, X), M, q, p, X, m)
+    return vector_transport_to(trait(M, p, X, q, m), M, p, X, q, m)
 end
 function vector_transport_to(
     t::NestedTrait,
     M::AbstractManifold,
-    q,
     p,
     X,
+    q,
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
-    return vector_transport_to(next_trait(t), M, q, p, X, m)
+    return vector_transport_to(next_trait(t), M, p, X, q, m)
 end
 function vector_transport_to(
     ::EmptyTrait,
     M::AbstractManifold,
-    q,
     p,
     X,
+    q,
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
     return invoke(
         vector_transport_to,
         Tuple{AbstractManifold,typeof(q),typeof(p),typeof(X),typeof(m)},
         M,
-        q,
         p,
         X,
+        q,
         m,
     )
 end
@@ -866,41 +849,41 @@ end
 function vector_transport_to!(
     M::AbstractDecoratorManifold,
     Y,
-    q,
     p,
     X,
+    q,
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
-    return vector_transport_to!(trait(M, Y, q, p, X), M, Y, q, p, X, m)
+    return vector_transport_to!(trait(M, Y, p, X, q, m), M, Y, p, X, q, m)
 end
 function vector_transport_to!(
     t::NestedTrait,
     M::AbstractManifold,
     Y,
-    q,
     p,
     X,
+    q,
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
-    return vector_transport_to!(next_trait(t), M, Y, q, p, X, m)
+    return vector_transport_to!(next_trait(t), M, Y, p, X, q, m)
 end
 function vector_transport_to!(
     ::EmptyTrait,
     M::AbstractManifold,
     Y,
-    q,
     p,
     X,
+    q,
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
     return invoke(
         vector_transport_to!,
-        Tuple{AbstractManifold,typeof(Y),typeof(q),typeof(p),typeof(X),typeof(m)},
+        Tuple{AbstractManifold,typeof(Y),typeof(p),typeof(X),typeof(q),typeof(m)},
         M,
         Y,
-        q,
         p,
         X,
+        q,
         m,
     )
 end

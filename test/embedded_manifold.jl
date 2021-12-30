@@ -100,29 +100,29 @@ end
 #
 # A manifold that is a submanifold but otherwise has not implementations
 #
-struct NotImplementedEmbeddedManifold <: AbstractDecoratorManifold{ℝ} end
-function ManifoldsBase.get_embedding(::NotImplementedEmbeddedManifold)
+struct NotImplementedEmbeddedSubManifold <: AbstractDecoratorManifold{ℝ} end
+function ManifoldsBase.get_embedding(::NotImplementedEmbeddedSubManifold)
     return ManifoldsBase.DefaultManifold(3)
 end
-function ManifoldsBase.base_manifold(::NotImplementedEmbeddedManifold)
+function ManifoldsBase.base_manifold(::NotImplementedEmbeddedSubManifold)
     return ManifoldsBase.DefaultManifold(2)
 end
-function ManifoldsBase.active_traits(::NotImplementedEmbeddedManifold, args...)
+function ManifoldsBase.active_traits(::NotImplementedEmbeddedSubManifold, args...)
     return ManifoldsBase.merge_traits(ManifoldsBase.IsEmbeddedSubmanifoldManifold())
 end
 
 #
 # A manifold that is isometrically embedded but has no implementations
 #
-struct NotImplementedEmbeddedManifold2 <: AbstractDecoratorManifold{ℝ} end
-function ManifoldsBase.active_traits(::NotImplementedEmbeddedManifold, args...)
+struct NotImplementedIsometricEmbeddedManifold <: AbstractDecoratorManifold{ℝ} end
+function ManifoldsBase.active_traits(::NotImplementedIsometricEmbeddedManifold, args...)
     return ManifoldsBase.merge_traits(ManifoldsBase.IsIsometricEmbeddedManifold())
 end
 
 #
 # A manifold that is an embedded manifold but not isometric and has no other implementation
 #
-struct NotImplementedEmbeddedManifold3 <: AbstractDecoratorManifold{ℝ} end
+struct NotImplementedEmbeddedManifold <: AbstractDecoratorManifold{ℝ} end
 function ManifoldsBase.active_traits(::NotImplementedEmbeddedManifold, args...)
     return ManifoldsBase.merge_traits(ManifoldsBase.IsEmbeddedManifold())
 end
@@ -198,15 +198,15 @@ end
     end
 
     @testset "Test nonimplemented fallbacks" begin
-        @testset "Default Isometric Embedding Fallback Error Tests" begin
-            M = NotImplementedEmbeddedManifold()
+        @testset "Submanifold Embedding Fallbacks & Error Tests" begin
+            M = NotImplementedEmbeddedSubManifold()
             A = zeros(2)
-            # without any extra tests just the embedding is asked
+            # for a submanifold quite a lot of functions are passed on
             @test check_point(M, [1, 2]) === nothing
             @test check_vector(M, [1, 2], [3, 4]) === nothing
-            @test_throws MethodError norm(M, [1, 2], [2, 3])
-            @test_throws MethodError distance(M, [1, 2], [3, 4])
-            @test_throws MethodError inner(M, [1, 2], [2, 3], [2, 3])
+            @test norm(M, [1, 2], [2, 3]) ≈ sqrt(13)
+            @test distance(M, [1, 2], [3, 4]) ≈ sqrt(8)
+            @test inner(M, [1, 2], [2, 3], [2, 3]) == 13
             @test manifold_dimension(M) == 2 # since base is defined is defined
             @test_throws MethodError project(M, [1, 2])
             @test_throws MethodError project(M, [1, 2], [2, 3]) == [2, 3]
@@ -218,8 +218,8 @@ end
             vector_transport_to!(M, A, [1, 2], [2, 3], [3, 4])
             @test A == [2, 3]
         end
-        @testset "General Isometric Embedding Fallback Error Tests" begin
-            M2 = NotImplementedEmbeddedManifold2()
+        @testset "Isometric Embedding Fallbacks & Error Tests" begin
+            M2 = NotImplementedIsometricEmbeddedManifold()
             @test base_manifold(M2) == M2
             A = zeros(2)
             # Check that all of these report not to be implemented, i.e.
@@ -241,7 +241,8 @@ end
                 [[1, 2]],
                 ParallelTransport(),
             )
-            @test_throws MethodError vector_transport_along!(M2, A, [1, 2], [2, 3], [])
+            @test vector_transport_along!(M2, A, [1, 2], [2, 3], []) == [2, 3]
+            @test A == [2, 3]
             @test_throws MethodError vector_transport_direction(M2, [1, 2], [2, 3], [3, 4])
             @test_throws MethodError vector_transport_direction!(
                 M2,
@@ -254,7 +255,7 @@ end
             @test_throws MethodError vector_transport_to!(M2, A, [1, 2], [2, 3], [3, 4])
         end
         @testset "Nonisometric Embedding Fallback Error Rests" begin
-            M3 = NotImplementedEmbeddedManifold3()
+            M3 = NotImplementedEmbeddedManifold()
             @test_throws MethodError inner(M3, [1, 2], [2, 3], [2, 3])
             @test_throws StackOverflowError manifold_dimension(M3)
             @test_throws MethodError distance(M3, [1, 2], [2, 3])
