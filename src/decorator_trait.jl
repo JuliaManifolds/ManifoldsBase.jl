@@ -134,13 +134,30 @@ end
 function check_size(M::AbstractDecoratorManifold, p)
     return check_size(trait(M, p), M, p)
 end
-check_size(t::NestedTrait, M::AbstractManifold, p) = check_size(t.tail, M, p)
+function check_size(t::NestedTrait, M::AbstractManifold, p)
+    check_size(t.tail, M, p)
+end
 function check_size(::EmptyTrait, M::AbstractManifold, p)
     return invoke(check_size, Tuple{AbstractManifold,typeof(p)}, M, p)
 end
 # Embedded
 function check_size(::NestedTrait{IsEmbeddedManifold}, M::AbstractDecoratorManifold, p)
     return check_size(get_embedding(M), p)
+end
+
+# Introduce Deco Trait | automatic foward | fallback
+function check_size(M::AbstractDecoratorManifold, p, X)
+    return check_size(trait(M, p), M, p, X)
+end
+function check_size(t::NestedTrait, M::AbstractManifold, p, X)
+    check_size(t.tail, M, p, X)
+end
+function check_size(::EmptyTrait, M::AbstractManifold, p, X)
+    return invoke(check_size, Tuple{AbstractManifold,typeof(p)}, M, p, X)
+end
+# Embedded
+function check_size(::NestedTrait{IsEmbeddedManifold}, M::AbstractDecoratorManifold, p, X)
+    return check_size(get_embedding(M), p, X)
 end
 
 # Introduce Deco Trait | automatic foward | fallback
@@ -161,13 +178,40 @@ end
 function embed!(M::AbstractDecoratorManifold, q, p)
     return embed!(trait(M, q, p), M, q, p)
 end
-embed!(::NestedTrait, M::AbstractManifold, q, p) = embed!(t.tail, M, q, p)
-function embed!(::EmptyTrait, M::AbstractManifold, p)
+embed!(t::NestedTrait, M::AbstractManifold, q, p) = embed!(t.tail, M, q, p)
+function embed!(::EmptyTrait, M::AbstractManifold, q, p)
     return invoke(embed!, Tuple{AbstractManifold,typeof(q),typeof(p)}, M, q, p)
 end
 # EmbeddedManifold
 function embed!(::NestedTrait{IsEmbeddedManifold}, M::AbstractDecoratorManifold, q, p)
     return copyto!(M, q, p)
+end
+
+# Introduce Deco Trait | automatic foward | fallback
+function embed(M::AbstractDecoratorManifold, p, X)
+    return embed(trait(M, p, X), M, p, X)
+end
+embed(t::NestedTrait, M::AbstractManifold, p, X) = embed(t.tail, M, p, X)
+function embed(::EmptyTrait, M::AbstractManifold, p, X)
+    return invoke(embed, Tuple{AbstractManifold,typeof(p), typeof(X)}, M, p, X)
+end
+# EmbeddedManifold
+function embed(::NestedTrait{IsEmbeddedManifold}, M::AbstractDecoratorManifold, p, X)
+    q = allocate_result(M, embed, p, X)
+    return embed!(M, q, p, X)
+end
+
+# Introduce Deco Trait | automatic foward | fallback
+function embed!(M::AbstractDecoratorManifold, Y, p, X)
+    return embed!(trait(M, Y, p, X), M, Y, p, X)
+end
+embed!(t::NestedTrait, M::AbstractManifold, Y, p ,X) = embed!(t.tail, M, Y, p, X)
+function embed!(::EmptyTrait, M::AbstractManifold, Y, p, X)
+    return invoke(embed!, Tuple{AbstractManifold,typeof(Y),typeof(p), typeof(X)}, M, Y, p, X)
+end
+# EmbeddedManifold
+function embed!(::NestedTrait{IsEmbeddedManifold}, M::AbstractDecoratorManifold, Y, p, X)
+    return copyto!(M, Y, p, X)
 end
 
 # Introduce Deco Trait | automatic foward | fallback
@@ -200,7 +244,10 @@ end
 function inner(M::AbstractDecoratorManifold, p, X, Y)
     return inner(trait(M, p, X, Y), M, p, X, Y)
 end
-inner(t::NestedTrait, M::AbstractManifold, p, X, Y) = inner(t.tail, M, p, X, Y)
+function inner(t::NestedTrait, M::AbstractManifold, p, X, Y)
+    println(t)
+    return inner(t.tail, M, p, X, Y)
+end
 function inner(::EmptyTrait, M::AbstractManifold, p, X, Y)
     return invoke(inner, Tuple{AbstractManifold,typeof(p),typeof(X),typeof(Y)}, M, p, X, Y)
 end
@@ -402,6 +449,60 @@ function log!(
     q,
 )
     return log!(get_embedding(M), X, p, q)
+end
+
+# Introduce Deco Trait | automatic foward | fallback
+function project(M::AbstractDecoratorManifold, p)
+    return project(trait(M, p), M, p)
+end
+project(t::NestedTrait, M::AbstractManifold, p) = project(t.tail, M, p)
+function project(::EmptyTrait, M::AbstractManifold, p)
+    return invoke(project, Tuple{AbstractManifold,typeof(p)}, M, p)
+end
+# EmbeddedManifold
+function project(::NestedTrait{IsEmbeddedManifold}, M::AbstractDecoratorManifold, p)
+    q = allocate_result(M, project, p)
+    return project!(M, q, p)
+end
+
+# Introduce Deco Trait | automatic foward | fallback
+function project!(M::AbstractDecoratorManifold, q, p)
+    return project!(trait(M, q, p), M, q, p)
+end
+project!(t::NestedTrait, M::AbstractManifold, q, p) = project!(t.tail, M, q, p)
+function project!(::EmptyTrait, M::AbstractManifold, q, p)
+    return invoke(project!, Tuple{AbstractManifold,typeof(q),typeof(p)}, M, q, p)
+end
+# EmbeddedManifold
+function project!(::NestedTrait{IsEmbeddedManifold}, M::AbstractDecoratorManifold, q, p)
+    return copyto!(M, q, p)
+end
+
+# Introduce Deco Trait | automatic foward | fallback
+function project(M::AbstractDecoratorManifold, p, X)
+    return project(trait(M, p, X), M, p, X)
+end
+project(t::NestedTrait, M::AbstractManifold, p, X) = project(t.tail, M, p, X)
+function project(::EmptyTrait, M::AbstractManifold, p, X)
+    return invoke(project, Tuple{AbstractManifold,typeof(p), typeof(X)}, M, p, X)
+end
+# EmbeddedManifold
+function project(::NestedTrait{IsEmbeddedManifold}, M::AbstractDecoratorManifold, p, X)
+    q = allocate_result(M, project, p, X)
+    return project!(M, q, p, X)
+end
+
+# Introduce Deco Trait | automatic foward | fallback
+function project!(M::AbstractDecoratorManifold, Y, p, X)
+    return project!(trait(M, Y, p, X), M, Y, p, X)
+end
+project!(t::NestedTrait, M::AbstractManifold, Y, p ,X) = project!(t.tail, M, Y, p, X)
+function project!(::EmptyTrait, M::AbstractManifold, Y, p, X)
+    return invoke(project!, Tuple{AbstractManifold,typeof(Y),typeof(p), typeof(X)}, M, Y, p, X)
+end
+# EmbeddedManifold
+function project!(::NestedTrait{IsEmbeddedManifold}, M::AbstractDecoratorManifold, Y, p, X)
+    return copyto!(M, Y, p, X)
 end
 
 # Introduce Deco Trait | automatic foward | fallback
