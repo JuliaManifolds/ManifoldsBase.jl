@@ -245,7 +245,6 @@ function inner(M::AbstractDecoratorManifold, p, X, Y)
     return inner(trait(M, p, X, Y), M, p, X, Y)
 end
 function inner(t::NestedTrait, M::AbstractManifold, p, X, Y)
-    println(t)
     return inner(t.tail, M, p, X, Y)
 end
 function inner(::EmptyTrait, M::AbstractManifold, p, X, Y)
