@@ -25,40 +25,6 @@ struct CustomDefinedRetraction <: ManifoldsBase.AbstractRetractionMethod end
 struct CustomUndefinedRetraction <: ManifoldsBase.AbstractRetractionMethod end
 struct CustomDefinedInverseRetraction <: ManifoldsBase.AbstractInverseRetractionMethod end
 
-function ManifoldsBase.injectivity_radius(
-    ::ManifoldsBase.DefaultManifold,
-    ::CustomDefinedRetraction,
-)
-    return 10.0
-end
-function ManifoldsBase.retract!(
-    ::ManifoldsBase.DefaultManifold,
-    q,
-    p,
-    X,
-    ::CustomDefinedRetraction,
-)
-    return (q .= p .+ X)
-end
-function ManifoldsBase.inverse_retract!(
-    ::ManifoldsBase.DefaultManifold,
-    X,
-    p,
-    q,
-    ::CustomDefinedInverseRetraction,
-)
-    return (X .= q .- p)
-end
-
-
-struct MatrixVectorTransport{T} <: AbstractVector{T}
-    m::Matrix{T}
-end
-
-Base.getindex(x::MatrixVectorTransport, i) = x.m[:, i]
-
-Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
-
 struct DefaultPoint{T} <: AbstractManifoldPoint
     value::T
 end
@@ -77,6 +43,46 @@ Base.eltype(v::DefaultTVector) = eltype(v.value)
 ManifoldsBase.@manifold_element_forwards DefaultPoint value
 ManifoldsBase.@manifold_vector_forwards DefaultTVector value
 ManifoldsBase.@default_manifold_fallbacks ManifoldsBase.DefaultManifold DefaultPoint DefaultTVector value value
+
+function ManifoldsBase.injectivity_radius(
+    ::ManifoldsBase.DefaultManifold,
+    ::CustomDefinedRetraction,
+)
+    return 10.0
+end
+function ManifoldsBase._retract(
+    M::ManifoldsBase.DefaultManifold,
+    p,
+    X,
+    ::CustomDefinedRetraction,
+)
+    return retract_custom(M, p, X)
+end
+function retract_custom(::ManifoldsBase.DefaultManifold, p::DefaultPoint, X::DefaultTVector)
+    return DefaultPoint(p.value + X.value)
+end
+function ManifoldsBase._inverse_retract(
+    M::ManifoldsBase.DefaultManifold,
+    p,
+    q,
+    ::CustomDefinedInverseRetraction,
+)
+    return inverse_retract_custom(M, p, q)
+end
+function inverse_retract_custom(
+    ::ManifoldsBase.DefaultManifold,
+    p::DefaultPoint,
+    q::DefaultPoint,
+)
+    return DefaultTVector(q.value - p.value)
+end
+struct MatrixVectorTransport{T} <: AbstractVector{T}
+    m::Matrix{T}
+end
+
+Base.getindex(x::MatrixVectorTransport, i) = x.m[:, i]
+
+Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
 
 @testset "Testing Default (Euclidean)" begin
     M = ManifoldsBase.DefaultManifold(3)
@@ -410,8 +416,8 @@ ManifoldsBase.@default_manifold_fallbacks ManifoldsBase.DefaultManifold DefaultP
         X2 = allocate(X, eltype(X.value), size(X.value))
         @test size(X2.value) == size(X.value)
         # Dispatch on custom - dispatch not working, check for new scheme later.
-        @test_broken inverse_retract(M, p, q, CustomDefinedInverseRetraction()) == -Y
-        @test_broken retract(M, q, Y, CustomDefinedRetraction()) == p
+        @test inverse_retract(M, p, q, CustomDefinedInverseRetraction()) == -Y
+        @test retract(M, q, Y, CustomDefinedRetraction()) == p
         @test 2.0 \ X == DefaultTVector(2.0 \ X.value)
         @test X + Y == DefaultTVector(X.value + Y.value)
         @test +X == X

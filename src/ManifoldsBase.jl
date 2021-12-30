@@ -565,8 +565,6 @@ export AbstractPowerManifold, PowerManifold
 export AbstractPowerRepresentation,
     NestedPowerRepresentation, NestedReplacingPowerRepresentation
 
-export AbstractDecoratorType, DefaultDecoratorType
-
 export OutOfInjectivityRadiusError
 
 export AbstractRetractionMethod,
@@ -675,9 +673,6 @@ export allocate,
     inverse_retract_qr,
     inverse_retract_qr!,
     isapprox,
-    is_embedded_manifold,
-    is_embedded_submanifold,
-    is_isometric_embedded_manifold,
     is_point,
     is_vector,
     isempty,
