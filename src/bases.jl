@@ -241,7 +241,7 @@ struct CachedBasis{𝔽,B,V} <:
        AbstractBasis{𝔽,TangentSpaceType} where {B<:AbstractBasis{𝔽,TangentSpaceType},V}
     data::V
 end
-function CachedBasis(::B, data::V) where {V,𝔽,B<:AbstractBasis{𝔽,TangentSpaceType}}
+function CachedBasis(::B, data::V) where {V,𝔽,B<:AbstractBasis{𝔽,<:TangentSpaceType}}
     return CachedBasis{𝔽,B,V}(data)
 end
 function CachedBasis(basis::CachedBasis) # avoid double encapsulation

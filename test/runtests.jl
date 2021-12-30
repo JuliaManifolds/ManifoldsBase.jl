@@ -21,7 +21,7 @@ using ManifoldsBase
     include("allocation.jl")
     include("numbers.jl")
     include("bases.jl")
-    include("decorator_manifold.jl")
+    include("manifold_fallbacks.jl")
     include("empty_manifold.jl")
     include("errors.jl")
     include("default_manifold.jl")

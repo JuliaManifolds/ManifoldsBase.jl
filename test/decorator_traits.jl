@@ -42,7 +42,11 @@ f(t::NestedTrait, a, b) = f(next_trait(t), a, b)
 f(::EmptyTrait, a, b) = invoke(f, Tuple{AbstractA,typeof(b)}, a, b)
 
 @testset "Decorator trait tests" begin
-    @test merge_traits(
+      t =  ManifoldsBase.EmptyTrait()
+      @test merge_traits() == t
+      @test merge_traits(t) == t
+      @test merge_traits(t,t) == t
+      @test merge_traits(
         merge_traits(IsGreat(), IsNice()),
         merge_traits(IsGreat(), IsNice()),
     ) === merge_traits(IsGreat(), IsNice(), IsGreat(), IsNice())

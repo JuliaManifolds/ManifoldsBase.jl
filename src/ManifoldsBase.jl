@@ -602,7 +602,8 @@ export CachedBasis,
     DiagonalizingOrthonormalBasis,
     DefaultOrthonormalBasis,
     GramSchmidtOrthonormalBasis,
-    ProjectedOrthonormalBasis
+    ProjectedOrthonormalBasis,
+    VeeOrthogonalBasis
 
 export CompositeManifoldError, ComponentManifoldError
 
