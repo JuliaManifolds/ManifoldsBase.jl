@@ -22,7 +22,6 @@ struct A5 <: DecoA end
 f(::AbstractA, x) = x + 2
 g(::DecoA, x, y) = x + y
 
-
 struct IsGreat <: AbstractTrait end # a special case of IsNice
 parent_trait(::IsGreat) = IsNice()
 
@@ -68,4 +67,42 @@ f(::EmptyTrait, a, b) = invoke(f, Tuple{AbstractA,typeof(b)}, a, b)
     @test f(A5(), 890) == 893
     f(::NestedTrait{IsGreat}, a, b) = g(a, b, 54)
     @test f(A5(), 890) == 944
+end
+
+#
+# A Manifold decorator test - check that EmptyTrait cases call Abstract and those fail with
+# MethodError due to ambiguities (between Abstract and Decorator)
+struct NonDecoratorManifold <: AbstractDecoratorManifold{ManifoldsBase.ℝ} end
+ManifoldsBase.representation_size(::NonDecoratorManifold) = (2,)
+
+@testset "Testing a NonDecoratorManifold - emptytrait fallbacks" begin
+    M = NonDecoratorManifold()
+    p = [2.0, 1.0]
+    q = similar(p)
+    X = [1.0, 0.0]
+    Y = similar(X)
+    @test check_size(M, p) === nothing
+    # Ambiguous since not implemented
+    @test_throws MethodError embed(M, p)
+    @test_throws MethodError embed!(M, q, p)
+    @test_throws MethodError embed(M, p, X)
+    @test_throws MethodError embed!(M, Y, p, X)
+    # the following is implemented but passes to the second and hence fails
+    @test_throws MethodError exp(M, p, X)
+    @test_throws MethodError exp!(M, q, p, X)
+    @test_throws MethodError retract(M, p, X)
+    @test_throws MethodError retract!(M, q, p, X)
+    @test_throws MethodError log(M, p, q)
+    @test_throws MethodError log!(M, Y, p, q)
+    @test_throws MethodError inverse_retract(M, p, q)
+    @test_throws MethodError inverse_retract!(M, Y, p, q)
+    @test_throws MethodError vector_transport_along(M, p, X, :curve)
+    @test_throws MethodError vector_transport_along!(M, Y, p, X, :curve)
+end
+
+# With even less, check that representation size stacjk overflows
+struct NonDecoratorNonManifold <: AbstractDecoratorManifold{ManifoldsBase.ℝ} end
+@testset "Testing a NonDecoratorNonManifold - emptytrait fallback Errors" begin
+    N = NonDecoratorNonManifold()
+    @test_throws StackOverflowError representation_size(N)
 end

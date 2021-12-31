@@ -263,8 +263,13 @@ function inner(
 end
 
 # Introduce Deco Trait | automatic foward | fallback
-function inverse_retract(M::AbstractDecoratorManifold, p, q)
-    return inverse_retract(trait(M, q, X), M, p, q)
+function inverse_retract(
+    M::AbstractDecoratorManifold,
+    p,
+    q,
+    m::AbstractInverseRetractionMethod = default_inverse_retraction_method(M),
+)
+    return inverse_retract(trait(M, p, q), M, p, q, m)
 end
 function inverse_retract(
     t::NestedTrait,
@@ -273,7 +278,7 @@ function inverse_retract(
     q,
     m::AbstractInverseRetractionMethod = default_inverse_retraction_method(M),
 )
-    return inverse_retract(next_trait(t), M, p, q)
+    return inverse_retract(next_trait(t), M, p, q, m)
 end
 function inverse_retract(
     ::EmptyTrait,

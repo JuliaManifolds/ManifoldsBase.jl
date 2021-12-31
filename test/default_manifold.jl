@@ -378,6 +378,7 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
     @testset "Retraction" begin
         a = NLSolveInverseRetraction(ExponentialRetraction())
         @test a.retraction isa ExponentialRetraction
+
     end
 
     @testset "copy of points and vectors" begin
@@ -422,5 +423,12 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
         @test X + Y == DefaultTVector(X.value + Y.value)
         @test +X == X
         @test (Y .= X) === Y
+    end
+    @testset "DefaultManifold  and ONB" begin
+        M = ManifoldsBase.DefaultManifold(3)
+        p = [1.0, 0.0, 0.0]
+        CB = get_basis(M, p, DefaultOrthonormalBasis())
+        @test CB.data == [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
+
     end
 end

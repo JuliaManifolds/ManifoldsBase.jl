@@ -183,6 +183,10 @@ end
         exp!(M, r, p, X)
         @test r == q
         @test distance(M, p, r) == norm(r - p)
+
+        Y = similar(X)
+        @test vector_transport_along(M, p, X, []) == X
+        @test vector_transport_along!(M, Y, p, X, []) == X
     end
 
     @testset "AnotherPlaneManifold" begin
