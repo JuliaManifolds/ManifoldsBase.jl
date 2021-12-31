@@ -635,10 +635,13 @@ function get_vector_orthonormal(M::AbstractManifold, p, c, N)
     return get_vector!(M, Y, p, c, B)
 end
 
-function _get_vector!(M::AbstractManifold, p, c, B::DiagonalizingOrthonormalBasis)
-    return get_vector_diagonalizing(M, p, c, number_system(B))
+function _get_vector(M::AbstractManifold, p, c, B::DiagonalizingOrthonormalBasis)
+    return get_vector_diagonalizing(M, p, c, B)
 end
-function get_vector_diagonalizing end
+function get_vector_diagonalizing(M::AbstractManifold, p, c, B::DiagonalizingOrthonormalBasis)
+    Y = allocate_result(M, get_vector, p, c)
+    return get_vector!(M, Y, p, c, B)
+end
 
 function _get_vector(M::AbstractManifold, p, c, B::CachedBasis)
     return get_vector_cached(M, p, c, B)
@@ -688,7 +691,7 @@ end
 function get_vector_orthonormal! end
 
 function _get_vector!(M::AbstractManifold, Y, p, c, B::DiagonalizingOrthonormalBasis)
-    return get_vector_diagonalizing!(M, Y, p, c, number_system(B))
+    return get_vector_diagonalizing!(M, Y, p, c, B)
 end
 function get_vector_diagonalizing! end
 
