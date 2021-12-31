@@ -59,9 +59,6 @@ function get_embedding(M::EmbeddedManifold)
     return M.embedding
 end
 
-
-is_embedded_manifold(::Type{<:EmbeddedManifold}) = true
-
 function project(M::EmbeddedManifold, p)
     q = allocate_result(M, project, p)
     project!(M, q, p)

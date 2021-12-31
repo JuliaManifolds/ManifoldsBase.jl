@@ -939,7 +939,7 @@ function show(
 end
 function show(
     io::IO,
-    mime::MIME"text/plain",
+    ::MIME"text/plain",
     B::CachedBasis{𝔽,T,D},
 ) where {𝔽,T<:DiagonalizingOrthonormalBasis,D<:DiagonalizingBasisData}
     vectors = _get_vectors(B)

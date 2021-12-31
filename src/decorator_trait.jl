@@ -154,7 +154,7 @@ function check_size(t::NestedTrait, M::AbstractManifold, p, X)
     return check_size(next_trait(t), M, p, X)
 end
 function check_size(::EmptyTrait, M::AbstractManifold, p, X)
-    return invoke(check_size, Tuple{AbstractManifold,typeof(p)}, M, p, X)
+    return invoke(check_size, Tuple{AbstractManifold,typeof(p),typeof(X)}, M, p, X)
 end
 # Embedded
 function check_size(::NestedTrait{IsEmbeddedManifold}, M::AbstractDecoratorManifold, p, X)
