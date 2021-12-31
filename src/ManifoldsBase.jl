@@ -110,7 +110,7 @@ manifold for vector bundles or power manifolds. The optional parameter `depth` c
 to remove only the first `depth` many decorators and return the [`AbstractManifold`](@ref) from that
 level, whether its decorated or not. Any negative value deactivates this depth limit.
 """
-base_manifold(M::AbstractManifold, depth = Val(-1)) = M
+base_manifold(M::AbstractManifold, depth::Val = Val(-1)) = M
 
 """
     check_point(M::AbstractManifold, p; kwargs...) -> Union{Nothing,String}

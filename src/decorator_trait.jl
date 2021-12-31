@@ -54,7 +54,17 @@ parent_trait(::IsEmbeddedSubmanifoldManifold) = IsIsometricEmbeddedManifold()
 
 #
 # Generic Decorator functions
-decorated_manifold(M::AbstractDecoratorManifold) = M
+"""
+    decorated_manifold
+"""
+decorated_manifold(M::AbstractManifold) = M
+decorated_manifold(M::AbstractDecoratorManifold) = decorated_manifold(trait(M), M)
+function decorated_manifold(t::NestedTrait, M::AbstractManifold)
+    return decorated_manifold(next_trait(t), M)
+end
+function decorated_manifold(::EmptyTrait, M::AbstractManifold)
+    return invoke(decorated_manifold, Tuple{AbstractManifold}, M)
+end
 
 #
 # Implemented Traits
@@ -309,7 +319,7 @@ end
 
 # Introduce Deco Trait | automatic foward | fallback
 function inverse_retract!(M::AbstractDecoratorManifold, X, p, q)
-    return inverse_retract!(trait(M, X, p, q), M, p, p, q)
+    return inverse_retract!(trait(M, X, p, q), M, X, p, q)
 end
 function inverse_retract!(
     t::NestedTrait,
@@ -319,7 +329,7 @@ function inverse_retract!(
     q,
     m::AbstractInverseRetractionMethod = default_inverse_retraction_method(M),
 )
-    return exp!(next_trait(t), M, X, p, q, m)
+    return inverse_retract!(next_trait(t), M, X, p, q, m)
 end
 function inverse_retract!(
     ::EmptyTrait,

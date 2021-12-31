@@ -474,7 +474,7 @@ end
     @test b1_d_d.vector_space == CotangentSpace
 end
 
-@testset "Complex Cached Basis - Mutating cases" begin
+@testset "Complex Basis - Mutating cases" begin
     Mc = ManifoldsBase.DefaultManifold(2, field = ManifoldsBase.ℂ)
     p = [1.0, 1.0im]
     X = [2.0, 1.0im]
@@ -486,13 +486,19 @@ end
     @test CB.data == [[1.0, 0.0], [0.0, 1.0]]
     @test get_coordinates(Mc, p, X, CBc) == [2.0, 0.0, 0.0, 1.0]
     @test get_coordinates(Mc, p, X, CB) == [2.0, 1.0im]
-    #
+    # ONB
     cc = zeros(4)
-    @test get_coordinates!(Mc, cc, p, X, CBc) == [2.0, 0.0, 0.0, 1.0]
+    @test get_coordinates!(Mc, cc, p, X, Bc) == [2.0, 0.0, 0.0, 1.0]
     @test cc == [2.0, 0.0, 0.0, 1.0]
     c = zeros(ComplexF64, 2)
+    @test get_coordinates!(Mc, c, p, X, B) == [2.0, 1.0im]
+    @test c == [2.0, 1.0im]
+    # Cached
+    @test get_coordinates!(Mc, cc, p, X, CBc) == [2.0, 0.0, 0.0, 1.0]
+    @test cc == [2.0, 0.0, 0.0, 1.0]
     @test get_coordinates!(Mc, c, p, X, CB) == [2.0, 1.0im]
     @test c == [2.0, 1.0im]
+
 end
 
 @testset "FVector" begin

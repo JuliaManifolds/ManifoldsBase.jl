@@ -868,6 +868,8 @@ function number_of_coordinates(M::AbstractManifold{𝔽}, ::AbstractBasis{𝔾})
     return number_of_coordinates(M, 𝔾)
 end
 function number_of_coordinates(M::AbstractManifold{𝔽}, f::𝔾) where {𝔽,𝔾}
+    # for odd manifolds this first case has to match.
+    (real_dimension(𝔽) == real_dimension(f)) && return manifold_dimension(M)
     return div(manifold_dimension(M), real_dimension(𝔽)) * real_dimension(f)
 end
 
@@ -916,7 +918,7 @@ end
 function show(io::IO, ::ProjectedOrthonormalBasis{method,𝔽}) where {method,𝔽}
     return print(io, "ProjectedOrthonormalBasis($(repr(method)), $(𝔽))")
 end
-function show(io::IO, mime::MIME"text/plain", onb::DiagonalizingOrthonormalBasis)
+function show(io::IO, ::MIME"text/plain", onb::DiagonalizingOrthonormalBasis)
     println(
         io,
         "DiagonalizingOrthonormalBasis($(number_system(onb))) with eigenvalue 0 in direction:",
@@ -927,7 +929,7 @@ function show(io::IO, mime::MIME"text/plain", onb::DiagonalizingOrthonormalBasis
 end
 function show(
     io::IO,
-    mime::MIME"text/plain",
+    ::MIME"text/plain",
     B::CachedBasis{𝔽,T,D},
 ) where {𝔽,T<:AbstractBasis,D}
     print(

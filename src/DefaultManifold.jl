@@ -71,11 +71,11 @@ end
 function get_coordinates_orthonormal!(M::DefaultManifold, c, p, X, ::RealNumbers)
     return copyto!(c, reshape(X, number_of_coordinates(M, ℝ)))
 end
-function get_coordinates_orthonormal!(M::DefaultManifold, c, p, X, ::ComplexNumbers)
-    m = manifold_dimension(M)
-    return copyto!(c, [reshape(real(X), m), reshape(imag(X), m)])
+function get_coordinates_orthonormal!(::DefaultManifold, c, p, X, ::ComplexNumbers)
+    m = length(X)
+    return copyto!(c, [reshape(real(X), m); reshape(imag(X), m)])
 end
-function get_vector_orthonormal!(M::DefaultManifold, Y, p, c, ::RealNumbers) where {T}
+function get_vector_orthonormal!(M::DefaultManifold, Y, p, c, ::RealNumbers)
     return copyto!(Y, reshape(c, representation_size(M)))
 end
 function get_vector_orthonormal!(

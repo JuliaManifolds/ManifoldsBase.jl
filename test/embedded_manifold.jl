@@ -136,6 +136,9 @@ end
         @test repr(M) ==
               "EmbeddedManifold($(sprint(show, M.manifold)), $(sprint(show, M.embedding)))"
         @test base_manifold(M) == ManifoldsBase.DefaultManifold(2)
+        @test base_manifold(M, Val(0)) == M
+        @test base_manifold(M, Val(1)) == ManifoldsBase.DefaultManifold(2)
+        @test base_manifold(M, Val(2)) == ManifoldsBase.DefaultManifold(2)
         @test get_embedding(M) == ManifoldsBase.DefaultManifold(3)
     end
 
@@ -184,7 +187,15 @@ end
         @test r == q
         @test distance(M, p, r) == norm(r - p)
 
+        @test retract(M, p, X) == q
+        q2 = similar(q)
+        @test retract!(M, q2, p, X) == q
+        @test q2 == q
+        @test inverse_retract(M, p, q) == X
         Y = similar(X)
+        @test inverse_retract!(M, Y, p, q) == X
+        @test Y == X
+
         @test vector_transport_along(M, p, X, []) == X
         @test vector_transport_along!(M, Y, p, X, []) == X
     end
