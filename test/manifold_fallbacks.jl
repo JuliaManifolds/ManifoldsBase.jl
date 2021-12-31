@@ -5,9 +5,9 @@ struct NonManifold <: AbstractManifold{ManifoldsBase.ℝ} end
 
 @testset "NotImplemented Errors" begin
     M = NonManifold()
-    p = [1]
+    p = [1.0]
     q = similar(p)
-    X = [2]
+    X = [2.0]
     Y = similar(X)
     for B in [
         VeeOrthogonalBasis(),
@@ -47,6 +47,16 @@ struct NonManifold <: AbstractManifold{ManifoldsBase.ℝ} end
         [ExponentialRetraction(), PolarRetraction(), ProjectionRetraction(), QRRetraction()]
         @test_throws MethodError retract(M, p, X, R)
         @test_throws MethodError retract!(M, q, p, X, R)
+    end
+    for VT in [
+        DifferentiatedRetractionVectorTransport(ExponentialRetraction()),
+        ProjectionTransport(),
+        ParallelTransport(),
+    ]
+        @test_throws MethodError vector_transport_along(M, p, X, :curve, VT)
+        @test_throws MethodError vector_transport_along!(M, Y, p, X, :curve, VT)
+        @test_throws MethodError vector_transport_to(M, p, X, q, VT)
+        @test_throws MethodError vector_transport_to!(M, Y, p, X, q, VT)
     end
 end
 

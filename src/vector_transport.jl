@@ -490,8 +490,7 @@ function vector_transport_along!(
     c,
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
-    _vector_transport_along!(M, Y, p, X, c, m)
-    return
+    return _vector_transport_along!(M, Y, p, X, c, m)
 end
 function _vector_transport_along!(M::AbstractManifold, Y, p, X, c, ::ParallelTransport)
     return parallel_transport_along!(M, Y, p, X, c)
@@ -751,7 +750,7 @@ function vector_transport_to_diff(M::AbstractManifold, p, X, q, m)
     return vector_transport_to_diff!(M, Y, p, X, q, m)
 end
 function _vector_transport_to(M::AbstractManifold, p, X, q, ::ProjectionTransport)
-    return vector_transport_to_project(M, p, X, c)
+    return vector_transport_to_project(M, p, X, q)
 end
 function vector_transport_to_project(M::AbstractManifold, p, X, q)
     Y = allocate_result(M, vector_transport_to, X, p)
@@ -789,13 +788,13 @@ function _vector_transport_to!(
     q,
     m::DifferentiatedRetractionVectorTransport,
 )
-    return _vector_transport_to_diff!(M, Y, p, X, q, m.retraction)
+    return vector_transport_to_diff!(M, Y, p, X, q, m.retraction)
 end
 function vector_transport_to_diff! end
 function _vector_transport_to!(M::AbstractManifold, Y, p, X, q, ::ProjectionTransport)
     return vector_transport_to_project!(M, Y, p, X, q)
 end
-function vector_transport_to_project!(M::AbstractManifold, Y, p, X, q) end
+function vector_transport_to_project! end
 
 function _vector_transport_to(M::AbstractManifold, p, X, c, m::PoleLadderTransport)
     Y = allocate_result(M, vector_transport_to, X, p)

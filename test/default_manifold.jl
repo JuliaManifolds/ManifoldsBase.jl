@@ -284,6 +284,11 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
                 v1t5 = allocate(v1)
                 vector_transport_along!(M, v1t5, pts[1], v1, c)
                 @test isapprox(M, pts[1], v1, v1t5)
+                # transport along more than one interims point
+                @test vector_transport_along(M, pts[1], v1, pts[2:3]) == v1
+                v1t6 = allocate(v1)
+                vector_transport_along!(M, v1t6, pts[1], v1, pts[2:3])
+                @test isapprox(M, pts[1], v1, v1t6)
                 # along a custom type of points
                 if T <: DefaultPoint
                     S = eltype(pts[1].value)
@@ -429,6 +434,5 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
         p = [1.0, 0.0, 0.0]
         CB = get_basis(M, p, DefaultOrthonormalBasis())
         @test CB.data == [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
-
     end
 end
