@@ -864,14 +864,11 @@ Compute the number of coordinates in basis of field type `𝔾` on a manifold `M
 This also corresponds to the number of vectors represented by `B`,
 or stored within `B` in case of a [`CachedBasis`](@ref).
 """
-function number_of_coordinates(M::AbstractManifold{𝔽}, B::AbstractBasis{𝔾}) where {𝔽,𝔾}
+function number_of_coordinates(M::AbstractManifold{𝔽}, ::AbstractBasis{𝔾}) where {𝔽,𝔾}
     return number_of_coordinates(M, 𝔾)
 end
 function number_of_coordinates(M::AbstractManifold{𝔽}, f::𝔾) where {𝔽,𝔾}
     return div(manifold_dimension(M), real_dimension(𝔽)) * real_dimension(f)
-end
-function number_of_coordinates(M::AbstractManifold{𝔽}, ::𝔽) where {𝔽}
-    return manifold_dimension(M)
 end
 
 """
