@@ -66,14 +66,27 @@ function get_basis_diagonalizing(M::DefaultManifold, p, B)
     return CachedBasis(B, DiagonalizingBasisData(B.frame_direction, eigenvalues, vecs))
 end
 
-function get_coordinates_orthonormal!(M::DefaultManifold, Y, p, X, N)
-    copyto!(Y, reshape(X, manifold_dimension(M)))
-    return Y
+# Complex manifold, real basis -> coefficients c are complesx -> reshape
+# Real manifold, real basis -> reshape
+function get_coordinates_orthonormal!(M::DefaultManifold, c, p, X, ::RealNumbers)
+    return copyto!(c, reshape(X, number_of_coordinates(M, ℝ)))
 end
-
-function get_vector_orthonormal!(M::DefaultManifold, Y, p, X, N)
-    copyto!(Y, reshape(X, representation_size(M)))
-    return Y
+function get_coordinates_orthonormal!(M::DefaultManifold, c, p, X, ::ComplexNumbers)
+    m = manifold_dimension(M)
+    return copyto!(c, [reshape(real(X), m), reshape(imag(X), m)])
+end
+function get_vector_orthonormal!(M::DefaultManifold, Y, p, c, ::RealNumbers) where {T}
+    return copyto!(Y, reshape(c, representation_size(M)))
+end
+function get_vector_orthonormal!(
+    M::DefaultManifold{T,ℂ},
+    Y,
+    p,
+    c,
+    ::ComplexNumbers,
+) where {T}
+    n = div(length(c), 2)
+    return copyto!(Y, reshape(c[1:n] + c[(n + 1):(2n)] * 1im, representation_size(M)))
 end
 
 injectivity_radius(::DefaultManifold) = Inf

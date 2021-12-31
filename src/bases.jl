@@ -376,7 +376,7 @@ function _get_basis(
     B::DefaultOrthonormalBasis{<:Any,TangentSpaceType};
     kwargs...,
 )
-    dim = manifold_dimension(M)
+    dim = number_of_coordinates(M, B)
     return CachedBasis(
         B,
         [get_vector(M, p, [ifelse(i == j, 1, 0) for j in 1:dim], B) for i in 1:dim],
@@ -436,7 +436,7 @@ function _get_basis(M::AbstractManifold, p, B::DefaultOrthogonalBasis)
     return get_basis_orthogonal(M, p, number_system(B))
 end
 function get_basis_orthogonal(M::AbstractManifold, p, N)
-    return get_basis_orthonormal(M, p, N)
+    return get_basis(M, p, DefaultOrthonormalBasis(N))
 end
 
 function _get_basis(M::AbstractManifold, p, B::DiagonalizingOrthonormalBasis)
@@ -500,7 +500,7 @@ function get_coordinates_orthonormal(M::AbstractManifold, p, X, N)
 end
 
 function _get_coordinates(M::AbstractManifold, p, X, B::DiagonalizingOrthonormalBasis)
-    return get_coordinates_diagonalizing(M, p, X, number_system(B))
+    return get_coordinates_diagonalizing(M, p, X, B)
 end
 function get_coordinates_diagonalizing end
 
@@ -638,7 +638,12 @@ end
 function _get_vector(M::AbstractManifold, p, c, B::DiagonalizingOrthonormalBasis)
     return get_vector_diagonalizing(M, p, c, B)
 end
-function get_vector_diagonalizing(M::AbstractManifold, p, c, B::DiagonalizingOrthonormalBasis)
+function get_vector_diagonalizing(
+    M::AbstractManifold,
+    p,
+    c,
+    B::DiagonalizingOrthonormalBasis,
+)
     Y = allocate_result(M, get_vector, p, c)
     return get_vector!(M, Y, p, c, B)
 end

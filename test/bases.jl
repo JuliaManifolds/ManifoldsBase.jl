@@ -1,6 +1,6 @@
 using LinearAlgebra
 using ManifoldsBase
-using ManifoldsBase: DefaultManifold, ℝ, ℂ
+using ManifoldsBase: DefaultManifold, ℝ, ℂ, RealNumbers, ComplexNumbers
 using ManifoldsBase: CotangentSpace, CotangentSpaceType, TangentSpace, TangentSpaceType
 using ManifoldsBase: FVector
 using Test
@@ -187,7 +187,7 @@ function ManifoldsBase.get_coordinates_orthonormal!(
     Y,
     ::NonBroadcastBasisThing,
     X::NonBroadcastBasisThing,
-    𝔽,
+    ::RealNumbers,
 )
     copyto!(Y, reshape(X.v, manifold_dimension(M)))
     return Y
@@ -198,7 +198,7 @@ function ManifoldsBase.get_vector_orthonormal!(
     Y::NonBroadcastBasisThing,
     ::NonBroadcastBasisThing,
     X,
-    𝔽,
+    ::RealNumbers,
 )
     copyto!(Y.v, reshape(X, representation_size(M)))
     return Y
@@ -320,7 +320,7 @@ DiagonalizingBasisProxy() = DiagonalizingOrthonormalBasis([1.0, 0.0, 0.0])
     end
 end
 
-@testset "Complex DeaultManifold with real and complex Cached Bases" begin
+@testset "Complex DefaultManifold with real and complex Cached Bases" begin
     M = ManifoldsBase.DefaultManifold(3; field = ℂ)
     p = [1.0, 2.0im, 3.0]
     X = [1.2, 2.2im, 2.3im]
@@ -361,8 +361,10 @@ end
     M = DefaultManifold(2, 3)
     x = collect(reshape(1.0:6.0, (2, 3)))
     pb = get_basis(M, x, DefaultOrthonormalBasis())
+    B2 = DefaultOrthonormalBasis(ManifoldsBase.ℝ, ManifoldsBase.CotangentSpace)
+    pb2 = get_basis(M, x, B2)
 
-    @test sprint(show, "text/plain", pb) == """
+    test_basis_string = """
     DefaultOrthonormalBasis(ℝ) with 6 basis vectors:
      E1 =
       2×3 $(sprint(show, Matrix{Float64})):
@@ -381,6 +383,9 @@ end
       2×3 $(sprint(show, Matrix{Float64})):
        0.0  0.0  0.0
        0.0  0.0  1.0"""
+
+    @test sprint(show, "text/plain", pb) == test_basis_string
+    @test sprint(show, "text/plain", pb2) == test_basis_string
 
     b = DiagonalizingOrthonormalBasis(get_vectors(M, x, pb)[1])
     dpb = CachedBasis(b, Float64[1, 2, 3, 4, 5, 6], get_vectors(M, x, pb))
@@ -467,6 +472,27 @@ end
     b1_d_d = ManifoldsBase.dual_basis(M, p, b1_d)
     @test b1_d_d isa DefaultOrthonormalBasis
     @test b1_d_d.vector_space == CotangentSpace
+end
+
+@testset "Complex Cached Basis - Mutating cases" begin
+    Mc = ManifoldsBase.DefaultManifold(2, field = ManifoldsBase.ℂ)
+    p = [1.0, 1.0im]
+    X = [2.0, 1.0im]
+    Bc = DefaultOrthonormalBasis(ManifoldsBase.ℂ)
+    CBc = get_basis(Mc, p, Bc)
+    @test CBc.data == [[1.0, 0.0], [0.0, 1.0], [1.0im, 0.0], [0.0, 1.0im]]
+    B = DefaultOrthonormalBasis(ManifoldsBase.ℝ)
+    CB = get_basis(Mc, p, B)
+    @test CB.data == [[1.0, 0.0], [0.0, 1.0]]
+    @test get_coordinates(Mc, p, X, CBc) == [2.0, 0.0, 0.0, 1.0]
+    @test get_coordinates(Mc, p, X, CB) == [2.0, 1.0im]
+    #
+    cc = zeros(4)
+    @test get_coordinates!(Mc, cc, p, X, CBc) == [2.0, 0.0, 0.0, 1.0]
+    @test cc == [2.0, 0.0, 0.0, 1.0]
+    c = zeros(ComplexF64, 2)
+    @test get_coordinates!(Mc, c, p, X, CB) == [2.0, 1.0im]
+    @test c == [2.0, 1.0im]
 end
 
 @testset "FVector" begin
