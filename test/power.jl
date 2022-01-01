@@ -59,6 +59,7 @@ for PowerRepr in [NestedPowerRepresentation, NestedReplacingPowerRepresentation]
             @test retract(N, p, q) == p .+ q
             @test ManifoldsBase.get_iterator(N) == Base.OneTo(2)
             @test injectivity_radius(N) == injectivity_radius(M)
+            @test injectivity_radius(N, ExponentialRetraction()) == injectivity_radius(M)
             @test injectivity_radius(N, p) == injectivity_radius(M, p)
             p2 = allocate(p)
             copyto!(N, p2, p)
@@ -111,13 +112,23 @@ for PowerRepr in [NestedPowerRepresentation, NestedReplacingPowerRepresentation]
             # the method tested below should not be used but it prevents ambiguities from occurring
             # and the test is here to make coverage happy
             @test ManifoldsBase.allocate_result(N, get_coordinates, p, q, B) isa Vector
-            v2 = zeros(size(v))
+            v2 = similar(v)
             get_coordinates!(N, v2, p, q, B)
             @test v2 == v
             @test get_coordinates(N, p, q, DefaultOrthonormalBasis()) == v
+            v3 = similar(v2)
+            @test get_coordinates!(N, v3, p, q, DefaultOrthonormalBasis()) == v
+            @test v3 == v
             @test B.data.bases[1].data == get_basis(M, p[1], DefaultBasis()).data
             @test B.data.bases[2].data == get_basis(M, p[2], DefaultBasis()).data
             @test get_vector(N, p, v, B) == q
+            q2 = similar.(q)
+            @test get_vector!(N, q2, p, v, B) == q
+            @test q2 == q
+            q3 = similar.(q)
+            @test get_vector(N, p, v, DefaultOrthonormalBasis()) == q
+            @test get_vector!(N, q3, p, v, DefaultOrthonormalBasis()) == q
+            @test q3 == q
             @test zero_vector(N, p) == [zeros(3), zeros(3)]
             B2 = DiagonalizingOrthonormalBasis([ones(3), ones(3)])
             B3 = get_basis(N, p, B2)

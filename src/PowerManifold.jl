@@ -226,27 +226,6 @@ function allocate_result(
         B,
     )
 end
-for PowerRepr in [PowerManifoldNested, PowerManifoldNestedReplacing]
-    @eval begin
-        function allocate_result(
-            M::$PowerRepr,
-            f::typeof(get_coordinates),
-            p,
-            X,
-            field::AbstractNumbers,
-        )
-            return invoke(
-                allocate_result,
-                Tuple{AbstractManifold,typeof(get_coordinates),Any,Any,typeof(field)},
-                M,
-                f,
-                p,
-                X,
-                field,
-            )
-        end
-    end
-end
 
 function allocate_result(M::PowerManifoldNested, f::typeof(get_vector), p, X)
     return [allocate_result(M.manifold, f, _access_nested(p, i)) for i in get_iterator(M)]
@@ -455,7 +434,7 @@ function get_coordinates!(M::AbstractPowerManifold, c, p, X, B::AbstractBasis)
             B,
         )
     end
-    return Y
+    return c
 end
 function get_coordinates!(
     M::AbstractPowerManifold,
@@ -538,7 +517,7 @@ function get_vector!(M::AbstractPowerManifold, Y, p, c, B::AbstractBasis)
             M.manifold,
             _write(M, rep_size, Y, i),
             _read(M, rep_size, p, i),
-            _read_coordinates(M, rep_size, c, i),
+            _read_coordinates(M, c, i),
             B,
         )
     end
@@ -1122,7 +1101,12 @@ end
     return _write(M, rep_size, x, (i,))
 end
 
-@inline function _write(::PowerManifoldNested, rep_size::Tuple, x::AbstractArray, i::Tuple)
+@inline function _write(
+    ::AbstractPowerManifold,
+    rep_size::Tuple,
+    x::AbstractArray,
+    i::Tuple,
+)
     return view(x[i...], rep_size_to_colons(rep_size)...)
 end
 @inline function _write(::PowerManifoldNested, ::Tuple{}, x::AbstractArray, i::Tuple)
