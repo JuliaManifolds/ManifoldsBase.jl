@@ -148,7 +148,7 @@ ManifoldsBase._get_vector_cache_broadcast(::NonBroadcastBasisThing) = Val(false)
 
 DiagonalizingBasisProxy() = DiagonalizingOrthonormalBasis([1.0, 0.0, 0.0])
 
-@testset "Bases"
+@testset "Bases" begin
     @testset "Projected and arbitrary orthonormal basis" begin
         M = ProjManifold()
         x = [
@@ -361,9 +361,9 @@ DiagonalizingBasisProxy() = DiagonalizingOrthonormalBasis([1.0, 0.0, 0.0])
         @test sprint(show, "text/plain", diag_onb) == """
         DiagonalizingOrthonormalBasis(ℝ) with eigenvalue 0 in direction:
         3-element $(sprint(show, Vector{Float64})):
-        1.0
-        2.0
-        3.0"""
+          1.0
+          2.0
+          3.0"""
 
         M = DefaultManifold(2, 3)
         x = collect(reshape(1.0:6.0, (2, 3)))
@@ -373,23 +373,23 @@ DiagonalizingBasisProxy() = DiagonalizingOrthonormalBasis([1.0, 0.0, 0.0])
 
         test_basis_string = """
         DefaultOrthonormalBasis(ℝ) with 6 basis vectors:
-        E1 =
-        2×3 $(sprint(show, Matrix{Float64})):
-        1.0  0.0  0.0
-        0.0  0.0  0.0
-        E2 =
-        2×3 $(sprint(show, Matrix{Float64})):
-        0.0  0.0  0.0
-        1.0  0.0  0.0
-        ⋮
-        E5 =
-        2×3 $(sprint(show, Matrix{Float64})):
-        0.0  0.0  1.0
-        0.0  0.0  0.0
-        E6 =
-        2×3 $(sprint(show, Matrix{Float64})):
-        0.0  0.0  0.0
-        0.0  0.0  1.0"""
+         E1 =
+          2×3 $(sprint(show, Matrix{Float64})):
+           1.0  0.0  0.0
+           0.0  0.0  0.0
+         E2 =
+          2×3 $(sprint(show, Matrix{Float64})):
+           0.0  0.0  0.0
+           1.0  0.0  0.0
+         ⋮
+         E5 =
+          2×3 $(sprint(show, Matrix{Float64})):
+           0.0  0.0  1.0
+           0.0  0.0  0.0
+         E6 =
+          2×3 $(sprint(show, Matrix{Float64})):
+           0.0  0.0  0.0
+           0.0  0.0  1.0"""
 
         @test sprint(show, "text/plain", pb) == test_basis_string
         @test sprint(show, "text/plain", pb2) == test_basis_string
@@ -398,46 +398,46 @@ DiagonalizingBasisProxy() = DiagonalizingOrthonormalBasis([1.0, 0.0, 0.0])
         dpb = CachedBasis(b, Float64[1, 2, 3, 4, 5, 6], get_vectors(M, x, pb))
         @test sprint(show, "text/plain", dpb) == """
         DiagonalizingOrthonormalBasis(ℝ) with eigenvalue 0 in direction:
-        2×3 $(sprint(show, Matrix{Float64})):
-        1.0  0.0  0.0
-        0.0  0.0  0.0
+         2×3 $(sprint(show, Matrix{Float64})):
+           1.0  0.0  0.0
+           0.0  0.0  0.0
         and 6 basis vectors.
         Basis vectors:
-        E1 =
-        2×3 $(sprint(show, Matrix{Float64})):
-        1.0  0.0  0.0
-        0.0  0.0  0.0
-        E2 =
-        2×3 $(sprint(show, Matrix{Float64})):
-        0.0  0.0  0.0
-        1.0  0.0  0.0
-        ⋮
-        E5 =
-        2×3 $(sprint(show, Matrix{Float64})):
-        0.0  0.0  1.0
-        0.0  0.0  0.0
-        E6 =
-        2×3 $(sprint(show, Matrix{Float64})):
-        0.0  0.0  0.0
-        0.0  0.0  1.0
+         E1 =
+          2×3 $(sprint(show, Matrix{Float64})):
+           1.0  0.0  0.0
+           0.0  0.0  0.0
+         E2 =
+          2×3 $(sprint(show, Matrix{Float64})):
+           0.0  0.0  0.0
+           1.0  0.0  0.0
+         ⋮
+         E5 =
+          2×3 $(sprint(show, Matrix{Float64})):
+           0.0  0.0  1.0
+           0.0  0.0  0.0
+         E6 =
+          2×3 $(sprint(show, Matrix{Float64})):
+           0.0  0.0  0.0
+           0.0  0.0  1.0
         Eigenvalues:
-        6-element $(sprint(show, Vector{Float64})):
-        1.0
-        2.0
-        3.0
-        4.0
-        5.0
-        6.0"""
+         6-element $(sprint(show, Vector{Float64})):
+          1.0
+          2.0
+          3.0
+          4.0
+          5.0
+          6.0"""
 
         M = DefaultManifold(1, 1, 1)
         x = reshape(Float64[1], (1, 1, 1))
         pb = get_basis(M, x, DefaultOrthonormalBasis())
         @test sprint(show, "text/plain", pb) == """
         DefaultOrthonormalBasis(ℝ) with 1 basis vector:
-        E1 =
-        1×1×1 $(sprint(show, Array{Float64,3})):
-        [:, :, 1] =
-        1.0"""
+         E1 =
+          1×1×1 $(sprint(show, Array{Float64,3})):
+          [:, :, 1] =
+           1.0"""
 
         dpb = CachedBasis(
             DiagonalizingOrthonormalBasis(get_vectors(M, x, pb)),
@@ -447,17 +447,17 @@ DiagonalizingBasisProxy() = DiagonalizingOrthonormalBasis([1.0, 0.0, 0.0])
 
         @test sprint(show, "text/plain", dpb) == """
         DiagonalizingOrthonormalBasis(ℝ) with eigenvalue 0 in direction:
-        1-element $(sprint(show, Vector{Array{Float64,3}})):
-        $(sprint(show, dpb.data.frame_direction[1]))
+         1-element $(sprint(show, Vector{Array{Float64,3}})):
+           $(sprint(show, dpb.data.frame_direction[1]))
         and 1 basis vector.
         Basis vectors:
-        E1 =
-        1×1×1 $(sprint(show, Array{Float64,3})):
-        [:, :, 1] =
-        1.0
+         E1 =
+          1×1×1 $(sprint(show, Array{Float64,3})):
+          [:, :, 1] =
+           1.0
         Eigenvalues:
-        1-element $(sprint(show, Vector{Float64})):
-        1.0"""
+         1-element $(sprint(show, Vector{Float64})):
+          1.0"""
     end
 
     @testset "Bases of cotangent spaces" begin
