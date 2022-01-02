@@ -416,14 +416,24 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
         Y = DefaultTVector([1.0, 0.0, 0.0])
         @test angle(M, p, X, Y) ≈ π / 2
         @test inverse_retract(M, p, q, LogarithmicInverseRetraction()) == -Y
+        @test retract(M, q, Y, CustomDefinedRetraction()) == p
         @test retract(M, q, Y, ExponentialRetraction()) == p
         p2 = allocate(p, eltype(p.value), size(p.value))
         @test size(p2.value) == size(p.value)
         X2 = allocate(X, eltype(X.value), size(X.value))
         @test size(X2.value) == size(X.value)
-        # Dispatch on custom - dispatch not working, check for new scheme later.
+        X3 = ManifoldsBase.allocate_result(M, log, p, q)
+        @test log!(M, X3, p, q) == log(M, p, q)
+        @test X3 == log(M, p, q)
+        @test log!(M, X3, p, q) == log(M, p, q)
+        @test X3 == log(M, p, q)
         @test inverse_retract(M, p, q, CustomDefinedInverseRetraction()) == -Y
-        @test retract(M, q, Y, CustomDefinedRetraction()) == p
+        X4 = ManifoldsBase.allocate_result(M, inverse_retract, p, q)
+        @test inverse_retract!(M, X4, p, q) == inverse_retract(M, p, q)
+        @test X4 == inverse_retract(M, p, q)
+        c = ManifoldsBase.allocate_coordinates(M, p, Float64, manifold_dimension(M))
+        @test c isa Vector
+        @test length(c) == 3
         @test 2.0 \ X == DefaultTVector(2.0 \ X.value)
         @test X + Y == DefaultTVector(X.value + Y.value)
         @test +X == X
