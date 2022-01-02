@@ -30,11 +30,11 @@ abstract type ApproximateRetraction <: AbstractRetractionMethod end
 @doc raw"""
     EmbeddedRetraction{T<:AbstractRetractionMethod} <: AbstractRetractionMethod
 
-Compute a retraction by using the retraction of type T imn the embedding and projecting the result
+Compute a retraction by using the retraction of type `T` in the embedding and projecting the result.
 
 # Constructor
 
-    EmbeddedRetraction(r::AbstractRetractionMethod,)
+    EmbeddedRetraction(r::AbstractRetractionMethod)
 
 Generate the retraction with retraction `r` to use in the embedding.
 """
@@ -163,7 +163,7 @@ const CayleyRetraction = PadeRetraction{1}
 @doc raw"""
    EmbeddedInverseRetraction{T<:AbstractInverseRetractionMethod} <: AbstractInverseRetractionMethod
 
-Compute an inverse retraction by using the inverse retraction of type T imn the embedding and projecting the result
+Compute an inverse retraction by using the inverse retraction of type `T` in the embedding and projecting the result
 
 # Constructor
 
