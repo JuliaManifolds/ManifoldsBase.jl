@@ -101,9 +101,27 @@ ManifoldsBase.representation_size(::NonDecoratorManifold) = (2,)
     @test_throws MethodError vector_transport_along!(M, Y, p, X, :curve)
 end
 
-# With even less, check that representation size stacjk overflows
+# With even less, check that representation size stack overflows
 struct NonDecoratorNonManifold <: AbstractDecoratorManifold{ManifoldsBase.ℝ} end
 @testset "Testing a NonDecoratorNonManifold - emptytrait fallback Errors" begin
     N = NonDecoratorNonManifold()
     @test_throws StackOverflowError representation_size(N)
+end
+
+
+h(::AbstractA, x::Float64, y; a = 1) = x + y - a
+h(::DecoA, x, y) = x + y
+ManifoldsBase.@invoke_maker 1 AbstractA h(A::DecoA, x::Float64, y)
+
+@testset "@invoke_maker" begin
+    @test h(A1(), 1.0, 2) == 2
+    sig = ManifoldsBase._split_signature(:(fname(x::T; k::Float64 = 1) where {T}))
+    @test sig.fname == :fname
+    @test sig.where_exprs == Any[:T]
+    @test sig.callargs == Any[:(x::T)]
+    @test sig.kwargs_list == Any[:($(Expr(:kw, :(k::Float64), 1)))]
+    @test sig.argnames == [:x]
+    @test sig.argtypes == [:T]
+    @test sig.kwargs_call == Expr[:(k = k)]
+    @test_throws ErrorException ManifoldsBase._split_signature(:(a = b))
 end

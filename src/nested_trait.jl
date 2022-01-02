@@ -161,7 +161,7 @@ function _split_signature(sig::Expr)
         where_exprs = []
         call_expr = sig
     else
-        error("Incorrect syntax in $ex. Expected a :where or :call expression.")
+        error("Incorrect syntax in $sig. Expected a :where or :call expression.")
     end
     fname = call_expr.args[1]
     if isa(call_expr.args[2], Expr) && call_expr.args[2].head == :parameters
