@@ -34,7 +34,6 @@ struct NonManifold <: AbstractManifold{ManifoldsBase.ℝ} end
     for IR in [
         LogarithmicInverseRetraction(),
         EmbeddedInverseRetraction(ProjectionInverseRetraction()),
-        ODEExponentialRetraction(ProjectionRetraction(), DefaultBasis()),
         PolarInverseRetraction(),
         ProjectionInverseRetraction(),
         QRInverseRetraction(),
@@ -48,6 +47,8 @@ struct NonManifold <: AbstractManifold{ManifoldsBase.ℝ} end
     for R in [
         EmbeddedRetraction(ProjectionRetraction()),
         ExponentialRetraction(),
+        ODEExponentialRetraction(ProjectionRetraction(), DefaultBasis()),
+        ODEExponentialRetraction(ProjectionRetraction()),
         PolarRetraction(),
         ProjectionRetraction(),
         QRRetraction(),

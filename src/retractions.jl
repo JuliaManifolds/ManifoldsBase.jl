@@ -327,8 +327,7 @@ function _inverse_retract!(M::AbstractManifold, X, p, q, m::NLSolveInverseRetrac
 end
 # ToDo docu
 function inverse_retract_embedded!(M::AbstractManifold, X, p, q, m)
-    N = get_embedding(M)
-    return project!(M, X, p, inverse_retract(N, embed(N, p), embed(N, q), m))
+    return project!(M, X, p, inverse_retract(get_embedding(M), embed(get_embedding(M), p), embed(get_embedding(M), q), m))
 end
 function inverse_retract_softmax! end
 function inverse_retract_qr! end
@@ -364,8 +363,8 @@ function _inverse_retract(M::AbstractManifold, p, q, m::EmbeddedInverseRetractio
     return inverse_retract_embedded(M, p, q, m.inverse_retraction)
 end
 function inverse_retract_embedded(M::AbstractManifold, p, q, m)
-    N = get_embedding(M)
-    return project(M, p, inverse_retract(N, embed(N, p), embed(N, q), m))
+    X = allocate_result(M, inverse_retract, p, q)
+    return inverse_retract_embedded!(M, X, p, q,m)
 end
 function _inverse_retract(M::AbstractManifold, p, q, ::PolarInverseRetraction)
     return inverse_retract_polar(M, p, q)
@@ -440,7 +439,7 @@ function _retract(M::AbstractManifold, p, X, m::EmbeddedRetraction)
 end
 _retract(M::AbstractManifold, p, X, ::ExponentialRetraction) = exp(M, p, X)
 function _retract(M::AbstractManifold, p, X, m::ODEExponentialRetraction)
-    return retract_ode_exp(M, p, X, m.retraction, m.basis)
+    return retract_exp_ode(M, p, X, m.retraction, m.basis)
 end
 _retract(M::AbstractManifold, p, X, ::PolarRetraction) = retract_polar(M, p, X)
 _retract(M::AbstractManifold, p, X, ::ProjectionRetraction) = retract_project(M, p, X)
@@ -520,7 +519,7 @@ function _retract!(M::AbstractManifold, q, p, X, m::EmbeddedRetraction)
 end
 _retract!(M::AbstractManifold, q, p, X, ::ExponentialRetraction) = exp!(M, q, p, X)
 function _retract!(M::AbstractManifold, q, p, X, m::ODEExponentialRetraction)
-    return retract_ode_exp!(M, q, p, X, m.retraction, m.basis)
+    return retract_exp_ode!(M, q, p, X, m.retraction, m.basis)
 end
 _retract!(M::AbstractManifold, q, p, X, ::PolarRetraction) = retract_polar!(M, q, p, X)
 function _retract!(M::AbstractManifold, q, p, X, ::ProjectionRetraction)
@@ -535,14 +534,13 @@ end
 
 # ToDo - docu
 function retract_embedding!(M::AbstractManifold, q, p, X, m)
-    N = get_embedding(M)
-    return project!(M, q, retract(get_embedding(M), embed(M, p), embed(N, p, X), m))
+    return project!(M, q, retract(get_embedding(M), embed(get_embedding(M), p), embed(get_embedding(M), p, X), m))
 end
 function retract_pade! end
 function retract_project! end
 function retract_polar! end
 function retract_qr! end
-function retract_ode_exp! end
+function retract_exp_ode! end
 function retract_softmax! end
 
 Base.show(io::IO, ::CayleyRetraction) = print(io, "CayleyRetraction()")
