@@ -445,4 +445,8 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
         CB = get_basis(M, p, DefaultOrthonormalBasis())
         @test CB.data == [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
     end
+    @testset "Show methods" begin
+        @test repr(CayleyRetraction()) == "CayleyRetraction()"
+        @test repr(PadeRetraction(2)) == "PadeRetraction(2)"
+    end
 end

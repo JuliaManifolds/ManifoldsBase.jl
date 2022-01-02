@@ -460,8 +460,15 @@ function _retract(M::AbstractManifold, p, X, ::PadeRetraction{n}) where {n}
     return retract_pade(M, p, X, n)
 end
 function retract_embedding(M::AbstractManifold, p, X, m)
-    N = get_embedding(M)
-    return project(M, retract(get_embedding(M), embed(M, p), embed(N, p, X), m))
+    return project(
+        M,
+        retract(
+            get_embedding(M),
+            embed(get_embedding(M), p),
+            embed(get_embedding(M), p, X),
+            m,
+        ),
+    )
 end
 function retract_polar(M::AbstractManifold, p, X)
     q = allocate_result(M, retract, p, X)

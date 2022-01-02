@@ -38,6 +38,7 @@ struct NonManifold <: AbstractManifold{ManifoldsBase.ℝ} end
         ProjectionInverseRetraction(),
         QRInverseRetraction(),
         NLSolveInverseRetraction(ExponentialRetraction()),
+        SoftmaxInverseRetraction(),
     ]
         @test_throws MethodError inverse_retract(M, p, q, IR)
         @test_throws MethodError inverse_retract!(M, Y, p, q, IR)
