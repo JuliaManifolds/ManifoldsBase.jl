@@ -173,18 +173,17 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
         va = Symbol("get_vector_$(f_postfix)")
         vm = Symbol("get_vector_$(f_postfix)!")
         push!(block.args, quote
-            import ManifoldsBase: $ca, $cm, $va, $vm
-            function ($ca)(M::$TM, p::$TP, X::$TV, B)
-                return ($ca)(M, p.$pfield, X.$vfield, B)
+            function ManifoldsBase.$ca(M::$TM, p::$TP, X::$TV, B)
+                return ManifoldsBase.$ca(M, p.$pfield, X.$vfield, B)
             end
-            function ($cm)(M::$TM, Y, p::$TP, X::$TV, B)
-                return ($cm)(M, Y, p.$pfield, X.$vfield, B)
+            function ManifoldsBase.$cm(M::$TM, Y, p::$TP, X::$TV, B)
+                return ManifoldsBase.$cm(M, Y, p.$pfield, X.$vfield, B)
             end
-            function ($va)(M::$TM, p::$TP, X, B)
+            function ManifoldsBase.$va(M::$TM, p::$TP, X, B)
                 return $TV(($va)(M, p.$pfield, X, B))
             end
-            function ($vm)(M::$TM, Y::$TV, p::$TP, X, B)
-                return ($vm)(M, Y.$vfield, p.$pfield, X, B)
+            function ManifoldsBase.$vm(M::$TM, Y::$TV, p::$TP, X, B)
+                return ManifoldsBase.$vm(M, Y.$vfield, p.$pfield, X, B)
             end
         end)
     end
