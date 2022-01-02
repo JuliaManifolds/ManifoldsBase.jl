@@ -240,8 +240,12 @@ end
             # Check that all of these report not to be implemented, i.e.
             @test_throws MethodError exp(M2, [1, 2], [2, 3])
             @test_throws MethodError exp!(M2, A, [1, 2], [2, 3])
+            @test_throws MethodError retract(M2, [1, 2], [2, 3])
+            @test_throws MethodError retract!(M2, A, [1, 2], [2, 3])
             @test_throws MethodError log(M2, [1, 2], [2, 3])
             @test_throws MethodError log!(M2, A, [1, 2], [2, 3])
+            @test_throws MethodError inverse_retract(M2, [1, 2], [2, 3])
+            @test_throws MethodError inverse_retract!(M2, A, [1, 2], [2, 3])
             @test_throws MethodError distance(M2, [1, 2], [2, 3])
             @test_throws StackOverflowError manifold_dimension(M2)
             @test_throws MethodError project(M2, [1, 2])
@@ -279,7 +283,6 @@ end
             @test_throws MethodError embed(M3, [1, 2])
         end
     end
-
     @testset "Explicit Embeddings using EmbeddedManifold" begin
         M = DefaultManifold(3, 3)
         N = DefaultManifold(4, 4)
