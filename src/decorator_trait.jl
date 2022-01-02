@@ -514,7 +514,7 @@ function retract(
     M::AbstractDecoratorManifold,
     p,
     X,
-    m::AbstractVectorTransportMethod = default_retraction_method(M),
+    m::AbstractRetractionMethod = default_retraction_method(M),
 )
     return retract(trait(M, p, X, m), M, p, X, m)
 end
