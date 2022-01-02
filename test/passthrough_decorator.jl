@@ -10,7 +10,9 @@ struct PassthroughDecorator{𝔽,MT<:AbstractManifold{𝔽}} <: AbstractDecorato
     manifold::MT
 end
 
-ManifoldsBase.active_traits(::PassthroughDecorator, ::Any...) = merge_traits(PassthoughTrait())
+function ManifoldsBase.active_traits(::PassthroughDecorator, ::Any...)
+    return merge_traits(PassthoughTrait())
+end
 
 function ManifoldsBase.log!(
     ::NestedTrait{PassthoughTrait},
@@ -42,5 +44,3 @@ end
     @test retract(M, p, q) == [1.0, 2.0]
     @test retract!(M, Y, p, q) == [1.0, 2.0]
 end
-
-

@@ -124,4 +124,10 @@ ManifoldsBase.@invoke_maker 1 AbstractA h(A::DecoA, x::Float64, y)
     @test sig.argtypes == [:T]
     @test sig.kwargs_call == Expr[:(k = k)]
     @test_throws ErrorException ManifoldsBase._split_signature(:(a = b))
+
+    sig2 = ManifoldsBase._split_signature(:(fname(x; kwargs...)))
+    @test sig2.kwargs_call == Expr[:(kwargs...)]
+
+    sig3 = ManifoldsBase._split_signature(:(fname(x::T; k1 = 1) where {T}))
+    @test sig3.kwargs_call == Expr[:(k1 = k1)]
 end
