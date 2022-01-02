@@ -156,7 +156,8 @@ DiagonalizingBasisProxy() = DiagonalizingOrthonormalBasis([1.0, 0.0, 0.0])
             0.0 sqrt(2)/2 0.0
         ]
 
-        for pB in (ProjectedOrthonormalBasis(:svd), ProjectedOrthonormalBasis(:gram_schmidt))
+        for pB in
+            (ProjectedOrthonormalBasis(:svd), ProjectedOrthonormalBasis(:gram_schmidt))
             if pB isa ProjectedOrthonormalBasis{:gram_schmidt,ℝ}
                 pb = get_basis(
                     M,
@@ -178,8 +179,8 @@ DiagonalizingBasisProxy() = DiagonalizingOrthonormalBasis([1.0, 0.0, 0.0])
             for i in 1:N
                 @test norm(M, x, get_vectors(M, x, pb)[i]) ≈ 1
                 for j in (i + 1):N
-                    @test inner(M, x, get_vectors(M, x, pb)[i], get_vectors(M, x, pb)[j]) ≈ 0 atol =
-                        1e-15
+                    @test inner(M, x, get_vectors(M, x, pb)[i], get_vectors(M, x, pb)[j]) ≈
+                          0 atol = 1e-15
                 end
             end
         end
@@ -238,13 +239,14 @@ DiagonalizingBasisProxy() = DiagonalizingOrthonormalBasis([1.0, 0.0, 0.0])
         @testset "Constructors" begin
             @test DefaultBasis{ℂ,TangentSpaceType}() === DefaultBasis(ℂ)
             @test DefaultOrthogonalBasis{ℂ,TangentSpaceType}() === DefaultOrthogonalBasis(ℂ)
-            @test DefaultOrthonormalBasis{ℂ,TangentSpaceType}() === DefaultOrthonormalBasis(ℂ)
+            @test DefaultOrthonormalBasis{ℂ,TangentSpaceType}() ===
+                  DefaultOrthonormalBasis(ℂ)
 
             @test DefaultBasis{ℂ}(CotangentSpace) === DefaultBasis(ℂ, CotangentSpace)
             @test DefaultOrthogonalBasis{ℂ}(CotangentSpace) ===
-                DefaultOrthogonalBasis(ℂ, CotangentSpace)
+                  DefaultOrthogonalBasis(ℂ, CotangentSpace)
             @test DefaultOrthonormalBasis{ℂ}(CotangentSpace) ===
-                DefaultOrthonormalBasis(ℂ, CotangentSpace)
+                  DefaultOrthonormalBasis(ℂ, CotangentSpace)
         end
 
         _pts = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
@@ -272,7 +274,10 @@ DiagonalizingBasisProxy() = DiagonalizingOrthonormalBasis([1.0, 0.0, 0.0])
             b = get_basis(M, pts[1], BT())
             if BT != DiagonalizingBasisProxy
                 if pts[1] isa Array
-                    @test isa(b, CachedBasis{ℝ,BT{ℝ,TangentSpaceType},Vector{Vector{Float64}}})
+                    @test isa(
+                        b,
+                        CachedBasis{ℝ,BT{ℝ,TangentSpaceType},Vector{Vector{Float64}}},
+                    )
                 else
                     @test isa(
                         b,
@@ -307,7 +312,8 @@ DiagonalizingBasisProxy() = DiagonalizingOrthonormalBasis([1.0, 0.0, 0.0])
             end
 
             if BT != DiagonalizingBasisProxy
-                @test get_coordinates(M, pts[1], v1, b) ≈ get_coordinates(M, pts[1], v1, BT())
+                @test get_coordinates(M, pts[1], v1, b) ≈
+                      get_coordinates(M, pts[1], v1, BT())
                 @test get_vector(M, pts[1], vb, b) ≈ get_vector(M, pts[1], vb, BT())
             end
 
@@ -322,8 +328,8 @@ DiagonalizingBasisProxy() = DiagonalizingOrthonormalBasis([1.0, 0.0, 0.0])
         @testset "() Manifolds" begin
             M = ManifoldsBase.DefaultManifold()
             ManifoldsBase.allocate_coordinates(M, 1, Float64, 0) == 0.0
-            ManifoldsBase.allocate_coordinates(M, 1, Float64, 1) == zeros(Float64,1)
-            ManifoldsBase.allocate_coordinates(M, 1, Float64, 2) == zeros(Float64,2)
+            ManifoldsBase.allocate_coordinates(M, 1, Float64, 1) == zeros(Float64, 1)
+            ManifoldsBase.allocate_coordinates(M, 1, Float64, 2) == zeros(Float64, 2)
         end
     end
 
@@ -351,11 +357,12 @@ DiagonalizingBasisProxy() = DiagonalizingOrthonormalBasis([1.0, 0.0, 0.0])
         @test sprint(show, DefaultOrthogonalBasis()) == "DefaultOrthogonalBasis(ℝ)"
         @test sprint(show, DefaultOrthonormalBasis()) == "DefaultOrthonormalBasis(ℝ)"
         @test sprint(show, DefaultOrthonormalBasis(ℂ)) == "DefaultOrthonormalBasis(ℂ)"
-        @test sprint(show, GramSchmidtOrthonormalBasis(ℂ)) == "GramSchmidtOrthonormalBasis(ℂ)"
+        @test sprint(show, GramSchmidtOrthonormalBasis(ℂ)) ==
+              "GramSchmidtOrthonormalBasis(ℂ)"
         @test sprint(show, ProjectedOrthonormalBasis(:svd)) ==
-            "ProjectedOrthonormalBasis(:svd, ℝ)"
+              "ProjectedOrthonormalBasis(:svd, ℝ)"
         @test sprint(show, ProjectedOrthonormalBasis(:gram_schmidt, ℂ)) ==
-            "ProjectedOrthonormalBasis(:gram_schmidt, ℂ)"
+              "ProjectedOrthonormalBasis(:gram_schmidt, ℂ)"
 
         diag_onb = DiagonalizingOrthonormalBasis(Float64[1, 2, 3])
         @test sprint(show, "text/plain", diag_onb) == """
