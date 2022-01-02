@@ -573,9 +573,7 @@ export AbstractRetractionMethod,
     ExponentialRetraction,
     QRRetraction,
     PolarRetraction,
-    ProjectionRetraction,
-    PowerRetraction,
-    InversePowerRetraction
+    ProjectionRetraction
 
 export AbstractInverseRetractionMethod,
     ApproximateInverseRetraction,

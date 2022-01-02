@@ -96,7 +96,7 @@ injectivity_radius(::DefaultManifold) = Inf
 log!(::DefaultManifold, Y, p, q) = (Y .= q .- p)
 
 @generated function manifold_dimension(::DefaultManifold{T,𝔽}) where {T,𝔽}
-    return *(T.parameters...) * real_dimension(𝔽)
+    return length(T.parameters) == 0 ? 1 : *(T.parameters...) * real_dimension(𝔽)
 end
 
 number_system(::DefaultManifold{T,𝔽}) where {T,𝔽} = 𝔽

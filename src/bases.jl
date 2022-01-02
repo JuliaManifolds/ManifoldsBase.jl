@@ -267,7 +267,10 @@ Allocate vector of coordinates of length `n` of type `T` of a vector at point `p
 on manifold `M`.
 """
 allocate_coordinates(::AbstractManifold, p, T, n::Int) = allocate(p, T, n)
-
+function allocate_coordinates(::AbstractManifold, p::Int, T, n::Int)
+    print("$p - $T - $n")
+    return allocate(p, T, n)
+end
 function allocate_result(
     M::AbstractManifold,
     f::typeof(get_coordinates),

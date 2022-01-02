@@ -113,41 +113,6 @@ function PowerManifold(
 end
 
 """
-    PowerRetraction{TR<:AbstractRetractionMethod} <: AbstractRetractionMethod
-
-The `PowerRetraction` avoids ambiguities between dispatching on the [`AbstractPowerManifold`](@ref)
-and dispatching on the [`AbstractRetractionMethod`](@ref) and encapsulates this.
-This container should only be used in rare cases outside of this package. Usually a
-subtype of the [`AbstractPowerManifold`](@ref) should define a way how to treat
-its [`AbstractRetractionMethod`](@ref)s.
-
-# Constructor
-
-    PowerRetraction(retraction::AbstractRetractionMethod)
-"""
-struct PowerRetraction{TR<:AbstractRetractionMethod} <: AbstractRetractionMethod
-    retraction::TR
-end
-
-"""
-    InversePowerRetraction{TR<:AbstractInverseRetractionMethod} <: AbstractInverseRetractionMethod
-
-The `InversePowerRetraction` avoids ambiguities between dispatching on the [`AbstractPowerManifold`](@ref)
-and dispatching on the [`AbstractInverseRetractionMethod`](@ref) and encapsulates this.
-This container should only be used in rare cases outside of this package. Usually a
-subtype of the [`AbstractPowerManifold`](@ref) should define a way how to treat
-its [`AbstractRetractionMethod`](@ref)s.
-
-# Constructor
-
-    InversePowerRetraction(inverse_retractions::AbstractInverseRetractionMethod...)
-"""
-struct InversePowerRetraction{TR<:AbstractInverseRetractionMethod} <:
-       AbstractInverseRetractionMethod
-    inverse_retraction::TR
-end
-
-"""
     PowerBasisData{TB<:AbstractArray}
 
 Data storage for an array of basis data.
@@ -190,6 +155,7 @@ function allocate_result(M::PowerManifoldNested, f, x...)
         ]
     end
 end
+# avoid ambituities - though usually not used
 function allocate_result(
     M::PowerManifoldNested,
     f::typeof(get_coordinates),
@@ -198,7 +164,7 @@ function allocate_result(
     B::AbstractBasis,
 )
     if representation_size(M.manifold) === ()
-        return allocate(x[1])
+        return allocate(X, manifold_dimension(M))
     else
         return [
             allocate_result(M.manifold, f, _access_nested(p, i), _access_nested(X, i), B)
@@ -209,6 +175,7 @@ end
 function allocate_result(::PowerManifoldNestedReplacing, f, x...)
     return copy(x[1])
 end
+# the following is not used but necessary to avoid ambiguities
 function allocate_result(
     M::PowerManifoldNestedReplacing,
     f::typeof(get_coordinates),
@@ -226,7 +193,6 @@ function allocate_result(
         B,
     )
 end
-
 function allocate_result(M::PowerManifoldNested, f::typeof(get_vector), p, X)
     return [allocate_result(M.manifold, f, _access_nested(p, i)) for i in get_iterator(M)]
 end
@@ -423,9 +389,7 @@ end
 
 function get_coordinates!(M::AbstractPowerManifold, c, p, X, B::AbstractBasis)
     rep_size = representation_size(M.manifold)
-    dim = manifold_dimension(M.manifold)
     for i in get_iterator(M)
-        # TODO: this view is really suboptimal when `dim` can be statically determined
         get_coordinates!(
             M.manifold,
             _write_coordinates(M, c, i),
@@ -619,16 +583,22 @@ function Base.isapprox(M::AbstractPowerManifold, p, X, Y; kwargs...)
 end
 
 @doc raw"""
-    inverse_retract(M::AbstractPowerManifold, p, q, m::InversePowerRetraction)
+    inverse_retract(M::AbstractPowerManifold, p, q, m::AbstractInverseRetractionMethod)
 
 Compute the inverse retraction from `p` with respect to `q` on an [`AbstractPowerManifold`](@ref) `M`
-using an [`InversePowerRetraction`](@ref), which by default encapsulates a inverse retraction
-of the base manifold. Then this method is performed elementwise, so the encapsulated inverse
+using an [`AbstractInverseRetractionMethod`](@ref).
+Then this method is performed elementwise, so the inverse
 retraction method has to be one that is available on the base [`AbstractManifold`](@ref).
 """
 inverse_retract(::AbstractPowerManifold, ::Any...)
 
-function inverse_retract!(M::AbstractPowerManifold, X, p, q, method::InversePowerRetraction)
+function inverse_retract!(
+    M::AbstractPowerManifold,
+    X,
+    p,
+    q,
+    m::AbstractInverseRetractionMethod = LogarithmicInverseRetraction(),
+)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         inverse_retract!(
@@ -636,7 +606,7 @@ function inverse_retract!(M::AbstractPowerManifold, X, p, q, method::InversePowe
             _write(M, rep_size, X, i),
             _read(M, rep_size, p, i),
             _read(M, rep_size, q, i),
-            method.inverse_retraction,
+            m,
         )
     end
     return X
@@ -646,7 +616,7 @@ function inverse_retract!(
     X,
     p,
     q,
-    method::InversePowerRetraction,
+    m::AbstractInverseRetractionMethod = LogarithmicInverseRetraction(),
 )
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
@@ -654,7 +624,7 @@ function inverse_retract!(
             M.manifold,
             _read(M, rep_size, p, i),
             _read(M, rep_size, q, i),
-            method.inverse_retraction,
+            m,
         )
     end
     return X
@@ -837,16 +807,22 @@ end
 
 
 @doc raw"""
-    retract(M::AbstractPowerManifold, p, X, method::PowerRetraction)
+    retract(M::AbstractPowerManifold, p, X, method::AbstractRetractionMethod)
 
 Compute the retraction from `p` with tangent vector `X` on an [`AbstractPowerManifold`](@ref) `M`
-using a [`PowerRetraction`](@ref), which by default encapsulates a retraction of the
-base manifold. Then this method is performed elementwise, so the encapsulated retraction
+using a [`AbstractRetractionMethod`](@ref).
+Then this method is performed elementwise, so the retraction
 method has to be one that is available on the base [`AbstractManifold`](@ref).
 """
 retract(::AbstractPowerManifold, ::Any...)
 
-function retract!(M::AbstractPowerManifold, q, p, X, method::PowerRetraction)
+function retract!(
+    M::AbstractPowerManifold,
+    q,
+    p,
+    X,
+    m::AbstractRetractionMethod = ExponentialRetraction(),
+)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         retract!(
@@ -854,20 +830,21 @@ function retract!(M::AbstractPowerManifold, q, p, X, method::PowerRetraction)
             _write(M, rep_size, q, i),
             _read(M, rep_size, p, i),
             _read(M, rep_size, X, i),
-            method.retraction,
+            m,
         )
     end
     return q
 end
-function retract!(M::PowerManifoldNestedReplacing, q, p, X, method::PowerRetraction)
+function retract!(
+    M::PowerManifoldNestedReplacing,
+    q,
+    p,
+    X,
+    m::AbstractRetractionMethod = ExponentialRetraction(),
+)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
-        q[i...] = retract(
-            M.manifold,
-            _read(M, rep_size, p, i),
-            _read(M, rep_size, X, i),
-            method.retraction,
-        )
+        q[i...] = retract(M.manifold, _read(M, rep_size, p, i), _read(M, rep_size, X, i), m)
     end
     return q
 end
