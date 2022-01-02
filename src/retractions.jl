@@ -327,7 +327,17 @@ function _inverse_retract!(M::AbstractManifold, X, p, q, m::NLSolveInverseRetrac
 end
 # ToDo docu
 function inverse_retract_embedded!(M::AbstractManifold, X, p, q, m)
-    return project!(M, X, p, inverse_retract(get_embedding(M), embed(get_embedding(M), p), embed(get_embedding(M), q), m))
+    return project!(
+        M,
+        X,
+        p,
+        inverse_retract(
+            get_embedding(M),
+            embed(get_embedding(M), p),
+            embed(get_embedding(M), q),
+            m,
+        ),
+    )
 end
 function inverse_retract_softmax! end
 function inverse_retract_qr! end
@@ -364,7 +374,7 @@ function _inverse_retract(M::AbstractManifold, p, q, m::EmbeddedInverseRetractio
 end
 function inverse_retract_embedded(M::AbstractManifold, p, q, m)
     X = allocate_result(M, inverse_retract, p, q)
-    return inverse_retract_embedded!(M, X, p, q,m)
+    return inverse_retract_embedded!(M, X, p, q, m)
 end
 function _inverse_retract(M::AbstractManifold, p, q, ::PolarInverseRetraction)
     return inverse_retract_polar(M, p, q)
@@ -534,7 +544,16 @@ end
 
 # ToDo - docu
 function retract_embedding!(M::AbstractManifold, q, p, X, m)
-    return project!(M, q, retract(get_embedding(M), embed(get_embedding(M), p), embed(get_embedding(M), p, X), m))
+    return project!(
+        M,
+        q,
+        retract(
+            get_embedding(M),
+            embed(get_embedding(M), p),
+            embed(get_embedding(M), p, X),
+            m,
+        ),
+    )
 end
 function retract_pade! end
 function retract_project! end
