@@ -28,7 +28,7 @@ The general architecture consists of three layers
 * an interims layer to dispatch on different parameters in the last section
 * the lowest layer with a specific manifold and no optional parameters for performance
 
-These three layers are described in more detail in the following.
+These three layers are described in more detail in the following. The main motivation to introduce this separation is reduction of method ambiguity problems.
 
 ### Layer I: The high level interface and ease of use
 
