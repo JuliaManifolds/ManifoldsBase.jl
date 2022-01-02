@@ -27,6 +27,21 @@ An abstract type for representing approximate retraction methods.
 """
 abstract type ApproximateRetraction <: AbstractRetractionMethod end
 
+@doc raw"""
+    EmbeddedRetraction{T<:AbstractRetractionMethod} <: AbstractRetractionMethod
+
+Compute a retraction by using the retraction of type T imn the embedding and projecting the result
+
+# Constructor
+
+    EmbeddedRetraction(r::AbstractRetractionMethod,)
+
+Generate the retraction with retraction `r` to use in the embedding.
+"""
+struct EmbeddedRetraction{T<:AbstractRetractionMethod} <: AbstractRetractionMethod
+    retraction::T
+end
+
 """
     ExponentialRetraction
 
@@ -144,6 +159,23 @@ A retraction based on the Cayley transform, which is realized by using the
 [`PadeRetraction`](@ref)`{1}`.
 """
 const CayleyRetraction = PadeRetraction{1}
+
+@doc raw"""
+   EmbeddedInverseRetraction{T<:AbstractInverseRetractionMethod} <: AbstractInverseRetractionMethod
+
+Compute an inverse retraction by using the inverse retraction of type T imn the embedding and projecting the result
+
+# Constructor
+
+    EmbeddedInverseRetraction(r::AbstractInverseRetractionMethod)
+
+Generate the inverse retraction with inverse retraction `r` to use in the embedding.
+"""
+struct EmbeddedInverseRetraction{T<:AbstractInverseRetractionMethod} <:
+       AbstractInverseRetractionMethod
+    inverse_retraction::T
+end
+
 
 """
     LogarithmicInverseRetraction
@@ -275,6 +307,9 @@ end
 
 #
 # dispatch to lower level
+function _inverse_retract!(M::AbstractManifold, X, p, q, m::EmbeddedInverseRetraction)
+    return inverse_retract_embedded!(M, X, p, q, m.inverse_retraction)
+end
 function _inverse_retract!(M::AbstractManifold, X, p, q, ::PolarInverseRetraction)
     return inverse_retract_polar!(M, X, p, q)
 end
@@ -291,6 +326,10 @@ function _inverse_retract!(M::AbstractManifold, X, p, q, m::NLSolveInverseRetrac
     return inverse_retract_nlsolve!(M, X, p, q, m)
 end
 # ToDo docu
+function inverse_retract_embedded!(M::AbstractManifold, X, p, q, m)
+    N = get_embedding(M)
+    return project!(M, X, p, inverse_retract(N, embed(N, p), embed(N, q), m))
+end
 function inverse_retract_softmax! end
 function inverse_retract_qr! end
 function inverse_retract_project! end
@@ -321,6 +360,13 @@ function inverse_retract(
     return _inverse_retract(M, p, q, m)
 end
 _inverse_retract(M::AbstractManifold, p, q, ::LogarithmicInverseRetraction) = log(M, p, q)
+function _inverse_retract(M::AbstractManifold, p, q, m::EmbeddedInverseRetraction)
+    return inverse_retract_embedded(M, p, q, m.inverse_retraction)
+end
+function inverse_retract_embedded(M::AbstractManifold, p, q, m)
+    N = get_embedding(M)
+    return project(M, p, inverse_retract(N, embed(N, p), embed(N, q), m))
+end
 function _inverse_retract(M::AbstractManifold, p, q, ::PolarInverseRetraction)
     return inverse_retract_polar(M, p, q)
 end
@@ -389,6 +435,9 @@ function retract(
 )
     return _retract(M, p, t * X, m)
 end
+function _retract(M::AbstractManifold, p, X, m::EmbeddedRetraction)
+    return retract_embedding(M, p, X, m.retraction)
+end
 _retract(M::AbstractManifold, p, X, ::ExponentialRetraction) = exp(M, p, X)
 function _retract(M::AbstractManifold, p, X, m::ODEExponentialRetraction)
     return retract_ode_exp(M, p, X, m.retraction, m.basis)
@@ -400,6 +449,10 @@ _retract(M::AbstractManifold, p, X, ::SoftmaxRetraction) = retract_softmax(M, p,
 _retract(M::AbstractManifold, p, X, ::CayleyRetraction) = retract_pade(M, p, X, 1)
 function _retract(M::AbstractManifold, p, X, ::PadeRetraction{n}) where {n}
     return retract_pade(M, p, X, n)
+end
+function retract_embedding(M::AbstractManifold, p, X, m)
+    N = get_embedding(M)
+    return project(M, retract(get_embedding(M), embed(M, p), embed(N, p, X), m))
 end
 function retract_polar(M::AbstractManifold, p, X)
     q = allocate_result(M, retract, p, X)
@@ -462,6 +515,9 @@ function retract!(
     return _retract!(M, q, p, t * X, method)
 end
 # dispatch to lower level
+function _retract!(M::AbstractManifold, q, p, X, m::EmbeddedRetraction)
+    return retract_embedding!(M, q, p, X, m.retraction)
+end
 _retract!(M::AbstractManifold, q, p, X, ::ExponentialRetraction) = exp!(M, q, p, X)
 function _retract!(M::AbstractManifold, q, p, X, m::ODEExponentialRetraction)
     return retract_ode_exp!(M, q, p, X, m.retraction, m.basis)
@@ -478,6 +534,10 @@ function _retract!(M::AbstractManifold, q, p, X, ::PadeRetraction{n}) where {n}
 end
 
 # ToDo - docu
+function retract_embedding!(M::AbstractManifold, q, p, X, m)
+    N = get_embedding(M)
+    return project!(M, q, retract(get_embedding(M), embed(M, p), embed(N, p, X), m))
+end
 function retract_pade! end
 function retract_project! end
 function retract_polar! end
