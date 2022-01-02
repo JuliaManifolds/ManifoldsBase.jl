@@ -33,10 +33,14 @@ struct NonManifold <: AbstractManifold{ManifoldsBase.ℝ} end
     @test_throws MethodError inverse_retract!(M, Y, p, q)
     for IR in [
         LogarithmicInverseRetraction(),
+        ODEExponentialRetraction(ProjectionRetraction(), DefaultBasis()),
         PolarInverseRetraction(),
         ProjectionInverseRetraction(),
         QRInverseRetraction(),
         NLSolveInverseRetraction(ExponentialRetraction()),
+        SoftmaxRetraction(),
+        CayleyRetraction(),
+        PadeRetraction(2),
     ]
         @test_throws MethodError inverse_retract(M, p, q, IR)
         @test_throws MethodError inverse_retract!(M, Y, p, q, IR)
@@ -62,5 +66,14 @@ end
 
 @testset "Default Fallbacks and Error Messages" begin
     M = ManifoldsBase.DefaultManifold(3)
+    p = [1.0, 0.0, 0.0]
     @test number_of_coordinates(M, ManifoldsBase.ℝ) == 3
+    B = get_basis(M, p, DefaultBasis())
+    @test_throws DomainError ODEExponentialRetraction(ProjectionRetraction(), B)
+    @test_throws DomainError ODEExponentialRetraction(
+        ExponentialRetraction(),
+        DefaultBasis(),
+    )
+    @test_throws DomainError ODEExponentialRetraction(ExponentialRetraction(), B)
+    @test_throws ErrorException PadeRetraction(0)
 end

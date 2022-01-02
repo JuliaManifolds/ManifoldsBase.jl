@@ -23,6 +23,8 @@ import Markdown: @doc_str
 using LinearAlgebra
 
 include("maintypes.jl")
+include("numbers.jl")
+include("bases.jl")
 include("retractions.jl")
 include("exp_log_geo.jl")
 include("projections.jl")
@@ -543,9 +545,7 @@ function zero_vector(M::AbstractManifold, p)
     return X
 end
 include("errors.jl")
-include("numbers.jl")
 include("vector_transport.jl")
-include("bases.jl")
 include("vector_spaces.jl")
 include("point_vector_fallbacks.jl")
 include("nested_trait.jl")
@@ -569,11 +569,15 @@ export OutOfInjectivityRadiusError
 
 export AbstractRetractionMethod,
     ApproximateInverseRetraction,
+    CayleyRetraction,
     NLSolveInverseRetraction,
     ExponentialRetraction,
+    ODEExponentialRetraction,
     QRRetraction,
+    PadeRetraction,
     PolarRetraction,
-    ProjectionRetraction
+    ProjectionRetraction,
+    SoftmaxRetraction
 
 export AbstractInverseRetractionMethod,
     ApproximateInverseRetraction,
@@ -581,7 +585,8 @@ export AbstractInverseRetractionMethod,
     NLSolveInverseRetraction,
     QRInverseRetraction,
     PolarInverseRetraction,
-    ProjectionInverseRetraction
+    ProjectionInverseRetraction,
+    SoftmaxInverseRetraction
 
 export AbstractVectorTransportMethod,
     DifferentiatedRetractionVectorTransport,

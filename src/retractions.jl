@@ -34,6 +34,65 @@ Retraction using the exponential map.
 """
 struct ExponentialRetraction <: AbstractRetractionMethod end
 
+@doc raw"""
+    ODEExponentialRetraction{T<:AbstractRetractionMethod, B<:AbstractBasis} <: AbstractRetractionMethod
+
+Approximate the exponential map on the manifold by evaluating the ODE descripting the geodesic at 1,
+assuming the default connection of the given manifold by solving the ordinary differential
+equation
+
+```math
+\frac{d^2}{dt^2} p^k + Γ^k_{ij} \frac{d}{dt} p_i \frac{d}{dt} p_j = 0,
+```
+
+where ``Γ^k_{ij}`` are the Christoffel symbols of the second kind, and
+the Einstein summation convention is assumed.
+
+See [`solve_exp_ode`](@ref) for further details.
+
+# Constructor
+
+    ODEExponentialRetraction(
+        r::AbstractRetractionMethod,
+        b::AbstractBasis=DefaultOrthogonalBasis(),
+    )
+
+Generate the retraction with a retraction to use internally (for some approaches)
+and a basis for the tangent space(s).
+"""
+struct ODEExponentialRetraction{T<:AbstractRetractionMethod,B<:AbstractBasis} <:
+       AbstractRetractionMethod
+    retraction::T
+    basis::B
+end
+function ODEExponentialRetraction(r::T) where {T<:AbstractRetractionMethod}
+    return ODEExponentialRetraction(r, DefaultOrthonormalBasis())
+end
+function ODEExponentialRetraction(::T, b::CachedBasis) where {T<:AbstractRetractionMethod}
+    return throw(
+        DomainError(
+            b,
+            "Cached Bases are currently not supported, since the basis has to be implemented in a surrounding of the start point as well.",
+        ),
+    )
+end
+function ODEExponentialRetraction(r::ExponentialRetraction, ::AbstractBasis)
+    return throw(
+        DomainError(
+            r,
+            "You can not use the exponential map as an inner method to solve the ode for the exponential map.",
+        ),
+    )
+end
+function ODEExponentialRetraction(r::ExponentialRetraction, ::CachedBasis)
+    return throw(
+        DomainError(
+            r,
+            "Neither the exponential map nor a Cached Basis can be used with this retraction type.",
+        ),
+    )
+end
+
 """
     PolarRetraction <: AbstractRetractionMethod
 
@@ -56,6 +115,35 @@ Retractions that are based on a QR decomposition of the
 matrix / matrices for point and tangent vector on a [`AbstractManifold`](@ref)
 """
 struct QRRetraction <: AbstractRetractionMethod end
+
+"""
+    SoftmaxRetraction <: AbstractRetractionMethod
+
+Describes a retraction that is based on the softmax function.
+"""
+struct SoftmaxRetraction <: AbstractRetractionMethod end
+
+
+@doc raw"""
+    PadeRetraction{m} <: AbstractRetractionMethod
+
+A retraction based on the Padé approximation of order $m$
+"""
+struct PadeRetraction{m} <: AbstractRetractionMethod end
+
+function PadeRetraction(m::Int)
+    (m < 1) && error(
+        "The Padé based retraction is only available for positive orders, not for order $m.",
+    )
+    return PadeRetraction{m}()
+end
+@doc raw"""
+    CayleyRetraction <: AbstractRetractionMethod
+
+A retraction based on the Cayley transform, which is realized by using the
+[`PadeRetraction`](@ref)`{1}`.
+"""
+const CayleyRetraction = PadeRetraction{1}
 
 """
     LogarithmicInverseRetraction
@@ -136,6 +224,13 @@ function NLSolveInverseRetraction(
 end
 
 """
+    SoftmaxInverseRetraction <: AbstractInverseRetractionMethod
+
+Describes an inverse retraction that is based on the softmax function.
+"""
+struct SoftmaxInverseRetraction <: AbstractInverseRetractionMethod end
+
+"""
     default_inverse_retraction_method(M::AbstractManifold)
 
 The [`AbstractInverseRetractionMethod`](@ref) that is used when calling
@@ -183,18 +278,23 @@ end
 function _inverse_retract!(M::AbstractManifold, X, p, q, ::PolarInverseRetraction)
     return inverse_retract_polar!(M, X, p, q)
 end
-function inverse_retract_polar! end
 function _inverse_retract!(M::AbstractManifold, X, p, q, ::ProjectionInverseRetraction)
     return inverse_retract_project!(M, X, p, q)
 end
-function inverse_retract_project! end
 function _inverse_retract!(M::AbstractManifold, X, p, q, ::QRInverseRetraction)
     return inverse_retract_qr!(M, X, p, q)
 end
-function inverse_retract_qr! end
-function _inverse_retract!(M::AbstractManifold, X, p, q, m::NLSolveInverseRetraction)
-    return inverse_retract_nlsolve(M, X, p, q, m)
+function _inverse_retract!(M::AbstractManifold, X, p, q, ::SoftmaxInverseRetraction)
+    return inverse_retract_softmax!(M, X, p, q)
 end
+function _inverse_retract!(M::AbstractManifold, X, p, q, m::NLSolveInverseRetraction)
+    return inverse_retract_nlsolve!(M, X, p, q, m)
+end
+# ToDo docu
+function inverse_retract_softmax! end
+function inverse_retract_qr! end
+function inverse_retract_project! end
+function inverse_retract_polar! end
 function inverse_retract_nlsolve! end
 
 
@@ -290,9 +390,17 @@ function retract(
     return _retract(M, p, t * X, m)
 end
 _retract(M::AbstractManifold, p, X, ::ExponentialRetraction) = exp(M, p, X)
+function _retract(M::AbstractManifold, p, X, m::ODEExponentialRetraction)
+    return retract_ode_exp(M, p, X, m.retraction, m.basis)
+end
 _retract(M::AbstractManifold, p, X, ::PolarRetraction) = retract_polar(M, p, X)
 _retract(M::AbstractManifold, p, X, ::ProjectionRetraction) = retract_project(M, p, X)
 _retract(M::AbstractManifold, p, X, ::QRRetraction) = retract_qr(M, p, X)
+_retract(M::AbstractManifold, p, X, ::SoftmaxRetraction) = retract_softmax(M, p, X)
+_retract(M::AbstractManifold, p, X, ::CayleyRetraction) = retract_pade(M, p, X, 1)
+function _retract(M::AbstractManifold, p, X, ::PadeRetraction{n}) where {n}
+    return retract_pade(M, p, X, n)
+end
 function retract_polar(M::AbstractManifold, p, X)
     q = allocate_result(M, retract, p, X)
     return retract_polar!(M, q, p, X)
@@ -304,6 +412,18 @@ end
 function retract_qr(M::AbstractManifold, p, X)
     q = allocate_result(M, retract, p, X)
     return retract_qr!(M, q, p, X)
+end
+function retract_exp_ode(M::AbstractManifold, p, X, m, B)
+    q = allocate_result(M, retract, p, X)
+    return retract_exp_ode!(M, q, p, X, m, B)
+end
+function retract_softmax(M::AbstractManifold, p, X)
+    q = allocate_result(M, retract, p, X)
+    return retract_softmax!(M, q, p, X)
+end
+function retract_pade(M::AbstractManifold, p, X, n)
+    q = allocate_result(M, retract, p, X)
+    return retract_pade!(M, q, p, X, n)
 end
 
 """
@@ -343,12 +463,27 @@ function retract!(
 end
 # dispatch to lower level
 _retract!(M::AbstractManifold, q, p, X, ::ExponentialRetraction) = exp!(M, q, p, X)
+function _retract!(M::AbstractManifold, q, p, X, m::ODEExponentialRetraction)
+    return retract_ode_exp!(M, q, p, X, m.retraction, m.basis)
+end
 _retract!(M::AbstractManifold, q, p, X, ::PolarRetraction) = retract_polar!(M, q, p, X)
 function _retract!(M::AbstractManifold, q, p, X, ::ProjectionRetraction)
     return retract_project!(M, q, p, X)
 end
 _retract!(M::AbstractManifold, q, p, X, ::QRRetraction) = retract_qr!(M, q, p, X)
+_retract!(M::AbstractManifold, q, p, X, ::SoftmaxRetraction) = retract_softmax!(M, q, p, X)
+_retract!(M::AbstractManifold, q, p, X, ::CayleyRetraction) = retract_pade!(M, q, p, X, 1)
+function _retract!(M::AbstractManifold, q, p, X, ::PadeRetraction{n}) where {n}
+    return retract_pade!(M, q, p, X, n)
+end
 
+# ToDo - docu
+function retract_pade! end
 function retract_project! end
 function retract_polar! end
 function retract_qr! end
+function retract_ode_exp! end
+function retract_softmax! end
+
+Base.show(io::IO, ::CayleyRetraction) = print(io, "CayleyRetraction()")
+Base.show(io::IO, ::PadeRetraction{m}) where {m} = print(io, "PadeRetraction($(m))")
