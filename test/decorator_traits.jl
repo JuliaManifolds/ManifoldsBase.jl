@@ -128,6 +128,8 @@ ManifoldsBase.@invoke_maker 1 AbstractA h(A::DecoA, x::Float64, y)
     sig2 = ManifoldsBase._split_signature(:(fname(x; kwargs...)))
     @test sig2.kwargs_call == Expr[:(kwargs...)]
 
-    sig3 = ManifoldsBase._split_signature(:(fname(x::T; k1 = 1) where {T}))
+    sig3 = ManifoldsBase._split_signature(:(fname(x::T, y::Int = 10; k1 = 1) where {T}))
     @test sig3.kwargs_call == Expr[:(k1 = k1)]
+    @test sig3.callargs[2] == :($(Expr(:kw, :(y::Int), 10)))
+    @test sig3.argnames == [:x, :y]
 end
