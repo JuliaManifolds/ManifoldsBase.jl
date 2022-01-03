@@ -124,15 +124,15 @@ struct NotImplementedInverseRetraction <: AbstractInverseRetractionMethod end
     @test_throws MethodError zero_vector!(M, [0], [0])
     @test_throws MethodError zero_vector(M, [0])
 
-    @test check_point(M, [0]) === nothing
-    @test check_point(M, p) === nothing
+    @test ManifoldsBase.check_point(M, [0]) === nothing
+    @test ManifoldsBase.check_point(M, p) === nothing
     @test is_point(M, [0])
-    @test check_point(M, [0]) === nothing
+    @test ManifoldsBase.check_point(M, [0]) === nothing
 
-    @test check_vector(M, [0], [0]) === nothing
-    @test check_vector(M, p, v) === nothing
+    @test ManifoldsBase.check_vector(M, [0], [0]) === nothing
+    @test ManifoldsBase.check_vector(M, p, v) === nothing
     @test is_vector(M, [0], [0])
-    @test check_vector(M, [0], [0]) === nothing
+    @test ManifoldsBase.check_vector(M, [0], [0]) === nothing
 
     @test_throws MethodError hat!(M, [0], [0], [0])
     @test_throws MethodError vee!(M, [0], [0], [0])

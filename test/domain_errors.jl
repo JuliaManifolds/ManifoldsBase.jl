@@ -26,8 +26,8 @@ end
     @test is_point(M, [1, 1])
     @test_throws DomainError is_point(M, [-1, 1], true)
 
-    @test isa(check_vector(M, [1, 1], [-1, 1]), DomainError)
-    @test check_vector(M, [1, 1], [1, 1]) === nothing
+    @test isa(ManifoldsBase.check_vector(M, [1, 1], [-1, 1]), DomainError)
+    @test ManifoldsBase.check_vector(M, [1, 1], [1, 1]) === nothing
     @test !is_vector(M, [1, 1], [-1, 1])
     @test is_vector(M, [1, 1], [1, 1])
     @test_throws DomainError is_vector(M, [1, 1], [-1, 1], true)

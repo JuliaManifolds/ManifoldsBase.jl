@@ -156,12 +156,12 @@ end
         p = [1.0 1.0 0.0]
         q = [1.0 0.0 0.0]
         X = q - p
-        @test check_size(M, p) === nothing
-        @test check_size(M, p, X) === nothing
-        @test check_size(M, [1, 2]) isa DomainError
-        @test check_size(M, [1 2 3 4]) isa DomainError
-        @test check_size(M, p, [1, 2]) isa DomainError
-        @test check_size(M, p, [1 2 3 4]) isa DomainError
+        @test ManifoldsBase.check_size(M, p) === nothing
+        @test ManifoldsBase.check_size(M, p, X) === nothing
+        @test ManifoldsBase.check_size(M, [1, 2]) isa DomainError
+        @test ManifoldsBase.check_size(M, [1 2 3 4]) isa DomainError
+        @test ManifoldsBase.check_size(M, p, [1, 2]) isa DomainError
+        @test ManifoldsBase.check_size(M, p, [1 2 3 4]) isa DomainError
         @test embed(M, p) == p
         pE = similar(p)
         embed!(M, pE, p)
@@ -217,8 +217,8 @@ end
             M = NotImplementedEmbeddedSubManifold()
             A = zeros(2)
             # for a submanifold quite a lot of functions are passed on
-            @test check_point(M, [1, 2]) === nothing
-            @test check_vector(M, [1, 2], [3, 4]) === nothing
+            @test ManifoldsBase.check_point(M, [1, 2]) === nothing
+            @test ManifoldsBase.check_vector(M, [1, 2], [3, 4]) === nothing
             @test norm(M, [1, 2], [2, 3]) ≈ sqrt(13)
             @test distance(M, [1, 2], [3, 4]) ≈ sqrt(8)
             @test inner(M, [1, 2], [2, 3], [2, 3]) == 13

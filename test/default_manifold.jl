@@ -274,8 +274,8 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
                 v1t2 = zero(v1t1)
                 vector_transport_to!(M, v1t2, pts[1], v1, v2, ProjectionTransport())
                 v1t3 = vector_transport_direction(M, pts[1], v1, v2)
-                @test is_vector(M, pts[3], v1t1)
-                @test is_vector(M, pts[3], v1t3)
+                @test ManifoldsBase.is_vector(M, pts[3], v1t1)
+                @test ManifoldsBase.is_vector(M, pts[3], v1t3)
                 @test isapprox(M, pts[3], v1t1, v1t3)
                 # along a `Vector` of points
                 c = [pts[1]]
