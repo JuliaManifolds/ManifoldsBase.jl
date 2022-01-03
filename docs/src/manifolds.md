@@ -23,26 +23,6 @@ Pages = ["ValidationManifold.jl"]
 Order = [:macro, :type, :function]
 ```
 
-## [EmbeddedManifold](@id EmbeddedmanifoldSec)
-
-__TODO__: Update
-
-### Types
-
-```@autodocs
-Modules = [ManifoldsBase]
-Pages = ["EmbeddedManifold.jl"]
-Order = [:type]
-```
-
-### Functions
-
-```@autodocs
-Modules = [ManifoldsBase]
-Pages = ["EmbeddedManifold.jl"]
-Order = [:function]
-```
-
 ## DefaultManifold
 
 [`DefaultManifold`](@ref ManifoldsBase.DefaultManifold) is a simplified version of [`Euclidean`](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/euclidean.html) and demonstrates a basic interface implementation.
@@ -51,15 +31,4 @@ Since when using `Manifolds.jl` the [`Euclidean`](https://juliamanifolds.github.
 
 ```@docs
 ManifoldsBase.DefaultManifold
-```
-
-## Error Messages
-
-especially to collect and display errors on [`AbstractPowerManifold`](@ref)s the following
-component and collection error messages are available.
-
-```@autodocs
-Modules = [ManifoldsBase]
-Pages = ["errors.jl"]
-Order = [:type]
 ```

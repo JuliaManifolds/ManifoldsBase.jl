@@ -30,7 +30,7 @@ The general architecture consists of three layers
 
 These three layers are described in more detail in the following. The main motivation to introduce this separation is reduction of method ambiguity problems.
 
-### Layer I: The high level interface and ease of use
+### [Layer I: The high level interface and ease of use](@id design-layer1)
 
 THe highest layer for convenience of decorators.
 A usual scheme is, that a manifold might assume several things implicitly, for example the default implementation of the sphere $\mathbb S^n$ using unit vectors in $\mathbb R^{n+1}$.
@@ -46,7 +46,10 @@ With respect to the [dispatch on one argument at a time](https://docs.julialang.
 
 This layer ends usually in calling the same functions like `retract` but prefixed with a `_` to enter Layer II.
 
-### Layer II: An internal dispatch interface for parameters
+!!! note
+    Usually only functions from this layer are exported from the interface, since these are the ones one should use for generic implementations. If you implement your own manifold, `import` the necessary lower layer functions as needed.
+
+### [Layer II: An internal dispatch interface for parameters](@id design-layer2)
 
 This layer is an interims layer to dispatch on the (optional/default) parameters of a function like the retraction:
 [`retract`](@ref) has a last parameter that determines the type.
@@ -82,12 +85,12 @@ here for example
 
 ```julia
 _retract(M::AbstractManifold, p, X, m::Exponentialretraction) = exp(M,p,X)
-_retract(M::AbstractManifold, p, X, m::PolarRetractionMethod) = retract_polar(M,p,X)
+_retract(M::AbstractManifold, p, X, m::PolarRetraction) = retract_polar(M,p,X)
 ```
 
-or the [`PolarRetractionMethod`](@ref) which dispatches to [`retract_polar`](@ref).
+or the [`PolarRetraction`](@ref) which dispatches to [`retract_polar`](@ref).
 
-For further details and dispatches, see the [appendix](@ref subsec_appendix_retr) for an overview.
+For further details and dispatches, see [retractions and inverse retractions](@ref sec-retractions) for an overview.
 
 !!! note
     The documentation should be attached to the high level functions, since this again fosters ease of use.
@@ -95,7 +98,7 @@ For further details and dispatches, see the [appendix](@ref subsec_appendix_retr
 
 To summarize, with respect to the [dispatch on one argument at a time](https://docs.julialang.org/en/v1/manual/methods/#Dispatch-on-one-argument-at-a-time) paradigm, this layer dispatches the (optional) _parameters second_.
 
-### Layer III: The lower level interface to gain performance
+### [Layer III: The lower level interface to gain performance](@id design-layer3)
 
 This lower level aims for performance, that is, any function should have as few as possible optional and keyword arguments
 and be typed as concrete as possible/necessary. This means
@@ -168,46 +171,3 @@ but the return type would be ``V``, whose internal sizes (fields/arrays) will de
 !!! note
     This dispatch from the allocating to the mutating variant happens in Layer III, that is, functions like `exp` or `retract_polar` (but not `retract` itself) allocate their result (using `::typeof(retract)` for the second function)
     and call the mutating variant `exp!` and `retract_polar!` afterwards.
-
-## Appendix
-
-### Validations
-
-The function [`is_point`](@ref) internally calls the lower level function [`check_point`](@ref). Similarly [`is_vector`](@ref) calls [`check_vector`](@ref), which assumes that the (base) point is correct.
-
-### [Inverse Retractions](@id subsec_appendix_inv_retr)
-
-The high level function `inverse_retract(::M, p, X, m::AbstractInverseRetractionMethod)`
-as well as its mutating variant first dispatch on the lower level, before the non-mutating variant (of the name below) allocates memory and calls its mutating variant.
-
-The following table provides an overview of the currently available types and their lower level functions.
-
-| Name | default lower level function | comment |
-| :--- | :----------------------------- | :----- |
-| [`PolarInverseRetraction`](@ref) | `inverse_retract_polar` |
-| [`ProjectionInverseRetraction`](@ref) | `inverse_retract_project` |
-| [`QRInverseRetraction`](@ref) | `inverse_retract_qr` |
-| [`NLSolveInverseRetraction`](@ref) | `inverse_retract_nlsolve` | the `m` is also passed on here. |
-
-### [Retractions](@id subsec_appendix_retr)
-
-The high level function `retract(::M, p, X, m::AbstractRetractionMethod)`
-as well as its mutating variant first dispatch on the lower level, before the non-mutating variant (of the name below) allocates memory and calls its mutating variant.
-
-The following table provides an overview of the currently available types and their lower level functions.
-
-| Name | default lower level function | comment |
-| :--- | :----------------------------- | :----- |
-| [`PolarRetraction`](@ref) | `inverse_retract_polar` |
-| [`ProjectionRetraction`](@ref) | `inverse_retract_project` |
-| [`QRRetraction`](@ref) | `inverse_retract_qr` |
-
-### Vector transport
-
-In the follwing table the `V` in the function names stand for `along`, `to`. Nte that `vector_transport_direction` by default uses the default retraction and `to`.
-
-| Name | default lower level function | comment |
-| :--- | :----------------------------- | :----- |
-| [`DifferentiatedRetractionVectorTransport`](@ref) | `vector_transport_V_diff` | the inner retraction is passed on as last argument |
-| [`ParallelTransport`](@ref) | `parallel_transport_V` |
-| [`ProjectionTransport`](@ref) | `vector_transport_V_project` |

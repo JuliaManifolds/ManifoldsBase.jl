@@ -1,6 +1,25 @@
 # Functions on manifolds
 
-## The exponential and the logarithmic map, and geodesics
+This page collects several basic functions on manifolds.
+
+## Validation
+
+ince points and tangent vectors are represented usually as multidimensional arrays or for more complex cases as structs, there might be values, which invalidate a point of tangent vector. Here the interface provides two [high level functions](@ref design-layer1).
+
+```@docs
+is_point
+is_vector
+```
+
+These are mapped to the [lower level functions](@ref design-layer3)
+
+```@docs
+ManifoldsBase.check_point
+ManifoldsBase.check_vector
+ManifoldsBase.check_size
+```
+
+## [The exponential and the logarithmic map, and geodesics](@id exp-and-log)
 
 Geodesics are the generalizations of a straight line to manifolds, i.e. their intrinsic acceleration is zero.
 Together with geodesics one also obtains the exponential map and its inverse, the logarithmic map.
@@ -13,28 +32,6 @@ Pages = ["exp_log_geo.jl"]
 Order = [:function]
 ```
 
-## Retractions and inverse Retractions
-
-The exponential and logarithmic map might be too expensive to evaluate or not be available in a very stable numerical way. Retractions provide a possibly cheap, fast and stable alternative.
-
-The following figure compares the exponential map [`exp`](@ref)`(M, p, X)` on the [Circle](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/circle.html) `(ℂ)` (or [`Sphere`](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/sphere.html)`(1)` embedded in $ℝ^2$ with one possible retraction, the one based on projections. Note especially that ``\mathrm{dist}(p,q)=\lVert X\rVert_p`` while this is not the case for ``q'``.
-
-![A comparson of the exponential map and a retraction on the Circle.](assets/images/retraction_illustration_600.png)
-
-```@autodocs
-Modules = [ManifoldsBase]
-Pages = ["retractions.jl"]
-Order = [:function]
-```
-
-To distinguish different types of retractions, the last argument of the (inverse) retraction
-specifies a type. The following ones are available.
-
-```@autodocs
-Modules = [ManifoldsBase]
-Pages = ["retractions.jl"]
-Order = [:type]
-```
 
 ## Vector transport
 
@@ -62,7 +59,7 @@ Order = [:type, :function]
 A manifold might be embedded in some space.
 Often this is implicitly assumed, for example the complex [Circle](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/circle.html) is embedded in the complex plane.
 Let‘s keep the circle in mind in the following as a simple example.
-For the general case see of explicitly stating an embedding and/or distinguising several, different embeddings, see [Embedded Manifolds](@ref EmbeddedmanifoldSec) below.
+For the general case see of explicitly stating an embedding and/or distinguising several, different embeddings, see [Embedded Manifolds](@ref subsec-embeddedmanifold) below.
 
 To make this a little more concrete, let‘s assume we have a manifold ``\mathcal M`` which is embedded in some manifold ``\mathcal N`` and the image ``i(\mathcal M)`` of the embedding function ``i`` is a closed set (with respect to the topology on ``\mathcal N``). Then we can do two kinds of projections.
 
@@ -107,4 +104,15 @@ Order = [:function]
 Modules = [ManifoldsBase]
 Pages = ["ManifoldsBase.jl"]
 Order = [:type, :function]
+```
+
+## Error Messages
+
+especially to collect and display errors on [`AbstractPowerManifold`](@ref)s the following
+component and collection error messages are available.
+
+```@autodocs
+Modules = [ManifoldsBase]
+Pages = ["errors.jl"]
+Order = [:type]
 ```
