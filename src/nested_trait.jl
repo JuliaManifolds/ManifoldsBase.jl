@@ -173,13 +173,18 @@ function _split_signature(sig::Expr)
         kwargs_list = []
     end
     argnames = map(callargs) do arg
-        if isa(arg, Expr)
-            return arg.args[1]
-        else
-            return arg
+        if isa(arg, Expr) && arg.head === :kw # default val present
+            arg = arg.args[1]
         end
+        if isa(arg, Expr) && arg.head === :(::) # typed
+            return arg.args[1]
+        end
+        return arg
     end
     argtypes = map(callargs) do arg
+        if isa(arg, Expr) && arg.head === :kw # default val present
+            arg = arg.args[1]
+        end
         if isa(arg, Expr)
             return arg.args[2]
         else
@@ -235,6 +240,33 @@ macro invoke_maker(argnum, type, sig)
                     $(argnames...);
                     $(kwargs_call...),
                 )
+            end
+        end,
+    )
+end
+
+
+macro trait_function(sig)
+    parts = ManifoldsBase._split_signature(sig)
+    kwargs_list = parts[:kwargs_list]
+    callargs = parts[:callargs]
+    fname = parts[:fname]
+    where_exprs = parts[:where_exprs]
+    argnames = parts[:argnames]
+    argtypes = parts[:argtypes]
+    kwargs_call = parts[:kwargs_call]
+
+    return esc(
+        quote
+            function ($fname)($(callargs...); $(kwargs_list...)) where {$(where_exprs...)}
+                return ($fname)(trait($(argnames...)), $(argnames...); $(kwargs_list...))
+            end
+            function ($fname)(
+                t::NestedTrait,
+                $(callargs...);
+                $(kwargs_list...),
+            ) where {$(where_exprs...)}
+                return ($fname)(next_trait(t), $(argnames...); $(kwargs_list...))
             end
         end,
     )

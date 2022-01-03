@@ -90,7 +90,7 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
         end
 
         function ManifoldsBase.check_vector(M::$TM, p::$TP, X::$TV; kwargs...)
-            return check_vector(M, p.$pfield, X.$vfield; kwargs...)
+            return ManifoldsBase.check_vector(M, p.$pfield, X.$vfield; kwargs...)
         end
 
         function ManifoldsBase.distance(M::$TM, p::$TP, q::$TP)
@@ -180,7 +180,7 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
                 return ManifoldsBase.$cm(M, Y, p.$pfield, X.$vfield, B)
             end
             function ManifoldsBase.$va(M::$TM, p::$TP, X, B)
-                return $TV(($va)(M, p.$pfield, X, B))
+                return $TV((ManifoldsBase.$va)(M, p.$pfield, X, B))
             end
             function ManifoldsBase.$vm(M::$TM, Y::$TV, p::$TP, X, B)
                 return ManifoldsBase.$vm(M, Y.$vfield, p.$pfield, X, B)

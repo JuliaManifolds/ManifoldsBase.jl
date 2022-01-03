@@ -58,10 +58,7 @@ parent_trait(::IsEmbeddedSubmanifoldManifold) = IsIsometricEmbeddedManifold()
     decorated_manifold
 """
 decorated_manifold(M::AbstractManifold) = M
-decorated_manifold(M::AbstractDecoratorManifold) = decorated_manifold(trait(M), M)
-function decorated_manifold(t::NestedTrait, M::AbstractManifold)
-    return decorated_manifold(next_trait(t), M)
-end
+@trait_function decorated_manifold(M::AbstractDecoratorManifold)
 function decorated_manifold(::EmptyTrait, M::AbstractManifold)
     return invoke(decorated_manifold, Tuple{AbstractManifold}, M)
 end
@@ -142,12 +139,7 @@ end
 
 
 # Introduce Deco Trait | automatic foward | fallback
-function check_size(M::AbstractDecoratorManifold, p)
-    return check_size(trait(M, p), M, p)
-end
-function check_size(t::NestedTrait, M::AbstractManifold, p)
-    return check_size(next_trait(t), M, p)
-end
+@trait_function check_size(M::AbstractDecoratorManifold, p)
 function check_size(::EmptyTrait, M::AbstractManifold, p)
     return invoke(check_size, Tuple{AbstractManifold,typeof(p)}, M, p)
 end
@@ -157,12 +149,7 @@ function check_size(::NestedTrait{IsEmbeddedManifold}, M::AbstractDecoratorManif
 end
 
 # Introduce Deco Trait | automatic foward | fallback
-function check_size(M::AbstractDecoratorManifold, p, X)
-    return check_size(trait(M, p), M, p, X)
-end
-function check_size(t::NestedTrait, M::AbstractManifold, p, X)
-    return check_size(next_trait(t), M, p, X)
-end
+@trait_function check_size(M::AbstractDecoratorManifold, p, X)
 function check_size(::EmptyTrait, M::AbstractManifold, p, X)
     return invoke(check_size, Tuple{AbstractManifold,typeof(p),typeof(X)}, M, p, X)
 end
@@ -172,10 +159,7 @@ function check_size(::NestedTrait{IsEmbeddedManifold}, M::AbstractDecoratorManif
 end
 
 # Introduce Deco Trait | automatic foward | fallback
-function embed(M::AbstractDecoratorManifold, p)
-    return embed(trait(M, p), M, p)
-end
-embed(t::NestedTrait, M::AbstractManifold, p) = embed(next_trait(t), M, p)
+@trait_function embed(M::AbstractDecoratorManifold, p)
 function embed(::EmptyTrait, M::AbstractManifold, p)
     return invoke(embed, Tuple{AbstractManifold,typeof(p)}, M, p)
 end
@@ -186,10 +170,7 @@ function embed(::NestedTrait{IsEmbeddedManifold}, M::AbstractDecoratorManifold, 
 end
 
 # Introduce Deco Trait | automatic foward | fallback
-function embed!(M::AbstractDecoratorManifold, q, p)
-    return embed!(trait(M, q, p), M, q, p)
-end
-embed!(t::NestedTrait, M::AbstractManifold, q, p) = embed!(next_trait(t), M, q, p)
+@trait_function embed!(M::AbstractDecoratorManifold, q, p)
 function embed!(::EmptyTrait, M::AbstractManifold, q, p)
     return invoke(embed!, Tuple{AbstractManifold,typeof(q),typeof(p)}, M, q, p)
 end
@@ -199,10 +180,7 @@ function embed!(::NestedTrait{IsEmbeddedManifold}, M::AbstractDecoratorManifold,
 end
 
 # Introduce Deco Trait | automatic foward | fallback
-function embed(M::AbstractDecoratorManifold, p, X)
-    return embed(trait(M, p, X), M, p, X)
-end
-embed(t::NestedTrait, M::AbstractManifold, p, X) = embed(next_trait(t), M, p, X)
+@trait_function embed(M::AbstractDecoratorManifold, p, X)
 function embed(::EmptyTrait, M::AbstractManifold, p, X)
     return invoke(embed, Tuple{AbstractManifold,typeof(p),typeof(X)}, M, p, X)
 end
@@ -213,10 +191,7 @@ function embed(::NestedTrait{IsEmbeddedManifold}, M::AbstractDecoratorManifold, 
 end
 
 # Introduce Deco Trait | automatic foward | fallback
-function embed!(M::AbstractDecoratorManifold, Y, p, X)
-    return embed!(trait(M, Y, p, X), M, Y, p, X)
-end
-embed!(t::NestedTrait, M::AbstractManifold, Y, p, X) = embed!(next_trait(t), M, Y, p, X)
+@trait_function embed!(M::AbstractDecoratorManifold, Y, p, X)
 function embed!(::EmptyTrait, M::AbstractManifold, Y, p, X)
     return invoke(embed!, Tuple{AbstractManifold,typeof(Y),typeof(p),typeof(X)}, M, Y, p, X)
 end
@@ -226,10 +201,7 @@ function embed!(::NestedTrait{IsEmbeddedManifold}, M::AbstractDecoratorManifold,
 end
 
 # Introduce Deco Trait | automatic foward | fallback
-function exp(M::AbstractDecoratorManifold, p, X)
-    return exp(trait(M, p, X), M, p, X)
-end
-exp(t::NestedTrait, M::AbstractManifold, p, X) = exp(next_trait(t), M, p, X)
+@trait_function exp(M::AbstractDecoratorManifold, p, X)
 function exp(::EmptyTrait, M::AbstractManifold, p, X)
     return invoke(exp, Tuple{AbstractManifold,typeof(p),typeof(X)}, M, p, X)
 end
@@ -239,10 +211,7 @@ function exp(::NestedTrait{IsEmbeddedManifold}, M::AbstractDecoratorManifold, p,
 end
 
 # Introduce Deco Trait | automatic foward | fallback
-function exp!(M::AbstractDecoratorManifold, q, p, X)
-    return exp!(trait(M, q, p, X), M, q, p, X)
-end
-exp!(t::NestedTrait, M::AbstractManifold, q, p, X) = exp!(next_trait(t), M, q, p, X)
+@trait_function exp!(M::AbstractDecoratorManifold, q, p, X)
 function exp!(::EmptyTrait, M::AbstractManifold, q, p, X)
     return invoke(exp!, Tuple{AbstractManifold,typeof(q),typeof(p),typeof(X)}, M, q, p, X)
 end
@@ -252,12 +221,7 @@ function exp!(::NestedTrait{IsEmbeddedManifold}, M::AbstractDecoratorManifold, q
 end
 
 # Introduce Deco Trait | automatic foward | fallback
-function inner(M::AbstractDecoratorManifold, p, X, Y)
-    return inner(trait(M, p, X, Y), M, p, X, Y)
-end
-function inner(t::NestedTrait, M::AbstractManifold, p, X, Y)
-    return inner(next_trait(t), M, p, X, Y)
-end
+@trait_function inner(M::AbstractDecoratorManifold, p, X, Y)
 function inner(::EmptyTrait, M::AbstractManifold, p, X, Y)
     return invoke(inner, Tuple{AbstractManifold,typeof(p),typeof(X),typeof(Y)}, M, p, X, Y)
 end
@@ -273,23 +237,12 @@ function inner(
 end
 
 # Introduce Deco Trait | automatic foward | fallback
-function inverse_retract(
+@trait_function inverse_retract(
     M::AbstractDecoratorManifold,
     p,
     q,
     m::AbstractInverseRetractionMethod = default_inverse_retraction_method(M),
 )
-    return inverse_retract(trait(M, p, q), M, p, q, m)
-end
-function inverse_retract(
-    t::NestedTrait,
-    M::AbstractManifold,
-    p,
-    q,
-    m::AbstractInverseRetractionMethod = default_inverse_retraction_method(M),
-)
-    return inverse_retract(next_trait(t), M, p, q, m)
-end
 function inverse_retract(
     ::EmptyTrait,
     M::AbstractManifold,
@@ -318,19 +271,7 @@ function inverse_retract(
 end
 
 # Introduce Deco Trait | automatic foward | fallback
-function inverse_retract!(M::AbstractDecoratorManifold, X, p, q)
-    return inverse_retract!(trait(M, X, p, q), M, X, p, q)
-end
-function inverse_retract!(
-    t::NestedTrait,
-    M::AbstractManifold,
-    X,
-    p,
-    q,
-    m::AbstractInverseRetractionMethod = default_inverse_retraction_method(M),
-)
-    return inverse_retract!(next_trait(t), M, X, p, q, m)
-end
+@trait_function inverse_retract!(M::AbstractDecoratorManifold, X, p, q)
 function inverse_retract!(
     ::EmptyTrait,
     M::AbstractManifold,
@@ -360,12 +301,7 @@ function inverse_retract!(
     return inverse_retract!(get_embedding(M), X, p, q, m)
 end
 
-function is_point(M::AbstractDecoratorManifold, p, te = false; kwargs...)
-    return is_point(trait(M, p), M, p, te; kwargs...)
-end
-function is_point(t::NestedTrait, M::AbstractManifold, p, te = false; kwargs...)
-    return is_point(next_trait(t), M, p, te; kwargs...)
-end
+@trait_function is_point(M::AbstractDecoratorManifold, p, te = false; kwargs...)
 function is_point(::EmptyTrait, M::AbstractManifold, p, te = false; kwargs...)
     return invoke(
         is_point,
@@ -387,12 +323,7 @@ function is_point(
     return is_point(get_embedding(M), p, throw_error; kwargs...)
 end
 
-function is_vector(M::AbstractDecoratorManifold, p, X, te = false; kwargs...)
-    return is_vector(trait(M, p, X), M, p, X, te; kwargs...)
-end
-function is_vector(t::NestedTrait, M::AbstractManifold, p, X, te = false; kwargs...)
-    return is_vector(next_trait(t), M, p, X, te; kwargs...)
-end
+@trait_function is_vector(M::AbstractDecoratorManifold, p, X, te = false; kwargs...)
 function is_vector(::EmptyTrait, M::AbstractManifold, p, X, te = false; kwargs...)
     return invoke(
         is_vector,
@@ -416,10 +347,7 @@ function is_vector(
     return is_vector(get_embedding(M), p, X, throw_error; kwargs...)
 end
 
-function norm(M::AbstractDecoratorManifold, p, X)
-    return norm(trait(M, p, X), M, p, X)
-end
-norm(t::NestedTrait, M::AbstractManifold, p, X) = norm(next_trait(t), M, p, X)
+@trait_function norm(M::AbstractDecoratorManifold, p, X)
 function norm(::EmptyTrait, M::AbstractManifold, p, X)
     return invoke(norm, Tuple{AbstractManifold,typeof(p),typeof(X)}, M, p, X)
 end
@@ -432,10 +360,7 @@ function norm(
     return norm(get_embedding(M), p, X)
 end
 
-function log(M::AbstractDecoratorManifold, p, q)
-    return log(trait(M, p, q), M, p, q)
-end
-log(t::NestedTrait, M::AbstractManifold, p, q) = log(next_trait(t), M, p, q)
+@trait_function log(M::AbstractDecoratorManifold, p, q)
 function log(::EmptyTrait, M::AbstractManifold, p, q)
     return invoke(log, Tuple{AbstractManifold,typeof(p),typeof(q)}, M, p, q)
 end
@@ -449,10 +374,7 @@ function log(
 end
 
 # Introduce Deco Trait | automatic foward | fallback
-function log!(M::AbstractDecoratorManifold, X, p, q)
-    return log!(trait(M, X, p, q), M, X, p, q)
-end
-log!(t::NestedTrait, M::AbstractManifold, q, p, X) = log!(next_trait(t), M, q, p, X)
+@trait_function log!(M::AbstractDecoratorManifold, X, p, q)
 function log!(::EmptyTrait, M::AbstractManifold, q, p, X)
     return invoke(log!, Tuple{AbstractManifold,typeof(X),typeof(p),typeof(q)}, M, X, p, q)
 end
@@ -467,37 +389,25 @@ function log!(
 end
 
 # Introduce Deco Trait | automatic foward | fallback
-function project(M::AbstractDecoratorManifold, p)
-    return project(trait(M, p), M, p)
-end
-project(t::NestedTrait, M::AbstractManifold, p) = project(next_trait(t), M, p)
+@trait_function project(M::AbstractDecoratorManifold, p)
 function project(::EmptyTrait, M::AbstractManifold, p)
     return invoke(project, Tuple{AbstractManifold,typeof(p)}, M, p)
 end
 
 # Introduce Deco Trait | automatic foward | fallback
-function project!(M::AbstractDecoratorManifold, q, p)
-    return project!(trait(M, q, p), M, q, p)
-end
-project!(t::NestedTrait, M::AbstractManifold, q, p) = project!(next_trait(t), M, q, p)
+@trait_function project!(M::AbstractDecoratorManifold, q, p)
 function project!(::EmptyTrait, M::AbstractManifold, q, p)
     return invoke(project!, Tuple{AbstractManifold,typeof(q),typeof(p)}, M, q, p)
 end
 
 # Introduce Deco Trait | automatic foward | fallback
-function project(M::AbstractDecoratorManifold, p, X)
-    return project(trait(M, p, X), M, p, X)
-end
-project(t::NestedTrait, M::AbstractManifold, p, X) = project(next_trait(t), M, p, X)
+@trait_function project(M::AbstractDecoratorManifold, p, X)
 function project(::EmptyTrait, M::AbstractManifold, p, X)
     return invoke(project, Tuple{AbstractManifold,typeof(p),typeof(X)}, M, p, X)
 end
 
 # Introduce Deco Trait | automatic foward | fallback
-function project!(M::AbstractDecoratorManifold, Y, p, X)
-    return project!(trait(M, Y, p, X), M, Y, p, X)
-end
-project!(t::NestedTrait, M::AbstractManifold, Y, p, X) = project!(next_trait(t), M, Y, p, X)
+@trait_function project!(M::AbstractDecoratorManifold, Y, p, X)
 function project!(::EmptyTrait, M::AbstractManifold, Y, p, X)
     return invoke(
         project!,
@@ -510,23 +420,12 @@ function project!(::EmptyTrait, M::AbstractManifold, Y, p, X)
 end
 
 # Introduce Deco Trait | automatic foward | fallback
-function retract(
+@trait_function retract(
     M::AbstractDecoratorManifold,
     p,
     X,
     m::AbstractRetractionMethod = default_retraction_method(M),
 )
-    return retract(trait(M, p, X, m), M, p, X, m)
-end
-function retract(
-    t::NestedTrait,
-    M::AbstractManifold,
-    p,
-    X,
-    m::AbstractRetractionMethod = default_retraction_method(M),
-)
-    return retract(next_trait(t), M, p, X, m)
-end
 function retract(
     ::EmptyTrait,
     M::AbstractManifold,
@@ -553,25 +452,13 @@ function retract(
     return retract(get_embedding(M), p, X, m)
 end
 
-function retract!(
+@trait_function retract!(
     M::AbstractDecoratorManifold,
     q,
     p,
     X,
     m::AbstractRetractionMethod = default_retraction_method(M),
 )
-    return retract!(trait(M, q, p, X), M, q, p, X, m)
-end
-function retract!(
-    t::NestedTrait,
-    M::AbstractManifold,
-    q,
-    p,
-    X,
-    m::AbstractRetractionMethod = default_retraction_method(M),
-)
-    return retract!(next_trait(t), M, q, p, X, m)
-end
 function retract!(
     ::EmptyTrait,
     M::AbstractManifold,
@@ -601,25 +488,13 @@ function retract!(
     return retract!(get_embedding(M), q, p, X, m)
 end
 
-function vector_transport_along(
+@trait_function vector_transport_along(
     M::AbstractDecoratorManifold,
     q,
     p,
     X,
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
-    return vector_transport_along(trait(M, q, p, X), M, q, p, X, m)
-end
-function vector_transport_along(
-    t::NestedTrait,
-    M::AbstractManifold,
-    q,
-    p,
-    X,
-    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
-)
-    return vector_transport_along(next_trait(t), M, q, p, X, m)
-end
 function vector_transport_along(
     ::EmptyTrait,
     M::AbstractManifold,
@@ -649,17 +524,7 @@ function vector_transport_along(
     return vector_transport_along(get_embedding(M), p, X, c, m)
 end
 
-function vector_transport_along!(
-    M::AbstractDecoratorManifold,
-    Y,
-    p,
-    X,
-    c,
-    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
-)
-    return vector_transport_along!(trait(M, Y, p, X, c, m), M, Y, p, X, c, m)
-end
-function vector_transport_along!(
+@trait_function vector_transport_along!(
     M::AbstractDecoratorManifold,
     Y,
     p,
@@ -667,26 +532,13 @@ function vector_transport_along!(
     c::AbstractVector,
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
-    return vector_transport_along!(trait(M, Y, p, X, c, m), M, Y, p, X, c, m)
-end
-function vector_transport_along!(
-    t::NestedTrait,
-    M::AbstractManifold,
-    Y,
-    p,
-    X,
-    c,
-    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
-)
-    return vector_transport_along!(next_trait(t), M, Y, p, X, c, m)
-end
 function vector_transport_along!(
     ::EmptyTrait,
     M::AbstractManifold,
     Y,
     p,
     X,
-    c,
+    c::AbstractVector,
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
     return invoke(
@@ -706,31 +558,19 @@ function vector_transport_along!(
     Y,
     p,
     X,
-    c,
+    c::AbstractVector,
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
     return vector_transport_along!(get_embedding(M), Y, p, X, c, m)
 end
 
-function vector_transport_direction(
+@trait_function vector_transport_direction(
     M::AbstractDecoratorManifold,
     p,
     X,
     d,
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
-    return vector_transport_direction(trait(M, p, X, d, m), M, p, X, d, m)
-end
-function vector_transport_direction(
-    t::NestedTrait,
-    M::AbstractManifold,
-    p,
-    X,
-    d,
-    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
-)
-    return vector_transport_direction(next_trait(t), M, p, X, d, m)
-end
 function vector_transport_direction(
     ::EmptyTrait,
     M::AbstractManifold,
@@ -760,7 +600,7 @@ function vector_transport_direction(
     return vector_transport_direction(get_embedding(M), p, X, d, m)
 end
 
-function vector_transport_direction!(
+@trait_function vector_transport_direction!(
     M::AbstractDecoratorManifold,
     Y,
     p,
@@ -768,19 +608,6 @@ function vector_transport_direction!(
     d,
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
-    return vector_transport_direction!(trait(M, Y, p, X, d, m), M, Y, p, X, d, m)
-end
-function vector_transport_direction!(
-    t::NestedTrait,
-    M::AbstractManifold,
-    Y,
-    p,
-    X,
-    d,
-    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
-)
-    return vector_transport_direction!(next_trait(t), M, Y, p, X, d, m)
-end
 function vector_transport_direction!(
     ::EmptyTrait,
     M::AbstractManifold,
@@ -813,25 +640,13 @@ function vector_transport_direction!(
     return vector_transport_direction!(get_embedding(M), Y, p, X, d, m)
 end
 
-function vector_transport_to(
+@trait_function vector_transport_to(
     M::AbstractDecoratorManifold,
     p,
     X,
     q,
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
-    return vector_transport_to(trait(M, p, X, q, m), M, p, X, q, m)
-end
-function vector_transport_to(
-    t::NestedTrait,
-    M::AbstractManifold,
-    p,
-    X,
-    q,
-    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
-)
-    return vector_transport_to(next_trait(t), M, p, X, q, m)
-end
 function vector_transport_to(
     ::EmptyTrait,
     M::AbstractManifold,
@@ -861,7 +676,7 @@ function vector_transport_to(
     return vector_transport_to(get_embedding(M), p, X, q, m)
 end
 
-function vector_transport_to!(
+@trait_function vector_transport_to!(
     M::AbstractDecoratorManifold,
     Y,
     p,
@@ -869,19 +684,6 @@ function vector_transport_to!(
     q,
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
-    return vector_transport_to!(trait(M, Y, p, X, q, m), M, Y, p, X, q, m)
-end
-function vector_transport_to!(
-    t::NestedTrait,
-    M::AbstractManifold,
-    Y,
-    p,
-    X,
-    q,
-    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
-)
-    return vector_transport_to!(next_trait(t), M, Y, p, X, q, m)
-end
 function vector_transport_to!(
     ::EmptyTrait,
     M::AbstractManifold,
