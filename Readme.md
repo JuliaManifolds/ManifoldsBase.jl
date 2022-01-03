@@ -10,10 +10,15 @@
 In Julia you can install this package by typing
 
 ```julia
-] add Manopt
+] add ManifoldsBase
 ```
 
 in the Julia REPL.
+
+Since this package provides an interface, you probably either want to add it as a dependency to your project/package to work on manifold generically or implement a new manifold.
+A package that (only) depends on `ManifoldsBase.jl`, see [Manopt.jl](https://manoptjl.org/stable/), which implements optimization algorithms on manifolds using this interface, i.e. they can be used with any manifold based on `ManifoldsBase.jl`. A library of manifolds implemented using this interface is provided see [Manifolds.jl](https://juliamanifolds.github.io/Manifolds.jl/stable/).
+
+Your package is using `ManifoldsBase`? Give us a note and we add you here.
 
 ## Citation
 
