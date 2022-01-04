@@ -34,9 +34,9 @@ These three layers are described in more detail in the following. The main motiv
 
 THe highest layer for convenience of decorators.
 A usual scheme is, that a manifold might assume several things implicitly, for example the default implementation of the sphere $\mathbb S^n$ using unit vectors in $\mathbb R^{n+1}$.
-The embedding can be explicitly used to avoid reimplementations – the inner product can be “passed on” to its embedding.
+The embedding can be explicitly used to avoid re-implementations – the inner product can be “passed on” to its embedding.
 
-To do so, we “decorate” the manifold by making it an [`AbstractDecoratorManifold`](@ref) and activating the right traits see [the example](@ref example).
+To do so, we “decorate” the manifold by making it an [`AbstractDecoratorManifold`](@ref) and activating the right traits see [the example](@ref manifold-tutorial).
 
 The explicit case of the [`EmbeddedManifold`](@ref) can be used to distinguish different embeddings of a manifold, but also their dispatch (onto the manifold or its embedding, depending on the type of embedding) happens here.
 

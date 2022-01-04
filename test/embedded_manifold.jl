@@ -24,7 +24,6 @@ struct AnotherPlaneManifold <: AbstractDecoratorManifold{ℝ} end
 ManifoldsBase.get_embedding(::AnotherPlaneManifold) = ManifoldsBase.DefaultManifold(3)
 ManifoldsBase.base_manifold(::AnotherPlaneManifold) = ManifoldsBase.DefaultManifold(2)
 
-is_isometric_embedded_manifold(::Type{<:AnotherPlaneManifold}) = true
 function ManifoldsBase.active_traits(::AnotherPlaneManifold, args...)
     return ManifoldsBase.merge_traits(ManifoldsBase.IsIsometricEmbeddedManifold())
 end

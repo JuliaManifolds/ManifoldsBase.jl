@@ -9,9 +9,10 @@ makedocs(
         "Home" => "index.md",
         "How to write a manifold" => "example.md",
         "Design principles" => "design.md",
-        "The manifold" => "manifold.md",
+        "The manifold type" => "manifold_type.md",
         "Functions on Maniolds" => [
             "Basic functions" => "functions.md",
+            "Projections" => "projections.md",
             "Retractions" => "retractions.md",
             "Vector Transports" => "vector_transports.md",
         ],

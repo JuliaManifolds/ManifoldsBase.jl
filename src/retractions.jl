@@ -43,7 +43,7 @@ struct EmbeddedRetraction{T<:AbstractRetractionMethod} <: AbstractRetractionMeth
 end
 
 """
-    ExponentialRetraction
+    ExponentialRetraction <: AbstractRetractionMethod
 
 Retraction using the exponential map.
 """
@@ -62,8 +62,6 @@ equation
 
 where ``Γ^k_{ij}`` are the Christoffel symbols of the second kind, and
 the Einstein summation convention is assumed.
-
-See [`solve_exp_ode`](@ref) for further details.
 
 # Constructor
 
@@ -178,7 +176,7 @@ end
 
 
 """
-    LogarithmicInverseRetraction
+    LogarithmicInverseRetraction <: AbstractInverseRetractionMethod
 
 Inverse retraction using the [`log`](@ref)arithmic map.
 """
@@ -325,7 +323,13 @@ end
 function _inverse_retract!(M::AbstractManifold, X, p, q, m::NLSolveInverseRetraction)
     return inverse_retract_nlsolve!(M, X, p, q, m)
 end
-# ToDo docu
+"""
+    inverse_retract_embedded!(M::AbstractManifold, X, p, q, m)
+
+computes the mutating variant of the [`EmbeddedInverseRetraction`](@ref) using
+the [`AbstractInverseRetractionMethod`](@ref) `m` in the embedding (see [`get_embedding`](@ref))
+and projecting the result back.
+"""
 function inverse_retract_embedded!(M::AbstractManifold, X, p, q, m)
     return project!(
         M,
@@ -339,11 +343,36 @@ function inverse_retract_embedded!(M::AbstractManifold, X, p, q, m)
         ),
     )
 end
-function inverse_retract_softmax! end
+"""
+    inverse_retract_qr!(M::AbstractManifold, X, p, q)
+
+computes the mutating variant of the [`QRInverseRetraction`](@ref).
+"""
 function inverse_retract_qr! end
+"""
+    inverse_retract_project!(M::AbstractManifold, X, p, q)
+
+computes the mutating variant of the [`ProjectionInverseRetraction`](@ref).
+"""
 function inverse_retract_project! end
+"""
+    inverse_retract_polar!(M::AbstractManifold, X, p, q)
+
+computes the mutating variant of the [`PolarInverseRetraction`](@ref).
+"""
 function inverse_retract_polar! end
+"""
+    inverse_retract_nlsolve!(M::AbstractManifold, X, p, q, m)
+
+computes the mutating variant of the [`NLSolveInverseRetraction`](@ref) `m`.
+"""
 function inverse_retract_nlsolve! end
+"""
+    inverse_retract_softmax!(M::AbstractManifold, X, p, q)
+
+computes the mutating variant of the [`SoftmaxInverseRetraction`](@ref).
+"""
+function inverse_retract_softmax! end
 
 
 """
@@ -368,132 +397,95 @@ function inverse_retract(
 )
     return _inverse_retract(M, p, q, m)
 end
-_inverse_retract(M::AbstractManifold, p, q, ::LogarithmicInverseRetraction) = log(M, p, q)
 function _inverse_retract(M::AbstractManifold, p, q, m::EmbeddedInverseRetraction)
     return inverse_retract_embedded(M, p, q, m.inverse_retraction)
 end
-function inverse_retract_embedded(M::AbstractManifold, p, q, m)
-    X = allocate_result(M, inverse_retract, p, q)
-    return inverse_retract_embedded!(M, X, p, q, m)
+_inverse_retract(M::AbstractManifold, p, q, ::LogarithmicInverseRetraction) = log(M, p, q)
+function _inverse_retract(M::AbstractManifold, p, q, m::NLSolveInverseRetraction)
+    return inverse_retract_nlsolve(M, p, q, m)
 end
 function _inverse_retract(M::AbstractManifold, p, q, ::PolarInverseRetraction)
     return inverse_retract_polar(M, p, q)
 end
-function inverse_retract_polar(M::AbstractManifold, p, q)
-    X = allocate_result(M, inverse_retract, p, q)
-    return inverse_retract_polar!(M, X, p, q)
-end
 function _inverse_retract(M::AbstractManifold, p, q, ::ProjectionInverseRetraction)
     return inverse_retract_project(M, p, q)
-end
-function inverse_retract_project(M::AbstractManifold, p, q)
-    X = allocate_result(M, inverse_retract, p, q)
-    return inverse_retract_project!(M, X, p, q)
 end
 function _inverse_retract(M::AbstractManifold, p, q, ::QRInverseRetraction)
     return inverse_retract_qr(M, p, q)
 end
-function inverse_retract_qr(M::AbstractManifold, p, q)
-    X = allocate_result(M, inverse_retract, p, q)
-    return inverse_retract_qr!(M, X, p, q)
+function _inverse_retract(M::AbstractManifold, p, q, ::SoftmaxInverseRetraction)
+    return inverse_retract_softmax(M, p, q)
 end
-function _inverse_retract(M::AbstractManifold, p, q, m::NLSolveInverseRetraction)
-    return inverse_retract_nlsolve(M, p, q, m)
-end
-function inverse_retract_nlsolve(M::AbstractManifold, p, q, m)
-    X = allocate_result(M, inverse_retract, p, q)
-    return inverse_retract_nlsolve!(M, X, p, q, m)
-end
-
-@doc raw"""
-    retract(M::AbstractManifold, p, X, method::AbstractRetractionMethod=default_retraction_method(M))
-    retract(M::AbstractManifold, p, X, t::Real=1, method::AbstractRetractionMethod=default_retraction_method(M))
-
-Compute a retraction, a cheaper, approximate version of the [`exp`](@ref)onential map,
-from `p` into direction `X`, scaled by `t`, on the [`AbstractManifold`](@ref) `M`.
-
-A retraction ``\operatorname{retr}_p: T_p\mathcal M → \mathcal M`` is a smooth map that fulfills
-
-1. ``\operatorname{retr}_p(0) = p``
-2. ``D\operatorname{retr}_p(0): T_p\mathcal M \to T_p\mathcal M`` is the identity map, i.e. ``D\operatorname{retr}_p(0)[X]=X``,
-
-where ``D\operatorname{retr}_p`` denotes the differential of the retraction
-
-The retraction is called of second order if for all ``X`` the curves ``c(t) = R_p(tX)``
-have a zero acceleration at ``t=0``, i.e. ``c''(0) = 0``.
-
-Retraction method can be specified by the last argument, defaulting to
-[`default_retraction_method`](@ref)`(M)`. For further available retractions see the documentation of respective manifolds.
-
-Locally, the retraction is invertible. For the inverse operation, see [`inverse_retract`](@ref).
 """
-function retract(
-    M::AbstractManifold,
-    p,
-    X,
-    m::AbstractRetractionMethod = default_retraction_method(M),
-)
-    return _retract(M, p, X, m)
-end
-function retract(
-    M::AbstractManifold,
-    p,
-    X,
-    t::Real,
-    m::AbstractRetractionMethod = default_retraction_method(M),
-)
-    return _retract(M, p, t * X, m)
-end
-function _retract(M::AbstractManifold, p, X, m::EmbeddedRetraction)
-    return retract_embedding(M, p, X, m.retraction)
-end
-_retract(M::AbstractManifold, p, X, ::ExponentialRetraction) = exp(M, p, X)
-function _retract(M::AbstractManifold, p, X, m::ODEExponentialRetraction)
-    return retract_exp_ode(M, p, X, m.retraction, m.basis)
-end
-_retract(M::AbstractManifold, p, X, ::PolarRetraction) = retract_polar(M, p, X)
-_retract(M::AbstractManifold, p, X, ::ProjectionRetraction) = retract_project(M, p, X)
-_retract(M::AbstractManifold, p, X, ::QRRetraction) = retract_qr(M, p, X)
-_retract(M::AbstractManifold, p, X, ::SoftmaxRetraction) = retract_softmax(M, p, X)
-_retract(M::AbstractManifold, p, X, ::CayleyRetraction) = retract_pade(M, p, X, 1)
-function _retract(M::AbstractManifold, p, X, ::PadeRetraction{n}) where {n}
-    return retract_pade(M, p, X, n)
-end
-function retract_embedding(M::AbstractManifold, p, X, m)
+    inverse_retract_embedded(M::AbstractManifold, p, q, m)
+
+computes the allocating variant of the [`EmbeddedInverseRetraction`](@ref) using
+the [`AbstractInverseRetractionMethod`](@ref) `m` in the embedding (see [`get_embedding`](@ref))
+and projecting the result back.
+"""
+function inverse_retract_embedded(M::AbstractManifold, p, q, m)
     return project(
         M,
-        retract(
+        p,
+        inverse_retract(
             get_embedding(M),
             embed(get_embedding(M), p),
-            embed(get_embedding(M), p, X),
+            embed(get_embedding(M), q),
             m,
         ),
     )
 end
-function retract_polar(M::AbstractManifold, p, X)
-    q = allocate_result(M, retract, p, X)
-    return retract_polar!(M, q, p, X)
+"""
+    inverse_retract_polar(M::AbstractManifold, p, q)
+
+computes the allocating variant of the [`PolarInverseRetraction`](@ref),
+which by default allocates and calls [`inverse_retract_polar!`](@ref).
+"""
+function inverse_retract_polar(M::AbstractManifold, p, q)
+    X = allocate_result(M, inverse_retract, p, q)
+    return inverse_retract_polar!(M, X, p, q)
 end
-function retract_project(M::AbstractManifold, p, X)
-    q = allocate_result(M, retract, p, X)
-    return retract_project!(M, q, p, X)
+"""
+    inverse_retract_project(M::AbstractManifold, p, q)
+
+computes the allocating variant of the [`ProjectionInverseRetraction`](@ref),
+which by default allocates and calls [`inverse_retract_project!`](@ref).
+"""
+function inverse_retract_project(M::AbstractManifold, p, q)
+    X = allocate_result(M, inverse_retract, p, q)
+    return inverse_retract_project!(M, X, p, q)
 end
-function retract_qr(M::AbstractManifold, p, X)
-    q = allocate_result(M, retract, p, X)
-    return retract_qr!(M, q, p, X)
+"""
+    inverse_retract_qr(M::AbstractManifold, p, q)
+
+computes the allocating variant of the [`QRInverseRetraction`](@ref),
+which by default allocates and calls [`inverse_retract_qr!`](@ref).
+"""
+function inverse_retract_qr(M::AbstractManifold, p, q)
+    X = allocate_result(M, inverse_retract, p, q)
+    return inverse_retract_qr!(M, X, p, q)
 end
-function retract_exp_ode(M::AbstractManifold, p, X, m, B)
-    q = allocate_result(M, retract, p, X)
-    return retract_exp_ode!(M, q, p, X, m, B)
+"""
+    inverse_retract_nlsolve(M::AbstractManifold, p, q, m)
+
+computes the allocating variant of the [`NLSolveInverseRetraction`](@ref) `m`,
+which by default allocates and calls [`inverse_retract_nlsolve!`](@ref).
+"""
+function inverse_retract_nlsolve(M::AbstractManifold, p, q, m)
+    X = allocate_result(M, inverse_retract, p, q)
+    return inverse_retract_nlsolve!(M, X, p, q, m)
 end
-function retract_softmax(M::AbstractManifold, p, X)
-    q = allocate_result(M, retract, p, X)
-    return retract_softmax!(M, q, p, X)
+"""
+    inverse_retract_softmax(M::AbstractManifold, p, q)
+
+computes the allocating variant of the [`SoftmaxInverseRetraction`](@ref),
+which by default allocates and calls [`inverse_retract_softmax!`](@ref).
+"""
+function inverse_retract_softmax(M::AbstractManifold, p, q)
+    X = allocate_result(M, inverse_retract, p, q)
+    return inverse_retract_nlsolve!(M, X, p, q, m)
 end
-function retract_pade(M::AbstractManifold, p, X, n)
-    q = allocate_result(M, retract, p, X)
-    return retract_pade!(M, q, p, X, n)
-end
+
 
 """
     retract!(M::AbstractManifold, q, p, X)
@@ -549,7 +541,13 @@ function _retract!(M::AbstractManifold, q, p, X, ::PadeRetraction{n}) where {n}
     return retract_pade!(M, q, p, X, n)
 end
 
-# ToDo - docu
+"""
+    retract_embedded!(M::AbstractManifold, X, p, q, m)
+
+computes the mutating variant of the [`EmbeddedRetraction`](@ref) using
+the [`AbstractRetractionMethod`](@ref) `m` in the embedding (see [`get_embedding`](@ref))
+and projecting the result back.
+"""
 function retract_embedding!(M::AbstractManifold, q, p, X, m)
     return project!(
         M,
@@ -562,12 +560,175 @@ function retract_embedding!(M::AbstractManifold, q, p, X, m)
         ),
     )
 end
-function retract_pade! end
-function retract_project! end
-function retract_polar! end
-function retract_qr! end
+"""
+    retract_exp_ode!(M::AbstractManifold, q, p, X, m, B)
+
+computes the mutating variant of the [`ODEExponentialRetraction`](@ref)`(m, B)`.
+"""
 function retract_exp_ode! end
+"""
+    retract_pade!(M::AbstractManifold, q, p, n)
+
+computes the mutating variant of the [`PadeRetraction`](@ref)`(n)`.
+"""
+function retract_pade! end
+"""
+    retract_project!(M::AbstractManifold, q, p, X)
+
+computes the mutating variant of the [`ProjectionRetraction`](@ref).
+"""
+function retract_project! end
+"""
+    retract_polar!(M::AbstractManifold, q, p, X)
+
+computes the mutating variant of the [`PolarRetraction`](@ref).
+"""
+function retract_polar! end
+"""
+    retract_qr!(M::AbstractManifold, q, p, X)
+
+computes the mutating variant of the [`QRRetraction`](@ref).
+"""
+function retract_qr! end
+"""
+    retract_softmax!(M::AbstractManifold, q, p, X)
+
+computes the mutating variant of the [`SoftmaxRetraction`](@ref).
+"""
 function retract_softmax! end
+
+@doc raw"""
+    retract(M::AbstractManifold, p, X, method::AbstractRetractionMethod=default_retraction_method(M))
+    retract(M::AbstractManifold, p, X, t::Real=1, method::AbstractRetractionMethod=default_retraction_method(M))
+
+Compute a retraction, a cheaper, approximate version of the [`exp`](@ref)onential map,
+from `p` into direction `X`, scaled by `t`, on the [`AbstractManifold`](@ref) `M`.
+
+A retraction ``\operatorname{retr}_p: T_p\mathcal M → \mathcal M`` is a smooth map that fulfills
+
+1. ``\operatorname{retr}_p(0) = p``
+2. ``D\operatorname{retr}_p(0): T_p\mathcal M \to T_p\mathcal M`` is the identity map, i.e. ``D\operatorname{retr}_p(0)[X]=X``,
+
+where ``D\operatorname{retr}_p`` denotes the differential of the retraction
+
+The retraction is called of second order if for all ``X`` the curves ``c(t) = R_p(tX)``
+have a zero acceleration at ``t=0``, i.e. ``c''(0) = 0``.
+
+Retraction method can be specified by the last argument, defaulting to
+[`default_retraction_method`](@ref)`(M)`. For further available retractions see the documentation of respective manifolds.
+
+Locally, the retraction is invertible. For the inverse operation, see [`inverse_retract`](@ref).
+"""
+function retract(
+    M::AbstractManifold,
+    p,
+    X,
+    m::AbstractRetractionMethod = default_retraction_method(M),
+)
+    return _retract(M, p, X, m)
+end
+function retract(
+    M::AbstractManifold,
+    p,
+    X,
+    t::Real,
+    m::AbstractRetractionMethod = default_retraction_method(M),
+)
+    return _retract(M, p, t * X, m)
+end
+function _retract(M::AbstractManifold, p, X, m::EmbeddedRetraction)
+    return retract_embedding(M, p, X, m.retraction)
+end
+_retract(M::AbstractManifold, p, X, ::ExponentialRetraction) = exp(M, p, X)
+function _retract(M::AbstractManifold, p, X, m::ODEExponentialRetraction)
+    return retract_exp_ode(M, p, X, m.retraction, m.basis)
+end
+_retract(M::AbstractManifold, p, X, ::PolarRetraction) = retract_polar(M, p, X)
+_retract(M::AbstractManifold, p, X, ::ProjectionRetraction) = retract_project(M, p, X)
+_retract(M::AbstractManifold, p, X, ::QRRetraction) = retract_qr(M, p, X)
+_retract(M::AbstractManifold, p, X, ::SoftmaxRetraction) = retract_softmax(M, p, X)
+_retract(M::AbstractManifold, p, X, ::CayleyRetraction) = retract_pade(M, p, X, 1)
+function _retract(M::AbstractManifold, p, X, ::PadeRetraction{n}) where {n}
+    return retract_pade(M, p, X, n)
+end
+"""
+    retract_embedded(M::AbstractManifold, p, X, m)
+
+computes the allocating variant of the [`EmbeddedRetraction`](@ref) using
+the [`AbstractRetractionMethod`](@ref) `m` in the embedding (see [`get_embedding`](@ref))
+and projecting the result back.
+"""
+function retract_embedding(M::AbstractManifold, p, X, m)
+    return project(
+        M,
+        retract(
+            get_embedding(M),
+            embed(get_embedding(M), p),
+            embed(get_embedding(M), p, X),
+            m,
+        ),
+    )
+end
+"""
+    retract_polar(M::AbstractManifold, p, q)
+
+computes the allocating variant of the [`PolarRetraction`](@ref),
+which by default allocates and calls [`retract_polar!`](@ref).
+"""
+function retract_polar(M::AbstractManifold, p, X)
+    q = allocate_result(M, retract, p, X)
+    return retract_polar!(M, q, p, X)
+end
+"""
+    retract_polar(M::AbstractManifold, p, q)
+
+computes the allocating variant of the [`PolarRetraction`](@ref),
+which by default allocates and calls [`retract_polar!`](@ref).
+"""
+function retract_project(M::AbstractManifold, p, X)
+    q = allocate_result(M, retract, p, X)
+    return retract_project!(M, q, p, X)
+end
+"""
+    retract_polar(M::AbstractManifold, p, q)
+
+computes the allocating variant of the [`PolarRetraction`](@ref),
+which by default allocates and calls [`retract_polar!`](@ref).
+"""
+function retract_qr(M::AbstractManifold, p, X)
+    q = allocate_result(M, retract, p, X)
+    return retract_qr!(M, q, p, X)
+end
+"""
+    retract_polar(M::AbstractManifold, p, q, m, B)
+
+computes the allocating variant of the [`EmbeddedRetraction`](@ref)`(m,B)`,
+which by default allocates and calls [`retract_exp_ode!`](@ref).
+"""
+function retract_exp_ode(M::AbstractManifold, p, X, m, B)
+    q = allocate_result(M, retract, p, X)
+    return retract_exp_ode!(M, q, p, X, m, B)
+end
+"""
+    retract_softmax(M::AbstractManifold, p, q)
+
+computes the allocating variant of the [`SoftmaxRetraction`](@ref),
+which by default allocates and calls [`retract_softmax!`](@ref).
+"""
+function retract_softmax(M::AbstractManifold, p, X)
+    q = allocate_result(M, retract, p, X)
+    return retract_softmax!(M, q, p, X)
+end
+"""
+    retract_pade(M::AbstractManifold, p, q)
+
+computes the allocating variant of the [`PadeRetraction`](@ref)`(n)`,
+which by default allocates and calls [`retract_pade!`](@ref).
+"""
+function retract_pade(M::AbstractManifold, p, X, n)
+    q = allocate_result(M, retract, p, X)
+    return retract_pade!(M, q, p, X, n)
+end
 
 Base.show(io::IO, ::CayleyRetraction) = print(io, "CayleyRetraction()")
 Base.show(io::IO, ::PadeRetraction{m}) where {m} = print(io, "PadeRetraction($(m))")

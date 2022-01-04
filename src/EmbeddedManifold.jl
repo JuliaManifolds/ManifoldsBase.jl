@@ -4,7 +4,7 @@
 A type to represent an explicit embedding of a [`AbstractManifold`](@ref) `M` of type `MT` embedded
 into a manifold `N` of type `NT`.
 By default, an embedded manifold is set to be embedded, but neither isometrically embedded
-nor a submanifold, see [`is_isometric_embedded_manifold`](@ref) and [`is_embedded_submanifold`](@ref).
+nor a submanifold.
 
 !!! note
     This type is not required if a manifold `M` is to be embedded in one specific manifold `N`.

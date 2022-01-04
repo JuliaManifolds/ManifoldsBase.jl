@@ -67,22 +67,8 @@ end
 @doc raw"""
     ParallelTransport <: AbstractVectorTransportMethod
 
-Specify to use parallel transport vector transport method.
-
-To be precise let ``c(t)`` be a curve depending on the method
-
-* the (assumed to be unique) geodesic ``c(t) = γ_{p,q}(t)`` from ``γ_{p,q}(0)=p`` to ``γ_{p,q}(1)=q`` for [`vector_transport_to`](@ref) ``\mathcal P_{q\gets p}Y``
-* the unique geodesic ``c(t)=γ_{p,X}(t)`` from ``γ_{p,X}(0)=p`` into direction ``\dot γ_{p,X}(0)=X`` for [`vector_transport_direction`](@ref) ``\mathcal P_{p,X}Y``
-* a given curve ``c(0)=p`` for [`vector_transport_along`](@ref) ``\mathcal P^cY``
-
-In these cases ``Y\in T_p\mathcal M`` is the vector that we would like to transport from
-the tangent space at ``p=c(0)`` to the tangent space at ``c(1)``.
-
-Let ``Z\colon [0,1] \to T\mathcal M``, ``Z(t)\in T_{c(t)}\mathcal M`` be a smooth vector field
-along the curve ``c`` with ``Z(0) = Y``, such that ``Z`` is _parallel_, i.e.
-its covariant derivative ``\frac{\mathrm{D}}{\mathrm{d}t}Z`` is zero. Note that such a ``Z`` always exists and is unique.
-
-Then the parallel transport is given by ``Z(1)``.
+Compute the vector transport by parallel transport, see
+[`parallel_transport_to`](@ref)
 """
 struct ParallelTransport <: AbstractVectorTransportMethod end
 
@@ -441,10 +427,6 @@ end
 function _vector_transport_along(M::AbstractManifold, p, X, c, ::ParallelTransport)
     return parallel_transport_along(M, p, X, c)
 end
-function parallel_transport_along(M::AbstractManifold, p, X, c)
-    Y = allocate_result(M, vector_transport_along, X, p)
-    return parallel_transport_along!(M, Y, p, X, c)
-end
 function _vector_transport_along(
     M::AbstractManifold,
     p,
@@ -495,7 +477,6 @@ end
 function _vector_transport_along!(M::AbstractManifold, Y, p, X, c, ::ParallelTransport)
     return parallel_transport_along!(M, Y, p, X, c)
 end
-function parallel_transport_along! end
 function _vector_transport_along!(
     M::AbstractManifold,
     Y,
@@ -687,7 +668,20 @@ function vector_transport_direction(
     d,
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
-    return vector_transport_to(M, p, X, retract(M, p, d), m)
+    return _vector_transport_direction(M, p, X, d, m)
+end
+
+function _vector_transport_direction(
+    M::AbstractManifold,
+    p,
+    X,
+    d,
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
+)
+    return vector_transport_to(M, p, X, exp(M, p, d), m)
+end
+function _vector_transport_direction(M::AbstractManifold, p, X, d, ::ParallelTransport)
+    return parallel_transport_direction(M, p, X, d)
 end
 
 
@@ -706,9 +700,24 @@ function vector_transport_direction!(
     p,
     X,
     d,
-    method::AbstractVectorTransportMethod = default_vector_transport_method(M),
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
-    return vector_transport_to!(M, Y, p, X, retract(M, p, d), method)
+    return _vector_transport_direction!(M, Y, p, X, d, m)
+end
+
+
+function _vector_transport_direction!(
+    M::AbstractManifold,
+    Y,
+    p,
+    X,
+    d,
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
+)
+    return vector_transport_to!(M, Y, p, X, exp(M, p, d), m)
+end
+function _vector_transport_direction!(M::AbstractManifold, Y, p, X, d, ::ParallelTransport)
+    return parallel_transport_direction!(M, Y, p, X, d)
 end
 
 """
@@ -731,10 +740,6 @@ function vector_transport_to(
 end
 function _vector_transport_to(M::AbstractManifold, p, X, q, ::ParallelTransport)
     return parallel_transport_to(M, p, X, q)
-end
-function parallel_transport_to(M::AbstractManifold, p, X, q)
-    Y = allocate_result(M, vector_transport_to, X, p)
-    return parallel_transport_to!(M, Y, p, X, q)
 end
 function _vector_transport_to(
     M::AbstractManifold,
@@ -779,7 +784,6 @@ end
 function _vector_transport_to!(M::AbstractManifold, Y, p, X, q, ::ParallelTransport)
     return parallel_transport_to!(M, Y, p, X, q)
 end
-function parallel_transport_to! end
 function _vector_transport_to!(
     M::AbstractManifold,
     Y,

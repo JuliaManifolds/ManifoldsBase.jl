@@ -3,7 +3,7 @@
 While the interface `ManifoldsBase.jl` does not cover concrete manifolds, it provides a few
 helpers to build or create manifolds based on existing manifolds
 
-## Abstract Power Manifold
+## (Abstract) Power Manifold
 
 ```@autodocs
 Modules = [ManifoldsBase]

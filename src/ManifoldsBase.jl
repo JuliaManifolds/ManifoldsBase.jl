@@ -112,7 +112,7 @@ manifold for vector bundles or power manifolds. The optional parameter `depth` c
 to remove only the first `depth` many decorators and return the [`AbstractManifold`](@ref) from that
 level, whether its decorated or not. Any negative value deactivates this depth limit.
 """
-base_manifold(M::AbstractManifold, depth::Val = Val(-1)) = M
+base_manifold(M::AbstractManifold, ::Val = Val(-1)) = M
 
 """
     check_point(M::AbstractManifold, p; kwargs...) -> Union{Nothing,String}
@@ -545,6 +545,7 @@ function zero_vector(M::AbstractManifold, p)
     return X
 end
 include("errors.jl")
+include("parallel_transport.jl")
 include("vector_transport.jl")
 include("vector_spaces.jl")
 include("point_vector_fallbacks.jl")
@@ -641,8 +642,6 @@ export allocate,
     isapprox,
     is_point,
     is_vector,
-    is_isometric_embedded_manifold,
-    is_embedded_manifold,
     isempty,
     length,
     log,
@@ -657,6 +656,8 @@ export allocate,
     power_dimensions,
     parallel_transport_along,
     parallel_transport_along!,
+    parallel_transport_direction,
+    parallel_transport_direction!,
     parallel_transport_to,
     parallel_transport_to!,
     project,

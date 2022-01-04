@@ -28,24 +28,26 @@ struct IsEmbeddedManifold <: AbstractTrait end
 """
     IsIsometricManifoldEmbeddedManifold <: AbstractTrait
 
-Determine whether an [`AbstractDecoratorManifold`](@ref) `M` is an isometrically embedded manifold.
-To activate this for your manifold, set `is_isometric_embedded_manifold` for your manifold type to true.
+A Trait to determine whether an [`AbstractDecoratorManifold`](@ref) `M` is
+an isometrically embedded manifold.
+It is a special case of the [`IsEmbeddedManifold`](@ref) trait, i.e. it has all properties of this trait.
 
-Here, for example [`inner`](@ref) and [`norm`](@ref) are passed to the embedding
+Here, additionally, netric related functions like [`inner`](@ref) and [`norm`](@ref) are passed to the embedding
 """
 struct IsIsometricEmbeddedManifold <: AbstractTrait end
 
 parent_trait(::IsIsometricEmbeddedManifold) = IsEmbeddedManifold()
 
 """
-    IsEmbeddedSubmanifold{M}
-    is_embedded_submanifold(M::Type{<:AbstractDecoratorManifold})
+    IsEmbeddedSubmanifold <: AbstractTrait
 
-Determine whether an [`AbstractDecoratorManifold`](@ref) `M` is an embedded submanifold.
-It is a special case of an [`IsIsometricEmbeddedManifold`](@ref).
+A trait to determine whether an [`AbstractDecoratorManifold`](@ref) `M` is an embedded submanifold.
+It is a special case of the [`IsIsometricEmbeddedManifold`](@ref) trait, i.e. it has all properties of
+this trait.
 
-Here, additionally, all retraction, inverse retractions and vectors transports, especially
-[`exp`](@ref), [`log`](@ref), and [`parallel_transport_to`](@ref) are passed to the embedding.
+In this trait, additionally to the isometric embedded manifold, all retractions, inverse retractions,
+and vectors transports, especially [`exp`](@ref), [`log`](@ref), and [`parallel_transport_to`](@ref)
+are passed to the embedding.
 """
 struct IsEmbeddedSubmanifoldManifold <: AbstractTrait end
 

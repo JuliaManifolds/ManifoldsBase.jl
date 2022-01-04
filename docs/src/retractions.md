@@ -10,7 +10,11 @@ The following figure compares the exponential map [`exp`](@ref)`(M, p, X)` on th
 Modules = [ManifoldsBase]
 Pages = ["retractions.jl"]
 Order = [:function]
+Private = false
+Public = true
 ```
+
+## Types of Retractions
 
 To distinguish different types of retractions, the last argument of the (inverse) retraction
 specifies a type. The following ones are available.
@@ -19,4 +23,16 @@ specifies a type. The following ones are available.
 Modules = [ManifoldsBase]
 Pages = ["retractions.jl"]
 Order = [:type]
+```
+
+## The lower layer functions
+
+While you should always add your documentation to [`retract`](@ref) or [`retract!`](@ref) when implementing new manifolds, the actual implementation happens on the following functions on [the lower layer](@ref design-layer3).
+
+```@autodocs
+Modules = [ManifoldsBase]
+Pages = ["retractions.jl"]
+Order = [:function]
+Public = false
+Private = true
 ```
