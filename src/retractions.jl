@@ -483,7 +483,7 @@ which by default allocates and calls [`inverse_retract_softmax!`](@ref).
 """
 function inverse_retract_softmax(M::AbstractManifold, p, q)
     X = allocate_result(M, inverse_retract, p, q)
-    return inverse_retract_nlsolve!(M, X, p, q, m)
+    return inverse_retract_softmax!(M, X, p, q)
 end
 
 
