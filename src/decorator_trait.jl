@@ -391,15 +391,15 @@ function log!(
 end
 
 # Introduce Deco Trait | automatic foward | fallback
-@trait_function parallel_transport_along(M::AbstractDecoratorManifold, p, X, q)
-function parallel_transport_along(::EmptyTrait, M::AbstractManifold, p, X, q)
+@trait_function parallel_transport_along(M::AbstractDecoratorManifold, p, X, c)
+function parallel_transport_along(::EmptyTrait, M::AbstractManifold, p, X, c)
     return invoke(
         parallel_transport_along,
-        Tuple{AbstractManifold,typeof(p),typeof(X),typeof(q)},
+        Tuple{AbstractManifold,typeof(p),typeof(X),typeof(c)},
         M,
         p,
         X,
-        q,
+        c,
     )
 end
 # EmbeddedSubManifold
@@ -408,22 +408,22 @@ function parallel_transport_along(
     M::AbstractDecoratorManifold,
     p,
     X,
-    q,
+    c,
 )
-    return parallel_transport_along(get_embedding(M), p, X, q)
+    return parallel_transport_along(get_embedding(M), p, X, c)
 end
 
 # Introduce Deco Trait | automatic foward | fallback
-@trait_function parallel_transport_along!(M::AbstractDecoratorManifold, Y, p, X, q)
-function parallel_transport_along!(::EmptyTrait, M::AbstractManifold, Y, p, X, q)
+@trait_function parallel_transport_along!(M::AbstractDecoratorManifold, Y, p, X, c)
+function parallel_transport_along!(::EmptyTrait, M::AbstractManifold, Y, p, X, c)
     return invoke(
         parallel_transport_along!,
-        Tuple{AbstractManifold,typeof(Y),typeof(p),typeof(X),typeof(q)},
+        Tuple{AbstractManifold,typeof(Y),typeof(p),typeof(X),typeof(c)},
         M,
         Y,
         p,
         X,
-        q,
+        c,
     )
 end
 # EmbeddedSubManifold
@@ -433,9 +433,9 @@ function parallel_transport_along!(
     Y,
     p,
     X,
-    q,
+    c,
 )
-    return parallel_transport_along!(get_embedding(M), Y, p, X, q)
+    return parallel_transport_along!(get_embedding(M), Y, p, X, c)
 end
 
 # Introduce Deco Trait | automatic foward | fallback

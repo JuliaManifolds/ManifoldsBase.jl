@@ -197,6 +197,12 @@ end
 
         @test vector_transport_along(M, p, X, []) == X
         @test vector_transport_along!(M, Y, p, X, []) == X
+        @test parallel_transport_along(M, p, X, []) == X
+        @test parallel_transport_along!(M, Y, p, X, []) == X
+        @test parallel_transport_direction(M, p, X, X) == X
+        @test parallel_transport_direction!(M, Y, p, X, X) == X
+        @test parallel_transport_to(M, p, X, q) == X
+        @test parallel_transport_to!(M, Y, p, X, q) == X
     end
 
     @testset "AnotherPlaneManifold" begin
