@@ -42,14 +42,32 @@ Pages = ["parallel_transport.jl"]
 Order = [:function]
 ```
 
-
 ## Further functions
+
+### General functions provided by the interface
 
 ```@autodocs
 Modules = [ManifoldsBase]
 Pages = ["ManifoldsBase.jl"]
 Order = [:type, :function]
+Public=true
+Private=false
 ```
+
+
+### The lower layer functions
+
+While you should always add your documentation to functions from the last section, some of the functions dispatch onto functions on [the lower layer](@ref design-layer3). These are the ones
+you usually implement for your manifold – unless there is no lower level function called, like for the [`manifold_dimension`](@ref). Here, these functions mainly involve the concrete checks carries out by [`is_point`](@ref) and [`is_vector`](@ref), especially since both might involve the test for a point.
+
+```@autodocs
+Modules = [ManifoldsBase]
+Pages = ["ManifoldsBase.jl"]
+Order = [:function]
+Public=false
+Private=true
+```
+
 
 TODO split layer 1 and layer 3 here
 

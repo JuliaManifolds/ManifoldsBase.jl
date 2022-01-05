@@ -27,7 +27,7 @@ Pages = ["nested_trait.jl"]
 Order = [:type, :macro, :function]
 ```
 
-Then the following functions and macros introduce the decoraator traits
+Then the following functions and macros introduce the decorator traits
 
 ```@autodocs
 Modules = [ManifoldsBase]
@@ -35,17 +35,4 @@ Pages = ["decorator_trait.jl"]
 Order = [:type, :macro, :function]
 ```
 
-## [Concrete decorators: The EmbeddedManifold](@id subsec-embeddedmanifold)
-
-While the implicit decorator ddescribed until now provides a way to dispatch functions of a manifold to other manifold, there is also the case, that certain properties might have more than one variant they appear in. For example there might be different metrics or different embeddings.
-
-These are modelled in `ManifoldsBase.jl` as own manifolds that follow the `AbstractDecorator` manifold, but they explicitly “couple” a manifold with this new (second occurence of a) property.
-
-If a manifold ``\mathcal M`` is implemented as an embedded manifold as described above, but it can also be implemented using a different embedding (into another manifold ``\mathcal N``), then these two manifolds can be _explicitly_ coupled using the [`EmbeddedManifold`](@ref),
-which itself is an [`AbstractDecoratorManifold`](@ref) and dispatches functions to either ``\mathcal M`` or ``\mathcal N`` again based on the type of embedding specified.
-
-```@autodocs
-Modules = [ManifoldsBase]
-Pages = ["EmbeddedManifold.jl"]
-Order = [:type, :macro, :function]
-```
+For an example see the [(implicit) embedded manifold](@ref subsec-implicit-embedded).
