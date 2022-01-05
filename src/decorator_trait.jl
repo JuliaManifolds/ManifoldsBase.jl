@@ -391,6 +391,150 @@ function log!(
 end
 
 # Introduce Deco Trait | automatic foward | fallback
+@trait_function parallel_transport_along(M::AbstractDecoratorManifold, p, X, q)
+function parallel_transport_along(::EmptyTrait, M::AbstractManifold, p, X, q)
+    return invoke(
+        parallel_transport_along,
+        Tuple{AbstractManifold,typeof(p),typeof(X),typeof(q)},
+        M,
+        p,
+        X,
+        q,
+    )
+end
+# EmbeddedSubManifold
+function parallel_transport_along(
+    ::NestedTrait{IsEmbeddedManifold},
+    M::AbstractDecoratorManifold,
+    p,
+    X,
+    q,
+)
+    return parallel_transport_along(get_embedding(M), p, X, q)
+end
+
+# Introduce Deco Trait | automatic foward | fallback
+@trait_function parallel_transport_along!(M::AbstractDecoratorManifold, Y, p, X, q)
+function parallel_transport_along!(::EmptyTrait, M::AbstractManifold, Y, p, X, q)
+    return invoke(
+        parallel_transport_along!,
+        Tuple{AbstractManifold,typeof(Y),typeof(p),typeof(X),typeof(q)},
+        M,
+        Y,
+        p,
+        X,
+        q,
+    )
+end
+# EmbeddedSubManifold
+function parallel_transport_along!(
+    ::NestedTrait{IsEmbeddedManifold},
+    M::AbstractDecoratorManifold,
+    Y,
+    p,
+    X,
+    q,
+)
+    return parallel_transport_along!(get_embedding(M), Y, p, X, q)
+end
+
+# Introduce Deco Trait | automatic foward | fallback
+@trait_function parallel_transport_direction(M::AbstractDecoratorManifold, p, X, q)
+function parallel_transport_direction(::EmptyTrait, M::AbstractManifold, p, X, q)
+    return invoke(
+        parallel_transport_direction,
+        Tuple{AbstractManifold,typeof(p),typeof(X),typeof(q)},
+        M,
+        p,
+        X,
+        q,
+    )
+end
+# EmbeddedSubManifold
+function parallel_transport_direction(
+    ::NestedTrait{IsEmbeddedManifold},
+    M::AbstractDecoratorManifold,
+    p,
+    X,
+    q,
+)
+    return parallel_transport_direction(get_embedding(M), p, X, q)
+end
+
+# Introduce Deco Trait | automatic foward | fallback
+@trait_function parallel_transport_direction!(M::AbstractDecoratorManifold, Y, p, X, q)
+function parallel_transport_direction!(::EmptyTrait, M::AbstractManifold, Y, p, X, q)
+    return invoke(
+        parallel_transport_direction!,
+        Tuple{AbstractManifold,typeof(Y),typeof(p),typeof(X),typeof(q)},
+        M,
+        Y,
+        p,
+        X,
+        q,
+    )
+end
+# EmbeddedSubManifold
+function parallel_transport_direction!(
+    ::NestedTrait{IsEmbeddedManifold},
+    M::AbstractDecoratorManifold,
+    Y,
+    p,
+    X,
+    q,
+)
+    return parallel_transport_direction!(get_embedding(M), Y, p, X, q)
+end
+
+# Introduce Deco Trait | automatic foward | fallback
+@trait_function parallel_transport_to(M::AbstractDecoratorManifold, p, X, q)
+function parallel_transport_to(::EmptyTrait, M::AbstractManifold, p, X, q)
+    return invoke(
+        parallel_transport_to,
+        Tuple{AbstractManifold,typeof(p),typeof(X),typeof(q)},
+        M,
+        p,
+        X,
+        q,
+    )
+end
+# EmbeddedSubManifold
+function parallel_transport_to(
+    ::NestedTrait{IsEmbeddedManifold},
+    M::AbstractDecoratorManifold,
+    p,
+    X,
+    q,
+)
+    return parallel_transport_to(get_embedding(M), p, X, q)
+end
+
+# Introduce Deco Trait | automatic foward | fallback
+@trait_function parallel_transport_to!(M::AbstractDecoratorManifold, Y, p, X, q)
+function parallel_transport_to!(::EmptyTrait, M::AbstractManifold, Y, p, X, q)
+    return invoke(
+        parallel_transport_to!,
+        Tuple{AbstractManifold,typeof(Y),typeof(p),typeof(X),typeof(q)},
+        M,
+        Y,
+        p,
+        X,
+        q,
+    )
+end
+# EmbeddedSubManifold
+function parallel_transport_to!(
+    ::NestedTrait{IsEmbeddedManifold},
+    M::AbstractDecoratorManifold,
+    Y,
+    p,
+    X,
+    q,
+)
+    return parallel_transport_to!(get_embedding(M), Y, p, X, q)
+end
+
+# Introduce Deco Trait | automatic foward | fallback
 @trait_function project(M::AbstractDecoratorManifold, p)
 function project(::EmptyTrait, M::AbstractManifold, p)
     return invoke(project, Tuple{AbstractManifold,typeof(p)}, M, p)
