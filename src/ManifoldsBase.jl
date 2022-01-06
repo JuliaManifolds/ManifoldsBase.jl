@@ -392,7 +392,7 @@ Return whether `p` is a valid point on the [`AbstractManifold`](@ref) `M`.
 
 If `throw_error` is `false`, the function returns either `true` or `false`. If `throw_error`
 is `true`, the function either returns `true` or throws an error. By default the function
-calls [`check_point(M, p; kwargs...)`](@ref) and checks whether the returned value
+calls [`check_point`](@ref) and checks whether the returned value
 is `nothing` or an error.
 """
 function is_point(M::AbstractManifold, p, throw_error = false; kwargs...)
@@ -409,7 +409,7 @@ Returns either `true` or `false`.
 
 If `throw_error` is `false`, the function returns either `true` or `false`. If `throw_error`
 is `true`, the function either returns `true` or throws an error. By default the function
-calls [`check_vector(M, p, X; kwargs...)`](@ref) and checks whether the returned
+calls [`check_vector`](@ref) and checks whether the returned
 value is `nothing` or an error.
 
 If `check_base_point` is true, then the point `p` will be first checked using the
@@ -667,7 +667,6 @@ export allocate,
     representation_size,
     set_component!,
     show,
-    representation_size,
     retract,
     retract!,
     retract_polar,

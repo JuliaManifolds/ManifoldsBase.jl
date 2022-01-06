@@ -98,18 +98,20 @@ For further details and dispatches, see [retractions and inverse retractions](@r
 
 To summarize, with respect to the [dispatch on one argument at a time](https://docs.julialang.org/en/v1/manual/methods/#Dispatch-on-one-argument-at-a-time) paradigm, this layer dispatches the (optional) _parameters second_.
 
-### [Layer III: The lower level interface to gain performance](@id design-layer3)
+### [Layer III: The base layer with focus on implementations](@id design-layer3)
 
-This lower level aims for performance, that is, any function should have as few as possible optional and keyword arguments
-and be typed as concrete as possible/necessary. This means
+This lower level aims for the actual implementation of the function avoiding ambiguities.
+It should have as few as possible optional parameters and as concrete as possible types.
+This means
 
-* the function name should be similar to its high level parent (for example `retract` and `retract_polar`from above)
+* the function name should be similar to its high level parent (for example `retract` and `retract_polar`  above)
 * The manifold type in method signature should always be as narrow as possible.
-* the points/vectors should either be untyped (for the default representation of if there is only one) or provide all types concretely.
+* the points/vectors should either be untyped (for the default representation of if there is only one implementation) or provide all types concretely (for second representations or when using [`AbstractManifoldPoint`](@ref) and [`TVector`](@ref TVector)).
 
-The first thing to do on this level is the aforementioned default to pass from allocating to mutating functions.
+The first step that might happen on this level is, that an allocating function allocates memory and calls the mutating function. If faster, it might also implement the function at hand itself.
 
-Note that not all of these functions are exported, but if you implement for example an existing retraction on a new manifold, you will have to import this function.
+Usually functions from this layer are not exported, when they have an analogue on the first layer. For example the function [`retract_polar`](@ref)`(M, p, X)` is not exported, since when using the interface one would use the [`PolarRetraction`](@ref) or to be precise call [`retract`](@ref)`(M, p, X, PolarRetraction())`.
+When implementing your own manifold, you have to import functions like these anyways.
 
 To summarize, with respect to the [dispatch on one argument at a time](https://docs.julialang.org/en/v1/manual/methods/#Dispatch-on-one-argument-at-a-time) paradigm, this layer dispatches the _concrete manifold and point/vector types last_.
 

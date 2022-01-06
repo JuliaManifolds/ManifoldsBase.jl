@@ -13,7 +13,7 @@ This tutorial assumes that you heard of the exponential map, tangent vectors and
 If not, please read for example [[do Carmo, 1992](#doCarmo1992)], Chapter 3, first.
 
 In general you need just a datatype (`struct`) that inherits from [`AbstractManifold`](@ref) to define a manifold. No function is _per se_ required to be implemented.
-However, it is a good idea to provide functions that might be useful to others, for example [`check_point`](@ref) and [`check_vector`](@ref), as we do in this tutorial.
+However, it is a good idea to provide functions that might be useful to others, for example [`check_point`](@ref ManifoldsBase.check_point) and [`check_vector`](@ref ManifoldsBase.check_point), as we do in this tutorial.
 
 We start with two technical preliminaries. If you want to start directly, you can [skip](@ref manifold-tutorial-task) this paragraph and revisit it for two of the implementation details.
 
@@ -75,7 +75,7 @@ S = MySphere(1.5, 2)
 ## [Checking points and tangents](@id manifold-tutorial-checks)
 
 If we have now a point, represented as an array, we would first like to check, that it is a valid point on the manifold.
-For this one can use the easy interface [`is_point`](@ref is_point(M::AbstractManifold, p; kwargs...)). This internally uses [`check_point`](@ref check_point(M, p; kwargs...)).
+For this one can use the easy interface [`is_point`](@ref is_point(M::AbstractManifold, p; kwargs...)). This internally uses [`check_point`](@ref ManifoldsBase.check_point).
 This is what we want to implement.
 We have to return the error if `p` is not on `M` and `nothing` otherwise.
 
