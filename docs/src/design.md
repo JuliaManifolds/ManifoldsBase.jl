@@ -42,7 +42,7 @@ The explicit case of the [`EmbeddedManifold`](@ref) can be used to distinguish d
 
 Note that all other parameters of a function should be as unspecific as possible on this layer.
 
-With respect to the [dispatch on one argument at a time](https://docs.julialang.org/en/v1/manual/methods/#Dispatch-on-one-argument-at-a-time) paradigm, this layer dispatches the _manifold first_, but here we stay oon an abstract type level.
+With respect to the [dispatch on one argument at a time](https://docs.julialang.org/en/v1/manual/methods/#Dispatch-on-one-argument-at-a-time) paradigm, this layer dispatches the _manifold first_, but here we stay on an abstract type level.
 
 This layer ends usually in calling the same functions like `retract` but prefixed with a `_` to enter Layer II.
 
@@ -51,8 +51,8 @@ This layer ends usually in calling the same functions like `retract` but prefixe
 
 ### [Layer II: An internal dispatch interface for parameters](@id design-layer2)
 
-This layer is an interims layer to dispatch on the (optional/default) parameters of a function like the retraction:
-[`retract`](@ref) has a last parameter that determines the type.
+This layer is an interim layer to dispatch on the (optional/default) parameters of a function.
+For example the last parameter of retraction: [`retract`](@ref) determines the type (variant) to be used.
 The last function in the previous layer calls `_retract`, which is an internal function.
 
 On this layer, e.g. for `_retract` only these last parameters should be typed, the manifold should stay at the [`AbstractManifold`](@ref) level. It dispatches on different functions per existing parameter type (and might pass this one further on, if it has fields).
@@ -77,15 +77,15 @@ One could hence see the last code line as a definition on Layer I that passes di
 To close this section, let‘s look at an example. The high level (or level I) definition of the retraction is given by
 
 ```julia
-retract(M::AbstractManifold, p, X, m::AbstractRetractionMethod=default_retraction_method(M)) = _retract(M,p,X,m)
+retract(M::AbstractManifold, p, X, m::AbstractRetractionMethod=default_retraction_method(M)) = _retract(M, p, X, m)
 ```
 
 This level now dispatches on different retraction types. It usually passes to specific functions implemented in Layer III,
 here for example
 
 ```julia
-_retract(M::AbstractManifold, p, X, m::Exponentialretraction) = exp(M,p,X)
-_retract(M::AbstractManifold, p, X, m::PolarRetraction) = retract_polar(M,p,X)
+_retract(M::AbstractManifold, p, X, m::Exponentialretraction) = exp(M, p, X)
+_retract(M::AbstractManifold, p, X, m::PolarRetraction) = retract_polar(M, p, X)
 ```
 
 or the [`PolarRetraction`](@ref) which dispatches to [`retract_polar`](@ref).
@@ -94,7 +94,7 @@ For further details and dispatches, see [retractions and inverse retractions](@r
 
 !!! note
     The documentation should be attached to the high level functions, since this again fosters ease of use.
-    If yuo implement a polar retraction, you should write a function `polar_retract` but the doc string should be attached to `retract(::M, ::P, ::V, ::PolarRetraction)` for your types `::M, ::P, ::V` of the manifold, points and vectors, respectively.
+    If you implement a polar retraction, you should write a method of function `retract_polar` but the doc string should be attached to `retract(::M, ::P, ::V, ::PolarRetraction)` for your types `::M, ::P, ::V` of the manifold, points and vectors, respectively.
 
 To summarize, with respect to the [dispatch on one argument at a time](https://docs.julialang.org/en/v1/manual/methods/#Dispatch-on-one-argument-at-a-time) paradigm, this layer dispatches the (optional) _parameters second_.
 
@@ -106,9 +106,9 @@ This means
 
 * the function name should be similar to its high level parent (for example `retract` and `retract_polar`  above)
 * The manifold type in method signature should always be as narrow as possible.
-* the points/vectors should either be untyped (for the default representation of if there is only one implementation) or provide all types concretely (for second representations or when using [`AbstractManifoldPoint`](@ref) and [`TVector`](@ref TVector)).
+* The points/vectors should either be untyped (for the default representation or if there is only one implementation) or provide all type bounds (for second representations or when using [`AbstractManifoldPoint`](@ref) and [`TVector`](@ref TVector)).
 
-The first step that might happen on this level is, that an allocating function allocates memory and calls the mutating function. If faster, it might also implement the function at hand itself.
+The first step that often happens on this level is memory allocation and calling the mutating function. If faster, it might also implement the function at hand itself.
 
 Usually functions from this layer are not exported, when they have an analogue on the first layer. For example the function [`retract_polar`](@ref)`(M, p, X)` is not exported, since when using the interface one would use the [`PolarRetraction`](@ref) or to be precise call [`retract`](@ref)`(M, p, X, PolarRetraction())`.
 When implementing your own manifold, you have to import functions like these anyways.
@@ -118,9 +118,9 @@ To summarize, with respect to the [dispatch on one argument at a time](https://d
 ## Mutating and allocating functions
 
 Every function, where this is applicable should provide a mutating and an allocating variant.
-For example for the exponential map `exp(M,p,x)` returns a _new_ point `q` where the result is computed in.
+For example for the exponential map `exp(M, p, X)` returns a _new_ point `q` where the result is computed in.
 On the other hand `exp!(M, q, p, X)` computes the result in place of `q`, where the design of the implementation
-should keep in mind that also `exp!(M,p,p,X)` should correctly overwrite `p`.
+should keep in mind that also `exp!(M, p, p, X)` should correctly overwrite `p`.
 
 The interface provides a way to determine the allocation type and a result to compute/allocate
 the resulting memory, such that the default implementation allocating functions, like [`exp`](@ref) is to allocate the resulting memory and call [`exp!`](@ref).
@@ -168,7 +168,7 @@ then the logarithmic map has the signature
 log(::M, ::P, ::P)
 ```
 
-but the return type would be ``V``, whose internal sizes (fields/arrays) will depend on the concrete type of one of the points. This is accomplished by omplementing a `allocate_result(::M, ::typeof(log), ::P, ::P)`that returns the concrete variable for the return. This way, even with specific types, one just has to implement `log!` and the one line for the allocation.
+but the return type would be ``V``, whose internal sizes (fields/arrays) will depend on the concrete type of one of the points. This is accomplished by implementing a method `allocate_result(::M, ::typeof(log), ::P, ::P)` that returns the concrete variable for the result. This way, even with specific types, one just has to implement `log!` and the one line for the allocation.
 
 !!! note
     This dispatch from the allocating to the mutating variant happens in Layer III, that is, functions like `exp` or `retract_polar` (but not `retract` itself) allocate their result (using `::typeof(retract)` for the second function)
