@@ -1,0 +1,28 @@
+{
+    "creators": [
+        {
+            "affiliation": "University of California, San Francisco",
+            "name": "Axen, Seth",
+            "orcid": "0000-0003-3933-8247"
+        },
+        {
+            "affiliation": "AGH University of Science and Technology",
+            "name": "Baran, Mateusz",
+            "orcid": "0000-0001-9667-5579"
+        },
+        {
+            "affiliation": "NTNU Trondheim",
+            "name": "Bergmann, Ronny",
+            "orcid": "0000-0001-8342-7218"
+        }
+    ],
+    "description": "ManifoldsBase.jl is an interface for Riemannian manifolds in Julia",
+    "keywords": [
+        "Riemannian manifolds",
+        "manifolds",
+        "Julia"
+    ],
+    "license": "MIT",
+    "title": "ManifoldsBase.jl",
+    "upload_type": "software"
+}
