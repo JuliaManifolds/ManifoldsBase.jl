@@ -524,7 +524,7 @@ function retract!(
 end
 # dispatch to lower level
 function _retract!(M::AbstractManifold, q, p, X, m::EmbeddedRetraction)
-    return retract_embedding!(M, q, p, X, m.retraction)
+    return retract_embedded!(M, q, p, X, m.retraction)
 end
 _retract!(M::AbstractManifold, q, p, X, ::ExponentialRetraction) = exp!(M, q, p, X)
 function _retract!(M::AbstractManifold, q, p, X, m::ODEExponentialRetraction)
@@ -548,7 +548,7 @@ computes the mutating variant of the [`EmbeddedRetraction`](@ref) using
 the [`AbstractRetractionMethod`](@ref) `m` in the embedding (see [`get_embedding`](@ref))
 and projecting the result back.
 """
-function retract_embedding!(M::AbstractManifold, q, p, X, m)
+function retract_embedded!(M::AbstractManifold, q, p, X, m)
     return project!(
         M,
         q,
@@ -637,7 +637,7 @@ function retract(
     return _retract(M, p, t * X, m)
 end
 function _retract(M::AbstractManifold, p, X, m::EmbeddedRetraction)
-    return retract_embedding(M, p, X, m.retraction)
+    return retract_embedded(M, p, X, m.retraction)
 end
 _retract(M::AbstractManifold, p, X, ::ExponentialRetraction) = exp(M, p, X)
 function _retract(M::AbstractManifold, p, X, m::ODEExponentialRetraction)
@@ -658,7 +658,7 @@ computes the allocating variant of the [`EmbeddedRetraction`](@ref) using
 the [`AbstractRetractionMethod`](@ref) `m` in the embedding (see [`get_embedding`](@ref))
 and projecting the result back.
 """
-function retract_embedding(M::AbstractManifold, p, X, m)
+function retract_embedded(M::AbstractManifold, p, X, m)
     return project(
         M,
         retract(
@@ -680,29 +680,29 @@ function retract_polar(M::AbstractManifold, p, X)
     return retract_polar!(M, q, p, X)
 end
 """
-    retract_polar(M::AbstractManifold, p, q)
+    retract_project(M::AbstractManifold, p, q)
 
-computes the allocating variant of the [`PolarRetraction`](@ref),
-which by default allocates and calls [`retract_polar!`](@ref).
+computes the allocating variant of the [`ProjectionRetraction`](@ref),
+which by default allocates and calls [`retract_project!`](@ref).
 """
 function retract_project(M::AbstractManifold, p, X)
     q = allocate_result(M, retract, p, X)
     return retract_project!(M, q, p, X)
 end
 """
-    retract_polar(M::AbstractManifold, p, q)
+    retract_qr(M::AbstractManifold, p, q)
 
-computes the allocating variant of the [`PolarRetraction`](@ref),
-which by default allocates and calls [`retract_polar!`](@ref).
+computes the allocating variant of the [`QRRetraction`](@ref),
+which by default allocates and calls [`retract_qr!`](@ref).
 """
 function retract_qr(M::AbstractManifold, p, X)
     q = allocate_result(M, retract, p, X)
     return retract_qr!(M, q, p, X)
 end
 """
-    retract_polar(M::AbstractManifold, p, q, m, B)
+    retract_exp_ode(M::AbstractManifold, p, q, m, B)
 
-computes the allocating variant of the [`EmbeddedRetraction`](@ref)`(m,B)`,
+computes the allocating variant of the [`ODEExponentialRetraction`](@ref)`(m,B)`,
 which by default allocates and calls [`retract_exp_ode!`](@ref).
 """
 function retract_exp_ode(M::AbstractManifold, p, X, m, B)
