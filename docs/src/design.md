@@ -24,9 +24,9 @@ Since the central element for functions on a manifold is the manifold itself, it
 
 The general architecture consists of three layers
 
-* The high level interface for ease of use – and to dispatch on other manifolds
-* an interims layer to dispatch on different parameters in the last section
-* the lowest layer with a specific manifold and no optional parameters for performance
+* The high level interface for ease of use – and to dispatch on other manifolds.
+* The intermediate layer to dispatch on different parameters in the last section, e.g. type of retraction or vector transport.
+* The lowest layer for specific manifolds to dispatch on different types of points and tangent vectors. Usually this layer with a specific manifold and no optional parameters.
 
 These three layers are described in more detail in the following. The main motivation to introduce this separation is reduction of method ambiguity problems.
 
