@@ -259,14 +259,26 @@ macro trait_function(sig)
     return esc(
         quote
             function ($fname)($(callargs...); $(kwargs_list...)) where {$(where_exprs...)}
-                return ($fname)(trait($(argnames...)), $(argnames...); $(kwargs_list...))
+                return ($fname)(trait($(argnames...)), $(argnames...); $(kwargs_call...))
             end
             function ($fname)(
                 t::NestedTrait,
                 $(callargs...);
                 $(kwargs_list...),
             ) where {$(where_exprs...)}
-                return ($fname)(next_trait(t), $(argnames...); $(kwargs_list...))
+                return ($fname)(next_trait(t), $(argnames...); $(kwargs_call...))
+            end
+            function ($fname)(
+                ::EmptyTrait,
+                $(callargs...);
+                $(kwargs_list...),
+            ) where {$(where_exprs...)}
+                return invoke(
+                    $fname,
+                    Tuple{AbstractManifold,$(argtypes[2:end]...)},
+                    $(argnames...);
+                    $(kwargs_call...),
+                )
             end
         end,
     )

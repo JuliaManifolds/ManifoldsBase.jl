@@ -61,9 +61,6 @@ parent_trait(::IsEmbeddedSubmanifoldManifold) = IsIsometricEmbeddedManifold()
 """
 decorated_manifold(M::AbstractManifold) = M
 @trait_function decorated_manifold(M::AbstractDecoratorManifold)
-function decorated_manifold(::EmptyTrait, M::AbstractManifold)
-    return invoke(decorated_manifold, Tuple{AbstractManifold}, M)
-end
 
 #
 # Implemented Traits
@@ -142,9 +139,6 @@ end
 
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function check_size(M::AbstractDecoratorManifold, p)
-function check_size(::EmptyTrait, M::AbstractManifold, p)
-    return invoke(check_size, Tuple{AbstractManifold,typeof(p)}, M, p)
-end
 # Embedded
 function check_size(::NestedTrait{IsEmbeddedManifold}, M::AbstractDecoratorManifold, p)
     return check_size(get_embedding(M), p)
@@ -152,9 +146,6 @@ end
 
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function check_size(M::AbstractDecoratorManifold, p, X)
-function check_size(::EmptyTrait, M::AbstractManifold, p, X)
-    return invoke(check_size, Tuple{AbstractManifold,typeof(p),typeof(X)}, M, p, X)
-end
 # Embedded
 function check_size(::NestedTrait{IsEmbeddedManifold}, M::AbstractDecoratorManifold, p, X)
     return check_size(get_embedding(M), p, X)
@@ -162,9 +153,6 @@ end
 
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function embed(M::AbstractDecoratorManifold, p)
-function embed(::EmptyTrait, M::AbstractManifold, p)
-    return invoke(embed, Tuple{AbstractManifold,typeof(p)}, M, p)
-end
 # EmbeddedManifold
 function embed(::NestedTrait{IsEmbeddedManifold}, M::AbstractDecoratorManifold, p)
     q = allocate_result(M, embed, p)
@@ -173,9 +161,6 @@ end
 
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function embed!(M::AbstractDecoratorManifold, q, p)
-function embed!(::EmptyTrait, M::AbstractManifold, q, p)
-    return invoke(embed!, Tuple{AbstractManifold,typeof(q),typeof(p)}, M, q, p)
-end
 # EmbeddedManifold
 function embed!(::NestedTrait{IsEmbeddedManifold}, M::AbstractDecoratorManifold, q, p)
     return copyto!(M, q, p)
@@ -183,9 +168,6 @@ end
 
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function embed(M::AbstractDecoratorManifold, p, X)
-function embed(::EmptyTrait, M::AbstractManifold, p, X)
-    return invoke(embed, Tuple{AbstractManifold,typeof(p),typeof(X)}, M, p, X)
-end
 # EmbeddedManifold
 function embed(::NestedTrait{IsEmbeddedManifold}, M::AbstractDecoratorManifold, p, X)
     q = allocate_result(M, embed, p, X)
@@ -194,9 +176,6 @@ end
 
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function embed!(M::AbstractDecoratorManifold, Y, p, X)
-function embed!(::EmptyTrait, M::AbstractManifold, Y, p, X)
-    return invoke(embed!, Tuple{AbstractManifold,typeof(Y),typeof(p),typeof(X)}, M, Y, p, X)
-end
 # EmbeddedManifold
 function embed!(::NestedTrait{IsEmbeddedManifold}, M::AbstractDecoratorManifold, Y, p, X)
     return copyto!(M, Y, p, X)
@@ -204,9 +183,6 @@ end
 
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function exp(M::AbstractDecoratorManifold, p, X)
-function exp(::EmptyTrait, M::AbstractManifold, p, X)
-    return invoke(exp, Tuple{AbstractManifold,typeof(p),typeof(X)}, M, p, X)
-end
 # EmbeddedSubManifold
 function exp(::NestedTrait{IsEmbeddedManifold}, M::AbstractDecoratorManifold, p, X)
     return exp(get_embedding(M), p, X)
@@ -214,9 +190,6 @@ end
 
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function exp!(M::AbstractDecoratorManifold, q, p, X)
-function exp!(::EmptyTrait, M::AbstractManifold, q, p, X)
-    return invoke(exp!, Tuple{AbstractManifold,typeof(q),typeof(p),typeof(X)}, M, q, p, X)
-end
 # EmbeddedSubManifold
 function exp!(::NestedTrait{IsEmbeddedManifold}, M::AbstractDecoratorManifold, q, p, X)
     return exp!(get_embedding(M), q, p, X)
@@ -224,9 +197,6 @@ end
 
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function inner(M::AbstractDecoratorManifold, p, X, Y)
-function inner(::EmptyTrait, M::AbstractManifold, p, X, Y)
-    return invoke(inner, Tuple{AbstractManifold,typeof(p),typeof(X),typeof(Y)}, M, p, X, Y)
-end
 # Isometric Embedded submanifold
 function inner(
     ::NestedTrait{IsIsometricEmbeddedManifold},
@@ -245,22 +215,6 @@ end
     q,
     m::AbstractInverseRetractionMethod = default_inverse_retraction_method(M),
 )
-function inverse_retract(
-    ::EmptyTrait,
-    M::AbstractManifold,
-    p,
-    q,
-    m::AbstractInverseRetractionMethod = default_inverse_retraction_method(M),
-)
-    return invoke(
-        inverse_retract,
-        Tuple{AbstractManifold,typeof(p),typeof(q),typeof(m)},
-        M,
-        p,
-        q,
-        m,
-    )
-end
 # Transparent for Submanifolds
 function inverse_retract(
     ::NestedTrait{IsEmbeddedSubmanifoldManifold},
@@ -275,24 +229,6 @@ end
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function inverse_retract!(M::AbstractDecoratorManifold, X, p, q)
 function inverse_retract!(
-    ::EmptyTrait,
-    M::AbstractManifold,
-    X,
-    p,
-    q,
-    m::AbstractInverseRetractionMethod = default_inverse_retraction_method(M),
-)
-    return invoke(
-        inverse_retract!,
-        Tuple{AbstractManifold,typeof(X),typeof(p),typeof(q),typeof(m)},
-        M,
-        X,
-        p,
-        q,
-        m,
-    )
-end
-function inverse_retract!(
     ::NestedTrait{IsEmbeddedSubmanifoldManifold},
     M::AbstractDecoratorManifold,
     X,
@@ -304,16 +240,6 @@ function inverse_retract!(
 end
 
 @trait_function is_point(M::AbstractDecoratorManifold, p, te = false; kwargs...)
-function is_point(::EmptyTrait, M::AbstractManifold, p, te = false; kwargs...)
-    return invoke(
-        is_point,
-        Tuple{AbstractManifold,typeof(p),typeof(te)},
-        M,
-        p,
-        te;
-        kwargs...,
-    )
-end
 # EmbeddedManifold
 function is_point(
     ::NestedTrait{IsEmbeddedManifold},
@@ -326,17 +252,6 @@ function is_point(
 end
 
 @trait_function is_vector(M::AbstractDecoratorManifold, p, X, te = false; kwargs...)
-function is_vector(::EmptyTrait, M::AbstractManifold, p, X, te = false; kwargs...)
-    return invoke(
-        is_vector,
-        Tuple{AbstractManifold,typeof(p),typeof(X),typeof(te)},
-        M,
-        p,
-        X,
-        te;
-        kwargs...,
-    )
-end
 # EmbeddedManifold
 function is_vector(
     ::NestedTrait{IsEmbeddedManifold},
@@ -350,9 +265,6 @@ function is_vector(
 end
 
 @trait_function norm(M::AbstractDecoratorManifold, p, X)
-function norm(::EmptyTrait, M::AbstractManifold, p, X)
-    return invoke(norm, Tuple{AbstractManifold,typeof(p),typeof(X)}, M, p, X)
-end
 function norm(
     ::NestedTrait{IsIsometricEmbeddedManifold},
     M::AbstractDecoratorManifold,
@@ -363,9 +275,6 @@ function norm(
 end
 
 @trait_function log(M::AbstractDecoratorManifold, p, q)
-function log(::EmptyTrait, M::AbstractManifold, p, q)
-    return invoke(log, Tuple{AbstractManifold,typeof(p),typeof(q)}, M, p, q)
-end
 function log(
     ::NestedTrait{IsEmbeddedSubmanifoldManifold},
     M::AbstractDecoratorManifold,
@@ -377,9 +286,6 @@ end
 
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function log!(M::AbstractDecoratorManifold, X, p, q)
-function log!(::EmptyTrait, M::AbstractManifold, q, p, X)
-    return invoke(log!, Tuple{AbstractManifold,typeof(X),typeof(p),typeof(q)}, M, X, p, q)
-end
 function log!(
     ::NestedTrait{IsEmbeddedSubmanifoldManifold},
     M::AbstractDecoratorManifold,
@@ -392,16 +298,6 @@ end
 
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function parallel_transport_along(M::AbstractDecoratorManifold, p, X, c)
-function parallel_transport_along(::EmptyTrait, M::AbstractManifold, p, X, c)
-    return invoke(
-        parallel_transport_along,
-        Tuple{AbstractManifold,typeof(p),typeof(X),typeof(c)},
-        M,
-        p,
-        X,
-        c,
-    )
-end
 # EmbeddedSubManifold
 function parallel_transport_along(
     ::NestedTrait{IsEmbeddedManifold},
@@ -415,17 +311,6 @@ end
 
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function parallel_transport_along!(M::AbstractDecoratorManifold, Y, p, X, c)
-function parallel_transport_along!(::EmptyTrait, M::AbstractManifold, Y, p, X, c)
-    return invoke(
-        parallel_transport_along!,
-        Tuple{AbstractManifold,typeof(Y),typeof(p),typeof(X),typeof(c)},
-        M,
-        Y,
-        p,
-        X,
-        c,
-    )
-end
 # EmbeddedSubManifold
 function parallel_transport_along!(
     ::NestedTrait{IsEmbeddedManifold},
@@ -440,16 +325,6 @@ end
 
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function parallel_transport_direction(M::AbstractDecoratorManifold, p, X, q)
-function parallel_transport_direction(::EmptyTrait, M::AbstractManifold, p, X, q)
-    return invoke(
-        parallel_transport_direction,
-        Tuple{AbstractManifold,typeof(p),typeof(X),typeof(q)},
-        M,
-        p,
-        X,
-        q,
-    )
-end
 # EmbeddedSubManifold
 function parallel_transport_direction(
     ::NestedTrait{IsEmbeddedManifold},
@@ -463,17 +338,6 @@ end
 
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function parallel_transport_direction!(M::AbstractDecoratorManifold, Y, p, X, q)
-function parallel_transport_direction!(::EmptyTrait, M::AbstractManifold, Y, p, X, q)
-    return invoke(
-        parallel_transport_direction!,
-        Tuple{AbstractManifold,typeof(Y),typeof(p),typeof(X),typeof(q)},
-        M,
-        Y,
-        p,
-        X,
-        q,
-    )
-end
 # EmbeddedSubManifold
 function parallel_transport_direction!(
     ::NestedTrait{IsEmbeddedManifold},
@@ -488,16 +352,6 @@ end
 
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function parallel_transport_to(M::AbstractDecoratorManifold, p, X, q)
-function parallel_transport_to(::EmptyTrait, M::AbstractManifold, p, X, q)
-    return invoke(
-        parallel_transport_to,
-        Tuple{AbstractManifold,typeof(p),typeof(X),typeof(q)},
-        M,
-        p,
-        X,
-        q,
-    )
-end
 # EmbeddedSubManifold
 function parallel_transport_to(
     ::NestedTrait{IsEmbeddedManifold},
@@ -511,17 +365,6 @@ end
 
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function parallel_transport_to!(M::AbstractDecoratorManifold, Y, p, X, q)
-function parallel_transport_to!(::EmptyTrait, M::AbstractManifold, Y, p, X, q)
-    return invoke(
-        parallel_transport_to!,
-        Tuple{AbstractManifold,typeof(Y),typeof(p),typeof(X),typeof(q)},
-        M,
-        Y,
-        p,
-        X,
-        q,
-    )
-end
 # EmbeddedSubManifold
 function parallel_transport_to!(
     ::NestedTrait{IsEmbeddedManifold},
@@ -536,34 +379,15 @@ end
 
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function project(M::AbstractDecoratorManifold, p)
-function project(::EmptyTrait, M::AbstractManifold, p)
-    return invoke(project, Tuple{AbstractManifold,typeof(p)}, M, p)
-end
 
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function project!(M::AbstractDecoratorManifold, q, p)
-function project!(::EmptyTrait, M::AbstractManifold, q, p)
-    return invoke(project!, Tuple{AbstractManifold,typeof(q),typeof(p)}, M, q, p)
-end
 
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function project(M::AbstractDecoratorManifold, p, X)
-function project(::EmptyTrait, M::AbstractManifold, p, X)
-    return invoke(project, Tuple{AbstractManifold,typeof(p),typeof(X)}, M, p, X)
-end
 
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function project!(M::AbstractDecoratorManifold, Y, p, X)
-function project!(::EmptyTrait, M::AbstractManifold, Y, p, X)
-    return invoke(
-        project!,
-        Tuple{AbstractManifold,typeof(Y),typeof(p),typeof(X)},
-        M,
-        Y,
-        p,
-        X,
-    )
-end
 
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function retract(
@@ -572,22 +396,6 @@ end
     X,
     m::AbstractRetractionMethod = default_retraction_method(M),
 )
-function retract(
-    ::EmptyTrait,
-    M::AbstractManifold,
-    p,
-    X,
-    m::AbstractRetractionMethod = default_retraction_method(M),
-)
-    return invoke(
-        retract,
-        Tuple{AbstractManifold,typeof(p),typeof(X),typeof(m)},
-        M,
-        p,
-        X,
-        m,
-    )
-end
 function retract(
     ::NestedTrait{IsEmbeddedSubmanifoldManifold},
     M::AbstractDecoratorManifold,
@@ -606,24 +414,6 @@ end
     m::AbstractRetractionMethod = default_retraction_method(M),
 )
 function retract!(
-    ::EmptyTrait,
-    M::AbstractManifold,
-    q,
-    p,
-    X,
-    m::AbstractRetractionMethod = default_retraction_method(M),
-)
-    return invoke(
-        retract!,
-        Tuple{AbstractManifold,typeof(q),typeof(p),typeof(X),typeof(m)},
-        M,
-        q,
-        p,
-        X,
-        m,
-    )
-end
-function retract!(
     ::NestedTrait{IsEmbeddedSubmanifoldManifold},
     M::AbstractDecoratorManifold,
     q,
@@ -641,24 +431,6 @@ end
     X,
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
-function vector_transport_along(
-    ::EmptyTrait,
-    M::AbstractManifold,
-    q,
-    p,
-    X,
-    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
-)
-    return invoke(
-        vector_transport_along,
-        Tuple{AbstractManifold,typeof(q),typeof(p),typeof(X),typeof(m)},
-        M,
-        q,
-        p,
-        X,
-        m,
-    )
-end
 function vector_transport_along(
     ::NestedTrait{IsEmbeddedSubmanifoldManifold},
     M::AbstractDecoratorManifold,
@@ -679,26 +451,6 @@ end
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
 function vector_transport_along!(
-    ::EmptyTrait,
-    M::AbstractManifold,
-    Y,
-    p,
-    X,
-    c::AbstractVector,
-    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
-)
-    return invoke(
-        vector_transport_along!,
-        Tuple{AbstractManifold,typeof(Y),typeof(p),typeof(X),typeof(c),typeof(m)},
-        M,
-        Y,
-        p,
-        X,
-        c,
-        m,
-    )
-end
-function vector_transport_along!(
     ::NestedTrait{IsEmbeddedSubmanifoldManifold},
     M::AbstractDecoratorManifold,
     Y,
@@ -717,24 +469,6 @@ end
     d,
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
-function vector_transport_direction(
-    ::EmptyTrait,
-    M::AbstractManifold,
-    p,
-    X,
-    d,
-    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
-)
-    return invoke(
-        vector_transport_direction,
-        Tuple{AbstractManifold,typeof(p),typeof(X),typeof(d),typeof(m)},
-        M,
-        p,
-        X,
-        d,
-        m,
-    )
-end
 function vector_transport_direction(
     ::NestedTrait{IsEmbeddedSubmanifoldManifold},
     M::AbstractDecoratorManifold,
@@ -755,26 +489,6 @@ end
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
 function vector_transport_direction!(
-    ::EmptyTrait,
-    M::AbstractManifold,
-    Y,
-    p,
-    X,
-    d,
-    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
-)
-    return invoke(
-        vector_transport_direction!,
-        Tuple{AbstractManifold,typeof(Y),typeof(p),typeof(X),typeof(d),typeof(m)},
-        M,
-        Y,
-        p,
-        X,
-        d,
-        m,
-    )
-end
-function vector_transport_direction!(
     ::NestedTrait{IsEmbeddedSubmanifoldManifold},
     M::AbstractDecoratorManifold,
     Y,
@@ -794,24 +508,6 @@ end
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
 function vector_transport_to(
-    ::EmptyTrait,
-    M::AbstractManifold,
-    p,
-    X,
-    q,
-    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
-)
-    return invoke(
-        vector_transport_to,
-        Tuple{AbstractManifold,typeof(q),typeof(p),typeof(X),typeof(m)},
-        M,
-        p,
-        X,
-        q,
-        m,
-    )
-end
-function vector_transport_to(
     ::NestedTrait{IsEmbeddedSubmanifoldManifold},
     M::AbstractDecoratorManifold,
     p,
@@ -830,26 +526,6 @@ end
     q,
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
-function vector_transport_to!(
-    ::EmptyTrait,
-    M::AbstractManifold,
-    Y,
-    p,
-    X,
-    q,
-    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
-)
-    return invoke(
-        vector_transport_to!,
-        Tuple{AbstractManifold,typeof(Y),typeof(p),typeof(X),typeof(q),typeof(m)},
-        M,
-        Y,
-        p,
-        X,
-        q,
-        m,
-    )
-end
 function vector_transport_to!(
     ::NestedTrait{IsEmbeddedSubmanifoldManifold},
     M::AbstractDecoratorManifold,
