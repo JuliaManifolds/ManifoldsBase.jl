@@ -421,6 +421,7 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
         # rest not implemented - so they also fall back even onto mutating
         for r in [PolarRetraction, ProjectionRetraction, QRRetraction, SoftmaxRetraction]
             @test_throws MethodError retract(M, q, Y, r())
+            @test_throws MethodError retract!(M, p, q, Y, r())
         end
         @test_throws MethodError retract(
             M,
@@ -428,7 +429,22 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
             Y,
             ODEExponentialRetraction(PolarRetraction(), DefaultBasis()),
         )
+        @test_throws MethodError retract!(
+            M,
+            p,
+            q,
+            Y,
+            ODEExponentialRetraction(PolarRetraction(), DefaultBasis()),
+        )
         @test_throws MethodError retract(M, q, Y, PadeRetraction(2))
+        @test_throws MethodError retract!(M, p, q, Y, PadeRetraction(2))
+        @test_throws MethodError retract!(
+            M,
+            p,
+            q,
+            Y,
+            EmbeddedRetraction(ExponentialRetraction()),
+        )
         @test_throws MethodError retract(
             M,
             q,
@@ -456,6 +472,7 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
             SoftmaxInverseRetraction,
         ]
             @test_throws MethodError inverse_retract(M, q, p, r())
+            @test_throws MethodError inverse_retract!(M, Y, q, p, r())
         end
         @test_throws MethodError inverse_retract(
             M,
@@ -465,6 +482,20 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
         )
         @test_throws MethodError inverse_retract(
             M,
+            q,
+            Y,
+            NLSolveInverseRetraction(ExponentialRetraction()),
+        )
+        @test_throws MethodError inverse_retract!(
+            M,
+            Y,
+            q,
+            p,
+            EmbeddedInverseRetraction(LogarithmicInverseRetraction()),
+        )
+        @test_throws MethodError inverse_retract!(
+            M,
+            Y,
             q,
             Y,
             NLSolveInverseRetraction(ExponentialRetraction()),
@@ -479,12 +510,17 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
         # vector transport pass through
         @test vector_transport_to(M, p, X, q, ProjectionTransport()) == X
         @test vector_transport_direction(M, p, X, X, ProjectionTransport()) == X
+        @test vector_transport_to!(M, Y, p, X, q, ProjectionTransport()) == X
+        @test vector_transport_direction!(M, Y, p, X, X, ProjectionTransport()) == X
         # along not implemented
         @test_throws MethodError vector_transport_along(M, p, X, X, ProjectionTransport())
         @test vector_transport_to(M, p, X, :q, ProjectionTransport()) == X
         @test parallel_transport_to(M, p, X, q) == X
         @test parallel_transport_direction(M, p, X, X) == X
         @test parallel_transport_along(M, p, X, :c) == X
+        @test parallel_transport_to!(M, Y, p, X, q) == X
+        @test parallel_transport_direction!(M, Y, p, X, X) == X
+        @test parallel_transport_along!(M, Y, p, X, :c) == X
     end
     @testset "DefaultManifold  and ONB" begin
         M = ManifoldsBase.DefaultManifold(3)
