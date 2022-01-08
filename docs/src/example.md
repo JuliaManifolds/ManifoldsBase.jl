@@ -188,19 +188,21 @@ Now we can activate a decorator by specifying that the sphere has the [`IsIsomet
 
 ```@example manifold-tutorial
 active_traits(::ScaledSphere, args...) = merge_traits(IsIsometricEmbeddedManifold())
+nothing #hide
 ```
 
 and then specifying that said embedding is the default manifold
 
 ```@example manifold-tutorial
 get_embedding(::ScaledSphere{N}) where {N} = DefaultManifold(N+1)
+nothing #hide
 ```
 
 Now metric related functions are passed to this embedding, so the inner product works by using the embedding
 
 Now we can compute the inner product by calling [`inner`](@ref)
 
-```@example manifold_tutorial
+```@example manifold-tutorial
 X = [0.0, 0.1, 3.0]
 Y = [0.0, 4.0, 0.2]
     # returns 1.0 by calling the inner product in DefaultManifold(3)
