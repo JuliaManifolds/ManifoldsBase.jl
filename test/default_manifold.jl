@@ -514,6 +514,14 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
         @test vector_transport_direction!(M, Y, p, X, X, ProjectionTransport()) == X
         # along not implemented
         @test_throws MethodError vector_transport_along(M, p, X, X, ProjectionTransport())
+        @test_throws MethodError vector_transport_along!(
+            M,
+            Y,
+            p,
+            X,
+            X,
+            ProjectionTransport(),
+        )
         @test vector_transport_to(M, p, X, :q, ProjectionTransport()) == X
         @test parallel_transport_to(M, p, X, q) == X
         @test parallel_transport_direction(M, p, X, X) == X

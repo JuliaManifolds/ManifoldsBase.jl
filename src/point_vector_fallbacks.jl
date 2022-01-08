@@ -98,11 +98,13 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
         end
 
         function ManifoldsBase.embed!(M::$TM, q::$TP, p::$TP)
-            return embed!(M, q.$pfield, p.$pfield)
+            embed!(M, q.$pfield, p.$pfield)
+            return q
         end
 
         function ManifoldsBase.embed!(M::$TM, Y::$TV, p::$TP, X::$TV)
-            return embed!(M, Y.$vfield, p.$pfield, X.$vfield)
+            embed!(M, Y.$vfield, p.$pfield, X.$vfield)
+            return Y
         end
 
         function ManifoldsBase.exp!(M::$TM, q::$TP, p::$TP, X::$TV)
@@ -177,13 +179,15 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
                 return ManifoldsBase.$ca(M, p.$pfield, X.$vfield, B)
             end
             function ManifoldsBase.$cm(M::$TM, Y, p::$TP, X::$TV, B)
-                return ManifoldsBase.$cm(M, Y, p.$pfield, X.$vfield, B)
+                ManifoldsBase.$cm(M, Y, p.$pfield, X.$vfield, B)
+                return Y
             end
             function ManifoldsBase.$va(M::$TM, p::$TP, X, B)
                 return $TV(ManifoldsBase.$va(M, p.$pfield, X, B))
             end
             function ManifoldsBase.$vm(M::$TM, Y::$TV, p::$TP, X, B)
-                return ManifoldsBase.$vm(M, Y.$vfield, p.$pfield, X, B)
+                ManifoldsBase.$vm(M, Y.$vfield, p.$pfield, X, B)
+                return Y
             end
         end)
     end
@@ -191,17 +195,15 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
     for f_postfix in [:polar, :project, :qr, :softmax]
         ra = Symbol("retract_$(f_postfix)")
         rm = Symbol("retract_$(f_postfix)!")
-        push!(
-            block.args,
-            quote
-                function ManifoldsBase.$ra(M::$TM, p::$TP, X::$TV)
-                    return $TP(ManifoldsBase.$ra(M, p.$pfield, X.$vfield))
-                end
-                function ManifoldsBase.$rm(M::$TM, q, p::$TP, X::$TV)
-                    return ManifoldsBase.$rm(M, q.$pfield, p.$pfield, X.$vfield)
-                end
-            end,
-        )
+        push!(block.args, quote
+            function ManifoldsBase.$ra(M::$TM, p::$TP, X::$TV)
+                return $TP(ManifoldsBase.$ra(M, p.$pfield, X.$vfield))
+            end
+            function ManifoldsBase.$rm(M::$TM, q, p::$TP, X::$TV)
+                ManifoldsBase.$rm(M, q.$pfield, p.$pfield, X.$vfield)
+                return q
+            end
+        end)
     end
     push!(
         block.args,
@@ -210,49 +212,37 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
                 return $TP(ManifoldsBase.retract_exp_ode(M, p.$pfield, X.$vfield, m, B))
             end
             function ManifoldsBase.retract_exp_ode!(M::$TM, q::$TP, p::$TP, X::$TV, m, B)
-                return ManifoldsBase.retract_exp_ode!(
-                    M,
-                    q.$pfield,
-                    p.$pfield,
-                    X.$vfield,
-                    m,
-                    B,
-                )
+                ManifoldsBase.retract_exp_ode!(M, q.$pfield, p.$pfield, X.$vfield, m, B)
+                return q
             end
             function ManifoldsBase.retract_pade(M::$TM, p::$TP, X::$TV, n)
                 return $TP(ManifoldsBase.retract_pade(M, p.$pfield, X.$vfield, n))
             end
             function ManifoldsBase.retract_pade!(M::$TM, q::$TP, p::$TP, X::$TV, n)
-                return ManifoldsBase.retract_pade!(M, q.$pfield, p.$pfield, X.$vfield, n)
+                ManifoldsBase.retract_pade!(M, q.$pfield, p.$pfield, X.$vfield, n)
+                return q
             end
             function ManifoldsBase.retract_embedded(M::$TM, p::$TP, X::$TV, m)
                 return $TP(ManifoldsBase.retract_embedded(M, p.$pfield, X.$vfield, m))
             end
             function ManifoldsBase.retract_embedded!(M::$TM, q::$TP, p::$TP, X::$TV, m)
-                return ManifoldsBase.retract_embedded!(
-                    M,
-                    q.$pfield,
-                    p.$pfield,
-                    X.$vfield,
-                    m,
-                )
+                ManifoldsBase.retract_embedded!(M, q.$pfield, p.$pfield, X.$vfield, m)
+                return q
             end
         end,
     )
     for f_postfix in [:polar, :project, :qr, :softmax]
         ra = Symbol("inverse_retract_$(f_postfix)")
         rm = Symbol("inverse_retract_$(f_postfix)!")
-        push!(
-            block.args,
-            quote
-                function ManifoldsBase.$ra(M::$TM, p::$TP, q::$TP)
-                    return $TV((ManifoldsBase.$ra)(M, p.$pfield, q.$pfield))
-                end
-                function ManifoldsBase.$rm(M::$TM, Y::$TV, p::$TP, q::$TP)
-                    return ManifoldsBase.$rm(M, Y.$vfield, p.$pfield, q.$pfield)
-                end
-            end,
-        )
+        push!(block.args, quote
+            function ManifoldsBase.$ra(M::$TM, p::$TP, q::$TP)
+                return $TV((ManifoldsBase.$ra)(M, p.$pfield, q.$pfield))
+            end
+            function ManifoldsBase.$rm(M::$TM, Y::$TV, p::$TP, q::$TP)
+                ManifoldsBase.$rm(M, Y.$vfield, p.$pfield, q.$pfield)
+                return Y
+            end
+        end)
     end
     push!(
         block.args,
@@ -269,13 +259,14 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
                 q::$TP,
                 m,
             )
-                return ManifoldsBase.inverse_retract_embedded!(
+                ManifoldsBase.inverse_retract_embedded!(
                     M,
                     X.$vfield,
                     p.$pfield,
                     q.$pfield,
                     m,
                 )
+                return X
             end
             function ManifoldsBase.inverse_retract_nlsolve(M::$TM, p::$TP, q::$TP, m)
                 return $TV(
@@ -289,13 +280,14 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
                 q::$TP,
                 m,
             )
-                return ManifoldsBase.inverse_retract_nlsolve!(
+                ManifoldsBase.inverse_retract_nlsolve!(
                     M,
                     X.$vfield,
                     p.$pfield,
                     q.$pfield,
                     m,
                 )
+                return X
             end
         end,
     )
@@ -304,7 +296,7 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
     for sub in [:project, :diff]
         # project & diff
         vtaa = Symbol("vector_transport_along_$(sub)")
-        vtam = Symbol("vector_transport_along_$(sub)")
+        vtam = Symbol("vector_transport_along_$(sub)!")
         vtta = Symbol("vector_transport_to_$(sub)")
         vttm = Symbol("vector_transport_to_$(sub)!")
         push!(
@@ -313,20 +305,16 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
                 function ManifoldsBase.$vtaa(M::$TM, p::$TP, X::$TV, c)
                     return $TV(ManifoldsBase.$vtaa(M, p.$pfield, X.$vfield, c))
                 end
-                function ManifoldsBase.$vtam(M::$TM, Y::$TP, p::$TP, X::$TV, c)
-                    return ManifoldsBase.$vtam(M, Y.$vfield, p.$pfield, X.$vfield, c)
+                function ManifoldsBase.$vtam(M::$TM, Y::$TV, p::$TP, X::$TV, c)
+                    ManifoldsBase.$vtam(M, Y.$vfield, p.$pfield, X.$vfield, c)
+                    return Y
                 end
                 function ManifoldsBase.$vtta(M::$TM, p::$TP, X::$TV, q::$TP)
                     return $TV(ManifoldsBase.$vtta(M, p.$pfield, X.$vfield, q.$pfield))
                 end
-                function ManifoldsBase.$vttm(M::$TM, Y::$TP, p::$TP, X::$TV, q::$TP)
-                    return ManifoldsBase.$vttm(
-                        M,
-                        Y.$vfield,
-                        p.$pfield,
-                        X.$vfield,
-                        q.$pfield,
-                    )
+                function ManifoldsBase.$vttm(M::$TM, Y::$TV, p::$TP, X::$TV, q::$TP)
+                    ManifoldsBase.$vttm(M, Y.$vfield, p.$pfield, X.$vfield, q.$pfield)
+                    return Y
                 end
             end,
         )
@@ -342,18 +330,19 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
             end
             function ManifoldsBase.parallel_transport_along!(
                 M::$TM,
-                Y::$TP,
+                Y::$TV,
                 p::$TP,
                 X::$TV,
                 c,
             )
-                return ManifoldsBase.parallel_transport_along!(
+                ManifoldsBase.parallel_transport_along!(
                     M,
-                    p.$vfield,
+                    Y.$vfield,
                     p.$pfield,
                     X.$vfield,
                     c,
                 )
+                return Y
             end
             function ManifoldsBase.parallel_transport_direction(
                 M::$TM,
@@ -372,18 +361,19 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
             end
             function ManifoldsBase.parallel_transport_direction!(
                 M::$TM,
-                Y::$TP,
+                Y::$TV,
                 p::$TP,
                 X::$TV,
                 d::$TV,
             )
-                return ManifoldsBase.parallel_transport_direciton!(
+                ManifoldsBase.parallel_transport_direction!(
                     M,
-                    p.$vfield,
+                    Y.$vfield,
                     p.$pfield,
                     X.$vfield,
                     d.$vfield,
                 )
+                return Y
             end
             function ManifoldsBase.parallel_transport_to(M::$TM, p::$TP, X::$TV, q::$TP)
                 return $TV(
@@ -392,18 +382,19 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
             end
             function ManifoldsBase.parallel_transport_along!(
                 M::$TM,
-                Y::$TP,
+                Y::$TV,
                 p::$TP,
                 X::$TV,
                 q::$TP,
             )
-                return ManifoldsBase.parallel_transport_along!(
+                ManifoldsBase.parallel_transport_along!(
                     M,
-                    p.$vfield,
+                    Y.$vfield,
                     p.$pfield,
                     X.$vfield,
                     q.$pfield,
                 )
+                return Y
             end
         end,
     )
