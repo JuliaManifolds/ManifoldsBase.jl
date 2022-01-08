@@ -380,14 +380,14 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
                     ManifoldsBase.parallel_transport_to(M, p.$pfield, X.$vfield, q.$pfield),
                 )
             end
-            function ManifoldsBase.parallel_transport_along!(
+            function ManifoldsBase.parallel_transport_to!(
                 M::$TM,
                 Y::$TV,
                 p::$TP,
                 X::$TV,
                 q::$TP,
             )
-                ManifoldsBase.parallel_transport_along!(
+                ManifoldsBase.parallel_transport_toå!(
                     M,
                     Y.$vfield,
                     p.$pfield,
@@ -398,7 +398,6 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
             end
         end,
     )
-    # diff
     return esc(block)
 end
 

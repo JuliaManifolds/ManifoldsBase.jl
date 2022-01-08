@@ -483,7 +483,7 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
         @test_throws MethodError inverse_retract(
             M,
             q,
-            Y,
+            p,
             NLSolveInverseRetraction(ExponentialRetraction()),
         )
         @test_throws MethodError inverse_retract!(
@@ -497,7 +497,7 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
             M,
             Y,
             q,
-            Y,
+            p,
             NLSolveInverseRetraction(ExponentialRetraction()),
         )
         c = ManifoldsBase.allocate_coordinates(M, p, Float64, manifold_dimension(M))
