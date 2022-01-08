@@ -198,7 +198,6 @@ get_embedding(::ScaledSphere{N}) where {N} = DefaultManifold(N+1)
 
 Now metric related functions are passed to this embedding, so the inner product works by using the embedding
 
-
 Now we can compute the inner product by calling [`inner`](@ref)
 
 ```@example manifold_tutorial
