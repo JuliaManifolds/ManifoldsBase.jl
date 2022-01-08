@@ -30,7 +30,7 @@ cart_to_polar(x, y) = (hypot(x, y), atan(y, x))
 normal_coord_to_vector(M, x, rθ, B) = get_vector(M, x, collect(polar_to_cart(rθ...)), B)
 normal_coord_to_point(M, x, rθ, B) = exp(M, x, normal_coord_to_vector(M, x, rθ, B))
 
-function plot_patch!(ax, M, x, B, r, θs; options=Dict())
+function plot_patch!(ax, M, x, B, r, θs; options = Dict())
     push!(
         ax,
         Plot3(
@@ -41,9 +41,9 @@ function plot_patch!(ax, M, x, B, r, θs; options=Dict())
     return ax
 end
 
-function plot_geodesic!(ax, M, x, y; n=100, options=Dict())
+function plot_geodesic!(ax, M, x, y; n = 100, options = Dict())
     γ = shortest_geodesic(M, x, y)
-    T = range(0, 1; length=n)
+    T = range(0, 1; length = n)
     push!(ax, Plot3(options, Coordinates(Tuple.(γ.(T)))))
     return ax
 end
@@ -100,8 +100,8 @@ else
         ymax = 1.0,
     })
 end
-rs = range(0, π / 5; length=6)
-θs = range(0, 2π; length=100)
+rs = range(0, π / 5; length = 6)
+θs = range(0, 2π; length = 100)
 
 #
 # Plot manifold patches
@@ -114,9 +114,10 @@ for i in eachindex(base_points)
     B = DiagonalizingOrthonormalBasis(basis_vectors[i])
     basis = get_basis(S, b, B)
     optionsP = @pgf {fill = patch_colors[i], draw = "none", opacity = patch_opacity}
-    plot_patch!(tp, S, b, basis, π / 5, θs; options=optionsP)
-    optionsP = @pgf {fill = dark_mode ? "black" : "white", draw = "none", opacity = patch_opacity}
-    plot_patch!(tp, S, b, basis, 0.75* π / 5, θs; options=optionsP)
+    plot_patch!(tp, S, b, basis, π / 5, θs; options = optionsP)
+    optionsP =
+        @pgf {fill = dark_mode ? "black" : "white", draw = "none", opacity = patch_opacity}
+    plot_patch!(tp, S, b, basis, 0.75 * π / 5, θs; options = optionsP)
 end
 
 #
@@ -129,12 +130,12 @@ options = @pgf {
     line_width = geo_line_width,
     color = dark_mode ? "white" : "black",
 }
-plot_geodesic!(tp, S, base_points[1], base_points[2]; options=options)
-plot_geodesic!(tp, S, base_points[1], base_points[3]; options=options)
-plot_geodesic!(tp, S, base_points[2], base_points[3]; options=options)
+plot_geodesic!(tp, S, base_points[1], base_points[2]; options = options)
+plot_geodesic!(tp, S, base_points[1], base_points[3]; options = options)
+plot_geodesic!(tp, S, base_points[2], base_points[3]; options = options)
 
 #
 # Export Logo.
 out_file = "$(out_file_prefix)$(out_file_ext)"
 pgfsave(out_file, tp)
-pgfsave("$(out_file_prefix).pdf",tp)
+pgfsave("$(out_file_prefix).pdf", tp)

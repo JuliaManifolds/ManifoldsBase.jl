@@ -418,6 +418,23 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
         @test inverse_retract(M, p, q, LogarithmicInverseRetraction()) == -Y
         @test retract(M, q, Y, CustomDefinedRetraction()) == p
         @test retract(M, q, Y, ExponentialRetraction()) == p
+        # rest not implemented - so they also fall back even onto mutating
+        for r in [PolarRetraction, ProjectionRetraction, QRRetraction, SoftmaxRetraction]
+            @test_throws MethodError retract(M, q, Y, r())
+        end
+        @test_throws MethodError retract(
+            M,
+            q,
+            Y,
+            ODEExponentialRetraction(PolarRetraction(), DefaultBasis()),
+        )
+        @test_throws MethodError retract(M, q, Y, PadeRetraction(2))
+        @test_throws MethodError retract(
+            M,
+            q,
+            Y,
+            EmbeddedRetraction(ExponentialRetraction()),
+        )
         p2 = allocate(p, eltype(p.value), size(p.value))
         @test size(p2.value) == size(p.value)
         X2 = allocate(X, eltype(X.value), size(X.value))
@@ -431,6 +448,27 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
         X4 = ManifoldsBase.allocate_result(M, inverse_retract, p, q)
         @test inverse_retract!(M, X4, p, q) == inverse_retract(M, p, q)
         @test X4 == inverse_retract(M, p, q)
+        # rest not implemented but check passthrough
+        for r in [
+            PolarInverseRetraction,
+            ProjectionInverseRetraction,
+            QRInverseRetraction,
+            SoftmaxInverseRetraction,
+        ]
+            @test_throws MethodError inverse_retract(M, q, p, r())
+        end
+        @test_throws MethodError inverse_retract(
+            M,
+            q,
+            p,
+            EmbeddedInverseRetraction(LogarithmicInverseRetraction()),
+        )
+        @test_throws MethodError inverse_retract(
+            M,
+            q,
+            Y,
+            NLSolveInverseRetraction(ExponentialRetraction()),
+        )
         c = ManifoldsBase.allocate_coordinates(M, p, Float64, manifold_dimension(M))
         @test c isa Vector
         @test length(c) == 3
@@ -438,6 +476,15 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
         @test X + Y == DefaultTVector(X.value + Y.value)
         @test +X == X
         @test (Y .= X) === Y
+        # vector transport pass through
+        @test vector_transport_to(M, p, X, q, ProjectionTransport()) == X
+        @test vector_transport_direction(M, p, X, X, ProjectionTransport()) == X
+        # along not implemented
+        @test_throws MethodError vector_transport_along(M, p, X, X, ProjectionTransport())
+        @test vector_transport_to(M, p, X, :q, ProjectionTransport()) == X
+        @test parallel_transport_to(M,p,X,q) == X
+        @test parallel_transport_direction(M,p,X,X) == X
+        @test parallel_transport_along(M,p,X,:c) == X
     end
     @testset "DefaultManifold  and ONB" begin
         M = ManifoldsBase.DefaultManifold(3)

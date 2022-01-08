@@ -300,74 +300,111 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
         end,
     )
     # forward vector transports
-    for f_infix in [:along, :direction, :to]
-        vt = Symbol("vector_transport_$(f_infix)")
-        if f_infix != :direction
-            vtpa = Symbol("$(vt)_project")
-            vtpm = Symbol("$(vt)_project!")
-            push!(
-                block.args,
-                quote
-                    function ManifoldsBase.$vtpa(M::$TM, p::$TP, X::$TV, q::$TP)
-                        return $TV(
-                            ManifoldsBase.$vtpa(M, p.$pfield, X.$vfield, q .% pfield),
-                        )
-                    end
-                    function ManifoldsBase.$vtpm(M::$TM, Y::$TP, p::$TP, X::$TV, q::$TP)
-                        return ManifoldsBase.$vtpm(
-                            M,
-                            p.$vfield,
-                            p.$pfield,
-                            X.$vfield,
-                            q .% pfield,
-                        )
-                    end
-                end,
-            )
-            vtda = Symbol("$(vt)_diff")
-            vtdm = Symbol("$(vt)_diff!")
-            push!(
-                block.args,
-                quote
-                    function ManifoldsBase.$vtda(M::$TM, p::$TP, X::$TV, q::$TP, m)
-                        return $TV(
-                            ManifoldsBase.$vtda(M, p.$pfield, X.$vfield, q .% pfield, m),
-                        )
-                    end
-                    function ManifoldsBase.$vtdm(M::$TM, Y::$TP, p::$TP, X::$TV, q::$TP)
-                        return ManifoldsBase.$vtdm(
-                            M,
-                            p.$vfield,
-                            p.$pfield,
-                            X.$vfield,
-                            q .% pfield,
-                            m,
-                        )
-                    end
-                end,
-            )
-        end
-        pta = Symbol("parallel_transport_$(f_infix)")
-        ptm = Symbol("parallel_transport_$(f_infix)!")
+
+    for sub in [:project, :diff]
+        # project & diff
+        vtaa = Symbol("vector_transport_along_$(sub)")
+        vtam = Symbol("vector_transport_along_$(sub)")
+        vtta = Symbol("vector_transport_to_$(sub)")
+        vttm = Symbol("vector_transport_to_$(sub)!")
         push!(
             block.args,
             quote
-                function ManifoldsBase.$pta(M::$TM, p::$TP, X::$TV, q::$TP, m)
-                    return $TV(ManifoldsBase.$pta(M, p.$pfield, X.$vfield, q .% pfield, m))
+                function ManifoldsBase.$vtaa(M::$TM, p::$TP, X::$TV, c)
+                    return $TV(ManifoldsBase.$vtaa(M, p.$pfield, X.$vfield, c))
                 end
-                function ManifoldsBase.$ptm(M::$TM, Y::$TP, p::$TP, X::$TV, q::$TP)
-                    return ManifoldsBase.$ptm(
+                function ManifoldsBase.$vtam(M::$TM, Y::$TP, p::$TP, X::$TV, c)
+                    return ManifoldsBase.$vtam(M, Y.$vfield, p.$pfield, X.$vfield, c)
+                end
+                function ManifoldsBase.$vtta(M::$TM, p::$TP, X::$TV, q::$TP)
+                    return $TV(ManifoldsBase.$vtta(M, p.$pfield, X.$vfield, q.$pfield))
+                end
+                function ManifoldsBase.$vttm(M::$TM, Y::$TP, p::$TP, X::$TV, q::$TP)
+                    return ManifoldsBase.$vttm(
                         M,
-                        p.$vfield,
+                        Y.$vfield,
                         p.$pfield,
                         X.$vfield,
-                        q .% pfield,
-                        m,
+                        q.$pfield,
                     )
                 end
             end,
         )
     end
+    # parallel transports
+    push!(
+        block.args,
+        quote
+            function ManifoldsBase.parallel_transport_along(M::$TM, p::$TP, X::$TV, c)
+                return $TV(
+                    ManifoldsBase.parallel_transport_along(M, p.$pfield, X.$vfield, c),
+                )
+            end
+            function ManifoldsBase.parallel_transport_along!(
+                M::$TM,
+                Y::$TP,
+                p::$TP,
+                X::$TV,
+                c,
+            )
+                return ManifoldsBase.parallel_transport_along!(
+                    M,
+                    p.$vfield,
+                    p.$pfield,
+                    X.$vfield,
+                    c,
+                )
+            end
+            function ManifoldsBase.parallel_transport_direction(
+                M::$TM,
+                p::$TP,
+                X::$TV,
+                d::$TV,
+            )
+                return $TV(
+                    ManifoldsBase.parallel_transport_direction(
+                        M,
+                        p.$pfield,
+                        X.$vfield,
+                        d.$vfield,
+                    ),
+                )
+            end
+            function ManifoldsBase.parallel_transport_direction!(
+                M::$TM,
+                Y::$TP,
+                p::$TP,
+                X::$TV,
+                d::$TV,
+            )
+                return ManifoldsBase.parallel_transport_direciton!(
+                    M,
+                    p.$vfield,
+                    p.$pfield,
+                    X.$vfield,
+                    d.$vfield,
+                )
+            end
+            function ManifoldsBase.parallel_transport_to(M::$TM, p::$TP, X::$TV, q::$TP)
+                return $TV(ManifoldsBase.parallel_transport_to(M, p.$pfield, X.$vfield, q.$pfield))
+            end
+            function ManifoldsBase.parallel_transport_along!(
+                M::$TM,
+                Y::$TP,
+                p::$TP,
+                X::$TV,
+                q::$TP,
+            )
+                return ManifoldsBase.parallel_transport_along!(
+                    M,
+                    p.$vfield,
+                    p.$pfield,
+                    X.$vfield,
+                    q.$pfield,
+                )
+            end
+        end,
+    )
     # diff
     return esc(block)
 end
