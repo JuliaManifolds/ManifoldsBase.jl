@@ -115,7 +115,7 @@ When implementing your own manifold, you have to import functions like these any
 
 To summarize, with respect to the [dispatch on one argument at a time](https://docs.julialang.org/en/v1/manual/methods/#Dispatch-on-one-argument-at-a-time) paradigm, this layer dispatches the _concrete manifold and point/vector types last_.
 
-## Mutating and allocating functions
+## [Mutating and allocating functions](@id mutating-and-nonmutating)
 
 Every function, where this is applicable should provide a mutating and an allocating variant.
 For example for the exponential map `exp(M, p, X)` returns a _new_ point `q` where the result is computed in.
