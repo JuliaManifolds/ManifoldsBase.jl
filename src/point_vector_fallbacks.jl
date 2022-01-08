@@ -387,7 +387,7 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
                 X::$TV,
                 q::$TP,
             )
-                ManifoldsBase.parallel_transport_toå!(
+                ManifoldsBase.parallel_transport_to!(
                     M,
                     Y.$vfield,
                     p.$pfield,
