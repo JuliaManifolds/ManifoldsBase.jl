@@ -181,7 +181,7 @@ Since the sphere is isometrically embedded, we do not have to implement the [`in
 
 ```@example manifold-tutorial
 using ManifoldsBase: DefaultManifold, IsIsometricEmbeddedManifold
-import ManifoldsBase: activate_traits, merge_traits, get_embedding
+import ManifoldsBase: active_traits, merge_traits, get_embedding
 ```
 
 Now we can activate a decorator by specifying that the sphere has the [`IsIsometricEmbeddedManifold`](@ref) trait for the manifold by writing
