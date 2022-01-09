@@ -261,11 +261,11 @@ function get_coordinates end
 function get_vector end
 
 const all_uncached_bases{T} = Union{
-     AbstractBasis{<:Any,T},
-     DefaultBasis{<:Any,T},
-     DefaultOrthogonalBasis{<:Any,T},
-     DefaultOrthonormalBasis{<:Any,T},
- }
+    AbstractBasis{<:Any,T},
+    DefaultBasis{<:Any,T},
+    DefaultOrthogonalBasis{<:Any,T},
+    DefaultOrthonormalBasis{<:Any,T},
+}
 
 """
     allocate_coordinates(M::AbstractManifold, p, T, n::Int)
