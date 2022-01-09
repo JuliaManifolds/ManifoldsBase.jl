@@ -1,3 +1,7 @@
+<div align="center">
+    <img src="https://github.com/JuliaManifolds/Manifolds.jl/blob/master/docs/src/assets/logo-text-readme.png" alt="ManifoldsBase.jl Logo with text" width="701">
+</div>
+
 # ManifoldsBase.jl
 [![](https://img.shields.io/badge/docs-stable-blue.svg)](https://juliamanifolds.github.io/Manifolds.jl/stable/interface.html)
 [![](https://img.shields.io/badge/docs-dev-blue.svg)](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html)
