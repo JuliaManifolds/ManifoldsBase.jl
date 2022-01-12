@@ -825,7 +825,7 @@ function _vector_transport_to(
     return vector_transport_to_diff(M, p, X, q, r)
 end
 function vector_transport_to_diff(M::AbstractManifold, p, X, q, r)
-    Y = allocate_result(M, vector_transport_to, X, p, r)
+    Y = allocate_result(M, vector_transport_to, X, p)
     return vector_transport_to_diff!(M, Y, p, X, q, r)
 end
 function _vector_transport_to(
