@@ -25,7 +25,7 @@ abstract type AbstractLinearVectorTransportMethod <: AbstractVectorTransportMeth
 
 A type to specify a vector transport that is given by differentiating a retraction.
 This can be introduced in two ways. Let ``\mathcal M`` be a Riemannian manifold,
-``p\in\mathcal M`` a point, and ``X,Y\in T_p\mathcal M`` denote two tangent vectors at ``p``.
+``p∈\mathcal M`` a point, and ``X,Y∈ T_p\mathcal M`` denote two tangent vectors at ``p``.
 
 Given a retraction (cf. [`AbstractRetractionMethod`](@ref)) ``\operatorname{retr}``,
 the vector transport of `X` in direction `Y` (cf. [`vector_transport_direction`](@ref))
@@ -70,7 +70,7 @@ end
 Compute the vector transport by parallel transport, see
 [`parallel_transport_to`](@ref)
 """
-struct ParallelTransport <: AbstractVectorTransportMethod end
+struct ParallelTransport <: AbstractLinearVectorTransportMethod end
 
 """
     ProjectionTransport <: AbstractVectorTransportMethod
@@ -79,7 +79,7 @@ Specify to use projection onto tangent space as vector transport method within
 [`vector_transport_to`](@ref), [`vector_transport_direction`](@ref), or
 [`vector_transport_along`](@ref). See [`project`](@ref) for details.
 """
-struct ProjectionTransport <: AbstractVectorTransportMethod end
+struct ProjectionTransport <: AbstractLinearVectorTransportMethod end
 
 
 @doc raw"""
@@ -89,7 +89,7 @@ Specify to use [`pole_ladder`](@ref) as vector transport method within
 [`vector_transport_to`](@ref), [`vector_transport_direction`](@ref), or
 [`vector_transport_along`](@ref), i.e.
 
-Let $X\in T_p\mathcal M$ be a tangent vector at $p\in\mathcal M$ and $q\in\mathcal M$ the
+Let $X∈ T_p\mathcal M$ be a tangent vector at $p∈\mathcal M$ and $q∈\mathcal M$ the
 point to transport to. Then $x = \exp_pX$ is used to call
 `y = `[`pole_ladder`](@ref)`(M, p, x, q)` and the resulting vector is obtained by computing
 $Y = -\log_qy$.
@@ -149,7 +149,7 @@ end
     ScaledVectorTransport{T} <: AbstractVectorTransportMethod
 
 Introduce a scaled variant of any [`AbstractVectorTransportMethod`](@ref) `T`,
-as introduced in [^SatoIwai2013] for some ``X\in T_p\mathcal M`` as
+as introduced in [^SatoIwai2013] for some ``X∈ T_p\mathcal M`` as
 
 ```math
     \mathcal T^{\mathrm{S}}(X) = \frac{\lVert X\rVert_p}{\lVert \mathcal T(X)\rVert_q}\mathcal T(X).
@@ -181,7 +181,7 @@ Specify to use [`schilds_ladder`](@ref) as vector transport method within
 [`vector_transport_to`](@ref), [`vector_transport_direction`](@ref), or
 [`vector_transport_along`](@ref), i.e.
 
-Let $X\in T_p\mathcal M$ be a tangent vector at $p\in\mathcal M$ and $q\in\mathcal M$ the
+Let $X∈ T_p\mathcal M$ be a tangent vector at $p∈\mathcal M$ and $q∈\mathcal M$ the
 point to transport to. Then
 
 ````math
@@ -652,14 +652,43 @@ function _vector_transport_along!(
     return Y
 end
 
-"""
+@doc raw"""
     vector_transport_direction(M::AbstractManifold, p, X, d)
-    vector_transport_direction(M::AbstractManifold, p, X, d, method::AbstractVectorTransportMethod)
+    vector_transport_direction(M::AbstractManifold, p, X, d, m::AbstractVectorTransportMethod)
+    vector_transport_direction(M::AbstractManifold, p, X, d, m::AbstractVectorTransportMethod, r::AbstractRetractionMethod)
 
-Transport a vector `X` from the tangent space at a point `p` on the [`AbstractManifold`](@ref) `M`
-in the direction indicated by the tangent vector `d` at `p`. By default, [`retract`](@ref) and
-[`vector_transport_to!`](@ref) are used with the `method`, which defaults
-to [`default_vector_transport_method`](@ref)`(M)`.
+Given an [`AbstractManifold`](@ref) ``\mathcal M`` the vector transport is a generalization of the
+[`parallel_transport_direction`](@ref) that identifies vectors from different tangent spaces.
+
+More precisely using [^AbsilMahonySepulchre2008], Def. 8.1.1, a vector transport
+``T_{p,d}: T_p\mathcal M \to T_q\mathcal M``, ``p∈ \mathcal M``, ``Y∈ T_p\mathcal M`` is a smooth mapping
+associated to a retraction ``\operatorname{retr}_p(Y) = q`` such that
+
+1. (associated retraction) ``\mathcal T_{p,d}X ∈ T_q\mathcal M`` if and only if ``q = \operatorname{retr}_p(d)``.
+2. (consistency) ``\mathcal T_{p,0_p}X = X`` for all ``X∈T_p\mathcal M``
+3. (linearity) ``\mathcal T_{p,d}(αX+βY) = \mathcal T_{p,d}αX + \mathcal T_{p,d}βY`
+
+For the [`AbstractVectorTransportMethod`](@ref) we might even omit the third point,
+but the [`AbstractLinearVectorTransportMethod`](@ref)s are linear.
+
+# Input Parameters
+* `M` a manifold
+* `p` indicating the tangent space of
+* `X` the tangent vector to be transported
+* `d` indicating a transport direction (and distance through its length)
+* `m` an [`AbstractVectorTransportMethod`](@ref), by default [`default_vector_transport_method`](@ref), so usually [`ParallelTransport`](@ref)
+* `r` a [`AbstractRetractionMethod`](@ref) by default [`default_retraction_method`](@ref), so usually [`ExponentialRetraction`](@ref)
+
+Instead of spcifying a start direction `d` one can equivalently also specify a target tanget space
+``T_q\mathcal M``, see [`vector_transport_to`](@ref).
+This is what this method defaults to, if no implementation if given.
+
+[^AbsilMahonySepulchre2008]:
+    > Absil, P.-A., Mahony, R. and Sepulchre R.,
+    > _Optimization Algorithms on Matrix Manifolds_
+    > Princeton University Press, 2008,
+    > doi: [10.1515/9781400830244](https://doi.org/10.1515/9781400830244)
+    > [open access](http://press.princeton.edu/chapters/absil/)
 """
 function vector_transport_direction(
     M::AbstractManifold,
@@ -667,32 +696,44 @@ function vector_transport_direction(
     X,
     d,
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
+    r::AbstractRetractionMethod = default_retraction_method(M),
 )
-    return _vector_transport_direction(M, p, X, d, m)
+    return _vector_transport_direction(M, p, X, d, m, r)
 end
-
 function _vector_transport_direction(
     M::AbstractManifold,
     p,
     X,
     d,
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
+    r::AbstractRetractionMethod = default_retraction_method(M),
 )
-    return vector_transport_to(M, p, X, exp(M, p, d), m)
+    return vector_transport_to(M, p, X, retract(M, p, d, r), m, r)
 end
-function _vector_transport_direction(M::AbstractManifold, p, X, d, ::ParallelTransport)
+function _vector_transport_direction(
+    M::AbstractManifold,
+    p,
+    X,
+    d,
+    ::ParallelTransport,
+    ::ExponentialRetraction,
+)
     return parallel_transport_direction(M, p, X, d)
 end
 
 
 """
     vector_transport_direction!(M::AbstractManifold, Y, p, X, d)
-    vector_transport_direction!(M::AbstractManifold, Y, p, X, d, method::AbstractVectorTransportMethod)
+    vector_transport_direction!(M::AbstractManifold, Y, p, X, d, m::AbstractVectorTransportMethod)
+    vector_transport_direction!(M::AbstractManifold, Y, p, X, d, m::AbstractVectorTransportMethod)
 
 Transport a vector `X` from the tangent space at a point `p` on the [`AbstractManifold`](@ref) `M`
 in the direction indicated by the tangent vector `d` at `p`. By default, [`retract`](@ref) and
-[`vector_transport_to!`](@ref) are used with the `method`, which defaults
-to [`default_vector_transport_method`](@ref)`(M)`. The result is saved to `Y`.
+[`vector_transport_to!`](@ref) are used with the `m` and `r`, which default
+to [`default_vector_transport_method`](@ref)`(M)` and [`default_retraction_method`](@ref)`(M)`, respectively.
+The result is saved to `Y`.
+
+See [`vector_transport_direction`](@ref) for more details.
 """
 function vector_transport_direction!(
     M::AbstractManifold,
@@ -701,8 +742,9 @@ function vector_transport_direction!(
     X,
     d,
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
+    r::AbstractRetractionMethod = default_retraction_method(M),
 )
-    return _vector_transport_direction!(M, Y, p, X, d, m)
+    return _vector_transport_direction!(M, Y, p, X, d, m, r)
 end
 
 
@@ -713,21 +755,30 @@ function _vector_transport_direction!(
     X,
     d,
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
+    r::AbstractRetractionMethod = default_retraction_method(M),
 )
-    return vector_transport_to!(M, Y, p, X, exp(M, p, d), m)
+    return vector_transport_to!(M, Y, p, X, retract(M, p, d, r), m)
 end
 function _vector_transport_direction!(M::AbstractManifold, Y, p, X, d, ::ParallelTransport)
     return parallel_transport_direction!(M, Y, p, X, d)
 end
 
-"""
+@doc raw"""
     vector_transport_to(M::AbstractManifold, p, X, q)
     vector_transport_to(M::AbstractManifold, p, X, q, method::AbstractVectorTransportMethod)
+    vector_transport_to(M::AbstractManifold, p, X, q, method::AbstractVectorTransportMethod, r::AbstractRetractionMethod)
 
 Transport a vector `X` from the tangent space at a point `p` on the [`AbstractManifold`](@ref) `M`
-along the [`shortest_geodesic`](@ref) to the tangent space at another point `q`.
-By default, the [`AbstractVectorTransportMethod`](@ref) `method` is
-[`default_vector_transport_method`](@ref)`(M)`.
+along a curve specified by the [`AbstractRetractionMethod`](@ref) `r` to the tangent space at another point `q`.
+By `m` is the [`default_vector_transport_method`](@ref)`(M)` and `r` the [`default_retraction_method`](@ref).
+
+Note that some methods do not require the [`AbstractRetractionMethod`](@ref), for example [`ProjectionTransport`](@ref),
+while for others, it has to match the type like for the [`DifferentiatedRetractionVectorTransport`](@ref)
+or the [`parallel_transport_to`](@ref) which is always meant along the [`shortest_geodesic`](@ref).
+
+This method is equivalent to using ``d = \operatorname{retr}^{-1}_p(q)`` in [`vector_transport_direction`](@ref)`(M, p, X, q, m, r)`,
+where you can find the formal definition.
+However, this method form is – to the best of our knowledge – moreoften implemented.
 """
 function vector_transport_to(
     M::AbstractManifold,
@@ -735,10 +786,18 @@ function vector_transport_to(
     X,
     q,
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
+    r::AbstractRetractionMethod = default_retraction_method(M),
 )
-    return _vector_transport_to(M, p, X, q, m)
+    return _vector_transport_to(M, p, X, q, m, r)
 end
-function _vector_transport_to(M::AbstractManifold, p, X, q, ::ParallelTransport)
+function _vector_transport_to(
+    M::AbstractManifold,
+    p,
+    X,
+    q,
+    ::ParallelTransport,
+    ::ExponentialRetraction,
+)
     return parallel_transport_to(M, p, X, q)
 end
 function _vector_transport_to(
@@ -746,15 +805,23 @@ function _vector_transport_to(
     p,
     X,
     q,
-    m::DifferentiatedRetractionVectorTransport,
+    ::DifferentiatedRetractionVectorTransport{R},
+    r::R,
+) where {R<:AbstractRetractionMethod}
+    return vector_transport_to_diff(M, p, X, q, r)
+end
+function vector_transport_to_diff(M::AbstractManifold, p, X, q, m, r)
+    Y = allocate_result(M, vector_transport_to, X, p, r)
+    return vector_transport_to_diff!(M, Y, p, X, q, m, r)
+end
+function _vector_transport_to(
+    M::AbstractManifold,
+    p,
+    X,
+    q,
+    ::ProjectionTransport,
+    ::AbstractRetractionMethod,
 )
-    return vector_transport_to_diff(M, p, X, q, m.retraction)
-end
-function vector_transport_to_diff(M::AbstractManifold, p, X, q, m)
-    Y = allocate_result(M, vector_transport_to, X, p)
-    return vector_transport_to_diff!(M, Y, p, X, q, m)
-end
-function _vector_transport_to(M::AbstractManifold, p, X, q, ::ProjectionTransport)
     return vector_transport_to_project(M, p, X, q)
 end
 function vector_transport_to_project(M::AbstractManifold, p, X, q)
@@ -764,12 +831,13 @@ end
 
 """
     vector_transport_to!(M::AbstractManifold, Y, p, X, q)
-    vector_transport_to!(M::AbstractManifold, Y, p, X, q, method::AbstractVectorTransportMethod)
+    vector_transport_to!(M::AbstractManifold, Y, p, X, q, m::AbstractVectorTransportMethod)
 
 Transport a vector `X` from the tangent space at a point `p` on the [`AbstractManifold`](@ref) `M`
-along the [`shortest_geodesic`](@ref) to the tangent space at another point `q`.
-By default, the [`AbstractVectorTransportMethod`](@ref) `method` is
-[`default_vector_transport_method`](@ref)`(M)`. The result is saved to `Y`.
+to `q` using the [`AbstractVectorTransportMethod`](@ref) `m` and the [`AbstractRetractionMethod`](@ref) `r`.
+
+The result is computed in `Y`.
+See [`vector_transport_to`](@ref) for more details.
 """
 function vector_transport_to!(
     M::AbstractManifold,
@@ -778,10 +846,19 @@ function vector_transport_to!(
     X,
     q,
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
+    r::AbstractRetractionMethod = default_retraction_method(M),
 )
-    return _vector_transport_to!(M, Y, p, X, q, m)
+    return _vector_transport_to!(M, Y, p, X, q, m, r)
 end
-function _vector_transport_to!(M::AbstractManifold, Y, p, X, q, ::ParallelTransport)
+function _vector_transport_to!(
+    M::AbstractManifold,
+    Y,
+    p,
+    X,
+    q,
+    ::ParallelTransport,
+    ::ExponentialRetraction,
+)
     return parallel_transport_to!(M, Y, p, X, q)
 end
 function _vector_transport_to!(
@@ -790,27 +867,46 @@ function _vector_transport_to!(
     p,
     X,
     q,
-    m::DifferentiatedRetractionVectorTransport,
-)
-    return vector_transport_to_diff!(M, Y, p, X, q, m.retraction)
+    ::DifferentiatedRetractionVectorTransport{R},
+    r::R,
+) where {R}
+    return vector_transport_to_diff!(M, Y, p, X, q, r)
 end
 function vector_transport_to_diff! end
-function _vector_transport_to!(M::AbstractManifold, Y, p, X, q, ::ProjectionTransport)
+function _vector_transport_to!(
+    M::AbstractManifold,
+    Y,
+    p,
+    X,
+    q,
+    ::ProjectionTransport,
+    ::AbstractRetractionMethod,
+)
     return vector_transport_to_project!(M, Y, p, X, q)
 end
 function vector_transport_to_project! end
 
-function _vector_transport_to(M::AbstractManifold, p, X, c, m::PoleLadderTransport)
+function _vector_transport_to(
+    M::AbstractManifold,
+    p,
+    X,
+    c,
+    m::PoleLadderTransport{R},
+    r::R,
+) where {R}
     Y = allocate_result(M, vector_transport_to, X, p)
-    return _vector_transport_to!(M, Y, p, X, c, m)
+    return _vector_transport_to!(M, Y, p, X, c, m, r)
 end
 
-@doc raw"""
-    _vector_transport_to!(M::AbstractManifold, Y, p, X, q, method::PoleLadderTransport)
-
-Perform a vector transport by using [`PoleLadderTransport`](@ref).
-"""
-function _vector_transport_to!(M::AbstractManifold, Y, p, X, q, m::PoleLadderTransport)
+function _vector_transport_to!(
+    M::AbstractManifold,
+    Y,
+    p,
+    X,
+    q,
+    m::PoleLadderTransport{R},
+    ::R,
+) where {R}
     inverse_retract!(
         M,
         Y,
@@ -829,27 +925,52 @@ function _vector_transport_to!(M::AbstractManifold, Y, p, X, q, m::PoleLadderTra
     return Y
 end
 
-function _vector_transport_to(M::AbstractManifold, p, X, c, m::ScaledVectorTransport)
+function _vector_transport_to(
+    M::AbstractManifold,
+    p,
+    X,
+    c,
+    m::ScaledVectorTransport,
+    r::AbstractRetractionMethod,
+)
     Y = allocate_result(M, vector_transport_to, X, p)
-    return _vector_transport_to!(M, Y, p, X, c, m)
+    return _vector_transport_to!(M, Y, p, X, c, m, r)
 end
-function _vector_transport_to!(M::AbstractManifold, Y, p, X, q, m::ScaledVectorTransport)
-    vector_transport_to!(M, Y, p, X, q, m.method)
+function _vector_transport_to!(
+    M::AbstractManifold,
+    Y,
+    p,
+    X,
+    q,
+    m::ScaledVectorTransport,
+    r::AbstractRetractionMethod,
+)
+    vector_transport_to!(M, Y, p, X, q, m.method, r)
     Y .*= norm(M, p, X) / norm(M, q, Y)
     return Y
 end
 
-function _vector_transport_to(M::AbstractManifold, p, X, c, m::SchildsLadderTransport)
+function _vector_transport_to(
+    M::AbstractManifold,
+    p,
+    X,
+    c,
+    m::SchildsLadderTransport{R},
+    r::R,
+) where {R}
     Y = allocate_result(M, vector_transport_to, X, p)
-    return _vector_transport_to!(M, Y, p, X, c, m)
+    return _vector_transport_to!(M, Y, p, X, c, m, r)
 end
 
-@doc raw"""
-    _vector_transport_to!(M::AbstractManifold, Y, p, X, q, method::SchildsLadderTransport)
-
-Perform a vector transport by using [`SchildsLadderTransport`](@ref).
-"""
-function _vector_transport_to!(M::AbstractManifold, Y, p, X, q, m::SchildsLadderTransport)
+function _vector_transport_to!(
+    M::AbstractManifold,
+    Y,
+    p,
+    X,
+    q,
+    m::SchildsLadderTransport{R},
+    ::R,
+) where {R}
     return inverse_retract!(
         M,
         Y,

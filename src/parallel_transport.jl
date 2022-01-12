@@ -31,6 +31,8 @@ end
 
 Compute the [`parallel_transport_along`](@ref) the curve ``c(t) = γ_{p,q}(t)``,
 i.e. the * the unique geodesic ``c(t)=γ_{p,X}(t)`` from ``γ_{p,d}(0)=p`` into direction ``\dot γ_{p,d}(0)=d``, of the tangent vector `X`.
+
+By default this function calls [`parallel_transport_to`](@ref)`(M, p, X, q)`, where ``q=\exp_pX``.
 """
 function parallel_transport_direction(M::AbstractManifold, p, X, d)
     return parallel_transport_to(M, p, X, exp(M, p, d))
