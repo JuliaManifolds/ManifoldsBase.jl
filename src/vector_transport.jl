@@ -436,7 +436,13 @@ function _vector_transport_along(
 )
     return vector_transport_along_diff(M, p, X, c, m.retraction)
 end
-function vector_transport_along_diff(M::AbstractManifold, p, X, c, m)
+function vector_transport_along_diff(
+    M::AbstractManifold,
+    p,
+    X,
+    c,
+    m::AbstractRetractionMethod,
+)
     Y = allocate_result(M, vector_transport_along, X, p)
     return vector_transport_along_diff!(M, Y, p, X, c, m)
 end
@@ -759,7 +765,15 @@ function _vector_transport_direction!(
 )
     return vector_transport_to!(M, Y, p, X, retract(M, p, d, r), m)
 end
-function _vector_transport_direction!(M::AbstractManifold, Y, p, X, d, ::ParallelTransport)
+function _vector_transport_direction!(
+    M::AbstractManifold,
+    Y,
+    p,
+    X,
+    d,
+    ::ParallelTransport,
+    ::ExponentialRetraction,
+)
     return parallel_transport_direction!(M, Y, p, X, d)
 end
 
@@ -810,9 +824,9 @@ function _vector_transport_to(
 ) where {R<:AbstractRetractionMethod}
     return vector_transport_to_diff(M, p, X, q, r)
 end
-function vector_transport_to_diff(M::AbstractManifold, p, X, q, m, r)
+function vector_transport_to_diff(M::AbstractManifold, p, X, q, r)
     Y = allocate_result(M, vector_transport_to, X, p, r)
-    return vector_transport_to_diff!(M, Y, p, X, q, m, r)
+    return vector_transport_to_diff!(M, Y, p, X, q, r)
 end
 function _vector_transport_to(
     M::AbstractManifold,
