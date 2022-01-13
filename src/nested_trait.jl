@@ -36,22 +36,22 @@ A Trait indicating that no feature is present.
 struct EmptyTrait <: AbstractTrait end
 
 """
-    NestedTrait <: AbstractTrait
+    TraitList <: AbstractTrait
 
 Combine two traits into a combined trait.  Note that this introduces a preceedence.
 the first of the traits takes preceedence if a trait is implemented for both functions.
 
 # Constructor
 
-    NestedTrait(head::AbstractTrait, tail::AbstractTrait)
+    TraitList(head::AbstractTrait, tail::AbstractTrait)
 """
-struct NestedTrait{T1<:AbstractTrait,T2<:AbstractTrait} <: AbstractTrait
+struct TraitList{T1<:AbstractTrait,T2<:AbstractTrait} <: AbstractTrait
     head::T1
     tail::T2
 end
 
-function Base.show(io::IO, t::NestedTrait)
-    return print(io, "NestedTrait(", t.head, ", ", t.tail, ")")
+function Base.show(io::IO, t::TraitList)
+    return print(io, "TraitList(", t.head, ", ", t.tail, ")")
 end
 
 """
@@ -67,7 +67,7 @@ overloaded for specific function calls.
 
 Merge two traits into a nested list of traits. Note that this takes trait preceedence into account,
 i.e. `t1` takes preceedence over `t2` is any operations.
-It always returns either ab [`EmptyTrait`](@ref) or a [`NestedTrait`](@ref).
+It always returns either ab [`EmptyTrait`](@ref) or a [`TraitList`](@ref).
 
 This means that for
 * one argument it just returns the trait itself if it is list-like, or wraps the trait in a
@@ -86,22 +86,22 @@ merge_traits()
 
 @inline merge_traits() = EmptyTrait()
 @inline merge_traits(t::EmptyTrait) = t
-@inline merge_traits(t::NestedTrait) = t
-@inline merge_traits(t::AbstractTrait) = NestedTrait(t, EmptyTrait())
+@inline merge_traits(t::TraitList) = t
+@inline merge_traits(t::AbstractTrait) = TraitList(t, EmptyTrait())
 @inline merge_traits(t1::EmptyTrait, ::EmptyTrait) = t1
 @inline merge_traits(::EmptyTrait, t2::AbstractTrait) = merge_traits(t2)
-@inline merge_traits(t1::AbstractTrait, t2::EmptyTrait) = NestedTrait(t1, t2)
-@inline merge_traits(t1::AbstractTrait, t2::NestedTrait) = NestedTrait(t1, t2)
-@inline merge_traits(::EmptyTrait, t2::NestedTrait) = t2
+@inline merge_traits(t1::AbstractTrait, t2::EmptyTrait) = TraitList(t1, t2)
+@inline merge_traits(t1::AbstractTrait, t2::TraitList) = TraitList(t1, t2)
+@inline merge_traits(::EmptyTrait, t2::TraitList) = t2
 @inline function merge_traits(t1::AbstractTrait, t2::AbstractTrait)
-    return NestedTrait(t1, NestedTrait(t2, EmptyTrait()))
+    return TraitList(t1, TraitList(t2, EmptyTrait()))
 end
-@inline merge_traits(t1::NestedTrait, ::EmptyTrait) = t1
-@inline function merge_traits(t1::NestedTrait, t2::AbstractTrait)
-    return NestedTrait(t1.head, merge_traits(t1.tail, t2))
+@inline merge_traits(t1::TraitList, ::EmptyTrait) = t1
+@inline function merge_traits(t1::TraitList, t2::AbstractTrait)
+    return TraitList(t1.head, merge_traits(t1.tail, t2))
 end
-@inline function merge_traits(t1::NestedTrait, t2::NestedTrait)
-    return NestedTrait(t1.head, merge_traits(t1.tail, t2))
+@inline function merge_traits(t1::TraitList, t2::TraitList)
+    return TraitList(t1.head, merge_traits(t1.tail, t2))
 end
 @inline function merge_traits(
     t1::AbstractTrait,
@@ -128,14 +128,14 @@ end
 """
     expand_trait(t::AbstractTrait)
 
-Expand given trait into an ordered [`NestedTrait`](@ref) list of traits with their parent
+Expand given trait into an ordered [`TraitList`](@ref) list of traits with their parent
 traits obtained using [`parent_trait`](@ref).
 """
 expand_trait(::AbstractTrait)
 
 @inline expand_trait(e::EmptyTrait) = e
 @inline expand_trait(t::AbstractTrait) = merge_traits(t, expand_trait(parent_trait(t)))
-@inline function expand_trait(t::NestedTrait)
+@inline function expand_trait(t::TraitList)
     et1 = expand_trait(t.head)
     et2 = expand_trait(t.tail)
     return merge_traits(et1, et2)
@@ -148,7 +148,7 @@ Return the next trait to be considered after `t`.
 """
 next_trait(t::AbstractTrait)
 
-@inline next_trait(t::NestedTrait) = t.tail
+@inline next_trait(t::TraitList) = t.tail
 
 #! format: off
 # turn formatting for for the following functions
@@ -262,7 +262,7 @@ macro trait_function(sig)
                 return ($fname)(trait($(argnames...)), $(argnames...); $(kwargs_call...))
             end
             function ($fname)(
-                t::NestedTrait,
+                t::TraitList,
                 $(callargs...);
                 $(kwargs_list...),
             ) where {$(where_exprs...)}

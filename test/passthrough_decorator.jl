@@ -2,7 +2,7 @@
 using ManifoldsBase
 using Test
 
-using ManifoldsBase: NestedTrait, merge_traits
+using ManifoldsBase: TraitList, merge_traits
 
 struct PassthoughTrait <: AbstractTrait end
 
@@ -15,7 +15,7 @@ function ManifoldsBase.active_traits(::PassthroughDecorator, ::Any...)
 end
 
 function ManifoldsBase.log!(
-    ::NestedTrait{PassthoughTrait},
+    ::TraitList{PassthoughTrait},
     M::AbstractDecoratorManifold,
     X,
     p,
@@ -24,7 +24,7 @@ function ManifoldsBase.log!(
     return log!(M.manifold, X, p, q)
 end
 function ManifoldsBase.exp!(
-    ::NestedTrait{PassthoughTrait},
+    ::TraitList{PassthoughTrait},
     M::AbstractDecoratorManifold,
     q,
     p,

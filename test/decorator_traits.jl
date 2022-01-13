@@ -1,7 +1,7 @@
 using Test
 using ManifoldsBase
 
-using ManifoldsBase: AbstractTrait, NestedTrait, EmptyTrait, trait, merge_traits
+using ManifoldsBase: AbstractTrait, TraitList, EmptyTrait, trait, merge_traits
 using ManifoldsBase: expand_trait, next_trait
 import ManifoldsBase: active_traits, parent_trait
 
@@ -32,17 +32,17 @@ active_traits(::A5, ::Any) = merge_traits(IsGreat())
 
 f(a::DecoA, b) = f(trait(a, b), a, b)
 
-f(::NestedTrait{IsNice}, a, b) = g(a, b, 3)
-f(::NestedTrait{IsCool}, a, b) = g(a, b, 5)
+f(::TraitList{IsNice}, a, b) = g(a, b, 3)
+f(::TraitList{IsCool}, a, b) = g(a, b, 5)
 
 # generic forward to the next trait to be looked at
-f(t::NestedTrait, a, b) = f(next_trait(t), a, b)
+f(t::TraitList, a, b) = f(next_trait(t), a, b)
 # generic fallback when no traits are defined
 f(::EmptyTrait, a, b) = invoke(f, Tuple{AbstractA,typeof(b)}, a, b)
 
 @testset "Decorator trait tests" begin
     t = ManifoldsBase.EmptyTrait()
-    t2 = ManifoldsBase.NestedTrait(t, t)
+    t2 = ManifoldsBase.TraitList(t, t)
     @test merge_traits() == t
     @test merge_traits(t) == t
     @test merge_traits(t, t) == t
@@ -57,7 +57,7 @@ f(::EmptyTrait, a, b) = invoke(f, Tuple{AbstractA,typeof(b)}, a, b)
           merge_traits(IsCool(), IsGreat(), IsNice())
 
     @test string(merge_traits(IsGreat(), IsNice())) ==
-          "NestedTrait(IsGreat(), NestedTrait(IsNice(), EmptyTrait()))"
+          "TraitList(IsGreat(), TraitList(IsNice(), EmptyTrait()))"
 
     global f
     @test f(A(), 0) == 2
@@ -65,7 +65,7 @@ f(::EmptyTrait, a, b) = invoke(f, Tuple{AbstractA,typeof(b)}, a, b)
     @test f(A3(), 0) == 5
     @test f(A4(), 0) == 2
     @test f(A5(), 890) == 893
-    f(::NestedTrait{IsGreat}, a, b) = g(a, b, 54)
+    f(::TraitList{IsGreat}, a, b) = g(a, b, 54)
     @test f(A5(), 890) == 944
 end
 
