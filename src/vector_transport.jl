@@ -665,7 +665,7 @@ associated to a retraction ``\operatorname{retr}_p(Y) = q`` such that
 
 1. (associated retraction) ``\mathcal T_{p,d}X ∈ T_q\mathcal M`` if and only if ``q = \operatorname{retr}_p(d)``.
 2. (consistency) ``\mathcal T_{p,0_p}X = X`` for all ``X∈T_p\mathcal M``
-3. (linearity) ``\mathcal T_{p,d}(αX+βY) = \mathcal T_{p,d}αX + \mathcal T_{p,d}βY``
+3. (linearity) ``\mathcal T_{p,d}(αX+βY) = α\mathcal T_{p,d}X + β\mathcal T_{p,d}Y``
 
 For the [`AbstractVectorTransportMethod`](@ref) we might even omit the third point,
 but the [`AbstractLinearVectorTransportMethod`](@ref)s are linear.
