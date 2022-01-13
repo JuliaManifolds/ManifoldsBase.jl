@@ -51,13 +51,6 @@ compute ``Y = \operatorname{retr}_p^{-1}q``.
 # Constructor
 
     DifferentiatedRetractionVectorTransport(m::AbstractRetractionMethod)
-
-[^AbsilMahonySepulchre2008]:
-    > Absil, P.-A., Mahony, R. and Sepulchre R.,
-    > _Optimization Algorithms on Matrix Manifolds_
-    > Princeton University Press, 2008,
-    > doi: [10.1515/9781400830244](https://doi.org/10.1515/9781400830244)
-    > [open access](http://press.princeton.edu/chapters/absil/)
 """
 struct DifferentiatedRetractionVectorTransport{R<:AbstractRetractionMethod} <:
        AbstractLinearVectorTransportMethod
@@ -672,7 +665,7 @@ associated to a retraction ``\operatorname{retr}_p(Y) = q`` such that
 
 1. (associated retraction) ``\mathcal T_{p,d}X ∈ T_q\mathcal M`` if and only if ``q = \operatorname{retr}_p(d)``.
 2. (consistency) ``\mathcal T_{p,0_p}X = X`` for all ``X∈T_p\mathcal M``
-3. (linearity) ``\mathcal T_{p,d}(αX+βY) = \mathcal T_{p,d}αX + \mathcal T_{p,d}βY`
+3. (linearity) ``\mathcal T_{p,d}(αX+βY) = \mathcal T_{p,d}αX + \mathcal T_{p,d}βY``
 
 For the [`AbstractVectorTransportMethod`](@ref) we might even omit the third point,
 but the [`AbstractLinearVectorTransportMethod`](@ref)s are linear.

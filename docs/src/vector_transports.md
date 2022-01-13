@@ -5,16 +5,19 @@ Similar to the [exponential and logarithmic map](@ref exp-and-log) also the [par
 Similar to the [retraction and its inverse](@ref sec-retractions) the generalisation of the parallel transport can be phrased as follows
 
 A _vector transport_ is a way to transport a vector between two tangent spaces.
-Let ``p,q ∈ \mathcal M`` be given, ``c`` the curve along which we want to transport (cf. [parallel transport](@ref subsec-parallel-transport), for example a geodesic or a geodesic or curve given by a retraction, and ``X ∈ T_p\mathcal M`` be a tangent vector.
-Then ``T_{p→q}X`` is a vector transport if
+Let ``p,q ∈ \mathcal M`` be given, ``c`` the curve along which we want to transport (cf. [parallel transport](@ref subsec-parallel-transport), for example a geodesic or a geodesic or curve given by a retraction. We can speficy the geodesic or curve a retraction realises for example by a direction ``d``.
 
-1. Consistency. ``T_{p→p}`` is the identiy on ``T_p\mathcal M``.
-2. Underlying curve ``T_{p→c(t)}X ∈ T_{c(t)}\mathcal M`` for ``t∈[0,1]``
-3. Linearity. ``T_{p→q}(X+Y)=T_{p→q}X + T_{p→q}Y``
+More precisely using [^AbsilMahonySepulchre2008], Def. 8.1.1, a vector transport
+``T_{p,d}: T_p\mathcal M \to T_q\mathcal M``, ``p∈ \mathcal M``, ``Y∈ T_p\mathcal M`` is a smooth mapping
+associated to a retraction ``\operatorname{retr}_p(Y) = q`` such that
+
+1. (associated retraction) ``\mathcal T_{p,d}X ∈ T_q\mathcal M`` if and only if ``q = \operatorname{retr}_p(d)``.
+2. (consistency) ``\mathcal T_{p,0_p}X = X`` for all ``X∈T_p\mathcal M``
+3. (linearity) ``\mathcal T_{p,d}(αX+βY) = \mathcal T_{p,d}αX + \mathcal T_{p,d}βY``
 
 hold.
 
-Currently the following types of vector transport are defined in `ManifoldsBase.jl`.
+Currently the following methods for vector transport are defined in `ManifoldsBase.jl`.
 
 ```@autodocs
 Modules = [ManifoldsBase]
@@ -24,10 +27,9 @@ Public=true
 Private=false
 ```
 
-## Types of Retractions
+## Types of vector transports
 
-To distinguish different types of retractions, the last argument of the (inverse) retraction
-specifies a type. The following ones are available.
+To distinguish different types of vector transport we introduce the [`AbstractVectorTransportMethod`](@ref). The following concrete types are available.
 
 ```@autodocs
 Modules = [ManifoldsBase]
