@@ -185,7 +185,13 @@ end
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function exp!(M::AbstractDecoratorManifold, q, p, X)
 # EmbeddedSubManifold
-function exp!(::TraitList{IsEmbeddedSubmanifoldManifold}, M::AbstractDecoratorManifold, q, p, X)
+function exp!(
+    ::TraitList{IsEmbeddedSubmanifoldManifold},
+    M::AbstractDecoratorManifold,
+    q,
+    p,
+    X,
+)
     return exp!(get_embedding(M), q, p, X)
 end
 
@@ -234,10 +240,16 @@ function inverse_retract!(
 end
 
 # Introduce Deco Trait | automatic foward | fallback
-@trait_function is_point(M::AbstractDecoratorManifold, p)
+@trait_function is_point(M::AbstractDecoratorManifold, p, te=false; kwargs...)
 # Embedded
-function is_point(::TraitList{IsEmbeddedManifold}, M::AbstractDecoratorManifold, p, te=false; kwargs...)
-    ep = is_point(get_embedding(M), p, te; kwargs...)
+function is_point(
+    ::TraitList{IsEmbeddedManifold},
+    M::AbstractDecoratorManifold,
+    p,
+    te = false;
+    kwargs...,
+)
+    ep = is_point(get_embedding(M), embed(M,p), te; kwargs...)
     (!ep && !te) && return false # no point in E? above throws error - or we false here
     mpe = check_point(M, p; kwargs...)
     mpe === nothing && return true
@@ -246,11 +258,26 @@ function is_point(::TraitList{IsEmbeddedManifold}, M::AbstractDecoratorManifold,
 end
 
 # Introduce Deco Trait | automatic foward | fallback
-@trait_function is_vector(M::AbstractDecoratorManifold, p, X, te = false, cbp = true; kwargs...)
+@trait_function is_vector(
+    M::AbstractDecoratorManifold,
+    p,
+    X,
+    te = false,
+    cbp = true;
+    kwargs...,
+)
 # EmbeddedManifold
 # I am not yet sure how to properly document this embedding behaviour here in a docstring.
-function is_vector(::TraitList{IsEmbeddedManifold}, M::AbstractDecoratorManifold, p, X, te=false, cbp=true; kwargs...)
-    ev = is_vector(get_embedding(M), p, X, te, cbp; kwargs...)
+function is_vector(
+    ::TraitList{IsEmbeddedManifold},
+    M::AbstractDecoratorManifold,
+    p,
+    X,
+    te = false,
+    cbp = true;
+    kwargs...,
+)
+    ev = is_vector(get_embedding(M), embed(M,p), embed(M,p,X), te, cbp; kwargs...)
     (!ev && !te) && return false # if te, the line before throws an error, otherwuse we end with false early here
     if cbp
         # if we are here p is a valid point in embedding from the first code line
