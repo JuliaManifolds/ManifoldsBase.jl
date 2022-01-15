@@ -1,13 +1,3 @@
-@doc raw"""
-    decorated_manifold(M::AbstractDecoratorManifold)
-
-
-For a manifold `M` that is decorated with properties (for example an embedding `N`)
-this function returns the manifold that is attached (as a decorator).
-Hence for the embedding example this is `N`.
-"""
-decorated_manifold(M::AbstractDecoratorManifold)
-
 #
 # Base passons
 #
@@ -56,11 +46,25 @@ parent_trait(::IsEmbeddedSubmanifoldManifold) = IsIsometricEmbeddedManifold()
 
 #
 # Generic Decorator functions
+@doc raw"""
+    decorated_manifold(M::AbstractDecoratorManifold)
+
+For a manifold `M` that is decorated with some properties, this function returns
+the manifold without that manifold, i.e. the manifold that _was decorated_.
 """
-    decorated_manifold
-"""
+decorated_manifold(M::AbstractDecoratorManifold)
 decorated_manifold(M::AbstractManifold) = M
 @trait_function decorated_manifold(M::AbstractDecoratorManifold)
+
+@doc raw"""
+    get_decorator(M::AbstractDecoratorManifold)
+
+For a manifold `M` that is decorated with properties (for example an embedding `N`)
+this function returns the manifold that is attached (as a decorator).
+Hence for the embedding example this is `N`.
+"""
+get_decorator(M::AbstractDecoratorManifold)
+@trait_function get_decorator(M::AbstractDecoratorManifold)
 
 #
 # Implemented Traits
@@ -239,29 +243,34 @@ function inverse_retract!(
     return inverse_retract!(get_embedding(M), X, p, q, m)
 end
 
-@trait_function is_point(M::AbstractDecoratorManifold, p, te = false; kwargs...)
-# EmbeddedManifold
-function is_point(
-    ::TraitList{IsEmbeddedManifold},
-    M::AbstractDecoratorManifold,
-    p,
-    throw_error = false;
-    kwargs...,
-)
-    return is_point(get_embedding(M), p, throw_error; kwargs...)
+# Introduce Deco Trait | automatic foward | fallback
+@trait_function is_point(M::AbstractDecoratorManifold, p)
+# Embedded
+function is_point(::TraitList{IsEmbeddedManifold}, M::AbstractDecoratorManifold, p, throw_error=false; kwargs...)
+    is_point(get_embedding(M), p; kwargs...)
+    mpe = check_point(M, p; kwargs...)
+    mpe === nothing && return true
+    throw_error && throw(mpe)
+    return false
 end
 
-@trait_function is_vector(M::AbstractDecoratorManifold, p, X, te = false; kwargs...)
+# Introduce Deco Trait | automatic foward | fallback
+@trait_function is_vector(M::AbstractDecoratorManifold, p, X, te = false, cbp = true; kwargs...)
 # EmbeddedManifold
-function is_vector(
-    ::TraitList{IsEmbeddedManifold},
-    M::AbstractDecoratorManifold,
-    p,
-    X,
-    throw_error = false;
-    kwargs...,
-)
-    return is_vector(get_embedding(M), p, X, throw_error; kwargs...)
+# I am not yet sure how to properly document this embedding behaviour here in a docstring.
+function is_vector(::TraitList{IsEmbeddedManifold}, M::AbstractDecoratorManifold, p, X, te=false, cbs=true; kwargs...)
+    is_vector(get_embedding(M), p, X, te, cbp; kwargs...)
+    if cbp
+        mpe = check_point(M, p; kwargs...)
+        if mpe !== nothing
+            te && throw(mpe)
+            return false
+        end
+    end
+    mtve = check_vector(M, p, X; kwargs...)
+    mtve === nothing && return true
+    te && throw(mtve)
+    return false
 end
 
 @trait_function norm(M::AbstractDecoratorManifold, p, X)

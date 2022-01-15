@@ -435,7 +435,8 @@ function is_vector(
     end
     mtve = check_vector(M, p, X; kwargs...)
     mtve === nothing && return true
-    return throw_error ? throw(mtve) : false
+    throw_error && throw(mtve)
+    return false
 end
 
 @doc raw"""
