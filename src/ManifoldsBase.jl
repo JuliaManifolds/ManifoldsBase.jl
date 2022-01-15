@@ -419,8 +419,8 @@ function is_vector(
     M::AbstractManifold,
     p,
     X,
-    throw_error = false;
-    check_base_point = true,
+    throw_error = false,
+    check_base_point = true;
     kwargs...,
 )
     if check_base_point

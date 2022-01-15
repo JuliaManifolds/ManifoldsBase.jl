@@ -56,16 +56,6 @@ decorated_manifold(M::AbstractDecoratorManifold)
 decorated_manifold(M::AbstractManifold) = M
 @trait_function decorated_manifold(M::AbstractDecoratorManifold)
 
-@doc raw"""
-    get_decorator(M::AbstractDecoratorManifold)
-
-For a manifold `M` that is decorated with properties (for example an embedding `N`)
-this function returns the manifold that is attached (as a decorator).
-Hence for the embedding example this is `N`.
-"""
-get_decorator(M::AbstractDecoratorManifold)
-@trait_function get_decorator(M::AbstractDecoratorManifold)
-
 #
 # Implemented Traits
 function base_manifold(M::AbstractDecoratorManifold, depth::Val{N} = Val(-1)) where {N}
@@ -188,14 +178,14 @@ end
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function exp(M::AbstractDecoratorManifold, p, X)
 # EmbeddedSubManifold
-function exp(::TraitList{IsEmbeddedManifold}, M::AbstractDecoratorManifold, p, X)
+function exp(::TraitList{IsEmbeddedSubmanifoldManifold}, M::AbstractDecoratorManifold, p, X)
     return exp(get_embedding(M), p, X)
 end
 
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function exp!(M::AbstractDecoratorManifold, q, p, X)
 # EmbeddedSubManifold
-function exp!(::TraitList{IsEmbeddedManifold}, M::AbstractDecoratorManifold, q, p, X)
+function exp!(::TraitList{IsEmbeddedSubmanifoldManifold}, M::AbstractDecoratorManifold, q, p, X)
     return exp!(get_embedding(M), q, p, X)
 end
 
@@ -246,11 +236,12 @@ end
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function is_point(M::AbstractDecoratorManifold, p)
 # Embedded
-function is_point(::TraitList{IsEmbeddedManifold}, M::AbstractDecoratorManifold, p, throw_error=false; kwargs...)
-    is_point(get_embedding(M), p; kwargs...)
+function is_point(::TraitList{IsEmbeddedManifold}, M::AbstractDecoratorManifold, p, te=false; kwargs...)
+    ep = is_point(get_embedding(M), p, te; kwargs...)
+    (!ep && !te) && return false # no point in E? above throws error - or we false here
     mpe = check_point(M, p; kwargs...)
     mpe === nothing && return true
-    throw_error && throw(mpe)
+    te && throw(mpe)
     return false
 end
 
@@ -258,9 +249,11 @@ end
 @trait_function is_vector(M::AbstractDecoratorManifold, p, X, te = false, cbp = true; kwargs...)
 # EmbeddedManifold
 # I am not yet sure how to properly document this embedding behaviour here in a docstring.
-function is_vector(::TraitList{IsEmbeddedManifold}, M::AbstractDecoratorManifold, p, X, te=false, cbs=true; kwargs...)
-    is_vector(get_embedding(M), p, X, te, cbp; kwargs...)
+function is_vector(::TraitList{IsEmbeddedManifold}, M::AbstractDecoratorManifold, p, X, te=false, cbp=true; kwargs...)
+    ev = is_vector(get_embedding(M), p, X, te, cbp; kwargs...)
+    (!ev && !te) && return false # if te, the line before throws an error, otherwuse we end with false early here
     if cbp
+        # if we are here p is a valid point in embedding from the first code line
         mpe = check_point(M, p; kwargs...)
         if mpe !== nothing
             te && throw(mpe)
