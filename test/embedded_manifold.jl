@@ -9,6 +9,9 @@ struct PlaneManifold <: AbstractDecoratorManifold{ℝ} end
 ManifoldsBase.get_embedding(::PlaneManifold) = ManifoldsBase.DefaultManifold(1, 3)
 ManifoldsBase.base_manifold(::PlaneManifold) = ManifoldsBase.DefaultManifold(2)
 
+ManifoldsBase.embed(::PlaneManifold, p) = reshape(p, 1, :)
+ManifoldsBase.embed(::PlaneManifold, p, X) = reshape(X, 1, :)
+
 ManifoldsBase.project!(::PlaneManifold, q, p) = (q .= [p[1] p[2] 0.0])
 ManifoldsBase.project!(::PlaneManifold, Y, p, X) = (Y .= [X[1] X[2] 0.0])
 
@@ -145,8 +148,8 @@ end
         M = PlaneManifold()
         @test repr(M) == "PlaneManifold()"
         @test get_embedding(M) == ManifoldsBase.DefaultManifold(1, 3)
-        # Check fallbacks to check embed->check_manifoldpoint Defaults
-        @test_throws DomainError is_point(M, [1, 0, 0], true)
+        # Check point checks using embedding
+        @test is_point(M, [1, 0, 0], true)
         @test_throws DomainError is_point(M, [1 0], true)
         @test is_point(M, [1 0 0], true)
         @test_throws DomainError is_vector(M, [1 0 0], [1], true)
