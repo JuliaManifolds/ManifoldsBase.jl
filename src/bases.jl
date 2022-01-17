@@ -489,7 +489,7 @@ end
 function _get_coordinates(M::AbstractManifold, p, X, B::DefaultBasis)
     return get_coordinates_default(M, p, X, number_system(B))
 end
-function get_coordinates_default(M::AbstractManifold, p, X, N)
+function get_coordinates_default(M::AbstractManifold, p, X, N::AbstractNumbers)
     return get_coordinates(M, p, X, DefaultOrthogonalBasis(N))
 end
 
