@@ -2,49 +2,56 @@ using ManifoldsBase, Test
 
 using ManifoldsBase: DefaultManifold, ℝ
 #
-# A first manifold that is modelled as a submanifold
+# A first artificial (not real) manifold that is modelled as a submanifold
+# half plane with euclidean metric is not a manifold but should test all things correctly here
 #
-struct PlaneManifold <: AbstractDecoratorManifold{ℝ} end
+struct HalfPlanemanifold <: AbstractDecoratorManifold{ℝ} end
 
-ManifoldsBase.get_embedding(::PlaneManifold) = ManifoldsBase.DefaultManifold(1, 3)
-ManifoldsBase.base_manifold(::PlaneManifold) = ManifoldsBase.DefaultManifold(2)
+ManifoldsBase.get_embedding(::HalfPlanemanifold) = ManifoldsBase.DefaultManifold(1, 3)
+ManifoldsBase.base_manifold(::HalfPlanemanifold) = ManifoldsBase.DefaultManifold(2)
 
-ManifoldsBase.embed(::PlaneManifold, p) = reshape(p, 1, :)
-ManifoldsBase.embed(::PlaneManifold, p, X) = reshape(X, 1, :)
+function ManifoldsBase.check_point(::HalfPlanemanifold, p)
+    return p[1] > 0 ? nothing : DomainError(p[1], "p[1] ≤ 0")
+end
+function ManifoldsBase.check_vector(::HalfPlanemanifold, p, X)
+    return X[1] > 0 ? nothing : DomainError(X[1], "X[1] ≤ 0")
+end
+ManifoldsBase.embed(::HalfPlanemanifold, p) = reshape(p, 1, :)
+ManifoldsBase.embed(::HalfPlanemanifold, p, X) = reshape(X, 1, :)
 
-ManifoldsBase.project!(::PlaneManifold, q, p) = (q .= [p[1] p[2] 0.0])
-ManifoldsBase.project!(::PlaneManifold, Y, p, X) = (Y .= [X[1] X[2] 0.0])
+ManifoldsBase.project!(::HalfPlanemanifold, q, p) = (q .= [p[1] p[2] 0.0])
+ManifoldsBase.project!(::HalfPlanemanifold, Y, p, X) = (Y .= [X[1] X[2] 0.0])
 
-function ManifoldsBase.active_traits(::PlaneManifold, args...)
+function ManifoldsBase.active_traits(::HalfPlanemanifold, args...)
     return ManifoldsBase.merge_traits(ManifoldsBase.IsEmbeddedSubmanifold())
 end
 
 #
 # A second manifold that is modelled as just isometrically embedded but not a submanifold
 #
-struct AnotherPlaneManifold <: AbstractDecoratorManifold{ℝ} end
+struct AnotherHalfPlanemanifold <: AbstractDecoratorManifold{ℝ} end
 
-ManifoldsBase.get_embedding(::AnotherPlaneManifold) = ManifoldsBase.DefaultManifold(3)
-ManifoldsBase.base_manifold(::AnotherPlaneManifold) = ManifoldsBase.DefaultManifold(2)
+ManifoldsBase.get_embedding(::AnotherHalfPlanemanifold) = ManifoldsBase.DefaultManifold(3)
+ManifoldsBase.base_manifold(::AnotherHalfPlanemanifold) = ManifoldsBase.DefaultManifold(2)
 
-function ManifoldsBase.active_traits(::AnotherPlaneManifold, args...)
+function ManifoldsBase.active_traits(::AnotherHalfPlanemanifold, args...)
     return ManifoldsBase.merge_traits(ManifoldsBase.IsIsometricEmbeddedManifold())
 end
 
-function ManifoldsBase.embed!(::AnotherPlaneManifold, q, p)
+function ManifoldsBase.embed!(::AnotherHalfPlanemanifold, q, p)
     q[1:2] .= p
     q[3] = 0
     return q
 end
-function ManifoldsBase.embed!(::AnotherPlaneManifold, Y, p, X)
+function ManifoldsBase.embed!(::AnotherHalfPlanemanifold, Y, p, X)
     Y[1:2] .= X
     Y[3] = 0
     return Y
 end
-function ManifoldsBase.project!(::AnotherPlaneManifold, q, p)
+function ManifoldsBase.project!(::AnotherHalfPlanemanifold, q, p)
     return q .= [p[1], p[2]]
 end
-function ManifoldsBase.project!(::AnotherPlaneManifold, Y, p, X)
+function ManifoldsBase.project!(::AnotherHalfPlanemanifold, Y, p, X)
     return Y .= [X[1], X[2]]
 end
 
@@ -144,17 +151,20 @@ end
         @test get_embedding(M) == ManifoldsBase.DefaultManifold(3)
     end
 
-    @testset "PlaneManifold" begin
-        M = PlaneManifold()
-        @test repr(M) == "PlaneManifold()"
+    @testset "HalfPlanemanifold" begin
+        M = HalfPlanemanifold()
+        @test repr(M) == "HalfPlanemanifold()"
         @test get_embedding(M) == ManifoldsBase.DefaultManifold(1, 3)
         # Check point checks using embedding
-        @test is_point(M, [1, 0, 0], true)
-        @test_throws DomainError is_point(M, [1 0], true)
+        @test is_point(M, [1, 0.1, 0.1], true)
+        @test_throws DomainError is_point(M, [-1, 0, 0], true)
+        @test_throws DomainError is_point(M, [1, 0.1], true)
         @test is_point(M, [1 0 0], true)
-        @test_throws DomainError is_vector(M, [1 0 0], [1], true)
-        @test_throws DomainError is_vector(M, [1 0 0], [0 0 0 0], true)
+        @test_throws DomainError is_vector(M, [1, 0, 0], [1], true)
+        @test_throws DomainError is_vector(M, [1, 0, 0], [0, 0, 0, 0], true)
         @test is_vector(M, [1 0 0], [1 0 1], true)
+        @test_throws DomainError is_vector(M, [-1, 0, 0], [0, 0, 0], true)
+        @test_throws DomainError is_vector(M, [1, 0, 0], [-1, 0, 0], true)
         p = [1.0 1.0 0.0]
         q = [1.0 0.0 0.0]
         X = q - p
@@ -208,8 +218,8 @@ end
         @test parallel_transport_to!(M, Y, p, X, q) == X
     end
 
-    @testset "AnotherPlaneManifold" begin
-        M = AnotherPlaneManifold()
+    @testset "AnotherHalfPlanemanifold" begin
+        M = AnotherHalfPlanemanifold()
         p = [1.0, 2.0]
         pe = embed(M, p)
         @test pe == [1.0, 2.0, 0.0]
