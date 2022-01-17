@@ -16,7 +16,7 @@ ManifoldsBase.project!(::PlaneManifold, q, p) = (q .= [p[1] p[2] 0.0])
 ManifoldsBase.project!(::PlaneManifold, Y, p, X) = (Y .= [X[1] X[2] 0.0])
 
 function ManifoldsBase.active_traits(::PlaneManifold, args...)
-    return ManifoldsBase.merge_traits(ManifoldsBase.IsEmbeddedSubmanifoldManifold())
+    return ManifoldsBase.merge_traits(ManifoldsBase.IsEmbeddedSubmanifold())
 end
 
 #
@@ -110,7 +110,7 @@ function ManifoldsBase.base_manifold(::NotImplementedEmbeddedSubManifold)
     return ManifoldsBase.DefaultManifold(2)
 end
 function ManifoldsBase.active_traits(::NotImplementedEmbeddedSubManifold, args...)
-    return ManifoldsBase.merge_traits(ManifoldsBase.IsEmbeddedSubmanifoldManifold())
+    return ManifoldsBase.merge_traits(ManifoldsBase.IsEmbeddedSubmanifold())
 end
 
 #

@@ -560,7 +560,7 @@ include("PowerManifold.jl")
 export AbstractManifold, AbstractManifoldPoint, TVector, CoTVector, TFVector, CoTFVector
 export AbstractDecoratorManifold
 export AbstractTrait,
-    IsEmbeddedManifold, IsEmbeddedSubmanifoldManifold, IsIsometricEmbeddedManifold
+    IsEmbeddedManifold, IsEmbeddedSubmanifold, IsIsometricEmbeddedManifold
 export ValidationManifold, ValidationMPoint, ValidationTVector, ValidationCoTVector
 export EmbeddedManifold
 export AbstractPowerManifold, PowerManifold

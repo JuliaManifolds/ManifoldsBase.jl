@@ -39,9 +39,9 @@ In this trait, additionally to the isometric embedded manifold, all retractions,
 and vectors transports, especially [`exp`](@ref), [`log`](@ref), and [`parallel_transport_to`](@ref)
 are passed to the embedding.
 """
-struct IsEmbeddedSubmanifoldManifold <: AbstractTrait end
+struct IsEmbeddedSubmanifold <: AbstractTrait end
 
-parent_trait(::IsEmbeddedSubmanifoldManifold) = IsIsometricEmbeddedManifold()
+parent_trait(::IsEmbeddedSubmanifold) = IsIsometricEmbeddedManifold()
 
 
 #
@@ -178,7 +178,7 @@ end
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function exp(M::AbstractDecoratorManifold, p, X)
 # EmbeddedSubManifold
-function exp(::TraitList{IsEmbeddedSubmanifoldManifold}, M::AbstractDecoratorManifold, p, X)
+function exp(::TraitList{IsEmbeddedSubmanifold}, M::AbstractDecoratorManifold, p, X)
     return exp(get_embedding(M), p, X)
 end
 
@@ -186,7 +186,7 @@ end
 @trait_function exp!(M::AbstractDecoratorManifold, q, p, X)
 # EmbeddedSubManifold
 function exp!(
-    ::TraitList{IsEmbeddedSubmanifoldManifold},
+    ::TraitList{IsEmbeddedSubmanifold},
     M::AbstractDecoratorManifold,
     q,
     p,
@@ -217,7 +217,7 @@ end
 )
 # Transparent for Submanifolds
 function inverse_retract(
-    ::TraitList{IsEmbeddedSubmanifoldManifold},
+    ::TraitList{IsEmbeddedSubmanifold},
     M::AbstractDecoratorManifold,
     p,
     q,
@@ -229,7 +229,7 @@ end
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function inverse_retract!(M::AbstractDecoratorManifold, X, p, q)
 function inverse_retract!(
-    ::TraitList{IsEmbeddedSubmanifoldManifold},
+    ::TraitList{IsEmbeddedSubmanifold},
     M::AbstractDecoratorManifold,
     X,
     p,
@@ -299,14 +299,14 @@ function norm(::TraitList{IsIsometricEmbeddedManifold}, M::AbstractDecoratorMani
 end
 
 @trait_function log(M::AbstractDecoratorManifold, p, q)
-function log(::TraitList{IsEmbeddedSubmanifoldManifold}, M::AbstractDecoratorManifold, p, q)
+function log(::TraitList{IsEmbeddedSubmanifold}, M::AbstractDecoratorManifold, p, q)
     return log(get_embedding(M), p, q)
 end
 
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function log!(M::AbstractDecoratorManifold, X, p, q)
 function log!(
-    ::TraitList{IsEmbeddedSubmanifoldManifold},
+    ::TraitList{IsEmbeddedSubmanifold},
     M::AbstractDecoratorManifold,
     X,
     p,
@@ -319,7 +319,7 @@ end
 @trait_function parallel_transport_along(M::AbstractDecoratorManifold, p, X, c)
 # EmbeddedSubManifold
 function parallel_transport_along(
-    ::TraitList{IsEmbeddedManifold},
+    ::TraitList{IsEmbeddedSubmanifold},
     M::AbstractDecoratorManifold,
     p,
     X,
@@ -332,7 +332,7 @@ end
 @trait_function parallel_transport_along!(M::AbstractDecoratorManifold, Y, p, X, c)
 # EmbeddedSubManifold
 function parallel_transport_along!(
-    ::TraitList{IsEmbeddedManifold},
+    ::TraitList{IsEmbeddedSubmanifold},
     M::AbstractDecoratorManifold,
     Y,
     p,
@@ -346,7 +346,7 @@ end
 @trait_function parallel_transport_direction(M::AbstractDecoratorManifold, p, X, q)
 # EmbeddedSubManifold
 function parallel_transport_direction(
-    ::TraitList{IsEmbeddedManifold},
+    ::TraitList{IsEmbeddedSubmanifold},
     M::AbstractDecoratorManifold,
     p,
     X,
@@ -359,7 +359,7 @@ end
 @trait_function parallel_transport_direction!(M::AbstractDecoratorManifold, Y, p, X, q)
 # EmbeddedSubManifold
 function parallel_transport_direction!(
-    ::TraitList{IsEmbeddedManifold},
+    ::TraitList{IsEmbeddedSubmanifold},
     M::AbstractDecoratorManifold,
     Y,
     p,
@@ -373,7 +373,7 @@ end
 @trait_function parallel_transport_to(M::AbstractDecoratorManifold, p, X, q)
 # EmbeddedSubManifold
 function parallel_transport_to(
-    ::TraitList{IsEmbeddedManifold},
+    ::TraitList{IsEmbeddedSubmanifold},
     M::AbstractDecoratorManifold,
     p,
     X,
@@ -386,7 +386,7 @@ end
 @trait_function parallel_transport_to!(M::AbstractDecoratorManifold, Y, p, X, q)
 # EmbeddedSubManifold
 function parallel_transport_to!(
-    ::TraitList{IsEmbeddedManifold},
+    ::TraitList{IsEmbeddedSubmanifold},
     M::AbstractDecoratorManifold,
     Y,
     p,
@@ -416,7 +416,7 @@ end
     m::AbstractRetractionMethod = default_retraction_method(M),
 )
 function retract(
-    ::TraitList{IsEmbeddedSubmanifoldManifold},
+    ::TraitList{IsEmbeddedSubmanifold},
     M::AbstractDecoratorManifold,
     p,
     X,
@@ -433,7 +433,7 @@ end
     m::AbstractRetractionMethod = default_retraction_method(M),
 )
 function retract!(
-    ::TraitList{IsEmbeddedSubmanifoldManifold},
+    ::TraitList{IsEmbeddedSubmanifold},
     M::AbstractDecoratorManifold,
     q,
     p,
@@ -451,7 +451,7 @@ end
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
 function vector_transport_along(
-    ::TraitList{IsEmbeddedSubmanifoldManifold},
+    ::TraitList{IsEmbeddedSubmanifold},
     M::AbstractDecoratorManifold,
     p,
     X,
@@ -470,7 +470,7 @@ end
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
 function vector_transport_along!(
-    ::TraitList{IsEmbeddedSubmanifoldManifold},
+    ::TraitList{IsEmbeddedSubmanifold},
     M::AbstractDecoratorManifold,
     Y,
     p,
@@ -489,7 +489,7 @@ end
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
 function vector_transport_direction(
-    ::TraitList{IsEmbeddedSubmanifoldManifold},
+    ::TraitList{IsEmbeddedSubmanifold},
     M::AbstractDecoratorManifold,
     p,
     X,
@@ -508,7 +508,7 @@ end
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
 function vector_transport_direction!(
-    ::TraitList{IsEmbeddedSubmanifoldManifold},
+    ::TraitList{IsEmbeddedSubmanifold},
     M::AbstractDecoratorManifold,
     Y,
     p,
@@ -527,7 +527,7 @@ end
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
 function vector_transport_to(
-    ::TraitList{IsEmbeddedSubmanifoldManifold},
+    ::TraitList{IsEmbeddedSubmanifold},
     M::AbstractDecoratorManifold,
     p,
     X,
@@ -546,7 +546,7 @@ end
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
 function vector_transport_to!(
-    ::TraitList{IsEmbeddedSubmanifoldManifold},
+    ::TraitList{IsEmbeddedSubmanifold},
     M::AbstractDecoratorManifold,
     Y,
     p,
