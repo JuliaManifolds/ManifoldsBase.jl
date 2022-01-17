@@ -25,12 +25,12 @@ g(::DecoA, x, y) = x + y
 struct IsGreat <: AbstractTrait end # a special case of IsNice
 parent_trait(::IsGreat) = IsNice()
 
-active_traits(::A1, ::Any) = merge_traits(IsNice())
-active_traits(::A2, ::Any) = merge_traits(IsCool())
-active_traits(::A3, ::Any) = merge_traits(IsCool(), IsNice())
-active_traits(::A5, ::Any) = merge_traits(IsGreat())
+active_traits(f, ::A1, ::Any) = merge_traits(IsNice())
+active_traits(f, ::A2, ::Any) = merge_traits(IsCool())
+active_traits(f, ::A3, ::Any) = merge_traits(IsCool(), IsNice())
+active_traits(f, ::A5, ::Any) = merge_traits(IsGreat())
 
-f(a::DecoA, b) = f(trait(a, b), a, b)
+f(a::DecoA, b) = f(trait(f, a, b), a, b)
 
 f(::TraitList{IsNice}, a, b) = g(a, b, 3)
 f(::TraitList{IsCool}, a, b) = g(a, b, 5)

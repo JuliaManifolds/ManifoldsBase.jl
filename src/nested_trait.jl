@@ -55,12 +55,12 @@ function Base.show(io::IO, t::TraitList)
 end
 
 """
-    active_traits(args...)
+    active_traits(f, args...)
 
-Return the list of traits applicable to the given function call. This function should be
+Return the list of traits applicable to the given call of function `f``. This function should be
 overloaded for specific function calls.
 """
-@inline active_traits(args...) = EmptyTrait()
+@inline active_traits(f, args...) = EmptyTrait()
 
 """
     merge_traits(t1, t2, trest...)
@@ -120,8 +120,8 @@ inherits as a fallback.
 """
 @inline parent_trait(::AbstractTrait) = EmptyTrait()
 
-@inline function trait(args...)
-    bt = active_traits(args...)
+@inline function trait(f::TF, args...) where {TF}
+    bt = active_traits(f, args...)
     return expand_trait(bt)
 end
 
@@ -259,7 +259,11 @@ macro trait_function(sig)
     return esc(
         quote
             function ($fname)($(callargs...); $(kwargs_list...)) where {$(where_exprs...)}
-                return ($fname)(trait($(argnames...)), $(argnames...); $(kwargs_call...))
+                return ($fname)(
+                    trait($fname, $(argnames...)),
+                    $(argnames...);
+                    $(kwargs_call...),
+                )
             end
             function ($fname)(
                 t::TraitList,

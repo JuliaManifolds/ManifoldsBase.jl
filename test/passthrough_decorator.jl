@@ -10,7 +10,7 @@ struct PassthroughDecorator{𝔽,MT<:AbstractManifold{𝔽}} <: AbstractDecorato
     manifold::MT
 end
 
-function ManifoldsBase.active_traits(::PassthroughDecorator, ::Any...)
+function ManifoldsBase.active_traits(f, ::PassthroughDecorator, ::Any...)
     return merge_traits(PassthoughTrait())
 end
 

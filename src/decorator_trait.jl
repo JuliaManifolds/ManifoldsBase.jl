@@ -86,7 +86,7 @@ get_embedding(M::AbstractDecoratorManifold)
 # INtroduction and default fallbacks could become a macro?
 # Introduce trait
 function allocate_result(M::AbstractDecoratorManifold, f, x...)
-    return allocate_result(trait(M, f, x...), M, f, x...)
+    return allocate_result(trait(allocate_result, M, f, x...), M, f, x...)
 end
 # disambiguation
 @invoke_maker 1 AbstractManifold allocate_result(

@@ -22,7 +22,7 @@ ManifoldsBase.embed(::HalfPlanemanifold, p, X) = reshape(X, 1, :)
 ManifoldsBase.project!(::HalfPlanemanifold, q, p) = (q .= [p[1] p[2] 0.0])
 ManifoldsBase.project!(::HalfPlanemanifold, Y, p, X) = (Y .= [X[1] X[2] 0.0])
 
-function ManifoldsBase.active_traits(::HalfPlanemanifold, args...)
+function ManifoldsBase.active_traits(f, ::HalfPlanemanifold, args...)
     return ManifoldsBase.merge_traits(ManifoldsBase.IsEmbeddedSubmanifold())
 end
 
@@ -34,7 +34,7 @@ struct AnotherHalfPlanemanifold <: AbstractDecoratorManifold{ℝ} end
 ManifoldsBase.get_embedding(::AnotherHalfPlanemanifold) = ManifoldsBase.DefaultManifold(3)
 ManifoldsBase.base_manifold(::AnotherHalfPlanemanifold) = ManifoldsBase.DefaultManifold(2)
 
-function ManifoldsBase.active_traits(::AnotherHalfPlanemanifold, args...)
+function ManifoldsBase.active_traits(f, ::AnotherHalfPlanemanifold, args...)
     return ManifoldsBase.merge_traits(ManifoldsBase.IsIsometricEmbeddedManifold())
 end
 
@@ -116,7 +116,7 @@ end
 function ManifoldsBase.base_manifold(::NotImplementedEmbeddedSubManifold)
     return ManifoldsBase.DefaultManifold(2)
 end
-function ManifoldsBase.active_traits(::NotImplementedEmbeddedSubManifold, args...)
+function ManifoldsBase.active_traits(f, ::NotImplementedEmbeddedSubManifold, args...)
     return ManifoldsBase.merge_traits(ManifoldsBase.IsEmbeddedSubmanifold())
 end
 
@@ -124,7 +124,7 @@ end
 # A manifold that is isometrically embedded but has no implementations
 #
 struct NotImplementedIsometricEmbeddedManifold <: AbstractDecoratorManifold{ℝ} end
-function ManifoldsBase.active_traits(::NotImplementedIsometricEmbeddedManifold, args...)
+function ManifoldsBase.active_traits(f, ::NotImplementedIsometricEmbeddedManifold, args...)
     return ManifoldsBase.merge_traits(ManifoldsBase.IsIsometricEmbeddedManifold())
 end
 
@@ -132,7 +132,7 @@ end
 # A manifold that is an embedded manifold but not isometric and has no other implementation
 #
 struct NotImplementedEmbeddedManifold <: AbstractDecoratorManifold{ℝ} end
-function ManifoldsBase.active_traits(::NotImplementedEmbeddedManifold, args...)
+function ManifoldsBase.active_traits(f, ::NotImplementedEmbeddedManifold, args...)
     return ManifoldsBase.merge_traits(ManifoldsBase.IsEmbeddedManifold())
 end
 
