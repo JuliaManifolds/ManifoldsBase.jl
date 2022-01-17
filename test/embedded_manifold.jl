@@ -158,6 +158,7 @@ end
         # Check point checks using embedding
         @test is_point(M, [1, 0.1, 0.1], true)
         @test_throws DomainError is_point(M, [-1, 0, 0], true)
+        @test !is_point(M, [-1, 0, 0])
         @test_throws DomainError is_point(M, [1, 0.1], true)
         @test is_point(M, [1 0 0], true)
         @test_throws DomainError is_vector(M, [1, 0, 0], [1], true)
@@ -165,6 +166,8 @@ end
         @test is_vector(M, [1 0 0], [1 0 1], true)
         @test_throws DomainError is_vector(M, [-1, 0, 0], [0, 0, 0], true)
         @test_throws DomainError is_vector(M, [1, 0, 0], [-1, 0, 0], true)
+        @test !is_vector(M, [-1, 0, 0], [0, 0, 0])
+        @test !is_vector(M, [1, 0, 0], [-1, 0, 0])
         p = [1.0 1.0 0.0]
         q = [1.0 0.0 0.0]
         X = q - p
