@@ -575,7 +575,7 @@ end
 function get_coordinates_orthonormal! end
 
 function _get_coordinates!(M::AbstractManifold, Y, p, X, B::DiagonalizingOrthonormalBasis)
-    return get_coordinates_diagonalizing!(M, Y, p, X, number_system(B))
+    return get_coordinates_diagonalizing!(M, Y, p, X, B)
 end
 function get_coordinates_diagonalizing! end
 
