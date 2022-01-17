@@ -185,13 +185,7 @@ end
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function exp!(M::AbstractDecoratorManifold, q, p, X)
 # EmbeddedSubManifold
-function exp!(
-    ::TraitList{IsEmbeddedSubmanifold},
-    M::AbstractDecoratorManifold,
-    q,
-    p,
-    X,
-)
+function exp!(::TraitList{IsEmbeddedSubmanifold}, M::AbstractDecoratorManifold, q, p, X)
     return exp!(get_embedding(M), q, p, X)
 end
 
@@ -305,13 +299,7 @@ end
 
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function log!(M::AbstractDecoratorManifold, X, p, q)
-function log!(
-    ::TraitList{IsEmbeddedSubmanifold},
-    M::AbstractDecoratorManifold,
-    X,
-    p,
-    q,
-)
+function log!(::TraitList{IsEmbeddedSubmanifold}, M::AbstractDecoratorManifold, X, p, q)
     return log!(get_embedding(M), X, p, q)
 end
 
