@@ -71,11 +71,29 @@ end
 function get_coordinates_orthonormal!(M::DefaultManifold, c, p, X, ::RealNumbers)
     return copyto!(c, reshape(X, number_of_coordinates(M, ℝ)))
 end
+function get_coordinates_diagonalizing!(
+    M::DefaultManifold,
+    c,
+    p,
+    X,
+    ::DiagonalizingOrthonormalBasis{ℝ},
+)
+    return copyto!(c, reshape(X, number_of_coordinates(M, ℝ)))
+end
 function get_coordinates_orthonormal!(::DefaultManifold, c, p, X, ::ComplexNumbers)
     m = length(X)
     return copyto!(c, [reshape(real(X), m); reshape(imag(X), m)])
 end
 function get_vector_orthonormal!(M::DefaultManifold, Y, p, c, ::RealNumbers)
+    return copyto!(Y, reshape(c, representation_size(M)))
+end
+function get_vector_diagonalizing!(
+    M::DefaultManifold,
+    Y,
+    p,
+    c,
+    ::DiagonalizingOrthonormalBasis{ℝ},
+)
     return copyto!(Y, reshape(c, representation_size(M)))
 end
 function get_vector_orthonormal!(

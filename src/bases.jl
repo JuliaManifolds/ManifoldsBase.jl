@@ -511,7 +511,15 @@ end
 function _get_coordinates(M::AbstractManifold, p, X, B::DiagonalizingOrthonormalBasis)
     return get_coordinates_diagonalizing(M, p, X, B)
 end
-function get_coordinates_diagonalizing end
+function get_coordinates_diagonalizing(
+    M::AbstractManifold,
+    p,
+    X,
+    B::DiagonalizingOrthonormalBasis,
+)
+    Y = allocate_result(M, get_coordinates, p, X, B)
+    return get_coordinates_diagonalizing!(M, Y, p, X, B)
+end
 
 function _get_coordinates(M::AbstractManifold, p, X, B::CachedBasis)
     return get_coordinates_cached(M, number_system(M), p, X, B, number_system(B))

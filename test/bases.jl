@@ -264,12 +264,10 @@ DiagonalizingBasisProxy() = DiagonalizingOrthonormalBasis([1.0, 0.0, 0.0])
             v1 = log(M, pts[1], pts[2])
             @test ManifoldsBase.number_of_coordinates(M, BT()) == 3
 
-            if BT != DiagonalizingBasisProxy
-                vb = get_coordinates(M, pts[1], v1, BT())
-                @test isa(vb, AbstractVector)
-                vbi = get_vector(M, pts[1], vb, BT())
-                @test isapprox(M, pts[1], v1, vbi)
-            end
+            vb = get_coordinates(M, pts[1], v1, BT())
+            @test isa(vb, AbstractVector)
+            vbi = get_vector(M, pts[1], vb, BT())
+            @test isapprox(M, pts[1], v1, vbi)
 
             b = get_basis(M, pts[1], BT())
             if BT != DiagonalizingBasisProxy
