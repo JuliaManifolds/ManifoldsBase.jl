@@ -621,12 +621,16 @@ end
 function _get_vector(M::AbstractManifold, p, c, B::VeeOrthogonalBasis)
     return get_vector_vee(M, p, c, number_system(B))
 end
-get_vector_vee(M, p, c, N) = get_vector(M, p, c, DefaultOrthogonalBasis(N))
+function get_vector_vee(M::AbstractManifold, p, c, N)
+    return get_vector(M, p, c, DefaultOrthogonalBasis(N))
+end
 
 function _get_vector(M::AbstractManifold, p, c, B::DefaultBasis)
     return get_vector_default(M, p, c, number_system(B))
 end
-get_vector_default(M, p, c, N) = get_vector(M, p, c, DefaultOrthogonalBasis(N))
+function get_vector_default(M::AbstractManifold, p, c, N)
+    return get_vector(M, p, c, DefaultOrthogonalBasis(N))
+end
 
 function _get_vector(M::AbstractManifold, p, c, B::DefaultOrthogonalBasis)
     return get_vector_orthogonal(M, p, c, number_system(B))
@@ -692,12 +696,16 @@ get_vector_vee!(M, Y, p, c, N) = get_vector!(M, Y, p, c, DefaultOrthogonalBasis(
 function _get_vector!(M::AbstractManifold, Y, p, c, B::DefaultBasis)
     return get_vector_default!(M, Y, p, c, number_system(B))
 end
-get_vector_default!(M, Y, p, c, N) = get_vector!(M, Y, p, c, DefaultOrthogonalBasis(N))
+function get_vector_default!(M::AbstractManifold, Y, p, c, N)
+    return get_vector!(M, Y, p, c, DefaultOrthogonalBasis(N))
+end
 
 function _get_vector!(M::AbstractManifold, Y, p, c, B::DefaultOrthogonalBasis)
     return get_vector_orthogonal!(M, Y, p, c, number_system(B))
 end
-get_vector_orthogonal!(M, Y, p, c, N) = get_vector!(M, Y, p, c, DefaultOrthonormalBasis(N))
+function get_vector_orthogonal!(M::AbstractManifold, Y, p, c, N)
+    return get_vector!(M, Y, p, c, DefaultOrthonormalBasis(N))
+end
 
 function _get_vector!(M::AbstractManifold, Y, p, c, B::DefaultOrthonormalBasis)
     return get_vector_orthonormal!(M, Y, p, c, number_system(B))
