@@ -402,7 +402,7 @@ end
 
 """
     vector_transport_along(M::AbstractManifold, p, X, c)
-    vector_transport_along(M::AbstractManifold, p, X, c, method::AbstractVectorTransportMethod)
+    vector_transport_along(M::AbstractManifold, p, X, c, m::AbstractVectorTransportMethod)
 
 Transport a vector `X` from the tangent space at a point `p` on the [`AbstractManifold`](@ref) `M`
 along the curve represented by `c` using the `method`, which defaults to
@@ -457,7 +457,7 @@ end
 
 """
     vector_transport_along!(M::AbstractManifold, Y, p, X, c)
-    vector_transport_along!(M::AbstractManifold, Y, p, X, c, method::AbstractVectorTransportMethod)
+    vector_transport_along!(M::AbstractManifold, Y, p, X, c, m::AbstractVectorTransportMethod)
 
 Transport a vector `X` from the tangent space at a point `p` on the [`AbstractManifold`](@ref) `M`
 along the curve represented by `c` using the `method`, which defaults to
@@ -499,7 +499,7 @@ function vector_transport_along_project! end
         p,
         X,
         c::AbstractVector,
-        method::AbstractVectorTransportMethod
+        m::AbstractVectorTransportMethod
     ) where {T}
 
 Compute the vector transport along a discretized curve `c` using an
@@ -511,7 +511,7 @@ function vector_transport_along!(
     p,
     X,
     c::AbstractVector,
-    method::AbstractVectorTransportMethod,
+    m::AbstractVectorTransportMethod,
 )
     n = length(c)
     if n == 0
@@ -532,7 +532,7 @@ end
         p,
         X,
         c::AbstractVector,
-        method::PoleLadderTransport
+        m::PoleLadderTransport
     )
 
 Compute the vector transport along a discretized curve using
@@ -546,13 +546,13 @@ function _vector_transport_along!(
     p,
     X,
     c::AbstractVector,
-    method::PoleLadderTransport,
+    m::PoleLadderTransport,
 )
     clen = length(c)
     if clen == 0
         copyto!(Y, X)
     else
-        d = retract(M, p, X, method.retraction)
+        d = retract(M, p, X, m.retraction)
         m = mid_point(M, p, c[1])
         pole_ladder!(
             M,
@@ -562,8 +562,8 @@ function _vector_transport_along!(
             c[1],
             m,
             Y;
-            retraction = method.retraction,
-            inverse_retraction = method.inverse_retraction,
+            retraction = m.retraction,
+            inverse_retraction = m.inverse_retraction,
         )
         for i in 1:(clen - 1)
             # precompute mid point inplace
@@ -579,11 +579,11 @@ function _vector_transport_along!(
                 cip1,
                 m,
                 Y;
-                retraction = method.retraction,
-                inverse_retraction = method.inverse_retraction,
+                retraction = m.retraction,
+                inverse_retraction = m.inverse_retraction,
             )
         end
-        inverse_retract!(M, Y, c[clen], d, method.inverse_retraction)
+        inverse_retract!(M, Y, c[clen], d, m.inverse_retraction)
         Y *= (-1)^clen
     end
     return Y
@@ -595,7 +595,7 @@ end
         p,
         X,
         c::AbstractVector,
-        method::SchildsLadderTransport
+        m::SchildsLadderTransport
     )
 
 Compute the vector transport along a discretized curve using
@@ -609,13 +609,13 @@ function _vector_transport_along!(
     p,
     X,
     c::AbstractVector,
-    method::SchildsLadderTransport,
+    m::SchildsLadderTransport,
 )
     clen = length(c)
     if clen == 0
         copyto!(Y, X)
     else
-        d = retract(M, p, X, method.retraction)
+        d = retract(M, p, X, m.retraction)
         m = mid_point(M, c[1], d)
         schilds_ladder!(
             M,
@@ -625,8 +625,8 @@ function _vector_transport_along!(
             c[1],
             m,
             Y;
-            retraction = method.retraction,
-            inverse_retraction = method.inverse_retraction,
+            retraction = m.retraction,
+            inverse_retraction = m.inverse_retraction,
         )
         for i in 1:(clen - 1)
             ci = c[i]
@@ -642,11 +642,11 @@ function _vector_transport_along!(
                 cip1,
                 m,
                 Y;
-                retraction = method.retraction,
-                inverse_retraction = method.inverse_retraction,
+                retraction = m.retraction,
+                inverse_retraction = m.inverse_retraction,
             )
         end
-        inverse_retract!(M, Y, c[clen], d, method.inverse_retraction)
+        inverse_retract!(M, Y, c[clen], d, m.inverse_retraction)
     end
     return Y
 end
@@ -772,8 +772,8 @@ end
 
 @doc raw"""
     vector_transport_to(M::AbstractManifold, p, X, q)
-    vector_transport_to(M::AbstractManifold, p, X, q, method::AbstractVectorTransportMethod)
-    vector_transport_to(M::AbstractManifold, p, X, q, method::AbstractVectorTransportMethod, r::AbstractRetractionMethod)
+    vector_transport_to(M::AbstractManifold, p, X, q, m::AbstractVectorTransportMethod)
+    vector_transport_to(M::AbstractManifold, p, X, q, m::AbstractVectorTransportMethod, r::AbstractRetractionMethod)
 
 Transport a vector `X` from the tangent space at a point `p` on the [`AbstractManifold`](@ref) `M`
 along a curve specified by the [`AbstractRetractionMethod`](@ref) `r` to the tangent space at another point `q`.

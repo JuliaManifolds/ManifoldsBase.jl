@@ -15,9 +15,6 @@ implemented for ``\mathcal M`` but can be automatically implemented by deligatio
 
 This is modelled by the `AbstractDecoratorManifold` and traits. These are mapped to functions,
 which determine the types of transparencies.
-
-A dault function to implement determines the generic manifold that is added (decorates the manifold),
-see [`decorated_manifold`](@ref).
 """
 abstract type AbstractDecoratorManifold{𝔽} <: AbstractManifold{𝔽} end
 
