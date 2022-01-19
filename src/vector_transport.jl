@@ -263,7 +263,7 @@ to different [`AbstractRetractionMethod`](@ref) and [`AbstractInverseRetractionM
 
 When you have $X=log_pd$ and $Y = -\log_q \operatorname{Pl}(p,d,q)$,
 you will obtain the [`PoleLadderTransport`](@ref). When performing multiple steps, this
-method avoidsd the switching to the tangent space. Keep in mind that after $n$ successive
+method avoids the switching to the tangent space. Keep in mind that after $n$ successive
 steps the tangent vector reads $Y_n = (-1)^n\log_q \operatorname{Pl}(p_{n-1},d_{n-1},p_n)$.
 
 It is cheaper to evaluate than [`schilds_ladder`](@ref), sinc if you want to form multiple
@@ -517,9 +517,9 @@ function vector_transport_along!(
     if n == 0
         copyto!(Y, X)
     else
-        vector_transport_to!(M, Y, p, X, c[1], method)
+        vector_transport_to!(M, Y, p, X, c[1], m)
         for i in 1:(length(c) - 1)
-            vector_transport_to!(M, Y, c[i], Y, c[i + 1], method)
+            vector_transport_to!(M, Y, c[i], Y, c[i + 1], m)
         end
     end
     return Y
@@ -553,14 +553,14 @@ function _vector_transport_along!(
         copyto!(Y, X)
     else
         d = retract(M, p, X, m.retraction)
-        m = mid_point(M, p, c[1])
+        mp = mid_point(M, p, c[1])
         pole_ladder!(
             M,
             d,
             p,
             d,
             c[1],
-            m,
+            mp,
             Y;
             retraction = m.retraction,
             inverse_retraction = m.inverse_retraction,
@@ -569,7 +569,7 @@ function _vector_transport_along!(
             # precompute mid point inplace
             ci = c[i]
             cip1 = c[i + 1]
-            mid_point!(M, m, ci, cip1)
+            mid_point!(M, mp, ci, cip1)
             # compute new ladder point
             pole_ladder!(
                 M,
@@ -577,7 +577,7 @@ function _vector_transport_along!(
                 ci,
                 d,
                 cip1,
-                m,
+                mp,
                 Y;
                 retraction = m.retraction,
                 inverse_retraction = m.inverse_retraction,
@@ -616,14 +616,14 @@ function _vector_transport_along!(
         copyto!(Y, X)
     else
         d = retract(M, p, X, m.retraction)
-        m = mid_point(M, c[1], d)
+        mp = mid_point(M, c[1], d)
         schilds_ladder!(
             M,
             d,
             p,
             d,
             c[1],
-            m,
+            mp,
             Y;
             retraction = m.retraction,
             inverse_retraction = m.inverse_retraction,
@@ -632,7 +632,7 @@ function _vector_transport_along!(
             ci = c[i]
             cip1 = c[i + 1]
             # precompute mid point inplace
-            mid_point!(M, m, cip1, d)
+            mid_point!(M, mp, cip1, d)
             # compute new ladder point
             schilds_ladder!(
                 M,
@@ -640,7 +640,7 @@ function _vector_transport_along!(
                 ci,
                 d,
                 cip1,
-                m,
+                mp,
                 Y;
                 retraction = m.retraction,
                 inverse_retraction = m.inverse_retraction,
