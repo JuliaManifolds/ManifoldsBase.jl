@@ -835,6 +835,10 @@ function vector_transport_to_project(M::AbstractManifold, p, X, q)
     Y = allocate_result(M, vector_transport_to, X, p)
     return vector_transport_to_project!(M, Y, p, X, q)
 end
+function vector_transport_to_project!(M::AbstractManifold, Y, p, X, q)
+    return project!(M, Y, q, X)
+end
+
 
 """
     vector_transport_to!(M::AbstractManifold, Y, p, X, q)

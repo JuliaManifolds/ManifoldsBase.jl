@@ -136,9 +136,6 @@ end
 function parallel_transport_to!(::DefaultManifold, Y, p, X, q)
     return copyto!(Y, X)
 end
-function vector_transport_to_project!(M::DefaultManifold, Y, p, X, q)
-    return project!(M, Y, q, X)
-end
 
 zero_vector(::DefaultManifold, p) = zero(p)
 

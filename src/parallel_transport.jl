@@ -47,6 +47,6 @@ Compute the [`parallel_transport_along`](@ref) the curve ``c(t) = γ_{p,q}(t)``,
 i.e. the (assumed to be unique) [`geodesic`](@ref) connecting `p` and `q`, of the tangent vector `X`.
 """
 function parallel_transport_to(M::AbstractManifold, p, X, q)
-    Y = allocate_result(M, vector_transport_to, X, p)
+    Y = allocate_result(M, vector_transport_to, X, p, q)
     return parallel_transport_to!(M, Y, p, X, q)
 end
