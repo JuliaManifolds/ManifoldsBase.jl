@@ -546,13 +546,13 @@ function vector_transport_to!(
 end
 
 @trait_function zero_vector(M::AbstractDecoratorManifold, p)
-function zero_vector(::TraitList{IsEmbeddedSubmanifold}, M::AbstractDecoratorManifold, p)
+function zero_vector(::TraitList{IsEmbeddedManifold}, M::AbstractDecoratorManifold, p)
     return zero_vector(get_embedding(M), p)
 end
 
 @trait_function zero_vector!(M::AbstractDecoratorManifold, X, p)
 function zero_vector!(
-    ::TraitList{IsEmbeddedSubmanifold},
+    ::TraitList{IsEmbeddedManifold},
     M::AbstractDecoratorManifold,
     X,
     p,
