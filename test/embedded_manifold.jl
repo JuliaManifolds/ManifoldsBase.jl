@@ -185,6 +185,10 @@ end
         Q = similar(P)
         @test project!(M, Q, P) == project!(M, Q, P)
         @test project!(M, Q, P) == [1.0 1.0 0.0]
+        @test isapprox(M, p, zero_vector(M, p), [0 0 0])
+        XZ = similar(X)
+        zero_vector!(M, XZ, p)
+        @test isapprox(M, p, XZ, [0 0 0])
 
         XE = similar(X)
         embed!(M, XE, p, X)
