@@ -551,11 +551,6 @@ function zero_vector(::TraitList{IsEmbeddedManifold}, M::AbstractDecoratorManifo
 end
 
 @trait_function zero_vector!(M::AbstractDecoratorManifold, X, p)
-function zero_vector!(
-    ::TraitList{IsEmbeddedManifold},
-    M::AbstractDecoratorManifold,
-    X,
-    p,
-)
+function zero_vector!(::TraitList{IsEmbeddedManifold}, M::AbstractDecoratorManifold, X, p)
     return zero_vector!(get_embedding(M), X, p)
 end
