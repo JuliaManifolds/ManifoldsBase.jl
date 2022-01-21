@@ -714,6 +714,20 @@ function _vector_transport_direction(
     p,
     X,
     d,
+    m::DifferentiatedRetractionVectorTransport{R},
+    r::R
+) where {R<:AbstractRetractionMethod}
+    return vector_transport_direction_diff(M, p, X, d, m, r)
+end
+function vector_transport_direction_diff(M::AbstractManifold, p, X, d, r::AbstractRetractionMethod)
+    Y = allocate_result(M, vector_transport_direction, p, X, d)
+    return vector_transport_direction_diff!(M, Y, p, X, d, r)
+end
+function _vector_transport_direction(
+    M::AbstractManifold,
+    p,
+    X,
+    d,
     ::ParallelTransport,
     ::ExponentialRetraction,
 )
@@ -745,8 +759,6 @@ function vector_transport_direction!(
 )
     return _vector_transport_direction!(M, Y, p, X, d, m, r)
 end
-
-
 function _vector_transport_direction!(
     M::AbstractManifold,
     Y,
@@ -758,6 +770,18 @@ function _vector_transport_direction!(
 )
     return vector_transport_to!(M, Y, p, X, retract(M, p, d, r), m)
 end
+function _vector_transport_direction!(
+    M::AbstractManifold,
+    Y,
+    p,
+    X,
+    d,
+    m::DifferentiatedRetractionVectorTransport{R},
+    r::R
+) where {R<:AbstractRetractionMethod}
+    return vector_transport_direction_diff!(M, Y, p, X, d, m, r)
+end
+function vector_transport_direction_diff! end
 function _vector_transport_direction!(
     M::AbstractManifold,
     Y,
@@ -812,10 +836,9 @@ function _vector_transport_to(
     p,
     X,
     q,
-    ::DifferentiatedRetractionVectorTransport{R},
-    r::R,
+    m::DifferentiatedRetractionVectorTransport{R},
 ) where {R<:AbstractRetractionMethod}
-    return vector_transport_to_diff(M, p, X, q, r)
+    return vector_transport_to_diff(M, p, X, q, m.retraction)
 end
 function vector_transport_to_diff(M::AbstractManifold, p, X, q, r)
     Y = allocate_result(M, vector_transport_to, X, p)
@@ -878,10 +901,9 @@ function _vector_transport_to!(
     p,
     X,
     q,
-    ::DifferentiatedRetractionVectorTransport{R},
-    r::R,
+    m::DifferentiatedRetractionVectorTransport{R},
 ) where {R}
-    return vector_transport_to_diff!(M, Y, p, X, q, r)
+    return vector_transport_to_diff!(M, Y, p, X, q, m.retraction)
 end
 function vector_transport_to_diff! end
 function _vector_transport_to!(
