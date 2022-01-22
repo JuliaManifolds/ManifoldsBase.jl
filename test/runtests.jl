@@ -31,5 +31,5 @@ using ManifoldsBase
     include("embedded_manifold.jl")
     include("power.jl")
     include("domain_errors.jl")
-    include("vector_transport_along.jl")
+    include("vector_transport.jl")
 end

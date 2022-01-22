@@ -251,7 +251,7 @@ struct VectorTransportDirection{
         vector_transport = ParallelTransport(),
         retraction = ExponentialRetraction(),
     )
-        return new{typeof(retraction),typeof(vector_transport)}(
+        return new{typeof(vector_transport),typeof(retraction)}(
             retraction,
             vector_transport,
         )
@@ -278,7 +278,7 @@ struct VectorTransportTo{
         vector_transport = ParallelTransport(),
         inverse_retraction = LogarithmicInverseRetraction(),
     )
-        return new{typeof(inverse_retraction),typeof(vector_transport)}(
+        return new{typeof(vector_transport), typeof(inverse_retraction)}(
             inverse_retraction,
             vector_transport,
         )
