@@ -973,14 +973,7 @@ function _vector_transport_to(M::AbstractManifold, p, X, q, m::PoleLadderTranspo
     Y = allocate_result(M, vector_transport_to, X, p)
     return _vector_transport_to!(M, Y, p, X, q, m)
 end
-function _vector_transport_to!(
-    M::AbstractManifold,
-    Y,
-    p,
-    X,
-    q,
-    m::PoleLadderTransport,
-)
+function _vector_transport_to!(M::AbstractManifold, Y, p, X, q, m::PoleLadderTransport)
     inverse_retract!(
         M,
         Y,
