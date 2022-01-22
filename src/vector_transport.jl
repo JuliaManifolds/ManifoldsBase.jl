@@ -278,7 +278,7 @@ struct VectorTransportTo{
         vector_transport = ParallelTransport(),
         inverse_retraction = LogarithmicInverseRetraction(),
     )
-        return new{typeof(vector_transport), typeof(inverse_retraction)}(
+        return new{typeof(vector_transport),typeof(inverse_retraction)}(
             inverse_retraction,
             vector_transport,
         )

@@ -46,7 +46,7 @@ end
     p = [1.0, 0.0, 0.0]
     q = [0.0, 1.0, 0.0]
     X = [0.0, 0.0, 1.0]
-    @test vector_transport_direction(M, p, X, p-q, VT) == X
+    @test vector_transport_direction(M, p, X, p - q, VT) == X
     VT2 = VectorTransportTo()
     @test vector_transport_to(M, p, X, q, VT2) == X
 end
