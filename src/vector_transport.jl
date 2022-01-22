@@ -979,9 +979,8 @@ function _vector_transport_to!(
     p,
     X,
     q,
-    m::PoleLadderTransport{R},
-    ::R,
-) where {R}
+    m::PoleLadderTransport,
+)
     inverse_retract!(
         M,
         Y,
