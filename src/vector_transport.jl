@@ -55,6 +55,11 @@ compute ``Y = \operatorname{retr}_p^{-1}q``.
 struct DifferentiatedRetractionVectorTransport{R<:AbstractRetractionMethod} <:
        AbstractLinearVectorTransportMethod
     retraction::R
+    function DifferentiatedRetractionVectorTransport(
+        r::R,
+    ) where {R<:AbstractRetractionMethod}
+        return new{R}(r)
+    end
 end
 
 @doc raw"""
@@ -233,6 +238,8 @@ end
     Specify a [`vector_transport_direction`](@ref) using a [`AbstractVectorTransportMethod`](@ref)
     with explicitly using the [`AbstractRetractionMethod`](@ref) to determine the point in
     the specified direction where to transsport to.
+    Note that you only need this for the non-default (non-implicit) second retraction method associated to a vector transport,
+    i.e. when a first implementation assumed an implicit associated retraction.
 """
 struct VectorTransportDirection{
     VM<:AbstractVectorTransportMethod,
@@ -258,6 +265,8 @@ end
     Specify a [`vector_transport_to`](@ref) using a [`AbstractVectorTransportMethod`](@ref)
     with explicitly using the [`AbstractInverseRetractionMethod`](@ref) to determine the direction
     that transports from  in `p`to `q`.
+    Note that you only need this for the non-default (non-implicit) second retraction method associated to a vector transport,
+    i.e. when a first implementation assumed an implicit associated retraction.
 """
 struct VectorTransportTo{
     VM<:AbstractVectorTransportMethod,
@@ -751,7 +760,7 @@ function vector_transport_direction(
     d,
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
-    return _vector_transport_direction(M, p, X, d, m, r)
+    return _vector_transport_direction(M, p, X, d, m)
 end
 function _vector_transport_direction(
     M::AbstractManifold,
@@ -816,7 +825,7 @@ function vector_transport_direction!(
     d,
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
-    return _vector_transport_direction!(M, Y, p, X, d, m, r)
+    return _vector_transport_direction!(M, Y, p, X, d, m)
 end
 function _vector_transport_direction!(
     M::AbstractManifold,

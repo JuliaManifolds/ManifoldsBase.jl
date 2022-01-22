@@ -597,7 +597,9 @@ export AbstractVectorTransportMethod,
     PoleLadderTransport,
     ProjectionTransport,
     ScaledVectorTransport,
-    SchildsLadderTransport
+    SchildsLadderTransport,
+    VectorTransportDirection,
+    VectorTransportTo
 
 export CachedBasis,
     DefaultBasis,
