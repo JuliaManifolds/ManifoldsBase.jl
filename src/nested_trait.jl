@@ -33,6 +33,22 @@ A Trait indicating that no feature is present.
 struct EmptyTrait <: AbstractTrait end
 
 """
+    IsExplicitDecorator <: AbstractTrait
+
+Specify that a certain type should dispatch the function to the field of name `.fieldname`
+of the decorator. This means the decorator is stated to explicitly decorate its `.fieldname`s
+type.
+
+!!! note
+Any decorator _behind_ this decorator might not have any effect, since the function dispatch
+is moved to its field at this point. Therefore this decorator should always be _last_ in the
+[`TraitList`](@ref).
+"""
+struct IsExplicitDecorator <: AbstractTrait
+    fieldname::Symbol
+end
+
+"""
     TraitList <: AbstractTrait
 
 Combine two traits into a combined trait.  Note that this introduces a preceedence.
@@ -268,6 +284,21 @@ macro trait_function(sig)
                 $(kwargs_list...),
             ) where {$(where_exprs...)}
                 return ($fname)(next_trait(t), $(argnames...); $(kwargs_call...))
+            end
+            function ($fname)(
+                t::TraitList{IsExplicitDecorator},
+                $(callargs...);
+                $(kwargs_list...),
+            ) where {$(where_exprs...)}
+                arg1 = getproperty($(argnames[1]), t.head.fieldname)
+                argt1 = typeof(arg1)
+                return invoke(
+                    $fname,
+                    Tuple{argt1,$(argtypes[2:end]...)},
+                    arg1,
+                    $(argnames[2:end]...);
+                    $(kwargs_call...),
+                )
             end
             function ($fname)(
                 ::EmptyTrait,
