@@ -4,6 +4,14 @@ using Test
 
 struct ErrorTestManifold <: AbstractManifold{ℝ} end
 
+function ManifoldsBase.check_size(::ErrorTestManifold, p)
+    size(p) != (2,) && return DomainError(size(p), " size $p not (2,)")
+    return nothing
+end
+function ManifoldsBase.check_size(::ErrorTestManifold, p, X)
+    size(X) != (2,) && return DomainError(size(X), " size $X not (2,)")
+    return nothing
+end
 function ManifoldsBase.check_point(::ErrorTestManifold, x)
     if any(u -> u < 0, x)
         return DomainError(x, "<0")
@@ -22,14 +30,22 @@ end
 @testset "Domain errors" begin
     M = ErrorTestManifold()
     @test isa(ManifoldsBase.check_point(M, [-1, 1]), DomainError)
+    @test isa(ManifoldsBase.check_size(M, [-1, 1, 1]), DomainError)
+    @test isa(ManifoldsBase.check_size(M, [-1, 1], [1, 1, 1]), DomainError)
     @test ManifoldsBase.check_point(M, [1, 1]) === nothing
     @test !is_point(M, [-1, 1])
+    @test !is_point(M, [1, 1, 1]) # checksize fails
+    @test_throws DomainError is_point(M, [-1, 1, 1], true) # checksize errors
     @test is_point(M, [1, 1])
     @test_throws DomainError is_point(M, [-1, 1], true)
 
     @test isa(ManifoldsBase.check_vector(M, [1, 1], [-1, 1]), DomainError)
     @test ManifoldsBase.check_vector(M, [1, 1], [1, 1]) === nothing
     @test !is_vector(M, [1, 1], [-1, 1])
+    @test !is_vector(M, [1, 1], [1, 1, 1])
+    @test_throws DomainError is_vector(M, [1, 1], [-1, 1, 1], true)
+    @test !is_vector(M, [1, 1, 1], [1, 1, 1], false, true)
+    @test_throws DomainError is_vector(M, [1, 1, 1], [1, 1], true, true)
     @test is_vector(M, [1, 1], [1, 1])
     @test_throws DomainError is_vector(M, [1, 1], [-1, 1], true)
 end

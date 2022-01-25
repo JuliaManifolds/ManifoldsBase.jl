@@ -44,9 +44,7 @@ Any decorator _behind_ this decorator might not have any effect, since the funct
 is moved to its field at this point. Therefore this decorator should always be _last_ in the
 [`TraitList`](@ref).
 """
-struct IsExplicitDecorator <: AbstractTrait
-    fieldname::Symbol
-end
+struct IsExplicitDecorator <: AbstractTrait end
 
 """
     TraitList <: AbstractTrait

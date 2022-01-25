@@ -136,6 +136,15 @@ function ManifoldsBase.active_traits(f, ::NotImplementedEmbeddedManifold, args..
     return ManifoldsBase.merge_traits(ManifoldsBase.IsEmbeddedManifold())
 end
 
+#
+# A Manifold with a fallback
+#
+struct FallbackManifold <: AbstractDecoratorManifold{ℝ} end
+function ManifoldsBase.active_traits(f, ::FallbackManifold, args...)
+    return ManifoldsBase.merge_traits(ManifoldsBase.IsExplicitDecorator())
+end
+ManifoldsBase.decorated_manifold(::FallbackManifold) = DefaultManifold(3)
+
 @testset "Embedded Manifolds" begin
     @testset "EmbeddedManifold basic tests" begin
         M = EmbeddedManifold(
@@ -157,12 +166,17 @@ end
         @test get_embedding(M) == ManifoldsBase.DefaultManifold(1, 3)
         # Check point checks using embedding
         @test is_point(M, [1 0.1 0.1], true)
-        @test_throws DomainError is_point(M, [-1, 0, 0], true)
+        @test_throws DomainError is_point(M, [-1, 0, 0], true) #wrong dim (3,1)
         @test !is_point(M, [-1, 0, 0])
-        @test_throws DomainError is_point(M, [1, 0.1], true)
+        @test_throws DomainError is_point(M, [1, 0.1], true) # size
         @test is_point(M, [1 0 0], true)
-        @test_throws DomainError is_vector(M, [1, 0, 0], [1], true)
-        @test_throws DomainError is_vector(M, [1, 0, 0], [0, 0, 0, 0], true)
+        @test !is_point(M, [-1 0 0]) # right size but <0 1st
+        @test_throws DomainError is_point(M, [-1 0 0], true) # right size but <0 1st
+        @test_throws DomainError is_vector(M, [1, 0, 0], [1 0 0], true)
+        @test_throws DomainError is_vector(M, [1 0 0], [1], true) # right point, wrong size vector
+        @test !is_vector(M, [1 0 0], [1])
+        @test_throws DomainError is_vector(M, [1 0 0], [-1 0 0], true) # right point, vec 1st <0
+        @test !is_vector(M, [1 0 0], [-1 0 0])
         @test is_vector(M, [1 0 0], [1 0 1], true)
         @test_throws DomainError is_vector(M, [-1, 0, 0], [0, 0, 0], true)
         @test_throws DomainError is_vector(M, [1, 0, 0], [-1, 0, 0], true)
@@ -336,5 +350,11 @@ end
         @test_throws DomainError embed!(O, zeros(3, 3), zeros(4, 4))
         @test_throws DomainError project!(O, zeros(3, 3, 5), zeros(3, 3))
         @test_throws DomainError project!(O, zeros(4, 4), zeros(3, 3))
+    end
+    @testset "Explicit Fallback" begin
+        M = FallbackManifold()
+        # test the explicit fallback to DefaultManifold(3)
+        @test inner(M, [1, 0, 0], [1, 2, 3], [0, 1, 0]) == 2
+        @test is_point(M, [1, 0, 0])
     end
 end
