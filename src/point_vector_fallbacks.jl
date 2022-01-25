@@ -440,7 +440,6 @@ macro manifold_vector_forwards(T, Twhere, field::Symbol)
             Base.:-(X::$T) where {$Twhere} = $T(-X.$field)
             Base.:+(X::$T) where {$Twhere} = $T(X.$field)
             Base.zero(X::$T) where {$Twhere} = $T(zero(X.$field))
-            Base.size(X::$T) where {$Twhere} = size(X.$field)
 
             @eval ManifoldsBase.@manifold_element_forwards $T $Twhere $field
 
