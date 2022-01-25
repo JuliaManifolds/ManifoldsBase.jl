@@ -290,7 +290,7 @@ macro trait_function(sig)
                 $(callargs...);
                 $(kwargs_list...),
             ) where {$(where_exprs...)}
-                arg1 = getproperty($(argnames[1]), t.head.fieldname)
+                arg1 = decorated_manifold($(argnames[1]))
                 argt1 = typeof(arg1)
                 return invoke(
                     $fname,
