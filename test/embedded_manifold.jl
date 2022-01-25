@@ -156,7 +156,7 @@ end
         @test repr(M) == "HalfPlanemanifold()"
         @test get_embedding(M) == ManifoldsBase.DefaultManifold(1, 3)
         # Check point checks using embedding
-        @test is_point(M, [1, 0.1, 0.1], true)
+        @test is_point(M, [1 0.1 0.1], true)
         @test_throws DomainError is_point(M, [-1, 0, 0], true)
         @test !is_point(M, [-1, 0, 0])
         @test_throws DomainError is_point(M, [1, 0.1], true)

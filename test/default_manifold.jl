@@ -31,15 +31,15 @@ struct DefaultPoint{T} <: AbstractManifoldPoint
 end
 DefaultPoint(v::T) where {T} = DefaultPoint{T}(v)
 convert(::Type{DefaultPoint{T}}, v::T) where {T} = DefaultPoint(v)
-
+Base.size(p::DefaultPoint) = size(p.value)
 Base.eltype(v::DefaultPoint) = eltype(v.value)
 
 struct DefaultTVector{T} <: TVector
     value::T
 end
 DefaultTVector(v::T) where {T} = DefaultTVector{T}(v)
-
-Base.eltype(v::DefaultTVector) = eltype(v.value)
+Base.size(X::DefaultTVector) = size(X.value)
+Base.eltype(X::DefaultTVector) = eltype(X.value)
 
 ManifoldsBase.@manifold_element_forwards DefaultPoint value
 ManifoldsBase.@manifold_vector_forwards DefaultTVector value

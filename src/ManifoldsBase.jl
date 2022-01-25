@@ -150,8 +150,9 @@ By default, `check_size` returns `nothing`, i.e. if no checks are implemented, t
 assumption is to be optimistic.
 """
 function check_size(M::AbstractManifold, p)
-    n = size(p)
     m = representation_size(M)
+    m === nothing && return nothing # nothing reasonable in size to check
+    n = size(p)
     if length(n) != length(m)
         return DomainError(
             length(n),
@@ -168,8 +169,9 @@ end
 function check_size(M::AbstractManifold, p, X)
     mse = check_size(M, p)
     mse === nothing || return mse
-    n = size(X)
     m = representation_size(M)
+    m === nothing && return nothing # without a representation size - nothing to check.
+    n = size(X)
     if length(n) != length(m)
         return DomainError(
             length(n),
@@ -396,6 +398,11 @@ calls [`check_point`](@ref) and checks whether the returned value
 is `nothing` or an error.
 """
 function is_point(M::AbstractManifold, p, throw_error = false; kwargs...)
+    mps = check_size(M, p)
+    if mps !== nothing
+        throw_error && throw(mps)
+        return false
+    end
     mpe = check_point(M, p; kwargs...)
     mpe === nothing && return true
     return throw_error ? throw(mpe) : false
@@ -424,18 +431,17 @@ function is_vector(
     kwargs...,
 )
     if check_base_point
-        mpe = check_point(M, p; kwargs...)
-        if mpe !== nothing
-            if throw_error
-                throw(mpe)
-            else
-                return false
-            end
-        end
+        s = is_point(M, p, throw_error; kwargs...) # if throw_error, is_point throws,
+        !s && return false # otherwise if not a point return false
     end
-    mtve = check_vector(M, p, X; kwargs...)
-    mtve === nothing && return true
-    throw_error && throw(mtve)
+    mXs = check_size(M, p, X)
+    if mXs !== nothing
+        throw_error && throw(mXs)
+        return false
+    end
+    mXe = check_vector(M, p, X; kwargs...)
+    mXe === nothing && return true
+    throw_error && throw(mXe)
     return false
 end
 

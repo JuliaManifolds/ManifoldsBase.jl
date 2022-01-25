@@ -13,6 +13,7 @@ List of forwarded functions:
 * [`copyto!`](@ref),
 * [`number_eltype`](@ref) (only for values, not the type itself),
 * `similar`,
+* `size`,
 * `==`.
 """
 macro manifold_element_forwards(T, field::Symbol)
@@ -48,6 +49,8 @@ macro manifold_element_forwards(T, Twhere, field::Symbol)
 
             Base.similar(p::$T) where {$Twhere} = $T(similar(p.$field))
             Base.similar(p::$T, ::Type{P}) where {P,$Twhere} = $T(similar(p.$field, P))
+
+            Base.size(p::$T) where {$Twhere} = size(p.$field)
 
             Base.:(==)(p::$T, q::$T) where {$Twhere} = (p.$field == q.$field)
         end,
@@ -437,6 +440,7 @@ macro manifold_vector_forwards(T, Twhere, field::Symbol)
             Base.:-(X::$T) where {$Twhere} = $T(-X.$field)
             Base.:+(X::$T) where {$Twhere} = $T(X.$field)
             Base.zero(X::$T) where {$Twhere} = $T(zero(X.$field))
+            Base.size(X::$T) where {$Twhere} = size(X.$field)
 
             @eval ManifoldsBase.@manifold_element_forwards $T $Twhere $field
 
