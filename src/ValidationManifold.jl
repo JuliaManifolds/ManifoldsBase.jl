@@ -71,7 +71,7 @@ array_value(p::AbstractArray) = p
 array_value(p::ValidationMPoint) = p.value
 array_value(X::ValidationFibreVector) = X.value
 
-base_manifold(M::ValidationManifold) = M.manifold
+decorated_manifold(M::ValidationManifold) = M.manifold
 
 function check_point(M::ValidationManifold, p; kwargs...)
     return check_point(M.manifold, array_value(p); kwargs...)

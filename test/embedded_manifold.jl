@@ -8,7 +8,7 @@ using ManifoldsBase: DefaultManifold, ℝ
 struct HalfPlanemanifold <: AbstractDecoratorManifold{ℝ} end
 
 ManifoldsBase.get_embedding(::HalfPlanemanifold) = ManifoldsBase.DefaultManifold(1, 3)
-ManifoldsBase.base_manifold(::HalfPlanemanifold) = ManifoldsBase.DefaultManifold(2)
+ManifoldsBase.decorated_manifold(::HalfPlanemanifold) = ManifoldsBase.DefaultManifold(2)
 
 function ManifoldsBase.check_point(::HalfPlanemanifold, p)
     return p[1] > 0 ? nothing : DomainError(p[1], "p[1] ≤ 0")
@@ -32,7 +32,9 @@ end
 struct AnotherHalfPlanemanifold <: AbstractDecoratorManifold{ℝ} end
 
 ManifoldsBase.get_embedding(::AnotherHalfPlanemanifold) = ManifoldsBase.DefaultManifold(3)
-ManifoldsBase.base_manifold(::AnotherHalfPlanemanifold) = ManifoldsBase.DefaultManifold(2)
+function ManifoldsBase.decorated_manifold(::AnotherHalfPlanemanifold)
+    return ManifoldsBase.DefaultManifold(2)
+end
 
 function ManifoldsBase.active_traits(f, ::AnotherHalfPlanemanifold, args...)
     return ManifoldsBase.merge_traits(ManifoldsBase.IsIsometricEmbeddedManifold())
@@ -113,7 +115,7 @@ struct NotImplementedEmbeddedSubManifold <: AbstractDecoratorManifold{ℝ} end
 function ManifoldsBase.get_embedding(::NotImplementedEmbeddedSubManifold)
     return ManifoldsBase.DefaultManifold(3)
 end
-function ManifoldsBase.base_manifold(::NotImplementedEmbeddedSubManifold)
+function ManifoldsBase.decorated_manifold(::NotImplementedEmbeddedSubManifold)
     return ManifoldsBase.DefaultManifold(2)
 end
 function ManifoldsBase.active_traits(f, ::NotImplementedEmbeddedSubManifold, args...)
