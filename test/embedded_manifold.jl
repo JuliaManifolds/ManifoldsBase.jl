@@ -22,6 +22,25 @@ ManifoldsBase.embed(::HalfPlanemanifold, p, X) = reshape(X, 1, :)
 ManifoldsBase.project!(::HalfPlanemanifold, q, p) = (q .= [p[1] p[2] 0.0])
 ManifoldsBase.project!(::HalfPlanemanifold, Y, p, X) = (Y .= [X[1] X[2] 0.0])
 
+function ManifoldsBase.get_coordinates_orthonormal!(
+    ::HalfPlanemanifold,
+    Y,
+    p,
+    X,
+    ::ManifoldsBase.RealNumbers,
+)
+    return (Y .= [X[1], X[2]])
+end
+function ManifoldsBase.get_vector_orthonormal!(
+    ::HalfPlanemanifold,
+    Y,
+    p,
+    c,
+    ::ManifoldsBase.RealNumbers,
+)
+    return (Y .= [c[1] c[2] 0.0])
+end
+
 function ManifoldsBase.active_traits(f, ::HalfPlanemanifold, args...)
     return ManifoldsBase.merge_traits(ManifoldsBase.IsEmbeddedSubmanifold())
 end
@@ -239,6 +258,14 @@ ManifoldsBase.decorated_manifold(::FallbackManifold) = DefaultManifold(3)
         @test parallel_transport_direction!(M, Y, p, X, X) == X
         @test parallel_transport_to(M, p, X, q) == X
         @test parallel_transport_to!(M, Y, p, X, q) == X
+
+        @test get_basis(M, p, DefaultOrthonormalBasis()) isa CachedBasis
+        Xc = [X[1], X[2]]
+        Yc = similar(Xc)
+        @test get_coordinates(M, p, X, DefaultOrthonormalBasis()) == Xc
+        @test get_coordinates!(M, Yc, p, X, DefaultOrthonormalBasis()) == Xc
+        @test get_vector(M, p, Xc, DefaultOrthonormalBasis()) == X
+        @test get_vector!(M, Y, p, Xc, DefaultOrthonormalBasis()) == X
     end
 
     @testset "AnotherHalfPlanemanifold" begin

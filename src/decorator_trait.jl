@@ -191,69 +191,18 @@ end
 
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function get_basis(M::AbstractDecoratorManifold, p, B::AbstractBasis)
-# EmbeddedSubManifold
-function get_basis(
-    ::TraitList{IsEmbeddedSubmanifold},
-    M::AbstractDecoratorManifold,
-    p,
-    B::AbstractBasis,
-)
-    return get_basis(get_embedding(M), p, B)
-end
 
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function get_coordinates(M::AbstractDecoratorManifold, p, X, B::AbstractBasis)
-# EmbeddedSubManifold
-function get_coordinates(
-    ::TraitList{IsEmbeddedSubmanifold},
-    M::AbstractDecoratorManifold,
-    p,
-    X,
-    B::AbstractBasis,
-)
-    return get_coordinates(get_embedding(M), p, X, B)
-end
 
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function get_coordinates!(M::AbstractDecoratorManifold, Y, p, X, B::AbstractBasis)
-# EmbeddedSubManifold
-function get_coordinates!(
-    ::TraitList{IsEmbeddedSubmanifold},
-    M::AbstractDecoratorManifold,
-    Y,
-    p,
-    X,
-    B::AbstractBasis,
-)
-    return get_coordinates!(get_embedding(M), Y, p, X, B)
-end
 
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function get_vector(M::AbstractDecoratorManifold, p, c, B::AbstractBasis)
-# EmbeddedSubManifold
-function get_vector(
-    ::TraitList{IsEmbeddedSubmanifold},
-    M::AbstractDecoratorManifold,
-    p,
-    c,
-    B::AbstractBasis,
-)
-    return get_vector(get_embedding(M), p, c, B)
-end
 
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function get_vector!(M::AbstractDecoratorManifold, Y, p, c, B::AbstractBasis)
-# EmbeddedSubManifold
-function get_vector!(
-    ::TraitList{IsEmbeddedSubmanifold},
-    M::AbstractDecoratorManifold,
-    Y,
-    p,
-    c,
-    B::AbstractBasis,
-)
-    return get_vector!(get_embedding(M), Y, p, c, B)
-end
 
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function inner(M::AbstractDecoratorManifold, p, X, Y)
