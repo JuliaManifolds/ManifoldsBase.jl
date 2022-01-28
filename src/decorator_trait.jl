@@ -1,7 +1,6 @@
 #
 # Base passons
 #
-representation_size(M::AbstractDecoratorManifold) = representation_size(base_manifold(M))
 manifold_dimension(M::AbstractDecoratorManifold) = manifold_dimension(base_manifold(M))
 
 #
@@ -83,7 +82,7 @@ get_embedding(M::AbstractDecoratorManifold)
 # -----------------------------------------------------------------------------------------
 # This is one new function
 
-# INtroduction and default fallbacks could become a macro?
+# Introduction and default fallbacks could become a macro?
 # Introduce trait
 function allocate_result(M::AbstractDecoratorManifold, f, x...)
     return allocate_result(trait(allocate_result, M, f, x...), M, f, x...)
@@ -423,6 +422,17 @@ end
 
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function project!(M::AbstractDecoratorManifold, Y, p, X)
+
+# Introduce Deco Trait | automatic foward | fallback
+@trait_function representation_size(M::AbstractDecoratorManifold) (no_empty,)
+# Isometric Embedded submanifold
+function representation_size(::TraitList{IsEmbeddedManifold}, M::AbstractDecoratorManifold)
+    return representation_size(get_embedding(M))
+end
+function representation_size(::EmptyTrait, M::AbstractDecoratorManifold)
+    return representation_size(decorated_manifold(M))
+end
+
 
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function retract(

@@ -9,6 +9,7 @@ struct HalfPlanemanifold <: AbstractDecoratorManifold{ℝ} end
 
 ManifoldsBase.get_embedding(::HalfPlanemanifold) = ManifoldsBase.DefaultManifold(1, 3)
 ManifoldsBase.decorated_manifold(::HalfPlanemanifold) = ManifoldsBase.DefaultManifold(2)
+ManifoldsBase.representation_size(::HalfPlanemanifold) = (2,)
 
 function ManifoldsBase.check_point(::HalfPlanemanifold, p)
     return p[1] > 0 ? nothing : DomainError(p[1], "p[1] ≤ 0")
@@ -54,6 +55,7 @@ ManifoldsBase.get_embedding(::AnotherHalfPlanemanifold) = ManifoldsBase.DefaultM
 function ManifoldsBase.decorated_manifold(::AnotherHalfPlanemanifold)
     return ManifoldsBase.DefaultManifold(2)
 end
+ManifoldsBase.representation_size(::AnotherHalfPlanemanifold) = (2,)
 
 function ManifoldsBase.active_traits(f, ::AnotherHalfPlanemanifold, args...)
     return ManifoldsBase.merge_traits(ManifoldsBase.IsIsometricEmbeddedManifold())
@@ -185,6 +187,7 @@ ManifoldsBase.decorated_manifold(::FallbackManifold) = DefaultManifold(3)
         M = HalfPlanemanifold()
         @test repr(M) == "HalfPlanemanifold()"
         @test get_embedding(M) == ManifoldsBase.DefaultManifold(1, 3)
+        @test representation_size(M) == (2,)
         # Check point checks using embedding
         @test is_point(M, [1 0.1 0.1], true)
         @test_throws DomainError is_point(M, [-1, 0, 0], true) #wrong dim (3,1)

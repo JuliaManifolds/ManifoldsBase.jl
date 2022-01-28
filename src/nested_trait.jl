@@ -257,7 +257,7 @@ macro invoke_maker(argnum, type, sig)
 end
 
 
-macro trait_function(sig)
+macro trait_function(sig, opts = :())
     parts = ManifoldsBase._split_signature(sig)
     kwargs_list = parts[:kwargs_list]
     callargs = parts[:callargs]
@@ -267,37 +267,36 @@ macro trait_function(sig)
     argtypes = parts[:argtypes]
     kwargs_call = parts[:kwargs_call]
 
-    return esc(
-        quote
-            function ($fname)($(callargs...); $(kwargs_list...)) where {$(where_exprs...)}
-                return ($fname)(
-                    trait($fname, $(argnames...)),
-                    $(argnames...);
-                    $(kwargs_call...),
-                )
-            end
-            function ($fname)(
-                t::TraitList,
-                $(callargs...);
-                $(kwargs_list...),
-            ) where {$(where_exprs...)}
-                return ($fname)(next_trait(t), $(argnames...); $(kwargs_call...))
-            end
-            function ($fname)(
-                t::TraitList{IsExplicitDecorator},
-                $(callargs...);
-                $(kwargs_list...),
-            ) where {$(where_exprs...)}
-                arg1 = decorated_manifold($(argnames[1]))
-                argt1 = typeof(arg1)
-                return invoke(
-                    $fname,
-                    Tuple{argt1,$(argtypes[2:end]...)},
-                    arg1,
-                    $(argnames[2:end]...);
-                    $(kwargs_call...),
-                )
-            end
+    block = quote
+        function ($fname)($(callargs...); $(kwargs_list...)) where {$(where_exprs...)}
+            return ($fname)(trait($fname, $(argnames...)), $(argnames...); $(kwargs_call...))
+        end
+        function ($fname)(
+            t::TraitList,
+            $(callargs...);
+            $(kwargs_list...),
+        ) where {$(where_exprs...)}
+            return ($fname)(next_trait(t), $(argnames...); $(kwargs_call...))
+        end
+        function ($fname)(
+            t::TraitList{IsExplicitDecorator},
+            $(callargs...);
+            $(kwargs_list...),
+        ) where {$(where_exprs...)}
+            arg1 = decorated_manifold($(argnames[1]))
+            argt1 = typeof(arg1)
+            return invoke(
+                $fname,
+                Tuple{argt1,$(argtypes[2:end]...)},
+                arg1,
+                $(argnames[2:end]...);
+                $(kwargs_call...),
+            )
+        end
+    end
+    if !(:no_empty in opts.args)
+        block = quote
+            $block
             function ($fname)(
                 ::EmptyTrait,
                 $(callargs...);
@@ -310,6 +309,7 @@ macro trait_function(sig)
                     $(kwargs_call...),
                 )
             end
-        end,
-    )
+        end
+    end
+    return esc(block)
 end
