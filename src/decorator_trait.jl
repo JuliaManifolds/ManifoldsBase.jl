@@ -73,10 +73,14 @@ end
 # Embedded specifix functions.
 """
     get_embedding(M::AbstractDecoratorManifold)
+    get_embedding(M::AbstractDecoratorManifold, p)
 
 Specify the embedding of a manifold that has abstract decorators.
+the embedding might depend on a point representation, where different point representations
+are distinguished as subtypes of [`AbstractManifoldPoint`](@ref).
+A unique or default representation might also just be an `AbstractArray`.
 """
-get_embedding(M::AbstractDecoratorManifold)
+get_embedding(M::AbstractDecoratorManifold, p) = get_embedding(M)
 
 #
 # -----------------------------------------------------------------------------------------
@@ -116,8 +120,8 @@ function allocate_result(
     f::typeof(embed),
     x...,
 )
-    T = allocate_result_type(get_embedding(M), f, x)
-    return allocate(x[1], T, representation_size(get_embedding(M)))
+    T = allocate_result_type(get_embedding(M, x[1]), f, x)
+    return allocate(x[1], T, representation_size(get_embedding(M, x[1])))
 end
 function allocate_result(
     ::TraitList{IsEmbeddedManifold},
@@ -125,7 +129,7 @@ function allocate_result(
     f::typeof(project),
     x...,
 )
-    T = allocate_result_type(get_embedding(M), f, x)
+    T = allocate_result_type(get_embedding(M, x[1]), f, x)
     return allocate(x[1], T, representation_size(M))
 end
 
@@ -134,14 +138,14 @@ end
 @trait_function check_size(M::AbstractDecoratorManifold, p)
 # Embedded
 function check_size(::TraitList{IsEmbeddedManifold}, M::AbstractDecoratorManifold, p)
-    return check_size(get_embedding(M), p)
+    return check_size(get_embedding(M, p), p)
 end
 
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function check_size(M::AbstractDecoratorManifold, p, X)
 # Embedded
 function check_size(::TraitList{IsEmbeddedManifold}, M::AbstractDecoratorManifold, p, X)
-    return check_size(get_embedding(M), p, X)
+    return check_size(get_embedding(M, p), p, X)
 end
 
 # Introduce Deco Trait | automatic foward | fallback
@@ -178,14 +182,14 @@ end
 @trait_function exp(M::AbstractDecoratorManifold, p, X)
 # EmbeddedSubManifold
 function exp(::TraitList{IsEmbeddedSubmanifold}, M::AbstractDecoratorManifold, p, X)
-    return exp(get_embedding(M), p, X)
+    return exp(get_embedding(M, p), p, X)
 end
 
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function exp!(M::AbstractDecoratorManifold, q, p, X)
 # EmbeddedSubManifold
 function exp!(::TraitList{IsEmbeddedSubmanifold}, M::AbstractDecoratorManifold, q, p, X)
-    return exp!(get_embedding(M), q, p, X)
+    return exp!(get_embedding(M, p), q, p, X)
 end
 
 # Introduce Deco Trait | automatic foward | fallback
@@ -213,7 +217,7 @@ function inner(
     X,
     Y,
 )
-    return inner(get_embedding(M), p, X, Y)
+    return inner(get_embedding(M, p), p, X, Y)
 end
 
 # Introduce Deco Trait | automatic foward | fallback
@@ -231,7 +235,7 @@ function inverse_retract(
     q,
     m::AbstractInverseRetractionMethod = default_inverse_retraction_method(M),
 )
-    return inverse_retract(get_embedding(M), p, q, m)
+    return inverse_retract(get_embedding(M, p), p, q, m)
 end
 
 # Introduce Deco Trait | automatic foward | fallback
@@ -244,7 +248,7 @@ function inverse_retract!(
     q,
     m::AbstractInverseRetractionMethod = default_inverse_retraction_method(M),
 )
-    return inverse_retract!(get_embedding(M), X, p, q, m)
+    return inverse_retract!(get_embedding(M, p), X, p, q, m)
 end
 
 # Introduce Deco Trait | automatic foward | fallback
@@ -264,7 +268,7 @@ function is_point(
         return false
     end
     # this throws if te=true
-    ep = is_point(get_embedding(M), embed(M, p), te; kwargs...)
+    ep = is_point(get_embedding(M, p), embed(M, p), te; kwargs...)
     !ep && return false # otherwise if we get here with ep=false, end with false
     mpe = check_point(M, p; kwargs...)
     mpe === nothing && return true
@@ -305,7 +309,7 @@ function is_vector(
         return false
     end
     # Check vector in embedding
-    ev = is_vector(get_embedding(M), embed(M, p), embed(M, p, X), te, cbp; kwargs...)
+    ev = is_vector(get_embedding(M, p), embed(M, p), embed(M, p, X), te, cbp; kwargs...)
     (!ev && !te) && return false # if te, the line before throws an error, otherwise we end with false early here
     # Check (additional) local stuff
     mtve = check_vector(M, p, X; kwargs...)
@@ -316,18 +320,18 @@ end
 
 @trait_function norm(M::AbstractDecoratorManifold, p, X)
 function norm(::TraitList{IsIsometricEmbeddedManifold}, M::AbstractDecoratorManifold, p, X)
-    return norm(get_embedding(M), p, X)
+    return norm(get_embedding(M, p), p, X)
 end
 
 @trait_function log(M::AbstractDecoratorManifold, p, q)
 function log(::TraitList{IsEmbeddedSubmanifold}, M::AbstractDecoratorManifold, p, q)
-    return log(get_embedding(M), p, q)
+    return log(get_embedding(M, p), p, q)
 end
 
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function log!(M::AbstractDecoratorManifold, X, p, q)
 function log!(::TraitList{IsEmbeddedSubmanifold}, M::AbstractDecoratorManifold, X, p, q)
-    return log!(get_embedding(M), X, p, q)
+    return log!(get_embedding(M, p), X, p, q)
 end
 
 # Introduce Deco Trait | automatic foward | fallback
@@ -340,7 +344,7 @@ function parallel_transport_along(
     X,
     c,
 )
-    return parallel_transport_along(get_embedding(M), p, X, c)
+    return parallel_transport_along(get_embedding(M, p), p, X, c)
 end
 
 # Introduce Deco Trait | automatic foward | fallback
@@ -354,7 +358,7 @@ function parallel_transport_along!(
     X,
     c,
 )
-    return parallel_transport_along!(get_embedding(M), Y, p, X, c)
+    return parallel_transport_along!(get_embedding(M, p), Y, p, X, c)
 end
 
 # Introduce Deco Trait | automatic foward | fallback
@@ -367,7 +371,7 @@ function parallel_transport_direction(
     X,
     q,
 )
-    return parallel_transport_direction(get_embedding(M), p, X, q)
+    return parallel_transport_direction(get_embedding(M, p), p, X, q)
 end
 
 # Introduce Deco Trait | automatic foward | fallback
@@ -381,7 +385,7 @@ function parallel_transport_direction!(
     X,
     q,
 )
-    return parallel_transport_direction!(get_embedding(M), Y, p, X, q)
+    return parallel_transport_direction!(get_embedding(M, p), Y, p, X, q)
 end
 
 # Introduce Deco Trait | automatic foward | fallback
@@ -394,7 +398,7 @@ function parallel_transport_to(
     X,
     q,
 )
-    return parallel_transport_to(get_embedding(M), p, X, q)
+    return parallel_transport_to(get_embedding(M, p), p, X, q)
 end
 
 # Introduce Deco Trait | automatic foward | fallback
@@ -408,7 +412,7 @@ function parallel_transport_to!(
     X,
     q,
 )
-    return parallel_transport_to!(get_embedding(M), Y, p, X, q)
+    return parallel_transport_to!(get_embedding(M, p), Y, p, X, q)
 end
 
 # Introduce Deco Trait | automatic foward | fallback
@@ -448,7 +452,7 @@ function retract(
     X,
     m::AbstractRetractionMethod = default_retraction_method(M),
 )
-    return retract(get_embedding(M), p, X, m)
+    return retract(get_embedding(M, p), p, X, m)
 end
 
 @trait_function retract!(
@@ -466,7 +470,7 @@ function retract!(
     X,
     m::AbstractRetractionMethod = default_retraction_method(M),
 )
-    return retract!(get_embedding(M), q, p, X, m)
+    return retract!(get_embedding(M, p), q, p, X, m)
 end
 
 @trait_function vector_transport_along(
@@ -484,7 +488,7 @@ function vector_transport_along(
     c,
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
-    return vector_transport_along(get_embedding(M), p, X, c, m)
+    return vector_transport_along(get_embedding(M, p), p, X, c, m)
 end
 
 @trait_function vector_transport_along!(
@@ -504,7 +508,7 @@ function vector_transport_along!(
     c::AbstractVector,
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
-    return vector_transport_along!(get_embedding(M), Y, p, X, c, m)
+    return vector_transport_along!(get_embedding(M, p), Y, p, X, c, m)
 end
 
 @trait_function vector_transport_direction(
@@ -522,7 +526,7 @@ function vector_transport_direction(
     d,
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
-    return vector_transport_direction(get_embedding(M), p, X, d, m)
+    return vector_transport_direction(get_embedding(M, p), p, X, d, m)
 end
 
 @trait_function vector_transport_direction!(
@@ -542,7 +546,7 @@ function vector_transport_direction!(
     d,
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
-    return vector_transport_direction!(get_embedding(M), Y, p, X, d, m)
+    return vector_transport_direction!(get_embedding(M, p), Y, p, X, d, m)
 end
 
 @trait_function vector_transport_to(
@@ -560,7 +564,7 @@ function vector_transport_to(
     q,
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
-    return vector_transport_to(get_embedding(M), p, X, q, m)
+    return vector_transport_to(get_embedding(M, p), p, X, q, m)
 end
 
 @trait_function vector_transport_to!(
@@ -580,15 +584,15 @@ function vector_transport_to!(
     q,
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
-    return vector_transport_to!(get_embedding(M), Y, p, X, q, m)
+    return vector_transport_to!(get_embedding(M, p), Y, p, X, q, m)
 end
 
 @trait_function zero_vector(M::AbstractDecoratorManifold, p)
 function zero_vector(::TraitList{IsEmbeddedManifold}, M::AbstractDecoratorManifold, p)
-    return zero_vector(get_embedding(M), p)
+    return zero_vector(get_embedding(M, p), p)
 end
 
 @trait_function zero_vector!(M::AbstractDecoratorManifold, X, p)
 function zero_vector!(::TraitList{IsEmbeddedManifold}, M::AbstractDecoratorManifold, X, p)
-    return zero_vector!(get_embedding(M), X, p)
+    return zero_vector!(get_embedding(M, p), X, p)
 end

@@ -181,6 +181,7 @@ ManifoldsBase.decorated_manifold(::FallbackManifold) = DefaultManifold(3)
         @test base_manifold(M, Val(1)) == ManifoldsBase.DefaultManifold(2)
         @test base_manifold(M, Val(2)) == ManifoldsBase.DefaultManifold(2)
         @test get_embedding(M) == ManifoldsBase.DefaultManifold(3)
+        @test get_embedding(M, [1, 2, 3]) == ManifoldsBase.DefaultManifold(3)
     end
 
     @testset "HalfPlanemanifold" begin
