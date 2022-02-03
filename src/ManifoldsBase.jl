@@ -79,6 +79,10 @@ isomorphisms.
     T = allocate_result_type(M, f, x)
     return allocate(x[1], T)
 end
+@inline function allocate_result(M::AbstractManifold, f)
+    T = allocate_result_type(M, f, ())
+    return Array{T}(undef, representation_size(M)...)
+end
 
 """
     allocate_result_type(M::AbstractManifold, f, args::NTuple{N,Any}) where N
@@ -93,6 +97,9 @@ Return type of element of the array that will represent the result of function `
 ) where {N,TF}
     @inline eti_to_one(eti) = one(number_eltype(eti))
     return typeof(sum(map(eti_to_one, args)))
+end
+@inline function allocate_result_type(::AbstractManifold, f::TF, args::Tuple{}) where {TF}
+    return Float64
 end
 
 """

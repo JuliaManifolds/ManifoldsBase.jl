@@ -6,14 +6,14 @@ using ManifoldsBase
         num_ambiguities = length(Test.detect_ambiguities(ManifoldsBase))
         #num_ambiguities > 0 && @warn "The number of ambiguities in ManifoldsBase is $(num_ambiguities)."
         if VERSION >= v"1.8-DEV"
-            @test num_ambiguities <= bound + 4
+            @test num_ambiguities <= bound + 5
         elseif VERSION >= v"1.6-DEV"
             # At the time of writing there seem to be two ambiguities regarding `getindex`,
             # one with a method from SparseArrays and one from VSCode's JSON processing
             # that's automatically loaded when running code in VSCode.
-            @test num_ambiguities <= bound + 1
+            @test num_ambiguities <= bound + 3
         else
-            @test num_ambiguities == bound
+            @test num_ambiguities == bound + 1
         end
     end
 

@@ -13,6 +13,9 @@ function ManifoldsBase.exp!(::AllocManifold, v, x, y)
     return v
 end
 
+struct AllocManifold2 <: AbstractManifold{ℝ} end
+ManifoldsBase.representation_size(::AllocManifold2) = (2, 3)
+
 @testset "Allocation" begin
     a = [[1.0], [2.0], [3.0]]
     b = [[2.0], [3.0], [-3.0]]
@@ -51,4 +54,8 @@ end
     @test number_eltype(([2], [3.0])) === Float64
     @test number_eltype(([2], [3])) === Int
     @test number_eltype(Any[[2.0], [3.0]]) === Float64
+
+    alloc2 = ManifoldsBase.allocate_result(AllocManifold2(), rand)
+    @test alloc2 isa Matrix{Float64}
+    @test size(alloc2) == representation_size(AllocManifold2())
 end
