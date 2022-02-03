@@ -5,15 +5,13 @@ using ManifoldsBase
     if VERSION >= v"1.1"
         num_ambiguities = length(Test.detect_ambiguities(ManifoldsBase))
         #num_ambiguities > 0 && @warn "The number of ambiguities in ManifoldsBase is $(num_ambiguities)."
-        if VERSION >= v"1.7-DEV"
-            @test num_ambiguities <= 4
-        elseif VERSION >= v"1.6-DEV"
+        if VERSION >= v"1.6-DEV"
             # At the time of writing there seem to be two ambiguities regarding `getindex`,
             # one with a method from SparseArrays and one from VSCode's JSON processing
             # that's automatically loaded when running code in VSCode.
-            @test num_ambiguities <= 2
+            @test num_ambiguities <= 3
         else
-            @test num_ambiguities == 0
+            @test num_ambiguities <= 1
         end
     end
     include("allocation.jl")
