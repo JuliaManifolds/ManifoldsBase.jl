@@ -207,6 +207,65 @@ end
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function get_vector!(M::AbstractDecoratorManifold, Y, p, c, B::AbstractBasis)
 
+@trait_function injectivity_radius(M::AbstractDecoratorManifold)
+function injectivity_radius(
+    ::TraitList{IsIsometricEmbeddedManifold},
+    M::AbstractDecoratorManifold,
+)
+    return injectivity_radius(get_embedding(M))
+end
+@trait_function injectivity_radius(M::AbstractDecoratorManifold, p)
+function injectivity_radius(
+    ::TraitList{IsIsometricEmbeddedManifold},
+    M::AbstractDecoratorManifold,
+    p,
+)
+    return injectivity_radius(get_embedding(M, p), p)
+end
+@trait_function injectivity_radius(
+    M::AbstractDecoratorManifold,
+    m::AbstractRetractionMethod,
+)
+function injectivity_radius(
+    ::TraitList{IsIsometricEmbeddedManifold},
+    M::AbstractDecoratorManifold,
+    m::AbstractRetractionMethod,
+)
+    return injectivity_radius(get_embedding(M), m)
+end
+# resolve ambiguity
+function injectivity_radius(M::AbstractDecoratorManifold, m::ExponentialRetraction)
+    return invoke(
+        injectivity_radius,
+        Tuple{AbstractDecoratorManifold,AbstractRetractionMethod},
+        M,
+        m,
+    )
+end
+@trait_function injectivity_radius(
+    M::AbstractDecoratorManifold,
+    p,
+    m::AbstractRetractionMethod,
+)
+function injectivity_radius(
+    ::TraitList{IsIsometricEmbeddedManifold},
+    M::AbstractDecoratorManifold,
+    p,
+    m::AbstractRetractionMethod,
+)
+    return injectivity_radius(get_embedding(M, p), p, m)
+end
+# resolve ambiguity
+function injectivity_radius(M::AbstractDecoratorManifold, p, m::ExponentialRetraction)
+    return invoke(
+        injectivity_radius,
+        Tuple{AbstractDecoratorManifold,Any,AbstractRetractionMethod},
+        M,
+        p,
+        m,
+    )
+end
+
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function inner(M::AbstractDecoratorManifold, p, X, Y)
 # Isometric Embedded submanifold

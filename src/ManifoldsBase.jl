@@ -350,7 +350,7 @@ is injective for all tangent vectors shorter than ``d`` (i.e. has an inverse) fo
 if provided or all manifold points otherwise.
 """
 injectivity_radius(M::AbstractManifold)
-injectivity_radius(M::AbstractManifold, p) = injectivity_radius(M, ExponentialRetraction())
+injectivity_radius(M::AbstractManifold, p) = injectivity_radius(M)
 function injectivity_radius(M::AbstractManifold, p, method::AbstractRetractionMethod)
     return injectivity_radius(M, method)
 end
