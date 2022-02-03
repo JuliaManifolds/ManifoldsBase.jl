@@ -7,7 +7,7 @@ using ManifoldsBase
         #num_ambiguities > 0 && @warn "The number of ambiguities in ManifoldsBase is $(num_ambiguities)."
         if VERSION >= v"1.8-DEV"
             @test num_ambiguities <= 5
-        if VERSION >= v"1.6-DEV"
+        elseif VERSION >= v"1.6-DEV"
             # At the time of writing there seem to be two ambiguities regarding `getindex`,
             # one with a method from SparseArrays and one from VSCode's JSON processing
             # that's automatically loaded when running code in VSCode.
