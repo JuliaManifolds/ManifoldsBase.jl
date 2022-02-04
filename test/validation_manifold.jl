@@ -149,7 +149,8 @@ end
                 @test_throws DomainError get_coordinates(A, x, [1.0], cb)
                 @test_throws DomainError get_coordinates!(A, v, x, [0.0], cb)
                 @test_throws DomainError get_coordinates!(A, v, [1.0], [1.0, 0.0, 0.0], cb)
-                @test get_vector(A, x, [1.0, 2.0, 3.0], cb) ≈ get_vector(M, x, [1, 2, 3], cb)
+                @test get_vector(A, x, [1.0, 2.0, 3.0], cb) ≈
+                      get_vector(M, x, [1, 2, 3], cb)
                 @test get_vector!(A, v2, x, [1.0, 2.0, 3.0], cb) ≈
                       get_vector!(M, v, x, [1.0, 2.0, 3.0], cb)
                 @test get_coordinates(A, x, [1.0, 2.0, 3.0], cb) ≈
