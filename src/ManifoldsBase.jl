@@ -413,8 +413,15 @@ is `true`, the function either returns `true` or throws an error. By default the
 calls [`check_point(M, p; kwargs...)`](@ref) and checks whether the returned value
 is `nothing` or an error.
 """
-function is_point(M::AbstractManifold, p, throw_error = false; kwargs...)
-    mpe = check_point(M, p; kwargs...)
+function is_point(
+    M::AbstractManifold,
+    p,
+    throw_error = false;
+    atol::Real = 0,
+    rtol = atol > 0 ? 0 : sqrt(eps(number_eltype(p))),
+    kwargs...,
+)
+    mpe = check_point(M, p; atol = atol, rtol = rtol, kwargs...)
     mpe === nothing && return true
     return throw_error ? throw(mpe) : false
 end
@@ -439,10 +446,12 @@ function is_vector(
     X,
     throw_error = false;
     check_base_point = true,
+    atol = 0.0,
+    rtol = atol > 0 ? 0 : sqrt(eps(number_eltype(X))),
     kwargs...,
 )
     if check_base_point
-        mpe = check_point(M, p; kwargs...)
+        mpe = check_point(M, p; atol = atol, rtol = rtol, kwargs...)
         if mpe !== nothing
             if throw_error
                 throw(mpe)
@@ -451,7 +460,7 @@ function is_vector(
             end
         end
     end
-    mtve = check_vector(M, p, X; kwargs...)
+    mtve = check_vector(M, p, X; atol = atol, rtol = rtol, kwargs...)
     mtve === nothing && return true
     return throw_error ? throw(mtve) : false
 end

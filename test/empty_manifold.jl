@@ -138,12 +138,12 @@ struct NotImplementedInverseRetraction <: AbstractInverseRetractionMethod end
 
     @test check_point(M, [0]) === nothing
     @test check_point(M, p) === nothing
-    @test is_point(M, [0])
+    @test is_point(M, [0.0])
     @test check_point(M, [0]) === nothing
 
     @test check_vector(M, [0], [0]) === nothing
     @test check_vector(M, p, v) === nothing
-    @test is_vector(M, [0], [0])
+    @test is_vector(M, [0.0], [0.0])
     @test check_vector(M, [0], [0]) === nothing
 
     @test_throws ErrorException hat!(M, [0], [0], [0])
