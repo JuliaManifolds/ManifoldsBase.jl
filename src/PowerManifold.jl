@@ -435,16 +435,7 @@ function get_vector(
     B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:PowerBasisData},
 ) where {𝔽}
     Y = allocate_result(M, get_vector, p, c)
-    rep_size = representation_size(M.manifold)
-    for i in get_iterator(M)
-        Y[i...] = get_vector(
-            M.manifold,
-            _read(M, rep_size, p, i),
-            _read_coordinates(M, c, i),
-            _access_nested(B.data.bases, i),
-        )
-    end
-    return Y
+    return get_vector!(M, Y, p, c, B)
 end
 function get_vector!(
     M::AbstractPowerManifold,
@@ -465,14 +456,27 @@ function get_vector!(
     end
     return Y
 end
-function get_vector(M::AbstractPowerManifold, p, c, B::AbstractBasis)
-    Y = allocate_result(M, get_vector, p, c)
+function get_vector!(
+    M::PowerManifoldNestedReplacing,
+    Y,
+    p,
+    c,
+    B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:PowerBasisData},
+) where {𝔽}
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
-        Y[i...] =
-            get_vector(M.manifold, _read(M, rep_size, p, i), _read_coordinates(M, c, i), B)
+        Y[i...] = get_vector(
+            M.manifold,
+            _read(M, rep_size, p, i),
+            _read_coordinates(M, c, i),
+            _access_nested(B.data.bases, i),
+        )
     end
     return Y
+end
+function get_vector(M::AbstractPowerManifold, p, c, B::AbstractBasis)
+    Y = allocate_result(M, get_vector, p, c)
+    return get_vector!(M, Y, p, c, B)
 end
 function get_vector!(M::AbstractPowerManifold, Y, p, c, B::AbstractBasis)
     rep_size = representation_size(M.manifold)
@@ -484,6 +488,14 @@ function get_vector!(M::AbstractPowerManifold, Y, p, c, B::AbstractBasis)
             _read_coordinates(M, c, i),
             B,
         )
+    end
+    return Y
+end
+function get_vector!(M::PowerManifoldNestedReplacing, Y, p, c, B::AbstractBasis)
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        Y[i...] =
+            get_vector(M.manifold, _read(M, rep_size, p, i), _read_coordinates(M, c, i), B)
     end
     return Y
 end
@@ -929,17 +941,7 @@ function vector_transport_direction(
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
     Y = allocate_result(M, vector_transport_direction, p, X, d)
-    rep_size = representation_size(M.manifold)
-    for i in get_iterator(M)
-        Y[i...] = vector_transport_direction(
-            M.manifold,
-            _read(M, rep_size, p, i),
-            _read(M, rep_size, X, i),
-            _read(M, rep_size, d, i),
-            m,
-        )
-    end
-    return Y
+    return vector_transport_direction!(M, Y, p, X, d, m)
 end
 
 function vector_transport_direction!(
@@ -1005,18 +1007,8 @@ function vector_transport_to(
     q,
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
-    rep_size = representation_size(M.manifold)
     Y = allocate_result(M, vector_transport_to, p, X)
-    for i in get_iterator(M)
-        Y[i...] = vector_transport_to(
-            M.manifold,
-            _read(M, rep_size, p, i),
-            _read(M, rep_size, X, i),
-            _read(M, rep_size, q, i),
-            m,
-        )
-    end
-    return Y
+    return vector_transport_to!(M, Y, p, X, q, m)
 end
 function vector_transport_to!(
     M::AbstractPowerManifold,
@@ -1028,8 +1020,9 @@ function vector_transport_to!(
 )
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
-        Y[i...] = vector_transport_to(
+        vector_transport_to!(
             M.manifold,
+            _write(M, rep_size, Y, i),
             _read(M, rep_size, p, i),
             _read(M, rep_size, X, i),
             _read(M, rep_size, q, i),
