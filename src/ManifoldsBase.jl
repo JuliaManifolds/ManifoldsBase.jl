@@ -417,8 +417,8 @@ function is_point(
     M::AbstractManifold,
     p,
     throw_error = false;
-    atol::Real = 0,
-    rtol = atol > 0 ? 0 : sqrt(eps(number_eltype(p))),
+    atol::Real = zero(number_eltype(p)),
+    rtol = atol > zero(float(number_eltype(p))) ? zero(float(number_eltype(p))) : sqrt(eps(float(number_eltype(p)))),
     kwargs...,
 )
     mpe = check_point(M, p; atol = atol, rtol = rtol, kwargs...)
@@ -446,8 +446,8 @@ function is_vector(
     X,
     throw_error = false;
     check_base_point = true,
-    atol = 0.0,
-    rtol = atol > 0 ? 0 : sqrt(eps(number_eltype(X))),
+    atol = zero(number_eltype(X)),
+    rtol = atol > zero(float(number_eltype(X))) ? zero(float(number_eltype(X))) : sqrt(eps(float(number_eltype(X)))),
     kwargs...,
 )
     if check_base_point
