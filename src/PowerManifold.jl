@@ -227,7 +227,49 @@ function check_point(M::AbstractPowerManifold, p; kwargs...)
     return nothing
 end
 
+"""
+    check_power_size(M, p)
+    check_power_size(M, p, X)
+
+Check whether p hase the right size to represent points on M generically, i.e. just cheking the overall sizes, not the individual ones per manifold
+"""
+function check_power_size(M::AbstractPowerManifold, p)
+    d = prod(representation_size(M.manifold)) * power_dimensions(M)
+    (d != length(p)) && return DomainError(
+        length(p),
+        "The point $p can not be a point on $M, since its number of elements does not match the required overall representation size ($d)",
+    )
+    return nothing
+end
+function check_power_size(M::Union{PowerManifoldNested,PowerManifoldNestedReplacing}, p)
+    d = prod(power_dimensions(M))
+    (d != length(p)) && return DomainError(
+        length(p),
+        "The point $p can not be a point on $M, since its number of elements does not match the power dimensions ($d)",
+    )
+    return nothing
+end
+
+function check_power_size(M::AbstractPowerManifold, p, X)
+    d = prod(representation_size(M.manifold)) * power_dimensions(M)
+    (d != length(X)) && return DomainError(
+        length(X),
+        "The tangent vector $X can not belong to a trangent space at on $M, since its number of elements does not match the required overall representation size ($d)",
+    )
+    return nothing
+end
+function check_power_size(M::Union{PowerManifoldNested,PowerManifoldNestedReplacing}, p, X)
+    d = prod(power_dimensions(M))
+    (d != length(X)) && return DomainError(
+        length(X),
+        "The point $p can not be a point on $M, since its number of elements does not match the power dimensions ($d)",
+    )
+    return nothing
+end
+
 function check_size(M::AbstractPowerManifold, p)
+    cps = check_power_size(M, p)
+    (cps === nothing) || return cps
     rep_size = representation_size(M.manifold)
     e = [(i, check_size(M.manifold, _read(M, rep_size, p, i))) for i in get_iterator(M)]
     errors = filter((x) -> !(x[2] === nothing), e)
@@ -238,6 +280,8 @@ function check_size(M::AbstractPowerManifold, p)
 end
 
 function check_size(M::AbstractPowerManifold, p, X)
+    cps = check_power_size(M, p, X)
+    (cps === nothing) || return cps
     rep_size = representation_size(M.manifold)
     e = [
         (i, check_size(M.manifold, _read(M, rep_size, p, i), _read(M, rep_size, X, i);)) for i in get_iterator(M)
