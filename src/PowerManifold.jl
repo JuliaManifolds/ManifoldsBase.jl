@@ -227,6 +227,28 @@ function check_point(M::AbstractPowerManifold, p; kwargs...)
     return nothing
 end
 
+function check_size(M::AbstractPowerManifold, p)
+    rep_size = representation_size(M.manifold)
+    e = [(i, check_size(M.manifold, _read(M, rep_size, p, i))) for i in get_iterator(M)]
+    errors = filter((x) -> !(x[2] === nothing), e)
+    cerr = [ComponentManifoldError(er...) for er in errors]
+    (length(errors) > 1) && return CompositeManifoldError(cerr)
+    (length(errors) == 1) && return cerr[1]
+    return nothing
+end
+
+function check_size(M::AbstractPowerManifold, p, X)
+    rep_size = representation_size(M.manifold)
+    e = [
+        (i, check_size(M.manifold, _read(M, rep_size, p, i), _read(M, rep_size, X, i);)) for i in get_iterator(M)
+    ]
+    errors = filter((x) -> !(x[2] === nothing), e)
+    cerr = [ComponentManifoldError(er...) for er in errors]
+    (length(errors) > 1) && return CompositeManifoldError(cerr)
+    (length(errors) == 1) && return cerr[1]
+    return nothing
+end
+
 """
     check_vector(M::AbstractPowerManifold, p, X; kwargs... )
 
