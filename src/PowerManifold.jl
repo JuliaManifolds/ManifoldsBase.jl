@@ -724,6 +724,81 @@ function LinearAlgebra.norm(M::AbstractPowerManifold, p, X)
     return sqrt(sum_squares)
 end
 
+
+function parallel_transport_direction!(M::AbstractPowerManifold, Y, p, X, d)
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        parallel_transport_direction!(
+            M.manifold,
+            _write(M, rep_size, Y, i),
+            _read(M, rep_size, p, i),
+            _read(M, rep_size, X, i),
+            _read(M, rep_size, d, i),
+        )
+    end
+    return Y
+end
+function parallel_transport_direction(M::AbstractPowerManifold, p, X, d)
+    Y = allocate_result(M, vector_transport_direction, p, X, d)
+    return parallel_transport_direction!(M, Y, p, X, d)
+end
+
+function parallel_transport_direction!(M::PowerManifoldNestedReplacing, Y, p, X, d)
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        Y[i...] = parallel_transport_direction(
+            M.manifold,
+            _read(M, rep_size, p, i),
+            _read(M, rep_size, X, i),
+            _read(M, rep_size, d, i),
+        )
+    end
+    return Y
+end
+function parallel_transport_direction(M::PowerManifoldNestedReplacing, p, X, d)
+    Y = allocate_result(M, parallel_transport_direction, p, X, d)
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        Y[i...] = parallel_transport_direction(
+            M.manifold,
+            _read(M, rep_size, p, i),
+            _read(M, rep_size, X, i),
+            _read(M, rep_size, d, i),
+        )
+    end
+    return Y
+end
+
+function parallel_transport_to(M::AbstractPowerManifold, p, X, q)
+    Y = allocate_result(M, vector_transport_to, p, X)
+    return parallel_transport_to!(M, Y, p, X, q)
+end
+function parallel_transport_to!(M::AbstractPowerManifold, Y, p, X, q)
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        vector_transport_to!(
+            M.manifold,
+            _write(M, rep_size, Y, i),
+            _read(M, rep_size, p, i),
+            _read(M, rep_size, X, i),
+            _read(M, rep_size, q, i),
+        )
+    end
+    return Y
+end
+function parallel_transport_to!(M::PowerManifoldNestedReplacing, Y, p, X, q)
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        Y[i...] = parallel_transport_to(
+            M.manifold,
+            _read(M, rep_size, p, i),
+            _read(M, rep_size, X, i),
+            _read(M, rep_size, q, i),
+        )
+    end
+    return Y
+end
+
 @doc raw"""
     power_dimensions(M::PowerManifold)
 
