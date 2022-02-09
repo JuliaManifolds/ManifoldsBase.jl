@@ -234,7 +234,7 @@ end
 Check whether p hase the right size to represent points on M generically, i.e. just cheking the overall sizes, not the individual ones per manifold
 """
 function check_power_size(M::AbstractPowerManifold, p)
-    d = prod(representation_size(M.manifold)) * power_dimensions(M)
+    d = prod(representation_size(M.manifold)) * prod(power_dimensions(M))
     (d != length(p)) && return DomainError(
         length(p),
         "The point $p can not be a point on $M, since its number of elements does not match the required overall representation size ($d)",
@@ -251,7 +251,7 @@ function check_power_size(M::Union{PowerManifoldNested,PowerManifoldNestedReplac
 end
 
 function check_power_size(M::AbstractPowerManifold, p, X)
-    d = prod(representation_size(M.manifold)) * power_dimensions(M)
+    d = prod(representation_size(M.manifold)) * prod(power_dimensions(M))
     (d != length(X)) && return DomainError(
         length(X),
         "The tangent vector $X can not belong to a trangent space at on $M, since its number of elements does not match the required overall representation size ($d)",
