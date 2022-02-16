@@ -268,17 +268,17 @@ macro trait_function(sig, opts = :())
     kwargs_call = parts[:kwargs_call]
 
     block = quote
-        function ($fname)($(callargs...); $(kwargs_list...)) where {$(where_exprs...)}
+        @inline function ($fname)($(callargs...); $(kwargs_list...)) where {$(where_exprs...)}
             return ($fname)(trait($fname, $(argnames...)), $(argnames...); $(kwargs_call...))
         end
-        function ($fname)(
+        @inline function ($fname)(
             t::TraitList,
             $(callargs...);
             $(kwargs_list...),
         ) where {$(where_exprs...)}
             return ($fname)(next_trait(t), $(argnames...); $(kwargs_call...))
         end
-        function ($fname)(
+        @inline function ($fname)(
             t::TraitList{IsExplicitDecorator},
             $(callargs...);
             $(kwargs_list...),
@@ -297,7 +297,7 @@ macro trait_function(sig, opts = :())
     if !(:no_empty in opts.args)
         block = quote
             $block
-            function ($fname)(
+            @inline function ($fname)(
                 ::EmptyTrait,
                 $(callargs...);
                 $(kwargs_list...),

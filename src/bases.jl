@@ -878,8 +878,8 @@ For array manifolds, this converts a vector representation of the tangent
 vector to an array representation. The [`vee`](@ref) map is the `hat` map's
 inverse.
 """
-hat(M::AbstractManifold, p, X) = get_vector(M, p, X, VeeOrthogonalBasis())
-hat!(M::AbstractManifold, Y, p, X) = get_vector!(M, Y, p, X, VeeOrthogonalBasis())
+@inline hat(M::AbstractManifold, p, X) = get_vector(M, p, X, VeeOrthogonalBasis())
+@inline hat!(M::AbstractManifold, Y, p, X) = get_vector!(M, Y, p, X, VeeOrthogonalBasis())
 
 """
     number_of_coordinates(M::AbstractManifold{𝔽}, B::AbstractBasis)
