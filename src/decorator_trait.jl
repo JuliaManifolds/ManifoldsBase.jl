@@ -310,6 +310,9 @@ function inverse_retract!(
     return inverse_retract!(get_embedding(M, p), X, p, q, m)
 end
 
+@trait_function isapprox(M::AbstractDecoratorManifold, p, q; kwargs...)
+@trait_function isapprox(M::AbstractDecoratorManifold, p, X, Y; kwargs...)
+
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function is_point(M::AbstractDecoratorManifold, p, te = false; kwargs...)
 # Embedded
