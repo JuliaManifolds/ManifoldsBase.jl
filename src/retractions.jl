@@ -634,7 +634,7 @@ function retract(
     t::Real,
     m::AbstractRetractionMethod = default_retraction_method(M),
 )
-    return _retract(M, p, t * X, m)
+    return retract(M, p, t * X, m)
 end
 function _retract(M::AbstractManifold, p, X, m::EmbeddedRetraction)
     return retract_embedded(M, p, X, m.retraction)
