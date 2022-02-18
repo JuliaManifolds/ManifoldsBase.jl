@@ -149,6 +149,10 @@ function check_size(::TraitList{IsEmbeddedManifold}, M::AbstractDecoratorManifol
 end
 
 # Introduce Deco Trait | automatic foward | fallback
+@trait_function copyto!(M::AbstractDecoratorManifold, q, p)
+@trait_function copyto!(M::AbstractDecoratorManifold, Y, p, X)
+
+# Introduce Deco Trait | automatic foward | fallback
 @trait_function embed(M::AbstractDecoratorManifold, p)
 # EmbeddedManifold
 function embed(::TraitList{IsEmbeddedManifold}, M::AbstractDecoratorManifold, p)
