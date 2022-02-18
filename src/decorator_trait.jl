@@ -299,6 +299,13 @@ end
 
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function inverse_retract!(M::AbstractDecoratorManifold, X, p, q)
+@trait_function inverse_retract!(
+    M::AbstractDecoratorManifold,
+    X,
+    p,
+    q,
+    m::AbstractInverseRetractionMethod,
+)
 function inverse_retract!(
     ::TraitList{IsEmbeddedSubmanifold},
     M::AbstractDecoratorManifold,
