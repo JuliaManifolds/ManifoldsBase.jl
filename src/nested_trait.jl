@@ -40,9 +40,9 @@ of the decorator. This means the decorator is stated to explicitly decorate its 
 type.
 
 !!! note
-Any decorator _behind_ this decorator might not have any effect, since the function dispatch
-is moved to its field at this point. Therefore this decorator should always be _last_ in the
-[`TraitList`](@ref).
+    Any decorator _behind_ this decorator might not have any effect, since the function
+    dispatch is moved to its field at this point. Therefore this decorator should always be
+    _last_ in the [`TraitList`](@ref).
 """
 struct IsExplicitDecorator <: AbstractTrait end
 
@@ -155,9 +155,12 @@ end
 """
     next_trait(t::AbstractTrait)
 
-Return the next trait to be considered after `t`.
+Return the next trait to consider, which by default is no following trait (i.e. [`EmptyTrait`](@ref)).
+
+Expecially for a a [`TraitList`](@ref) this function returns the (remaining) tail of
+the remaining traits.
 """
-next_trait(t::AbstractTrait)
+next_trait(::AbstractTrait) = EmptyTrait()
 
 @inline next_trait(t::TraitList) = t.tail
 

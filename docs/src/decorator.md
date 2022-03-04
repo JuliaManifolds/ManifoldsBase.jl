@@ -27,7 +27,12 @@ Pages = ["nested_trait.jl"]
 Order = [:type, :macro, :function]
 ```
 
-Then the following functions and macros introduce the decorator traits
+If you handle a certain trait there might be a tremendous change so that you call a completely different function.
+If you want to continue with the following traits afterwards, use `s = `[`next_trait`](@ref ManifoldsBase.next_trait)`(t)` of a [`TraitList`] (@ref ManifoldsBase.TraitList) `t` to continue working on the next trait in the list by calling the function with `s` as first argument.
+
+## The Manifold decorator
+
+Then the following tyopes, functions and macros introduce the decorator trait to decorate a manifold
 
 ```@autodocs
 Modules = [ManifoldsBase]
