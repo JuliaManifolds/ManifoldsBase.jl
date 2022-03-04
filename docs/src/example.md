@@ -38,7 +38,7 @@ As a start, let's load `ManifoldsBase.jl` and import the functions we consider t
 
 ```@example manifold-tutorial
 using ManifoldsBase, LinearAlgebra, Test
-import ManifoldsBase: check_point, check_vector, manifold_dimension, exp!, inner
+import ManifoldsBase: check_point, check_vector, manifold_dimension, exp!, inner, representation_size, get_embedding
 import Base: show
 ```
 
@@ -94,11 +94,17 @@ This is usually a `DomainError`.
 
 We have to check two things: that a point `p` is a vector with `N+1` entries and its norm is the desired radius.
 To spare a few lines, we can use [short-circuit evaluation](https://docs.julialang.org/en/v1/manual/control-flow/#Short-Circuit-Evaluation-1) instead of `if` statements.
+
+A first thing we have to specify is how points and tangent vectors are represented, that is we have to specify their [`representation_size`](@ref)
+```@example manifold-tutorial
+representation_size(::ScaledSphere{N}) where {N} = N+1
+nothing #hide
+```
+
 If something has to only hold up to precision, we can pass that down, too using the `kwargs...`.
 
 ```@example manifold-tutorial
 function check_point(M::ScaledSphere{N}, p; kwargs...) where {N}
-    (size(p)) == (N+1,) || return DomainError(size(p),"The size of $p is not $((N+1,)).")
     if !isapprox(norm(p), M.radius; kwargs...)
         return DomainError(norm(p), "The norm of $p is not $(M.radius).")
     end
@@ -113,7 +119,6 @@ We can again use the `kwargs`, but also provide a way to check `p`, too.
 
 ```@example manifold-tutorial
 function check_vector(M::ScaledSphere, p, X; kwargs...)
-    size(X) != size(p) && return DomainError(size(X), "The size of $X is not $(size(p)).")
     if !isapprox(dot(p,X), 0.0; kwargs...)
         return DomainError(dot(p,X), "The tangent $X is not orthogonal to $p.")
     end
@@ -184,10 +189,10 @@ using ManifoldsBase: DefaultManifold, IsIsometricEmbeddedManifold
 import ManifoldsBase: active_traits, merge_traits, get_embedding
 ```
 
-Now we can activate a decorator by specifying that the sphere has the [`IsIsometricEmbeddedManifold`](@ref) trait for the manifold by writing
+Now we can activate a decorator by specifying that the sphere has the [`IsIsometricEmbeddedManifold`](@ref) trait for the functions `f` on our scaled sphere manifold by writing
 
 ```@example manifold-tutorial
-active_traits(::ScaledSphere, args...) = merge_traits(IsIsometricEmbeddedManifold())
+active_traits(f, ::ScaledSphere, args...) = merge_traits(IsIsometricEmbeddedManifold())
 nothing #hide
 ```
 
