@@ -134,13 +134,21 @@ struct TestArrayRepresentation <: AbstractPowerRepresentation end
                     m = ParallelTransport()
                     @test vector_transport_to(N, p, p, q) == p
                     @test vector_transport_to(N, p, p, q, m) == p
+                    @test parallel_transport_to(N, p, p, q) == p
                     q2 = [zeros(3) for _ in pow_cart]
                     vector_transport_to!(N, q2, p, q, p)
                     @test q2 == q
+                    q2 = [zeros(3) for _ in pow_cart]
+                    parallel_transport_to!(N, q2, p, q, p)
+                    @test q2 == q
                     @test vector_transport_direction(N, p, p, q) == p
                     @test vector_transport_direction(N, p, p, q, m) == p
+                    @test parallel_transport_direction(N, p, p, q) == p
                     q2 = [zeros(3) for _ in pow_cart]
                     vector_transport_direction!(N, q2, p, q, p)
+                    @test q2 == q
+                    q2 = [zeros(3) for _ in pow_cart]
+                    parallel_transport_direction!(N, q2, p, q, p)
                     @test q2 == q
                     if pow_size == (2,)
                         @test p[N, 1] == p[1]
