@@ -597,10 +597,12 @@ export AbstractRetractionMethod,
 
 export AbstractInverseRetractionMethod,
     ApproximateInverseRetraction,
+    CayleyInverseRetraction,
     EmbeddedInverseRetraction,
     LogarithmicInverseRetraction,
     NLSolveInverseRetraction,
     QRInverseRetraction,
+    PadeInverseRetraction,
     PolarInverseRetraction,
     ProjectionInverseRetraction,
     SoftmaxInverseRetraction

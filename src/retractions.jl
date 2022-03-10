@@ -182,6 +182,28 @@ Inverse retraction using the [`log`](@ref)arithmic map.
 """
 struct LogarithmicInverseRetraction <: AbstractInverseRetractionMethod end
 
+
+@doc raw"""
+    PadeInverseRetraction{m} <: AbstractRetractionMethod
+
+An inverse retraction based on the Padé approximation of order $m$ for the retraction.
+"""
+struct PadeInverseRetraction{m} <: AbstractInverseRetractionMethod end
+
+function PadeInverseRetraction(m::Int)
+    (m < 1) && error(
+        "The Padé based inverse retraction is only available for positive orders, not for order $m.",
+    )
+    return PadeRetraction{m}()
+end
+@doc raw"""
+    CayleyInverseRetraction <: AbstractInverseRetractionMethod
+
+A retraction based on the Cayley transform, which is realized by using the
+[`PadeRetraction`](@ref)`{1}`.
+"""
+const CayleyInverseRetraction = PadeInverseRetraction{1}
+
 """
     PolarInverseRetraction <: AbstractInverseRetractionMethod
 
@@ -536,7 +558,7 @@ function _retract!(M::AbstractManifold, q, p, X, ::ProjectionRetraction)
 end
 _retract!(M::AbstractManifold, q, p, X, ::QRRetraction) = retract_qr!(M, q, p, X)
 _retract!(M::AbstractManifold, q, p, X, ::SoftmaxRetraction) = retract_softmax!(M, q, p, X)
-_retract!(M::AbstractManifold, q, p, X, ::CayleyRetraction) = retract_pade!(M, q, p, X, 1)
+_retract!(M::AbstractManifold, q, p, X, ::CayleyRetraction) = retract_caley!(M, q, p, X, 1)
 function _retract!(M::AbstractManifold, q, p, X, ::PadeRetraction{n}) where {n}
     return retract_pade!(M, q, p, X, n)
 end
@@ -560,6 +582,11 @@ function retract_embedded!(M::AbstractManifold, q, p, X, m)
         ),
     )
 end
+
+function retract_caley!(M::AbstractManifold, q, p, X)
+    return retract_pade!(M, q, p, X, 1)
+end
+
 """
     retract_exp_ode!(M::AbstractManifold, q, p, X, m, B)
 
@@ -647,7 +674,7 @@ _retract(M::AbstractManifold, p, X, ::PolarRetraction) = retract_polar(M, p, X)
 _retract(M::AbstractManifold, p, X, ::ProjectionRetraction) = retract_project(M, p, X)
 _retract(M::AbstractManifold, p, X, ::QRRetraction) = retract_qr(M, p, X)
 _retract(M::AbstractManifold, p, X, ::SoftmaxRetraction) = retract_softmax(M, p, X)
-_retract(M::AbstractManifold, p, X, ::CayleyRetraction) = retract_pade(M, p, X, 1)
+_retract(M::AbstractManifold, p, X, ::CayleyRetraction) = retract_caley(M, p, X)
 function _retract(M::AbstractManifold, p, X, ::PadeRetraction{n}) where {n}
     return retract_pade(M, p, X, n)
 end
@@ -718,6 +745,10 @@ which by default allocates and calls [`retract_softmax!`](@ref).
 function retract_softmax(M::AbstractManifold, p, X)
     q = allocate_result(M, retract, p, X)
     return retract_softmax!(M, q, p, X)
+end
+
+function retract_caley(M::AbstractManifold, p, X)
+    return retract_pade(M, p, X, 1)
 end
 """
     retract_pade(M::AbstractManifold, p, q)
