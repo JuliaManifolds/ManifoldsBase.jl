@@ -630,7 +630,9 @@ function injectivity_radius(M::AbstractPowerManifold, p)
     return radius
 end
 injectivity_radius(M::AbstractPowerManifold) = injectivity_radius(M.manifold)
-injectivity_radius(M::AbstractPowerManifold, ::AbstractRetractionMethod) = injectivity_radius(M)
+function injectivity_radius(M::AbstractPowerManifold, ::AbstractRetractionMethod)
+    return injectivity_radius(M)
+end
 
 @doc raw"""
     inner(M::AbstractPowerManifold, p, X, Y)
