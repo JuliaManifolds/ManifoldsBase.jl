@@ -370,6 +370,12 @@ end
 function _injectivity_radius(M::AbstractManifold, p, m::AbstractRetractionMethod)
     return _injectivity_radius(M, m)
 end
+function _injectivity_radius(M::AbstractManifold, m::AbstractRetractionMethod)
+    return _injectivity_radius(M)
+end
+function _injectivity_radius(M::AbstractManifold)
+    return injectivity_radius(M)
+end
 function _injectivity_radius(M::AbstractManifold, p, ::ExponentialRetraction)
     return injectivity_radius_exp(M, p)
 end
