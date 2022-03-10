@@ -365,6 +365,18 @@ function inverse_retract_embedded!(M::AbstractManifold, X, p, q, m)
         ),
     )
 end
+
+function inverse_retract_caley!(M::AbstractManifold, X, p, q)
+    return inverse_retract_pade!(M, X, p, q, 1)
+end
+
+"""
+    inverse_retract_pade!(M::AbstractManifold, p, q)
+
+computes the mutating variant of the [`PadeInverseRetraction`](@ref)`(n)`,
+"""
+function inverse_retract_pade! end
+
 """
     inverse_retract_qr!(M::AbstractManifold, X, p, q)
 
@@ -457,6 +469,21 @@ function inverse_retract_embedded(M::AbstractManifold, p, q, m)
         ),
     )
 end
+
+function inervse_retract_caley(M::AbstractManifold, p, q)
+    return Inverseretract_pade(M, p, q, 1)
+end
+"""
+    inverse_retract_pade(M::AbstractManifold, p, q)
+
+computes the allocating variant of the [`PadeInverseRetraction`](@ref)`(n)`,
+which by default allocates and calls [`inverse_retract_pade!`](@ref).
+"""
+function inverse_retract_pade(M::AbstractManifold, X, p, q)
+    X = allocate_result(M, inverse_retract, p, q)
+    return inverse_retract_pade!(M, X, p, q, n)
+end
+
 """
     inverse_retract_polar(M::AbstractManifold, p, q)
 
