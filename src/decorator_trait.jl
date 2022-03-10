@@ -237,15 +237,6 @@ function injectivity_radius(
 )
     return injectivity_radius(get_embedding(M), m)
 end
-# resolve ambiguity
-function injectivity_radius(M::AbstractDecoratorManifold, m::ExponentialRetraction)
-    return invoke(
-        injectivity_radius,
-        Tuple{AbstractDecoratorManifold,AbstractRetractionMethod},
-        M,
-        m,
-    )
-end
 @trait_function injectivity_radius(
     M::AbstractDecoratorManifold,
     p,
@@ -258,16 +249,6 @@ function injectivity_radius(
     m::AbstractRetractionMethod,
 )
     return injectivity_radius(get_embedding(M, p), p, m)
-end
-# resolve ambiguity
-function injectivity_radius(M::AbstractDecoratorManifold, p, m::ExponentialRetraction)
-    return invoke(
-        injectivity_radius,
-        Tuple{AbstractDecoratorManifold,Any,AbstractRetractionMethod},
-        M,
-        p,
-        m,
-    )
 end
 
 # Introduce Deco Trait | automatic foward | fallback

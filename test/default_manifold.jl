@@ -45,7 +45,7 @@ ManifoldsBase.@manifold_element_forwards DefaultPoint value
 ManifoldsBase.@manifold_vector_forwards DefaultTVector value
 ManifoldsBase.@default_manifold_fallbacks ManifoldsBase.DefaultManifold DefaultPoint DefaultTVector value value
 
-function ManifoldsBase.injectivity_radius(::DefaultManifold, ::CustomDefinedRetraction)
+function ManifoldsBase._injectivity_radius(::DefaultManifold, ::CustomDefinedRetraction)
     return 10.0
 end
 function ManifoldsBase._retract(M::DefaultManifold, p, X, ::CustomDefinedRetraction)

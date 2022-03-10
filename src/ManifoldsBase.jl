@@ -29,7 +29,6 @@ include("retractions.jl")
 include("exp_log_geo.jl")
 include("projections.jl")
 
-
 """
     OutOfInjectivityRadiusError
 
@@ -355,16 +354,30 @@ Distance ``d`` such that
 [`retract(M, p, X, method)`](@ref retract(::AbstractManifold, ::Any, ::Any, ::AbstractRetractionMethod))
 is injective for all tangent vectors shorter than ``d`` (i.e. has an inverse) for point `p`
 if provided or all manifold points otherwise.
+
+In order to dispatch on different retraction methods, please either implement
+`_injectivity_radius(M[, p], m::T)` for your retraction `R` or specifically `injectivity_radius_exp(M[, p])` for the exponential map.
+By default the variant with a point `p` assumes that the default (without `p`) can ve called as a lower bound.
 """
 injectivity_radius(M::AbstractManifold)
 injectivity_radius(M::AbstractManifold, p) = injectivity_radius(M)
-function injectivity_radius(M::AbstractManifold, p, method::AbstractRetractionMethod)
-    return injectivity_radius(M, method)
+function injectivity_radius(M::AbstractManifold, p, m::AbstractRetractionMethod)
+    return _injectivity_radius(M, p, m)
 end
-function injectivity_radius(M::AbstractManifold, p, ::ExponentialRetraction)
-    return injectivity_radius(M, p)
+function injectivity_radius(M::AbstractManifold, m::AbstractRetractionMethod)
+    return _injectivity_radius(M, m)
 end
-injectivity_radius(M::AbstractManifold, ::ExponentialRetraction) = injectivity_radius(M)
+function _injectivity_radius(M::AbstractManifold, p, m::AbstractRetractionMethod)
+    return _injectivity_radius(M, m)
+end
+function _injectivity_radius(M::AbstractManifold, p, ::ExponentialRetraction)
+    return injectivity_radius_exp(M, p)
+end
+function _injectivity_radius(M::AbstractManifold, ::ExponentialRetraction)
+    return injectivity_radius_exp(M)
+end
+injectivity_radius_exp(M, p) = injectivity_radius_exp(M)
+injectivity_radius_exp(M) = injectivity_radius(M)
 
 """
     inner(M::AbstractManifold, p, X, Y)
