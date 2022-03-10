@@ -327,8 +327,14 @@ end
 
 #
 # dispatch to lower level
+function _inverse_retract!(M::AbstractManifold, X, p, q, ::CayleyInverseRetraction)
+    return inverse_retract_caley!(M, X, p, q)
+end
 function _inverse_retract!(M::AbstractManifold, X, p, q, m::EmbeddedInverseRetraction)
     return inverse_retract_embedded!(M, X, p, q, m.inverse_retraction)
+end
+function _inverse_retract!(M::AbstractManifold, X, p, q, ::PadeInverseRetraction)
+    return inverse_retract_pade!(M, X, p, q)
 end
 function _inverse_retract!(M::AbstractManifold, X, p, q, ::PolarInverseRetraction)
     return inverse_retract_polar!(M, X, p, q)
@@ -431,12 +437,18 @@ function inverse_retract(
 )
     return _inverse_retract(M, p, q, m)
 end
+function _inverse_retract(M::AbstractManifold, p, q, ::CayleyInverseRetraction)
+    return inverse_retract_caley(M, p, q)
+end
 function _inverse_retract(M::AbstractManifold, p, q, m::EmbeddedInverseRetraction)
     return inverse_retract_embedded(M, p, q, m.inverse_retraction)
 end
 _inverse_retract(M::AbstractManifold, p, q, ::LogarithmicInverseRetraction) = log(M, p, q)
 function _inverse_retract(M::AbstractManifold, p, q, m::NLSolveInverseRetraction)
     return inverse_retract_nlsolve(M, p, q, m)
+end
+function _inverse_retract(M::AbstractManifold, p, q, ::PadeInverseRetraction)
+    return inverse_retract_pade(M, p, q)
 end
 function _inverse_retract(M::AbstractManifold, p, q, ::PolarInverseRetraction)
     return inverse_retract_polar(M, p, q)
@@ -470,8 +482,9 @@ function inverse_retract_embedded(M::AbstractManifold, p, q, m)
     )
 end
 
-function inervse_retract_caley(M::AbstractManifold, p, q)
-    return Inverseretract_pade(M, p, q, 1)
+function inverse_retract_caley(M::AbstractManifold, p, q)
+    X = allocate_result(M, inverse_retract, p, q)
+    return inverse_retract_caley!(M, X, p, q)
 end
 """
     inverse_retract_pade(M::AbstractManifold, p, q)
@@ -572,6 +585,7 @@ function retract!(
     return retract!(M, q, p, t * X, method)
 end
 # dispatch to lower level
+_retract!(M::AbstractManifold, q, p, X, ::CayleyRetraction) = retract_caley!(M, q, p, X)
 function _retract!(M::AbstractManifold, q, p, X, m::EmbeddedRetraction)
     return retract_embedded!(M, q, p, X, m.retraction)
 end
@@ -585,7 +599,6 @@ function _retract!(M::AbstractManifold, q, p, X, ::ProjectionRetraction)
 end
 _retract!(M::AbstractManifold, q, p, X, ::QRRetraction) = retract_qr!(M, q, p, X)
 _retract!(M::AbstractManifold, q, p, X, ::SoftmaxRetraction) = retract_softmax!(M, q, p, X)
-_retract!(M::AbstractManifold, q, p, X, ::CayleyRetraction) = retract_caley!(M, q, p, X, 1)
 function _retract!(M::AbstractManifold, q, p, X, ::PadeRetraction{n}) where {n}
     return retract_pade!(M, q, p, X, n)
 end
@@ -775,7 +788,8 @@ function retract_softmax(M::AbstractManifold, p, X)
 end
 
 function retract_caley(M::AbstractManifold, p, X)
-    return retract_pade(M, p, X, 1)
+    q = allocate_result(M, retract, p, X)
+    return retract_caley!(M, q, p, X)
 end
 """
     retract_pade(M::AbstractManifold, p, q)
