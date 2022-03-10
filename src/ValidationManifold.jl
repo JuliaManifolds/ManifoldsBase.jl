@@ -273,18 +273,6 @@ function injectivity_radius(
     is_point(M, p, true; kwargs...)
     return injectivity_radius(M.manifold, array_value(p), method)
 end
-function injectivity_radius(M::ValidationManifold, method::ExponentialRetraction)
-    return injectivity_radius(M.manifold, method)
-end
-function injectivity_radius(
-    M::ValidationManifold,
-    p,
-    method::ExponentialRetraction;
-    kwargs...,
-)
-    is_point(M, p, true; kwargs...)
-    return injectivity_radius(M.manifold, array_value(p), method)
-end
 
 function inner(M::ValidationManifold, p, X, Y; kwargs...)
     is_point(M, p, true; kwargs...)
