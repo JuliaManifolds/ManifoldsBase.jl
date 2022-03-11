@@ -60,7 +60,9 @@ const ValidationCoTVector = ValidationFibreVector{CotangentSpaceType}
 
 @eval @manifold_element_forwards ValidationMPoint value
 
-@inline active_traits(f, ::ValidationManifold, ::Any...) = merge_traits(IsExplicitDecorator())
+@inline function active_traits(f, ::ValidationManifold, ::Any...)
+    return merge_traits(IsExplicitDecorator())
+end
 
 """
     array_value(p)
@@ -78,9 +80,6 @@ decorated_manifold(M::ValidationManifold) = M.manifold
 function check_point(M::ValidationManifold, p; kwargs...)
     return check_point(M.manifold, array_value(p); kwargs...)
 end
-function check_point(M::ValidationManifold, p::AbstractManifoldPoint; kwargs...)
-    return check_point(M.manifold, array_value(p); kwargs...)
-end
 
 function check_size(M::ValidationManifold, p)
     return check_size(M.manifold, array_value(p))
@@ -90,14 +89,6 @@ function check_size(M::ValidationManifold, p, X)
 end
 
 function check_vector(M::ValidationManifold, p, X; kwargs...)
-    return check_vector(M.manifold, array_value(p), array_value(X); kwargs...)
-end
-function check_vector(
-    M::ValidationManifold,
-    p::AbstractManifoldPoint,
-    X::TVector;
-    kwargs...,
-)
     return check_vector(M.manifold, array_value(p), array_value(X); kwargs...)
 end
 
@@ -288,6 +279,14 @@ function inner(M::ValidationManifold, p, X, Y; kwargs...)
     is_vector(M, p, X, true; kwargs...)
     is_vector(M, p, Y, true; kwargs...)
     return inner(M.manifold, array_value(p), array_value(X), array_value(Y))
+end
+
+
+function is_point(M::ValidationManifold, p, te = false; kw...)
+    return is_point(M.manifold, array_value(p), te; kw...)
+end
+function is_vector(M::ValidationManifold, p, X, te = false, cbp = true; kw...)
+    return is_vector(M.manifold, array_value(p), array_value(X), te, cbp; kw...)
 end
 
 function isapprox(M::ValidationManifold, p, q; kwargs...)
