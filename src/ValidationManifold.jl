@@ -60,6 +60,8 @@ const ValidationCoTVector = ValidationFibreVector{CotangentSpaceType}
 
 @eval @manifold_element_forwards ValidationMPoint value
 
+@inline active_traits(f, ::ValidationManifold, ::Any...) = merge_traits(IsExplicitDecorator())
+
 """
     array_value(p)
 
@@ -78,6 +80,13 @@ function check_point(M::ValidationManifold, p; kwargs...)
 end
 function check_point(M::ValidationManifold, p::AbstractManifoldPoint; kwargs...)
     return check_point(M.manifold, array_value(p); kwargs...)
+end
+
+function check_size(M::ValidationManifold, p)
+    return check_size(M.manifold, array_value(p))
+end
+function check_size(M::ValidationManifold, p, X)
+    return check_size(M.manifold, array_value(p), array_value(X))
 end
 
 function check_vector(M::ValidationManifold, p, X; kwargs...)

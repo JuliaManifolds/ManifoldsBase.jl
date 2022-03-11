@@ -372,6 +372,12 @@ function inverse_retract_embedded!(M::AbstractManifold, X, p, q, m)
     )
 end
 
+"""
+    inverse_retract_caley!(M::AbstractManifold, X, p, q)
+
+computes the mutating variant of the [`CayleyInverseRetraction`](@ref),
+which by default calls the first order [`PadeInverseRetraction`§(@ref).
+"""
 function inverse_retract_caley!(M::AbstractManifold, X, p, q)
     return inverse_retract_pade!(M, X, p, q, 1)
 end
@@ -482,6 +488,12 @@ function inverse_retract_embedded(M::AbstractManifold, p, q, m)
     )
 end
 
+"""
+    inverse_retract_caley(M::AbstractManifold, p, q)
+
+computes the allocating variant of the [`CaleyInverseRetraction`](@ref),
+which by default allocates and calls [`inverse_retract_caley!`](@ref).
+"""
 function inverse_retract_caley(M::AbstractManifold, p, q)
     X = allocate_result(M, inverse_retract, p, q)
     return inverse_retract_caley!(M, X, p, q)
@@ -623,6 +635,12 @@ function retract_embedded!(M::AbstractManifold, q, p, X, m)
     )
 end
 
+"""
+    retract_caley!(M::AbstractManifold, X, p, q)
+
+computes the mutating variant of the [`CayleyRetraction`](@ref),
+which by default falls back to calling the first order [`PadeRetraction`](@ref).
+"""
 function retract_caley!(M::AbstractManifold, q, p, X)
     return retract_pade!(M, q, p, X, 1)
 end
@@ -787,6 +805,12 @@ function retract_softmax(M::AbstractManifold, p, X)
     return retract_softmax!(M, q, p, X)
 end
 
+"""
+    retract_caley(M::AbstractManifold, p, q)
+
+computes the allocating variant of the [`CayleyRetraction`](@ref),
+which by default allocates and calls [`retract_caley!`](@ref).
+"""
 function retract_caley(M::AbstractManifold, p, X)
     q = allocate_result(M, retract, p, X)
     return retract_caley!(M, q, p, X)
