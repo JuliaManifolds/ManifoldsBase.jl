@@ -695,12 +695,22 @@ retraction method has to be one that is available on the base [`AbstractManifold
 """
 inverse_retract(::AbstractPowerManifold, ::Any...)
 
+function inverse_retract(
+    M::AbstractPowerManifold,
+    p,
+    q,
+    m::AbstractInverseRetractionMethod = default_inverse_retraction_method(M),
+)
+    X = allocate_result(M, inverse_retract, p, q)
+    return inverse_retract!(M, X, p, q, m)
+end
+
 function inverse_retract!(
     M::AbstractPowerManifold,
     X,
     p,
     q,
-    m::AbstractInverseRetractionMethod = LogarithmicInverseRetraction(),
+    m::AbstractInverseRetractionMethod = default_inverse_retraction_method(M),
 )
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
@@ -719,7 +729,7 @@ function inverse_retract!(
     X,
     p,
     q,
-    m::AbstractInverseRetractionMethod = LogarithmicInverseRetraction(),
+    m::AbstractInverseRetractionMethod = default_inverse_retraction_method(M),
 )
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
@@ -984,12 +994,22 @@ method has to be one that is available on the base [`AbstractManifold`](@ref).
 """
 retract(::AbstractPowerManifold, ::Any...)
 
+function retract(
+    M::AbstractPowerManifold,
+    p,
+    X,
+    m::AbstractRetractionMethod = default_retraction_method(M),
+)
+    q = allocate_result(M, retract, p, X)
+    return retract!(M, q, p, X, m)
+end
+
 function retract!(
     M::AbstractPowerManifold,
     q,
     p,
     X,
-    m::AbstractRetractionMethod = ExponentialRetraction(),
+    m::AbstractRetractionMethod = default_retraction_method(M),
 )
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
@@ -1008,7 +1028,7 @@ function retract!(
     q,
     p,
     X,
-    m::AbstractRetractionMethod = ExponentialRetraction(),
+    m::AbstractRetractionMethod = default_retraction_method(M),
 )
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
