@@ -35,9 +35,7 @@ struct EmptyTrait <: AbstractTrait end
 """
     IsExplicitDecorator <: AbstractTrait
 
-Specify that a certain type should dispatch the function to the field of name `.fieldname`
-of the decorator. This means the decorator is stated to explicitly decorate its `.fieldname`s
-type.
+Specify that a certain type should dispatch per default to its [`decorated_manifold`](@ref).
 
 !!! note
     Any decorator _behind_ this decorator might not have any effect, since the function
