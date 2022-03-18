@@ -110,8 +110,12 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
     @test number_system(M) == ManifoldsBase.ℝ
     @test ManifoldsBase.representation_size(M) == (3,)
 
+    p = zeros(3)
+    m = PolarRetraction()
     @test injectivity_radius(M) == Inf
-
+    @test injectivity_radius(M, p) == Inf
+    @test injectivity_radius(M, m) == Inf
+    @test injectivity_radius(M, p, m) == Inf
     @test default_retraction_method(M) == ExponentialRetraction()
     @test default_inverse_retraction_method(M) == LogarithmicInverseRetraction()
 
