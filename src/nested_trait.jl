@@ -268,6 +268,8 @@ macro trait_function(sig, opts = :())
     argtypes = parts[:argtypes]
     kwargs_call = parts[:kwargs_call]
 
+    argnametype_exprs = [:(typeof($(argname))) for argname in argnames]
+
     block = quote
         @inline function ($fname)($(callargs...); $(kwargs_list...)) where {$(where_exprs...)}
             return ($fname)(trait($fname, $(argnames...)), $(argnames...); $(kwargs_call...))
@@ -288,7 +290,7 @@ macro trait_function(sig, opts = :())
             argt1 = typeof(arg1)
             return invoke(
                 $fname,
-                Tuple{argt1,$(argtypes[2:end]...)},
+                Tuple{argt1,$(argnametype_exprs[2:end]...)},
                 arg1,
                 $(argnames[2:end]...);
                 $(kwargs_call...),
