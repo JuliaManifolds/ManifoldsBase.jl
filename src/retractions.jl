@@ -194,7 +194,7 @@ function PadeInverseRetraction(m::Int)
     (m < 1) && error(
         "The Padé based inverse retraction is only available for positive orders, not for order $m.",
     )
-    return PadeRetraction{m}()
+    return PadeInverseRetraction{m}()
 end
 @doc raw"""
     CayleyInverseRetraction <: AbstractInverseRetractionMethod

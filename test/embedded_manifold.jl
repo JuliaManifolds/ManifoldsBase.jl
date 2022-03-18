@@ -282,6 +282,11 @@ ManifoldsBase.decorated_manifold(::FallbackManifold) = DefaultManifold(3)
         @test Xe == [2.0, 3.0, 0.0]
         @test project(M, pe) == p
         @test project(M, pe, Xe) == X
+        # isometric passtthrough
+        @test injectivity_radius(M) == Inf
+        @test injectivity_radius(M, p) == Inf
+        @test injectivity_radius(M, p, ExponentialRetraction()) == Inf
+        @test injectivity_radius(M, ExponentialRetraction()) == Inf
     end
 
     @testset "Test nonimplemented fallbacks" begin

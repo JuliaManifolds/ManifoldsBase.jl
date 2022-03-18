@@ -31,9 +31,12 @@ struct NonManifold <: AbstractManifold{ManifoldsBase.ℝ} end
     end
     @test_throws MethodError inverse_retract(M, p, q)
     @test_throws MethodError inverse_retract!(M, Y, p, q)
+    @test_throws ErrorException PadeInverseRetraction(0)
     for IR in [
-        LogarithmicInverseRetraction(),
+        CayleyInverseRetraction(),
         EmbeddedInverseRetraction(ProjectionInverseRetraction()),
+        LogarithmicInverseRetraction(),
+        PadeInverseRetraction(2),
         PolarInverseRetraction(),
         ProjectionInverseRetraction(),
         QRInverseRetraction(),
@@ -45,11 +48,14 @@ struct NonManifold <: AbstractManifold{ManifoldsBase.ℝ} end
     end
     @test_throws MethodError retract(M, p, X)
     @test_throws MethodError retract!(M, q, p, X)
+    @test_throws ErrorException PadeRetraction(0)
     for R in [
+        CayleyRetraction(),
         EmbeddedRetraction(ProjectionRetraction()),
         ExponentialRetraction(),
         ODEExponentialRetraction(ProjectionRetraction(), DefaultBasis()),
         ODEExponentialRetraction(ProjectionRetraction()),
+        PadeRetraction(2),
         PolarRetraction(),
         ProjectionRetraction(),
         QRRetraction(),

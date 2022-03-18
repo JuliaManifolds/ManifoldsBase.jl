@@ -67,6 +67,8 @@ f(::EmptyTrait, a, b) = invoke(f, Tuple{AbstractA,typeof(b)}, a, b)
     @test f(A5(), 890) == 893
     f(::TraitList{IsGreat}, a, b) = g(a, b, 54)
     @test f(A5(), 890) == 944
+
+    @test next_trait(EmptyTrait()) === EmptyTrait()
 end
 
 #

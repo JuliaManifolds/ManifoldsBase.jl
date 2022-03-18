@@ -120,6 +120,7 @@ struct NotImplementedInverseRetraction <: AbstractInverseRetractionMethod end
     @test_throws MethodError injectivity_radius(M)
     @test_throws MethodError injectivity_radius(M, [0])
     @test_throws MethodError injectivity_radius(M, [0], exp_retr)
+    @test_throws MethodError injectivity_radius(M, exp_retr)
 
     @test_throws MethodError zero_vector!(M, [0], [0])
     @test_throws MethodError zero_vector(M, [0])
