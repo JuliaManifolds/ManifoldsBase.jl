@@ -497,7 +497,7 @@ end
 """
     inverse_retract_caley(M::AbstractManifold, p, q)
 
-computes the allocating variant of the [`CaleyInverseRetraction`](@ref),
+computes the allocating variant of the [`CayleyInverseRetraction`](@ref),
 which by default allocates and calls [`inverse_retract_caley!`](@ref).
 """
 function inverse_retract_caley(M::AbstractManifold, p, q)

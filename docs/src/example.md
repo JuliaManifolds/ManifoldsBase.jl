@@ -86,22 +86,25 @@ S = ScaledSphere(1.5, 2)
 
 If we have now a point, represented as an array, we would first like to check, that it is a valid point on the manifold.
 For this one can use the easy interface [`is_point`](@ref is_point(M::AbstractManifold, p; kwargs...)).
-This is a function on [layer 1](@ref design-layer1) which handles specialy cases, so it should not be implemented.
-The actual functions where we dispatch per manifold are on [layer 3](@ref design-layer3).
-For the test of points this function is [`check_point`](@ref ManifoldsBase.check_point) which we actually will implement.
-This function returns `nothing` if the point is a valid point and returns an error not throw it) otherwise.
+This is a function on [layer 1](@ref design-layer1) which handles special cases as well cases, so it should not be implemented.
+The actual functions where we dispatch per manifold are on [layer 3](@ref design-layer3). Generically, for both  [`is_point`](@ref is_point(M::AbstractManifold, p; kwargs...)) and  [`is_vector`](@ref is_vector(M::AbstractManifold, p, X; kwargs...)) the size is checked using [`check_size`](@ref ManifoldsBase.check_size)
+For the test of points the function to implement is [`check_point`](@ref ManifoldsBase.check_point) which we actually will implement, analogously there exists also [`check_vector`](@ref ManifoldsBase.check_vector).
+These functions return `nothing` if the point (vector, size) is a correct/valid and returns an error (but not throw it) otherwise.
 This is usually a `DomainError`.
 
 We have to check two things: that a point `p` is a vector with `N+1` entries and its norm is the desired radius.
 To spare a few lines, we can use [short-circuit evaluation](https://docs.julialang.org/en/v1/manual/control-flow/#Short-Circuit-Evaluation-1) instead of `if` statements.
 
 A first thing we have to specify is how points and tangent vectors are represented, that is we have to specify their [`representation_size`](@ref)
+
 ```@example manifold-tutorial
 representation_size(::ScaledSphere{N}) where {N} = N+1
 nothing #hide
 ```
 
-If something has to only hold up to precision, we can pass that down, too using the `kwargs...`.
+This already finishes the size check which [`check_size`](@ref ManifoldsBase.check_size) performs (based on the representation size).
+
+If something has to only hold up to precision, we can pass that down, too using the `kwargs...`, so all three functions we currenlty discuss have these in their signature usually.
 
 ```@example manifold-tutorial
 function check_point(M::ScaledSphere{N}, p; kwargs...) where {N}
