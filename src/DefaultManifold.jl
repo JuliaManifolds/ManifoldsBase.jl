@@ -14,26 +14,6 @@ function DefaultManifold(n::Vararg{Int,N}; field = ℝ) where {N}
     return DefaultManifold{Tuple{n...},field}()
 end
 
-function check_point(M::DefaultManifold, p; kwargs...)
-    if size(p) != representation_size(M)
-        return DomainError(
-            size(p),
-            "The point $(p) does not lie on $M, since its size is not $(representation_size(M)).",
-        )
-    end
-    return nothing
-end
-
-function check_vector(M::DefaultManifold, p, X; kwargs...)
-    if size(X) != representation_size(M)
-        return DomainError(
-            size(X),
-            "The vector $(X) is not a tangent to a point on $M since its size does not match $(representation_size(M)).",
-        )
-    end
-    return nothing
-end
-
 distance(::DefaultManifold, p, q) = norm(p - q)
 
 embed!(::DefaultManifold, q, p) = copyto!(q, p)

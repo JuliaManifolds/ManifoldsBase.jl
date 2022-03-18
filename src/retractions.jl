@@ -333,8 +333,14 @@ end
 function _inverse_retract!(M::AbstractManifold, X, p, q, m::EmbeddedInverseRetraction)
     return inverse_retract_embedded!(M, X, p, q, m.inverse_retraction)
 end
-function _inverse_retract!(M::AbstractManifold, X, p, q, ::PadeInverseRetraction)
-    return inverse_retract_pade!(M, X, p, q)
+function _inverse_retract!(
+    M::AbstractManifold,
+    X,
+    p,
+    q,
+    ::PadeInverseRetraction{n},
+) where {n}
+    return inverse_retract_pade!(M, X, p, q, n)
 end
 function _inverse_retract!(M::AbstractManifold, X, p, q, ::PolarInverseRetraction)
     return inverse_retract_polar!(M, X, p, q)
@@ -383,7 +389,7 @@ function inverse_retract_caley!(M::AbstractManifold, X, p, q)
 end
 
 """
-    inverse_retract_pade!(M::AbstractManifold, p, q)
+    inverse_retract_pade!(M::AbstractManifold, p, q, n)
 
 computes the mutating variant of the [`PadeInverseRetraction`](@ref)`(n)`,
 """
@@ -453,8 +459,8 @@ _inverse_retract(M::AbstractManifold, p, q, ::LogarithmicInverseRetraction) = lo
 function _inverse_retract(M::AbstractManifold, p, q, m::NLSolveInverseRetraction)
     return inverse_retract_nlsolve(M, p, q, m)
 end
-function _inverse_retract(M::AbstractManifold, p, q, ::PadeInverseRetraction)
-    return inverse_retract_pade(M, p, q)
+function _inverse_retract(M::AbstractManifold, p, q, ::PadeInverseRetraction{n}) where {n}
+    return inverse_retract_pade(M, p, q, n)
 end
 function _inverse_retract(M::AbstractManifold, p, q, ::PolarInverseRetraction)
     return inverse_retract_polar(M, p, q)
@@ -504,7 +510,7 @@ end
 computes the allocating variant of the [`PadeInverseRetraction`](@ref)`(n)`,
 which by default allocates and calls [`inverse_retract_pade!`](@ref).
 """
-function inverse_retract_pade(M::AbstractManifold, X, p, q)
+function inverse_retract_pade(M::AbstractManifold, p, q, n)
     X = allocate_result(M, inverse_retract, p, q)
     return inverse_retract_pade!(M, X, p, q, n)
 end

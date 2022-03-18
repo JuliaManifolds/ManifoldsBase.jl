@@ -526,4 +526,21 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
         @test repr(CayleyRetraction()) == "CayleyRetraction()"
         @test repr(PadeRetraction(2)) == "PadeRetraction(2)"
     end
+    @testset "Further TestArrayRepresentation" begin
+        M = ManifoldsBase.DefaultManifold(3)
+        p = [1.0, 0.0, 0.0]
+        X = [1.0, 0.0, 0.0]
+        @test is_point(M, p, true)
+        @test is_vector(M, p, X, true)
+        pF = [1.0, 0.0]
+        XF = [0.0, 0.0]
+        m = ExponentialRetraction()
+        @test_throws DomainError is_point(M, pF, true)
+        @test_throws DomainError is_vector(M, p, XF, true)
+        @test_throws DomainError is_vector(M, pF, XF, true; check_point = true)
+        @test injectivity_radius(M) == Inf
+        @test injectivity_radius(M, p) == Inf
+        @test injectivity_radius(M, p, m) == Inf
+        @test injectivity_radius(M, m) == Inf
+    end
 end

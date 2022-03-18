@@ -31,6 +31,10 @@ end
     y2 = exp(A, x, v2)
     w = log(M, x, z)
     w2 = log(A, x, z; atol = 10^(-15))
+    @testset "Checks forward" begin
+        @test ManifoldsBase.check_size(A, x2, v2) === ManifoldsBase.check_size(M, x, v)
+        @test ManifoldsBase.check_size(A, x2) === ManifoldsBase.check_size(M, x)
+    end
     @testset "Types and Conversion" begin
         @test convert(typeof(M), A) == M
         @test convert(typeof(A), M) == A

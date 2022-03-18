@@ -77,21 +77,6 @@ array_value(X::ValidationFibreVector) = X.value
 
 decorated_manifold(M::ValidationManifold) = M.manifold
 
-function check_point(M::ValidationManifold, p; kwargs...)
-    return check_point(M.manifold, array_value(p); kwargs...)
-end
-
-function check_size(M::ValidationManifold, p)
-    return check_size(M.manifold, array_value(p))
-end
-function check_size(M::ValidationManifold, p, X)
-    return check_size(M.manifold, array_value(p), array_value(X))
-end
-
-function check_vector(M::ValidationManifold, p, X; kwargs...)
-    return check_vector(M.manifold, array_value(p), array_value(X); kwargs...)
-end
-
 convert(::Type{M}, m::ValidationManifold{𝔽,M}) where {𝔽,M<:AbstractManifold{𝔽}} = m.manifold
 function convert(::Type{ValidationManifold{𝔽,M}}, m::M) where {𝔽,M<:AbstractManifold{𝔽}}
     return ValidationManifold(m)
