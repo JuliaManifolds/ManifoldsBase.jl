@@ -9,6 +9,21 @@ power_array_wrapper(::Type{NestedReplacingPowerRepresentation}, i::Int) = SVecto
 struct TestArrayRepresentation <: AbstractPowerRepresentation end
 
 @testset "Power Manifold" begin
+
+    @testset "Power Manifold with a test representation" begin
+        M = ManifoldsBase.DefaultManifold(3)
+        N = PowerManifold(M, TestArrayRepresentation(), 2)
+        O = PowerManifold(N, TestArrayRepresentation(), 3) # joins instead of nesting.
+        @test repr(O) ==
+              "PowerManifold(DefaultManifold(3; field = ℝ), TestArrayRepresentation(), 2, 3)"
+        p = zeros(6)
+        X = zeros(6)
+        @test ManifoldsBase.check_power_size(N, p) === nothing
+        @test ManifoldsBase.check_power_size(O, p) isa DomainError
+        @test ManifoldsBase.check_power_size(N, p, X) === nothing
+        @test ManifoldsBase.check_power_size(O, p, X) isa DomainError
+    end
+
     @testset "PowerManifold and allocation with empty representation size" begin
         M = ManifoldsBase.DefaultManifold()
         N = PowerManifold(M, NestedPowerRepresentation(), 2)
