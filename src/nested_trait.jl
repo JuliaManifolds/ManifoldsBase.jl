@@ -307,7 +307,7 @@ macro trait_function(sig, opts = :())
             ) where {$(where_exprs...)}
                 return invoke(
                     $fname,
-                    Tuple{supertype($(argtypes[1])),$(argtypes[2:end]...)},
+                    Tuple{supertype($(argtypes[1])),$(argnametype_exprs[2:end]...)},
                     $(argnames...);
                     $(kwargs_call...),
                 )
