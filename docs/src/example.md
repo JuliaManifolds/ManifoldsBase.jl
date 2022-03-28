@@ -9,9 +9,9 @@ CurrentModule = ManifoldsBase
 This tutorial explains, how to implement a manifold using the `ManifoldsBase.jl` interface.
 We assume that you are familiar with the basic terminology on Riemannian manifolds, especially
 the dimension of a manifold, the exponential map, and the inner product on tangent spaces.
-To read more about this you can for example check [[do Carmo, 1992](#doCarmo1992)], Chapter 3, first.
+To read more about this you can for example check [^doCarmo1992], Chapter 3, first.
 
-Furthermore, we will look into a manifold that is isometrically embedded into e Euclidean space.
+Furthermore, we will look at a manifold that is isometrically embedded into a Euclidean space.
 
 In general you need just a datatype (`struct`) that inherits from [`AbstractManifold`](@ref) to define a manifold. No function is _per se_ required to be implemented.
 However, it is a good idea to provide functions that might be useful to others, for example [`check_point`](@ref check_point) and [`check_vector`](@ref check_point), as we do in this tutorial.
@@ -29,8 +29,7 @@ After that, we will
 
 There are only two small technical things we need to explain at this point.
 First of all our [`AbstractManifold`](@ref)`{𝔽}` has a parameter `𝔽`.
-This parameter indicates the [`number_system`](@ref) the manifold is based on, for example `ℝ` for rel manifolds, which is short for `RealNumbers()`.
-This indicates that the manifold is a real manifold.
+This parameter indicates the [`number_system`](@ref) the manifold is based on, for example `ℝ` for real manifolds, which is short for [`RealNumbers`](@ref)`()` or `ℂ` for complex manifolds, a shorthand for [`ComplexNumbers`](@ref)`()`.
 
 ## [Startup](@id manifold-tutorial-startup)
 
@@ -48,18 +47,19 @@ We import the mutating variant of the [`exp`](@ref)onential map, see [the design
 
 ## [The manifold](@id manifold-tutorial-task)
 
-The manifold we want to implement here a sphere, with a radius $r$.
-Since this radius is a property inherent to the manifold, it will become a field of the manifold.
-The second information, we want to store is the dimension of the sphere, for example whether it's the 1-sphere, i.e. the circle, represented by vectors $p\in\mathbb R^2$ or norm $r$ or the 2-sphere in $\mathbb R^3$ of radius $r$.
+The manifold we want to implement here a sphere, with radius $r$.
+Since this radius is a property inherent to the manifold, it will become a field of the manifolds `struct`.
+The second information, we want to store is the dimension of the sphere, for example whether it's the 1-sphere, i.e. the circle, represented by vectors $p\in\mathbb R^2$ of norm $r$ or the 2-sphere in $\mathbb R^3$ of radius $r$.
 Since the latter might be something we want to [dispatch](https://en.wikipedia.org/wiki/Multiple_dispatch) on, we model it as a parameter of the type.
 In general the `struct` of a manifold should provide information about the manifold, which are inherent to the manifold or has to be available without a specific point or tangent vector present.
-This is -- most prominently -- a way to determine the manifold dimension.
+This is -- most prominently -- all information required to determine the manifold dimension.
 
 Note that this a slightly more general manifold than the [Sphere](https://juliamanifolds.github.io/Manifolds.jl/stable/manifolds/sphere.html) in [Manifolds.jl](https://juliamanifolds.github.io/Manifolds.jl/stable/index.html)
 
-For our example we define the following struct.
+For our example we define the following `struct`.
 While a first implementation might also just take [`AbstractManifold`](@ref)`{ℝ}` as supertype, we directly take
-[`AbstractDecoratorManifold`](@ref)`{ℝ}, which will be useful later. For now it does not make a difference.
+[`AbstractDecoratorManifold`](@ref)`{ℝ}, which will be useful later on.
+For now it does not make a difference.
 
 ```@example manifold-tutorial
 """
@@ -104,7 +104,7 @@ nothing #hide
 
 This already finishes the size check which [`check_size`](@ref ManifoldsBase.check_size) performs (based on the representation size).
 
-If something has to only hold up to precision, we can pass that down, too using the `kwargs...`, so all three functions we currenlty discuss have these in their signature usually.
+If something has to only hold up to precision, we can pass that down, too using the `kwargs...`, so all three functions we currently discuss have these in their signature usually.
 
 ```@example manifold-tutorial
 function check_point(M::ScaledSphere{N}, p; kwargs...) where {N}
@@ -117,7 +117,7 @@ nothing #hide
 ```
 
 Similarly, we can verify, whether a tangent vector `X` is valid.
-It has to fulfill the same size requirements and it has to be orthogonal to `p`.
+It has to fulfil the same size requirements and it has to be orthogonal to `p`.
 We can again use the `kwargs`, but also provide a way to check `p`, too.
 
 ```@example manifold-tutorial
@@ -234,14 +234,5 @@ In summary with just these few functions you can already explore the first thing
 
 ## Literature
 
-```@raw html
-<ul>
-<li id="doCarmo1992">
-    [<a>doCarmo, 1992</a>]
-    M. P. do Carmo,
-    <emph>Riemannian Geometry</emph>,
-    Birkhäuser Boston, 1992,
-    ISBN: 0-8176-3490-8.
-</li>
-</ul>
-```
+[^doCarmo1992]:
+    > do Carmo, Manfredo __Riemannian Geometry__,  Birkhäuser Boston, 1992, ISBN: 0-8176-3490-8.
