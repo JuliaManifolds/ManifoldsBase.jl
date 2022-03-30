@@ -209,8 +209,12 @@ function allocate_result(M::PowerManifoldNested, f, x...)
         ]
     end
 end
-function allocate_result(::PowerManifoldNestedReplacing, f, x...)
-    return copy(x[1])
+function allocate_result(M::PowerManifoldNestedReplacing, f, x...)
+    if length(x) == 0
+        return [allocate_result(M.manifold, f) for _ in get_iterator(M)]
+    else
+        return copy(x[1])
+    end
 end
 
 for PowerRepr in [PowerManifoldNested, PowerManifoldNestedReplacing]
