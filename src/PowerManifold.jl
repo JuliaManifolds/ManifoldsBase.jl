@@ -200,7 +200,7 @@ function Base.:^(
 end
 
 function allocate_result(M::PowerManifoldNested, f, x...)
-    if representation_size(M.manifold) === ()
+    if representation_size(M.manifold) === () && length(x) > 0
         return allocate(x[1])
     else
         return [

@@ -156,7 +156,7 @@ power_array_wrapper(::Type{NestedReplacingPowerRepresentation}, i::Int) = SVecto
             @test p[DN, 1] == p[N, 1]
         end
         @testset "zero argument allocation" begin
-            @test size(ManifoldsBase.allocate_result(M, rand)) == size(p)
+            @test size(ManifoldsBase.allocate_result(N, rand)) == size(p)
         end
     end
 end
