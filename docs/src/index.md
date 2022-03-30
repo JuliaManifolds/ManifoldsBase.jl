@@ -2,10 +2,18 @@
 
 `ManifoldsBase.jl` is a lightweight interface for manifolds.
 
-This package provides an interface, so you probably either want to add it as a dependency to your project/package to work on manifold generically or implement a new manifold.
-A package that (only) depends on `ManifoldsBase.jl`, see [Manopt.jl](https://manoptjl.org/stable/), which implements optimization algorithms on manifolds using this interface, i.e. they can be used with any manifold based on `ManifoldsBase.jl`. A library of manifolds implemented using this interface is provided see [Manifolds.jl](https://juliamanifolds.github.io/Manifolds.jl/stable/).
+This packages has two main purposes:
+You add it as a dependency if you plan to work on manifolds (generically) or if you plan to
+define own manifolds in a package.
+For a package that (only) depends on `ManifoldsBase.jl`, see [Manopt.jl](https://manoptjl.org/stable/),
+which implements optimization algorithms on manifolds using this interface.
+These optimisation algorithms can hence be used with any manifold implemented based on `ManifoldsBase.jl`.
 
-Your package is using `ManifoldsBase`? Give us a note and we add you here.
+For a library of manifolds implemented using this interface [Manifolds.jl](https://juliamanifolds.github.io/Manifolds.jl/stable/).
+
+Your package is using `ManifoldsBase`?
+We would like to add that here as well. Either [write an issue](https://github.com/JuliaManifolds/ManifoldsBase.jl/issues/new)
+or add yourself by forking, editing this file and [opening a PR](https://github.com/JuliaManifolds/ManifoldsBase.jl/compare).
 
 ## Citation
 
