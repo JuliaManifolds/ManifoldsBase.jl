@@ -36,6 +36,14 @@ const ℝ = RealNumbers()
 const ℂ = ComplexNumbers()
 const ℍ = QuaternionNumbers()
 
+@inline function allocate_result_type(
+    ::AbstractManifold{ℂ},
+    f::TF,
+    args::Tuple{},
+) where {TF}
+    return ComplexF64
+end
+
 """
     _unify_number_systems(𝔽s::AbstractNumbers...)
 

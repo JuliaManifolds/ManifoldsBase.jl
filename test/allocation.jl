@@ -1,7 +1,7 @@
 using ManifoldsBase
 using Test
 using ManifoldsBase:
-    combine_allocation_promotion_functions, allocation_promotion_function, ℝ
+    combine_allocation_promotion_functions, allocation_promotion_function, ℝ, ℂ
 
 struct AllocManifold{𝔽} <: AbstractManifold{𝔽} end
 AllocManifold() = AllocManifold{ℝ}()
@@ -15,6 +15,9 @@ end
 
 struct AllocManifold2 <: AbstractManifold{ℝ} end
 ManifoldsBase.representation_size(::AllocManifold2) = (2, 3)
+
+struct AllocManifold3 <: AbstractManifold{ℂ} end
+ManifoldsBase.representation_size(::AllocManifold3) = (2, 3)
 
 @testset "Allocation" begin
     a = [[1.0], [2.0], [3.0]]
@@ -58,4 +61,6 @@ ManifoldsBase.representation_size(::AllocManifold2) = (2, 3)
     alloc2 = ManifoldsBase.allocate_result(AllocManifold2(), rand)
     @test alloc2 isa Matrix{Float64}
     @test size(alloc2) == representation_size(AllocManifold2())
+
+    @test ManifoldsBase.allocate_result(AllocManifold3(), rand) isa Matrix{ComplexF64}
 end

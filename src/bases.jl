@@ -318,7 +318,7 @@ end
 @inline function allocate_result_type(
     M::AbstractManifold,
     f::Union{typeof(get_coordinates),typeof(get_vector)},
-    args::Tuple,
+    args::Tuple{Any,Vararg{Any}},
 )
     apf = allocation_promotion_function(M, f, args)
     return apf(
