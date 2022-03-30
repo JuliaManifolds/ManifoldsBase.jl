@@ -218,5 +218,8 @@ struct TestArrayRepresentation <: AbstractPowerRepresentation end
                 @test zero_vector(N, p) == zero(p)
             end
         end
+        @testset "zero argument allocation" begin
+            @test size(ManifoldsBase.allocate_result(N, rand)) == size(p)
+        end
     end
 end
