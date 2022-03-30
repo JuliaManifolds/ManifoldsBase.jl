@@ -13,23 +13,30 @@ To read more about this you can for example check [^doCarmo1992], Chapter 3, fir
 
 Furthermore, we will look at a manifold that is isometrically embedded into a Euclidean space.
 
-In general you need just a datatype (`struct`) that inherits from [`AbstractManifold`](@ref) to define a manifold. No function is _per se_ required to be implemented.
+In general you need just a data type (`struct`) that inherits from [`AbstractManifold`](@ref) to define a manifold. No function is _per se_ required to be implemented.
 However, it is a good idea to provide functions that might be useful to others, for example [`check_point`](@ref check_point) and [`check_vector`](@ref check_point), as we do in this tutorial.
 
-We start with two technical preliminaries. If you want to start directly, you can [skip](@ref manifold-tutorial-task) this paragraph and revisit it for two of the implementation details.
-
-After that, we will
+In this tutorial we will
 
 * [model](@ref manifold-tutorial-task) the manifold
 * [implement](@ref manifold-tutorial-checks) two tests, so that points and tangent vectors can be checked for validity, for example also within [`ValidationManifold`](@ref),
 * [implement](@ref manifold-tutorial-fn) two functions, the exponential map and the manifold dimension.
 * [decorate](@ref manifold-tutorial-emb) the manifold with an embedding to gain further features.
 
+The next two sections are just a technical detail and the necessary `import`s to extend the functions defined in this interface.
+
 ## [Technical preliminaries](@id manifold-tutorial-prel)
 
-There are only two small technical things we need to explain at this point.
+There are only two small technical things we need to explain at this point before we get started.
 First of all our [`AbstractManifold`](@ref)`{𝔽}` has a parameter `𝔽`.
 This parameter indicates the [`number_system`](@ref) the manifold is based on, for example `ℝ` for real manifolds, which is short for [`RealNumbers`](@ref)`()` or `ℂ` for complex manifolds, a shorthand for [`ComplexNumbers`](@ref)`()`.
+
+Second, this interface usually provides both an allocating and a mutating variant of each function, for example for the [`exp`](@ref)onential map [implemented below](@ref manifold-tutorial-fn) this interface provides `exp(M,p,X)` to compute the exponential map and `exp!(M, q, p, X)` to compute the exponential map in the memory provided by `q`, mutating that input.
+the convention is, that the manifold is the first argument -- in both function variants -- the mutating variant then has the input to be mutated in second place, and the remaining parameters are again the same (`p`and `X` here).
+We usually refer to these two variants of the same function as the allocating (`exp`) function and the mutating (`exp!`) one.
+
+The convention for this interface is to __document the allocation function__, which by default allocates the necessary memory and calls the mutating function. So the convention is to just __implement the mutating function__, unless there is a good reason to provide an implementation for both.
+For more details see [the design section on mutating and non-mutating functions](@ref mutating-and-nonmutating)
 
 ## [Startup](@id manifold-tutorial-startup)
 
@@ -43,7 +50,7 @@ import Base: show
 
 We load `LinearAlgebra` for some computations. `Test` is only loaded for illustrations in the examples.
 
-We import the mutating variant of the [`exp`](@ref)onential map, see [the design section on mutating and nonmutating functions](@ref mutating-and-nonmutating).
+We import the mutating variant of the [`exp`](@ref)onential map, as just discussed above.
 
 ## [The manifold](@id manifold-tutorial-task)
 
@@ -58,7 +65,7 @@ Note that this a slightly more general manifold than the [Sphere](https://juliam
 
 For our example we define the following `struct`.
 While a first implementation might also just take [`AbstractManifold`](@ref)`{ℝ}` as supertype, we directly take
-[`AbstractDecoratorManifold`](@ref)`{ℝ}, which will be useful later on.
+[`AbstractDecoratorManifold`](@ref)`{ℝ}`, which will be useful later on.
 For now it does not make a difference.
 
 ```@example manifold-tutorial
@@ -84,27 +91,29 @@ S = ScaledSphere(1.5, 2)
 
 ## [Checking points and tangents](@id manifold-tutorial-checks)
 
-If we have now a point, represented as an array, we would first like to check, that it is a valid point on the manifold.
-For this one can use the easy interface [`is_point`](@ref is_point(M::AbstractManifold, p; kwargs...)).
-This is a function on [layer 1](@ref design-layer1) which handles special cases as well cases, so it should not be implemented.
-The actual functions where we dispatch per manifold are on [layer 3](@ref design-layer3). Generically, for both  [`is_point`](@ref is_point(M::AbstractManifold, p; kwargs...)) and  [`is_vector`](@ref is_vector(M::AbstractManifold, p, X; kwargs...)) the size is checked using [`check_size`](@ref ManifoldsBase.check_size)
+Points on a manifold are usually represented as vector, matrices or more generally arrays.
+Since we consider vectors of a certain norm (and space dimension), our points are vectors.
+For an arbitrary vector we would first like to check, that it is a valid point on the manifold.
+For this one can use the function [`is_point`](@ref is_point(M::AbstractManifold, p; kwargs...)).
+This is a function on [layer 1](@ref design-layer1) which handles special cases as well cases, so it should not be implemented directly by a user of this interface.
+The functions that have to be implemented can be found on [layer 3](@ref design-layer3). Generically, for both [`is_point`](@ref is_point(M::AbstractManifold, p; kwargs...)) and  [`is_vector`](@ref is_vector(M::AbstractManifold, p, X; kwargs...)), this layer contains a function to check correct size of an array, called [`check_size`](@ref ManifoldsBase.check_size)
 For the test of points the function to implement is [`check_point`](@ref ManifoldsBase.check_point) which we actually will implement, analogously there exists also [`check_vector`](@ref ManifoldsBase.check_vector).
 These functions return `nothing` if the point (vector, size) is a correct/valid and returns an error (but not throw it) otherwise.
 This is usually a `DomainError`.
 
 We have to check two things: that a point `p` is a vector with `N+1` entries and its norm is the desired radius.
-To spare a few lines, we can use [short-circuit evaluation](https://docs.julialang.org/en/v1/manual/control-flow/#Short-Circuit-Evaluation-1) instead of `if` statements.
 
-A first thing we have to specify is how points and tangent vectors are represented, that is we have to specify their [`representation_size`](@ref)
+A first thing we have specify is how points and tangent vectors are represented, that is we have to specify their [`representation_size`](@ref)
 
 ```@example manifold-tutorial
 representation_size(::ScaledSphere{N}) where {N} = N+1
 nothing #hide
 ```
 
-This already finishes the size check which [`check_size`](@ref ManifoldsBase.check_size) performs (based on the representation size).
+This already finishes the size check which [`check_size`](@ref ManifoldsBase.check_size) performs by default (based on the representation size).
 
-If something has to only hold up to precision, we can pass that down, too using the `kwargs...`, so all three functions we currently discuss have these in their signature usually.
+If something has to only hold up to precision, we can pass that down, too using the `kwargs...`, so all three `check_` functions should usually have these in their signature.
+For our manifold we have to check that the norm of a point `p` is approximately the specified `radius`.
 
 ```@example manifold-tutorial
 function check_point(M::ScaledSphere{N}, p; kwargs...) where {N}
@@ -117,8 +126,9 @@ nothing #hide
 ```
 
 Similarly, we can verify, whether a tangent vector `X` is valid.
-It has to fulfil the same size requirements and it has to be orthogonal to `p`.
-We can again use the `kwargs`, but also provide a way to check `p`, too.
+It's size is again already checked using [`check_size`](@ref ManifoldsBase.check_size),
+so the only remaining property to verify is, that `X` is orthogonal to `p`.
+We can again use the `kwargs`.
 
 ```@example manifold-tutorial
 function check_vector(M::ScaledSphere, p, X; kwargs...)
@@ -129,6 +139,11 @@ function check_vector(M::ScaledSphere, p, X; kwargs...)
 end
 nothing #hide
 ```
+
+Note that the function [`is_vector`](@ref is_vector(M::AbstractManifold, p, X; kwargs...))
+even can check that the base point of `X` (the `p` the tangent space belongs to), can be checked for validity,
+see its keyword argument `check_base_point`, so within  [`check_vector`](@ref ManifoldsBase.check_vector)
+this can be (implicitly) assumed to hold.
 
 to test points we can now use
 
@@ -152,15 +167,18 @@ manifold_dimension(S)
 
 Note that we can even omit the variable name in the first line since we do not have to access any field or use the variable otherwise.
 
-To implement the exponential map, we have to implement the formula for great arcs, given a start point `p` and a direction `X` on the $n$-sphere of radius $r$ the formula reads
+To implement the [`exp`](@ref)onential map, we have to implement the formula for great arcs, given a start point `p` and a direction `X` on the $n$-sphere of radius $r$ the formula reads
 
 ````math
-\exp_p X = \cos(\frac{1}{r}\lVert X \rVert)p + \sin(\frac{1}{r}\lVert X \rVert)\frac{r}{\lVert X \rVert}X.
+\exp_p X = \cos\Bigl(\frac{1}{r}\lVert X \rVert\Bigr)p + \sin\Bigl(\frac{1}{r}\lVert X \rVert\Bigr)\frac{r}{\lVert X \rVert}X.
 ````
 
-Note that with this choice we for example implicitly assume a certain metric. This is completely fine. We only have to think about specifying a metric explicitly, when we have (at least) two different metrics on the same manifold.
+Note that with this choice we for example implicitly assume that the manifold is equipped with that certain metric.
+This is the default within this interface.
+To distinguish different metrics, see [`MetricManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/metric.html) in [Manifolds.jl](https://juliamanifolds.github.io/Manifolds.jl/stable/) for more details.
+Since we here only consider one metric, we do not have to specify that.
 
-An implementation of the mutation version, see the [technical note](@ref manifold-tutorial-prel), reads
+An implementation of the mutation version, see the [technical note](@ref manifold-tutorial-prel) for the naming and reasoning, reads
 
 ```@example manifold-tutorial
 function exp!(M::ScaledSphere{N}, q, p, X) where {N}
@@ -176,7 +194,7 @@ nothing #hide
 ```
 
 A first easy check can be done taking `p` from above and any vector `X` of length `1.5π` from its tangent space.
-The resulting point is opposite of `p`, i.e. `-p`.
+The resulting point is opposite of `p`, i.e. `-p` and it is of course a valid point on `S`.
 
 ```@example manifold-tutorial
 q = exp(S, p, [0.0,1.5π,0.0])
@@ -185,7 +203,8 @@ q = exp(S, p, [0.0,1.5π,0.0])
 
 ## [Adding an isometric embedding](@id manifold-tutorial-emb)
 
-Since the sphere is isometrically embedded, we do not have to implement the [`inner`](@ref)`(M,p,X,Y)`for tangent vectors, but we can “delegate” it to the embedding. The embedding is the [Euclidean](https://juliamanifolds.github.io/Manifolds.jl/stable/manifolds/essentialmanifold.html) which is also available in `ManifoldsBase` as `DefaultManifold` for testing purposes.
+Since the sphere is isometrically embedded, we do not have to implement the [`inner`](@ref)`(M,p,X,Y)` for tangent vectors `X`, `Y` in the tangent space at `p` , but we can “delegate” it to the embedding. The embedding is the [Euclidean](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/euclidean.html).
+The same manifold with a little smaller feature set is available in `ManifoldsBase.jl` as `DefaultManifold` for testing purposes.
 
 ```@example manifold-tutorial
 using ManifoldsBase: DefaultManifold, IsIsometricEmbeddedManifold
@@ -199,21 +218,20 @@ active_traits(f, ::ScaledSphere, args...) = merge_traits(IsIsometricEmbeddedMani
 nothing #hide
 ```
 
-and then specifying that said embedding is the default manifold
+and then specifying that said embedding is the `DefaultManifold`.
 
 ```@example manifold-tutorial
 get_embedding(::ScaledSphere{N}) where {N} = DefaultManifold(N+1)
 nothing #hide
 ```
 
-Now metric related functions are passed to this embedding, so the inner product works by using the embedding
-
-Now we can compute the inner product by calling [`inner`](@ref)
+Now metric related functions are passed to this embedding, for example the inner product.
+It now works by using the inner product from the embedding, so we can compute the inner product by calling [`inner`](@ref)
 
 ```@example manifold-tutorial
 X = [0.0, 0.1, 3.0]
 Y = [0.0, 4.0, 0.2]
-    # returns 1.0 by calling the inner product in DefaultManifold(3)
+# returns 1.0 by calling the inner product in DefaultManifold(3)
 inner(S, p, X, Y)
 ```
 

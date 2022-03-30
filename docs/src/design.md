@@ -13,7 +13,7 @@ concepts, the [exponential map](https://en.wikipedia.org/wiki/Exponential_map_(R
 
 You do not need to know their exact definition at this point, just that there is _one_ exponential map on a Riemannian manifold, and several retractions, where one of them is the exponential map (sometime called exponential retraction for completeness). Every retraction has its own subtype of the [`AbstractRetractionMethod`](@ref) that uniquely defines it.
 
-The following three design patterns aim to fulfill the criteria from above, while
+The following three design patterns aim to fulfil the criteria from above, while
 also avoiding ambiguities in multiple dispatch using the [dispatch on one argument at a time](https://docs.julialang.org/en/v1/manual/methods/#Dispatch-on-one-argument-at-a-time) approach.
 
 ## General order of parameters
@@ -28,7 +28,9 @@ The general architecture consists of three layers
 * The intermediate layer to dispatch on different parameters in the last section, e.g. type of retraction or vector transport.
 * The lowest layer for specific manifolds to dispatch on different types of points and tangent vectors. Usually this layer with a specific manifold and no optional parameters.
 
-These three layers are described in more detail in the following. The main motivation to introduce this separation is reduction of method ambiguity problems.
+These three layers are described in more detail in the following.
+The main motivation to introduce these layers is, that it reduces method ambiguities.
+It also provides a good structure where to implement extensions to this interface.
 
 ### [Layer I: The high level interface and ease of use](@id design-layer1)
 
@@ -40,31 +42,34 @@ To do so, we “decorate” the manifold by making it an [`AbstractDecoratorMani
 
 The explicit case of the [`EmbeddedManifold`](@ref) can be used to distinguish different embeddings of a manifold, but also their dispatch (onto the manifold or its embedding, depending on the type of embedding) happens here.
 
-Note that all other parameters of a function should be as unspecific as possible on this layer.
+Note that all other parameters of a function should be as least typed as possible for all parameters besides the manifold.
+With respect to the [dispatch on one argument at a time](https://docs.julialang.org/en/v1/manual/methods/#Dispatch-on-one-argument-at-a-time) paradigm, this layer dispatches the _manifold first_.
+We also stay as abstract as possible, for example on the [`AbstractManifold`](@ref) level if possible.
 
-With respect to the [dispatch on one argument at a time](https://docs.julialang.org/en/v1/manual/methods/#Dispatch-on-one-argument-at-a-time) paradigm, this layer dispatches the _manifold first_, but here we stay on an abstract type level.
 
-This layer ends usually in calling the same functions like `retract` but prefixed with a `_` to enter Layer II.
+If a function has optional positional arguments, (like [`retract`](@ref)) their default values might be filled/provided on this layer.
+This layer ends usually in calling the same functions like [`retract`](@ref) but prefixed with a `_` to enter [Layer II](@ref design-layer2).
 
 !!! note
-    Usually only functions from this layer are exported from the interface, since these are the ones one should use for generic implementations. If you implement your own manifold, `import` the necessary lower layer functions as needed.
+    Usually only functions from this layer are exported from the interface, since these are the ones one should use for generic implementations.
+    If you implement your own manifold, `import` the necessary lower layer functions as needed.
 
 ### [Layer II: An internal dispatch interface for parameters](@id design-layer2)
 
-This layer is an interim layer to dispatch on the (optional/default) parameters of a function.
+This layer is an interims layer to dispatch on the (optional/default) parameters of a function.
 For example the last parameter of retraction: [`retract`](@ref) determines the type (variant) to be used.
 The last function in the previous layer calls `_retract`, which is an internal function.
+These parameters are usually the last parameters of a function.
 
-On this layer, e.g. for `_retract` only these last parameters should be typed, the manifold should stay at the [`AbstractManifold`](@ref) level. It dispatches on different functions per existing parameter type (and might pass this one further on, if it has fields).
-
-Note that this layer is an internal one. It is automatically called for functions with parameters to dispatch on.
-
-It should only be extended when introducing new such parameter types, for example when introducing a new type of a retraction.
+On this layer, e.g. for `_retract` only these last parameters should be typed, the manifold should stay at the [`AbstractManifold`](@ref) level.
+The layer dispatches on different functions per existing parameter type (and might pass this one further on, if it has fields).
+Function definitions on this layer should only be extended when introducing new such parameter types, for example when introducing a new type of a retraction.
 
 The functions from this layer should never be called directly, are hence also not exported and carry the `_` prefix.
 They should only be called as the final step in the previous layer.
 
 If the default parameters are not dispatched per type, using `_` might be skipped.
+The same holds for functions that do not have these parameters.
 The following resolution might even be seen as a last step in layer I or the resolution here in layer II.
 
 ```julia
@@ -74,21 +79,22 @@ exp(M::AbstractManifold, p, X, t::Real) = exp(M, p, t * X)
 When there is no dispatch for different types of the optional parameter (here `t`), the `_` might be skipped.
 One could hence see the last code line as a definition on Layer I that passes directly to Layer III, since there are not parameter to dispatch on.
 
-To close this section, let‘s look at an example. The high level (or level I) definition of the retraction is given by
+To close this section, let‘s look at an example.
+The high level (or [Layer I](design-layer1)) definition of the retraction is given by
 
 ```julia
 retract(M::AbstractManifold, p, X, m::AbstractRetractionMethod=default_retraction_method(M)) = _retract(M, p, X, m)
 ```
 
-This level now dispatches on different retraction types. It usually passes to specific functions implemented in Layer III,
-here for example
+This level now dispatches on different retraction types `m`.
+It usually passes to specific functions implemented in [Layer III](@id design-layer3), here for example
 
 ```julia
 _retract(M::AbstractManifold, p, X, m::Exponentialretraction) = exp(M, p, X)
 _retract(M::AbstractManifold, p, X, m::PolarRetraction) = retract_polar(M, p, X)
 ```
 
-or the [`PolarRetraction`](@ref) which dispatches to [`retract_polar`](@ref).
+where the [`ExponentialRetration`](@ref) is resolved by again calling a function on [Layer I](@id design-layer1) (to fill futher default values if these exist). The [`PolarRetraction`](@ref) is dispatched to [`retract_polar`](@ref), a function on [Layer III](@id design-layer3).
 
 For further details and dispatches, see [retractions and inverse retractions](@ref sec-retractions) for an overview.
 
@@ -101,17 +107,18 @@ To summarize, with respect to the [dispatch on one argument at a time](https://d
 ### [Layer III: The base layer with focus on implementations](@id design-layer3)
 
 This lower level aims for the actual implementation of the function avoiding ambiguities.
-It should have as few as possible optional parameters and as concrete as possible types.
+It should have as few as possible optional parameters and as concrete as possible types for these.
+
 This means
 
-* the function name should be similar to its high level parent (for example `retract` and `retract_polar`  above)
+* the function name should be similar to its high level parent (for example [`retract`](@ref) and [`retract_polar`](@ref)  above)
 * The manifold type in method signature should always be as narrow as possible.
-* The points/vectors should either be untyped (for the default representation or if there is only one implementation) or provide all type bounds (for second representations or when using [`AbstractManifoldPoint`](@ref) and [`TVector`](@ref TVector)).
+* The points/vectors should either be untyped (for the default representation or if there is only one implementation) or provide all type bounds (for second representations or when using [`AbstractManifoldPoint`](@ref) and [`TVector`](@ref TVector), respectively).
 
 The first step that often happens on this level is memory allocation and calling the mutating function. If faster, it might also implement the function at hand itself.
 
 Usually functions from this layer are not exported, when they have an analogue on the first layer. For example the function [`retract_polar`](@ref)`(M, p, X)` is not exported, since when using the interface one would use the [`PolarRetraction`](@ref) or to be precise call [`retract`](@ref)`(M, p, X, PolarRetraction())`.
-When implementing your own manifold, you have to import functions like these anyways.
+When implementing your own manifold, you have to import functions like these anyway.
 
 To summarize, with respect to the [dispatch on one argument at a time](https://docs.julialang.org/en/v1/manual/methods/#Dispatch-on-one-argument-at-a-time) paradigm, this layer dispatches the _concrete manifold and point/vector types last_.
 
@@ -129,8 +136,12 @@ the resulting memory, such that the default implementation allocating functions,
     it might be useful to provide two distinct implementations, for example when using AD schemes.
     The default is meant for ease of use (concerning implementation), since then one has to just implement the mutating variants.
 
-Non-mutating functions in `ManifoldsBase.jl` are typically implemented using mutating variants.
-Allocation of new points is performed using a custom mechanism that relies on the following functions:
+Non-mutating functions in `ManifoldsBase.jl` are typically implemented using mutating variants after a suitable allocation of memory.
+
+Not that this allocation usually takes place only on [Layer III](@ref design-layer3) when dispatching on points.
+Both [Layer I](@ref design-layer1) and [Layer II](@ref design-layer1) are usually implemented for both variants in parallel.
+
+### Allocation of new points and vectors
 
 The [`allocate`](@ref) function behaves like `similar` for simple representations of points and vectors (for example `Array{Float64}`).
 For more complex types, such as nested representations of [`PowerManifold`](@ref) (see [`NestedPowerRepresentation`](@ref)), checked types like [`ValidationMPoint`](@ref) and more it operates differently.

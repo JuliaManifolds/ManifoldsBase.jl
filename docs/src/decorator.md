@@ -32,7 +32,7 @@ If you want to continue with the following traits afterwards, use `s = `[`next_t
 
 ## The Manifold decorator
 
-Then the following tyopes, functions and macros introduce the decorator trait to decorate a manifold
+Then the following types, functions and macros introduce the decorator trait to decorate a manifold
 
 ```@autodocs
 Modules = [ManifoldsBase]
