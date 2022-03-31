@@ -7,17 +7,19 @@ Several properties of a manifold are often implicitly assumed, for example the c
 When first implementing a manifold, it might be beneficial to dispatch certain computations to already existing manifolds.
 For an embedded manifold that is isometrically embedded this might be the [`inner`](@ref) the manifold inherits in each tangent space from its embedding.
 
-This means we dispatch the default implementation of a function to some other manifold.
+This means we would like to dispatch the default implementation of a function to some other manifold.
 We refer to this as implicit decoration, since one can not “see” explicitly that a certain manifold inherits this property.
-As a small example consider the [Sphere](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/sphere.html), which in every tangent space inherits its metric from the embedding. Since in the default implementation in [Manifolds.jl](https://juliamanifolds.github.io/Manifolds.jl/stable/) points are represented by unit vectors and tangent vectors as vectors orthogonal to a point, we can just dispatch the inner product to the embedding without having to re-implement this.
-The manifold using such an implicit dispatch just has to have [`AbstractDecoratorManifold`](@ref) as its super type.
+As an example consider the [Sphere](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/sphere.html), which in every tangent space inherits its metric from the embedding, the [Euclidean](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/euclidean.html) manifold the unit vectors of the sphere belong to.
+Since in the default implementation in [Manifolds.jl](https://juliamanifolds.github.io/Manifolds.jl/stable/) points are represented by unit vectors and tangent vectors as vectors orthogonal to a point, we can just dispatch the inner product to the embedding without having to re-implement this.
+The manifold using such an implicit dispatch just has to be a subtype of [`AbstractDecoratorManifold`](@ref).
 
 ## Traits with a inheritance hierarchy
 
 The properties mentioned above might form a hierarchy.
 For embedded manifolds, again, we might have just a manifold whose points are represented in some embedding.
-If the manifold is even isometrically embedded, it is embedded but also inherits the Riemannian metric (by restriction). But it also inherits the functions form the plain embedding.
-If it is even a submanifold, also further functions are inherited.
+If the manifold is even isometrically embedded, it is embedded but also inherits the Riemannian metric by restricting the metric from the embedding to the corresponding tangent space under consideration.
+But it also inherits the functions form the plain embedding, for example checking the validity of points and vectors.
+If it is even a submanifold, also further functions are inherited like the [`shortest_geodesic`](@ref).
 
 We use a variation of [Tim Holy's Traits Trick](https://github.com/JuliaLang/julia/issues/2345#issuecomment-54537633) (THTT) which takes into account this nestedness of traits
 
@@ -32,7 +34,7 @@ If you want to continue with the following traits afterwards, use `s = `[`next_t
 
 ## The Manifold decorator
 
-Then the following types, functions and macros introduce the decorator trait to decorate a manifold
+Based on the generic [`TraitList`](@ref ManifoldsBase.TraitList) the following types, functions, and macros introduce the decorator trait which allows to decorate an arbitrary `<: `[`AbstractDecoratorManifold`](@ref) with further features.
 
 ```@autodocs
 Modules = [ManifoldsBase]
