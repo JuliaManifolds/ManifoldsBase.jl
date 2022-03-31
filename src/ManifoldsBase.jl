@@ -30,14 +30,6 @@ include("exp_log_geo.jl")
 include("projections.jl")
 
 """
-    OutOfInjectivityRadiusError
-
-An error thrown when a function (for example [`log`](@ref)arithmic map or
-[`inverse_retract`](@ref)) is given arguments outside of its [`injectivity_radius`](@ref).
-"""
-struct OutOfInjectivityRadiusError <: Exception end
-
-"""
     allocate(a)
     allocate(a, dims::Integer...)
     allocate(a, dims::Tuple)
@@ -338,14 +330,14 @@ See also: [`EmbeddedManifold`](@ref), [`project!`](@ref project!(M::AbstractMani
 embed!(M::AbstractManifold, Y, p, X)
 
 @doc raw"""
+    injectivity_radius(M::AbstractManifold)
+
+Infimum of the injectivity radii `injectivity_radius(M,p)` of all points `p` on the [`AbstractManifold`](@ref).
+
     injectivity_radius(M::AbstractManifold, p)
 
 Return the distance $d$ such that [`exp(M, p, X)`](@ref exp(::AbstractManifold, ::Any, ::Any)) is
 injective for all tangent vectors shorter than $d$ (i.e. has an inverse).
-
-    injectivity_radius(M::AbstractManifold)
-
-Infimum of the injectivity radius of all manifold points.
 
     injectivity_radius(M::AbstractManifold[, x], method::AbstractRetractionMethod)
     injectivity_radius(M::AbstractManifold, x, method::AbstractRetractionMethod)

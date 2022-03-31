@@ -47,7 +47,7 @@ Private=false
 
 ### Internal functions
 
-While you should always add your documentation to functions from the last section, some of the functions dispatch onto functions on [the lower layer](@ref design-layer3). These are the ones
+While you should always add your documentation to functions from the last section, some of the functions dispatch onto functions on [layer III](@ref design-layer3). These are the ones
 you usually implement for your manifold – unless there is no lower level function called, like for the [`manifold_dimension`](@ref).
 
 ```@autodocs
@@ -60,8 +60,7 @@ Private=true
 
 ## Error Messages
 
-especially to collect and display errors on [`AbstractPowerManifold`](@ref ManifoldsBase.AbstractPowerManifold)s the following
-component and collection error messages are available.
+This interface introduces a small set of own error messages.
 
 ```@autodocs
 Modules = [ManifoldsBase]
