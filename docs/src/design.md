@@ -80,21 +80,21 @@ When there is no dispatch for different types of the optional parameter (here `t
 One could hence see the last code line as a definition on Layer I that passes directly to Layer III, since there are not parameter to dispatch on.
 
 To close this section, let‘s look at an example.
-The high level (or [Layer I](design-layer1)) definition of the retraction is given by
+The high level (or [Layer I](@ref design-layer1)) definition of the retraction is given by
 
 ```julia
 retract(M::AbstractManifold, p, X, m::AbstractRetractionMethod=default_retraction_method(M)) = _retract(M, p, X, m)
 ```
 
 This level now dispatches on different retraction types `m`.
-It usually passes to specific functions implemented in [Layer III](@id design-layer3), here for example
+It usually passes to specific functions implemented in [Layer III](@ref design-layer3), here for example
 
 ```julia
 _retract(M::AbstractManifold, p, X, m::Exponentialretraction) = exp(M, p, X)
 _retract(M::AbstractManifold, p, X, m::PolarRetraction) = retract_polar(M, p, X)
 ```
 
-where the [`ExponentialRetration`](@ref) is resolved by again calling a function on [Layer I](@id design-layer1) (to fill futher default values if these exist). The [`PolarRetraction`](@ref) is dispatched to [`retract_polar`](@ref), a function on [Layer III](@id design-layer3).
+where the [`ExponentialRetraction`](@ref) is resolved by again calling a function on [Layer I](@ref design-layer1) (to fill futher default values if these exist). The [`PolarRetraction`](@ref) is dispatched to [`retract_polar`](@ref), a function on [Layer III](@ref design-layer3).
 
 For further details and dispatches, see [retractions and inverse retractions](@ref sec-retractions) for an overview.
 
