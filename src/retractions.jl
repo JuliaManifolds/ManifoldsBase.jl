@@ -695,10 +695,11 @@ function retract_softmax! end
 Compute a retraction, a cheaper, approximate version of the [`exp`](@ref)onential map,
 from `p` into direction `X`, scaled by `t`, on the [`AbstractManifold`](@ref) `M`.
 
-A retraction ``\operatorname{retr}_p: T_p\mathcal M → \mathcal M`` is a smooth map that fulfills
+A retraction ``\operatorname{retr}_p: T_p\mathcal M → \mathcal M`` is a smooth map that fulfils
 
 1. ``\operatorname{retr}_p(0) = p``
-2. ``D\operatorname{retr}_p(0): T_p\mathcal M \to T_p\mathcal M`` is the identity map, i.e. ``D\operatorname{retr}_p(0)[X]=X``,
+2. ``D\operatorname{retr}_p(0): T_p\mathcal M \to T_p\mathcal M`` is the identity map,
+i.e. ``D\operatorname{retr}_p(0)[X]=X`` holds for all ``X\in T_p\mathcal M``,
 
 where ``D\operatorname{retr}_p`` denotes the differential of the retraction
 
@@ -764,7 +765,7 @@ end
     retract_polar(M::AbstractManifold, p, q)
 
 computes the allocating variant of the [`PolarRetraction`](@ref),
-which by default allocates and calls [`retract_polar!`](@ref).
+which by default allocates and calls [`retract_polar!`](@ref ManifoldsBase.retract_polar!).
 """
 function retract_polar(M::AbstractManifold, p, X)
     q = allocate_result(M, retract, p, X)
@@ -774,7 +775,7 @@ end
     retract_project(M::AbstractManifold, p, q)
 
 computes the allocating variant of the [`ProjectionRetraction`](@ref),
-which by default allocates and calls [`retract_project!`](@ref).
+which by default allocates and calls [`retract_project!`](@ref ManifoldsBase.retract_project!).
 """
 function retract_project(M::AbstractManifold, p, X)
     q = allocate_result(M, retract, p, X)
@@ -784,7 +785,7 @@ end
     retract_qr(M::AbstractManifold, p, q)
 
 computes the allocating variant of the [`QRRetraction`](@ref),
-which by default allocates and calls [`retract_qr!`](@ref).
+which by default allocates and calls [`retract_qr!`](@ref ManifoldsBase.retract_qr!).
 """
 function retract_qr(M::AbstractManifold, p, X)
     q = allocate_result(M, retract, p, X)
@@ -794,7 +795,7 @@ end
     retract_exp_ode(M::AbstractManifold, p, q, m, B)
 
 computes the allocating variant of the [`ODEExponentialRetraction`](@ref)`(m,B)`,
-which by default allocates and calls [`retract_exp_ode!`](@ref).
+which by default allocates and calls [`retract_exp_ode!`](@ref ManifoldsBase.retract_exp_ode!).
 """
 function retract_exp_ode(M::AbstractManifold, p, X, m, B)
     q = allocate_result(M, retract, p, X)
@@ -804,7 +805,7 @@ end
     retract_softmax(M::AbstractManifold, p, q)
 
 computes the allocating variant of the [`SoftmaxRetraction`](@ref),
-which by default allocates and calls [`retract_softmax!`](@ref).
+which by default allocates and calls [`retract_softmax!`](@ref ManifoldsBase.retract_softmax!).
 """
 function retract_softmax(M::AbstractManifold, p, X)
     q = allocate_result(M, retract, p, X)
@@ -815,7 +816,7 @@ end
     retract_caley(M::AbstractManifold, p, q)
 
 computes the allocating variant of the [`CayleyRetraction`](@ref),
-which by default allocates and calls [`retract_caley!`](@ref).
+which by default allocates and calls [`retract_caley!`](@ref ManifoldsBase.retract_caley!).
 """
 function retract_caley(M::AbstractManifold, p, X)
     q = allocate_result(M, retract, p, X)
@@ -825,7 +826,7 @@ end
     retract_pade(M::AbstractManifold, p, q)
 
 computes the allocating variant of the [`PadeRetraction`](@ref)`(n)`,
-which by default allocates and calls [`retract_pade!`](@ref).
+which by default allocates and calls [`retract_pade!`](@ref ManifoldsBase.retract_pade!).
 """
 function retract_pade(M::AbstractManifold, p, X, n)
     q = allocate_result(M, retract, p, X)
