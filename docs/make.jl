@@ -9,12 +9,12 @@ makedocs(
         "Home" => "index.md",
         "How to write a manifold" => "example.md",
         "Design principles" => "design.md",
-        "The manifold type" => "manifold_type.md",
-        "Functions on Maniolds" => [
+        "An abstract manifold" => "types.md",
+        "Functions on maniolds" => [
             "Basic functions" => "functions.md",
             "Projections" => "projections.md",
             "Retractions" => "retractions.md",
-            "Vector Transports" => "vector_transports.md",
+            "Vector transports" => "vector_transports.md",
         ],
         "Manifolds" => "manifolds.md",
         "Decorating/Extending a Manifold" => "decorator.md",

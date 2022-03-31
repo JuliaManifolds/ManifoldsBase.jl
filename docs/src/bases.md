@@ -1,4 +1,4 @@
-# Bases for tangent spaces
+# [Bases for tangent spaces](@id bases)
 
 The following functions and types provide support for bases of the tangent space of different manifolds.
 Moreover, bases of the cotangent space are also supported, though this description focuses on the tangent space.
@@ -23,11 +23,5 @@ The main functions are:
 ```@autodocs
 Modules = [ManifoldsBase]
 Pages = ["bases.jl"]
-Order = [:type, :function]
-```
-
-```@autodocs
-Modules = [ManifoldsBase]
-Pages = ["vector_spaces.jl"]
 Order = [:type, :function]
 ```
