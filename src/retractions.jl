@@ -438,9 +438,9 @@ function inverse_retract_nlsolve! end
 
 computes the mutating variant of the [`SoftmaxInverseRetraction`](@ref).
 """
-function inverse_retract_softmax!(M::AbstractManifold, X, p, q) end
+inverse_retract_softmax!(M::AbstractManifold, X, p, q)
 
-function retract_softmax! end
+function inverse_retract_softmax! end
 
 """
     inverse_retract(M::AbstractManifold, p, q)
@@ -717,6 +717,8 @@ function retract_qr! end
 computes the mutating variant of the [`SoftmaxRetraction`](@ref).
 """
 retract_softmax!(M::AbstractManifold, q, p, X)
+
+function retract_softmax! end
 
 @doc raw"""
     retract(M::AbstractManifold, p, X, method::AbstractRetractionMethod=default_retraction_method(M))
