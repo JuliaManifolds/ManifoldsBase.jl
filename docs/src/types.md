@@ -20,7 +20,7 @@ Usually one can just use any type. When a manifold has multiple representations,
 AbstractManifoldPoint
 ```
 
-## Tangent spaces
+## Tangent and Cotangent spaces
 
 ```@autodocs
 Modules = [ManifoldsBase]
@@ -28,7 +28,7 @@ Pages = ["vector_spaces.jl"]
 Order = [:type, :function]
 ```
 
-This interface also covers a large variety how to [model bases in tangent spaces](@ref bases)
+This interface also covers a large variety how to [model bases in tangent spaces](@ref bases).
 
 ## Macros for automatic forwards for simple points/tangent vectors
 
