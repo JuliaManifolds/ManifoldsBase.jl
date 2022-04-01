@@ -52,7 +52,7 @@ This is the implicit case, since the manifold type itself does not carry any inf
 
 The [`EmbeddedManifold`](@ref) itself is an [`AbstractDecoratorManifold`](@ref) so it is a case of the implicit embedding itself, but internally stores both the original manifold and the embedding.
 They are also parameters of the type.
-This way, additional embeddings can be modelled. That is, if the manifold is implemented using the implicit embedding approach from before but can also be implemented using a _different_ embedding, then this method should be chosen, since you can dispatch functions that you want to implement in this embedding then on the type which explicitly has the manifold and its embedding as parameters.
+This way, an additional embedding of one manifold in another can be modelled. That is, if the manifold is implemented using the implicit embedding approach from before but can also be implemented using a _different_ embedding, then this method should be chosen, since you can dispatch functions that you want to implement in this embedding then on the type which explicitly has the manifold and its embedding as parameters.
 
 Hence this case should be used for any further embedding after the first or if the default implementation works without an embedding and the alternative needs one.
 
