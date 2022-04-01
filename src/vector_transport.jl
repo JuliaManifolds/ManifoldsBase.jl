@@ -55,11 +55,6 @@ compute ``Y = \operatorname{retr}_p^{-1}q``.
 struct DifferentiatedRetractionVectorTransport{R<:AbstractRetractionMethod} <:
        AbstractLinearVectorTransportMethod
     retraction::R
-    function DifferentiatedRetractionVectorTransport(
-        r::R,
-    ) where {R<:AbstractRetractionMethod}
-        return new{R}(r)
-    end
 end
 
 @doc raw"""
