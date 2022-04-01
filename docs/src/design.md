@@ -9,9 +9,9 @@ The main design criteria for the interface are:
 * Provide a high level interface that is easy to use.
 
 Therefore this interface has 3 main features, that we will explain using two (related)
-concepts, the [exponential map](https://en.wikipedia.org/wiki/Exponential_map_(Riemannian_geometry)) that maps a tangent vector ``X`` at a point ``p`` to a point ``q`` or mathematically ``\exp_p:T_p\mathcal M \to \mathcal M`` and its generalization, a [`retract`](@ref)ion ``\operatorname{retr}_p`` with same domain and range.
+concepts, the [exponential map](https://en.wikipedia.org/wiki/Exponential_map_(Riemannian_geometry)) that maps a tangent vector ``X`` at a point ``p`` to a point ``q`` or mathematically ``\exp_p:T_p\mathcal M \to \mathcal M`` and its generalization, a [`retract`](@ref)ion ``\operatorname{retr}_p`` with the same domain and range.
 
-You do not need to know their exact definition at this point, just that there is _one_ exponential map on a Riemannian manifold, and several retractions, where one of them is the exponential map (sometime called exponential retraction for completeness). Every retraction has its own subtype of the [`AbstractRetractionMethod`](@ref) that uniquely defines it.
+You do not need to know their exact definition at this point, just that there is _one_ exponential map on a Riemannian manifold, and several retractions, where one of them is the exponential map (called [`ExponentialRetraction`](@ref) for completeness). Every retraction has its own subtype of the [`AbstractRetractionMethod`](@ref) that uniquely defines it.
 
 The following three design patterns aim to fulfil the criteria from above, while
 also avoiding ambiguities in multiple dispatch using the [dispatch on one argument at a time](https://docs.julialang.org/en/v1/manual/methods/#Dispatch-on-one-argument-at-a-time) approach.
@@ -34,7 +34,7 @@ It also provides a good structure where to implement extensions to this interfac
 
 ### [Layer I: The high level interface and ease of use](@id design-layer1)
 
-THe highest layer for convenience of decorators.
+The highest layer for convenience of decorators.
 A usual scheme is, that a manifold might assume several things implicitly, for example the default implementation of the sphere $\mathbb S^n$ using unit vectors in $\mathbb R^{n+1}$.
 The embedding can be explicitly used to avoid re-implementations – the inner product can be “passed on” to its embedding.
 

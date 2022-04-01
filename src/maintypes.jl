@@ -1,5 +1,5 @@
 """
-    AbstractManifold{𝔽 <: AbstractNummbers}
+    AbstractManifold{𝔽}
 
 A type to represent a (Riemannian) manifold.
 The [`AbstractManifold`](@ref) is a central type of this interface.

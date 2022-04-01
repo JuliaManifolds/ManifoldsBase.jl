@@ -126,7 +126,7 @@ nothing #hide
 ```
 
 Similarly, we can verify, whether a tangent vector `X` is valid.
-It's size is again already checked using [`check_size`](@ref ManifoldsBase.check_size),
+Its size is again already checked using [`check_size`](@ref ManifoldsBase.check_size),
 so the only remaining property to verify is, that `X` is orthogonal to `p`.
 We can again use the `kwargs`.
 
@@ -208,7 +208,8 @@ The same manifold with a little smaller feature set is available in `ManifoldsBa
 
 ```@example manifold-tutorial
 using ManifoldsBase: DefaultManifold, IsIsometricEmbeddedManifold
-import ManifoldsBase: active_traits, merge_traits, get_embedding
+import ManifoldsBase: active_traits, get_embedding
+using ManifoldsBase: merge_traits
 ```
 
 Now we can activate a decorator by specifying that the sphere has the [`IsIsometricEmbeddedManifold`](@ref) trait for the functions `f` on our scaled sphere manifold by writing
@@ -237,13 +238,13 @@ inner(S, p, X, Y)
 
 ## [Conclusion](@id manifold-tutorial-outlook)
 
-You can now just continue implementing further functions from `ManifoldsBase.jl`.
+You can now just continue implementing further functions from `ManifoldsBase.jl`
 but with just [`exp!`](@ref exp!(M::AbstractManifold, q, p, X)) you for example already have
 
 * [`geodesic`](@ref geodesic(M::AbstractManifold, p, X)) the (not necessarily shortest) geodesic emanating from `p` in direction `X`.
 * the [`ExponentialRetraction`](@ref), that the [`retract`](@ref retract(M::AbstractManifold, p, X)) function uses by default.
 
-For the [`shortest_geodesic`](@ref shortest_geodesic(M::AbstractManifold, p, q)) the implementation of a logarithm [`log`](@ref ManifoldsBase.log(M::AbstractManifold, p, q)), again better a [`log!`](@ref log!(M::AbstractManifold, X, p, q)) is necessary.
+For the [`shortest_geodesic`](@ref shortest_geodesic(M::AbstractManifold, p, q)) the implementation of a logarithm [`log`](@ref ManifoldsBase.log(M::AbstractManifold, p, q)), or just [`log!`](@ref log!(M::AbstractManifold, X, p, q)) is sufficient.
 
 Sometimes a default implementation is provided; for example if you implemented [`inner`](@ref inner(M::AbstractManifold, p, X, Y)), the [`norm`](@ref norm(M, p, X)) is defined. You should overwrite it, if you can provide a more efficient version. For a start the default should suffice.
 With [`log!`](@ref log!(M::AbstractManifold, X, p, q)) and [`inner`](@ref inner(M::AbstractManifold, p, X, Y)) you get the [`distance`](@ref distance(M::AbstractManifold, p, q)), and so.

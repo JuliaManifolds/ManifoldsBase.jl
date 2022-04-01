@@ -7,7 +7,7 @@ makedocs(
     sitename = "ManifoldsBase.jl",
     pages = [
         "Home" => "index.md",
-        "How to write a manifold" => "example.md",
+        "How to define a manifold" => "example.md",
         "Design principles" => "design.md",
         "An abstract manifold" => "types.md",
         "Functions on maniolds" => [
