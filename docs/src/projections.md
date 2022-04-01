@@ -21,7 +21,7 @@ And this resulting ``q`` we call the projection of ``p`` onto the manifold ``\ma
 
 The second projection we can look at is for a given a point ``p∈\mathcal M`` and a vector in ``X\in T_{i(p)}\mathcal N`` in the embedding,
 where we can similarly look for the closest tangent vector ``Y∈ T_p\mathcal M``, which we have to embed itself before itself.
-Embedding a tangent vector is the same as using the pushforward ``\mathrm{d}i_p`` of the embedding (at ``p``).
+Embedding a tangent vector is usually the same as using the pushforward ``\mathrm{d}i_p`` of the embedding (at ``p``).
 We obtain
 
 ```math
