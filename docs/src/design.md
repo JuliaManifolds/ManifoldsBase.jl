@@ -124,7 +124,7 @@ To summarize, with respect to the [dispatch on one argument at a time](https://d
 
 ## [Mutating and allocating functions](@id mutating-and-nonmutating)
 
-Every function, where this is applicable should provide a mutating and an allocating variant.
+Every function, where this is applicable, should provide a mutating and an allocating variant.
 For example for the exponential map `exp(M, p, X)` returns a _new_ point `q` where the result is computed in.
 On the other hand `exp!(M, q, p, X)` computes the result in place of `q`, where the design of the implementation
 should keep in mind that also `exp!(M, p, p, X)` should correctly overwrite `p`.
@@ -133,7 +133,7 @@ The interface provides a way to determine the allocation type and a result to co
 the resulting memory, such that the default implementation allocating functions, like [`exp`](@ref) is to allocate the resulting memory and call [`exp!`](@ref).
 
 !!! note
-    it might be useful to provide two distinct implementations, for example when using AD schemes.
+    It might be useful to provide two distinct implementations, for example when using AD schemes.
     The default is meant for ease of use (concerning implementation), since then one has to just implement the mutating variants.
 
 Non-mutating functions in `ManifoldsBase.jl` are typically implemented using mutating variants after a suitable allocation of memory.

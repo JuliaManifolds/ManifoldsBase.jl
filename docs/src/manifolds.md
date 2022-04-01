@@ -5,7 +5,7 @@ helpers to build or create manifolds based on existing manifolds
 
 ## [(Abstract) power manifold](@id sec-power-manifold)
 
-A power manifold is constructed like higher dimensional vector spaces are formed from the real line, just that for every point ``p = (p_1,\ldots,p_n) ∈ \mathcal M^n`` on the power manifold ``\mathcal M^n`` the entries of ``p`` are points ``p_1,\ldots,p_n ∈ \mathcal M`` on some manifold ``\mathcal M``. Note that ``n`` can also be replaced by multiple values, such that ``p`` is not a vector but a matrix or tensor of points.
+A power manifold is constructed like higher dimensional vector spaces are formed from the real line, just that for every point ``p = (p_1,\ldots,p_n) ∈ \mathcal M^n`` on the power manifold ``\mathcal M^n`` the entries of ``p`` are points ``p_1,\ldots,p_n ∈ \mathcal M`` on some manifold ``\mathcal M``. Note that ``n`` can also be replaced by multiple values, such that ``p`` is not a vector but a matrix or a multi-index array of points.
 
 ```@autodocs
 Modules = [ManifoldsBase]
@@ -37,15 +37,15 @@ ManifoldsBase.DefaultManifold
 
 ## [Embedded manifold](@id sec-embedded-manifold)
 
-The embedded manifold is a manifold ``mathcal N`` which is modelled _explicitly_ mentioning its embedding ``\mathcal N`` in which the points and tangent vectors are represented.
+The embedded manifold is a manifold ``\mathcal M`` which is modelled _explicitly_ specifying its embedding ``\mathcal N`` in which the points and tangent vectors are represented.
 Most prominently [`is_point`](@ref) and [`is_vector`](@ref) of an embedded manifold are implemented to check whether the point is a valid point in the embedding. This can of course still be extended by further tests.
 `ManifoldsBase.jl` provides two possibilities of easily introducing this in order to dispatch some functions to the embedding.
 
 ### [Implicit case: the `IsEmbeddedManifold` Trait](@id subsec-implicit-embedded)
 
-For the implicti case, your manifold has to be a subtype of the [`AbstractDecoratorManifold`](@ref).
-Setting the [`active_traits`](@ref ManifoldsBase.active_traits) function to the [`AbstractTrait`](@ref)
-[`IsEmbeddedManifold`](@ref), makes a manifold an embedded manifold. you just have to also define [`get_embedding`](@ref) such that functions are passed on to that embedding.
+For the implicit case, your manifold has to be a subtype of the [`AbstractDecoratorManifold`](@ref).
+Adding a method to the [`active_traits`](@ref ManifoldsBase.active_traits) function for a manifold that returns an [`AbstractTrait`](@ref)
+[`IsEmbeddedManifold`](@ref), makes that manifold an embedded manifold. You just have to also define [`get_embedding`](@ref) so that appropriate functions are passed on to that embedding.
 This is the implicit case, since the manifold type itself does not carry any information about the embedding, just the trait and the function definition do.
 
 ### [Explicit case: the `EmbeddedManifold`](@id subsec-explicit-embedded)

@@ -2,8 +2,8 @@
 
 `ManifoldsBase.jl` is a lightweight interface for manifolds.
 
-This packages has two main purposes:
-You add it as a dependency if you plan to work on manifolds (generically) or if you plan to
+This packages has two main purposes.
+You can add it as a dependency if you plan to work on manifolds (generically) or if you plan to
 define own manifolds in a package.
 For a package that (only) depends on `ManifoldsBase.jl`, see [Manopt.jl](https://manoptjl.org/stable/),
 which implements optimization algorithms on manifolds using this interface.

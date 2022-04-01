@@ -21,7 +21,7 @@ And this resulting ``q`` we call the projection of ``p`` onto the manifold ``\ma
 
 The second projection we can look at is for a given a point ``p∈\mathcal M`` and a vector in ``X\in T_{i(p)}\mathcal N`` in the embedding,
 where we can similarly look for the closest tangent vector ``Y∈ T_p\mathcal M``, which we have to embed itself before itself.
-Embedding a tangent vector is the same as using the push forward ``\mathrm{d}i_p`` of the embedding (at ``p``).
+Embedding a tangent vector is the same as using the pushforward ``\mathrm{d}i_p`` of the embedding (at ``p``).
 We obtain
 
 ```math
@@ -30,7 +30,7 @@ We obtain
 
 And we call the resulting ``Y`` the projection of ``X`` onto the tangent space ``T_p\mathcal M`` at ``p``.
 
-Let‘s look at the little more concrete example of the complex Circle again.
+Let‘s look at the little more concrete example of the complex circle again.
 Here, the closest point of ``p ∈ ℂ`` is just the projection onto the circle, or in other words ``q = \frac{p}{\lvert p \rvert}``, as long as ``p\neq 0``. For ``p=0`` the projection is not defined.
 A tangent space ``T_p\mathcal C`` in the embedding is the line through the origin that is orthogonal to a point ``p∈\mathcal C``.
 This can be better visualized by looking at ``p+T_p\mathcal C`` which is actually the line tangent to ``p`` on the unit circle.

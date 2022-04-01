@@ -6,7 +6,7 @@ CurrentModule = ManifoldsBase
 
 ## Introduction
 
-This tutorial explains, how to implement a manifold using the `ManifoldsBase.jl` interface.
+This tutorial explains how to implement a manifold using the `ManifoldsBase.jl` interface.
 We assume that you are familiar with the basic terminology on Riemannian manifolds, especially
 the dimension of a manifold, the exponential map, and the inner product on tangent spaces.
 To read more about this you can for example check [^doCarmo1992], Chapter 3, first.
