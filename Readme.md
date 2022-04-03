@@ -2,7 +2,7 @@
     <img src="https://github.com/JuliaManifolds/ManifoldsBase.jl/blob/master/docs/src/assets/logo-text-readme.png" alt="ManifoldsBase.jl Logo with text" width="701">
 </div>
 
-[![](https://img.shields.io/badge/docs-stable-blue.svg)]https://juliamanifolds.github.io/ManifoldsBase.jl/stable/)
+[![](https://img.shields.io/badge/docs-stable-blue.svg)](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/)
 [![](https://img.shields.io/badge/docs-dev-blue.svg)](https://juliamanifolds.github.io/ManifoldsBase.jl/latest/)
 [![Build Status](https://travis-ci.org/JuliaManifolds/ManifoldsBase.jl.svg?branch=master)](https://travis-ci.org/JuliaManifolds/ManifoldsBase.jl/)
 [![codecov.io](http://codecov.io/github/JuliaManifolds/ManifoldsBase.jl/coverage.svg?branch=master)](https://codecov.io/gh/JuliaManifolds/ManifoldsBase.jl/)
