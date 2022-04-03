@@ -31,6 +31,10 @@ end
     y2 = exp(A, x, v2)
     w = log(M, x, z)
     w2 = log(A, x, z; atol = 10^(-15))
+    @testset "Checks forward" begin
+        @test ManifoldsBase.check_size(A, x2, v2) === ManifoldsBase.check_size(M, x, v)
+        @test ManifoldsBase.check_size(A, x2) === ManifoldsBase.check_size(M, x)
+    end
     @testset "Types and Conversion" begin
         @test convert(typeof(M), A) == M
         @test convert(typeof(A), M) == A
@@ -104,28 +108,25 @@ end
         @test isapprox(A, zero_vector(A, x), zero_vector(M, x))
         vector_transport_to!(A, v2s, x2, v2, y2)
         @test isapprox(A, x2, v2, v2s)
-        vector_transport_to!(A, v2s, x2, v2, y2, ManifoldsBase.SchildsLadderTransport())
+        @test isapprox(A, x2, v2, vector_transport_to(A, x2, v2, y2))
+        slt = ManifoldsBase.SchildsLadderTransport()
+        vector_transport_to!(A, v2s, x2, v2, y2, slt)
         @test isapprox(A, x2, v2, v2s)
-        vector_transport_to!(A, v2s, x2, v2, y, ManifoldsBase.PoleLadderTransport())
+        @test isapprox(A, x2, v2, vector_transport_to(A, x2, v2, y2, slt))
+        plt = ManifoldsBase.PoleLadderTransport()
+        vector_transport_to!(A, v2s, x2, v2, y, plt)
+        @test isapprox(A, x2, v2, vector_transport_to(A, x2, v2, y2, plt))
         @test isapprox(A, x2, v2, v2s)
-        vector_transport_to!(A, v2s, x2, v2, y2, ManifoldsBase.ProjectionTransport())
+        pt = ManifoldsBase.ProjectionTransport()
+        vector_transport_to!(A, v2s, x2, v2, y2, pt)
         @test isapprox(A, x2, v2, v2s)
+        @test isapprox(A, x2, v2, vector_transport_to(A, x2, v2, y2, pt))
         zero_vector!(A, v2s, x)
         @test isapprox(A, x, v2s, zero_vector(M, x))
-        c = [x2]
+        c2 = [x2]
         v3 = similar(v2)
-        @test isapprox(
-            A,
-            x2,
-            v2,
-            vector_transport_along!(A, v3, x2, v2, c, ParallelTransport()),
-        )
-        @test isapprox(
-            A,
-            x2,
-            v2,
-            vector_transport_along(A, x2, v2, c, ManifoldsBase.ProjectionTransport()),
-        )
+        @test isapprox(A, x2, v2, vector_transport_along!(A, v3, x2, v2, c2))
+        @test isapprox(A, x2, v2, vector_transport_along(A, x2, v2, c2))
         @test injectivity_radius(A) == Inf
         @test injectivity_radius(A, x) == Inf
         @test injectivity_radius(A, ManifoldsBase.ExponentialRetraction()) == Inf

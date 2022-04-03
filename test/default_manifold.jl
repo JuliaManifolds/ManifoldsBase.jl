@@ -1,6 +1,7 @@
 using ManifoldsBase
 using ManifoldsBase:
     @manifold_element_forwards, @manifold_vector_forwards, @default_manifold_fallbacks
+using ManifoldsBase: DefaultManifold
 import ManifoldsBase:
     number_eltype,
     check_point,
@@ -10,6 +11,7 @@ import ManifoldsBase:
     inner,
     isapprox,
     log!,
+    parallel_transport_to!,
     retract!,
     inverse_retract!
 import Base: angle, convert
@@ -24,58 +26,67 @@ struct CustomDefinedRetraction <: ManifoldsBase.AbstractRetractionMethod end
 struct CustomUndefinedRetraction <: ManifoldsBase.AbstractRetractionMethod end
 struct CustomDefinedInverseRetraction <: ManifoldsBase.AbstractInverseRetractionMethod end
 
-function ManifoldsBase.injectivity_radius(
-    ::ManifoldsBase.DefaultManifold,
-    ::CustomDefinedRetraction,
-)
-    return 10.0
-end
-function ManifoldsBase.retract!(
-    ::ManifoldsBase.DefaultManifold,
-    q,
-    p,
-    X,
-    ::CustomDefinedRetraction,
-)
-    return (q .= p .+ X)
-end
-function ManifoldsBase.inverse_retract!(
-    ::ManifoldsBase.DefaultManifold,
-    X,
-    p,
-    q,
-    ::CustomDefinedInverseRetraction,
-)
-    return (X .= q .- p)
-end
-
-
-struct MatrixVectorTransport{T} <: AbstractVector{T}
-    m::Matrix{T}
-end
-
-Base.getindex(x::MatrixVectorTransport, i) = x.m[:, i]
-
-Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
-
 struct DefaultPoint{T} <: AbstractManifoldPoint
     value::T
 end
 DefaultPoint(v::T) where {T} = DefaultPoint{T}(v)
 convert(::Type{DefaultPoint{T}}, v::T) where {T} = DefaultPoint(v)
-
+Base.size(p::DefaultPoint) = size(p.value)
 Base.eltype(v::DefaultPoint) = eltype(v.value)
 
 struct DefaultTVector{T} <: TVector
     value::T
 end
 DefaultTVector(v::T) where {T} = DefaultTVector{T}(v)
-
-Base.eltype(v::DefaultTVector) = eltype(v.value)
+Base.size(X::DefaultTVector) = size(X.value)
+Base.eltype(X::DefaultTVector) = eltype(X.value)
 
 ManifoldsBase.@manifold_element_forwards DefaultPoint value
 ManifoldsBase.@manifold_vector_forwards DefaultTVector value
 ManifoldsBase.@default_manifold_fallbacks ManifoldsBase.DefaultManifold DefaultPoint DefaultTVector value value
+
+function ManifoldsBase._injectivity_radius(::DefaultManifold, ::CustomDefinedRetraction)
+    return 10.0
+end
+function ManifoldsBase._retract(M::DefaultManifold, p, X, ::CustomDefinedRetraction)
+    return retract_custom(M, p, X)
+end
+function retract_custom(::DefaultManifold, p::DefaultPoint, X::DefaultTVector)
+    return DefaultPoint(p.value + X.value)
+end
+function ManifoldsBase._inverse_retract(
+    M::DefaultManifold,
+    p,
+    q,
+    ::CustomDefinedInverseRetraction,
+)
+    return inverse_retract_custom(M, p, q)
+end
+function inverse_retract_custom(::DefaultManifold, p::DefaultPoint, q::DefaultPoint)
+    return DefaultTVector(q.value - p.value)
+end
+struct MatrixVectorTransport{T} <: AbstractVector{T}
+    m::Matrix{T}
+end
+# dummy retractions, inverse retracions for fallback tests - mutating should be enough
+ManifoldsBase.retract_polar!(::DefaultManifold, q, p, X) = (q .= p .+ X)
+ManifoldsBase.retract_project!(::DefaultManifold, q, p, X) = (q .= p .+ X)
+ManifoldsBase.retract_qr!(::DefaultManifold, q, p, X) = (q .= p .+ X)
+ManifoldsBase.retract_exp_ode!(::DefaultManifold, q, p, X, m, B) = (q .= p .+ X)
+ManifoldsBase.retract_pade!(::DefaultManifold, q, p, X, i) = (q .= p .+ X)
+ManifoldsBase.retract_softmax!(::DefaultManifold, q, p, X) = (q .= p .+ X)
+ManifoldsBase.get_embedding(M::DefaultManifold) = M # dummy embedding
+ManifoldsBase.inverse_retract_polar!(::DefaultManifold, Y, p, q) = (Y .= q .- p)
+ManifoldsBase.inverse_retract_project!(::DefaultManifold, Y, p, q) = (Y .= q .- p)
+ManifoldsBase.inverse_retract_qr!(::DefaultManifold, Y, p, q) = (Y .= q .- p)
+ManifoldsBase.inverse_retract_softmax!(::DefaultManifold, Y, p, q) = (Y .= q .- p)
+ManifoldsBase.inverse_retract_nlsolve!(::DefaultManifold, Y, p, q, m) = (Y .= q .- p)
+ManifoldsBase.vector_transport_along_project!(::DefaultManifold, Y, p, X, c) = (Y .= X)
+
+
+Base.getindex(x::MatrixVectorTransport, i) = x.m[:, i]
+
+Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
 
 @testset "Testing Default (Euclidean)" begin
     M = ManifoldsBase.DefaultManifold(3)
@@ -99,8 +110,12 @@ ManifoldsBase.@default_manifold_fallbacks ManifoldsBase.DefaultManifold DefaultP
     @test number_system(M) == ManifoldsBase.ℝ
     @test ManifoldsBase.representation_size(M) == (3,)
 
+    p = zeros(3)
+    m = PolarRetraction()
     @test injectivity_radius(M) == Inf
-
+    @test injectivity_radius(M, p) == Inf
+    @test injectivity_radius(M, m) == Inf
+    @test injectivity_radius(M, p, m) == Inf
     @test default_retraction_method(M) == ExponentialRetraction()
     @test default_inverse_retraction_method(M) == LogarithmicInverseRetraction()
 
@@ -119,8 +134,6 @@ ManifoldsBase.@default_manifold_fallbacks ManifoldsBase.DefaultManifold DefaultP
             @test injectivity_radius(M, rm) == Inf
             @test injectivity_radius(M, rm2) == 10
             @test injectivity_radius(M, pts[1], rm2) == 10
-            @test_throws ErrorException injectivity_radius(M, rm3)
-            @test_throws ErrorException injectivity_radius(M, pts[1], rm3)
 
             tv1 = log(M, pts[1], pts[2])
 
@@ -261,18 +274,16 @@ ManifoldsBase.@default_manifold_fallbacks ManifoldsBase.DefaultManifold DefaultP
             end
 
             @testset "vector transport" begin
-                # test constructor and alias
+                # test constructor
                 @test default_vector_transport_method(M) == ParallelTransport()
-                @test DifferentiatedRetractionVectorTransport(ExponentialRetraction()) ==
-                      ParallelTransport()
                 v1 = log(M, pts[1], pts[2])
                 v2 = log(M, pts[1], pts[3])
                 v1t1 = vector_transport_to(M, pts[1], v1, pts[3])
                 v1t2 = zero(v1t1)
                 vector_transport_to!(M, v1t2, pts[1], v1, v2, ProjectionTransport())
                 v1t3 = vector_transport_direction(M, pts[1], v1, v2)
-                @test is_vector(M, pts[3], v1t1)
-                @test is_vector(M, pts[3], v1t3)
+                @test ManifoldsBase.is_vector(M, pts[3], v1t1)
+                @test ManifoldsBase.is_vector(M, pts[3], v1t3)
                 @test isapprox(M, pts[3], v1t1, v1t3)
                 # along a `Vector` of points
                 c = [pts[1]]
@@ -281,6 +292,11 @@ ManifoldsBase.@default_manifold_fallbacks ManifoldsBase.DefaultManifold DefaultP
                 v1t5 = allocate(v1)
                 vector_transport_along!(M, v1t5, pts[1], v1, c)
                 @test isapprox(M, pts[1], v1, v1t5)
+                # transport along more than one interims point
+                @test vector_transport_along(M, pts[1], v1, pts[2:3]) == v1
+                v1t6 = allocate(v1)
+                vector_transport_along!(M, v1t6, pts[1], v1, pts[2:3])
+                @test isapprox(M, pts[1], v1, v1t6)
                 # along a custom type of points
                 if T <: DefaultPoint
                     S = eltype(pts[1].value)
@@ -373,8 +389,9 @@ ManifoldsBase.@default_manifold_fallbacks ManifoldsBase.DefaultManifold DefaultP
     end
 
     @testset "Retraction" begin
-        a = NLsolveInverseRetraction(ExponentialRetraction())
+        a = NLSolveInverseRetraction(ExponentialRetraction())
         @test a.retraction isa ExponentialRetraction
+
     end
 
     @testset "copy of points and vectors" begin
@@ -407,17 +424,127 @@ ManifoldsBase.@default_manifold_fallbacks ManifoldsBase.DefaultManifold DefaultP
         Y = DefaultTVector([1.0, 0.0, 0.0])
         @test angle(M, p, X, Y) ≈ π / 2
         @test inverse_retract(M, p, q, LogarithmicInverseRetraction()) == -Y
+        @test retract(M, q, Y, CustomDefinedRetraction()) == p
         @test retract(M, q, Y, ExponentialRetraction()) == p
+        # rest not implemented - so they also fall back even onto mutating
+        Z = similar(Y)
+        r = similar(p)
+        # test passthrough using the dummy implementations
+        for retr in [PolarRetraction, ProjectionRetraction, QRRetraction, SoftmaxRetraction]
+            @test retract(M, q, Y, retr()) == DefaultPoint(q.value + Y.value)
+            @test retract!(M, r, q, Y, retr()) == DefaultPoint(q.value + Y.value)
+        end
+        @test retract(
+            M,
+            q,
+            Y,
+            ODEExponentialRetraction(PolarRetraction(), DefaultBasis()),
+        ) == DefaultPoint(q.value + Y.value)
+        @test retract!(
+            M,
+            r,
+            q,
+            Y,
+            ODEExponentialRetraction(PolarRetraction(), DefaultBasis()),
+        ) == DefaultPoint(q.value + Y.value)
+        @test retract(M, q, Y, PadeRetraction(2)) == DefaultPoint(q.value + Y.value)
+        @test retract!(M, r, q, Y, PadeRetraction(2)) == DefaultPoint(q.value + Y.value)
+        @test retract!(M, r, q, Y, EmbeddedRetraction(ExponentialRetraction())) ==
+              DefaultPoint(q.value + Y.value)
+        @test retract(M, q, Y, EmbeddedRetraction(ExponentialRetraction())) ==
+              DefaultPoint(q.value + Y.value)
         p2 = allocate(p, eltype(p.value), size(p.value))
         @test size(p2.value) == size(p.value)
         X2 = allocate(X, eltype(X.value), size(X.value))
         @test size(X2.value) == size(X.value)
-        # Dispatch on custom - dispatch not working, check for new scheme later.
-        @test_broken inverse_retract(M, p, q, CustomDefinedInverseRetraction()) == -Y
-        @test_broken retract(M, q, Y, CustomDefinedRetraction()) == p
+        X3 = ManifoldsBase.allocate_result(M, log, p, q)
+        @test log!(M, X3, p, q) == log(M, p, q)
+        @test X3 == log(M, p, q)
+        @test log!(M, X3, p, q) == log(M, p, q)
+        @test X3 == log(M, p, q)
+        @test inverse_retract(M, p, q, CustomDefinedInverseRetraction()) == -Y
+        X4 = ManifoldsBase.allocate_result(M, inverse_retract, p, q)
+        @test inverse_retract!(M, X4, p, q) == inverse_retract(M, p, q)
+        @test X4 == inverse_retract(M, p, q)
+        # rest not implemented but check passthrough
+        for r in [
+            PolarInverseRetraction,
+            ProjectionInverseRetraction,
+            QRInverseRetraction,
+            SoftmaxInverseRetraction,
+        ]
+            @test inverse_retract(M, q, p, r()) == DefaultTVector(p.value - q.value)
+            @test inverse_retract!(M, Z, q, p, r()) == DefaultTVector(p.value - q.value)
+        end
+        @test inverse_retract(
+            M,
+            q,
+            p,
+            EmbeddedInverseRetraction(LogarithmicInverseRetraction()),
+        ) == DefaultTVector(p.value - q.value)
+        @test inverse_retract(M, q, p, NLSolveInverseRetraction(ExponentialRetraction())) ==
+              DefaultTVector(p.value - q.value)
+        @test inverse_retract!(
+            M,
+            Z,
+            q,
+            p,
+            EmbeddedInverseRetraction(LogarithmicInverseRetraction()),
+        ) == DefaultTVector(p.value - q.value)
+        @test inverse_retract!(
+            M,
+            Z,
+            q,
+            p,
+            NLSolveInverseRetraction(ExponentialRetraction()),
+        ) == DefaultTVector(p.value - q.value)
+        c = ManifoldsBase.allocate_coordinates(M, p, Float64, manifold_dimension(M))
+        @test c isa Vector
+        @test length(c) == 3
         @test 2.0 \ X == DefaultTVector(2.0 \ X.value)
         @test X + Y == DefaultTVector(X.value + Y.value)
         @test +X == X
         @test (Y .= X) === Y
+        # vector transport pass through
+        @test vector_transport_to(M, p, X, q, ProjectionTransport()) == X
+        @test vector_transport_direction(M, p, X, X, ProjectionTransport()) == X
+        @test vector_transport_to!(M, Y, p, X, q, ProjectionTransport()) == X
+        @test vector_transport_direction!(M, Y, p, X, X, ProjectionTransport()) == X
+        @test vector_transport_along(M, p, X, X, ProjectionTransport()) == X
+        @test vector_transport_along!(M, Z, p, X, X, ProjectionTransport()) == X
+        @test vector_transport_to(M, p, X, :q, ProjectionTransport()) == X
+        @test parallel_transport_to(M, p, X, q) == X
+        @test parallel_transport_direction(M, p, X, X) == X
+        @test parallel_transport_along(M, p, X, :c) == X
+        @test parallel_transport_to!(M, Y, p, X, q) == X
+        @test parallel_transport_direction!(M, Y, p, X, X) == X
+        @test parallel_transport_along!(M, Y, p, X, :c) == X
+    end
+    @testset "DefaultManifold  and ONB" begin
+        M = ManifoldsBase.DefaultManifold(3)
+        p = [1.0, 0.0, 0.0]
+        CB = get_basis(M, p, DefaultOrthonormalBasis())
+        @test CB.data == [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
+    end
+    @testset "Show methods" begin
+        @test repr(CayleyRetraction()) == "CayleyRetraction()"
+        @test repr(PadeRetraction(2)) == "PadeRetraction(2)"
+    end
+    @testset "Further TestArrayRepresentation" begin
+        M = ManifoldsBase.DefaultManifold(3)
+        p = [1.0, 0.0, 0.0]
+        X = [1.0, 0.0, 0.0]
+        @test is_point(M, p, true)
+        @test is_vector(M, p, X, true)
+        pF = [1.0, 0.0]
+        XF = [0.0, 0.0]
+        m = ExponentialRetraction()
+        @test_throws DomainError is_point(M, pF, true)
+        @test_throws DomainError is_vector(M, p, XF, true)
+        @test_throws DomainError is_vector(M, pF, XF, true; check_point = true)
+        @test injectivity_radius(M) == Inf
+        @test injectivity_radius(M, p) == Inf
+        @test injectivity_radius(M, p, m) == Inf
+        @test injectivity_radius(M, m) == Inf
     end
 end

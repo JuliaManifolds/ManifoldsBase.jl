@@ -23,18 +23,11 @@ import Markdown: @doc_str
 using LinearAlgebra
 
 include("maintypes.jl")
+include("numbers.jl")
+include("bases.jl")
 include("retractions.jl")
 include("exp_log_geo.jl")
 include("projections.jl")
-
-
-"""
-    OutOfInjectivityRadiusError
-
-An error thrown when a function (for example [`log`](@ref)arithmic map or
-[`inverse_retract`](@ref)) is given arguments outside of its [`injectivity_radius`](@ref).
-"""
-struct OutOfInjectivityRadiusError <: Exception end
 
 """
     allocate(a)
@@ -117,7 +110,7 @@ manifold for vector bundles or power manifolds. The optional parameter `depth` c
 to remove only the first `depth` many decorators and return the [`AbstractManifold`](@ref) from that
 level, whether its decorated or not. Any negative value deactivates this depth limit.
 """
-base_manifold(M::AbstractManifold, depth = Val(-1)) = M
+base_manifold(M::AbstractManifold, ::Val = Val(-1)) = M
 
 """
     check_point(M::AbstractManifold, p; kwargs...) -> Union{Nothing,String}
@@ -155,8 +148,9 @@ By default, `check_size` returns `nothing`, i.e. if no checks are implemented, t
 assumption is to be optimistic.
 """
 function check_size(M::AbstractManifold, p)
-    n = size(p)
     m = representation_size(M)
+    m === nothing && return nothing # nothing reasonable in size to check
+    n = size(p)
     if length(n) != length(m)
         return DomainError(
             length(n),
@@ -173,8 +167,9 @@ end
 function check_size(M::AbstractManifold, p, X)
     mse = check_size(M, p)
     mse === nothing || return mse
-    n = size(X)
     m = representation_size(M)
+    m === nothing && return nothing # without a representation size - nothing to check.
+    n = size(X)
     if length(n) != length(m)
         return DomainError(
             length(n),
@@ -287,13 +282,11 @@ the representation is changed accordingly.
 
 If you have more than one embedding, see [`EmbeddedManifold`](@ref) for defining a second
 embedding. If your point `p` is already represented in some embedding,
-see [`AbstractEmbeddedManifold`](@ref) how you can avoid reimplementing code from the embedded manifold
+see [`AbstractDecoratorManifold`](@ref) how you can avoid reimplementing code from the embedded manifold
 
 See also: [`EmbeddedManifold`](@ref), [`project!`](@ref project!(M::AbstractManifold, q, p))
 """
-function embed!(M::AbstractManifold, q, p)
-    return error(manifold_function_not_implemented_message(M, embed!, q, p))
-end
+embed!(M::AbstractManifold, q, p)
 
 """
     embed(M::AbstractManifold, p, X)
@@ -308,7 +301,7 @@ embedding, the representation is changed accordingly.
 
 If you have more than one embedding, see [`EmbeddedManifold`](@ref) for defining a second
 embedding. If your tangent vector `X` is already represented in some embedding,
-see [`AbstractEmbeddedManifold`](@ref) how you can avoid reimplementing code from the embedded manifold
+see [`AbstractDecoratorManifold`](@ref) how you can avoid reimplementing code from the embedded manifold
 
 See also: [`EmbeddedManifold`](@ref), [`project`](@ref project(M::AbstractManifold, p, X))
 """
@@ -334,19 +327,17 @@ the tangent spaces of the embedded base points.
 
 See also: [`EmbeddedManifold`](@ref), [`project!`](@ref project!(M::AbstractManifold, Y, p, X))
 """
-function embed!(M::AbstractManifold, Y, p, X)
-    return error(manifold_function_not_implemented_message(M, embed!, Y, p, X))
-end
+embed!(M::AbstractManifold, Y, p, X)
 
 @doc raw"""
+    injectivity_radius(M::AbstractManifold)
+
+Infimum of the injectivity radii `injectivity_radius(M,p)` of all points `p` on the [`AbstractManifold`](@ref).
+
     injectivity_radius(M::AbstractManifold, p)
 
 Return the distance $d$ such that [`exp(M, p, X)`](@ref exp(::AbstractManifold, ::Any, ::Any)) is
 injective for all tangent vectors shorter than $d$ (i.e. has an inverse).
-
-    injectivity_radius(M::AbstractManifold)
-
-Infimum of the injectivity radius of all manifold points.
 
     injectivity_radius(M::AbstractManifold[, x], method::AbstractRetractionMethod)
     injectivity_radius(M::AbstractManifold, x, method::AbstractRetractionMethod)
@@ -355,33 +346,44 @@ Distance ``d`` such that
 [`retract(M, p, X, method)`](@ref retract(::AbstractManifold, ::Any, ::Any, ::AbstractRetractionMethod))
 is injective for all tangent vectors shorter than ``d`` (i.e. has an inverse) for point `p`
 if provided or all manifold points otherwise.
+
+In order to dispatch on different retraction methods, please either implement
+`_injectivity_radius(M[, p], m::T)` for your retraction `R` or specifically `injectivity_radius_exp(M[, p])` for the exponential map.
+By default the variant with a point `p` assumes that the default (without `p`) can ve called as a lower bound.
 """
-function injectivity_radius(M::AbstractManifold)
-    return error(manifold_function_not_implemented_message(M, injectivity_radius))
-end
+injectivity_radius(M::AbstractManifold)
 injectivity_radius(M::AbstractManifold, p) = injectivity_radius(M)
-function injectivity_radius(M::AbstractManifold, p, method::AbstractRetractionMethod)
-    return injectivity_radius(M, method)
+function injectivity_radius(M::AbstractManifold, p, m::AbstractRetractionMethod)
+    return _injectivity_radius(M, p, m)
 end
-function injectivity_radius(M::AbstractManifold, method::AbstractRetractionMethod)
-    return error(manifold_function_not_implemented_message(M, injectivity_radius, method))
+function injectivity_radius(M::AbstractManifold, m::AbstractRetractionMethod)
+    return _injectivity_radius(M, m)
 end
-function injectivity_radius(M::AbstractManifold, p, ::ExponentialRetraction)
-    return injectivity_radius(M, p)
+function _injectivity_radius(M::AbstractManifold, p, m::AbstractRetractionMethod)
+    return _injectivity_radius(M, m)
 end
-injectivity_radius(M::AbstractManifold, ::ExponentialRetraction) = injectivity_radius(M)
+function _injectivity_radius(M::AbstractManifold, m::AbstractRetractionMethod)
+    return _injectivity_radius(M)
+end
+function _injectivity_radius(M::AbstractManifold)
+    return injectivity_radius(M)
+end
+function _injectivity_radius(M::AbstractManifold, p, ::ExponentialRetraction)
+    return injectivity_radius_exp(M, p)
+end
+function _injectivity_radius(M::AbstractManifold, ::ExponentialRetraction)
+    return injectivity_radius_exp(M)
+end
+injectivity_radius_exp(M, p) = injectivity_radius_exp(M)
+injectivity_radius_exp(M) = injectivity_radius(M)
 
 """
     inner(M::AbstractManifold, p, X, Y)
 
 Compute the inner product of tangent vectors `X` and `Y` at point `p` from the
 [`AbstractManifold`](@ref) `M`.
-
-See also: [`MetricManifold`](@ref Main.Manifolds.MetricManifold)
 """
-function inner(M::AbstractManifold, p, X, Y)
-    return error(manifold_function_not_implemented_message(M, inner, p, X, Y))
-end
+inner(M::AbstractManifold, p, X, Y)
 
 """
     isapprox(M::AbstractManifold, p, q; kwargs...)
@@ -410,10 +412,15 @@ Return whether `p` is a valid point on the [`AbstractManifold`](@ref) `M`.
 
 If `throw_error` is `false`, the function returns either `true` or `false`. If `throw_error`
 is `true`, the function either returns `true` or throws an error. By default the function
-calls [`check_point(M, p; kwargs...)`](@ref) and checks whether the returned value
+calls [`check_point`](@ref) and checks whether the returned value
 is `nothing` or an error.
 """
 function is_point(M::AbstractManifold, p, throw_error = false; kwargs...)
+    mps = check_size(M, p)
+    if mps !== nothing
+        throw_error && throw(mps)
+        return false
+    end
     mpe = check_point(M, p; kwargs...)
     mpe === nothing && return true
     return throw_error ? throw(mpe) : false
@@ -427,7 +434,7 @@ Returns either `true` or `false`.
 
 If `throw_error` is `false`, the function returns either `true` or `false`. If `throw_error`
 is `true`, the function either returns `true` or throws an error. By default the function
-calls [`check_vector(M, p, X; kwargs...)`](@ref) and checks whether the returned
+calls [`check_vector`](@ref) and checks whether the returned
 value is `nothing` or an error.
 
 If `check_base_point` is true, then the point `p` will be first checked using the
@@ -437,23 +444,23 @@ function is_vector(
     M::AbstractManifold,
     p,
     X,
-    throw_error = false;
-    check_base_point = true,
+    throw_error = false,
+    check_base_point = true;
     kwargs...,
 )
     if check_base_point
-        mpe = check_point(M, p; kwargs...)
-        if mpe !== nothing
-            if throw_error
-                throw(mpe)
-            else
-                return false
-            end
-        end
+        s = is_point(M, p, throw_error; kwargs...) # if throw_error, is_point throws,
+        !s && return false # otherwise if not a point return false
     end
-    mtve = check_vector(M, p, X; kwargs...)
-    mtve === nothing && return true
-    return throw_error ? throw(mtve) : false
+    mXs = check_size(M, p, X)
+    if mXs !== nothing
+        throw_error && throw(mXs)
+        return false
+    end
+    mXe = check_vector(M, p, X; kwargs...)
+    mXe === nothing && return true
+    throw_error && throw(mXe)
+    return false
 end
 
 @doc raw"""
@@ -462,16 +469,7 @@ end
 The dimension $n=\dim_{\mathcal M}$ of real space $\mathbb R^n$ to which the neighborhood of
 each point of the [`AbstractManifold`](@ref) `M` is homeomorphic.
 """
-function manifold_dimension(M::AbstractManifold)
-    return error(manifold_function_not_implemented_message(M, manifold_dimension))
-end
-
-function manifold_function_not_implemented_message(M::AbstractManifold, f, x...)
-    s = join(map(string, map(typeof, x)), ", ", " and ")
-    a = length(x) > 1 ? "arguments" : "argument"
-    m = length(x) > 0 ? " for $(a) $(s)." : "."
-    return "$(f) not implemented on $(M)$(m)"
-end
+manifold_dimension(M::AbstractManifold)
 
 """
     mid_point(M::AbstractManifold, p1, p2)
@@ -572,12 +570,12 @@ function zero_vector(M::AbstractManifold, p)
     return X
 end
 include("errors.jl")
-include("numbers.jl")
+include("parallel_transport.jl")
 include("vector_transport.jl")
-include("DecoratorManifold.jl")
-include("bases.jl")
 include("vector_spaces.jl")
 include("point_vector_fallbacks.jl")
+include("nested_trait.jl")
+include("decorator_trait.jl")
 include("ValidationManifold.jl")
 include("EmbeddedManifold.jl")
 include("DefaultManifold.jl")
@@ -585,43 +583,50 @@ include("PowerManifold.jl")
 
 export AbstractManifold, AbstractManifoldPoint, TVector, CoTVector, TFVector, CoTFVector
 export AbstractDecoratorManifold
+export AbstractTrait, IsEmbeddedManifold, IsEmbeddedSubmanifold, IsIsometricEmbeddedManifold
+export IsExplicitDecorator
 export ValidationManifold, ValidationMPoint, ValidationTVector, ValidationCoTVector
-export AbstractEmbeddingType,
-    TransparentIsometricEmbedding, DefaultIsometricEmbeddingType, DefaultEmbeddingType
-export AbstractEmbeddedManifold, EmbeddedManifold, TransparentIsometricEmbedding
+export EmbeddedManifold
 export AbstractPowerManifold, PowerManifold
 export AbstractPowerRepresentation,
     NestedPowerRepresentation, NestedReplacingPowerRepresentation
-
-export AbstractDecoratorType, DefaultDecoratorType
 
 export OutOfInjectivityRadiusError
 
 export AbstractRetractionMethod,
     ApproximateInverseRetraction,
-    NLsolveInverseRetraction,
+    CayleyRetraction,
+    EmbeddedRetraction,
     ExponentialRetraction,
+    NLSolveInverseRetraction,
+    ODEExponentialRetraction,
     QRRetraction,
+    PadeRetraction,
     PolarRetraction,
     ProjectionRetraction,
-    PowerRetraction,
-    InversePowerRetraction
+    SoftmaxRetraction
 
 export AbstractInverseRetractionMethod,
     ApproximateInverseRetraction,
+    CayleyInverseRetraction,
+    EmbeddedInverseRetraction,
     LogarithmicInverseRetraction,
+    NLSolveInverseRetraction,
     QRInverseRetraction,
+    PadeInverseRetraction,
     PolarInverseRetraction,
-    ProjectionInverseRetraction
+    ProjectionInverseRetraction,
+    SoftmaxInverseRetraction
 
 export AbstractVectorTransportMethod,
     DifferentiatedRetractionVectorTransport,
     ParallelTransport,
     PoleLadderTransport,
-    PowerVectorTransport,
     ProjectionTransport,
     ScaledVectorTransport,
-    SchildsLadderTransport
+    SchildsLadderTransport,
+    VectorTransportDirection,
+    VectorTransportTo
 
 export CachedBasis,
     DefaultBasis,
@@ -630,15 +635,14 @@ export CachedBasis,
     DiagonalizingOrthonormalBasis,
     DefaultOrthonormalBasis,
     GramSchmidtOrthonormalBasis,
-    ProjectedOrthonormalBasis
+    ProjectedOrthonormalBasis,
+    VeeOrthogonalBasis
 
 export CompositeManifoldError, ComponentManifoldError
 
 export allocate,
+    angle,
     base_manifold,
-    check_point,
-    check_vector,
-    check_size,
     copy,
     copyto!,
     default_inverse_retraction_method,
@@ -652,7 +656,6 @@ export allocate,
     geodesic,
     get_basis,
     get_component,
-    get_component!,
     get_coordinates,
     get_coordinates!,
     get_embedding,
@@ -681,6 +684,12 @@ export allocate,
     number_of_coordinates,
     number_system,
     power_dimensions,
+    parallel_transport_along,
+    parallel_transport_along!,
+    parallel_transport_direction,
+    parallel_transport_direction!,
+    parallel_transport_to,
+    parallel_transport_to!,
     project,
     project!,
     real_dimension,

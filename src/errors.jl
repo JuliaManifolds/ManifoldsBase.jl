@@ -70,3 +70,11 @@ function Base.showerror(io::IO, ex::CompositeManifoldError)
         print(io, "CompositeManifoldError()\n")
     end
 end
+
+"""
+    OutOfInjectivityRadiusError
+
+An error thrown when a function (for example [`log`](@ref)arithmic map or
+[`inverse_retract`](@ref)) is given arguments outside of its [`injectivity_radius`](@ref).
+"""
+struct OutOfInjectivityRadiusError <: Exception end

@@ -9,8 +9,7 @@ encapsulated/stripped automatically when needed.
 This manifold is a decorator for a manifold, i.e. it decorates a [`AbstractManifold`](@ref) `M`
 with types points, vectors, and covectors.
 """
-struct ValidationManifold{𝔽,M<:AbstractManifold{𝔽}} <:
-       AbstractDecoratorManifold{𝔽,DefaultDecoratorType}
+struct ValidationManifold{𝔽,M<:AbstractManifold{𝔽}} <: AbstractDecoratorManifold{𝔽}
     manifold::M
 end
 
@@ -61,6 +60,10 @@ const ValidationCoTVector = ValidationFibreVector{CotangentSpaceType}
 
 @eval @manifold_element_forwards ValidationMPoint value
 
+@inline function active_traits(f, ::ValidationManifold, ::Any...)
+    return merge_traits(IsExplicitDecorator())
+end
+
 """
     array_value(p)
 
@@ -72,24 +75,7 @@ array_value(p::AbstractArray) = p
 array_value(p::ValidationMPoint) = p.value
 array_value(X::ValidationFibreVector) = X.value
 
-function check_point(M::ValidationManifold, p; kwargs...)
-    return check_point(M.manifold, array_value(p); kwargs...)
-end
-function check_point(M::ValidationManifold, p::AbstractManifoldPoint; kwargs...)
-    return check_point(M.manifold, array_value(p); kwargs...)
-end
-
-function check_vector(M::ValidationManifold, p, X; kwargs...)
-    return check_vector(M.manifold, array_value(p), array_value(X); kwargs...)
-end
-function check_vector(
-    M::ValidationManifold,
-    p::AbstractManifoldPoint,
-    X::TVector;
-    kwargs...,
-)
-    return check_vector(M.manifold, array_value(p), array_value(X); kwargs...)
-end
+decorated_manifold(M::ValidationManifold) = M.manifold
 
 convert(::Type{M}, m::ValidationManifold{𝔽,M}) where {𝔽,M<:AbstractManifold{𝔽}} = m.manifold
 function convert(::Type{ValidationManifold{𝔽,M}}, m::M) where {𝔽,M<:AbstractManifold{𝔽}}
@@ -226,58 +212,17 @@ function get_basis(
     end
     return Ξ
 end
-for BT in DISAMBIGUATION_BASIS_TYPES
-    if BT <:
-       Union{AbstractOrthonormalBasis,CachedBasis{𝔽,<:AbstractOrthonormalBasis} where 𝔽}
-        CT = AbstractOrthonormalBasis
-    elseif BT <:
-           Union{AbstractOrthogonalBasis,CachedBasis{𝔽,<:AbstractOrthogonalBasis} where 𝔽}
-        CT = AbstractOrthogonalBasis
-    else
-        CT = AbstractBasis
-    end
-    eval(quote
-        @invoke_maker 3 $CT get_basis(M::ValidationManifold, p, B::$BT; kwargs...)
-    end)
-end
 
 function get_coordinates(M::ValidationManifold, p, X, B::AbstractBasis; kwargs...)
     is_point(M, p, true; kwargs...)
     is_vector(M, p, X, true; kwargs...)
     return get_coordinates(M.manifold, p, X, B)
 end
-for BT in DISAMBIGUATION_BASIS_TYPES
-    eval(
-        quote
-            @invoke_maker 4 AbstractBasis get_coordinates(
-                M::ValidationManifold,
-                p,
-                X,
-                B::$BT;
-                kwargs...,
-            )
-        end,
-    )
-end
 
 function get_coordinates!(M::ValidationManifold, Y, p, X, B::AbstractBasis; kwargs...)
     is_vector(M, p, X, true; kwargs...)
     get_coordinates!(M.manifold, Y, p, X, B)
     return Y
-end
-for BT in [DISAMBIGUATION_BASIS_TYPES..., DISAMBIGUATION_COTANGENT_BASIS_TYPES...]
-    eval(
-        quote
-            @invoke_maker 5 AbstractBasis get_coordinates!(
-                M::ValidationManifold,
-                Y,
-                p,
-                X,
-                B::$BT;
-                kwargs...,
-            )
-        end,
-    )
 end
 
 function get_vector(M::ValidationManifold, p, X, B::AbstractBasis; kwargs...)
@@ -287,19 +232,6 @@ function get_vector(M::ValidationManifold, p, X, B::AbstractBasis; kwargs...)
     size(Y) == representation_size(M) || error("Incorrect size of tangent vector Y")
     return Y
 end
-for BT in DISAMBIGUATION_BASIS_TYPES
-    eval(
-        quote
-            @invoke_maker 4 AbstractBasis get_vector(
-                M::ValidationManifold,
-                p,
-                X,
-                B::$BT;
-                kwargs...,
-            )
-        end,
-    )
-end
 
 function get_vector!(M::ValidationManifold, Y, p, X, B::AbstractBasis; kwargs...)
     is_point(M, p, true; kwargs...)
@@ -307,20 +239,6 @@ function get_vector!(M::ValidationManifold, Y, p, X, B::AbstractBasis; kwargs...
     get_vector!(M.manifold, Y, p, X, B)
     size(Y) == representation_size(M) || error("Incorrect size of tangent vector Y")
     return Y
-end
-for BT in [DISAMBIGUATION_BASIS_TYPES..., DISAMBIGUATION_COTANGENT_BASIS_TYPES...]
-    eval(
-        quote
-            @invoke_maker 5 AbstractBasis get_vector!(
-                M::ValidationManifold,
-                Y,
-                p,
-                X,
-                B::$BT;
-                kwargs...,
-            )
-        end,
-    )
 end
 
 injectivity_radius(M::ValidationManifold) = injectivity_radius(M.manifold)
@@ -340,24 +258,20 @@ function injectivity_radius(
     is_point(M, p, true; kwargs...)
     return injectivity_radius(M.manifold, array_value(p), method)
 end
-function injectivity_radius(M::ValidationManifold, method::ExponentialRetraction)
-    return injectivity_radius(M.manifold, method)
-end
-function injectivity_radius(
-    M::ValidationManifold,
-    p,
-    method::ExponentialRetraction;
-    kwargs...,
-)
-    is_point(M, p, true; kwargs...)
-    return injectivity_radius(M.manifold, array_value(p), method)
-end
 
 function inner(M::ValidationManifold, p, X, Y; kwargs...)
     is_point(M, p, true; kwargs...)
     is_vector(M, p, X, true; kwargs...)
     is_vector(M, p, Y, true; kwargs...)
     return inner(M.manifold, array_value(p), array_value(X), array_value(Y))
+end
+
+
+function is_point(M::ValidationManifold, p, te = false; kw...)
+    return is_point(M.manifold, array_value(p), te; kw...)
+end
+function is_vector(M::ValidationManifold, p, X, te = false, cbp = true; kw...)
+    return is_vector(M.manifold, array_value(p), array_value(X), te, cbp; kw...)
 end
 
 function isapprox(M::ValidationManifold, p, q; kwargs...)
@@ -414,6 +328,20 @@ function project!(M::ValidationManifold, Y, p, X; kwargs...)
     return Y
 end
 
+function vector_transport_along(
+    M::ValidationManifold,
+    p,
+    X,
+    c::AbstractVector,
+    m::AbstractVectorTransportMethod;
+    kwargs...,
+)
+    is_vector(M, p, X, true; kwargs...)
+    Y = vector_transport_along(M.manifold, array_value(p), array_value(X), c, m)
+    is_vector(M, c[end], Y, true; kwargs...)
+    return Y
+end
+
 function vector_transport_along!(
     M::ValidationManifold,
     Y,
@@ -435,21 +363,21 @@ function vector_transport_along!(
     is_vector(M, c[end], Y, true; kwargs...)
     return Y
 end
-for VT in VECTOR_TRANSPORT_DISAMBIGUATION
-    eval(
-        quote
-            @invoke_maker 6 AbstractVectorTransportMethod vector_transport_along!(
-                M::ValidationManifold,
-                vto,
-                x,
-                v,
-                c::AbstractVector,
-                B::$VT,
-            )
-        end,
-    )
-end
 
+function vector_transport_to(
+    M::ValidationManifold,
+    p,
+    X,
+    q,
+    m::AbstractVectorTransportMethod;
+    kwargs...,
+)
+    is_point(M, q, true; kwargs...)
+    is_vector(M, p, X, true; kwargs...)
+    Y = vector_transport_to(M.manifold, array_value(p), array_value(X), array_value(q), m)
+    is_vector(M, q, Y, true; kwargs...)
+    return Y
+end
 function vector_transport_to!(
     M::ValidationManifold,
     Y,
@@ -471,30 +399,6 @@ function vector_transport_to!(
     )
     is_vector(M, q, Y, true; kwargs...)
     return Y
-end
-
-for T in [
-    PoleLadderTransport,
-    ProjectionTransport,
-    ScaledVectorTransport,
-    SchildsLadderTransport,
-]
-    @eval begin
-        function vector_transport_to!(M::ValidationManifold, Y, p, X, q, m::$T; kwargs...)
-            is_point(M, q, true; kwargs...)
-            is_vector(M, p, X, true; kwargs...)
-            vector_transport_to!(
-                M.manifold,
-                array_value(Y),
-                array_value(p),
-                array_value(X),
-                array_value(q),
-                m,
-            )
-            is_vector(M, q, Y, true; kwargs...)
-            return Y
-        end
-    end
 end
 
 function zero_vector(M::ValidationManifold, p; kwargs...)

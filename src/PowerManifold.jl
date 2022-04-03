@@ -113,60 +113,6 @@ function PowerManifold(
 end
 
 """
-    PowerRetraction{TR<:AbstractRetractionMethod} <: AbstractRetractionMethod
-
-The `PowerRetraction` avoids ambiguities between dispatching on the [`AbstractPowerManifold`](@ref)
-and dispatching on the [`AbstractRetractionMethod`](@ref) and encapsulates this.
-This container should only be used in rare cases outside of this package. Usually a
-subtype of the [`AbstractPowerManifold`](@ref) should define a way how to treat
-its [`AbstractRetractionMethod`](@ref)s.
-
-# Constructor
-
-    PowerRetraction(retraction::AbstractRetractionMethod)
-"""
-struct PowerRetraction{TR<:AbstractRetractionMethod} <: AbstractRetractionMethod
-    retraction::TR
-end
-
-"""
-    InversePowerRetraction{TR<:AbstractInverseRetractionMethod} <: AbstractInverseRetractionMethod
-
-The `InversePowerRetraction` avoids ambiguities between dispatching on the [`AbstractPowerManifold`](@ref)
-and dispatching on the [`AbstractInverseRetractionMethod`](@ref) and encapsulates this.
-This container should only be used in rare cases outside of this package. Usually a
-subtype of the [`AbstractPowerManifold`](@ref) should define a way how to treat
-its [`AbstractRetractionMethod`](@ref)s.
-
-# Constructor
-
-    InversePowerRetraction(inverse_retractions::AbstractInverseRetractionMethod...)
-"""
-struct InversePowerRetraction{TR<:AbstractInverseRetractionMethod} <:
-       AbstractInverseRetractionMethod
-    inverse_retraction::TR
-end
-
-"""
-    PowerVectorTransport{TR<:AbstractVectorTransportMethod} <:
-       AbstractVectorTransportMethod
-
-The `PowerVectorTransport` avoids ambiguities between dispatching on the [`AbstractPowerManifold`](@ref)
-and dispatching on the [`AbstractVectorTransportMethod`](@ref) and encapsulates this.
-This container should only be used in rare cases outside of this package. Usually a
-subtype of the [`AbstractPowerManifold`](@ref) should define a way how to treat
-its [`AbstractVectorTransportMethod`](@ref)s.
-
-# Constructor
-
-    PowerVectorTransport(method::AbstractVectorTransportMethod)
-"""
-struct PowerVectorTransport{TR<:AbstractVectorTransportMethod} <:
-       AbstractVectorTransportMethod
-    method::TR
-end
-
-"""
     PowerBasisData{TB<:AbstractArray}
 
 Data storage for an array of basis data.
@@ -209,6 +155,24 @@ function allocate_result(M::PowerManifoldNested, f, x...)
         ]
     end
 end
+# avoid ambituities - though usually not used
+function allocate_result(
+    M::PowerManifoldNested,
+    f::typeof(get_coordinates),
+    p,
+    X,
+    B::AbstractBasis,
+)
+    return invoke(
+        allocate_result,
+        Tuple{AbstractManifold,typeof(get_coordinates),Any,Any,AbstractBasis},
+        M,
+        f,
+        p,
+        X,
+        B,
+    )
+end
 function allocate_result(M::PowerManifoldNestedReplacing, f, x...)
     if length(x) == 0
         return [allocate_result(M.manifold, f) for _ in get_iterator(M)]
@@ -216,46 +180,24 @@ function allocate_result(M::PowerManifoldNestedReplacing, f, x...)
         return copy(x[1])
     end
 end
-
-for PowerRepr in [PowerManifoldNested, PowerManifoldNestedReplacing]
-    @eval begin
-        function allocate_result(
-            M::$PowerRepr,
-            f::typeof(get_coordinates),
-            p,
-            X,
-            B::AbstractBasis,
-        )
-            return invoke(
-                allocate_result,
-                Tuple{AbstractManifold,typeof(get_coordinates),Any,Any,typeof(B)},
-                M,
-                f,
-                p,
-                X,
-                B,
-            )
-        end
-        function allocate_result(
-            M::$PowerRepr,
-            f::typeof(get_coordinates),
-            p,
-            X,
-            B::CachedBasis,
-        )
-            return invoke(
-                allocate_result,
-                Tuple{AbstractManifold,typeof(get_coordinates),Any,Any,typeof(B)},
-                M,
-                f,
-                p,
-                X,
-                B,
-            )
-        end
-    end
+# the following is not used but necessary to avoid ambiguities
+function allocate_result(
+    M::PowerManifoldNestedReplacing,
+    f::typeof(get_coordinates),
+    p,
+    X,
+    B::AbstractBasis,
+)
+    return invoke(
+        allocate_result,
+        Tuple{AbstractManifold,typeof(get_coordinates),Any,Any,AbstractBasis},
+        M,
+        f,
+        p,
+        X,
+        B,
+    )
 end
-
 function allocate_result(M::PowerManifoldNested, f::typeof(get_vector), p, X)
     return [allocate_result(M.manifold, f, _access_nested(p, i)) for i in get_iterator(M)]
 end
@@ -282,6 +224,72 @@ function check_point(M::AbstractPowerManifold, p; kwargs...)
     e = [
         (i, check_point(M.manifold, _read(M, rep_size, p, i); kwargs...)) for
         i in get_iterator(M)
+    ]
+    errors = filter((x) -> !(x[2] === nothing), e)
+    cerr = [ComponentManifoldError(er...) for er in errors]
+    (length(errors) > 1) && return CompositeManifoldError(cerr)
+    (length(errors) == 1) && return cerr[1]
+    return nothing
+end
+
+"""
+    check_power_size(M, p)
+    check_power_size(M, p, X)
+
+Check whether p hase the right size to represent points on M generically, i.e. just cheking the overall sizes, not the individual ones per manifold
+"""
+function check_power_size(M::AbstractPowerManifold, p)
+    d = prod(representation_size(M.manifold)) * prod(power_dimensions(M))
+    (d != length(p)) && return DomainError(
+        length(p),
+        "The point $p can not be a point on $M, since its number of elements does not match the required overall representation size ($d)",
+    )
+    return nothing
+end
+function check_power_size(M::Union{PowerManifoldNested,PowerManifoldNestedReplacing}, p)
+    d = prod(power_dimensions(M))
+    (d != length(p)) && return DomainError(
+        length(p),
+        "The point $p can not be a point on $M, since its number of elements does not match the power dimensions ($d)",
+    )
+    return nothing
+end
+
+function check_power_size(M::AbstractPowerManifold, p, X)
+    d = prod(representation_size(M.manifold)) * prod(power_dimensions(M))
+    (d != length(X)) && return DomainError(
+        length(X),
+        "The tangent vector $X can not belong to a trangent space at on $M, since its number of elements does not match the required overall representation size ($d)",
+    )
+    return nothing
+end
+function check_power_size(M::Union{PowerManifoldNested,PowerManifoldNestedReplacing}, p, X)
+    d = prod(power_dimensions(M))
+    (d != length(X)) && return DomainError(
+        length(X),
+        "The point $p can not be a point on $M, since its number of elements does not match the power dimensions ($d)",
+    )
+    return nothing
+end
+
+function check_size(M::AbstractPowerManifold, p)
+    cps = check_power_size(M, p)
+    (cps === nothing) || return cps
+    rep_size = representation_size(M.manifold)
+    e = [(i, check_size(M.manifold, _read(M, rep_size, p, i))) for i in get_iterator(M)]
+    errors = filter((x) -> !(x[2] === nothing), e)
+    cerr = [ComponentManifoldError(er...) for er in errors]
+    (length(errors) > 1) && return CompositeManifoldError(cerr)
+    (length(errors) == 1) && return cerr[1]
+    return nothing
+end
+
+function check_size(M::AbstractPowerManifold, p, X)
+    cps = check_power_size(M, p, X)
+    (cps === nothing) || return cps
+    rep_size = representation_size(M.manifold)
+    e = [
+        (i, check_size(M.manifold, _read(M, rep_size, p, i), _read(M, rep_size, X, i);)) for i in get_iterator(M)
     ]
     errors = filter((x) -> !(x[2] === nothing), e)
     cerr = [ComponentManifoldError(er...) for er in errors]
@@ -414,14 +422,6 @@ function get_basis(M::AbstractPowerManifold, p, B::DiagonalizingOrthonormalBasis
     ]
     return CachedBasis(B, PowerBasisData(vs))
 end
-for BT in ManifoldsBase.DISAMBIGUATION_BASIS_TYPES
-    if BT == DiagonalizingOrthonormalBasis
-        continue
-    end
-    eval(quote
-        @invoke_maker 3 AbstractBasis get_basis(M::AbstractPowerManifold, p, B::$BT)
-    end)
-end
 
 """
     get_component(M::AbstractPowerManifold, p, idx...)
@@ -433,7 +433,7 @@ function get_component(M::AbstractPowerManifold, p, idx...)
     return _read(M, rep_size, p, idx)
 end
 
-function get_coordinates(M::AbstractPowerManifold, p, X, B::DefaultOrthonormalBasis)
+function get_coordinates(M::AbstractPowerManifold, p, X, B::AbstractBasis)
     rep_size = representation_size(M.manifold)
     vs = [
         get_coordinates(M.manifold, _read(M, rep_size, p, i), _read(M, rep_size, X, i), B) for i in get_iterator(M)
@@ -458,7 +458,7 @@ function get_coordinates(
     return reduce(vcat, reshape(vs, length(vs)))
 end
 
-function get_coordinates!(M::AbstractPowerManifold, Y, p, X, B::DefaultOrthonormalBasis)
+function get_coordinates!(M::AbstractPowerManifold, c, p, X, B::AbstractBasis)
     rep_size = representation_size(M.manifold)
     dim = manifold_dimension(M.manifold)
     v_iter = 1
@@ -466,18 +466,18 @@ function get_coordinates!(M::AbstractPowerManifold, Y, p, X, B::DefaultOrthonorm
         # TODO: this view is really suboptimal when `dim` can be statically determined
         get_coordinates!(
             M.manifold,
-            view(Y, v_iter:(v_iter + dim - 1)),
+            view(c, v_iter:(v_iter + dim - 1)),
             _read(M, rep_size, p, i),
             _read(M, rep_size, X, i),
             B,
         )
         v_iter += dim
     end
-    return Y
+    return c
 end
 function get_coordinates!(
     M::AbstractPowerManifold,
-    Y,
+    c,
     p,
     X,
     B::CachedBasis{𝔽,<:AbstractBasis,<:PowerBasisData},
@@ -486,16 +486,17 @@ function get_coordinates!(
     dim = manifold_dimension(M.manifold)
     v_iter = 1
     for i in get_iterator(M)
+        # TODO: this view is really suboptimal when `dim` can be statically determined
         get_coordinates!(
             M.manifold,
-            view(Y, v_iter:(v_iter + dim - 1)),
+            view(c, v_iter:(v_iter + dim - 1)),
             _read(M, rep_size, p, i),
             _read(M, rep_size, X, i),
             _access_nested(B.data.bases, i),
         )
         v_iter += dim
     end
-    return Y
+    return c
 end
 
 get_iterator(::PowerManifold{𝔽,<:AbstractManifold{𝔽},Tuple{N}}) where {𝔽,N} = Base.OneTo(N)
@@ -506,11 +507,20 @@ get_iterator(::PowerManifold{𝔽,<:AbstractManifold{𝔽},Tuple{N}}) where {�
     return Base.product(map(Base.OneTo, size_tuple)...)
 end
 
+function get_vector(
+    M::AbstractPowerManifold,
+    p,
+    c,
+    B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:PowerBasisData},
+) where {𝔽}
+    Y = allocate_result(M, get_vector, p, c)
+    return get_vector!(M, Y, p, c, B)
+end
 function get_vector!(
     M::AbstractPowerManifold,
     Y,
     p,
-    X,
+    c,
     B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:PowerBasisData},
 ) where {𝔽}
     dim = manifold_dimension(M.manifold)
@@ -521,24 +531,8 @@ function get_vector!(
             M.manifold,
             _write(M, rep_size, Y, i),
             _read(M, rep_size, p, i),
-            X[v_iter:(v_iter + dim - 1)],
+            c[v_iter:(v_iter + dim - 1)],
             _access_nested(B.data.bases, i),
-        )
-        v_iter += dim
-    end
-    return Y
-end
-function get_vector!(M::AbstractPowerManifold, Y, p, X, B::DefaultOrthonormalBasis)
-    dim = manifold_dimension(M.manifold)
-    rep_size = representation_size(M.manifold)
-    v_iter = 1
-    for i in get_iterator(M)
-        get_vector!(
-            M.manifold,
-            _write(M, rep_size, Y, i),
-            _read(M, rep_size, p, i),
-            X[v_iter:(v_iter + dim - 1)],
-            B,
         )
         v_iter += dim
     end
@@ -548,7 +542,7 @@ function get_vector!(
     M::PowerManifoldNestedReplacing,
     Y,
     p,
-    X,
+    c,
     B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:PowerBasisData},
 ) where {𝔽}
     dim = manifold_dimension(M.manifold)
@@ -558,14 +552,34 @@ function get_vector!(
         Y[i...] = get_vector(
             M.manifold,
             _read(M, rep_size, p, i),
-            X[v_iter:(v_iter + dim - 1)],
+            c[v_iter:(v_iter + dim - 1)],
             _access_nested(B.data.bases, i),
         )
         v_iter += dim
     end
     return Y
 end
-function get_vector!(M::PowerManifoldNestedReplacing, Y, p, X, B::DefaultOrthonormalBasis)
+function get_vector(M::AbstractPowerManifold, p, c, B::AbstractBasis)
+    Y = allocate_result(M, get_vector, p, c)
+    return get_vector!(M, Y, p, c, B)
+end
+function get_vector!(M::AbstractPowerManifold, Y, p, c, B::AbstractBasis)
+    dim = manifold_dimension(M.manifold)
+    rep_size = representation_size(M.manifold)
+    v_iter = 1
+    for i in get_iterator(M)
+        get_vector!(
+            M.manifold,
+            _write(M, rep_size, Y, i),
+            _read(M, rep_size, p, i),
+            c[v_iter:(v_iter + dim - 1)],
+            B,
+        )
+        v_iter += dim
+    end
+    return Y
+end
+function get_vector!(M::PowerManifoldNestedReplacing, Y, p, c, B::AbstractBasis)
     dim = manifold_dimension(M.manifold)
     rep_size = representation_size(M.manifold)
     v_iter = 1
@@ -573,7 +587,7 @@ function get_vector!(M::PowerManifoldNestedReplacing, Y, p, X, B::DefaultOrthono
         Y[i...] = get_vector(
             M.manifold,
             _read(M, rep_size, p, i),
-            X[v_iter:(v_iter + dim - 1)],
+            c[v_iter:(v_iter + dim - 1)],
             B,
         )
         v_iter += dim
@@ -620,22 +634,9 @@ function injectivity_radius(M::AbstractPowerManifold, p)
     return radius
 end
 injectivity_radius(M::AbstractPowerManifold) = injectivity_radius(M.manifold)
-eval(
-    quote
-        @invoke_maker 1 AbstractManifold injectivity_radius(
-            M::AbstractPowerManifold,
-            rm::AbstractRetractionMethod,
-        )
-    end,
-)
-eval(
-    quote
-        @invoke_maker 1 AbstractManifold injectivity_radius(
-            M::AbstractPowerManifold,
-            rm::ExponentialRetraction,
-        )
-    end,
-)
+function injectivity_radius(M::AbstractPowerManifold, ::AbstractRetractionMethod)
+    return injectivity_radius(M)
+end
 
 @doc raw"""
     inner(M::AbstractPowerManifold, p, X, Y)
@@ -689,16 +690,32 @@ function Base.isapprox(M::AbstractPowerManifold, p, X, Y; kwargs...)
 end
 
 @doc raw"""
-    inverse_retract(M::AbstractPowerManifold, p, q, m::InversePowerRetraction)
+    inverse_retract(M::AbstractPowerManifold, p, q, m::AbstractInverseRetractionMethod)
 
 Compute the inverse retraction from `p` with respect to `q` on an [`AbstractPowerManifold`](@ref) `M`
-using an [`InversePowerRetraction`](@ref), which by default encapsulates a inverse retraction
-of the base manifold. Then this method is performed elementwise, so the encapsulated inverse
+using an [`AbstractInverseRetractionMethod`](@ref).
+Then this method is performed elementwise, so the inverse
 retraction method has to be one that is available on the base [`AbstractManifold`](@ref).
 """
 inverse_retract(::AbstractPowerManifold, ::Any...)
 
-function inverse_retract!(M::AbstractPowerManifold, X, p, q, method::InversePowerRetraction)
+function inverse_retract(
+    M::AbstractPowerManifold,
+    p,
+    q,
+    m::AbstractInverseRetractionMethod = default_inverse_retraction_method(M),
+)
+    X = allocate_result(M, inverse_retract, p, q)
+    return inverse_retract!(M, X, p, q, m)
+end
+
+function inverse_retract!(
+    M::AbstractPowerManifold,
+    X,
+    p,
+    q,
+    m::AbstractInverseRetractionMethod = default_inverse_retraction_method(M),
+)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         inverse_retract!(
@@ -706,7 +723,7 @@ function inverse_retract!(M::AbstractPowerManifold, X, p, q, method::InversePowe
             _write(M, rep_size, X, i),
             _read(M, rep_size, p, i),
             _read(M, rep_size, q, i),
-            method.inverse_retraction,
+            m,
         )
     end
     return X
@@ -716,7 +733,7 @@ function inverse_retract!(
     X,
     p,
     q,
-    method::InversePowerRetraction,
+    m::AbstractInverseRetractionMethod = default_inverse_retraction_method(M),
 )
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
@@ -724,27 +741,10 @@ function inverse_retract!(
             M.manifold,
             _read(M, rep_size, p, i),
             _read(M, rep_size, q, i),
-            method.inverse_retraction,
+            m,
         )
     end
     return X
-end
-# log and power have to be explicitly stated to avoid an ambiguity in the third case with AbstractPower
-@invoke_maker 5 AbstractInverseRetractionMethod inverse_retract!(
-    M::AbstractPowerManifold,
-    X,
-    q,
-    p,
-    m::LogarithmicInverseRetraction,
-)
-function inverse_retract!(
-    M::AbstractPowerManifold,
-    X,
-    q,
-    p,
-    m::AbstractInverseRetractionMethod,
-)
-    return inverse_retract!(M, X, q, p, InversePowerRetraction(m))
 end
 
 @doc raw"""
@@ -827,6 +827,81 @@ function LinearAlgebra.norm(M::AbstractPowerManifold, p, X)
             norm(M.manifold, _read(M, rep_size, p, i), _read(M, rep_size, X, i))^2
     end
     return sqrt(sum_squares)
+end
+
+
+function parallel_transport_direction!(M::AbstractPowerManifold, Y, p, X, d)
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        parallel_transport_direction!(
+            M.manifold,
+            _write(M, rep_size, Y, i),
+            _read(M, rep_size, p, i),
+            _read(M, rep_size, X, i),
+            _read(M, rep_size, d, i),
+        )
+    end
+    return Y
+end
+function parallel_transport_direction(M::AbstractPowerManifold, p, X, d)
+    Y = allocate_result(M, vector_transport_direction, p, X, d)
+    return parallel_transport_direction!(M, Y, p, X, d)
+end
+
+function parallel_transport_direction!(M::PowerManifoldNestedReplacing, Y, p, X, d)
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        Y[i...] = parallel_transport_direction(
+            M.manifold,
+            _read(M, rep_size, p, i),
+            _read(M, rep_size, X, i),
+            _read(M, rep_size, d, i),
+        )
+    end
+    return Y
+end
+function parallel_transport_direction(M::PowerManifoldNestedReplacing, p, X, d)
+    Y = allocate_result(M, parallel_transport_direction, p, X, d)
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        Y[i...] = parallel_transport_direction(
+            M.manifold,
+            _read(M, rep_size, p, i),
+            _read(M, rep_size, X, i),
+            _read(M, rep_size, d, i),
+        )
+    end
+    return Y
+end
+
+function parallel_transport_to(M::AbstractPowerManifold, p, X, q)
+    Y = allocate_result(M, vector_transport_to, p, X)
+    return parallel_transport_to!(M, Y, p, X, q)
+end
+function parallel_transport_to!(M::AbstractPowerManifold, Y, p, X, q)
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        vector_transport_to!(
+            M.manifold,
+            _write(M, rep_size, Y, i),
+            _read(M, rep_size, p, i),
+            _read(M, rep_size, X, i),
+            _read(M, rep_size, q, i),
+        )
+    end
+    return Y
+end
+function parallel_transport_to!(M::PowerManifoldNestedReplacing, Y, p, X, q)
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        Y[i...] = parallel_transport_to(
+            M.manifold,
+            _read(M, rep_size, p, i),
+            _read(M, rep_size, X, i),
+            _read(M, rep_size, q, i),
+        )
+    end
+    return Y
 end
 
 @doc raw"""
@@ -914,16 +989,32 @@ end
 
 
 @doc raw"""
-    retract(M::AbstractPowerManifold, p, X, method::PowerRetraction)
+    retract(M::AbstractPowerManifold, p, X, method::AbstractRetractionMethod)
 
 Compute the retraction from `p` with tangent vector `X` on an [`AbstractPowerManifold`](@ref) `M`
-using a [`PowerRetraction`](@ref), which by default encapsulates a retraction of the
-base manifold. Then this method is performed elementwise, so the encapsulated retraction
+using a [`AbstractRetractionMethod`](@ref).
+Then this method is performed elementwise, so the retraction
 method has to be one that is available on the base [`AbstractManifold`](@ref).
 """
 retract(::AbstractPowerManifold, ::Any...)
 
-function retract!(M::AbstractPowerManifold, q, p, X, method::PowerRetraction)
+function retract(
+    M::AbstractPowerManifold,
+    p,
+    X,
+    m::AbstractRetractionMethod = default_retraction_method(M),
+)
+    q = allocate_result(M, retract, p, X)
+    return retract!(M, q, p, X, m)
+end
+
+function retract!(
+    M::AbstractPowerManifold,
+    q,
+    p,
+    X,
+    m::AbstractRetractionMethod = default_retraction_method(M),
+)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         retract!(
@@ -931,35 +1022,24 @@ function retract!(M::AbstractPowerManifold, q, p, X, method::PowerRetraction)
             _write(M, rep_size, q, i),
             _read(M, rep_size, p, i),
             _read(M, rep_size, X, i),
-            method.retraction,
+            m,
         )
     end
     return q
 end
-function retract!(M::PowerManifoldNestedReplacing, q, p, X, method::PowerRetraction)
-    rep_size = representation_size(M.manifold)
-    for i in get_iterator(M)
-        q[i...] = retract(
-            M.manifold,
-            _read(M, rep_size, p, i),
-            _read(M, rep_size, X, i),
-            method.retraction,
-        )
-    end
-    return q
-end
-# exp and power have to be explicitly stated, since the third case otherwise introduces and ambiguity.
-@invoke_maker 5 AbstractRetractionMethod retract!(
-    M::AbstractPowerManifold,
+function retract!(
+    M::PowerManifoldNestedReplacing,
     q,
     p,
     X,
-    m::ExponentialRetraction,
+    m::AbstractRetractionMethod = default_retraction_method(M),
 )
-function retract!(M::AbstractPowerManifold, q, p, X, m::AbstractRetractionMethod)
-    return retract!(M, q, p, X, PowerRetraction(m))
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        q[i...] = retract(M.manifold, _read(M, rep_size, p, i), _read(M, rep_size, X, i), m)
+    end
+    return q
 end
-
 
 """
     set_component!(M::AbstractPowerManifold, q, p, idx...)
@@ -1012,37 +1092,13 @@ function Base.show(
     return nothing
 end
 
-function vector_transport_direction(M::AbstractPowerManifold, p, X, d)
-    return vector_transport_direction(M, p, X, d, PowerVectorTransport(ParallelTransport()))
-end
-
-function vector_transport_direction!(M::AbstractPowerManifold, Y, p, X, d)
-    return vector_transport_direction!(
-        M,
-        Y,
-        p,
-        X,
-        d,
-        PowerVectorTransport(ParallelTransport()),
-    )
-end
 function vector_transport_direction!(
     M::AbstractPowerManifold,
     Y,
     p,
     X,
     d,
-    m::AbstractVectorTransportMethod,
-)
-    return vector_transport_direction!(M, Y, p, X, d, PowerVectorTransport(m))
-end
-function vector_transport_direction!(
-    M::AbstractPowerManifold,
-    Y,
-    p,
-    X,
-    d,
-    m::PowerVectorTransport,
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
@@ -1052,18 +1108,29 @@ function vector_transport_direction!(
             _read(M, rep_size, p, i),
             _read(M, rep_size, X, i),
             _read(M, rep_size, d, i),
-            m.method,
+            m,
         )
     end
     return Y
 end
+function vector_transport_direction(
+    M::AbstractPowerManifold,
+    p,
+    X,
+    d,
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
+)
+    Y = allocate_result(M, vector_transport_direction, p, X, d)
+    return vector_transport_direction!(M, Y, p, X, d, m)
+end
+
 function vector_transport_direction!(
     M::PowerManifoldNestedReplacing,
     Y,
     p,
     X,
     d,
-    m::PowerVectorTransport,
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
@@ -1072,29 +1139,65 @@ function vector_transport_direction!(
             _read(M, rep_size, p, i),
             _read(M, rep_size, X, i),
             _read(M, rep_size, d, i),
-            m.method,
+            m,
+        )
+    end
+    return Y
+end
+function vector_transport_direction(
+    M::PowerManifoldNestedReplacing,
+    p,
+    X,
+    d,
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
+)
+    Y = allocate_result(M, vector_transport_direction, p, X, d)
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        Y[i...] = vector_transport_direction(
+            M.manifold,
+            _read(M, rep_size, p, i),
+            _read(M, rep_size, X, i),
+            _read(M, rep_size, d, i),
+            m,
         )
     end
     return Y
 end
 
 @doc raw"""
-    vector_transport_to(M::AbstractPowerManifold, p, X, q, method::PowerVectorTransport)
+    vector_transport_to(M::AbstractPowerManifold, p, X, q, method::AbstractVectorTransportMethod)
 
 Compute the vector transport the tangent vector `X`at `p` to `q` on the
-[`PowerManifold`](@ref) `M` using an [`PowerVectorTransport`](@ref) `m`.
+[`PowerManifold`](@ref) `M` using an [`AbstractVectorTransportMethod`](@ref) `m`.
 This method is performed elementwise, i.e. the method `m` has to be implemented on the
 base manifold.
 """
-vector_transport_to(::AbstractPowerManifold, ::Any, ::Any, ::Any, ::PowerVectorTransport)
-function vector_transport_to(M::AbstractPowerManifold, p, X, q)
-    return vector_transport_to(M, p, X, q, PowerVectorTransport(ParallelTransport()))
+vector_transport_to(
+    ::AbstractPowerManifold,
+    ::Any,
+    ::Any,
+    ::Any,
+    ::AbstractVectorTransportMethod,
+)
+function vector_transport_to(
+    M::AbstractPowerManifold,
+    p,
+    X,
+    q,
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
+)
+    Y = allocate_result(M, vector_transport_to, p, X)
+    return vector_transport_to!(M, Y, p, X, q, m)
 end
-
-function vector_transport_to!(M::AbstractPowerManifold, Y, p, X, q)
-    return vector_transport_to!(M, Y, p, X, q, PowerVectorTransport(ParallelTransport()))
-end
-function vector_transport_to!(M::AbstractPowerManifold, Y, p, X, q, m::PowerVectorTransport)
+function vector_transport_to!(
+    M::AbstractPowerManifold,
+    Y,
+    p,
+    X,
+    q,
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
+)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         vector_transport_to!(
@@ -1103,7 +1206,7 @@ function vector_transport_to!(M::AbstractPowerManifold, Y, p, X, q, m::PowerVect
             _read(M, rep_size, p, i),
             _read(M, rep_size, X, i),
             _read(M, rep_size, q, i),
-            m.method,
+            m,
         )
     end
     return Y
@@ -1114,7 +1217,7 @@ function vector_transport_to!(
     p,
     X,
     q,
-    m::PowerVectorTransport,
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
@@ -1123,35 +1226,10 @@ function vector_transport_to!(
             _read(M, rep_size, p, i),
             _read(M, rep_size, X, i),
             _read(M, rep_size, q, i),
-            m.method,
+            m,
         )
     end
     return Y
-end
-
-function vector_transport_to!(
-    M::AbstractPowerManifold,
-    Y,
-    p,
-    X,
-    q,
-    m::AbstractVectorTransportMethod,
-)
-    return vector_transport_to!(M, Y, p, X, q, PowerVectorTransport(m))
-end
-for VT in ManifoldsBase.VECTOR_TRANSPORT_DISAMBIGUATION
-    eval(
-        quote
-            @invoke_maker 6 AbstractVectorTransportMethod vector_transport_to!(
-                M::AbstractPowerManifold,
-                Y,
-                p,
-                X,
-                q,
-                B::$VT,
-            )
-        end,
-    )
 end
 
 """
@@ -1173,7 +1251,12 @@ end
     return _write(M, rep_size, x, (i,))
 end
 
-@inline function _write(::PowerManifoldNested, rep_size::Tuple, x::AbstractArray, i::Tuple)
+@inline function _write(
+    ::AbstractPowerManifold,
+    rep_size::Tuple,
+    x::AbstractArray,
+    i::Tuple,
+)
     return view(x[i...], rep_size_to_colons(rep_size)...)
 end
 @inline function _write(::PowerManifoldNested, ::Tuple{}, x::AbstractArray, i::Tuple)
