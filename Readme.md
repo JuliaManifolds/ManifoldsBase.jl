@@ -36,3 +36,19 @@ Eprint = {2106.08777},
 Eprinttype = {arXiv},
 }
 ```
+
+To refer to a certain version we recommend to also cite for example
+
+```biblatex
+@softawre{manifoldsbasejl-zenodo-mostrecent,
+    AUTHOR    = {Seth D. Axen and Mateusz Baran and Ronny Bergmann},
+    TITLE     = {ManifoldsBase.jl},
+    DOI       = {10.5281/ZENODO.5964340},
+    URL       = {https://zenodo.org/record/5964340},
+    PUBLISHER = {Zenodo},
+    YEAR      = {2022},
+    COPYRIGHT = {MIT License}
+}
+```
+
+Note that both citations are in [BibLaTeX](https://ctan.org/pkg/biblatex) format.
