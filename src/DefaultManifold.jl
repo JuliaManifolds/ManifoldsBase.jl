@@ -110,7 +110,7 @@ function Base.show(io::IO, ::DefaultManifold{N,𝔽}) where {N,𝔽}
     return print(io, "DefaultManifold($(join(N.parameters, ", ")); field = $(𝔽))")
 end
 
-function parallel_transport_along!(::DefaultManifold, Y, p, X, c)
+function parallel_transport_along!(::DefaultManifold, Y, p, X, c::AbstractVector)
     return copyto!(Y, X)
 end
 function parallel_transport_to!(::DefaultManifold, Y, p, X, q)

@@ -515,10 +515,10 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
         @test vector_transport_to(M, p, X, :q, ProjectionTransport()) == X
         @test parallel_transport_to(M, p, X, q) == X
         @test parallel_transport_direction(M, p, X, X) == X
-        @test parallel_transport_along(M, p, X, :c) == X
+        @test parallel_transport_along(M, p, X, []) == X
         @test parallel_transport_to!(M, Y, p, X, q) == X
         @test parallel_transport_direction!(M, Y, p, X, X) == X
-        @test parallel_transport_along!(M, Y, p, X, :c) == X
+        @test parallel_transport_along!(M, Y, p, X, []) == X
     end
     @testset "DefaultManifold  and ONB" begin
         M = ManifoldsBase.DefaultManifold(3)

@@ -350,7 +350,12 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
     push!(
         block.args,
         quote
-            function ManifoldsBase.parallel_transport_along(M::$TM, p::$TP, X::$TV, c)
+            function ManifoldsBase.parallel_transport_along(
+                M::$TM,
+                p::$TP,
+                X::$TV,
+                c::AbstractVector,
+            )
                 return $TV(
                     ManifoldsBase.parallel_transport_along(M, p.$pfield, X.$vfield, c),
                 )
@@ -360,7 +365,7 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
                 Y::$TV,
                 p::$TP,
                 X::$TV,
-                c,
+                c::AbstractVector,
             )
                 ManifoldsBase.parallel_transport_along!(
                     M,
