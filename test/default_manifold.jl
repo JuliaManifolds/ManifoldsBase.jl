@@ -156,21 +156,21 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
             new_pt = exp(M, pts[1], tv1)
             retract!(M, new_pt, pts[1], tv1)
             @test is_point(M, new_pt)
-            for x in pts
-                @test isapprox(M, x, zero_vector(M, x), log(M, x, x); atol = eps(eltype(x)))
+            for p in pts
+                @test isapprox(M, p, zero_vector(M, p), log(M, p, p); atol = eps(eltype(p)))
                 @test isapprox(
                     M,
-                    x,
-                    zero_vector(M, x),
-                    inverse_retract(M, x, x);
-                    atol = eps(eltype(x)),
+                    p,
+                    zero_vector(M, p),
+                    inverse_retract(M, p, p);
+                    atol = eps(eltype(p)),
                 )
                 @test isapprox(
                     M,
-                    x,
-                    zero_vector(M, x),
-                    inverse_retract(M, x, x, irm);
-                    atol = eps(eltype(x)),
+                    p,
+                    zero_vector(M, p),
+                    inverse_retract(M, p, p, irm);
+                    atol = eps(eltype(p)),
                 )
             end
             zero_vector!(M, tv1, pts[1])
@@ -276,27 +276,27 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
             @testset "vector transport" begin
                 # test constructor
                 @test default_vector_transport_method(M) == ParallelTransport()
-                v1 = log(M, pts[1], pts[2])
-                v2 = log(M, pts[1], pts[3])
-                v1t1 = vector_transport_to(M, pts[1], v1, pts[3])
-                v1t2 = zero(v1t1)
-                vector_transport_to!(M, v1t2, pts[1], v1, v2, ProjectionTransport())
-                v1t3 = vector_transport_direction(M, pts[1], v1, v2)
-                @test ManifoldsBase.is_vector(M, pts[3], v1t1)
-                @test ManifoldsBase.is_vector(M, pts[3], v1t3)
-                @test isapprox(M, pts[3], v1t1, v1t3)
+                X1 = log(M, pts[1], pts[2])
+                X2 = log(M, pts[1], pts[3])
+                X1t1 = vector_transport_to(M, pts[1], X1, pts[3])
+                X1t2 = zero(X1t1)
+                vector_transport_to!(M, X1t2, pts[1], X1, X2, ProjectionTransport())
+                X1t3 = vector_transport_direction(M, pts[1], X1, X2)
+                @test ManifoldsBase.is_vector(M, pts[3], X1t1)
+                @test ManifoldsBase.is_vector(M, pts[3], X1t3)
+                @test isapprox(M, pts[3], X1t1, X1t3)
                 # along a `Vector` of points
                 c = [pts[1]]
-                v1t4 = vector_transport_along(M, pts[1], v1, c)
-                @test isapprox(M, pts[1], v1, v1t4)
-                v1t5 = allocate(v1)
-                vector_transport_along!(M, v1t5, pts[1], v1, c)
-                @test isapprox(M, pts[1], v1, v1t5)
+                X1t4 = vector_transport_along(M, pts[1], X1, c)
+                @test isapprox(M, pts[1], X1, X1t4)
+                X1t5 = allocate(X1)
+                vector_transport_along!(M, X1t5, pts[1], X1, c)
+                @test isapprox(M, pts[1], X1, X1t5)
                 # transport along more than one interims point
-                @test vector_transport_along(M, pts[1], v1, pts[2:3]) == v1
-                v1t6 = allocate(v1)
-                vector_transport_along!(M, v1t6, pts[1], v1, pts[2:3])
-                @test isapprox(M, pts[1], v1, v1t6)
+                @test vector_transport_along(M, pts[1], X1, pts[2:3]) == X1
+                X1t6 = allocate(X1)
+                vector_transport_along!(M, X1t6, pts[1], X1, pts[2:3])
+                @test isapprox(M, pts[1], X1, X1t6)
                 # along a custom type of points
                 if T <: DefaultPoint
                     S = eltype(pts[1].value)
@@ -306,28 +306,28 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
                     mat = reshape(pts[1], length(pts[1]), 1)
                 end
                 c2 = MatrixVectorTransport{S}(mat)
-                v1t4c2 = vector_transport_along(M, pts[1], v1, c2)
-                @test isapprox(M, pts[1], v1, v1t4c2)
-                v1t5c2 = allocate(v1)
-                vector_transport_along!(M, v1t5c2, pts[1], v1, c2)
-                @test isapprox(M, pts[1], v1, v1t5c2)
+                X1t4c2 = vector_transport_along(M, pts[1], X1, c2)
+                @test isapprox(M, pts[1], X1, X1t4c2)
+                X1t5c2 = allocate(X1)
+                vector_transport_along!(M, X1t5c2, pts[1], X1, c2)
+                @test isapprox(M, pts[1], X1, X1t5c2)
                 # On Euclidean Space Schild & Pole are identity
                 @test vector_transport_to(
                     M,
                     pts[1],
-                    v2,
+                    X2,
                     pts[2],
                     SchildsLadderTransport(),
-                ) == v2
-                @test vector_transport_to(M, pts[1], v2, pts[2], PoleLadderTransport()) ==
-                      v2
+                ) == X2
+                @test vector_transport_to(M, pts[1], X2, pts[2], PoleLadderTransport()) ==
+                      X2
                 @test vector_transport_to(
                     M,
                     pts[1],
-                    v2,
+                    X2,
                     pts[2],
                     ScaledVectorTransport(ParallelTransport()),
-                ) == v2
+                ) == X2
 
                 # along is also the identity
                 c = [
@@ -336,11 +336,44 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
                     mid_point(M, pts[2], pts[3]),
                     pts[3],
                 ]
-                @test vector_transport_along(M, pts[1], v2, c, SchildsLadderTransport()) ==
-                      v2
-                @test vector_transport_along(M, pts[1], v2, c, PoleLadderTransport()) == v2
-                @test vector_transport_along(M, pts[1], v2, c, ParallelTransport()) == v2
-                @test vector_transport_along(M, pts[1], v2, c, ProjectionTransport()) == v2
+                Xtmp = allocate(X2)
+                @test vector_transport_along(M, pts[1], X2, c, SchildsLadderTransport()) ==
+                      X2
+                @test vector_transport_along!(
+                    M,
+                    Xtmp,
+                    pts[1],
+                    X2,
+                    c,
+                    SchildsLadderTransport(),
+                ) == X2
+                @test vector_transport_along(M, pts[1], X2, c, PoleLadderTransport()) == X2
+                @test vector_transport_along!(
+                    M,
+                    Xtmp,
+                    pts[1],
+                    X2,
+                    c,
+                    PoleLadderTransport(),
+                ) == X2
+                @test vector_transport_along(M, pts[1], X2, c, ParallelTransport()) == X2
+                @test vector_transport_along!(
+                    M,
+                    Xtmp,
+                    pts[1],
+                    X2,
+                    c,
+                    ParallelTransport(),
+                ) == X2
+                @test vector_transport_along(M, pts[1], X2, c, ProjectionTransport()) == X2
+                @test vector_transport_along!(
+                    M,
+                    Xtmp,
+                    pts[1],
+                    X2,
+                    c,
+                    ProjectionTransport(),
+                ) == X2
                 # check mutating ones with defaults
                 p = allocate(pts[1])
                 ManifoldsBase.pole_ladder!(M, p, pts[1], pts[2], pts[3])
