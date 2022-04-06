@@ -158,7 +158,13 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
             return X
         end
 
-        function ManifoldsBase.vector_transport_along!(M::$TM, Y::$TV, p::$TP, X::$TV, c)
+        function ManifoldsBase.vector_transport_along!(
+            M::$TM,
+            Y::$TV,
+            p::$TP,
+            X::$TV,
+            c::AbstractVector,
+        )
             vector_transport_along!(M, Y.$vfield, p.$pfield, X.$vfield, c)
             return Y
         end
@@ -317,10 +323,16 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
         push!(
             block.args,
             quote
-                function ManifoldsBase.$vtaa(M::$TM, p::$TP, X::$TV, c)
+                function ManifoldsBase.$vtaa(M::$TM, p::$TP, X::$TV, c::AbstractVector)
                     return $TV(ManifoldsBase.$vtaa(M, p.$pfield, X.$vfield, c))
                 end
-                function ManifoldsBase.$vtam(M::$TM, Y::$TV, p::$TP, X::$TV, c)
+                function ManifoldsBase.$vtam(
+                    M::$TM,
+                    Y::$TV,
+                    p::$TP,
+                    X::$TV,
+                    c::AbstractVector,
+                )
                     ManifoldsBase.$vtam(M, Y.$vfield, p.$pfield, X.$vfield, c)
                     return Y
                 end

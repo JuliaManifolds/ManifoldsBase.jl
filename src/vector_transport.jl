@@ -534,18 +534,30 @@ vector_transport_along_project!(M::AbstractManifold, Y, p, X, c)
 
 function vector_transport_along_project! end
 
-function _vector_transport_along(M::AbstractManifold, p, X, c, m::PoleLadderTransport)
+function _vector_transport_along(
+    M::AbstractManifold,
+    p,
+    X,
+    c::AbstractVector,
+    m::PoleLadderTransport,
+)
     Y = allocate_result(M, vector_transport_along, X, p)
     return _vector_transport_along!(M, Y, p, X, c, m)
 end
-function _vector_transport_along(M::AbstractManifold, p, X, c, m::SchildsLadderTransport)
+function _vector_transport_along(
+    M::AbstractManifold,
+    p,
+    X,
+    c::AbstractVector,
+    m::SchildsLadderTransport,
+)
     Y = allocate_result(M, vector_transport_along, X, p)
     return _vector_transport_along!(M, Y, p, X, c, m)
 end
 
 """
-    vector_transport_along!(M::AbstractManifold, Y, p, X, c)
-    vector_transport_along!(M::AbstractManifold, Y, p, X, c, m::AbstractVectorTransportMethod)
+    vector_transport_along!(M::AbstractManifold, Y, p, X, c::AbstractVector)
+    vector_transport_along!(M::AbstractManifold, Y, p, X, c::AbstractVector, m::AbstractVectorTransportMethod)
 
 Transport a vector `X` from the tangent space at a point `p` on the [`AbstractManifold`](@ref) `M`
 along the curve represented by `c` using the `method`, which defaults to
@@ -556,48 +568,8 @@ function vector_transport_along!(
     Y,
     p,
     X,
-    c,
-    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
-)
-    return _vector_transport_along!(M, Y, p, X, c, m)
-end
-function _vector_transport_along!(M::AbstractManifold, Y, p, X, c, ::ParallelTransport)
-    return parallel_transport_along!(M, Y, p, X, c)
-end
-function _vector_transport_along!(
-    M::AbstractManifold,
-    Y,
-    p,
-    X,
-    c,
-    m::DifferentiatedRetractionVectorTransport,
-)
-    return vector_transport_along_diff!(M, Y, p, X, c, m.retraction)
-end
-function _vector_transport_along!(M::AbstractManifold, Y, p, X, c, ::ProjectionTransport)
-    return vector_transport_along_project!(M, Y, p, X, c)
-end
-
-@doc raw"""
-    vector_transport_along!(
-        M::AbstractManifold,
-        Y,
-        p,
-        X,
-        c::AbstractVector,
-        m::AbstractVectorTransportMethod
-    ) where {T}
-
-Compute the vector transport along a discretized curve `c` using an
-[`AbstractVectorTransportMethod`](@ref) `method` succesively along the sampled curve.
-"""
-function vector_transport_along!(
-    M::AbstractManifold,
-    Y,
-    p,
-    X,
     c::AbstractVector,
-    m::AbstractVectorTransportMethod,
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
     n = length(c)
     if n == 0
@@ -609,6 +581,36 @@ function vector_transport_along!(
         end
     end
     return Y
+end
+function _vector_transport_along!(
+    M::AbstractManifold,
+    Y,
+    p,
+    X,
+    c::AbstractVector,
+    ::ParallelTransport,
+)
+    return parallel_transport_along!(M, Y, p, X, c)
+end
+function _vector_transport_along!(
+    M::AbstractManifold,
+    Y,
+    p,
+    X,
+    c::AbstractVector,
+    m::DifferentiatedRetractionVectorTransport,
+)
+    return vector_transport_along_diff!(M, Y, p, X, c, m.retraction)
+end
+function _vector_transport_along!(
+    M::AbstractManifold,
+    Y,
+    p,
+    X,
+    c::AbstractVector,
+    ::ProjectionTransport,
+)
+    return vector_transport_along_project!(M, Y, p, X, c)
 end
 
 @doc raw"""
