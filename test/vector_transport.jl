@@ -11,7 +11,13 @@ ManifoldsBase.exp!(::NonDefaultEuclidean, y, x, v) = (y .= x .+ v)
 function ManifoldsBase.parallel_transport_to!(::NonDefaultEuclidean, Y, p, X, q)
     return copyto!(Y, X)
 end
-function ManifoldsBase.parallel_transport_along!(::NonDefaultEuclidean, Y, p, X, q)
+function ManifoldsBase.parallel_transport_along!(
+    ::NonDefaultEuclidean,
+    Y,
+    p,
+    X,
+    c::AbstractVector,
+)
     return copyto!(Y, X)
 end
 

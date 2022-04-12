@@ -571,17 +571,22 @@ function vector_transport_along!(
     c::AbstractVector,
     m::AbstractVectorTransportMethod = default_vector_transport_method(M),
 )
+    return _vector_transport_along!(M, Y, p, X, c, m)
+end
+
+function parallel_transport_along!(M::AbstractManifold, Y, p, X, c::AbstractVector)
     n = length(c)
     if n == 0
         copyto!(Y, X)
     else
-        vector_transport_to!(M, Y, p, X, c[1], m)
+        parallel_transport_to!(M, Y, p, X, c[1])
         for i in 1:(length(c) - 1)
-            vector_transport_to!(M, Y, c[i], Y, c[i + 1], m)
+            parallel_transport_to!(M, Y, c[i], Y, c[i + 1])
         end
     end
     return Y
 end
+
 function _vector_transport_along!(
     M::AbstractManifold,
     Y,

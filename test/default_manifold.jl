@@ -1,7 +1,7 @@
 using ManifoldsBase
 using ManifoldsBase:
     @manifold_element_forwards, @manifold_vector_forwards, @default_manifold_fallbacks
-using ManifoldsBase: DefaultManifold
+using ManifoldsBase: DefaultManifold, AbstractNumbers
 import ManifoldsBase:
     number_eltype,
     check_point,
@@ -358,6 +358,14 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
                 ) == X2
                 @test vector_transport_along(M, pts[1], X2, c, ParallelTransport()) == X2
                 @test vector_transport_along!(
+                    M,
+                    Xtmp,
+                    pts[1],
+                    X2,
+                    c,
+                    ParallelTransport(),
+                ) == X2
+                @test ManifoldsBase._vector_transport_along!(
                     M,
                     Xtmp,
                     pts[1],
