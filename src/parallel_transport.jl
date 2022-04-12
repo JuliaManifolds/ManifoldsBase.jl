@@ -17,7 +17,7 @@ its covariant derivative ``\frac{\mathrm{D}}{\mathrm{d}t}Z`` is zero. Note that 
 
 Then the parallel transport is given by ``Z(1)``.
 """
-function parallel_transport_along(M::AbstractManifold, p, X, c)
+function parallel_transport_along(M::AbstractManifold, p, X, c::AbstractVector)
     Y = allocate_result(M, vector_transport_along, X, p)
     return parallel_transport_along!(M, Y, p, X, c)
 end

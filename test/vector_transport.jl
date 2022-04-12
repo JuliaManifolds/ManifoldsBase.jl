@@ -11,7 +11,13 @@ ManifoldsBase.exp!(::NonDefaultEuclidean, y, x, v) = (y .= x .+ v)
 function ManifoldsBase.parallel_transport_to!(::NonDefaultEuclidean, Y, p, X, q)
     return copyto!(Y, X)
 end
-function ManifoldsBase.parallel_transport_along!(::NonDefaultEuclidean, Y, p, X, q)
+function ManifoldsBase.parallel_transport_along!(
+    ::NonDefaultEuclidean,
+    Y,
+    p,
+    X,
+    c::AbstractVector,
+)
     return copyto!(Y, X)
 end
 
@@ -21,14 +27,14 @@ end
     for T in types
         @testset "Type $T" begin
             pts = convert.(Ref(T), [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
-            v2 = log(M, pts[1], pts[3])
+            X2 = log(M, pts[1], pts[3])
             c = [0.5 * (pts[1] + pts[2]), pts[2], 0.5 * (pts[2] + pts[3]), pts[3]]
-            @test vector_transport_along(M, pts[1], v2, c, SchildsLadderTransport()) == v2
-            @test vector_transport_along(M, pts[1], v2, c, PoleLadderTransport()) == v2
-            @test vector_transport_along(M, pts[1], v2, c, ParallelTransport()) == v2
-            @test vector_transport_along(M, pts[1], v2, [], SchildsLadderTransport()) == v2
-            @test vector_transport_along(M, pts[1], v2, [], PoleLadderTransport()) == v2
-            @test vector_transport_along(M, pts[1], v2, [], ParallelTransport()) == v2
+            @test vector_transport_along(M, pts[1], X2, c, SchildsLadderTransport()) == X2
+            @test vector_transport_along(M, pts[1], X2, c, PoleLadderTransport()) == X2
+            @test vector_transport_along(M, pts[1], X2, c, ParallelTransport()) == X2
+            @test vector_transport_along(M, pts[1], X2, [], SchildsLadderTransport()) == X2
+            @test vector_transport_along(M, pts[1], X2, [], PoleLadderTransport()) == X2
+            @test vector_transport_along(M, pts[1], X2, [], ParallelTransport()) == X2
             # check mutating ones with defaults
             p = allocate(pts[1])
             ManifoldsBase.pole_ladder!(M, p, pts[1], pts[2], pts[3])

@@ -389,20 +389,31 @@ function log!(::TraitList{IsEmbeddedSubmanifold}, M::AbstractDecoratorManifold, 
 end
 
 # Introduce Deco Trait | automatic foward | fallback
-@trait_function parallel_transport_along(M::AbstractDecoratorManifold, p, X, c)
+@trait_function parallel_transport_along(
+    M::AbstractDecoratorManifold,
+    p,
+    X,
+    c::AbstractVector,
+)
 # EmbeddedSubManifold
 function parallel_transport_along(
     ::TraitList{IsEmbeddedSubmanifold},
     M::AbstractDecoratorManifold,
     p,
     X,
-    c,
+    c::AbstractVector,
 )
     return parallel_transport_along(get_embedding(M, p), p, X, c)
 end
 
 # Introduce Deco Trait | automatic foward | fallback
-@trait_function parallel_transport_along!(M::AbstractDecoratorManifold, Y, p, X, c)
+@trait_function parallel_transport_along!(
+    M::AbstractDecoratorManifold,
+    Y,
+    p,
+    X,
+    c::AbstractVector,
+)
 # EmbeddedSubManifold
 function parallel_transport_along!(
     ::TraitList{IsEmbeddedSubmanifold},
@@ -410,7 +421,7 @@ function parallel_transport_along!(
     Y,
     p,
     X,
-    c,
+    c::AbstractVector,
 )
     return parallel_transport_along!(get_embedding(M, p), Y, p, X, c)
 end
