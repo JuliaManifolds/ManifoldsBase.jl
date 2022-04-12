@@ -73,6 +73,7 @@ struct NonManifold <: AbstractManifold{ManifoldsBase.ℝ} end
     ]
         @test_throws MethodError vector_transport_along(M, p, X, :curve, VT)
         @test_throws MethodError vector_transport_along!(M, Y, p, X, :curve, VT)
+        @test_throws MethodError vector_transport_along!(M, Y, p, X, [p], VT)
         @test_throws MethodError vector_transport_direction(M, p, X, X, VT)
         @test_throws MethodError vector_transport_direction!(M, Y, p, X, X, VT)
         @test_throws MethodError vector_transport_to(M, p, X, q, VT)

@@ -286,7 +286,7 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
                 @test ManifoldsBase.is_vector(M, pts[3], X1t3)
                 @test isapprox(M, pts[3], X1t1, X1t3)
                 # along a `Vector` of points
-                c = [pts[1]]
+                c = [pts[1], pts[1]]
                 X1t4 = vector_transport_along(M, pts[1], X1, c)
                 @test isapprox(M, pts[1], X1, X1t4)
                 X1t5 = allocate(X1)
