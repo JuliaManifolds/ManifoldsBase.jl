@@ -515,22 +515,22 @@ function _vector_transport_along(M::AbstractManifold, p, X, c, ::ProjectionTrans
     return vector_transport_along_project(M, p, X, c)
 end
 @doc raw"""
-    vector_transport_along_project(M::AbstractManifold, p, X, c)
+    vector_transport_along_project(M::AbstractManifold, p, X, c::AbstractVector)
 
 Compute the vector transport of `X` from ``T_p\mathcal M`` along the curve `c`
 using a projection.
 """
-function vector_transport_along_project(M::AbstractManifold, p, X, c)
+function vector_transport_along_project(M::AbstractManifold, p, X, c::AbstractVector)
     Y = allocate_result(M, vector_transport_along, X, p)
     return vector_transport_along_project!(M, Y, p, X, c)
 end
 @doc raw"""
-    vector_transport_along_project!(M::AbstractManifold, Y, p, X, c)
+    vector_transport_along_project!(M::AbstractManifold, Y, p, X, c::AbstractVector)
 
 Compute the vector transport of `X` from ``T_p\mathcal M`` along the curve `c`
 using a projection. The result is computed in place of `Y`.
 """
-vector_transport_along_project!(M::AbstractManifold, Y, p, X, c)
+vector_transport_along_project!(M::AbstractManifold, Y, p, X, c::AbstractVector)
 
 function vector_transport_along_project! end
 
