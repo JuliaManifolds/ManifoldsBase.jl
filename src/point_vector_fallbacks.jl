@@ -183,34 +183,36 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
         cm = Symbol("get_coordinates_$(f_postfix)!")
         va = Symbol("get_vector_$(f_postfix)")
         vm = Symbol("get_vector_$(f_postfix)!")
-        B_type = if f_postfix in [:default, :orthogonal, :orthonormal, :vee]
-            :AbstractNumbers
+        B_types = if f_postfix in [:default, :orthogonal, :orthonormal, :vee]
+            [:AbstractNumbers, :RealNumbers, :ComplexNumbers]
         elseif f_postfix === :cached
-            :CachedBasis
+            [:CachedBasis]
         elseif f_postfix === :diagonalizing
-            :DiagonalizingOrthonormalBasis
+            [:DiagonalizingOrthonormalBasis]
         else
-            :Any
+            [:Any]
         end
-        push!(
-            block.args,
-            quote
-                function ManifoldsBase.$ca(M::$TM, p::$TP, X::$TV, B::$B_type)
-                    return ManifoldsBase.$ca(M, p.$pfield, X.$vfield, B)
-                end
-                function ManifoldsBase.$cm(M::$TM, Y, p::$TP, X::$TV, B::$B_type)
-                    ManifoldsBase.$cm(M, Y, p.$pfield, X.$vfield, B)
-                    return Y
-                end
-                function ManifoldsBase.$va(M::$TM, p::$TP, X, B::$B_type)
-                    return $TV(ManifoldsBase.$va(M, p.$pfield, X, B))
-                end
-                function ManifoldsBase.$vm(M::$TM, Y::$TV, p::$TP, X, B::$B_type)
-                    ManifoldsBase.$vm(M, Y.$vfield, p.$pfield, X, B)
-                    return Y
-                end
-            end,
-        )
+        for B_type in B_types
+            push!(
+                block.args,
+                quote
+                    function ManifoldsBase.$ca(M::$TM, p::$TP, X::$TV, B::$B_type)
+                        return ManifoldsBase.$ca(M, p.$pfield, X.$vfield, B)
+                    end
+                    function ManifoldsBase.$cm(M::$TM, Y, p::$TP, X::$TV, B::$B_type)
+                        ManifoldsBase.$cm(M, Y, p.$pfield, X.$vfield, B)
+                        return Y
+                    end
+                    function ManifoldsBase.$va(M::$TM, p::$TP, X, B::$B_type)
+                        return $TV(ManifoldsBase.$va(M, p.$pfield, X, B))
+                    end
+                    function ManifoldsBase.$vm(M::$TM, Y::$TV, p::$TP, X, B::$B_type)
+                        ManifoldsBase.$vm(M, Y.$vfield, p.$pfield, X, B)
+                        return Y
+                    end
+                end,
+            )
+        end
     end
     # TODO  forward retraction / inverse_retraction
     for f_postfix in [:polar, :project, :qr, :softmax]
