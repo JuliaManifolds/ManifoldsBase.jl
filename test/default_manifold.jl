@@ -72,7 +72,16 @@ end
 ManifoldsBase.retract_polar!(::DefaultManifold, q, p, X) = (q .= p .+ X)
 ManifoldsBase.retract_project!(::DefaultManifold, q, p, X) = (q .= p .+ X)
 ManifoldsBase.retract_qr!(::DefaultManifold, q, p, X) = (q .= p .+ X)
-ManifoldsBase.retract_exp_ode!(::DefaultManifold, q, p, X, m, B) = (q .= p .+ X)
+function ManifoldsBase.retract_exp_ode!(
+    ::DefaultManifold,
+    q,
+    p,
+    X,
+    m::AbstractRetractionMethod,
+    B::ManifoldsBase.AbstractBasis,
+)
+    return (q .= p .+ X)
+end
 ManifoldsBase.retract_pade!(::DefaultManifold, q, p, X, i) = (q .= p .+ X)
 ManifoldsBase.retract_softmax!(::DefaultManifold, q, p, X) = (q .= p .+ X)
 ManifoldsBase.get_embedding(M::DefaultManifold) = M # dummy embedding
@@ -80,8 +89,24 @@ ManifoldsBase.inverse_retract_polar!(::DefaultManifold, Y, p, q) = (Y .= q .- p)
 ManifoldsBase.inverse_retract_project!(::DefaultManifold, Y, p, q) = (Y .= q .- p)
 ManifoldsBase.inverse_retract_qr!(::DefaultManifold, Y, p, q) = (Y .= q .- p)
 ManifoldsBase.inverse_retract_softmax!(::DefaultManifold, Y, p, q) = (Y .= q .- p)
-ManifoldsBase.inverse_retract_nlsolve!(::DefaultManifold, Y, p, q, m) = (Y .= q .- p)
-ManifoldsBase.vector_transport_along_project!(::DefaultManifold, Y, p, X, c) = (Y .= X)
+function ManifoldsBase.inverse_retract_nlsolve!(
+    ::DefaultManifold,
+    Y,
+    p,
+    q,
+    m::NLSolveInverseRetraction,
+)
+    return (Y .= q .- p)
+end
+function ManifoldsBase.vector_transport_along_project!(
+    ::DefaultManifold,
+    Y,
+    p,
+    X,
+    c::AbstractVector,
+)
+    return (Y .= X)
+end
 
 
 Base.getindex(x::MatrixVectorTransport, i) = x.m[:, i]
