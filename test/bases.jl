@@ -377,7 +377,7 @@ DiagonalizingBasisProxy() = DiagonalizingOrthonormalBasis([1.0, 0.0, 0.0])
         pb2 = get_basis(M, x, B2)
 
         test_basis_string = """
-        DefaultOrthonormalBasis(ℝ) with 6 basis vectors:
+        Cached basis of type $(sprint(show, typeof(DefaultOrthonormalBasis()))) with 6 basis vectors:
          E1 =
           2×3 $(sprint(show, Matrix{Float64})):
            1.0  0.0  0.0
@@ -438,7 +438,7 @@ DiagonalizingBasisProxy() = DiagonalizingOrthonormalBasis([1.0, 0.0, 0.0])
         x = reshape(Float64[1], (1, 1, 1))
         pb = get_basis(M, x, DefaultOrthonormalBasis())
         @test sprint(show, "text/plain", pb) == """
-        DefaultOrthonormalBasis(ℝ) with 1 basis vector:
+        Cached basis of type $(sprint(show, typeof(DefaultOrthonormalBasis()))) with 1 basis vector:
          E1 =
           1×1×1 $(sprint(show, Array{Float64,3})):
           [:, :, 1] =
