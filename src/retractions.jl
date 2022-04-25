@@ -709,10 +709,7 @@ computes the mutating variant of the [`ProjectionRetraction`](@ref).
 By default this [`porject!`](@ref)s `X` onto the manifold (in place of `q`)
 after [`embed!`](@ref)ing `X`.
 """
-retract_project!(M::AbstractManifold, q, p, X) = project!(M, q, embed(M, p, X))
-# Note that we have to use embed (not embed!) since we do not have memory to store this embedded value in
-
-
+retract_project!(M::AbstractManifold, q, p, X)
 
 function retract_project! end
 
