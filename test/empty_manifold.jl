@@ -93,14 +93,15 @@ struct NotImplementedInverseRetraction <: AbstractInverseRetractionMethod end
     @test_throws MethodError exp(M, [0.0], [0.0])
     @test_throws MethodError exp(M, [0.0], [0.0], 0.0)
 
-    @test_throws MethodError embed!(M, p, [0])
-    @test_throws MethodError embed!(M, [0], [0])
-    @test_throws MethodError embed(M, [0])
+    @test_throws MethodError embed!(M, p, [0]) # no copy for NoPoint p
+    @test embed!(M, [0], [0]) == [0]
+    @test embed(M, [0]) == [0]
 
-    @test_throws MethodError embed!(M, v, p, [0.0])
-    @test_throws MethodError embed!(M, [0], [0], [0])
-    @test_throws MethodError embed(M, [0], [0])
-    @test_throws MethodError embed(M, [0.0], [0.0])
+    # Identity
+    @test_throws MethodError embed!(M, v, p, [0.0]) # no copyto
+    @test embed!(M, [0], [0], [0]) == [0]
+    @test_throws MethodError embed(M, [0], v) # no copyto
+    @test embed(M, [0.0], [0.0]) == [0.0]
 
 
     @test_throws MethodError log!(M, v, p, p)

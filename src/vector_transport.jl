@@ -1012,7 +1012,8 @@ Compute a vector transport by projecting ``X\in T_p\mathcal M`` onto the tangent
 space ``T_q\mathcal M`` at ``q`` in place of `Y`.
 """
 function vector_transport_to_project!(M::AbstractManifold, Y, p, X, q)
-    return project!(M, Y, q, X)
+    # Note that we have to use embed (not embed!) since we do not have memory to store this embedded value in
+    return project!(M, Y, q, embed(M, p, X))
 end
 
 
