@@ -706,7 +706,7 @@ function retract_pade! end
     retract_project!(M::AbstractManifold, q, p, X)
 
 computes the mutating variant of the [`ProjectionRetraction`](@ref).
-By default this [`porject!`](@ref)s `X` onto the manifold (in place of `q`)
+By default this [`project`](@ref)s `X` onto the manifold (in place of `q`)
 after [`embed!`](@ref)ing `X`.
 """
 retract_project!(M::AbstractManifold, q, p, X)
