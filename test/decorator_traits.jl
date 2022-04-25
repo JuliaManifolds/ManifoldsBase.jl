@@ -85,11 +85,11 @@ ManifoldsBase.representation_size(::NonDecoratorManifold) = (2,)
     Y = similar(X)
     @test ManifoldsBase.check_size(M, p) === nothing
     @test ManifoldsBase.check_size(M, p, X) === nothing
-    # Ambiguous since not implemented
-    @test_throws MethodError embed(M, p)
-    @test_throws MethodError embed!(M, q, p)
-    @test_throws MethodError embed(M, p, X)
-    @test_throws MethodError embed!(M, Y, p, X)
+    # default to identity
+    @test embed(M, p) == p
+    @test embed!(M, q, p) == p
+    @test embed(M, p, X) == X
+    @test embed!(M, Y, p, X) == X
     # the following is implemented but passes to the second and hence fails
     @test_throws MethodError exp(M, p, X)
     @test_throws MethodError exp!(M, q, p, X)
