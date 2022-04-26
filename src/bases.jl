@@ -379,18 +379,6 @@ function get_basis(M::AbstractManifold, p, B::AbstractBasis; kwargs...)
     return _get_basis(M, p, B; kwargs...)
 end
 
-function _get_basis(
-    M::AbstractManifold,
-    p,
-    B::DefaultOrthonormalBasis{<:Any,TangentSpaceType};
-    kwargs...,
-)
-    dim = number_of_coordinates(M, B)
-    return CachedBasis(
-        B,
-        [get_vector(M, p, [ifelse(i == j, 1, 0) for j in 1:dim], B) for i in 1:dim],
-    )
-end
 function _get_basis(::AbstractManifold, ::Any, B::CachedBasis)
     return B
 end
@@ -456,7 +444,14 @@ function get_basis_diagonalizing end
 function _get_basis(M::AbstractManifold, p, B::DefaultOrthonormalBasis)
     return get_basis_orthonormal(M, p, number_system(B))
 end
-function get_basis_orthonormal end
+function get_basis_orthonormal(M::AbstractManifold, p, N::AbstractNumbers; kwargs...)
+    B = DefaultOrthonormalBasis(N)
+    dim = number_of_coordinates(M, B)
+    return CachedBasis(
+        B,
+        [get_vector(M, p, [ifelse(i == j, 1, 0) for j in 1:dim], B) for i in 1:dim],
+    )
+end
 
 @doc raw"""
     get_coordinates(M::AbstractManifold, p, X, B::AbstractBasis)

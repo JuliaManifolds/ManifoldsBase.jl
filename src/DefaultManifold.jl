@@ -22,25 +22,25 @@ embed!(::DefaultManifold, Y, p, X) = copyto!(Y, X)
 
 exp!(::DefaultManifold, q, p, X) = (q .= p .+ X)
 
-function get_basis_orthonormal(::DefaultManifold, p, N)
+function get_basis_orthonormal(::DefaultManifold, p, N::RealNumbers)
     return CachedBasis(
         DefaultOrthonormalBasis(N),
         [_euclidean_basis_vector(p, i) for i in eachindex(p)],
     )
 end
-function get_basis_orthogonal(::DefaultManifold, p, N)
+function get_basis_orthogonal(::DefaultManifold, p, N::RealNumbers)
     return CachedBasis(
         DefaultOrthogonalBasis(N),
         [_euclidean_basis_vector(p, i) for i in eachindex(p)],
     )
 end
-function get_basis_default(::DefaultManifold, p, N)
+function get_basis_default(::DefaultManifold, p, N::RealNumbers)
     return CachedBasis(
         DefaultBasis(N),
         [_euclidean_basis_vector(p, i) for i in eachindex(p)],
     )
 end
-function get_basis_diagonalizing(M::DefaultManifold, p, B)
+function get_basis_diagonalizing(M::DefaultManifold, p, B::DiagonalizingOrthonormalBasis)
     vecs = get_vectors(M, p, get_basis(M, p, DefaultOrthonormalBasis()))
     eigenvalues = zeros(real(eltype(p)), manifold_dimension(M))
     return CachedBasis(B, DiagonalizingBasisData(B.frame_direction, eigenvalues, vecs))
