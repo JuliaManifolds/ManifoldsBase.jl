@@ -80,17 +80,21 @@ end
 function ManifoldsBase.get_basis_orthonormal(
     ::DefaultManifold,
     p::NonBroadcastBasisThing,
-    𝔽,
+    𝔽::RealNumbers,
 )
     return CachedBasis(
-        B,
+        DefaultOrthonormalBasis(𝔽),
         [
             NonBroadcastBasisThing(ManifoldsBase._euclidean_basis_vector(p.v, i)) for
             i in eachindex(p.v)
         ],
     )
 end
-function ManifoldsBase.get_basis_orthogonal(::DefaultManifold, p::NonBroadcastBasisThing, 𝔽)
+function ManifoldsBase.get_basis_orthogonal(
+    ::DefaultManifold,
+    p::NonBroadcastBasisThing,
+    𝔽::RealNumbers,
+)
     return CachedBasis(
         DefaultOrthogonalBasis(𝔽),
         [
