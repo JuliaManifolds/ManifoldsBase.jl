@@ -322,7 +322,7 @@ function is_point(
         return false
     end
     mpe = check_point(get_embedding(M, p), embed(M, p); kwargs...)
-    if mpe !=M nothing
+    if mpe !== nothing
         wrapped_error = ManifoldDomainError(
             "$p is not a point on $M because it is not a valid point in its embedding: ",
             mpe,
