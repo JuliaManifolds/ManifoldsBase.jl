@@ -603,7 +603,7 @@ export AbstractPowerManifold, PowerManifold
 export AbstractPowerRepresentation,
     NestedPowerRepresentation, NestedReplacingPowerRepresentation
 
-export OutOfInjectivityRadiusError
+export OutOfInjectivityRadiusError, ManifoldDomainError
 
 export AbstractRetractionMethod,
     ApproximateInverseRetraction,

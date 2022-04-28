@@ -78,3 +78,20 @@ An error thrown when a function (for example [`log`](@ref)arithmic map or
 [`inverse_retract`](@ref)) is given arguments outside of its [`injectivity_radius`](@ref).
 """
 struct OutOfInjectivityRadiusError <: Exception end
+
+"""
+    ManifoldDomainError{<:Exception} <: Exception
+
+An error to represent a nested (Domain) error on a manifold, for example
+if a point or tangent vector is invalid because its representation in some
+embedding is already invalid.
+"""
+struct ManifoldDomainError{E} <: Exception where {E<:Exception}
+    outer_text::String
+    error::E
+end
+
+function Base.showerror(io::IO, ex::ManifoldDomainError)
+    print(io, ex.outer_text)
+    return print(io, ex.error)
+end

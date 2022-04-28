@@ -1,5 +1,5 @@
 #
-# Base passons
+# Base pass-ons
 #
 manifold_dimension(M::AbstractDecoratorManifold) = manifold_dimension(base_manifold(M))
 
@@ -321,9 +321,15 @@ function is_point(
         te && throw(es)
         return false
     end
-    # this throws if te=true
-    ep = is_point(get_embedding(M, p), embed(M, p), te; kwargs...)
-    !ep && return false # otherwise if we get here with ep=false, end with false
+    mpe = check_point(get_embedding(M, p), embed(M, p); kwargs...)
+    if mpe !=M nothing
+        wrapped_error = ManifoldDomainError(
+            "$p is not a point on $M because it is not a valid point in its embedding: ",
+            mpe,
+        )
+        te && throw(wrapped_error)
+        return false
+    end
     mpe = check_point(M, p; kwargs...)
     mpe === nothing && return true
     te && throw(mpe)
@@ -363,8 +369,15 @@ function is_vector(
         return false
     end
     # Check vector in embedding
-    ev = is_vector(get_embedding(M, p), embed(M, p), embed(M, p, X), te, cbp; kwargs...)
-    (!ev && !te) && return false # if te, the line before throws an error, otherwise we end with false early here
+    mpe = check_vector(get_embedding(M, p), embed(M, p), embed(M, p, X); kwargs...)
+    if mpe !== nothing
+        wrapped_error = ManifoldDomainError(
+            "$X is not a tangent vector to $p on $M because it is not a valid tangent vector in its embedding: ",
+            mpe,
+        )
+        te && throw(wrapped_error)
+        return false
+    end
     # Check (additional) local stuff
     mtve = check_vector(M, p, X; kwargs...)
     mtve === nothing && return true
