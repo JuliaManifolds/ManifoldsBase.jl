@@ -5,26 +5,37 @@ using ManifoldsBase: DefaultManifold, ℝ
 # A first artificial (not real) manifold that is modelled as a submanifold
 # half plane with euclidean metric is not a manifold but should test all things correctly here
 #
-struct HalfPlanemanifold <: AbstractDecoratorManifold{ℝ} end
+struct HalfPlaneManifold <: AbstractDecoratorManifold{ℝ} end
+struct PosQuadrantManifold <: AbstractDecoratorManifold{ℝ} end
 
-ManifoldsBase.get_embedding(::HalfPlanemanifold) = ManifoldsBase.DefaultManifold(1, 3)
-ManifoldsBase.decorated_manifold(::HalfPlanemanifold) = ManifoldsBase.DefaultManifold(2)
-ManifoldsBase.representation_size(::HalfPlanemanifold) = (2,)
+ManifoldsBase.get_embedding(::HalfPlaneManifold) = ManifoldsBase.DefaultManifold(1, 3)
+ManifoldsBase.decorated_manifold(::HalfPlaneManifold) = ManifoldsBase.DefaultManifold(2)
+ManifoldsBase.representation_size(::HalfPlaneManifold) = (3,)
 
-function ManifoldsBase.check_point(::HalfPlanemanifold, p)
+ManifoldsBase.get_embedding(::PosQuadrantManifold) = HalfPlaneManifold()
+ManifoldsBase.representation_size(::PosQuadrantManifold) = (3,)
+
+function ManifoldsBase.check_point(::HalfPlaneManifold, p)
     return p[1] > 0 ? nothing : DomainError(p[1], "p[1] ≤ 0")
 end
-function ManifoldsBase.check_vector(::HalfPlanemanifold, p, X)
+function ManifoldsBase.check_vector(::HalfPlaneManifold, p, X)
     return X[1] > 0 ? nothing : DomainError(X[1], "X[1] ≤ 0")
 end
-ManifoldsBase.embed(::HalfPlanemanifold, p) = reshape(p, 1, :)
-ManifoldsBase.embed(::HalfPlanemanifold, p, X) = reshape(X, 1, :)
+function ManifoldsBase.check_point(::PosQuadrantManifold, p)
+    return p[2] > 0 ? nothing : DomainError(p[1], "p[2] ≤ 0")
+end
+function ManifoldsBase.check_vector(::PosQuadrantManifold, p, X)
+    return X[2] > 0 ? nothing : DomainError(X[1], "X[2] ≤ 0")
+end
 
-ManifoldsBase.project!(::HalfPlanemanifold, q, p) = (q .= [p[1] p[2] 0.0])
-ManifoldsBase.project!(::HalfPlanemanifold, Y, p, X) = (Y .= [X[1] X[2] 0.0])
+ManifoldsBase.embed(::HalfPlaneManifold, p) = reshape(p, 1, :)
+ManifoldsBase.embed(::HalfPlaneManifold, p, X) = reshape(X, 1, :)
+
+ManifoldsBase.project!(::HalfPlaneManifold, q, p) = (q .= [p[1] p[2] 0.0])
+ManifoldsBase.project!(::HalfPlaneManifold, Y, p, X) = (Y .= [X[1] X[2] 0.0])
 
 function ManifoldsBase.get_coordinates_orthonormal!(
-    ::HalfPlanemanifold,
+    ::HalfPlaneManifold,
     Y,
     p,
     X,
@@ -33,7 +44,7 @@ function ManifoldsBase.get_coordinates_orthonormal!(
     return (Y .= [X[1], X[2]])
 end
 function ManifoldsBase.get_vector_orthonormal!(
-    ::HalfPlanemanifold,
+    ::HalfPlaneManifold,
     Y,
     p,
     c,
@@ -42,7 +53,10 @@ function ManifoldsBase.get_vector_orthonormal!(
     return (Y .= [c[1] c[2] 0.0])
 end
 
-function ManifoldsBase.active_traits(f, ::HalfPlanemanifold, args...)
+function ManifoldsBase.active_traits(f, ::HalfPlaneManifold, args...)
+    return ManifoldsBase.merge_traits(ManifoldsBase.IsEmbeddedSubmanifold())
+end
+function ManifoldsBase.active_traits(f, ::PosQuadrantManifold, args...)
     return ManifoldsBase.merge_traits(ManifoldsBase.IsEmbeddedSubmanifold())
 end
 
@@ -185,10 +199,11 @@ ManifoldsBase.decorated_manifold(::FallbackManifold) = DefaultManifold(3)
     end
 
     @testset "HalfPlanemanifold" begin
-        M = HalfPlanemanifold()
-        @test repr(M) == "HalfPlanemanifold()"
+        M = HalfPlaneManifold()
+        N = PosQuadrantManifold()
+        @test repr(M) == "HalfPlaneManifold()"
         @test get_embedding(M) == ManifoldsBase.DefaultManifold(1, 3)
-        @test representation_size(M) == (2,)
+        @test representation_size(M) == (3,)
         # Check point checks using embedding
         @test is_point(M, [1 0.1 0.1], true)
         @test_throws DomainError is_point(M, [-1, 0, 0], true) #wrong dim (3,1)
@@ -206,6 +221,11 @@ ManifoldsBase.decorated_manifold(::FallbackManifold) = DefaultManifold(3)
         @test_throws DomainError is_vector(M, [1, 0, 0], [-1, 0, 0], true)
         @test !is_vector(M, [-1, 0, 0], [0, 0, 0])
         @test !is_vector(M, [1, 0, 0], [-1, 0, 0])
+        # check manifold domain error from embedding to obtain ManifoldDomainErrors
+        @test !is_point(N, [0, 0, 0])
+        @test_throws ManifoldDomainError is_point(N, [0, 0, 0], true)
+        @test !is_vector(N, [1, 1, 0], [0, 0, 0])
+        @test_throws ManifoldDomainError is_vector(N, [1, 1, 0], [0, 0, 0], true)
         p = [1.0 1.0 0.0]
         q = [1.0 0.0 0.0]
         X = q - p
