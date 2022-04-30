@@ -32,5 +32,5 @@ using Test
 
     e6 = ManifoldDomainError("A.", e)
     s6 = sprint(showerror, e6)
-    @test s6 == "ManifoldDomainError: A.\nDomainError with 1.0:\nNorm not zero."
+    @test s6 == "ManifoldDomainError: A.\n$(s1)"
 end
