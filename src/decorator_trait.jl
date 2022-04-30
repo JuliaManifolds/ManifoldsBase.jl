@@ -141,7 +141,7 @@ function check_size(::TraitList{IsEmbeddedManifold}, M::AbstractDecoratorManifol
     mpe = check_size(get_embedding(M, p), embed(M, p))
     if mpe !== nothing
         return ManifoldDomainError(
-            "$p is not a point on $M because it is not a valid point in its embedding: ",
+            "$p is not a point on $M because it is not a valid point in its embedding.",
             mpe,
         )
     end
@@ -155,7 +155,7 @@ function check_size(::TraitList{IsEmbeddedManifold}, M::AbstractDecoratorManifol
     mpe = check_size(get_embedding(M, p), embed(M, p), embed(M, p, X))
     if mpe !== nothing
         return ManifoldDomainError(
-            "$X is not a tangent vector to $p on $M because it is not a valid tangent vector in its embedding: ",
+            "$X is not a tangent vector to $p on $M because it is not a valid tangent vector in its embedding.",
             mpe,
         )
     end
@@ -338,7 +338,7 @@ function is_point(
     mpe = check_point(get_embedding(M, p), embed(M, p); kwargs...)
     if mpe !== nothing
         wrapped_error = ManifoldDomainError(
-            "$p is not a point on $M because it is not a valid point in its embedding: ",
+            "$p is not a point on $M because it is not a valid point in its embedding.",
             mpe,
         )
         te && throw(wrapped_error)
@@ -386,7 +386,7 @@ function is_vector(
     mpe = check_vector(get_embedding(M, p), embed(M, p), embed(M, p, X); kwargs...)
     if mpe !== nothing
         wrapped_error = ManifoldDomainError(
-            "$X is not a tangent vector to $p on $M because it is not a valid tangent vector in its embedding: ",
+            "$X is not a tangent vector to $p on $M because it is not a valid tangent vector in its embedding.",
             mpe,
         )
         te && throw(wrapped_error)

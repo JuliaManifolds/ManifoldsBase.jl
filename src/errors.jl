@@ -92,6 +92,6 @@ struct ManifoldDomainError{E} <: Exception where {E<:Exception}
 end
 
 function Base.showerror(io::IO, ex::ManifoldDomainError)
-    print(io, ex.outer_text)
+    print(io, "$(ex.outer_text)\n")
     return showerror(io, ex.error)
 end
