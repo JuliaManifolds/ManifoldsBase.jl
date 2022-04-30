@@ -650,7 +650,7 @@ export CachedBasis,
     ProjectedOrthonormalBasis,
     VeeOrthogonalBasis
 
-export CompositeManifoldError, ComponentManifoldError
+export CompositeManifoldError, ComponentManifoldError, ManifoldDomainError
 
 export allocate,
     angle,

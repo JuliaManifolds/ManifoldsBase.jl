@@ -208,7 +208,8 @@ ManifoldsBase.decorated_manifold(::FallbackManifold) = DefaultManifold(3)
         @test is_point(M, [1 0.1 0.1], true)
         @test_throws DomainError is_point(M, [-1, 0, 0], true) #wrong dim (3,1)
         @test !is_point(M, [-1, 0, 0])
-        @test_throws ManifoldDomainError is_point(M, [1, 0.1], true) # size
+        @test_throws ManifoldDomainError is_point(M, [1, 0.1], true) # size (from embedding)
+        @test !is_point(M, [1, 0.1])
         @test is_point(M, [1 0 0], true)
         @test !is_point(M, [-1 0 0]) # right size but <0 1st
         @test_throws DomainError is_point(M, [-1 0 0], true) # right size but <0 1st

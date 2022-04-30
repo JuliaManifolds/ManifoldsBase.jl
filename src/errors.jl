@@ -93,5 +93,5 @@ end
 
 function Base.showerror(io::IO, ex::ManifoldDomainError)
     print(io, ex.outer_text)
-    return print(io, ex.error)
+    return showerror(io, ex.error)
 end
