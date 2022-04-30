@@ -193,12 +193,11 @@ ManifoldsBase.decorated_manifold(::FallbackManifold) = DefaultManifold(3)
         @test is_point(M, [1 0.1 0.1], true)
         @test_throws DomainError is_point(M, [-1, 0, 0], true) #wrong dim (3,1)
         @test !is_point(M, [-1, 0, 0])
-        @test_throws DomainError is_point(M, [1, 0.1], true) # size
+        @test_throws ManifoldDomainError is_point(M, [1, 0.1], true) # size
         @test is_point(M, [1 0 0], true)
         @test !is_point(M, [-1 0 0]) # right size but <0 1st
         @test_throws DomainError is_point(M, [-1 0 0], true) # right size but <0 1st
-        @test_throws DomainError is_vector(M, [1, 0, 0], [1 0 0], true)
-        @test_throws DomainError is_vector(M, [1 0 0], [1], true) # right point, wrong size vector
+        @test_throws ManifoldDomainError is_vector(M, [1 0 0], [1], true) # right point, wrong size vector
         @test !is_vector(M, [1 0 0], [1])
         @test_throws DomainError is_vector(M, [1 0 0], [-1 0 0], true) # right point, vec 1st <0
         @test !is_vector(M, [1 0 0], [-1 0 0])
@@ -212,10 +211,10 @@ ManifoldsBase.decorated_manifold(::FallbackManifold) = DefaultManifold(3)
         X = q - p
         @test ManifoldsBase.check_size(M, p) === nothing
         @test ManifoldsBase.check_size(M, p, X) === nothing
-        @test ManifoldsBase.check_size(M, [1, 2]) isa DomainError
-        @test ManifoldsBase.check_size(M, [1 2 3 4]) isa DomainError
-        @test ManifoldsBase.check_size(M, p, [1, 2]) isa DomainError
-        @test ManifoldsBase.check_size(M, p, [1 2 3 4]) isa DomainError
+        @test ManifoldsBase.check_size(M, [1, 2]) isa ManifoldDomainError
+        @test ManifoldsBase.check_size(M, [1 2 3 4]) isa ManifoldDomainError
+        @test ManifoldsBase.check_size(M, p, [1, 2]) isa ManifoldDomainError
+        @test ManifoldsBase.check_size(M, p, [1 2 3 4]) isa ManifoldDomainError
         @test embed(M, p) == p
         pE = similar(p)
         embed!(M, pE, p)

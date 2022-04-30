@@ -138,14 +138,28 @@ end
 @trait_function check_size(M::AbstractDecoratorManifold, p)
 # Embedded
 function check_size(::TraitList{IsEmbeddedManifold}, M::AbstractDecoratorManifold, p)
-    return check_size(get_embedding(M, p), p)
+    mpe = check_size(get_embedding(M, p), embed(M, p))
+    if mpe !== nothing
+        return ManifoldDomainError(
+            "$p is not a point on $M because it is not a valid point in its embedding: ",
+            mpe,
+        )
+    end
+    return nothing
 end
 
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function check_size(M::AbstractDecoratorManifold, p, X)
 # Embedded
 function check_size(::TraitList{IsEmbeddedManifold}, M::AbstractDecoratorManifold, p, X)
-    return check_size(get_embedding(M, p), p, X)
+    mpe = check_size(get_embedding(M, p), embed(M, p), embed(M, p, X))
+    if mpe !== nothing
+        return ManifoldDomainError(
+            "$X is not a tangent vector to $p on $M because it is not a valid tangent vector in its embedding: ",
+            mpe,
+        )
+    end
+    return nothing
 end
 
 # Introduce Deco Trait | automatic foward | fallback
