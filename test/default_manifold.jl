@@ -1,7 +1,7 @@
 using ManifoldsBase
 using ManifoldsBase:
     @manifold_element_forwards, @manifold_vector_forwards, @default_manifold_fallbacks
-using ManifoldsBase: DefaultManifold, AbstractNumbers
+using ManifoldsBase: DefaultManifold, AbstractNumbers, RealNumbers, ComplexNumbers
 import ManifoldsBase:
     number_eltype,
     check_point,
@@ -147,6 +147,9 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
     rm = ManifoldsBase.ExponentialRetraction()
     irm = ManifoldsBase.LogarithmicInverseRetraction()
 
+    # Representation sizes not equal
+    @test ManifoldsBase.check_size(M, zeros(3, 3)) isa DomainError
+    @test ManifoldsBase.check_size(M, zeros(3), zeros(3, 3)) isa DomainError
     rm2 = CustomDefinedRetraction()
     rm3 = CustomUndefinedRetraction()
 

@@ -603,7 +603,7 @@ export AbstractPowerManifold, PowerManifold
 export AbstractPowerRepresentation,
     NestedPowerRepresentation, NestedReplacingPowerRepresentation
 
-export OutOfInjectivityRadiusError
+export OutOfInjectivityRadiusError, ManifoldDomainError
 
 export AbstractRetractionMethod,
     ApproximateInverseRetraction,
@@ -650,7 +650,7 @@ export CachedBasis,
     ProjectedOrthonormalBasis,
     VeeOrthogonalBasis
 
-export CompositeManifoldError, ComponentManifoldError
+export CompositeManifoldError, ComponentManifoldError, ManifoldDomainError
 
 export allocate,
     angle,
