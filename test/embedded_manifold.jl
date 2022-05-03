@@ -218,7 +218,7 @@ ManifoldsBase.decorated_manifold(::FallbackManifold) = DefaultManifold(3)
         @test_throws DomainError is_vector(M, [1 0 0], [-1 0 0], true) # right point, vec 1st <0
         @test !is_vector(M, [1 0 0], [-1 0 0])
         @test is_vector(M, [1 0 0], [1 0 1], true)
-        @test_throws DomainError is_vector(M, [-1, 0, 0], [0, 0, 0], true)
+        @test_throws ManifoldDomainError is_vector(M, [-1, 0, 0], [0, 0, 0], true)
         @test_throws DomainError is_vector(M, [1, 0, 0], [-1, 0, 0], true)
         @test !is_vector(M, [-1, 0, 0], [0, 0, 0])
         @test !is_vector(M, [1, 0, 0], [-1, 0, 0])

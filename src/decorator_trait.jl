@@ -330,11 +330,6 @@ function is_point(
     kwargs...,
 )
     # to be safe check_size first
-    es = check_size(M, p)
-    if es !== nothing
-        te && throw(es)
-        return false
-    end
     try
         pt = is_point(get_embedding(M, p), embed(M, p), te; kwargs...)
         !pt && return false # no error thrown (deactivated) but returned false -> return false
@@ -344,9 +339,13 @@ function is_point(
                 "$p is not a point on $M because it is not a valid point in its embedding.",
                 e,
             )
+            te && throw(e)
+            return false
         end
-        # one could also move these two lines into the if to only catch/handle those two
-        te && throw(e)
+    end
+    es = check_size(M, p)
+    if es !== nothing
+        te && throw(es)
         return false
     end
     mpe = check_point(M, p; kwargs...)
@@ -378,14 +377,19 @@ function is_vector(
     if cbp
         # check whether p is valid before embedding the tangent vector
         # throws it te=true
-        ep = is_point(M, p, te; kwargs...)
-        !ep && return false
-    end
-    # now that we know p is valid, check size of X
-    es = check_size(M, p, X)
-    if es !== nothing
-        te && throw(es) # error & throw?
-        return false
+        try
+            ep = is_point(M, p, te; kwargs...)
+            !ep && return false
+        catch e
+            if e isa DomainError || e isa AbstractManifoldDomainError
+                e = ManifoldDomainError(
+                    "$X is not a tangent vector to $p on $M because its bas epoint is not valid point on $M.",
+                    e,
+                )
+                te && throw(e)
+                return false
+            end
+        end
     end
     # Check vector in embedding
     try
@@ -397,9 +401,15 @@ function is_vector(
                 "$X is not a tangent vector to $p on $M because it is not a valid tangent vector in its embedding.",
                 e,
             )
+            # one could also move these two lines into the if to only catch/handle those two
+            te && throw(e)
+            return false
         end
-        # one could also move these two lines into the if to only catch/handle those two
-        te && throw(e)
+    end
+    # now that we know p is valid, check size of X
+    es = check_size(M, p, X)
+    if es !== nothing
+        te && throw(es) # error & throw?
         return false
     end
     # Check (additional) local stuff
