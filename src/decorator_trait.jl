@@ -327,6 +327,11 @@ function is_point(
     kwargs...,
 )
     # to be safe check_size first
+    es = check_size(M, p)
+    if es !== nothing
+        te && throw(es)
+        return false
+    end
     try
         pt = is_point(get_embedding(M, p), embed(M, p), te; kwargs...)
         !pt && return false # no error thrown (deactivated) but returned false -> return false
@@ -340,11 +345,6 @@ function is_point(
             return false
         end
         throw(e) #an error occured that we do not handle ourselves -> rethrow.
-    end
-    es = check_size(M, p)
-    if es !== nothing
-        te && throw(es)
-        return false
     end
     mpe = check_point(M, p; kwargs...)
     mpe === nothing && return true
@@ -372,6 +372,11 @@ function is_vector(
     cbp = true;
     kwargs...,
 )
+    es = check_size(M, p, X)
+    if es !== nothing
+        te && throw(es) # error & throw?
+        return false
+    end
     if cbp
         # check whether p is valid before embedding the tangent vector
         # throws it te=true
@@ -405,12 +410,6 @@ function is_vector(
             return false
         end
         throw(e) #an error occured that we do not handle ourselves -> rethrow.
-    end
-    # now that we know p is valid, check size of X
-    es = check_size(M, p, X)
-    if es !== nothing
-        te && throw(es) # error & throw?
-        return false
     end
     # Check (additional) local stuff
     mtve = check_vector(M, p, X; kwargs...)
