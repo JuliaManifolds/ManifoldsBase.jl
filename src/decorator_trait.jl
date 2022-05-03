@@ -335,13 +335,18 @@ function is_point(
         te && throw(es)
         return false
     end
-    mpe = check_point(get_embedding(M, p), embed(M, p); kwargs...)
-    if mpe !== nothing
-        wrapped_error = ManifoldDomainError(
-            "$p is not a point on $M because it is not a valid point in its embedding.",
-            mpe,
-        )
-        te && throw(wrapped_error)
+    try
+        pt = is_point(get_embedding(M, p), embed(M, p), te; kwargs...)
+        !pt && return false # no error thrown (deactivated) but returned false -> return false
+    catch e
+        if e isa DomainError || e isa AbstractManifoldDomainError
+            e = ManifoldDomainError(
+                "$p is not a point on $M because it is not a valid point in its embedding.",
+                e,
+            )
+        end
+        # one could also move these two lines into the if to only catch/handle those two
+        te && throw(e)
         return false
     end
     mpe = check_point(M, p; kwargs...)
@@ -383,13 +388,18 @@ function is_vector(
         return false
     end
     # Check vector in embedding
-    mpe = check_vector(get_embedding(M, p), embed(M, p), embed(M, p, X); kwargs...)
-    if mpe !== nothing
-        wrapped_error = ManifoldDomainError(
-            "$X is not a tangent vector to $p on $M because it is not a valid tangent vector in its embedding.",
-            mpe,
-        )
-        te && throw(wrapped_error)
+    try
+        tv = is_vector(get_embedding(M, p), embed(M, p), embed(M, p, X), te, cbp; kwargs...)
+        !tv && return false # no error thrown (deactivated) but returned false -> return false
+    catch e
+        if e isa DomainError || e isa AbstractManifoldDomainError
+            e = ManifoldDomainError(
+                "$X is not a tangent vector to $p on $M because it is not a valid tangent vector in its embedding.",
+                e,
+            )
+        end
+        # one could also move these two lines into the if to only catch/handle those two
+        te && throw(e)
         return false
     end
     # Check (additional) local stuff
