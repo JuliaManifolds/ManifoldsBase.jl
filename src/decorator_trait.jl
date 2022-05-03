@@ -147,15 +147,12 @@ function check_size(::TraitList{IsEmbeddedManifold}, M::AbstractDecoratorManifol
     end
     return nothing
 end
-
-# Introduce Deco Trait | automatic foward | fallback
-@trait_function check_size(M::AbstractDecoratorManifold, p, X)
 # Embedded
 function check_size(::TraitList{IsEmbeddedManifold}, M::AbstractDecoratorManifold, p, X)
     mpe = check_size(get_embedding(M, p), embed(M, p), embed(M, p, X))
     if mpe !== nothing
         return ManifoldDomainError(
-            "$X is not a tangent vector to $p on $M because it is not a valid tangent vector in its embedding.",
+            "$X is not a tangent vector at $p on $M because it is not a valid tangent vector in its embedding.",
             mpe,
         )
     end
@@ -342,6 +339,7 @@ function is_point(
             te && throw(e)
             return false
         end
+        throw(e) #an error occured that we do not handle ourselves -> rethrow.
     end
     es = check_size(M, p)
     if es !== nothing
@@ -382,13 +380,14 @@ function is_vector(
             !ep && return false
         catch e
             if e isa DomainError || e isa AbstractManifoldDomainError
-                e = ManifoldDomainError(
+                ew = ManifoldDomainError(
                     "$X is not a tangent vector to $p on $M because its bas epoint is not valid point on $M.",
                     e,
                 )
-                te && throw(e)
+                te && throw(ew)
                 return false
             end
+            throw(e) #not an error we handle here
         end
     end
     # Check vector in embedding
@@ -397,14 +396,15 @@ function is_vector(
         !tv && return false # no error thrown (deactivated) but returned false -> return false
     catch e
         if e isa DomainError || e isa AbstractManifoldDomainError
-            e = ManifoldDomainError(
+            ew = ManifoldDomainError(
                 "$X is not a tangent vector to $p on $M because it is not a valid tangent vector in its embedding.",
                 e,
             )
             # one could also move these two lines into the if to only catch/handle those two
-            te && throw(e)
+            te && throw(ew)
             return false
         end
+        throw(e) #an error occured that we do not handle ourselves -> rethrow.
     end
     # now that we know p is valid, check size of X
     es = check_size(M, p, X)
