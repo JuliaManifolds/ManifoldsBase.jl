@@ -147,6 +147,8 @@ function check_size(::TraitList{IsEmbeddedManifold}, M::AbstractDecoratorManifol
     end
     return nothing
 end
+# Introduce Deco Trait | automatic foward | fallback
+@trait_function check_size(M::AbstractDecoratorManifold, p, X)
 # Embedded
 function check_size(::TraitList{IsEmbeddedManifold}, M::AbstractDecoratorManifold, p, X)
     mpe = check_size(get_embedding(M, p), embed(M, p), embed(M, p, X))
