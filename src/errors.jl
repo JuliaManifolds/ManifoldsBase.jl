@@ -1,3 +1,10 @@
+"""
+    AbstractManifoldDomainError <: Exception
+
+An absytract Case for Errors when checking validity of points/vectors on mainfolds
+"""
+abstract type AbstractManifoldDomainError <: Exception end
+
 @doc """
     CompnentError{I,E} <: Exception
 
@@ -8,7 +15,7 @@ Store an error that occured in a component, where the additional `index` is stor
 * `index` index where the error occured`
 * `error` error that occured.
 """
-struct ComponentManifoldError{I,E} <: Exception where {I,E<:Exception}
+struct ComponentManifoldError{I,E} <: AbstractManifoldDomainError where {I,E<:Exception}
     index::I
     error::E
 end
@@ -25,7 +32,7 @@ with [`ComponentManifoldError`](@ref) to store a set of errors that occured.
 # Fields
 * `errors` a `Vector` of `<:Exceptions`.
 """
-struct CompositeManifoldError{T} <: Exception where {T<:Exception}
+struct CompositeManifoldError{T} <: AbstractManifoldDomainError where {T<:Exception}
     errors::Vector{T}
 end
 CompositeManifoldError() = CompositeManifoldError{Exception}(Exception[])
@@ -86,7 +93,7 @@ An error to represent a nested (Domain) error on a manifold, for example
 if a point or tangent vector is invalid because its representation in some
 embedding is already invalid.
 """
-struct ManifoldDomainError{E} <: Exception where {E<:Exception}
+struct ManifoldDomainError{E} <: AbstractManifoldDomainError where {E<:Exception}
     outer_text::String
     error::E
 end
