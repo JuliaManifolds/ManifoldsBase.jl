@@ -343,8 +343,6 @@ function is_point(
                 "$p is not a point on $M because it is not a valid point in its embedding.",
                 e,
             )
-            te && throw(e)
-            return false
         end
         throw(e) #an error occured that we do not handle ourselves -> rethrow.
     end
@@ -387,14 +385,12 @@ function is_vector(
             !ep && return false
         catch e
             if e isa DomainError || e isa AbstractManifoldDomainError
-                ew = ManifoldDomainError(
+                e = ManifoldDomainError(
                     "$X is not a tangent vector to $p on $M because its bas epoint is not valid point on $M.",
                     e,
                 )
-                te && throw(ew)
-                return false
             end
-            throw(e) #not an error we handle here
+            throw(e)
         end
     end
     # Check vector in embedding
@@ -403,15 +399,12 @@ function is_vector(
         !tv && return false # no error thrown (deactivated) but returned false -> return false
     catch e
         if e isa DomainError || e isa AbstractManifoldDomainError
-            ew = ManifoldDomainError(
+            e = ManifoldDomainError(
                 "$X is not a tangent vector to $p on $M because it is not a valid tangent vector in its embedding.",
                 e,
             )
-            # one could also move these two lines into the if to only catch/handle those two
-            te && throw(ew)
-            return false
         end
-        throw(e) #an error occured that we do not handle ourselves -> rethrow.
+        throw(e)
     end
     # Check (additional) local stuff
     mtve = check_vector(M, p, X; kwargs...)
