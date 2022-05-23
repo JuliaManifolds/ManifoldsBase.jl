@@ -216,29 +216,46 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
             @test mid_point!(M, midp, pts[1], pts[2]) === midp
             @test midp == convert(T, [0.5, 0.5, 0.0])
 
+            q = copy(M, pts[1])
+            Ts = [0.0, 1.0 / 2, 1.0]
             @testset "Geodesic interface test" begin
                 @test isapprox(M, geodesic(M, pts[1], tv1)(0.0), pts[1])
                 @test isapprox(M, geodesic(M, pts[1], tv1)(1.0), pts[2])
+                g! = geodesic!(M, pts[1], tv1)
+                g!(q, 0.0)
+                isapprox(M, q, pts[1])
+                g!(q, 0.0)
+                isapprox(M, q, pts[2])
+                geodesic!(M, q, pts[1], tv1, 1.0 / 2)
+                isapprox(M, q, midp)
                 @test isapprox(M, geodesic(M, pts[1], tv1, 1.0), pts[2])
                 @test isapprox(M, geodesic(M, pts[1], tv1, 1.0 / 2), midp)
                 @test isapprox(M, shortest_geodesic(M, pts[1], pts[2])(0.0), pts[1])
                 @test isapprox(M, shortest_geodesic(M, pts[1], pts[2])(1.0), pts[2])
+                sg! = shortest_geodesic!(M, pts[1], tv1)
+                sg!(q, 0.0)
+                isapprox(M, q, pts[1])
+                sg!(q, 0.0)
+                isapprox(M, q, pts[2])
                 @test isapprox(M, shortest_geodesic(M, pts[1], pts[2], 0.0), pts[1])
                 @test isapprox(M, shortest_geodesic(M, pts[1], pts[2], 1.0), pts[2])
+                shortest_geodesic!(M, q, pts[1], pts[2], 0.5)
+                isapprox(M, q, midp)
                 @test all(
-                    isapprox.(
-                        Ref(M),
-                        geodesic(M, pts[1], tv1, [0.0, 1.0 / 2, 1.0]),
-                        [pts[1], midp, pts[2]],
-                    ),
+                    isapprox.(Ref(M), geodesic(M, pts[1], tv1, Ts), [pts[1], midp, pts[2]]),
                 )
                 @test all(
                     isapprox.(
                         Ref(M),
-                        shortest_geodesic(M, pts[1], pts[2], [0.0, 1.0 / 2, 1.0]),
+                        shortest_geodesic(M, pts[1], pts[2], Ts),
                         [pts[1], midp, pts[2]],
                     ),
                 )
+                Q = [copy(M, q), copy(M, q), copy(M, q)]
+                geodesic!(M, Q, pts[1], tv1, Ts)
+                @test all(isapprox.(Ref(M), Q, [pts[1], midp, pts[2]]))
+                shortest_geodesic!(M, Q, pts[1], pts[2], Ts)
+                @test all(isapprox.(Ref(M), Q, [pts[1], midp, pts[2]]))
             end
 
             @testset "basic linear algebra in tangent space" begin
