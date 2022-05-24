@@ -595,6 +595,43 @@ function get_vector!(M::PowerManifoldNestedReplacing, Y, p, c, B::AbstractBasis)
     return Y
 end
 
+function _get_vectors(
+    M::PowerManifoldNested,
+    p,
+    B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:PowerBasisData},
+) where {𝔽}
+    zero_tv = zero_vector(M, p)
+    rep_size = representation_size(M.manifold)
+    vs = typeof(zero_tv)[]
+    for i in get_iterator(M)
+        b_i = _access_nested(B.data.bases, i)
+        p_i = _read(M, rep_size, p, i)
+        for v in b_i.data
+            new_v = copy(M, p, zero_tv)
+            copyto!(M.manifold, _write(M, rep_size, new_v, i), p_i, v)
+            push!(vs, new_v)
+        end
+    end
+    return vs
+end
+function _get_vectors(
+    M::PowerManifoldNestedReplacing,
+    p,
+    B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:PowerBasisData},
+) where {𝔽}
+    zero_tv = zero_vector(M, p)
+    vs = typeof(zero_tv)[]
+    for i in get_iterator(M)
+        b_i = _access_nested(B.data.bases, i)
+        for v in b_i.data
+            new_v = copy(M, p, zero_tv)
+            new_v[i...] = v
+            push!(vs, new_v)
+        end
+    end
+    return vs
+end
+
 """
     getindex(p, M::AbstractPowerManifold, i::Union{Integer,Colon,AbstractVector}...)
     p[M::AbstractPowerManifold, i...]
