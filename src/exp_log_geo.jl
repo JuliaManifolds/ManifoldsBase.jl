@@ -166,7 +166,7 @@ When there are multiple shortest geodesics, a deterministic choice will be retur
 This function returns a function of time, which may be a `Real` or an `AbstractVector`.
 """
 shortest_geodesic(M::AbstractManifold, p, q) = geodesic(M, p, log(M, p, q))
-@docs raw"""
+@doc raw"""
     shortest_geodesic(M::AabstractManifold, p, q, t::Real)
 
 Evaluate a [`geodesic`](@ref) $γ_{p,q}(t)$ whose length is the shortest path between the
@@ -174,7 +174,7 @@ points `p`and `q`, where $γ_{p,q}(0)=p$ and $γ_{p,q}(1)=q$ at time `t`.
 When there are multiple shortest geodesics, a deterministic choice will be returned.
 """
 shortest_geodesic(M::AbstractManifold, p, q, t::Real) = geodesic(M, p, log(M, p, q), t)
-@docs raw"""
+@doc raw"""
     shortest_geodesic(M::AbstractManifold, p, q, T::AbstractVector) -> AbstractVector
 
 Evaluate a [`geodesic`](@ref) $γ_{p,q}(t)$ whose length is the shortest path between the
@@ -204,7 +204,7 @@ mutate (and return) the point `r` and the vector of points `R`, respectively,
 returning the point at time `t` or points at times `t` in `T` along the shortest [`geodesic`](@ref).
 """
 shortest_geodesic!(M::AbstractManifold, p, q) = geodesic!(M, p, log(M, p, q))
-@docs raw"""
+@doc raw"""
     shortest_geodesic!(M::AabstractManifold, r, p, q, t::Real)
 
 Evaluate a [`geodesic`](@ref) $γ_{p,q}(t)$ whose length is the shortest path between the
@@ -214,7 +214,7 @@ When there are multiple shortest geodesics, a deterministic choice will be taken
 function shortest_geodesic!(M::AbstractManifold, r, p, q, t::Real)
     return geodesic!(M, r, p, log(M, p, q), t)
 end
-@docs raw"""
+@doc raw"""
     shortest_geodesic!(M::AbstractManifold, R, p, q, T::AbstractVector) -> AbstractVector
 
 Evaluate a [`geodesic`](@ref) $γ_{p,q}(t)$ whose length is the shortest path between the
