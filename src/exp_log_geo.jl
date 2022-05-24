@@ -47,14 +47,33 @@ i.e. the curve is acceleration free with respect to the Riemannian metric.
 This yields, that the curve has constant velocity that is locally distance-minimizing.
 
 This function returns a function of (time) `t`.
-
-    geodesic(M::AbstractManifold, p, X, t::Real)
-    geodesic(M::AbstractManifold, p, X, T::AbstractVector) -> AbstractVector
-
-Return the point at time `t` or points at times `t` in `T` along the geodesic.
 """
 geodesic(M::AbstractManifold, p, X) = t -> exp(M, p, X, t)
+@doc raw"""
+    geodesic(M::AbstractManifold, p, X, t::Real)
+
+Evaluate the geodesic ``γ_{p,X}: I → \mathcal M``,
+with ``γ_{p,X}(0) = p`` and ``\dot γ_{p,X}(0) = X`` a geodesic further fulfills
+
+```math
+∇_{\dot γ_{p,X}(t)} \dot γ_{p,X}(t) = 0,
+```
+
+at time `t`.
+"""
 geodesic(M::AbstractManifold, p, X, t::Real) = exp(M, p, X, t)
+@doc raw"""
+    geodesic(M::AbstractManifold, p, X, T::AbstractVector) -> AbstractVector
+
+Evaluate the geodesic ``γ_{p,X}: I → \mathcal M``,
+with ``γ_{p,X}(0) = p`` and ``\dot γ_{p,X}(0) = X`` a geodesic further fulfills
+
+```math
+∇_{\dot γ_{p,X}(t)} \dot γ_{p,X}(t) = 0,
+```
+
+at time points `t` from `T`.
+"""
 geodesic(M::AbstractManifold, p, X, T::AbstractVector) = map(t -> exp(M, p, X, t), T)
 
 @doc raw"""
@@ -72,14 +91,37 @@ i.e. the curve is acceleration free with respect to the Riemannian metric.
 This yields, that the curve has constant velocity that is locally distance-minimizing.
 
 This function returns a function `(q,t)` of (time) `t` that mutates `q``.
-
-    geodesic!(M::AbstractManifold, q, p, X, t::Real)
-    geodesic!(M::AbstractManifold, Q, p, X, T::AbstractVector) -> AbstractVector
-
-Return the point at time `t` or points at times `t` in `T` along the geodesic and mutate `q`and `Q`, respectively.
 """
 geodesic!(M::AbstractManifold, p, X) = (q, t) -> exp!(M, q, p, X, t)
+@doc raw"""
+    geodesic!(M::AbstractManifold, q, p, X, t::Real)
+
+Get the geodesic with initial point `p` and velocity `X` on the [`AbstractManifold`](@ref) `M`.
+A geodesic is a curve of zero acceleration. That is for the curve ``γ_{p,X}: I → \mathcal M``,
+with ``γ_{p,X}(0) = p`` and ``\dot γ_{p,X}(0) = X`` a geodesic further fulfills
+
+```math
+∇_{\dot γ_{p,X}(t)} \dot γ_{p,X}(t) = 0,
+```
+
+i.e. the curve is acceleration free with respect to the Riemannian metric.
+This function evaluates the geodeic at `t` in place of `q`.
+"""
 geodesic!(M::AbstractManifold, q, p, X, t::Real) = exp!(M, q, p, X, t)
+@doc raw"""
+    geodesic!(M::AbstractManifold, Q, p, X, T::AbstractVector) -> AbstractVector
+
+Get the geodesic with initial point `p` and velocity `X` on the [`AbstractManifold`](@ref) `M`.
+A geodesic is a curve of zero acceleration. That is for the curve ``γ_{p,X}: I → \mathcal M``,
+with ``γ_{p,X}(0) = p`` and ``\dot γ_{p,X}(0) = X`` a geodesic further fulfills
+
+```math
+∇_{\dot γ_{p,X}(t)} \dot γ_{p,X}(t) = 0,
+```
+
+i.e. the curve is acceleration free with respect to the Riemannian metric.
+This function evaluates the geodeic at time points `t` fom `T` in place of `Q`.
+"""
 function geodesic!(M::AbstractManifold, Q, p, X, T::AbstractVector)
     for (q, t) in zip(Q, T)
         exp!(M, q, p, X, t)
@@ -118,18 +160,27 @@ log!(M::AbstractManifold, X, p, q)
     shortest_geodesic(M::AbstractManifold, p, q) -> Function
 
 Get a [`geodesic`](@ref) $γ_{p,q}(t)$ whose length is the shortest path between the
-points `p`and `q`, where $γ_{p,q}(0)=p$ and $γ_{p,q}(1)=q$. When there are
-multiple shortest geodesics, a deterministic choice will be returned.
+points `p`and `q`, where $γ_{p,q}(0)=p$ and $γ_{p,q}(1)=q$.
+When there are multiple shortest geodesics, a deterministic choice will be returned.
 
 This function returns a function of time, which may be a `Real` or an `AbstractVector`.
-
-    shortest_geodesic(M::AabstractManifold, p, q, t::Real)
-    shortest_geodesic(M::AbstractManifold, p, q, T::AbstractVector) -> AbstractVector
-
-Return the point at time `t` or points at times `t` in `T` along the shortest [`geodesic`](@ref).
 """
 shortest_geodesic(M::AbstractManifold, p, q) = geodesic(M, p, log(M, p, q))
+@docs raw"""
+    shortest_geodesic(M::AabstractManifold, p, q, t::Real)
+
+Evaluate a [`geodesic`](@ref) $γ_{p,q}(t)$ whose length is the shortest path between the
+points `p`and `q`, where $γ_{p,q}(0)=p$ and $γ_{p,q}(1)=q$ at time `t`.
+When there are multiple shortest geodesics, a deterministic choice will be returned.
+"""
 shortest_geodesic(M::AbstractManifold, p, q, t::Real) = geodesic(M, p, log(M, p, q), t)
+@docs raw"""
+    shortest_geodesic(M::AbstractManifold, p, q, T::AbstractVector) -> AbstractVector
+
+Evaluate a [`geodesic`](@ref) $γ_{p,q}(t)$ whose length is the shortest path between the
+points `p`and `q`, where $γ_{p,q}(0)=p$ and $γ_{p,q}(1)=q$ at time points `T`.
+When there are multiple shortest geodesics, a deterministic choice will be returned.
+"""
 function shortest_geodesic(M::AbstractManifold, p, q, T::AbstractVector)
     return geodesic(M, p, log(M, p, q), T)
 end
@@ -142,7 +193,7 @@ Get a [`geodesic`](@ref) $γ_{p,q}(t)$ whose length is the shortest path between
 points `p`and `q`, where $γ_{p,q}(0)=p$ and $γ_{p,q}(1)=q$. When there are
 multiple shortest geodesics, a deterministic choice will be returned.
 
-This function returns a function `(r,t) -> ... ` of time `t` which mutates `r`.
+This function returns a function `(r,t) -> ... ` of time `t` which works in place of `r`.
 
 Further variants
 
@@ -153,9 +204,23 @@ mutate (and return) the point `r` and the vector of points `R`, respectively,
 returning the point at time `t` or points at times `t` in `T` along the shortest [`geodesic`](@ref).
 """
 shortest_geodesic!(M::AbstractManifold, p, q) = geodesic!(M, p, log(M, p, q))
+@docs raw"""
+    shortest_geodesic!(M::AabstractManifold, r, p, q, t::Real)
+
+Evaluate a [`geodesic`](@ref) $γ_{p,q}(t)$ whose length is the shortest path between the
+points `p`and `q`, where $γ_{p,q}(0)=p$ and $γ_{p,q}(1)=q$ at `t` in place of `r`.
+When there are multiple shortest geodesics, a deterministic choice will be taken.
+"""
 function shortest_geodesic!(M::AbstractManifold, r, p, q, t::Real)
     return geodesic!(M, r, p, log(M, p, q), t)
 end
+@docs raw"""
+    shortest_geodesic!(M::AbstractManifold, R, p, q, T::AbstractVector) -> AbstractVector
+
+Evaluate a [`geodesic`](@ref) $γ_{p,q}(t)$ whose length is the shortest path between the
+points `p`and `q`, where $γ_{p,q}(0)=p$ and $γ_{p,q}(1)=q$ at all `t` from `T` in place of `R`.
+When there are multiple shortest geodesics, a deterministic choice will be taken.
+"""
 function shortest_geodesic!(M::AbstractManifold, R, p, q, T::AbstractVector)
     return geodesic!(M, R, p, log(M, p, q), T)
 end
