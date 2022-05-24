@@ -206,6 +206,17 @@ struct TestArrayRepresentation <: AbstractPowerRepresentation end
           $(sprint(show, "text/plain", B.data.bases[2]))
           """
                     end
+
+                    bv = get_vectors(N, p, B)
+                    @test length(bv) == number_of_coordinates(N, B)
+                    for i in 1:number_of_coordinates(N, B)
+                        @test bv[i] == get_vector(
+                            N,
+                            p,
+                            ManifoldsBase._euclidean_basis_vector(v, i),
+                            B,
+                        )
+                    end
                 end
                 @testset "zero argument allocation" begin
                     @test size(ManifoldsBase.allocate_result(N, rand)) == size(p)
