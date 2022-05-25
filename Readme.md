@@ -1,5 +1,8 @@
 <div align="center">
-    <img src="https://github.com/JuliaManifolds/ManifoldsBase.jl/blob/master/docs/src/assets/logo-text-readme.png" alt="ManifoldsBase.jl Logo with text" width="701">
+    <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="https://github.com/JuliaManifolds/ManifoldsBase.jl/raw/master/docs/src/assets/logo-text-readme-dark.png">
+      <img alt="ManifoldsBase.jl logo with text on the side" src="https://github.com/JuliaManifolds/ManifoldsBase.jl/raw/master/docs/src/assets/logo-text-readme.png">
+    </picture>
 </div>
 
 [![](https://img.shields.io/badge/docs-stable-blue.svg)](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/)
