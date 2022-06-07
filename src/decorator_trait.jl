@@ -224,6 +224,9 @@ end
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function get_vector!(M::AbstractDecoratorManifold, Y, p, c, B::AbstractBasis)
 
+# Introduce Deco Trait | automatic foward | fallback
+@trait_function get_vectors(M::AbstractDecoratorManifold, p, B::AbstractBasis)
+
 @trait_function injectivity_radius(M::AbstractDecoratorManifold)
 function injectivity_radius(
     ::TraitList{IsIsometricEmbeddedManifold},
