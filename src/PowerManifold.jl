@@ -1270,19 +1270,11 @@ function vector_transport_to!(
 end
 
 """
-    view(p, M::AbstractPowerManifold, i::Union{Integer,Colon,AbstractVector}...)
+    view(p, M::PowerManifoldNested, i::Union{Integer,Colon,AbstractVector}...)
 
 Get the view of the element(s) at index `[i...]` of a point `p` on an
 [`AbstractPowerManifold`](@ref) `M` by linear or multidimensional indexing.
 """
-function Base.view(
-    p::AbstractArray,
-    M::AbstractPowerManifold,
-    I::Union{Integer,Colon,AbstractVector}...,
-)
-    rep_size = representation_size(M.manifold)
-    return _write(M, rep_size, p, I...)
-end
 function Base.view(
     p::AbstractArray,
     M::PowerManifoldNested,
@@ -1294,15 +1286,6 @@ end
 
 @inline function _write(M::AbstractPowerManifold, rep_size::Tuple, x::AbstractArray, i::Int)
     return _write(M, rep_size, x, (i,))
-end
-
-@inline function _write(
-    ::AbstractPowerManifold,
-    rep_size::Tuple,
-    x::AbstractArray,
-    i::Tuple,
-)
-    return view(x[i...], rep_size_to_colons(rep_size)...)
 end
 
 @inline function _is_nested_write_getindex(::PowerManifoldNested, x)
