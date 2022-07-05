@@ -2,6 +2,7 @@ using Test
 using ManifoldsBase
 using ManifoldsBase: AbstractNumbers, ℝ, ℂ, NestedReplacingPowerRepresentation
 using StaticArrays
+using LinearAlgebra
 
 power_array_wrapper(::Type{NestedPowerRepresentation}, ::Int) = identity
 power_array_wrapper(::Type{NestedReplacingPowerRepresentation}, i::Int) = SVector{i}
@@ -32,6 +33,14 @@ struct TestArrayRepresentation <: AbstractPowerRepresentation end
         # check - though only because this function exists for avoiding ambiguities.
         cm = ManifoldsBase.allocate_result(N, get_coordinates, p, X, DefaultBasis())
         @test size(X) == size(cm)
+    end
+
+    @testset "PowerManifoldNested with mutable element" begin
+        M = ManifoldsBase.DefaultManifold(2, 2)
+        N = PowerManifold(M, NestedPowerRepresentation(), 2)
+        p = [UpperTriangular([1 2; 2 1]), UpperTriangular([1 2; 2 1])]
+        q = [UpperTriangular([2 3; 3 2]), UpperTriangular([1 2; 2 1])]
+        @test typeof(log(N, p, q)) === typeof(p)
     end
 
     for PowerRepr in [NestedPowerRepresentation, NestedReplacingPowerRepresentation]
