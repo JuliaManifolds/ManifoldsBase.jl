@@ -609,9 +609,12 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
     end
     @testset "DefaultManifold  and ONB" begin
         M = ManifoldsBase.DefaultManifold(3)
-        p = [1.0, 0.0, 0.0]
+        p = [1.0f0, 0.0f0, 0.0f0]
         CB = get_basis(M, p, DefaultOrthonormalBasis())
-        @test CB.data == [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
+        # make sure the right type is propagated
+        @test CB.data isa Vector{Vector{Float32}}
+        @test CB.data ==
+              [[1.0f0, 0.0f0, 0.0f0], [0.0f0, 1.0f0, 0.0f0], [0.0f0, 0.0f0, 1.0f0]]
     end
     @testset "Show methods" begin
         @test repr(CayleyRetraction()) == "CayleyRetraction()"
