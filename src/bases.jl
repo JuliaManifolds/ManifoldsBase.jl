@@ -447,9 +447,13 @@ end
 function get_basis_orthonormal(M::AbstractManifold, p, N::AbstractNumbers; kwargs...)
     B = DefaultOrthonormalBasis(N)
     dim = number_of_coordinates(M, B)
+    Eltp = number_eltype(p)
     return CachedBasis(
         B,
-        [get_vector(M, p, [ifelse(i == j, 1, 0) for j in 1:dim], B) for i in 1:dim],
+        [
+            get_vector(M, p, [ifelse(i == j, one(Eltp), zero(Eltp)) for j in 1:dim], B) for
+            i in 1:dim
+        ],
     )
 end
 
