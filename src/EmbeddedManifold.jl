@@ -37,7 +37,7 @@ end
 
 function allocate_result(M::EmbeddedManifold, f::typeof(project), x...)
     T = allocate_result_type(M, f, x)
-    return allocate(x[1], T, representation_size(base_manifold(M)))
+    return allocate(M, x[1], T, representation_size(base_manifold(M)))
 end
 
 """

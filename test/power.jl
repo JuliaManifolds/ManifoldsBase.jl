@@ -43,6 +43,13 @@ struct TestArrayRepresentation <: AbstractPowerRepresentation end
         @test typeof(log(N, p, q)) === typeof(p)
     end
 
+    @testset "PowerManifoldNestedReplacing with SArray element" begin
+        M = ManifoldsBase.DefaultManifold(2, 2)
+        N = PowerManifold(M, NestedReplacingPowerRepresentation(), 2)
+        p = [SMatrix{2,2,Float64}([i i+1; i-1 i-2]) for i in 1:2]
+        allocate(M, p) isa Vector{SMatrix{2,2,Float64,4}}
+    end
+
     for PowerRepr in [NestedPowerRepresentation, NestedReplacingPowerRepresentation]
         @testset "PowerManifold with $(PowerRepr)" begin
             M = ManifoldsBase.DefaultManifold(3)
