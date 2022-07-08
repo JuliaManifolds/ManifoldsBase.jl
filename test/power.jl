@@ -7,7 +7,10 @@ using LinearAlgebra
 power_array_wrapper(::Type{NestedPowerRepresentation}, ::Int) = identity
 power_array_wrapper(::Type{NestedReplacingPowerRepresentation}, i::Int) = SVector{i}
 
-function ManifoldsBase.allocate(::PowerManifoldNestedReplacing, x::AbstractArray{<:SArray})
+function ManifoldsBase.allocate(
+    ::ManifoldsBase.PowerManifoldNestedReplacing,
+    x::AbstractArray{<:SArray},
+)
     return similar(x)
 end
 
