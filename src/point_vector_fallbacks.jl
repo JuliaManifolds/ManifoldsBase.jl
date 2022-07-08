@@ -138,6 +138,14 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
             return isapprox(M, p.$pfield, X.$vfield, Y.$vfield; kwargs...)
         end
 
+        function ManifoldsBase.is_point(M::$TM, p::$TP, te=false; kwargs...)
+            return is_point(M, p.$pfield, te; kwargs...)
+        end
+
+        function ManifoldsBase.is_vector(M::$TM, p::$TP, X::$TV, te=false, cbp=true; kwargs...)
+            return ManifoldsBase.is_vector(M, p.$pfield, X.$vfield, te, cbp; kwargs...)
+        end
+
         function ManifoldsBase.log!(M::$TM, X::$TV, p::$TP, q::$TP)
             log!(M, X.$vfield, p.$pfield, q.$pfield)
             return X
