@@ -145,10 +145,6 @@ function Base.:^(
     return PowerManifold(M, size...)
 end
 
-function allocate(::PowerManifoldNestedReplacing, x::AbstractArray{<:SArray})
-    return similar(x)
-end
-
 function allocate_result(M::PowerManifoldNested, f, x...)
     if representation_size(M.manifold) === () && length(x) > 0
         return allocate(M, x[1])

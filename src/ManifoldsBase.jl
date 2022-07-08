@@ -22,8 +22,6 @@ import LinearAlgebra: dot, norm, det, cross, I, UniformScaling, Diagonal
 import Markdown: @doc_str
 using LinearAlgebra
 
-using StaticArraysCore: SArray
-
 include("maintypes.jl")
 include("numbers.jl")
 include("bases.jl")
