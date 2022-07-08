@@ -73,7 +73,7 @@ end
 allocate(::AbstractManifold, a, dims::Tuple) = allocate(a, dims)
 allocate(::AbstractManifold, a, T::Type) = allocate(a, T)
 function allocate(::AbstractManifold, a, T::Type, dim1::Integer, dims::Integer...)
-    return allocate(a, T, dims1, dims...)
+    return allocate(a, T, dim1, dims...)
 end
 allocate(::AbstractManifold, a, T::Type, dims::Tuple) = allocate(a, T, dims)
 

@@ -29,6 +29,14 @@ ManifoldsBase.representation_size(::AllocManifold3) = (2, 3)
     @test allocate(([1.0], [2.0]), Int) isa Tuple{Vector{Int},Vector{Int}}
     @test allocate([[1.0], [2.0]]) isa Vector{Vector{Float64}}
     @test allocate([[1.0], [2.0]], Int) isa Vector{Vector{Int}}
+    @test allocate(M, a, 5) isa Vector{Vector{Float64}}
+    @test length(allocate(M, a, 5)) == 5
+    @test allocate(M, a, (5,)) isa Vector{Vector{Float64}}
+    @test length(allocate(M, a, (5,))) == 5
+    @test allocate(M, a, Int, (5,)) isa Vector{Int}
+    @test length(allocate(M, a, Int, (5,))) == 5
+    @test allocate(M, a, Int, 5) isa Vector{Int}
+    @test length(allocate(M, a, Int, 5)) == 5
 
     a1 = allocate([1], 2, 3)
     @test a1 isa Matrix{Int}
