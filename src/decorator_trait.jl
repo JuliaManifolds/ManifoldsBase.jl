@@ -121,7 +121,7 @@ function allocate_result(
     x...,
 )
     T = allocate_result_type(get_embedding(M, x[1]), f, x)
-    return allocate(x[1], T, representation_size(get_embedding(M, x[1])))
+    return allocate(M, x[1], T, representation_size(get_embedding(M, x[1])))
 end
 function allocate_result(
     ::TraitList{IsEmbeddedManifold},
@@ -130,7 +130,7 @@ function allocate_result(
     x...,
 )
     T = allocate_result_type(get_embedding(M, x[1]), f, x)
-    return allocate(x[1], T, representation_size(M))
+    return allocate(M, x[1], T, representation_size(M))
 end
 
 

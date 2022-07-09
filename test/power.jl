@@ -7,6 +7,13 @@ using LinearAlgebra
 power_array_wrapper(::Type{NestedPowerRepresentation}, ::Int) = identity
 power_array_wrapper(::Type{NestedReplacingPowerRepresentation}, i::Int) = SVector{i}
 
+function ManifoldsBase.allocate(
+    ::ManifoldsBase.PowerManifoldNestedReplacing,
+    x::AbstractArray{<:SArray},
+)
+    return similar(x)
+end
+
 struct TestArrayRepresentation <: AbstractPowerRepresentation end
 
 @testset "Power Manifold" begin
@@ -41,6 +48,13 @@ struct TestArrayRepresentation <: AbstractPowerRepresentation end
         p = [UpperTriangular([1 2; 2 1]), UpperTriangular([1 2; 2 1])]
         q = [UpperTriangular([2 3; 3 2]), UpperTriangular([1 2; 2 1])]
         @test typeof(log(N, p, q)) === typeof(p)
+    end
+
+    @testset "PowerManifoldNestedReplacing with SArray element" begin
+        M = ManifoldsBase.DefaultManifold(2, 2)
+        N = PowerManifold(M, NestedReplacingPowerRepresentation(), 2)
+        p = [SMatrix{2,2,Float64}([i i+1; i-1 i-2]) for i in 1:2]
+        allocate(M, p) isa Vector{SMatrix{2,2,Float64,4}}
     end
 
     for PowerRepr in [NestedPowerRepresentation, NestedReplacingPowerRepresentation]
