@@ -78,6 +78,17 @@ end
 allocate(::AbstractManifold, a, T::Type, dims::Tuple) = allocate(a, T, dims)
 
 """
+    _pick_basic_allocation_argument(::AbstractManifold, f, x...)
+
+Pick which one of elements of `x` should be used as a basis for allocation in the
+`allocate_result(M::AbstractManifold, f, x...)` method. This can be specialized to, for
+example, skip `Identity` arguments in Manifolds.jl group-related functions.
+"""
+function _pick_basic_allocation_argument(::AbstractManifold, f, x...)
+    return x[1]
+end
+
+"""
     allocate_result(M::AbstractManifold, f, x...)
 
 Allocate an array for the result of function `f` on [`AbstractManifold`](@ref) `M` and arguments
@@ -88,7 +99,8 @@ isomorphisms.
 """
 @inline function allocate_result(M::AbstractManifold, f, x...)
     T = allocate_result_type(M, f, x)
-    return allocate(M, x[1], T)
+    picked = _pick_basic_allocation_argument(M, f, x...)
+    return allocate(M, picked, T)
 end
 @inline function allocate_result(M::AbstractManifold, f)
     T = allocate_result_type(M, f, ())
