@@ -452,10 +452,7 @@ function get_basis_orthonormal(M::AbstractManifold, p, N::AbstractNumbers; kwarg
     p1 = one(Eltp)
     return CachedBasis(
         B,
-        [
-            get_vector(M, p, [ifelse(i == j, p1, p0) for j in 1:dim], B) for
-            i in 1:dim
-        ],
+        [get_vector(M, p, [ifelse(i == j, p1, p0) for j in 1:dim], B) for i in 1:dim],
     )
 end
 
@@ -721,7 +718,13 @@ end
 end
 function get_vector_orthonormal! end
 
-@inline function _get_vector!(M::AbstractManifold, Y, p, c, B::DiagonalizingOrthonormalBasis)
+@inline function _get_vector!(
+    M::AbstractManifold,
+    Y,
+    p,
+    c,
+    B::DiagonalizingOrthonormalBasis,
+)
     return get_vector_diagonalizing!(M, Y, p, c, B)
 end
 function get_vector_diagonalizing! end
