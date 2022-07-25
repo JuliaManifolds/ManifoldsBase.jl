@@ -52,7 +52,7 @@ function ManifoldsBase._retract(M::DefaultManifold, p, X, ::CustomDefinedRetract
     return retract_custom(M, p, X)
 end
 function retract_custom(::DefaultManifold, p::DefaultPoint, X::DefaultTVector)
-    return DefaultPoint(p.value + X.value)
+    return DefaultPoint(2 * p.value + X.value)
 end
 function ManifoldsBase._inverse_retract(
     M::DefaultManifold,
@@ -63,7 +63,7 @@ function ManifoldsBase._inverse_retract(
     return inverse_retract_custom(M, p, q)
 end
 function inverse_retract_custom(::DefaultManifold, p::DefaultPoint, q::DefaultPoint)
-    return DefaultTVector(q.value - p.value)
+    return DefaultTVector(q.value - 2 * p.value)
 end
 struct MatrixVectorTransport{T} <: AbstractVector{T}
     m::Matrix{T}
@@ -210,6 +210,8 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
             @test isapprox(M, exp(M, pts[1], tv1, 0), pts[1])
 
             @test distance(M, pts[1], pts[2]) ≈ norm(M, pts[1], tv1)
+            @test distance(M, pts[1], pts[2], LogarithmicInverseRetraction()) ≈
+                  norm(M, pts[1], tv1)
 
             @test mid_point(M, pts[1], pts[2]) == convert(T, [0.5, 0.5, 0.0])
             midp = allocate(pts[1])
@@ -549,7 +551,8 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
         @test X3 == log(M, p, q)
         @test log!(M, X3, p, q) == log(M, p, q)
         @test X3 == log(M, p, q)
-        @test inverse_retract(M, p, q, CustomDefinedInverseRetraction()) == -Y
+        @test inverse_retract(M, p, q, CustomDefinedInverseRetraction()) == -2 * Y
+        @test distance(M, p, q, CustomDefinedInverseRetraction()) == 2.0
         X4 = ManifoldsBase.allocate_result(M, inverse_retract, p, q)
         @test inverse_retract!(M, X4, p, q) == inverse_retract(M, p, q)
         @test X4 == inverse_retract(M, p, q)
