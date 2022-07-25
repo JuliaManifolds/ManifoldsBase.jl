@@ -283,6 +283,16 @@ If ``\mathcal M`` is not connected, i.e. consists of several disjoint components
 the distance between two points from different components should be ``∞``.
 """
 distance(M::AbstractManifold, p, q) = norm(M, p, log(M, p, q))
+"""
+    distance(M::AbstractManifold, p, q, m::AbstractInverseRetractionMethod)
+
+Approximate distance between points `p` and `q` on manifold `M` using
+[`AbstractInverseRetractionMethod`](@ref) `m`.
+"""
+function distance(M::AbstractManifold, p, q, m::AbstractInverseRetractionMethod)
+    return norm(M, p, inverse_retract(M, p, q, m))
+end
+distance(M::AbstractManifold, p, q, ::LogarithmicInverseRetraction) = distance(M, p, q)
 
 """
     embed(M::AbstractManifold, p)
