@@ -610,7 +610,7 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
         @test parallel_transport_direction!(M, Y, p, X, X) == X
         @test parallel_transport_along!(M, Y, p, X, []) == X
     end
-    @testset "DefaultManifold  and ONB" begin
+    @testset "DefaultManifold and ONB" begin
         M = ManifoldsBase.DefaultManifold(3)
         p = [1.0f0, 0.0f0, 0.0f0]
         CB = get_basis(M, p, DefaultOrthonormalBasis())
@@ -618,6 +618,13 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
         @test CB.data isa Vector{Vector{Float32}}
         @test CB.data ==
               [[1.0f0, 0.0f0, 0.0f0], [0.0f0, 1.0f0, 0.0f0], [0.0f0, 0.0f0, 1.0f0]]
+
+        # test complex point -> real coordinates
+        MC = ManifoldsBase.DefaultManifold(3; field = ManifoldsBase.ℂ)
+        p = [1.0im, 2.0im, -1.0im]
+        CB = get_basis(MC, p, DefaultOrthonormalBasis(ManifoldsBase.ℂ))
+        @test CB.data isa Vector{Vector{ComplexF64}}
+        @test ManifoldsBase._get_basis_eltype(MC, p, ManifoldsBase.ℂ) === Float64
     end
     @testset "Show methods" begin
         @test repr(CayleyRetraction()) == "CayleyRetraction()"

@@ -444,10 +444,26 @@ function get_basis_diagonalizing end
 function _get_basis(M::AbstractManifold, p, B::DefaultOrthonormalBasis)
     return get_basis_orthonormal(M, p, number_system(B))
 end
+
+"""
+    _get_basis_eltype(M::AbstractManifold{M𝔽}, p, 𝔽::AbstractNumbers) where {M𝔽}
+
+Get the element type for 𝔽-field coordinates of the tangent space at a point `p` from
+manifold `M`. This default assumes that usually complex bases of complex manifolds have
+real coordinates but it can be overridden by a more specific method.
+"""
+@inline function _get_basis_eltype(::AbstractManifold{M𝔽}, p, 𝔽::AbstractNumbers) where {M𝔽}
+    if M𝔽 === 𝔽
+        return real(number_eltype(p))
+    else
+        return number_eltype(p)
+    end
+end
+
 function get_basis_orthonormal(M::AbstractManifold, p, N::AbstractNumbers; kwargs...)
     B = DefaultOrthonormalBasis(N)
     dim = number_of_coordinates(M, B)
-    Eltp = number_eltype(p)
+    Eltp = _get_basis_eltype(M, p, N)
     p0 = zero(Eltp)
     p1 = one(Eltp)
     return CachedBasis(
