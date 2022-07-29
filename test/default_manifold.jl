@@ -624,9 +624,9 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
         p = [1.0im, 2.0im, -1.0im]
         CB = get_basis(MC, p, DefaultOrthonormalBasis(ManifoldsBase.ℂ))
         @test CB.data isa Vector{Vector{ComplexF64}}
-        @test ManifoldsBase._get_basis_eltype(MC, p, ManifoldsBase.ℂ) === Float64
-        @test ManifoldsBase._get_basis_eltype(MC, p, ManifoldsBase.ℝ) === ComplexF64
-        CBR = get_basis(MC, p, DefaultOrthonormalBasis(ManifoldsBase.ℝ))
+        @test ManifoldsBase.coordinate_eltype(MC, p, ManifoldsBase.ℂ) === Float64
+        @test ManifoldsBase.coordinate_eltype(MC, p, ManifoldsBase.ℝ) === ComplexF64
+        CBR = get_basis(MC, p, DefaultOrthonormalBasis())
         @test CBR.data == [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
     end
     @testset "Show methods" begin
