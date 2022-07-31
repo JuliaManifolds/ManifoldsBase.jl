@@ -40,6 +40,10 @@ end
 DefaultTVector(v::T) where {T} = DefaultTVector{T}(v)
 Base.size(X::DefaultTVector) = size(X.value)
 Base.eltype(X::DefaultTVector) = eltype(X.value)
+function Base.fill!(X::DefaultTVector, x)
+    fill!(X.value, x)
+    return X
+end
 
 ManifoldsBase.@manifold_element_forwards DefaultPoint value
 ManifoldsBase.@manifold_vector_forwards DefaultTVector value
@@ -217,6 +221,11 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
             midp = allocate(pts[1])
             @test mid_point!(M, midp, pts[1], pts[2]) === midp
             @test midp == convert(T, [0.5, 0.5, 0.0])
+
+            @test riemann_tensor(M, pts[1], tv1, tv2, tv1) == zero(tv1)
+            tv_rt = allocate(tv1)
+            @test riemann_tensor!(M, tv_rt, pts[1], tv1, tv2, tv1) === tv_rt
+            @test tv_rt == zero(tv1)
 
             q = copy(M, pts[1])
             Ts = [0.0, 1.0 / 2, 1.0]

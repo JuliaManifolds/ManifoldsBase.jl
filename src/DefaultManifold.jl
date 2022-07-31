@@ -114,6 +114,10 @@ function parallel_transport_to!(::DefaultManifold, Y, p, X, q)
     return copyto!(Y, X)
 end
 
+function riemann_tensor!(::DefaultManifold, Xresult, p, X, Y, Z)
+    return fill!(Xresult, 0)
+end
+
 zero_vector(::DefaultManifold, p) = zero(p)
 
 zero_vector!(::DefaultManifold, Y, p) = fill!(Y, 0)
