@@ -418,5 +418,6 @@ ManifoldsBase.decorated_manifold(::FallbackManifold) = DefaultManifold(3)
         # test the explicit fallback to DefaultManifold(3)
         @test inner(M, [1, 0, 0], [1, 2, 3], [0, 1, 0]) == 2
         @test is_point(M, [1, 0, 0])
+        @test ManifoldsBase.allocate_result(M, exp, [1.0, 0.0, 2.0]) isa Vector
     end
 end
