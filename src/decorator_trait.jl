@@ -132,6 +132,14 @@ function allocate_result(
     T = allocate_result_type(get_embedding(M, x[1]), f, x)
     return allocate(M, x[1], T, representation_size(M))
 end
+@inline function allocate_result(
+    ::TraitList{IsExplicitDecorator},
+    M::AbstractDecoratorManifold,
+    f,
+    x...,
+)
+    return allocate_result(decorated_manifold(M), f, x...)
+end
 
 
 # Introduce Deco Trait | automatic foward | fallback
