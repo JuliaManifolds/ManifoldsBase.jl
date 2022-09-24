@@ -352,6 +352,11 @@ DiagonalizingBasisProxy() = DiagonalizingOrthonormalBasis([1.0, 0.0, 0.0])
         Yℂ = get_vector(M, p, aℂ, Bℂ)
         @test Yℂ ≈ X
         @test ManifoldsBase.number_of_coordinates(M, Bℂ) == 6
+
+        @test change_basis(M, p, aℝ, Bℝ, Bℂ) ≈ aℂ
+        aℂ_sim = similar(aℂ)
+        change_basis!(M, aℂ_sim, p, aℝ, Bℝ, Bℂ)
+        @test aℂ_sim ≈ aℂ
     end
 
     @testset "Basis show methods" begin
