@@ -715,6 +715,8 @@ export CompositeManifoldError, ComponentManifoldError, ManifoldDomainError
 export allocate,
     angle,
     base_manifold,
+    change_basis,
+    change_basis!,
     copy,
     copyto!,
     default_inverse_retraction_method,

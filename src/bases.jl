@@ -309,6 +309,27 @@ a complex-valued vector representation is allocated.
 """
 allocation_promotion_function(M::AbstractManifold, f, args::Tuple) = identity
 
+"""
+    change_basis(M::AbstractManifold, p, c, B_in::AbstractBasis, B_out::AbstractBasis)
+
+Given a vector with coordinates `c` at point `p` from manifold `M` in basis `B_in`,
+compute coordinates of the same vector in basis `B_out`.
+"""
+function change_basis(M::AbstractManifold, p, c, B_in::AbstractBasis, B_out::AbstractBasis)
+    return get_coordinates(M, p, get_vector(M, p, c, B_in), B_out)
+end
+
+function change_basis!(
+    M::AbstractManifold,
+    c_out,
+    p,
+    c,
+    B_in::AbstractBasis,
+    B_out::AbstractBasis,
+)
+    return get_coordinates!(M, c_out, p, get_vector(M, p, c, B_in), B_out)
+end
+
 function combine_allocation_promotion_functions(f::T, ::T) where {T}
     return f
 end
