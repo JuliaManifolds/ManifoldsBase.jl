@@ -370,7 +370,7 @@ end
 @doc raw"""
     default_retraction_method(M::PowerManifold)
 
-uses the default retraction method of the internal `M.manifold` also in defaults of
+Use the default retraction method of the internal `M.manifold` also in defaults of
 functions defined for the power manifold, meaning that this is useed elementwise.
 """
 function default_retraction_method(M::PowerManifold)
@@ -380,7 +380,7 @@ end
 @doc raw"""
     default_inverse_retraction_method(M::PowerManifold)
 
-uses the default inverse retraction method of the internal `M.manifold` also in defaults of
+Use the default inverse retraction method of the internal `M.manifold` also in defaults of
 functions defined for the power manifold, meaning that this is useed elementwise.
 """
 function default_inverse_retraction_method(M::PowerManifold)
@@ -390,7 +390,7 @@ end
 @doc raw"""
     default_vector_transport_method(M::PowerManifold)
 
-uses the default vector transport method of the internal `M.manifold` also in defaults of
+Use the default vector transport method of the internal `M.manifold` also in defaults of
 functions defined for the power manifold, meaning that this is useed elementwise.
 """
 function default_vector_transport_method(M::PowerManifold)
