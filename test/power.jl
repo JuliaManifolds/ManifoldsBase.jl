@@ -30,6 +30,9 @@ struct TestArrayRepresentation <: AbstractPowerRepresentation end
         @test ManifoldsBase.check_power_size(O, p) isa DomainError
         @test ManifoldsBase.check_power_size(N, p, X) === nothing
         @test ManifoldsBase.check_power_size(O, p, X) isa DomainError
+        @test default_inverse_retraction_method(M) == default_inverse_retraction_method(N)
+        @test default_retraction_method(M) == default_retraction_method(N)
+        @test default_vector_transport_method(M) == default_vector_transport_method(N)
     end
 
     @testset "PowerManifold and allocation with empty representation size" begin
