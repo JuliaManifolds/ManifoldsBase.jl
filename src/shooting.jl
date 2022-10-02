@@ -64,7 +64,7 @@ function inverse_retract_shooting!(
     gap = norm(M, p, X)
     gap < m.tolerance && return X
     T = real(Base.promote_type(number_eltype(X), number_eltype(p), number_eltype(q)))
-    transport_grid = range(one(T), zero(T); length=m.num_transport_points)[2:(end - 1)]
+    transport_grid = range(one(T), zero(T); length = m.num_transport_points)[2:(end - 1)]
     ΔX = allocate(X)
     ΔXnew = tX = allocate(ΔX)
     retr_tX = allocate_result(M, retract, p, X)
