@@ -69,6 +69,9 @@ end
                 )
                 Y = inverse_retract(M, p, q, inverse_retraction)
                 @test isapprox(M, p, Y, X; atol = 1e-3)
+                Y2 = similar(Y)
+                inverse_retract!(M, Y2, p, q, inverse_retraction)
+                @test isapprox(M, p, Y2, Y)
             end
         end
     end
