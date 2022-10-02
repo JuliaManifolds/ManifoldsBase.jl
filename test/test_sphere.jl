@@ -21,7 +21,7 @@ end
 
 ManifoldsBase.inner(::TestSphere, p, X, Y) = dot(X, Y)
 
-function ManifoldsBase.inverse_retract_project!(::TestSphere, X, p, q)
+function ManifoldsBase.inverse_retract_project!(M::TestSphere, X, p, q)
     X .= q .- p
     project!(M, X, p, X)
     return X
