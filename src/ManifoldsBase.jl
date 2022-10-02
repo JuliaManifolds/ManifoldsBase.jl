@@ -644,6 +644,7 @@ end
 include("errors.jl")
 include("parallel_transport.jl")
 include("vector_transport.jl")
+include("shooting.jl")
 include("vector_spaces.jl")
 include("point_vector_fallbacks.jl")
 include("nested_trait.jl")
@@ -676,6 +677,7 @@ export AbstractRetractionMethod,
     PadeRetraction,
     PolarRetraction,
     ProjectionRetraction,
+    ShootingInverseRetraction,
     SoftmaxRetraction
 
 export AbstractInverseRetractionMethod,
