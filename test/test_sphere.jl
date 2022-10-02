@@ -68,7 +68,7 @@ end
                     10_000,
                 )
                 Y = inverse_retract(M, p, q, inverse_retraction)
-                @test isapprox(M, p, Y, X; atol = 1e-6)
+                @test isapprox(M, p, Y, X; atol = 1e-3)
             end
         end
     end
