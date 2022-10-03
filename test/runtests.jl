@@ -30,6 +30,7 @@ using ManifoldsBase
     include("complex_manifold.jl")
     include("validation_manifold.jl")
     include("embedded_manifold.jl")
+    include("test_sphere.jl")
     include("power.jl")
     include("domain_errors.jl")
     include("vector_transport.jl")

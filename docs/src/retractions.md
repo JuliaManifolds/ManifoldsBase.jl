@@ -29,7 +29,7 @@ The general interface looks as follows.
 
 ```@autodocs
 Modules = [ManifoldsBase]
-Pages = ["retractions.jl"]
+Pages = ["retractions.jl", "shooting.jl"]
 Order = [:function]
 Private = false
 Public = true
@@ -42,7 +42,7 @@ specifies a type. The following ones are available.
 
 ```@autodocs
 Modules = [ManifoldsBase]
-Pages = ["retractions.jl"]
+Pages = ["retractions.jl", "shooting.jl"]
 Order = [:type]
 ```
 
@@ -52,7 +52,7 @@ While you should always add your documentation to [`retract`](@ref) or [`retract
 
 ```@autodocs
 Modules = [ManifoldsBase]
-Pages = ["retractions.jl"]
+Pages = ["retractions.jl", "shooting.jl"]
 Order = [:function]
 Public = false
 Private = true
