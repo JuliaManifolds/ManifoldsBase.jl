@@ -1113,6 +1113,14 @@ function retract!(
     return q
 end
 
+@doc raw"""
+    riemann_tensor(M::AbstractPowerManifold, p, X, Y, Z)
+
+Compute the Riemann tensor at point from `p` with tangent vectors `X`, `Y` and `Z` on
+the [`AbstractPowerManifold`](@ref) `M`.
+"""
+riemann_tensor(M::AbstractPowerManifold, p, X, Y, Z)
+
 function riemann_tensor!(M::AbstractPowerManifold, Xresult, p, X, Y, Z)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
