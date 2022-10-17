@@ -192,6 +192,17 @@ struct TestArrayRepresentation <: AbstractPowerRepresentation end
                             @test view(p, N, 2) == p[2]
                         end
                     end
+
+                    @test isapprox(
+                        N,
+                        p,
+                        riemann_tensor(N, p, X, X, X),
+                        zero_vector(N, p);
+                        atol = eps(),
+                    )
+                    Xresult = allocate(X)
+                    riemann_tensor!(N, Xresult, p, X, X, X)
+                    @test isapprox(N, p, Xresult, zero_vector(N, p); atol = eps())
                 end
                 @testset "Basis, coordinates & vector" begin
                     v = get_coordinates(N, p, q, DefaultBasis())

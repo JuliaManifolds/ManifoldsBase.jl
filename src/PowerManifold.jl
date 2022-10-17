@@ -1113,6 +1113,34 @@ function retract!(
     return q
 end
 
+function riemann_tensor!(M::AbstractPowerManifold, Xresult, p, X, Y, Z)
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        riemann_tensor!(
+            M.manifold,
+            _write(M, rep_size, Xresult, i),
+            _read(M, rep_size, p, i),
+            _read(M, rep_size, X, i),
+            _read(M, rep_size, Y, i),
+            _read(M, rep_size, Z, i),
+        )
+    end
+    return Xresult
+end
+function riemann_tensor!(M::PowerManifoldNestedReplacing, Xresult, p, X, Y, Z)
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        Xresult[i...] = riemann_tensor(
+            M.manifold,
+            _read(M, rep_size, p, i),
+            _read(M, rep_size, X, i),
+            _read(M, rep_size, Y, i),
+            _read(M, rep_size, Z, i),
+        )
+    end
+    return Xresult
+end
+
 """
     set_component!(M::AbstractPowerManifold, q, p, idx...)
 
