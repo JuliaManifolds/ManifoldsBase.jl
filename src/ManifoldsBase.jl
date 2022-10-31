@@ -677,6 +677,7 @@ export AbstractRetractionMethod,
     PadeRetraction,
     PolarRetraction,
     ProjectionRetraction,
+    RetractionWithKeywords,
     ShootingInverseRetraction,
     SoftmaxRetraction
 
