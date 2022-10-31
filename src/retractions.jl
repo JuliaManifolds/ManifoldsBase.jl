@@ -130,6 +130,31 @@ matrix / matrices for point and tangent vector on a [`AbstractManifold`](@ref)
 struct QRRetraction <: AbstractRetractionMethod end
 
 """
+    RetractionWithKeywords{R<:AbstractRetractionMethod,K} <: AbstractRetractionMethod
+
+Since retractions might have keywords, this type is a way to set them as an own type to be
+used as a specific retraction
+
+## Fields
+
+* `retraction` the retraction that is decorated with keywords
+* `kwargs` th ekeyword arguments
+
+## Constructor
+
+    RetractionWithKeywords(m::T; kwargs...) where {T <: AbstractRetractionMethod}
+
+
+"""
+struct RetractionWithKeywords{T<:AbstractRetractionMethod,K} <: AbstractRetractionMethod
+    retraction::T
+    kwargs::K
+end
+function RetractionWithKeywords(m::T; kwargs...) where {T<:AbstractRetractionMethod}
+    return RetractionWithKeywords{T,typeof(kwargs)}(m, kwargs)
+end
+
+"""
     SoftmaxRetraction <: AbstractRetractionMethod
 
 Describes a retraction that is based on the softmax function.
@@ -778,20 +803,33 @@ function retract(
 )
     return retract(M, p, t * X, m)
 end
-function _retract(M::AbstractManifold, p, X, m::EmbeddedRetraction)
-    return retract_embedded(M, p, X, m.retraction)
+function _retract(M::AbstractManifold, p, X, m::EmbeddedRetraction; kwargs...)
+    return retract_embedded(M, p, X, m.retraction; kwargs...)
 end
-_retract(M::AbstractManifold, p, X, ::ExponentialRetraction) = exp(M, p, X)
-function _retract(M::AbstractManifold, p, X, m::ODEExponentialRetraction)
+_retract(M::AbstractManifold, p, X, ::ExponentialRetraction; kwargs...) = exp(M, p, X)
+function _retract(M::AbstractManifold, p, X, m::ODEExponentialRetraction; kwargs...)
     return retract_exp_ode(M, p, X, m.retraction, m.basis)
 end
-_retract(M::AbstractManifold, p, X, ::PolarRetraction) = retract_polar(M, p, X)
-_retract(M::AbstractManifold, p, X, ::ProjectionRetraction) = retract_project(M, p, X)
-_retract(M::AbstractManifold, p, X, ::QRRetraction) = retract_qr(M, p, X)
-_retract(M::AbstractManifold, p, X, ::SoftmaxRetraction) = retract_softmax(M, p, X)
-_retract(M::AbstractManifold, p, X, ::CayleyRetraction) = retract_caley(M, p, X)
-function _retract(M::AbstractManifold, p, X, ::PadeRetraction{n}) where {n}
-    return retract_pade(M, p, X, n)
+function _retract(M::AbstractManifold, p, X, ::PolarRetraction; kwargs...)
+    return retract_polar(M, p, X; kwargs...)
+end
+function _retract(M::AbstractManifold, p, X, ::ProjectionRetraction; kwargs...)
+    return retract_project(M, p, X; kwargs...)
+end
+function _retract(M::AbstractManifold, p, X, ::QRRetraction; kwargs...)
+    return retract_qr(M, p, X; kwargs...)
+end
+function _retract(M::AbstractManifold, p, X, ::SoftmaxRetraction; kwargs...)
+    return retract_softmax(M, p, X; kwargs...)
+end
+function _retract(M::AbstractManifold, p, X, ::CayleyRetraction; kwargs...)
+    return retract_caley(M, p, X; kwargs...)
+end
+function _retract(M::AbstractManifold, p, X, ::PadeRetraction{n}; kwargs...) where {n}
+    return retract_pade(M, p, X, n; kwargs...)
+end
+function _retract(M::AbstractManifold, p, X, m::RetractionWithKeywords)
+    return _retract(M, p, X, m.retraction; m.kwargs...)
 end
 """
     retract_embedded(M::AbstractManifold, p, X, m::AbstractRetractionMethod)
