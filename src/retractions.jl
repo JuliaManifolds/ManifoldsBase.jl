@@ -140,7 +140,7 @@ last layer would be implemented with keywords, so this way they can be passed do
 ## Fields
 
 * `retraction` the retraction that is decorated with keywords
-* `kwargs` th ekeyword arguments
+* `kwargs` the keyword arguments
 
 Note that you can nest this type. Then the most outer specification of a keyword wins.
 
@@ -306,17 +306,17 @@ end
 
 
 """
-    RetractionWithKeywords{R<:AbstractRetractionMethod,K} <: AbstractRetractionMethod
+    InverseRetractionWithKeywords{R<:AbstractRetractionMethod,K} <: AbstractRetractionMethod
 
-Since retractions might have keywords, this type is a way to set them as an own type to be
-used as a specific retraction.
-Another reason for this type is that we dispatch on the retraction first and only the
+Since inverse retractions might have keywords, this type is a way to set them as an own type to be
+used as a specific inverse retraction.
+Another reason for this type is that we dispatch on the inverse retraction first and only the
 last layer would be implemented with keywords, so this way they can be passed down
 
 ## Fields
 
-* `inverse_retraction` the retraction that is decorated with keywords
-* `kwargs` th ekeyword arguments
+* `inverse_retraction` the inverse retraction that is decorated with keywords
+* `kwargs` the keyword arguments
 
 Note that you can nest this type. Then the most outer specification of a keyword wins.
 
@@ -324,7 +324,7 @@ Note that you can nest this type. Then the most outer specification of a keyword
 
     InverseRetractionWithKeywords(m::T; kwargs...) where {T <: AbstractInverseRetractionMethod}
 
-Specify the subtype `T <: `[`AbstractRetractionMethod`](@ref) to have keywords `kwargs...`.
+Specify the subtype `T <: `[`AbstractInverseRetractionMethod`](@ref) to have keywords `kwargs...`.
 """
 struct InverseRetractionWithKeywords{T<:AbstractInverseRetractionMethod,K} <:
        AbstractInverseRetractionMethod
