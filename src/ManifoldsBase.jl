@@ -691,6 +691,7 @@ export AbstractInverseRetractionMethod,
     PadeInverseRetraction,
     PolarInverseRetraction,
     ProjectionInverseRetraction,
+    InverseRetractionWithKeywords,
     SoftmaxInverseRetraction
 
 export AbstractVectorTransportMethod,
