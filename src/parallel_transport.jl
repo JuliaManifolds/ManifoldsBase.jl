@@ -17,13 +17,13 @@ its covariant derivative ``\frac{\mathrm{D}}{\mathrm{d}t}Z`` is zero. Note that 
 
 Then the parallel transport is given by ``Z(1)``.
 """
-function parallel_transport_along(M::AbstractManifold, p, X, c::AbstractVector)
+function parallel_transport_along(M::AbstractManifold, p, X, c::AbstractVector; kwargs...)
     Y = allocate_result(M, vector_transport_along, X, p)
-    return parallel_transport_along!(M, Y, p, X, c)
+    return parallel_transport_along!(M, Y, p, X, c; kwargs...)
 end
 
-function parallel_transport_direction!(M::AbstractManifold, Y, p, X, d)
-    return parallel_transport_to!(M, Y, p, X, exp(M, p, d))
+function parallel_transport_direction!(M::AbstractManifold, Y, p, X, d; kwargs...)
+    return parallel_transport_to!(M, Y, p, X, exp(M, p, d); kwargs...)
 end
 
 @doc raw"""
@@ -34,8 +34,8 @@ i.e. the * the unique geodesic ``c(t)=γ_{p,X}(t)`` from ``γ_{p,d}(0)=p`` into 
 
 By default this function calls [`parallel_transport_to`](@ref)`(M, p, X, q)`, where ``q=\exp_pX``.
 """
-function parallel_transport_direction(M::AbstractManifold, p, X, d)
-    return parallel_transport_to(M, p, X, exp(M, p, d))
+function parallel_transport_direction(M::AbstractManifold, p, X, d; kwargs...)
+    return parallel_transport_to(M, p, X, exp(M, p, d); kwargs...)
 end
 
 function parallel_transport_to! end
@@ -46,7 +46,7 @@ function parallel_transport_to! end
 Compute the [`parallel_transport_along`](@ref) the curve ``c(t) = γ_{p,q}(t)``,
 i.e. the (assumed to be unique) [`geodesic`](@ref) connecting `p` and `q`, of the tangent vector `X`.
 """
-function parallel_transport_to(M::AbstractManifold, p, X, q)
+function parallel_transport_to(M::AbstractManifold, p, X, q; kwargs...)
     Y = allocate_result(M, vector_transport_to, X, p, q)
-    return parallel_transport_to!(M, Y, p, X, q)
+    return parallel_transport_to!(M, Y, p, X, q; kwargs...)
 end

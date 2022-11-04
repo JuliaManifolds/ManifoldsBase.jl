@@ -524,7 +524,14 @@ function _vector_transport_along(
 )
     return vector_transport_along_diff(M, p, X, c, m.retraction; kwargs...)
 end
-function _vector_transport_along(M, p, X, c, m::VectorTransportWithKeywords; kwargs...)
+function _vector_transport_along(
+    M::AbstractManifold,
+    p,
+    X,
+    c,
+    m::VectorTransportWithKeywords;
+    kwargs...,
+)
     return _vector_transport_along(M, p, X, c, m.vector_transport; kwargs..., m.kwargs...)
 end
 
@@ -684,6 +691,26 @@ function _vector_transport_along!(
     kwargs...,
 )
     return vector_transport_along_project!(M, Y, p, X, c; kwargs...)
+end
+function _vector_transport_along!(
+    M::AbstractManifold,
+    Y,
+    p,
+    X,
+    c,
+    m::VectorTransportWithKeywords;
+    kwargs...,
+)
+    return _vector_transport_along!(
+        M,
+        Y,
+        p,
+        X,
+        c,
+        m.vector_transport;
+        kwargs...,
+        m.kwargs...,
+    )
 end
 
 @doc raw"""
@@ -894,7 +921,7 @@ function _vector_transport_direction(
     kwargs...,
 )
     r = default_retraction_method(M)
-    v = length(kwargs) > 0 ? VectorTransportWithKeywords(m, kwargs) : m
+    v = length(kwargs) > 0 ? VectorTransportWithKeywords(m; kwargs...) : m
     return vector_transport_to(M, p, X, retract(M, p, d, r), v)
 end
 function _vector_transport_direction(
@@ -906,7 +933,7 @@ function _vector_transport_direction(
     kwargs...,
 )
     mv =
-        length(kwargs) > 0 ? VectorTransportWithKeywords(m.vector_transport, kwargs) :
+        length(kwargs) > 0 ? VectorTransportWithKeywords(m.vector_transport; kwargs...) :
         m.vector_transport
     mr = m.retraction
     return vector_transport_to(M, p, X, retract(M, p, d, mr), mv)
@@ -934,7 +961,7 @@ function _vector_transport_direction(
         p,
         X,
         d,
-        m.vector_transport,
+        m.vector_transport;
         kwargs...,
         m.kwargs...,
     )
@@ -999,7 +1026,7 @@ function _vector_transport_direction!(
     kwargs...,
 )
     r = default_retraction_method(M)
-    v = length(kwargs) > 0 ? VectorTransportWithKeywords(m, kwargs) : m
+    v = length(kwargs) > 0 ? VectorTransportWithKeywords(m; kwargs...) : m
     return vector_transport_to!(M, Y, p, X, retract(M, p, d, r), v)
 end
 function _vector_transport_direction!(
@@ -1012,7 +1039,7 @@ function _vector_transport_direction!(
     kwargs...,
 )
     v =
-        length(kwargs) > 0 ? VectorTransportWithKeywords(m.vector_transport, kwargs) :
+        length(kwargs) > 0 ? VectorTransportWithKeywords(m.vector_transport; kwargs...) :
         m.vector_transport
     return vector_transport_to!(M, Y, p, X, retract(M, p, d, m.retraction), v)
 end
@@ -1097,7 +1124,7 @@ end
 function _vector_transport_to(M::AbstractManifold, p, X, q, m::VectorTransportTo; kwargs...)
     d = inverse_retract(M, p, q, m.inverse_retraction)
     v =
-        length(kwargs) > 0 ? VectorTransportWithKeywords(m.vector_transport, kwargs) :
+        length(kwargs) > 0 ? VectorTransportWithKeywords(m.vector_transport; kwargs...) :
         m.vector_transport
     return vector_transport_direction(M, p, X, d, v)
 end
@@ -1204,7 +1231,7 @@ function _vector_transport_to!(
     kwargs...,
 )
     d = inverse_retract(M, p, q, m.inverse_retraction)
-    return vector_transport_direction!(M, Y, p, X, d, m.vector_transport; kwargs...)
+    return _vector_transport_direction!(M, Y, p, X, d, m.vector_transport; kwargs...)
 end
 function _vector_transport_to!(
     M::AbstractManifold,
@@ -1299,7 +1326,7 @@ function _vector_transport_to!(
     m::ScaledVectorTransport;
     kwargs...,
 )
-    v = length(kwargs) > 0 ? VectorTransportWithKeywords(m.method, kwargs) : m.method
+    v = length(kwargs) > 0 ? VectorTransportWithKeywords(m.method; kwargs...) : m.method
     vector_transport_to!(M, Y, p, X, q, v)
     Y .*= norm(M, p, X) / norm(M, q, Y)
     return Y

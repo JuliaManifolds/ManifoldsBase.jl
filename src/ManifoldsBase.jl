@@ -702,7 +702,8 @@ export AbstractVectorTransportMethod,
     ScaledVectorTransport,
     SchildsLadderTransport,
     VectorTransportDirection,
-    VectorTransportTo
+    VectorTransportTo,
+    VectorTransportWithKeywords
 
 export CachedBasis,
     DefaultBasis,
