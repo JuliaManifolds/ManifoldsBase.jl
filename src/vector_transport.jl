@@ -293,7 +293,7 @@ last layer would be implemented with keywords, so this way they can be passed do
 * `vector_transport` the vector transport that is decorated with keywords
 * `kwargs` the keyword arguments
 
-Note that you can nest this type. Then the most outer specification of a keyword wins.
+Note that you can nest this type. Then the most outer specification of a keyword is used.
 
 ## Constructor
 
