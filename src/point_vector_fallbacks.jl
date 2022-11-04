@@ -18,43 +18,71 @@ List of forwarded functions:
 """
 macro manifold_element_forwards(T, field::Symbol)
     return esc(quote
-        ManifoldsBase.@manifold_element_forwards ($T) _ ($field)
+        ManifoldsBase.@manifold_element_forwards ($T) _unused ($field)
     end)
 end
 macro manifold_element_forwards(T, Twhere, field::Symbol)
-    return esc(
-        quote
-            ManifoldsBase.allocate(p::$T) where {$Twhere} = $T(allocate(p.$field))
-            function ManifoldsBase.allocate(p::$T, ::Type{P}) where {P,$Twhere}
-                return $T(allocate(p.$field, P))
-            end
-            function ManifoldsBase.allocate(
-                p::$T,
-                ::Type{P},
-                dims::Tuple,
-            ) where {P,$Twhere}
-                return $T(allocate(p.$field, P, dims))
-            end
+    TWT = if Twhere === :_unused
+        T
+    else
+        :($T where {$Twhere})
+    end
+    code = quote
+        function ManifoldsBase.number_eltype(p::$TWT)
+            return typeof(one(eltype(p.$field)))
+        end
 
-            @inline Base.copy(p::$T) where {$Twhere} = $T(copy(p.$field))
+        Base.size(p::$TWT) = size(p.$field)
+    end
+    if Twhere === :_unused
+        push!(
+            code.args,
+            quote
+                ManifoldsBase.allocate(p::$T) = $T(allocate(p.$field))
+                function ManifoldsBase.allocate(p::$T, ::Type{P}) where {P}
+                    return $T(allocate(p.$field, P))
+                end
+                function ManifoldsBase.allocate(p::$T, ::Type{P}, dims::Tuple) where {P}
+                    return $T(allocate(p.$field, P, dims))
+                end
+                @inline Base.copy(p::$T) = $T(copy(p.$field))
+                function Base.copyto!(q::$T, p::$T)
+                    copyto!(q.$field, p.$field)
+                    return q
+                end
+                Base.similar(p::$T) = $T(similar(p.$field))
+                Base.similar(p::$T, ::Type{P}) where {P} = $T(similar(p.$field, P))
+                Base.:(==)(p::$T, q::$T) = (p.$field == q.$field)
+            end,
+        )
+    else
+        push!(
+            code.args,
+            quote
+                ManifoldsBase.allocate(p::$T) where {$Twhere} = $T(allocate(p.$field))
+                function ManifoldsBase.allocate(p::$T, ::Type{P}) where {P,$Twhere}
+                    return $T(allocate(p.$field, P))
+                end
+                function ManifoldsBase.allocate(
+                    p::$T,
+                    ::Type{P},
+                    dims::Tuple,
+                ) where {P,$Twhere}
+                    return $T(allocate(p.$field, P, dims))
+                end
+                @inline Base.copy(p::$T) where {$Twhere} = $T(copy(p.$field))
+                function Base.copyto!(q::$T, p::$T) where {$Twhere}
+                    copyto!(q.$field, p.$field)
+                    return q
+                end
+                Base.similar(p::$T) where {$Twhere} = $T(similar(p.$field))
+                Base.similar(p::$T, ::Type{P}) where {P,$Twhere} = $T(similar(p.$field, P))
+                Base.:(==)(p::$T, q::$T) where {$Twhere} = (p.$field == q.$field)
+            end,
+        )
+    end
 
-            function Base.copyto!(q::$T, p::$T) where {$Twhere}
-                copyto!(q.$field, p.$field)
-                return q
-            end
-
-            function ManifoldsBase.number_eltype(p::$T) where {$Twhere}
-                return typeof(one(eltype(p.$field)))
-            end
-
-            Base.similar(p::$T) where {$Twhere} = $T(similar(p.$field))
-            Base.similar(p::$T, ::Type{P}) where {P,$Twhere} = $T(similar(p.$field, P))
-
-            Base.size(p::$T) where {$Twhere} = size(p.$field)
-
-            Base.:(==)(p::$T, q::$T) where {$Twhere} = (p.$field == q.$field)
-        end,
-    )
+    return esc(code)
 end
 
 
@@ -490,81 +518,143 @@ List of forwarded functions:
 """
 macro manifold_vector_forwards(T, field::Symbol)
     return esc(quote
-        ManifoldsBase.@manifold_vector_forwards ($T) _ ($field)
+        ManifoldsBase.@manifold_vector_forwards ($T) _unused ($field)
     end)
 end
 macro manifold_vector_forwards(T, Twhere, field::Symbol)
-    return esc(
-        quote
-            Base.:*(X::$T, s::Number) where {$Twhere} = $T(X.$field * s)
-            Base.:*(s::Number, X::$T) where {$Twhere} = $T(s * X.$field)
-            Base.:/(X::$T, s::Number) where {$Twhere} = $T(X.$field / s)
-            Base.:\(s::Number, X::$T) where {$Twhere} = $T(s \ X.$field)
-            Base.:+(X::$T, Y::$T) where {$Twhere} = $T(X.$field + Y.$field)
-            Base.:-(X::$T, Y::$T) where {$Twhere} = $T(X.$field - Y.$field)
-            Base.:-(X::$T) where {$Twhere} = $T(-X.$field)
-            Base.:+(X::$T) where {$Twhere} = $T(X.$field)
-            Base.zero(X::$T) where {$Twhere} = $T(zero(X.$field))
+    TWT = if Twhere === :_unused
+        T
+    else
+        :($T where {$Twhere})
+    end
+    code = quote
+        @eval ManifoldsBase.@manifold_element_forwards $T $Twhere $field
 
-            @eval ManifoldsBase.@manifold_element_forwards $T $Twhere $field
+        Base.axes(p::$TWT) = axes(p.$field)
 
-            Base.axes(p::$T) where {$Twhere} = axes(p.$field)
+        Broadcast.broadcastable(X::$TWT) = X
 
-            function Broadcast.BroadcastStyle(::Type{<:$T}) where {$Twhere}
-                return Broadcast.Style{$T}()
+        Base.@propagate_inbounds function Broadcast._broadcast_getindex(X::$TWT, I)
+            return X.$field
+        end
+    end
+
+    broadcast_copyto_code = quote
+        axes(dest) == axes(bc) || Broadcast.throwdm(axes(dest), axes(bc))
+        # Performance optimization: broadcast!(identity, dest, A) is equivalent to copyto!(dest, A) if indices match
+        if bc.f === identity && bc.args isa Tuple{$T} # only a single input argument to broadcast!
+            A = bc.args[1]
+            if axes(dest) == axes(A)
+                return copyto!(dest, A)
             end
-            function Broadcast.BroadcastStyle(
-                ::Broadcast.AbstractArrayStyle{0},
-                b::Broadcast.Style{$T},
-            ) where {$Twhere}
-                return b
-            end
+        end
+        bc′ = Broadcast.preprocess(dest, bc)
+        # Performance may vary depending on whether `@inbounds` is placed outside the
+        # for loop or not. (cf. https://github.com/JuliaLang/julia/issues/38086)
+        copyto!(dest.$field, bc′[1])
+        return dest
+    end
 
-            function Broadcast.instantiate(
-                bc::Broadcast.Broadcasted{Broadcast.Style{$T},Nothing},
-            ) where {$Twhere}
-                return bc
-            end
-            function Broadcast.instantiate(
-                bc::Broadcast.Broadcasted{Broadcast.Style{$T}},
-            ) where {$Twhere}
-                Broadcast.check_broadcast_axes(bc.axes, bc.args...)
-                return bc
-            end
+    if Twhere === :_unused
+        push!(
+            code.args,
+            quote
+                Base.:*(X::$T, s::Number) = $T(X.$field * s)
+                Base.:*(s::Number, X::$T) = $T(s * X.$field)
+                Base.:/(X::$T, s::Number) = $T(X.$field / s)
+                Base.:\(s::Number, X::$T) = $T(s \ X.$field)
+                Base.:-(X::$T) = $T(-X.$field)
+                Base.:+(X::$T) = $T(X.$field)
+                Base.zero(X::$T) = $T(zero(X.$field))
+                Base.:+(X::$T, Y::$T) = $T(X.$field + Y.$field)
+                Base.:-(X::$T, Y::$T) = $T(X.$field - Y.$field)
 
-            Broadcast.broadcastable(X::$T) where {$Twhere} = X
-
-            @inline function Base.copy(
-                bc::Broadcast.Broadcasted{Broadcast.Style{$T}},
-            ) where {$Twhere}
-                return $T(Broadcast._broadcast_getindex(bc, 1))
-            end
-
-            Base.@propagate_inbounds function Broadcast._broadcast_getindex(
-                X::$T,
-                I,
-            ) where {$Twhere}
-                return X.$field
-            end
-
-            @inline function Base.copyto!(
-                dest::$T,
-                bc::Broadcast.Broadcasted{Broadcast.Style{$T}},
-            ) where {$Twhere}
-                axes(dest) == axes(bc) || Broadcast.throwdm(axes(dest), axes(bc))
-                # Performance optimization: broadcast!(identity, dest, A) is equivalent to copyto!(dest, A) if indices match
-                if bc.f === identity && bc.args isa Tuple{$T} # only a single input argument to broadcast!
-                    A = bc.args[1]
-                    if axes(dest) == axes(A)
-                        return copyto!(dest, A)
-                    end
+                function Broadcast.BroadcastStyle(::Type{<:$T})
+                    return Broadcast.Style{$T}()
                 end
-                bc′ = Broadcast.preprocess(dest, bc)
-                # Performance may vary depending on whether `@inbounds` is placed outside the
-                # for loop or not. (cf. https://github.com/JuliaLang/julia/issues/38086)
-                copyto!(dest.$field, bc′[1])
-                return dest
-            end
-        end,
-    )
+
+                function Broadcast.BroadcastStyle(
+                    ::Broadcast.AbstractArrayStyle{0},
+                    b::Broadcast.Style{$T},
+                )
+                    return b
+                end
+
+                function Broadcast.instantiate(
+                    bc::Broadcast.Broadcasted{Broadcast.Style{$T},Nothing},
+                )
+                    return bc
+                end
+                function Broadcast.instantiate(
+                    bc::Broadcast.Broadcasted{Broadcast.Style{$T}},
+                )
+                    Broadcast.check_broadcast_axes(bc.axes, bc.args...)
+                    return bc
+                end
+
+                @inline function Base.copy(bc::Broadcast.Broadcasted{Broadcast.Style{$T}})
+                    return $T(Broadcast._broadcast_getindex(bc, 1))
+                end
+
+                @inline function Base.copyto!(
+                    dest::$T,
+                    bc::Broadcast.Broadcasted{Broadcast.Style{$T}},
+                )
+                    return $broadcast_copyto_code
+                end
+            end,
+        )
+    else
+        push!(
+            code.args,
+            quote
+                Base.:*(X::$T, s::Number) where {$Twhere} = $T(X.$field * s)
+                Base.:*(s::Number, X::$T) where {$Twhere} = $T(s * X.$field)
+                Base.:/(X::$T, s::Number) where {$Twhere} = $T(X.$field / s)
+                Base.:\(s::Number, X::$T) where {$Twhere} = $T(s \ X.$field)
+                Base.:-(X::$T) where {$Twhere} = $T(-X.$field)
+                Base.:+(X::$T) where {$Twhere} = $T(X.$field)
+                Base.zero(X::$T) where {$Twhere} = $T(zero(X.$field))
+                Base.:+(X::$T, Y::$T) where {$Twhere} = $T(X.$field + Y.$field)
+                Base.:-(X::$T, Y::$T) where {$Twhere} = $T(X.$field - Y.$field)
+
+                function Broadcast.BroadcastStyle(::Type{<:$T}) where {$Twhere}
+                    return Broadcast.Style{$T}()
+                end
+
+                function Broadcast.BroadcastStyle(
+                    ::Broadcast.AbstractArrayStyle{0},
+                    b::Broadcast.Style{$T},
+                ) where {$Twhere}
+                    return b
+                end
+
+                function Broadcast.instantiate(
+                    bc::Broadcast.Broadcasted{Broadcast.Style{$T},Nothing},
+                ) where {$Twhere}
+                    return bc
+                end
+                function Broadcast.instantiate(
+                    bc::Broadcast.Broadcasted{Broadcast.Style{$T}},
+                ) where {$Twhere}
+                    Broadcast.check_broadcast_axes(bc.axes, bc.args...)
+                    return bc
+                end
+
+                @inline function Base.copy(
+                    bc::Broadcast.Broadcasted{Broadcast.Style{$T}},
+                ) where {$Twhere}
+                    return $T(Broadcast._broadcast_getindex(bc, 1))
+                end
+
+                @inline function Base.copyto!(
+                    dest::$T,
+                    bc::Broadcast.Broadcasted{Broadcast.Style{$T}},
+                ) where {$Twhere}
+                    return $broadcast_copyto_code
+                end
+            end,
+        )
+    end
+    return esc(code)
 end
