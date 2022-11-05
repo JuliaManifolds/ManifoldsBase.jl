@@ -331,6 +331,7 @@ end
 
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function is_point(M::AbstractDecoratorManifold, p, te = false; kwargs...)
+@trait_function is_point(M::AbstractDecoratorManifold, p, e::Symbol; kwargs...)
 # Embedded
 function is_point(
     ::TraitList{IsEmbeddedManifold},
@@ -369,6 +370,14 @@ end
     p,
     X,
     te = false,
+    cbp = true;
+    kwargs...,
+)
+@trait_function is_vector(
+    M::AbstractDecoratorManifold,
+    p,
+    X,
+    e::Symbol,
     cbp = true;
     kwargs...,
 )

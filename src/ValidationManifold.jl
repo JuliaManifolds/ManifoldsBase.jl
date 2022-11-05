@@ -270,8 +270,14 @@ end
 function is_point(M::ValidationManifold, p, te = false; kw...)
     return is_point(M.manifold, array_value(p), te; kw...)
 end
+function is_point(M::ValidationManifold, p, e::Symbol; kw...)
+    return is_point(M.manifold, array_value(p), e; kw...)
+end
 function is_vector(M::ValidationManifold, p, X, te = false, cbp = true; kw...)
     return is_vector(M.manifold, array_value(p), array_value(X), te, cbp; kw...)
+end
+function is_vector(M::ValidationManifold, p, X, e::Symbol, cbp = true; kw...)
+    return is_vector(M.manifold, array_value(p), array_value(X), e, cbp; kw...)
 end
 
 function isapprox(M::ValidationManifold, p, q; kwargs...)
