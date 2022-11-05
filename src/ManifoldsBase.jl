@@ -460,7 +460,8 @@ isapprox(::AbstractManifold, p, X, Y; kwargs...) = isapprox(X, Y; kwargs...)
 
 
 """
-    is_point(M::AbstractManifold, p, throw_error = false; kwargs...)
+    is_point(M::AbstractManifold, p, throw_error::Boolean = false; kwargs...)
+    is_point(M::AbstractManifold, p, report_error::Symbol; kwargs...)
 
 Return whether `p` is a valid point on the [`AbstractManifold`](@ref) `M`.
 
@@ -468,6 +469,13 @@ If `throw_error` is `false`, the function returns either `true` or `false`. If `
 is `true`, the function either returns `true` or throws an error. By default the function
 calls [`check_point`](@ref) and checks whether the returned value
 is `nothing` or an error.
+
+A more precise way can be set using a symbol as the optional parameter, where
+' `:error` is the same as setting `throw_error=true`
+' `:info` displays the error message as an `@info`
+* `:warning` displays the error message as a `@warning`
+
+all other symbols are equivalent to `throw_error=false`.
 """
 function is_point(M::AbstractManifold, p, throw_error = false; kwargs...)
     mps = check_size(M, p)
@@ -480,8 +488,29 @@ function is_point(M::AbstractManifold, p, throw_error = false; kwargs...)
     return throw_error ? throw(mpe) : false
 end
 
+function is_point(M::AbstractManifold, p, error::Symbol; kwargs...)
+    (error === :error) && return is_point(M, p, true; kwargs...)
+    mps = check_size(M, p)
+    if mps !== nothing
+        s = "$(typeof(mps)) with $(mps.val)\n$(mps.msg)"
+        (error === :info) && @info s
+        (error === :warning) && @warn s
+        return false
+    end
+    mpe = check_point(M, p; kwargs...)
+    if mpe !== nothing
+        s = "$(typeof(mpe)) with $(mpe.val)\n$(mpe.msg)"
+        (error === :info) && @info s
+        (error === :warning) && @warn s
+        return false
+    end
+    return true
+end
+
+
 """
     is_vector(M::AbstractManifold, p, X, throw_error = false, check_base_point=true; kwargs...)
+    is_vector(M::AbstractManifold, p, X, error::Symbol, check_base_point=true; kwargs...)
 
 Return whether `X` is a valid tangent vector at point `p` on the [`AbstractManifold`](@ref) `M`.
 Returns either `true` or `false`.
@@ -493,6 +522,13 @@ value is `nothing` or an error.
 
 If `check_base_point` is true, then the point `p` will be first checked using the
 [`check_point`](@ref) function.
+
+A more precise way can be set using a symbol as the optional parameter, where
+' `:error` is the same as setting `throw_error=true`
+' `:info` displays the error message as an `@info`
+* `:warning` displays the error message as a `@warn`ing.
+
+all other symbols are equivalent to `throw_error=false`.
 """
 function is_vector(
     M::AbstractManifold,
@@ -515,6 +551,36 @@ function is_vector(
     mXe === nothing && return true
     throw_error && throw(mXe)
     return false
+end
+
+function is_vector(
+    M::AbstractManifold,
+    p,
+    X,
+    error::Symbol,
+    check_base_point = true;
+    kwargs...,
+)
+    (error === :error) && return is_vector(M, p, X, true, check_base_point; kwargs...)
+    if check_base_point
+        s = is_point(M, p, error; kwargs...) # if error, is_point throws,
+        !s && return false # otherwise if not a point return false
+    end
+    mXs = check_size(M, p, X)
+    if mXs !== nothing
+        s = "$(typeof(mXs)) with $(mXs.val)\n$(mXs.msg)"
+        (error === :info) && @info s
+        (error === :warning) && @warn s
+        return false
+    end
+    mXe = check_vector(M, p, X; kwargs...)
+    if mXe !== nothing
+        s = "$(typeof(mXe)) with $(mXe.val)\n$(mXe.msg)"
+        (error === :info) && @info s
+        (error === :warning) && @warn s
+        return false
+    end
+    return true
 end
 
 @doc raw"""
