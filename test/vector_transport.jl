@@ -8,8 +8,8 @@ import ManifoldsBase: parallel_transport_to!, parallel_transport_along!
 struct NonDefaultEuclidean <: AbstractManifold{ManifoldsBase.ℝ} end
 ManifoldsBase.log!(::NonDefaultEuclidean, v, x, y) = (v .= y .- x)
 ManifoldsBase.exp!(::NonDefaultEuclidean, y, x, v) = (y .= x .+ v)
-function ManifoldsBase.parallel_transport_to!(::NonDefaultEuclidean, Y, p, X, q)
-    return copyto!(Y, X)
+function ManifoldsBase.parallel_transport_to!(::NonDefaultEuclidean, Y, p, X, q; a = 0)
+    return copyto!(Y, X .+ a)
 end
 function ManifoldsBase.parallel_transport_along!(
     ::NonDefaultEuclidean,
@@ -35,6 +35,9 @@ end
             @test vector_transport_along(M, pts[1], X2, [], SchildsLadderTransport()) == X2
             @test vector_transport_along(M, pts[1], X2, [], PoleLadderTransport()) == X2
             @test vector_transport_along(M, pts[1], X2, [], ParallelTransport()) == X2
+            kwP = VectorTransportWithKeywords(ParallelTransport())
+            @test vector_transport_along(M, pts[1], X2, [], kwP) == X2
+            @test vector_transport_along!(M, X2, pts[1], X2, [], kwP) == X2
             # check mutating ones with defaults
             p = allocate(pts[1])
             ManifoldsBase.pole_ladder!(M, p, pts[1], pts[2], pts[3])
@@ -58,4 +61,10 @@ end
     VT2 = VectorTransportTo()
     @test vector_transport_to(M, p, X, q, VT2) == X
     @test vector_transport_to!(M, Y, p, X, q, VT2) == X
+    VT3 = VectorTransportWithKeywords(VT; a = 1)
+    @test vector_transport_direction(M, p, X, q, VT3) == (X .+ 1)
+    @test vector_transport_direction!(M, Y, p, X, q, VT3) == (X .+ 1)
+    VT4 = VectorTransportWithKeywords(VT2; a = 2)
+    @test vector_transport_to(M, p, X, q, VT4) == (X .+ 2)
+    @test vector_transport_to!(M, Y, p, X, q, VT4) == (X .+ 2)
 end

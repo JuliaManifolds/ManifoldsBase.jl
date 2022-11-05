@@ -119,7 +119,6 @@ changed to an [`AbstractRetractionMethod`](@ref) `retraction` and an
     > Pennec, X: Parallel Transport with Pole Ladder: a Third Order Scheme in Affine
     > Connection Spaces which is Exact in Affine Symmetric Spaces.
     > arXiv: [1805.11436](https://arxiv.org/abs/1805.11436)
-
 """
 struct PoleLadderTransport{
     RT<:AbstractRetractionMethod,
@@ -207,7 +206,6 @@ changed to an [`AbstractRetractionMethod`](@ref) `retraction` and an
     > propagation. In: O’Raifeartaigh, L. (ed.) General Relativity: Papers in Honour of
     > J. L. Synge, pp. 63–84. Clarendon Press, Oxford (1972).
     > reprint doi: [10.1007/s10714-012-1353-4](https://doi.org/10.1007/s10714-012-1353-4)
-
 """
 struct SchildsLadderTransport{
     RT<:AbstractRetractionMethod,
@@ -280,6 +278,39 @@ struct VectorTransportTo{
             vector_transport,
         )
     end
+end
+
+"""
+    VectorTransportWithKeywords{V<:AbstractVectorTransportMethod, K} <: AbstractVectorTransportMethod
+
+Since vector transports might have keywords, this type is a way to set them as an own type to be
+used as a specific vector transport.
+Another reason for this type is that we dispatch on the vector transport first and only the
+last layer would be implemented with keywords, so this way they can be passed down.
+
+## Fields
+
+* `vector_transport` the vector transport that is decorated with keywords
+* `kwargs` the keyword arguments
+
+Note that you can nest this type. Then the most outer specification of a keyword is used.
+
+## Constructor
+
+    VectorTransportWithKeywords(m::T; kwargs...) where {T <: AbstractVectorTransportMethod}
+
+Specify the subtype `T <: `[`AbstractVectorTransportMethod`](@ref) to have keywords `kwargs...`.
+"""
+struct VectorTransportWithKeywords{T<:AbstractVectorTransportMethod,K} <:
+       AbstractVectorTransportMethod
+    vector_transport::T
+    kwargs::K
+end
+function VectorTransportWithKeywords(
+    m::T;
+    kwargs...,
+) where {T<:AbstractVectorTransportMethod}
+    return VectorTransportWithKeywords{T,typeof(kwargs)}(m, kwargs)
 end
 
 """
@@ -473,18 +504,37 @@ function vector_transport_along(
 )
     return _vector_transport_along(M, p, X, c, m)
 end
-function _vector_transport_along(M::AbstractManifold, p, X, c, ::ParallelTransport)
-    return parallel_transport_along(M, p, X, c)
+function _vector_transport_along(
+    M::AbstractManifold,
+    p,
+    X,
+    c,
+    ::ParallelTransport;
+    kwargs...,
+)
+    return parallel_transport_along(M, p, X, c; kwargs...)
 end
 function _vector_transport_along(
     M::AbstractManifold,
     p,
     X,
     c,
-    m::DifferentiatedRetractionVectorTransport,
+    m::DifferentiatedRetractionVectorTransport;
+    kwargs...,
 )
-    return vector_transport_along_diff(M, p, X, c, m.retraction)
+    return vector_transport_along_diff(M, p, X, c, m.retraction; kwargs...)
 end
+function _vector_transport_along(
+    M::AbstractManifold,
+    p,
+    X,
+    c,
+    m::VectorTransportWithKeywords;
+    kwargs...,
+)
+    return _vector_transport_along(M, p, X, c, m.vector_transport; kwargs..., m.kwargs...)
+end
+
 @doc raw"""
     vector_transport_along_diff(M::AbstractManifold, p, X, c, m::AbstractRetractionMethod)
 
@@ -511,8 +561,15 @@ vector_transport_along_diff!(M::AbstractManifold, Y, p, X, c, m)
 
 function vector_transport_along_diff! end
 
-function _vector_transport_along(M::AbstractManifold, p, X, c, ::ProjectionTransport)
-    return vector_transport_along_project(M, p, X, c)
+function _vector_transport_along(
+    M::AbstractManifold,
+    p,
+    X,
+    c,
+    ::ProjectionTransport;
+    kwargs...,
+)
+    return vector_transport_along_project(M, p, X, c; kwargs...)
 end
 @doc raw"""
     vector_transport_along_project(M::AbstractManifold, p, X, c::AbstractVector)
@@ -520,9 +577,15 @@ end
 Compute the vector transport of `X` from ``T_p\mathcal M`` along the curve `c`
 using a projection.
 """
-function vector_transport_along_project(M::AbstractManifold, p, X, c::AbstractVector)
+function vector_transport_along_project(
+    M::AbstractManifold,
+    p,
+    X,
+    c::AbstractVector;
+    kwargs...,
+)
     Y = allocate_result(M, vector_transport_along, X, p)
-    return vector_transport_along_project!(M, Y, p, X, c)
+    return vector_transport_along_project!(M, Y, p, X, c; kwargs...)
 end
 @doc raw"""
     vector_transport_along_project!(M::AbstractManifold, Y, p, X, c::AbstractVector)
@@ -539,20 +602,22 @@ function _vector_transport_along(
     p,
     X,
     c::AbstractVector,
-    m::PoleLadderTransport,
+    m::PoleLadderTransport;
+    kwargs...,
 )
     Y = allocate_result(M, vector_transport_along, X, p)
-    return _vector_transport_along!(M, Y, p, X, c, m)
+    return _vector_transport_along!(M, Y, p, X, c, m; kwargs...)
 end
 function _vector_transport_along(
     M::AbstractManifold,
     p,
     X,
     c::AbstractVector,
-    m::SchildsLadderTransport,
+    m::SchildsLadderTransport;
+    kwargs...,
 )
     Y = allocate_result(M, vector_transport_along, X, p)
-    return _vector_transport_along!(M, Y, p, X, c, m)
+    return _vector_transport_along!(M, Y, p, X, c, m; kwargs...)
 end
 
 """
@@ -574,14 +639,21 @@ function vector_transport_along!(
     return _vector_transport_along!(M, Y, p, X, c, m)
 end
 
-function parallel_transport_along!(M::AbstractManifold, Y, p, X, c::AbstractVector)
+function parallel_transport_along!(
+    M::AbstractManifold,
+    Y,
+    p,
+    X,
+    c::AbstractVector;
+    kwargs...,
+)
     n = length(c)
     if n == 0
         copyto!(Y, X)
     else
-        parallel_transport_to!(M, Y, p, X, c[1])
+        parallel_transport_to!(M, Y, p, X, c[1]; kwargs...)
         for i in 1:(length(c) - 1)
-            parallel_transport_to!(M, Y, c[i], Y, c[i + 1])
+            parallel_transport_to!(M, Y, c[i], Y, c[i + 1]; kwargs...)
         end
     end
     return Y
@@ -593,9 +665,10 @@ function _vector_transport_along!(
     p,
     X,
     c::AbstractVector,
-    ::ParallelTransport,
+    ::ParallelTransport;
+    kwargs...,
 )
-    return parallel_transport_along!(M, Y, p, X, c)
+    return parallel_transport_along!(M, Y, p, X, c; kwargs...)
 end
 function _vector_transport_along!(
     M::AbstractManifold,
@@ -603,9 +676,10 @@ function _vector_transport_along!(
     p,
     X,
     c::AbstractVector,
-    m::DifferentiatedRetractionVectorTransport,
+    m::DifferentiatedRetractionVectorTransport;
+    kwargs...,
 )
-    return vector_transport_along_diff!(M, Y, p, X, c, m.retraction)
+    return vector_transport_along_diff!(M, Y, p, X, c, m.retraction; kwargs...)
 end
 function _vector_transport_along!(
     M::AbstractManifold,
@@ -613,9 +687,30 @@ function _vector_transport_along!(
     p,
     X,
     c::AbstractVector,
-    ::ProjectionTransport,
+    ::ProjectionTransport;
+    kwargs...,
 )
-    return vector_transport_along_project!(M, Y, p, X, c)
+    return vector_transport_along_project!(M, Y, p, X, c; kwargs...)
+end
+function _vector_transport_along!(
+    M::AbstractManifold,
+    Y,
+    p,
+    X,
+    c,
+    m::VectorTransportWithKeywords;
+    kwargs...,
+)
+    return _vector_transport_along!(
+        M,
+        Y,
+        p,
+        X,
+        c,
+        m.vector_transport;
+        kwargs...,
+        m.kwargs...,
+    )
 end
 
 @doc raw"""
@@ -647,7 +742,8 @@ function _vector_transport_along!(
     p,
     X,
     c::AbstractVector,
-    m::PoleLadderTransport,
+    m::PoleLadderTransport;
+    kwargs...,
 )
     clen = length(c)
     if clen == 0
@@ -665,6 +761,7 @@ function _vector_transport_along!(
             Y;
             retraction = m.retraction,
             inverse_retraction = m.inverse_retraction,
+            kwargs...,
         )
         for i in 1:(clen - 1)
             # precompute mid point inplace
@@ -682,6 +779,7 @@ function _vector_transport_along!(
                 Y;
                 retraction = m.retraction,
                 inverse_retraction = m.inverse_retraction,
+                kwargs...,
             )
         end
         inverse_retract!(M, Y, c[clen], d, m.inverse_retraction)
@@ -717,7 +815,8 @@ function _vector_transport_along!(
     p,
     X,
     c::AbstractVector,
-    m::SchildsLadderTransport,
+    m::SchildsLadderTransport;
+    kwargs...,
 )
     clen = length(c)
     if clen == 0
@@ -735,6 +834,7 @@ function _vector_transport_along!(
             Y;
             retraction = m.retraction,
             inverse_retraction = m.inverse_retraction,
+            kwargs...,
         )
         for i in 1:(clen - 1)
             ci = c[i]
@@ -752,6 +852,7 @@ function _vector_transport_along!(
                 Y;
                 retraction = m.retraction,
                 inverse_retraction = m.inverse_retraction,
+                kwargs...,
             )
         end
         inverse_retract!(M, Y, c[clen], d, m.inverse_retraction)
@@ -816,28 +917,54 @@ function _vector_transport_direction(
     p,
     X,
     d,
-    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M);
+    kwargs...,
 )
     r = default_retraction_method(M)
-    return vector_transport_to(M, p, X, retract(M, p, d, r), m)
+    v = length(kwargs) > 0 ? VectorTransportWithKeywords(m; kwargs...) : m
+    return vector_transport_to(M, p, X, retract(M, p, d, r), v)
 end
 function _vector_transport_direction(
     M::AbstractManifold,
     p,
     X,
     d,
-    m::VectorTransportDirection,
+    m::VectorTransportDirection;
+    kwargs...,
 )
-    return vector_transport_to(M, p, X, retract(M, p, d, m.retraction), m.vector_transport)
+    mv =
+        length(kwargs) > 0 ? VectorTransportWithKeywords(m.vector_transport; kwargs...) :
+        m.vector_transport
+    mr = m.retraction
+    return vector_transport_to(M, p, X, retract(M, p, d, mr), mv)
 end
 function _vector_transport_direction(
     M::AbstractManifold,
     p,
     X,
     d,
-    m::DifferentiatedRetractionVectorTransport{R},
+    m::DifferentiatedRetractionVectorTransport{R};
+    kwargs...,
 ) where {R<:AbstractRetractionMethod}
-    return vector_transport_direction_diff(M, p, X, d, m.retraction)
+    return vector_transport_direction_diff(M, p, X, d, m.retraction; kwargs...)
+end
+function _vector_transport_direction(
+    M::AbstractManifold,
+    p,
+    X,
+    d,
+    m::VectorTransportWithKeywords;
+    kwargs...,
+)
+    return _vector_transport_direction(
+        M,
+        p,
+        X,
+        d,
+        m.vector_transport;
+        kwargs...,
+        m.kwargs...,
+    )
 end
 @doc raw"""
     vector_transport_direction_diff(M::AbstractManifold, p, X, d, m::AbstractRetractionMethod)
@@ -850,15 +977,22 @@ function vector_transport_direction_diff(
     p,
     X,
     d,
-    r::AbstractRetractionMethod,
+    r::AbstractRetractionMethod;
+    kwargs...,
 )
     Y = allocate_result(M, vector_transport_direction, p, X, d)
-    return vector_transport_direction_diff!(M, Y, p, X, d, r)
+    return vector_transport_direction_diff!(M, Y, p, X, d, r; kwargs...)
 end
-function _vector_transport_direction(M::AbstractManifold, p, X, d, ::ParallelTransport)
-    return parallel_transport_direction(M, p, X, d)
+function _vector_transport_direction(
+    M::AbstractManifold,
+    p,
+    X,
+    d,
+    ::ParallelTransport;
+    kwargs...,
+)
+    return parallel_transport_direction(M, p, X, d; kwargs...)
 end
-
 
 """
     vector_transport_direction!(M::AbstractManifold, Y, p, X, d)
@@ -888,10 +1022,12 @@ function _vector_transport_direction!(
     p,
     X,
     d,
-    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M);
+    kwargs...,
 )
     r = default_retraction_method(M)
-    return vector_transport_to!(M, Y, p, X, retract(M, p, d, r), m)
+    v = length(kwargs) > 0 ? VectorTransportWithKeywords(m; kwargs...) : m
+    return vector_transport_to!(M, Y, p, X, retract(M, p, d, r), v)
 end
 function _vector_transport_direction!(
     M::AbstractManifold,
@@ -899,16 +1035,13 @@ function _vector_transport_direction!(
     p,
     X,
     d,
-    m::VectorTransportDirection,
+    m::VectorTransportDirection;
+    kwargs...,
 )
-    return vector_transport_to!(
-        M,
-        Y,
-        p,
-        X,
-        retract(M, p, d, m.retraction),
-        m.vector_transport,
-    )
+    v =
+        length(kwargs) > 0 ? VectorTransportWithKeywords(m.vector_transport; kwargs...) :
+        m.vector_transport
+    return vector_transport_to!(M, Y, p, X, retract(M, p, d, m.retraction), v)
 end
 function _vector_transport_direction!(
     M::AbstractManifold,
@@ -916,9 +1049,10 @@ function _vector_transport_direction!(
     p,
     X,
     d,
-    m::DifferentiatedRetractionVectorTransport,
+    m::DifferentiatedRetractionVectorTransport;
+    kwargs...,
 )
-    return vector_transport_direction_diff!(M, Y, p, X, d, m.retraction)
+    return vector_transport_direction_diff!(M, Y, p, X, d, m.retraction; kwargs...)
 end
 @doc raw"""
     vector_transport_direction_diff!(M::AbstractManifold, Y, p, X, d, m::AbstractRetractionMethod)
@@ -930,8 +1064,37 @@ vector_transport_direction_diff!(M, Y, p, X, d, m)
 
 function vector_transport_direction_diff! end
 
-function _vector_transport_direction!(M::AbstractManifold, Y, p, X, d, ::ParallelTransport)
-    return parallel_transport_direction!(M, Y, p, X, d)
+function _vector_transport_direction!(
+    M::AbstractManifold,
+    Y,
+    p,
+    X,
+    d,
+    ::ParallelTransport;
+    kwargs...,
+)
+    return parallel_transport_direction!(M, Y, p, X, d; kwargs...)
+end
+
+function _vector_transport_direction!(
+    M::AbstractManifold,
+    Y,
+    p,
+    X,
+    d,
+    m::VectorTransportWithKeywords;
+    kwargs...,
+)
+    return _vector_transport_direction!(
+        M,
+        Y,
+        p,
+        X,
+        d,
+        m.vector_transport;
+        kwargs...,
+        m.kwargs...,
+    )
 end
 
 @doc raw"""
@@ -958,30 +1121,44 @@ function vector_transport_to(
 )
     return _vector_transport_to(M, p, X, q, m)
 end
-function _vector_transport_to(M::AbstractManifold, p, X, q, m::VectorTransportTo)
+function _vector_transport_to(M::AbstractManifold, p, X, q, m::VectorTransportTo; kwargs...)
     d = inverse_retract(M, p, q, m.inverse_retraction)
-    return vector_transport_direction(M, p, X, d, m.vector_transport)
+    v =
+        length(kwargs) > 0 ? VectorTransportWithKeywords(m.vector_transport; kwargs...) :
+        m.vector_transport
+    return vector_transport_direction(M, p, X, d, v)
 end
-function _vector_transport_to(M::AbstractManifold, p, X, q, ::ParallelTransport)
-    return parallel_transport_to(M, p, X, q)
+function _vector_transport_to(M::AbstractManifold, p, X, q, ::ParallelTransport; kwargs...)
+    return parallel_transport_to(M, p, X, q; kwargs...)
 end
 function _vector_transport_to(
     M::AbstractManifold,
     p,
     X,
     q,
-    m::DifferentiatedRetractionVectorTransport,
+    m::DifferentiatedRetractionVectorTransport;
+    kwargs...,
 )
-    return vector_transport_to_diff(M, p, X, q, m.retraction)
+    return vector_transport_to_diff(M, p, X, q, m.retraction; kwargs...)
+end
+function _vector_transport_to(
+    M::AbstractManifold,
+    p,
+    X,
+    q,
+    m::VectorTransportWithKeywords;
+    kwargs...,
+)
+    return _vector_transport_to(M, p, X, q, m.vector_transport; kwargs..., m.kwargs...)
 end
 @doc raw"""
     vector_transport_to_diff(M::AbstractManifold, p, X, q, r)
 
 Compute a vector transport by using a [`DifferentiatedRetractionVectorTransport`](@ref) `r`.
 """
-function vector_transport_to_diff(M::AbstractManifold, p, X, q, r)
+function vector_transport_to_diff(M::AbstractManifold, p, X, q, r; kwargs...)
     Y = allocate_result(M, vector_transport_to, X, p)
-    return vector_transport_to_diff!(M, Y, p, X, q, r)
+    return vector_transport_to_diff!(M, Y, p, X, q, r; kwargs...)
 end
 @doc raw"""
     vector_transport_to_diff(M::AbstractManifold, p, X, q, r)
@@ -992,8 +1169,15 @@ vector_transport_to_diff!(M::AbstractManifold, Y, p, X, q, r)
 
 function vector_transport_to_diff! end
 
-function _vector_transport_to(M::AbstractManifold, p, X, q, ::ProjectionTransport)
-    return vector_transport_to_project(M, p, X, q)
+function _vector_transport_to(
+    M::AbstractManifold,
+    p,
+    X,
+    q,
+    ::ProjectionTransport;
+    kwargs...,
+)
+    return vector_transport_to_project(M, p, X, q; kwargs...)
 end
 @doc raw"""
     vector_transport_to_project(M::AbstractManifold, p, X, q)
@@ -1001,9 +1185,9 @@ end
 Compute a vector transport by projecting ``X\in T_p\mathcal M`` onto the tangent
 space ``T_q\mathcal M`` at ``q``.
 """
-function vector_transport_to_project(M::AbstractManifold, p, X, q)
+function vector_transport_to_project(M::AbstractManifold, p, X, q; kwargs...)
     Y = allocate_result(M, vector_transport_to, X, p)
-    return vector_transport_to_project!(M, Y, p, X, q)
+    return vector_transport_to_project!(M, Y, p, X, q; kwargs...)
 end
 @doc raw"""
     vector_transport_to_project!(M::AbstractManifold, Y, p, X, q)
@@ -1011,9 +1195,9 @@ end
 Compute a vector transport by projecting ``X\in T_p\mathcal M`` onto the tangent
 space ``T_q\mathcal M`` at ``q`` in place of `Y`.
 """
-function vector_transport_to_project!(M::AbstractManifold, Y, p, X, q)
+function vector_transport_to_project!(M::AbstractManifold, Y, p, X, q; kwargs...)
     # Note that we have to use embed (not embed!) since we do not have memory to store this embedded value in
-    return project!(M, Y, q, embed(M, p, X))
+    return project!(M, Y, q, embed(M, p, X); kwargs...)
 end
 
 
@@ -1037,12 +1221,17 @@ function vector_transport_to!(
 )
     return _vector_transport_to!(M, Y, p, X, q, m)
 end
-function _vector_transport_to!(M::AbstractManifold, Y, p, X, q, m::VectorTransportTo)
+function _vector_transport_to!(
+    M::AbstractManifold,
+    Y,
+    p,
+    X,
+    q,
+    m::VectorTransportTo;
+    kwargs...,
+)
     d = inverse_retract(M, p, q, m.inverse_retraction)
-    return vector_transport_direction!(M, Y, p, X, d, m.vector_transport)
-end
-function _vector_transport_to!(M::AbstractManifold, Y, p, X, q, ::ParallelTransport)
-    return parallel_transport_to!(M, Y, p, X, q)
+    return _vector_transport_direction!(M, Y, p, X, d, m.vector_transport; kwargs...)
 end
 function _vector_transport_to!(
     M::AbstractManifold,
@@ -1050,20 +1239,55 @@ function _vector_transport_to!(
     p,
     X,
     q,
-    m::DifferentiatedRetractionVectorTransport,
+    ::ParallelTransport;
+    kwargs...,
 )
-    return vector_transport_to_diff!(M, Y, p, X, q, m.retraction)
+    return parallel_transport_to!(M, Y, p, X, q; kwargs...)
+end
+function _vector_transport_to!(
+    M::AbstractManifold,
+    Y,
+    p,
+    X,
+    q,
+    m::DifferentiatedRetractionVectorTransport;
+    kwargs...,
+)
+    return vector_transport_to_diff!(M, Y, p, X, q, m.retraction; kwargs...)
 end
 
-function _vector_transport_to!(M::AbstractManifold, Y, p, X, q, ::ProjectionTransport)
-    return vector_transport_to_project!(M, Y, p, X, q)
+function _vector_transport_to!(
+    M::AbstractManifold,
+    Y,
+    p,
+    X,
+    q,
+    ::ProjectionTransport;
+    kwargs...,
+)
+    return vector_transport_to_project!(M, Y, p, X, q; kwargs...)
 end
 
-function _vector_transport_to(M::AbstractManifold, p, X, q, m::PoleLadderTransport)
+function _vector_transport_to(
+    M::AbstractManifold,
+    p,
+    X,
+    q,
+    m::PoleLadderTransport;
+    kwargs...,
+)
     Y = allocate_result(M, vector_transport_to, X, p)
-    return _vector_transport_to!(M, Y, p, X, q, m)
+    return _vector_transport_to!(M, Y, p, X, q, m; kwargs...)
 end
-function _vector_transport_to!(M::AbstractManifold, Y, p, X, q, m::PoleLadderTransport)
+function _vector_transport_to!(
+    M::AbstractManifold,
+    Y,
+    p,
+    X,
+    q,
+    m::PoleLadderTransport;
+    kwargs...,
+)
     inverse_retract!(
         M,
         Y,
@@ -1075,27 +1299,70 @@ function _vector_transport_to!(M::AbstractManifold, Y, p, X, q, m::PoleLadderTra
             q;
             retraction = m.retraction,
             inverse_retraction = m.inverse_retraction,
+            kwargs...,
         ),
         m.inverse_retraction,
     )
     copyto!(Y, -Y)
     return Y
 end
-
-function _vector_transport_to(M::AbstractManifold, p, X, c, m::ScaledVectorTransport)
+function _vector_transport_to(
+    M::AbstractManifold,
+    p,
+    X,
+    c,
+    m::ScaledVectorTransport;
+    kwargs...,
+)
     Y = allocate_result(M, vector_transport_to, X, p)
-    return _vector_transport_to!(M, Y, p, X, c, m)
+    return _vector_transport_to!(M, Y, p, X, c, m; kwargs...)
 end
-function _vector_transport_to!(M::AbstractManifold, Y, p, X, q, m::ScaledVectorTransport)
-    vector_transport_to!(M, Y, p, X, q, m.method)
+function _vector_transport_to!(
+    M::AbstractManifold,
+    Y,
+    p,
+    X,
+    q,
+    m::ScaledVectorTransport;
+    kwargs...,
+)
+    v = length(kwargs) > 0 ? VectorTransportWithKeywords(m.method; kwargs...) : m.method
+    vector_transport_to!(M, Y, p, X, q, v)
     Y .*= norm(M, p, X) / norm(M, q, Y)
     return Y
 end
-function _vector_transport_to(M::AbstractManifold, p, X, c, m::SchildsLadderTransport)
-    Y = allocate_result(M, vector_transport_to, X, p)
-    return _vector_transport_to!(M, Y, p, X, c, m)
+function _vector_transport_to!(
+    M::AbstractManifold,
+    Y,
+    p,
+    X,
+    q,
+    m::VectorTransportWithKeywords;
+    kwargs...,
+)
+    return _vector_transport_to!(M, Y, p, X, q, m.vector_transport; kwargs..., m.kwargs...)
 end
-function _vector_transport_to!(M::AbstractManifold, Y, p, X, q, m::SchildsLadderTransport)
+
+function _vector_transport_to(
+    M::AbstractManifold,
+    p,
+    X,
+    c,
+    m::SchildsLadderTransport;
+    kwargs...,
+)
+    Y = allocate_result(M, vector_transport_to, X, p)
+    return _vector_transport_to!(M, Y, p, X, c, m; kwargs...)
+end
+function _vector_transport_to!(
+    M::AbstractManifold,
+    Y,
+    p,
+    X,
+    q,
+    m::SchildsLadderTransport;
+    kwargs...,
+)
     return inverse_retract!(
         M,
         Y,
@@ -1107,6 +1374,7 @@ function _vector_transport_to!(M::AbstractManifold, Y, p, X, q, m::SchildsLadder
             q;
             retraction = m.retraction,
             inverse_retraction = m.inverse_retraction,
+            kwargs...,
         ),
         m.inverse_retraction,
     )
