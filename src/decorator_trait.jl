@@ -330,14 +330,14 @@ end
 @trait_function isapprox(M::AbstractDecoratorManifold, p, X, Y; kwargs...)
 
 # Introduce Deco Trait | automatic foward | fallback
-@trait_function is_point(M::AbstractDecoratorManifold, p, te = false; kwargs...)
+@trait_function is_point(M::AbstractDecoratorManifold, p, te::Bool = false; kwargs...)
 @trait_function is_point(M::AbstractDecoratorManifold, p, e::Symbol; kwargs...)
 # Embedded
 function is_point(
     ::TraitList{IsEmbeddedManifold},
     M::AbstractDecoratorManifold,
     p,
-    te = false;
+    te::Bool = false;
     kwargs...,
 )
     # to be safe check_size first
@@ -369,7 +369,7 @@ end
     M::AbstractDecoratorManifold,
     p,
     X,
-    te = false,
+    te::Bool = false,
     cbp = true;
     kwargs...,
 )
@@ -388,7 +388,7 @@ function is_vector(
     M::AbstractDecoratorManifold,
     p,
     X,
-    te = false,
+    te::Bool = false,
     cbp = true;
     kwargs...,
 )
