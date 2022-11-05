@@ -677,6 +677,7 @@ export AbstractRetractionMethod,
     PadeRetraction,
     PolarRetraction,
     ProjectionRetraction,
+    RetractionWithKeywords,
     ShootingInverseRetraction,
     SoftmaxRetraction
 
@@ -690,6 +691,7 @@ export AbstractInverseRetractionMethod,
     PadeInverseRetraction,
     PolarInverseRetraction,
     ProjectionInverseRetraction,
+    InverseRetractionWithKeywords,
     SoftmaxInverseRetraction
 
 export AbstractVectorTransportMethod,
@@ -700,7 +702,8 @@ export AbstractVectorTransportMethod,
     ScaledVectorTransport,
     SchildsLadderTransport,
     VectorTransportDirection,
-    VectorTransportTo
+    VectorTransportTo,
+    VectorTransportWithKeywords
 
 export CachedBasis,
     DefaultBasis,

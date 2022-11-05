@@ -24,6 +24,9 @@ using Test
 
 struct CustomDefinedRetraction <: ManifoldsBase.AbstractRetractionMethod end
 struct CustomUndefinedRetraction <: ManifoldsBase.AbstractRetractionMethod end
+struct CustomDefinedKeywordRetraction <: ManifoldsBase.AbstractRetractionMethod end
+struct CustomDefinedKeywordInverseRetraction <:
+       ManifoldsBase.AbstractInverseRetractionMethod end
 struct CustomDefinedInverseRetraction <: ManifoldsBase.AbstractInverseRetractionMethod end
 
 struct DefaultPoint{T} <: AbstractManifoldPoint
@@ -58,6 +61,44 @@ end
 function retract_custom(::DefaultManifold, p::DefaultPoint, X::DefaultTVector)
     return DefaultPoint(2 * p.value + X.value)
 end
+function ManifoldsBase._retract(
+    M::DefaultManifold,
+    p,
+    X,
+    ::CustomDefinedKeywordRetraction;
+    kwargs...,
+)
+    return retract_custom_kw(M, p, X; kwargs...)
+end
+function retract_custom_kw(
+    ::DefaultManifold,
+    p::DefaultPoint,
+    X::DefaultTVector;
+    scale = 2.0,
+)
+    return DefaultPoint(scale * p.value + X.value)
+end
+function ManifoldsBase._retract!(
+    M::DefaultManifold,
+    q,
+    p,
+    X,
+    ::CustomDefinedKeywordRetraction;
+    kwargs...,
+)
+    return retract_custom_kw!(M, q, p, X; kwargs...)
+end
+function retract_custom_kw!(
+    ::DefaultManifold,
+    q::DefaultPoint,
+    p::DefaultPoint,
+    X::DefaultTVector;
+    scale = 2.0,
+)
+    q.value .= scale * p.value + X.value
+    return q
+end
+
 function ManifoldsBase._inverse_retract(
     M::DefaultManifold,
     p,
@@ -69,6 +110,45 @@ end
 function inverse_retract_custom(::DefaultManifold, p::DefaultPoint, q::DefaultPoint)
     return DefaultTVector(q.value - 2 * p.value)
 end
+function ManifoldsBase._inverse_retract(
+    M::DefaultManifold,
+    p,
+    q,
+    ::CustomDefinedKeywordInverseRetraction;
+    kwargs...,
+)
+    return inverse_retract_custom_kw(M, p, q; kwargs...)
+end
+function inverse_retract_custom_kw(
+    ::DefaultManifold,
+    p::DefaultPoint,
+    q::DefaultPoint;
+    scale = 2.0,
+)
+    return DefaultTVector(q.value - scale * p.value)
+end
+function ManifoldsBase._inverse_retract!(
+    M::DefaultManifold,
+    X,
+    p,
+    q,
+    ::CustomDefinedKeywordInverseRetraction;
+    kwargs...,
+)
+    return inverse_retract_custom_kw!(M, X, p, q; kwargs...)
+end
+function inverse_retract_custom_kw!(
+    ::DefaultManifold,
+    X::DefaultTVector,
+    p::DefaultPoint,
+    q::DefaultPoint;
+    scale = 2.0,
+)
+    X.value .= q.value - scale * p.value
+    return X
+end
+
+
 struct MatrixVectorTransport{T} <: AbstractVector{T}
     m::Matrix{T}
 end
@@ -551,6 +631,18 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
               DefaultPoint(q.value + Y.value)
         @test retract(M, q, Y, EmbeddedRetraction(ExponentialRetraction())) ==
               DefaultPoint(q.value + Y.value)
+        mRK = RetractionWithKeywords(CustomDefinedKeywordRetraction(); scale = 3.0)
+        pRK = allocate(p, eltype(p.value), size(p.value))
+        @test retract(M, p, X, mRK) == DefaultPoint(3 * p.value + X.value)
+        @test retract!(M, pRK, p, X, mRK) == DefaultPoint(3 * p.value + X.value)
+        mIRK = InverseRetractionWithKeywords(
+            CustomDefinedKeywordInverseRetraction();
+            scale = 3.0,
+        )
+        XIRK = allocate(X, eltype(X.value), size(X.value))
+        @test inverse_retract(M, p, pRK, mIRK) == DefaultTVector(pRK.value - 3 * p.value)
+        @test inverse_retract!(M, XIRK, p, pRK, mIRK) ==
+              DefaultTVector(pRK.value - 3 * p.value)
         p2 = allocate(p, eltype(p.value), size(p.value))
         @test size(p2.value) == size(p.value)
         X2 = allocate(X, eltype(X.value), size(X.value))

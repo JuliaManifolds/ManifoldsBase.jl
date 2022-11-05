@@ -52,7 +52,7 @@ allocate(a::NonBroadcastBasisThing) = NonBroadcastBasisThing(allocate(a.v))
 function allocate(a::NonBroadcastBasisThing, ::Type{T}) where {T}
     return NonBroadcastBasisThing(allocate(a.v, T))
 end
-allocate(::NonBroadcastBasisThing, ::Type{T}, s::Integer) where {S,T} = Vector{T}(undef, s)
+allocate(::NonBroadcastBasisThing, ::Type{T}, s::Integer) where {T} = Vector{T}(undef, s)
 
 function copyto!(a::NonBroadcastBasisThing, b::NonBroadcastBasisThing)
     copyto!(a.v, b.v)
