@@ -52,6 +52,7 @@ end
             @test number_eltype(p) == eltype(x)
             @test typeof(allocate(p)) == typeof(p)
             @test typeof(allocate(p, eltype(x))) == typeof(p)
+            @test typeof(allocate(p, eltype(x), (3, 1))) == T{Matrix{Float64}}
             @test allocate(p) isa T
             @test allocate(p, Float32) isa T
             @test number_eltype(allocate(p, Float32)) == Float32
@@ -67,6 +68,11 @@ end
             @test isapprox(A, q, p)
             @test ManifoldsBase.array_value(p) == x
             @test ManifoldsBase.array_value(x) == x
+            @test copy(p) == p
+            q = allocate(p)
+            copyto!(q, p)
+            @test q == p
+            @test isapprox(A, q, p)
         end
     end
     @testset "Vector functions" begin
@@ -76,7 +82,12 @@ end
             @test isapprox(A, a + b, T(v + w))
             @test isapprox(A, (a - b), T(v - w))
             @test isapprox(A, -b, T(-w))
+            @test isapprox(A, +b, T(+w))
             @test isapprox(A, 2 * a, T(2 .* v))
+            @test isapprox(A, a * 2, T(v .* 2))
+            @test isapprox(A, 2 \ a, T(2 .\ v))
+            @test isapprox(A, a / 2, T(v ./ 2))
+            @test zero(a) == T(zero(v))
             @test isapprox(A, 2 .* a .+ b, T(2 .* v .+ w))
             c = similar(a)
             c .= a .+ b
