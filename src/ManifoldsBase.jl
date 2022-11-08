@@ -455,7 +455,28 @@ Currently the following are supported
 
 Keyword arguments can be used to specify tolerances.
 """
-isapprox(::AbstractManifold, x, y; kwargs...) = isapprox(x, y; kwargs...)
+isapprox(::AbstractManifold, p, q; kwargs...) = isapprox(p, q; kwargs...)
+
+
+function isapprox(M::AbstractManifold, p, q, error::Symbol; kwargs...)
+    ma = check_approx(M, p, q; kwargs...)
+    if ma !== nothing
+        (error === :error) && throw(ma)
+        s = "$(typeof(ma)) with\n$(ma.msg)"
+        (error === :info) && @info s
+        (error === :warning) && @warn s
+        return false
+    end
+end
+
+function check_approx(M, p, q; kwargs...)
+    # fall back to old mode - just that we do not have a reason then
+    res = isapprox(M, p, q; kwargs...)
+    res && return nothing
+    s = "The two points $p and $q on $M are not (approximately) equal."
+    return AssertionError(s)
+end
+
 
 """
     isapprox(M::AbstractManifold, p, X, Y; kwargs...)
@@ -480,7 +501,22 @@ Keyword arguments can be used to specify tolerances.
 isapprox(::AbstractManifold, p, X, Y; kwargs...) = isapprox(X, Y; kwargs...)
 
 function isapprox(M::AbstractManifold, p, X, Y, error::Symbol; kwargs...)
+    mat = check_approx(M, p, X, Y; kwargs...)
+    if mat !== nothing
+        (error === :error) && throw(mat)
+        s = "$(typeof(mat)) with\n$(mat.msg)"
+        (error === :info) && @info s
+        (error === :warning) && @warn s
+        return false
+    end
+end
 
+function check_approx(M, p, X, Y; kwargs...)
+    # fall back to old mode - just that we do not have a reason then
+    res = isapprox(M, p, X, Y; kwargs...)
+    res && return nothing
+    s = "The two tangent vectors $X and $Y in the tangent space at $p on $M are not (approximately) equal."
+    return AssertionError(s)
 end
 
 
