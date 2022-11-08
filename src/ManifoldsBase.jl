@@ -441,8 +441,17 @@ inner(M::AbstractManifold, p, X, Y)
 
 """
     isapprox(M::AbstractManifold, p, q; kwargs...)
+    isapprox(M::AbstractManifold, p, q, error::Symbol; kwargs...)
 
 Check if points `p` and `q` from [`AbstractManifold`](@ref) `M` are approximately equal.
+
+The optional positional argument can be used to get more information for the case that
+the result is false, if the concrete manifold provides such information.
+Currently the following are supported
+* `:error` - throws an error if `isapprox` evaluates to false, providing possibly a more detailed error.
+  Note that this turns `isapprox` basically to an `@assert`.
+* `:info` – prints the information in an `@info`
+* `:warning` – prints the information in an `@warn`
 
 Keyword arguments can be used to specify tolerances.
 """
@@ -450,13 +459,29 @@ isapprox(::AbstractManifold, x, y; kwargs...) = isapprox(x, y; kwargs...)
 
 """
     isapprox(M::AbstractManifold, p, X, Y; kwargs...)
+    isapprox(M::AbstractManifold, p, X, Y, error:Symbol; kwargs...)
 
 Check if vectors `X` and `Y` tangent at `p` from [`AbstractManifold`](@ref) `M` are approximately
 equal.
 
+The optional positional argument can be used to get more information for the case that
+the result is false, if the concrete manifold provides such information.
+Currently the following are supported
+
+* `:error` - throws an error if `isapprox` evaluates to false, providing possibly a more detailed error.
+  Note that this turns `isapprox` basically to an `@assert`.
+* `:info` – prints the information in an `@info`
+* `:warning` – prints the information in an `@warn`
+
+By default these informations are collected by calling [`check_approx`](@ref).
+
 Keyword arguments can be used to specify tolerances.
 """
 isapprox(::AbstractManifold, p, X, Y; kwargs...) = isapprox(X, Y; kwargs...)
+
+function isapprox(M::AbstractManifold, p, X, Y, error::Symbol; kwargs...)
+
+end
 
 
 """
