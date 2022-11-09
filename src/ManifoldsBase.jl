@@ -440,12 +440,11 @@ Compute the inner product of tangent vectors `X` and `Y` at point `p` from the
 inner(M::AbstractManifold, p, X, Y)
 
 """
-    isapprox(M::AbstractManifold, p, q; kwargs...)
-    isapprox(M::AbstractManifold, p, q, error::Symbol; kwargs...)
+    isapprox(M::AbstractManifold, p, q; error::Symbol=none, kwargs...)
 
 Check if points `p` and `q` from [`AbstractManifold`](@ref) `M` are approximately equal.
 
-The optional positional argument can be used to get more information for the case that
+The keyword argument can be used to get more information for the case that
 the result is false, if the concrete manifold provides such information.
 Currently the following are supported
 * `:error` - throws an error if `isapprox` evaluates to false, providing possibly a more detailed error.
@@ -455,14 +454,15 @@ Currently the following are supported
 
 Keyword arguments can be used to specify tolerances.
 """
-isapprox(::AbstractManifold, p, q; kwargs...) = isapprox(p, q; kwargs...)
-
-
-function isapprox(M::AbstractManifold, p, q, error::Symbol; kwargs...)
+function isapprox(M::AbstractManifold, p, q; error::Symbol = :none, kwargs...)
     ma = check_approx(M, p, q; kwargs...)
     if ma !== nothing
         (error === :error) && throw(ma)
-        s = "$(typeof(ma)) with\n$(ma.msg)"
+        if isnan(ma.val)
+            s = "$(typeof(ma))\n$(ma.msg)"
+        else
+            s = "$(typeof(ma)) with $(ma.val)\n$(ma.msg)"
+        end
         (error === :info) && @info s
         (error === :warning) && @warn s
         return false
@@ -500,11 +500,15 @@ Keyword arguments can be used to specify tolerances.
 """
 isapprox(::AbstractManifold, p, X, Y; kwargs...) = isapprox(X, Y; kwargs...)
 
-function isapprox(M::AbstractManifold, p, X, Y, error::Symbol; kwargs...)
+function isapprox(M::AbstractManifold, p, X, Y; error::Symbol = :none, kwargs...)
     mat = check_approx(M, p, X, Y; kwargs...)
     if mat !== nothing
         (error === :error) && throw(mat)
-        s = "$(typeof(mat)) with\n$(mat.msg)"
+        if isnan(mat.val)
+            s = "$(typeof(mat))\n$(mat.msg)"
+        else
+            s = "$(typeof(mat)) with $(mat.val)\n$(mat.msg)"
+        end
         (error === :info) && @info s
         (error === :warning) && @warn s
         return false
@@ -516,7 +520,7 @@ function check_approx(M, p, X, Y; kwargs...)
     res = isapprox(M, p, X, Y; kwargs...)
     res && return nothing
     s = "The two tangent vectors $X and $Y in the tangent space at $p on $M are not (approximately) equal."
-    return AssertionError(s)
+    return ApproximatelyError(s)
 end
 
 
@@ -842,6 +846,7 @@ export CachedBasis,
     ProjectedOrthonormalBasis,
     VeeOrthogonalBasis
 
+export ApproximatelyError
 export CompositeManifoldError, ComponentManifoldError, ManifoldDomainError
 
 export allocate,
