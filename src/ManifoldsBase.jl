@@ -467,14 +467,15 @@ function isapprox(M::AbstractManifold, p, q; error::Symbol = :none, kwargs...)
         (error === :warning) && @warn s
         return false
     end
+    return true
 end
 
-function check_approx(M, p, q; kwargs...)
-    # fall back to old mode - just that we do not have a reason then
-    res = isapprox(M, p, q; kwargs...)
+function check_approx(M::AbstractManifold, p, q; kwargs...)
+    # fall back to classical approx mode - just that we do not have a reason then
+    res = isapprox(p, q; kwargs...)
     res && return nothing
     s = "The two points $p and $q on $M are not (approximately) equal."
-    return AssertionError(s)
+    return ApproximatelyError(s)
 end
 
 
@@ -513,11 +514,12 @@ function isapprox(M::AbstractManifold, p, X, Y; error::Symbol = :none, kwargs...
         (error === :warning) && @warn s
         return false
     end
+    return true
 end
 
 function check_approx(M, p, X, Y; kwargs...)
-    # fall back to old mode - just that we do not have a reason then
-    res = isapprox(M, p, X, Y; kwargs...)
+    # fall back to classical mode - just that we do not have a reason then
+    res = isapprox(X, Y; kwargs...)
     res && return nothing
     s = "The two tangent vectors $X and $Y in the tangent space at $p on $M are not (approximately) equal."
     return ApproximatelyError(s)
