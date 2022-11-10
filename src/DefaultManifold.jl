@@ -14,6 +14,24 @@ function DefaultManifold(n::Vararg{Int,N}; field = ℝ) where {N}
     return DefaultManifold{Tuple{n...},field}()
 end
 
+
+
+function check_approx(M::DefaultManifold, p, q; kwargs...)
+    res = isapprox(p, q; kwargs...)
+    res && return nothing
+    v = distance(M, p, q)
+    s = "The two points $p and $q on $M are not (approximately) equal."
+    return ApproximatelyError(v, s)
+end
+
+function check_approx(M::DefaultManifold, p, X, Y; kwargs...)
+    res = isapprox(X, Y; kwargs...)
+    res && return nothing
+    v = norm(M, p, X - Y)
+    s = "The two tangent vectors $X and $Y in the tangent space at $p on $M are not (approximately) equal."
+    return ApproximatelyError(v, s)
+end
+
 distance(::DefaultManifold, p, q) = norm(p - q)
 
 embed!(::DefaultManifold, q, p) = copyto!(q, p)
