@@ -451,6 +451,7 @@ Currently the following are supported
   Note that this turns `isapprox` basically to an `@assert`.
 * `:info` – prints the information in an `@info`
 * `:warning` – prints the information in an `@warn`
+* `:none` (default) – the function just returns `true`/`false`
 
 Keyword arguments can be used to specify tolerances.
 """
@@ -473,6 +474,7 @@ end
 function check_approx(M::AbstractManifold, p, q; kwargs...)
     # fall back to classical approx mode - just that we do not have a reason then
     res = isapprox(p, q; kwargs...)
+    # since we can not assume distance to be implemented, we can not provide a default value
     res && return nothing
     s = "The two points $p and $q on $M are not (approximately) equal."
     return ApproximatelyError(s)
@@ -480,8 +482,7 @@ end
 
 
 """
-    isapprox(M::AbstractManifold, p, X, Y; kwargs...)
-    isapprox(M::AbstractManifold, p, X, Y, error:Symbol; kwargs...)
+    isapprox(M::AbstractManifold, p, X, Y; error:Symbol=:none; kwargs...)
 
 Check if vectors `X` and `Y` tangent at `p` from [`AbstractManifold`](@ref) `M` are approximately
 equal.
@@ -494,13 +495,12 @@ Currently the following are supported
   Note that this turns `isapprox` basically to an `@assert`.
 * `:info` – prints the information in an `@info`
 * `:warning` – prints the information in an `@warn`
+* `:none` (default) – the function just returns `true`/`false`
 
 By default these informations are collected by calling [`check_approx`](@ref).
 
 Keyword arguments can be used to specify tolerances.
 """
-isapprox(::AbstractManifold, p, X, Y; kwargs...) = isapprox(X, Y; kwargs...)
-
 function isapprox(M::AbstractManifold, p, X, Y; error::Symbol = :none, kwargs...)
     mat = check_approx(M, p, X, Y; kwargs...)
     if mat !== nothing
@@ -521,8 +521,9 @@ function check_approx(M, p, X, Y; kwargs...)
     # fall back to classical mode - just that we do not have a reason then
     res = isapprox(X, Y; kwargs...)
     res && return nothing
+    v = norm(X - Y)
     s = "The two tangent vectors $X and $Y in the tangent space at $p on $M are not (approximately) equal."
-    return ApproximatelyError(s)
+    return ApproximatelyError(v, s)
 end
 
 

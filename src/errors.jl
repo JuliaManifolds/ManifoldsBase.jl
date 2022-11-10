@@ -31,7 +31,6 @@ struct ApproximatelyError{V,S} <: Exception
     val::V
     msg::S
 end
-ApproximatelyError(val::V, msg::S) where {V,S} = ApproximatelyError{V,S}(val, msg)
 ApproximatelyError(msg::S) where {S} = ApproximatelyError{Float64,S}(NaN, msg)
 
 function Base.show(io::IO, ex::ApproximatelyError)
