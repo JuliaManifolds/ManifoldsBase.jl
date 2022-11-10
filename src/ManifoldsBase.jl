@@ -521,7 +521,7 @@ function check_approx(M, p, X, Y; kwargs...)
     # fall back to classical mode - just that we do not have a reason then
     res = isapprox(X, Y; kwargs...)
     res && return nothing
-    v = norm(X - Y)
+    v = norm(M, p, X - Y)
     s = "The two tangent vectors $X and $Y in the tangent space at $p on $M are not (approximately) equal."
     return ApproximatelyError(v, s)
 end
@@ -578,7 +578,7 @@ end
 
 """
     is_vector(M::AbstractManifold, p, X, throw_error = false, check_base_point=true; kwargs...)
-    is_vector(M::AbstractManifold, p, X, error::Symbol, check_base_point=true; kwargs...)
+    is_vector(M::AbstractManifold, p, X, error::Symbol, check_base_point::Bool=true; kwargs...)
 
 Return whether `X` is a valid tangent vector at point `p` on the [`AbstractManifold`](@ref) `M`.
 Returns either `true` or `false`.
