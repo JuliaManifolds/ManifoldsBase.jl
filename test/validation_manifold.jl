@@ -35,6 +35,12 @@ end
         @test ManifoldsBase.check_size(A, x2, v2) === ManifoldsBase.check_size(M, x, v)
         @test ManifoldsBase.check_size(A, x2) === ManifoldsBase.check_size(M, x)
     end
+    @testset "Is_point / is_vector error." begin
+        @test is_point(M, x, :error)
+        @test_throws DomainError is_point(M, [1, 2, 3, 4], :error)
+        @test is_vector(M, x, v, :error)
+        @test_throws DomainError is_vector(M, x, [1, 2, 3, 4], :error)
+    end
     @testset "Types and Conversion" begin
         @test convert(typeof(M), A) == M
         @test convert(typeof(A), M) == A

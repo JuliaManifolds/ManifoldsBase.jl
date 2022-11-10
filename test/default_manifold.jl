@@ -262,6 +262,9 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
             @test isapprox(M, pts[1], exp(M, pts[2], tv2))
             @test_throws ApproximatelyError isapprox(M, pts[1], pts[2]; error = :error)
             @test_throws ApproximatelyError isapprox(M, pts[2], tv2, tv3; error = :error)
+            # test lower level fallbacks
+            @test ManifoldsBase.check_approx(M, pts[1], pts[2]) isa ApproximatelyError
+            @test ManifoldsBase.check_approx(M, pts[2], tv2, tv3) isa ApproximatelyError
             @test is_point(M, retract(M, pts[1], tv1))
             @test isapprox(M, pts[1], retract(M, pts[1], tv1, 0))
 
