@@ -64,4 +64,8 @@ end
     @test_logs (:warn, ps2) is_vector(M, [1, 1, 1], [1, 1], :warn, true)
     @test is_vector(M, [1, 1], [1, 1])
     @test_throws DomainError is_vector(M, [1, 1], [-1, 1], true)
+    @test_throws DomainError is_vector(M, [1, 1], [-1, 1], :error, true)
+    ps3 = "DomainError with [-1, 1]\n<0"
+    @test_logs (:info, ps3) is_vector(M, [1, 1], [-1, 1], :info, true)
+    @test_logs (:warn, ps3) is_vector(M, [1, 1], [-1, 1], :warn, true)
 end

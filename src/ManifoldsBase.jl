@@ -522,7 +522,12 @@ function check_approx(M, p, X, Y; kwargs...)
     res = isapprox(X, Y; kwargs...)
     res && return nothing
     s = "The two tangent vectors $X and $Y in the tangent space at $p on $M are not (approximately) equal."
-    return ApproximatelyError(s)
+    v = try
+        norm(M, p, X - Y)
+    catch e
+        NaN
+    end
+    return ApproximatelyError(v, s)
 end
 
 
