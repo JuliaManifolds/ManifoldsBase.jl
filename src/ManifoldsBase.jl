@@ -450,7 +450,7 @@ Currently the following are supported
 * `:error` - throws an error if `isapprox` evaluates to false, providing possibly a more detailed error.
   Note that this turns `isapprox` basically to an `@assert`.
 * `:info` – prints the information in an `@info`
-* `:warning` – prints the information in an `@warn`
+* `:warn` – prints the information in an `@warn`
 * `:none` (default) – the function just returns `true`/`false`
 
 Keyword arguments can be used to specify tolerances.
@@ -465,7 +465,7 @@ function isapprox(M::AbstractManifold, p, q; error::Symbol = :none, kwargs...)
             s = "$(typeof(ma)) with $(ma.val)\n$(ma.msg)"
         end
         (error === :info) && @info s
-        (error === :warning) && @warn s
+        (error === :warn) && @warn s
         return false
     end
     return true
@@ -494,7 +494,7 @@ Currently the following are supported
 * `:error` - throws an error if `isapprox` evaluates to false, providing possibly a more detailed error.
   Note that this turns `isapprox` basically to an `@assert`.
 * `:info` – prints the information in an `@info`
-* `:warning` – prints the information in an `@warn`
+* `:warn` – prints the information in an `@warn`
 * `:none` (default) – the function just returns `true`/`false`
 
 By default these informations are collected by calling [`check_approx`](@ref).
@@ -511,7 +511,7 @@ function isapprox(M::AbstractManifold, p, X, Y; error::Symbol = :none, kwargs...
             s = "$(typeof(mat)) with $(mat.val)\n$(mat.msg)"
         end
         (error === :info) && @info s
-        (error === :warning) && @warn s
+        (error === :warn) && @warn s
         return false
     end
     return true
@@ -540,7 +540,7 @@ is `nothing` or an error.
 A more precise way can be set using a symbol as the optional parameter, where
 ' `:error` is the same as setting `throw_error=true`
 ' `:info` displays the error message as an `@info`
-* `:warning` displays the error message as a `@warning`
+* `:warn` displays the error message as a `@warning`
 
 all other symbols are equivalent to `throw_error=false`.
 """
@@ -561,14 +561,14 @@ function is_point(M::AbstractManifold, p, error::Symbol; kwargs...)
     if mps !== nothing
         s = "$(typeof(mps)) with $(mps.val)\n$(mps.msg)"
         (error === :info) && @info s
-        (error === :warning) && @warn s
+        (error === :warn) && @warn s
         return false
     end
     mpe = check_point(M, p; kwargs...)
     if mpe !== nothing
         s = "$(typeof(mpe)) with $(mpe.val)\n$(mpe.msg)"
         (error === :info) && @info s
-        (error === :warning) && @warn s
+        (error === :warn) && @warn s
         return false
     end
     return true
@@ -593,7 +593,7 @@ If `check_base_point` is true, then the point `p` will be first checked using th
 A more precise way can be set using a symbol as the optional parameter, where
 ' `:error` is the same as setting `throw_error=true`
 ' `:info` displays the error message as an `@info`
-* `:warning` displays the error message as a `@warn`ing.
+* `:warn` displays the error message as a `@warn`ing.
 
 all other symbols are equivalent to `throw_error=false`.
 """
@@ -637,14 +637,14 @@ function is_vector(
     if mXs !== nothing
         s = "$(typeof(mXs)) with $(mXs.val)\n$(mXs.msg)"
         (error === :info) && @info s
-        (error === :warning) && @warn s
+        (error === :warn) && @warn s
         return false
     end
     mXe = check_vector(M, p, X; kwargs...)
     if mXe !== nothing
         s = "$(typeof(mXe)) with $(mXe.val)\n$(mXe.msg)"
         (error === :info) && @info s
-        (error === :warning) && @warn s
+        (error === :warn) && @warn s
         return false
     end
     return true
