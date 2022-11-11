@@ -41,6 +41,7 @@ end
     @test_logs (:info, cs) is_point(M, [-1, 1, 1], :info)
     @test_logs (:warn, cs) is_point(M, [-1, 1, 1], :warn)
     @test is_point(M, [1, 1])
+    @test is_point(M, [1, 1], :error)
     @test_throws DomainError is_point(M, [-1, 1], true)
     @test_throws DomainError is_point(M, [-1, 1], :error)
     ps = "DomainError with [-1, 1]\n<0"
@@ -63,6 +64,7 @@ end
     @test_logs (:info, ps2) is_vector(M, [1, 1, 1], [1, 1], :info, true)
     @test_logs (:warn, ps2) is_vector(M, [1, 1, 1], [1, 1], :warn, true)
     @test is_vector(M, [1, 1], [1, 1])
+    @test is_vector(M, [1, 1], [1, 1], :none) #default just true/false
     @test_throws DomainError is_vector(M, [1, 1], [-1, 1], true)
     @test_throws DomainError is_vector(M, [1, 1], [-1, 1], :error, true)
     ps3 = "DomainError with [-1, 1]\n<0"
