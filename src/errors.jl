@@ -22,9 +22,9 @@ Store an error that occurs when two data structures, e.g. points or tangent vect
 
 Generate an Error with value `val` and message `msg`.
 
-ApproximatelyError(msg::S) where {S}
+    ApproximatelyError(msg::S) where {S}
 
-Generate a message without a value (using `NaN` internally) and message `msg`.
+Generate a message without a value (using `val=NaN` internally) and message `msg`.
 
 """
 struct ApproximatelyError{V,S} <: Exception

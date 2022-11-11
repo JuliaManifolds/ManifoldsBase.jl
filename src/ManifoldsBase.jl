@@ -144,6 +144,44 @@ level, whether its decorated or not. Any negative value deactivates this depth l
 """
 base_manifold(M::AbstractManifold, ::Val = Val(-1)) = M
 
+
+"""
+    check_approx(M::AbstractManifold, p, q; kwargs...)
+    check_approx(M::AbstractManifold, p, X, Y; kwargs...)
+
+Check whether two elements are approximately equal, either `p`, `q` on the [`AbstractManifold`](@ref)
+or the two tangent vectors `X`, `Y` in the tangent space at `p` are approximately the same.
+The keyword arguments `kwargs` can be used to set tolerances, similar to Julia's `isapprox`.
+
+This function might use `isapprox` from Julia internally and is similar to [`isapprox`](@ref),
+with the difference that is returns an [`ApproximatelyError`](@ref) if the two elements are
+not approximately equal, containting a more detailed description/reason.
+If the two elements are approximalely equal, this method returns `nothing`.
+
+This method is an internal function and is called by `isapprox` whenever the user specifies
+an `error=` keyword therein.
+"""
+function check_approx(M::AbstractManifold, p, q; kwargs...)
+    # fall back to classical approx mode - just that we do not have a reason then
+    res = isapprox(p, q; kwargs...)
+    # since we can not assume distance to be implemented, we can not provide a default value
+    res && return nothing
+    s = "The two points $p and $q on $M are not (approximately) equal."
+    return ApproximatelyError(s)
+end
+function check_approx(M, p, X, Y; kwargs...)
+    # fall back to classical mode - just that we do not have a reason then
+    res = isapprox(X, Y; kwargs...)
+    res && return nothing
+    s = "The two tangent vectors $X and $Y in the tangent space at $p on $M are not (approximately) equal."
+    v = try
+        norm(M, p, X - Y)
+    catch e
+        NaN
+    end
+    return ApproximatelyError(v, s)
+end
+
 """
     check_point(M::AbstractManifold, p; kwargs...) -> Union{Nothing,String}
 
@@ -471,16 +509,6 @@ function isapprox(M::AbstractManifold, p, q; error::Symbol = :none, kwargs...)
     return true
 end
 
-function check_approx(M::AbstractManifold, p, q; kwargs...)
-    # fall back to classical approx mode - just that we do not have a reason then
-    res = isapprox(p, q; kwargs...)
-    # since we can not assume distance to be implemented, we can not provide a default value
-    res && return nothing
-    s = "The two points $p and $q on $M are not (approximately) equal."
-    return ApproximatelyError(s)
-end
-
-
 """
     isapprox(M::AbstractManifold, p, X, Y; error:Symbol=:none; kwargs...)
 
@@ -516,20 +544,6 @@ function isapprox(M::AbstractManifold, p, X, Y; error::Symbol = :none, kwargs...
     end
     return true
 end
-
-function check_approx(M, p, X, Y; kwargs...)
-    # fall back to classical mode - just that we do not have a reason then
-    res = isapprox(X, Y; kwargs...)
-    res && return nothing
-    s = "The two tangent vectors $X and $Y in the tangent space at $p on $M are not (approximately) equal."
-    v = try
-        norm(M, p, X - Y)
-    catch e
-        NaN
-    end
-    return ApproximatelyError(v, s)
-end
-
 
 """
     is_point(M::AbstractManifold, p, throw_error::Boolean = false; kwargs...)
