@@ -169,7 +169,7 @@ function check_approx(M::AbstractManifold, p, q; kwargs...)
     s = "The two points $p and $q on $M are not (approximately) equal."
     return ApproximatelyError(s)
 end
-function check_approx(M, p, X, Y; kwargs...)
+function check_approx(M::AbstractManifold, p, X, Y; kwargs...)
     # fall back to classical mode - just that we do not have a reason then
     res = isapprox(X, Y; kwargs...)
     res && return nothing
