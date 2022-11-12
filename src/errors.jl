@@ -5,6 +5,43 @@ An absytract Case for Errors when checking validity of points/vectors on mainfol
 """
 abstract type AbstractManifoldDomainError <: Exception end
 
+
+@doc """
+    ApproximatelyError{V,S} <: Exception
+
+Store an error that occurs when two data structures, e.g. points or tangent vectors.
+
+# Fields
+
+* `val` amount the two approximate elements are apart – is set to `NaN` if this is not known
+* `msg` a message providing more detail about the performed test and why it failed.
+
+# Constructors
+
+    ApproximatelyError(val::V, msg::S) where {V,S}
+
+Generate an Error with value `val` and message `msg`.
+
+    ApproximatelyError(msg::S) where {S}
+
+Generate a message without a value (using `val=NaN` internally) and message `msg`.
+
+"""
+struct ApproximatelyError{V,S} <: Exception
+    val::V
+    msg::S
+end
+ApproximatelyError(msg::S) where {S} = ApproximatelyError{Float64,S}(NaN, msg)
+
+function Base.show(io::IO, ex::ApproximatelyError)
+    isnan(ex.val) && return print(io, "ApproximatelyError(\"$(ex.msg)\")")
+    return print(io, "ApproximatelyError($(ex.val), \"$(ex.msg)\")")
+end
+function Base.showerror(io::IO, ex::ApproximatelyError)
+    isnan(ex.val) && return print(io, "ApproximatelyError\n$(ex.msg)\n")
+    return print(io, "ApproximatelyError with $(ex.val)\n$(ex.msg)\n")
+end
+
 @doc """
     CompnentError{I,E} <: Exception
 
@@ -12,8 +49,8 @@ Store an error that occured in a component, where the additional `index` is stor
 
 # Fields
 
-* `index` index where the error occured`
-* `error` error that occured.
+* `index::I` index where the error occured`
+* `error::E` error that occured.
 """
 struct ComponentManifoldError{I,E} <: AbstractManifoldDomainError where {I,E<:Exception}
     index::I

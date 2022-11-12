@@ -33,4 +33,10 @@ using Test
     e6 = ManifoldDomainError("A.", e)
     s6 = sprint(showerror, e6)
     @test s6 == "ManifoldDomainError: A.\n$(s1)"
+
+    e7 = ApproximatelyError(1.0, "M.")
+    s7 = sprint(showerror, e7)
+    @test s7 == "ApproximatelyError with 1.0\nM.\n"
+    p7 = sprint(show, e7)
+    @test p7 == "ApproximatelyError(1.0, \"M.\")"
 end

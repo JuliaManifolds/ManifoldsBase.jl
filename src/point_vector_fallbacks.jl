@@ -124,6 +124,13 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
             return ManifoldsBase.check_vector(M, p.$pfield, X.$vfield; kwargs...)
         end
 
+        function ManifoldsBase.check_approx(M::$TM, p::$TP, q::$TP; kwargs...)
+            return ManifoldsBase.check_approx(M, p.$pfield, q.$pfield; kwargs...)
+        end
+        function ManifoldsBase.check_approx(M::$TM, p::$TP, X::$TV, Y::$TV; kwargs...)
+            return ManifoldsBase.check_approx(M, p.$pfield, X.$vfield, Y.$vfield; kwargs...)
+        end
+
         function ManifoldsBase.distance(M::$TM, p::$TP, q::$TP)
             return distance(M, p.$pfield, q.$pfield)
         end

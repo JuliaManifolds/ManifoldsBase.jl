@@ -144,6 +144,44 @@ level, whether its decorated or not. Any negative value deactivates this depth l
 """
 base_manifold(M::AbstractManifold, ::Val = Val(-1)) = M
 
+
+"""
+    check_approx(M::AbstractManifold, p, q; kwargs...)
+    check_approx(M::AbstractManifold, p, X, Y; kwargs...)
+
+Check whether two elements are approximately equal, either `p`, `q` on the [`AbstractManifold`](@ref)
+or the two tangent vectors `X`, `Y` in the tangent space at `p` are approximately the same.
+The keyword arguments `kwargs` can be used to set tolerances, similar to Julia's `isapprox`.
+
+This function might use `isapprox` from Julia internally and is similar to [`isapprox`](@ref),
+with the difference that is returns an [`ApproximatelyError`](@ref) if the two elements are
+not approximately equal, containting a more detailed description/reason.
+If the two elements are approximalely equal, this method returns `nothing`.
+
+This method is an internal function and is called by `isapprox` whenever the user specifies
+an `error=` keyword therein.
+"""
+function check_approx(M::AbstractManifold, p, q; kwargs...)
+    # fall back to classical approx mode - just that we do not have a reason then
+    res = isapprox(p, q; kwargs...)
+    # since we can not assume distance to be implemented, we can not provide a default value
+    res && return nothing
+    s = "The two points $p and $q on $M are not (approximately) equal."
+    return ApproximatelyError(s)
+end
+function check_approx(M::AbstractManifold, p, X, Y; kwargs...)
+    # fall back to classical mode - just that we do not have a reason then
+    res = isapprox(X, Y; kwargs...)
+    res && return nothing
+    s = "The two tangent vectors $X and $Y in the tangent space at $p on $M are not (approximately) equal."
+    v = try
+        norm(M, p, X - Y)
+    catch e
+        NaN
+    end
+    return ApproximatelyError(v, s)
+end
+
 """
     check_point(M::AbstractManifold, p; kwargs...) -> Union{Nothing,String}
 
@@ -440,27 +478,76 @@ Compute the inner product of tangent vectors `X` and `Y` at point `p` from the
 inner(M::AbstractManifold, p, X, Y)
 
 """
-    isapprox(M::AbstractManifold, p, q; kwargs...)
+    isapprox(M::AbstractManifold, p, q; error::Symbol=none, kwargs...)
 
 Check if points `p` and `q` from [`AbstractManifold`](@ref) `M` are approximately equal.
 
+The keyword argument can be used to get more information for the case that
+the result is false, if the concrete manifold provides such information.
+Currently the following are supported
+* `:error` - throws an error if `isapprox` evaluates to false, providing possibly a more detailed error.
+  Note that this turns `isapprox` basically to an `@assert`.
+* `:info` – prints the information in an `@info`
+* `:warn` – prints the information in an `@warn`
+* `:none` (default) – the function just returns `true`/`false`
+
 Keyword arguments can be used to specify tolerances.
 """
-isapprox(::AbstractManifold, x, y; kwargs...) = isapprox(x, y; kwargs...)
+function isapprox(M::AbstractManifold, p, q; error::Symbol = :none, kwargs...)
+    ma = check_approx(M, p, q; kwargs...)
+    if ma !== nothing
+        (error === :error) && throw(ma)
+        if isnan(ma.val)
+            s = "$(typeof(ma))\n$(ma.msg)"
+        else
+            s = "$(typeof(ma)) with $(ma.val)\n$(ma.msg)"
+        end
+        (error === :info) && @info s
+        (error === :warn) && @warn s
+        return false
+    end
+    return true
+end
 
 """
-    isapprox(M::AbstractManifold, p, X, Y; kwargs...)
+    isapprox(M::AbstractManifold, p, X, Y; error:Symbol=:none; kwargs...)
 
 Check if vectors `X` and `Y` tangent at `p` from [`AbstractManifold`](@ref) `M` are approximately
 equal.
 
+The optional positional argument can be used to get more information for the case that
+the result is false, if the concrete manifold provides such information.
+Currently the following are supported
+
+* `:error` - throws an error if `isapprox` evaluates to false, providing possibly a more detailed error.
+  Note that this turns `isapprox` basically to an `@assert`.
+* `:info` – prints the information in an `@info`
+* `:warn` – prints the information in an `@warn`
+* `:none` (default) – the function just returns `true`/`false`
+
+By default these informations are collected by calling [`check_approx`](@ref).
+
 Keyword arguments can be used to specify tolerances.
 """
-isapprox(::AbstractManifold, p, X, Y; kwargs...) = isapprox(X, Y; kwargs...)
-
+function isapprox(M::AbstractManifold, p, X, Y; error::Symbol = :none, kwargs...)
+    mat = check_approx(M, p, X, Y; kwargs...)
+    if mat !== nothing
+        (error === :error) && throw(mat)
+        if isnan(mat.val)
+            s = "$(typeof(mat))\n$(mat.msg)"
+        else
+            s = "$(typeof(mat)) with $(mat.val)\n$(mat.msg)"
+        end
+        (error === :info) && @info s
+        (error === :warn) && @warn s
+        return false
+    end
+    return true
+end
 
 """
-    is_point(M::AbstractManifold, p, throw_error = false; kwargs...)
+    is_point(M::AbstractManifold, p, throw_error::Boolean = false; kwargs...)
+    is_point(M::AbstractManifold, p, report_error::Symbol; kwargs...)
 
 Return whether `p` is a valid point on the [`AbstractManifold`](@ref) `M`.
 
@@ -468,6 +555,13 @@ If `throw_error` is `false`, the function returns either `true` or `false`. If `
 is `true`, the function either returns `true` or throws an error. By default the function
 calls [`check_point`](@ref) and checks whether the returned value
 is `nothing` or an error.
+
+A more precise way can be set using a symbol as the optional parameter, where
+' `:error` is the same as setting `throw_error=true`
+' `:info` displays the error message as an `@info`
+* `:warn` displays the error message as a `@warning`
+
+all other symbols are equivalent to `throw_error=false`.
 """
 function is_point(M::AbstractManifold, p, throw_error = false; kwargs...)
     mps = check_size(M, p)
@@ -480,8 +574,29 @@ function is_point(M::AbstractManifold, p, throw_error = false; kwargs...)
     return throw_error ? throw(mpe) : false
 end
 
+function is_point(M::AbstractManifold, p, error::Symbol; kwargs...)
+    (error === :error) && return is_point(M, p, true; kwargs...)
+    mps = check_size(M, p)
+    if mps !== nothing
+        s = "$(typeof(mps)) with $(mps.val)\n$(mps.msg)"
+        (error === :info) && @info s
+        (error === :warn) && @warn s
+        return false
+    end
+    mpe = check_point(M, p; kwargs...)
+    if mpe !== nothing
+        s = "$(typeof(mpe)) with $(mpe.val)\n$(mpe.msg)"
+        (error === :info) && @info s
+        (error === :warn) && @warn s
+        return false
+    end
+    return true
+end
+
+
 """
     is_vector(M::AbstractManifold, p, X, throw_error = false, check_base_point=true; kwargs...)
+    is_vector(M::AbstractManifold, p, X, error::Symbol, check_base_point::Bool=true; kwargs...)
 
 Return whether `X` is a valid tangent vector at point `p` on the [`AbstractManifold`](@ref) `M`.
 Returns either `true` or `false`.
@@ -493,6 +608,13 @@ value is `nothing` or an error.
 
 If `check_base_point` is true, then the point `p` will be first checked using the
 [`check_point`](@ref) function.
+
+A more precise way can be set using a symbol as the optional parameter, where
+' `:error` is the same as setting `throw_error=true`
+' `:info` displays the error message as an `@info`
+* `:warn` displays the error message as a `@warn`ing.
+
+all other symbols are equivalent to `throw_error=false`.
 """
 function is_vector(
     M::AbstractManifold,
@@ -515,6 +637,36 @@ function is_vector(
     mXe === nothing && return true
     throw_error && throw(mXe)
     return false
+end
+
+function is_vector(
+    M::AbstractManifold,
+    p,
+    X,
+    error::Symbol,
+    check_base_point = true;
+    kwargs...,
+)
+    (error === :error) && return is_vector(M, p, X, true, check_base_point; kwargs...)
+    if check_base_point
+        s = is_point(M, p, error; kwargs...) # if error, is_point throws,
+        !s && return false # otherwise if not a point return false
+    end
+    mXs = check_size(M, p, X)
+    if mXs !== nothing
+        s = "$(typeof(mXs)) with $(mXs.val)\n$(mXs.msg)"
+        (error === :info) && @info s
+        (error === :warn) && @warn s
+        return false
+    end
+    mXe = check_vector(M, p, X; kwargs...)
+    if mXe !== nothing
+        s = "$(typeof(mXe)) with $(mXe.val)\n$(mXe.msg)"
+        (error === :info) && @info s
+        (error === :warn) && @warn s
+        return false
+    end
+    return true
 end
 
 @doc raw"""
@@ -715,6 +867,7 @@ export CachedBasis,
     ProjectedOrthonormalBasis,
     VeeOrthogonalBasis
 
+export ApproximatelyError
 export CompositeManifoldError, ComponentManifoldError, ManifoldDomainError
 
 export allocate,

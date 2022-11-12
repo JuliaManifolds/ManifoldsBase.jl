@@ -255,10 +255,16 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
             @test is_vector(M, pts[1], tv1; atol = eps(eltype(pts[1])))
 
             tv2 = log(M, pts[2], pts[1])
+            tv3 = log(M, pts[2], pts[3])
             @test isapprox(M, pts[2], exp(M, pts[1], tv1))
             @test isapprox(M, pts[1], exp(M, pts[1], tv1, 0))
             @test isapprox(M, pts[2], exp(M, pts[1], tv1, 1))
             @test isapprox(M, pts[1], exp(M, pts[2], tv2))
+            @test_throws ApproximatelyError isapprox(M, pts[1], pts[2]; error = :error)
+            @test_throws ApproximatelyError isapprox(M, pts[2], tv2, tv3; error = :error)
+            # test lower level fallbacks
+            @test ManifoldsBase.check_approx(M, pts[1], pts[2]) isa ApproximatelyError
+            @test ManifoldsBase.check_approx(M, pts[2], tv2, tv3) isa ApproximatelyError
             @test is_point(M, retract(M, pts[1], tv1))
             @test isapprox(M, pts[1], retract(M, pts[1], tv1, 0))
 

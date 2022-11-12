@@ -163,7 +163,10 @@ DiagonalizingBasisProxy() = DiagonalizingOrthonormalBasis([1.0, 0.0, 0.0])
         for pB in
             (ProjectedOrthonormalBasis(:svd), ProjectedOrthonormalBasis(:gram_schmidt))
             if pB isa ProjectedOrthonormalBasis{:gram_schmidt,ℝ}
-                pb = get_basis(
+                pb = @test_logs (
+                    :warn,
+                    "Input vector 4 lies in the span of the previous ones.",
+                ) get_basis(
                     M,
                     x,
                     pB;
@@ -204,8 +207,15 @@ DiagonalizingBasisProxy() = DiagonalizingOrthonormalBasis([1.0, 0.0, 0.0])
             tm = ProjectionTestManifold()
             bt = ProjectedOrthonormalBasis(:gram_schmidt)
             p = [sqrt(2) / 2, 0.0, sqrt(2) / 2, 0.0, 0.0]
-            @test_throws ErrorException get_basis(tm, p, bt)
-            b = get_basis(
+            @test_logs (:warn, "Input only has 5 vectors, but manifold dimension is 100.") (@test_throws ErrorException get_basis(
+                tm,
+                p,
+                bt,
+            ))
+            b = @test_logs (
+                :warn,
+                "Input only has 5 vectors, but manifold dimension is 100.",
+            ) get_basis(
                 tm,
                 p,
                 bt;
@@ -213,7 +223,11 @@ DiagonalizingBasisProxy() = DiagonalizingOrthonormalBasis([1.0, 0.0, 0.0])
                 skip_linearly_dependent = true, #skips 3 and 5
             )
             @test length(get_vectors(tm, p, b)) == 3
-            @test_throws ErrorException ManifoldsBase.gram_schmidt(M, p, [V[1]])
+            @test_logs (:warn, "Input only has 1 vectors, but manifold dimension is 3.") (@test_throws ErrorException ManifoldsBase.gram_schmidt(
+                M,
+                p,
+                [V[1]],
+            ))
             @test_throws ErrorException ManifoldsBase.gram_schmidt(
                 M,
                 p,
