@@ -300,6 +300,8 @@ macro trait_function(sig, opts = :())
     if !(:no_empty in opts.args)
         block = quote
             $block
+            # See https://discourse.julialang.org/t/extremely-slow-invoke-when-inlined/90665
+            # for the reasoning behind @noinline
             @noinline function ($fname)(
                 ::EmptyTrait,
                 $(callargs...);
