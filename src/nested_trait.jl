@@ -300,7 +300,7 @@ macro trait_function(sig, opts = :())
     if !(:no_empty in opts.args)
         block = quote
             $block
-            @inline function ($fname)(
+            @noinline function ($fname)(
                 ::EmptyTrait,
                 $(callargs...);
                 $(kwargs_list...),
