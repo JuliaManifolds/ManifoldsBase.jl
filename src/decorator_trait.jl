@@ -88,7 +88,11 @@ get_embedding(M::AbstractDecoratorManifold, p) = get_embedding(M)
 
 # Introduction and default fallbacks could become a macro?
 # Introduce trait
-function allocate_result(M::AbstractDecoratorManifold, f, x...)
+@inline function allocate_result(
+    M::AbstractDecoratorManifold,
+    f::TF,
+    x::Vararg{Any,N},
+) where {TF,N}
     return allocate_result(trait(allocate_result, M, f, x...), M, f, x...)
 end
 # disambiguation
@@ -101,7 +105,12 @@ end
 )
 
 # Introduce fallback
-@inline function allocate_result(::EmptyTrait, M::AbstractManifold, f, x...)
+@inline function allocate_result(
+    ::EmptyTrait,
+    M::AbstractManifold,
+    f::TF,
+    x::Vararg{Any,N},
+) where {TF,N}
     return invoke(
         allocate_result,
         Tuple{AbstractManifold,typeof(f),typeof(x).parameters...},
@@ -111,15 +120,20 @@ end
     )
 end
 # Introduce automatic forward
-@inline function allocate_result(t::TraitList, M::AbstractManifold, f, x...)
+@inline function allocate_result(
+    t::TraitList,
+    M::AbstractManifold,
+    f::TF,
+    x::Vararg{Any,N},
+) where {TF,N}
     return allocate_result(next_trait(t), M, f, x...)
 end
 function allocate_result(
     ::TraitList{IsEmbeddedManifold},
     M::AbstractDecoratorManifold,
     f::typeof(embed),
-    x...,
-)
+    x::Vararg{Any,N},
+) where {N}
     T = allocate_result_type(get_embedding(M, x[1]), f, x)
     return allocate(M, x[1], T, representation_size(get_embedding(M, x[1])))
 end
@@ -127,17 +141,17 @@ function allocate_result(
     ::TraitList{IsEmbeddedManifold},
     M::AbstractDecoratorManifold,
     f::typeof(project),
-    x...,
-)
+    x::Vararg{Any,N},
+) where {N}
     T = allocate_result_type(get_embedding(M, x[1]), f, x)
     return allocate(M, x[1], T, representation_size(M))
 end
 @inline function allocate_result(
     ::TraitList{IsExplicitDecorator},
     M::AbstractDecoratorManifold,
-    f,
-    x...,
-)
+    f::TF,
+    x::Vararg{Any,N},
+) where {TF,N}
     return allocate_result(decorated_manifold(M), f, x...)
 end
 
