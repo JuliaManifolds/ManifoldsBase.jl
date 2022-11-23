@@ -198,8 +198,8 @@ function get_basis(
         Any,
         Union{
             AbstractOrthogonalBasis,
-            CachedBasis{𝔽,<:AbstractOrthogonalBasis{𝔽}},
-        } where {𝔽},
+            CachedBasis{𝔽2,<:AbstractOrthogonalBasis{𝔽2}},
+        } where {𝔽2},
     }
     Ξ = invoke(get_basis, get_basis_invoke_types, M, p, B; kwargs...)
     bvectors = get_vectors(M, p, Ξ)
