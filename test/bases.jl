@@ -181,6 +181,7 @@ DiagonalizingBasisProxy() = DiagonalizingOrthonormalBasis([1.0, 0.0, 0.0])
             N = manifold_dimension(M)
             @test isa(pb, CachedBasis)
             @test CachedBasis(pb) === pb
+            @test !ManifoldsBase.requires_caching(pb)
             @test length(get_vectors(M, x, pb)) == N
             # test orthonormality
             for i in 1:N
@@ -576,5 +577,12 @@ DiagonalizingBasisProxy() = DiagonalizingOrthonormalBasis([1.0, 0.0, 0.0])
         @test ManifoldsBase.vector_space_dimension(M, CotangentSpace) == 3
         @test ManifoldsBase.vector_space_dimension(MC, TangentSpace) == 6
         @test ManifoldsBase.vector_space_dimension(MC, CotangentSpace) == 6
+    end
+
+    @testset "requires_caching" begin
+        @test ManifoldsBase.requires_caching(ProjectedOrthonormalBasis(:svd))
+        @test !ManifoldsBase.requires_caching(DefaultBasis())
+        @test !ManifoldsBase.requires_caching(DefaultOrthogonalBasis())
+        @test !ManifoldsBase.requires_caching(DefaultOrthonormalBasis())
     end
 end
