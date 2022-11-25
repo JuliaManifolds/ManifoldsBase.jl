@@ -946,6 +946,18 @@ The number system for the vectors of the given basis.
 """
 number_system(::AbstractBasis{𝔽}) where {𝔽} = 𝔽
 
+"""
+    requires_caching(B::AbstractBasis)
+
+Return whether basis `B` can be used in [`get_vector`](@ref) and [`get_coordinates`](@ref)
+without calling [`get_basis`](@ref) first.
+"""
+requires_caching(::AbstractBasis) = true
+requires_caching(::CachedBasis) = false
+requires_caching(::DefaultBasis) = false
+requires_caching(::DefaultOrthogonalBasis) = false
+requires_caching(::DefaultOrthonormalBasis) = false
+
 function _show_basis_vector(io::IO, X; pre = "", head = "")
     sX = sprint(show, "text/plain", X, context = io, sizehint = 0)
     sX = replace(sX, '\n' => "\n$(pre)")
