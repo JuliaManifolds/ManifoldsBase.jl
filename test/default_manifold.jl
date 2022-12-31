@@ -14,10 +14,12 @@ import ManifoldsBase:
     parallel_transport_to!,
     retract!,
     inverse_retract!
+
 import Base: angle, convert
-using LinearAlgebra
 using DoubleFloats
 using ForwardDiff
+using LinearAlgebra
+using Random
 using ReverseDiff
 using StaticArrays
 using Test
@@ -415,6 +417,34 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
                 @test isapprox(M, pts[1], tv, tv1)
             end
 
+            @testset "randon tests" begin
+                Random.seed!(23)
+                pr = rand(M)
+                @test is_point(M, pr, true)
+                Xr = rand(M; vector_at = pr)
+                @test is_vector(M, pr, Xr, true)
+                rng = MersenneTwister(42)
+                P = rand(M, 3)
+                @test length(P) == 3
+                @test all([is_point(M, pj) for pj in P])
+                Xv = rand(M, 3; vector_at = pr)
+                @test length(Xv) == 3
+                @test all([is_point(M, Xj) for Xj in Xv])
+                # and the same again with rng upfront
+                rng = MersenneTwister(42)
+                pr = rand(rng, M)
+                @test is_point(M, pr, true)
+                Xr = rand(rng, M; vector_at = pr)
+                @test is_vector(M, pr, Xr, true)
+                rng = MersenneTwister(42)
+                P = rand(rng, M, 3)
+                @test length(P) == 3
+                @test all([is_point(M, pj) for pj in P])
+                Xv = rand(rng, M, 3; vector_at = pr)
+                @test length(Xv) == 3
+                @test all([is_point(M, Xj) for Xj in Xv])
+            end
+
             @testset "vector transport" begin
                 # test constructor
                 @test default_vector_transport_method(M) == ParallelTransport()
@@ -600,6 +630,7 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
         p2 = copy(p1)
         @test (p1 == p2) && (p1 !== p2)
     end
+
     @testset "further vector and point automatic forwards" begin
         M = ManifoldsBase.DefaultManifold(3)
         p = DefaultPoint([1.0, 0.0, 0.0])
@@ -717,6 +748,7 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
         @test parallel_transport_direction!(M, Y, p, X, X) == X
         @test parallel_transport_along!(M, Y, p, X, []) == X
     end
+
     @testset "DefaultManifold and ONB" begin
         M = ManifoldsBase.DefaultManifold(3)
         p = [1.0f0, 0.0f0, 0.0f0]
@@ -736,10 +768,12 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
         CBR = get_basis(MC, p, DefaultOrthonormalBasis())
         @test CBR.data == [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
     end
+
     @testset "Show methods" begin
         @test repr(CayleyRetraction()) == "CayleyRetraction()"
         @test repr(PadeRetraction(2)) == "PadeRetraction(2)"
     end
+
     @testset "Further TestArrayRepresentation" begin
         M = ManifoldsBase.DefaultManifold(3)
         p = [1.0, 0.0, 0.0]

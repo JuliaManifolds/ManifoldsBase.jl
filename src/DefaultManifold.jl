@@ -132,6 +132,21 @@ function parallel_transport_to!(::DefaultManifold, Y, p, X, q)
     return copyto!(Y, X)
 end
 
+function Random.rand!(::DefaultManifold, pX; σ = one(eltype(pX)), vector_at = nothing)
+    pX .= randn(size(pX)) .* σ
+    return pX
+end
+function Random.rand!(
+    rng::AbstractRNG,
+    ::DefaultManifold,
+    pX;
+    σ = one(eltype(pX)),
+    vector_at = nothing,
+)
+    pX .= randn(rng, size(pX)) .* σ
+    return pX
+end
+
 function riemann_tensor!(::DefaultManifold, Xresult, p, X, Y, Z)
     return fill!(Xresult, 0)
 end
