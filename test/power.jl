@@ -3,6 +3,7 @@ using ManifoldsBase
 using ManifoldsBase: AbstractNumbers, ℝ, ℂ, NestedReplacingPowerRepresentation
 using StaticArrays
 using LinearAlgebra
+using Random
 
 power_array_wrapper(::Type{NestedPowerRepresentation}, ::Int) = identity
 power_array_wrapper(::Type{NestedReplacingPowerRepresentation}, i::Int) = SVector{i}
@@ -268,6 +269,26 @@ struct TestArrayRepresentation <: AbstractPowerRepresentation end
                 @test p[N, 1] == 1.0
                 @test zero_vector(N, p) == zero(p)
             end
+        end
+    end
+
+    @testset "Power RNG" begin
+        M = ManifoldsBase.DefaultManifold(3)
+        for rep in [NestedPowerRepresentation(), NestedReplacingPowerRepresentation()]
+            N = PowerManifold(M, rep, 2)
+            @test is_point(N, rand(N))
+            @test is_point(N, rand(MersenneTwister(123), N))
+            @test rand(MersenneTwister(123), N) == rand(MersenneTwister(123), N)
+            p = rand(N)
+            @test is_vector(N, p, rand(N; vector_at = p); atol = 1e-15)
+            @test is_vector(
+                N,
+                p,
+                rand(MersenneTwister(123), N; vector_at = p);
+                atol = 1e-15,
+            )
+            @test rand(MersenneTwister(123), N; vector_at = p) ==
+                  rand(MersenneTwister(123), N; vector_at = p)
         end
     end
 end

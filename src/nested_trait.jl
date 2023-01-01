@@ -258,7 +258,7 @@ macro invoke_maker(argnum, type, sig)
 end
 
 
-macro trait_function(sig, opts = :())
+macro trait_function(sig, opts = :(), manifold_arg_no = 1)
     parts = ManifoldsBase._split_signature(sig)
     kwargs_list = parts[:kwargs_list]
     callargs = parts[:callargs]
@@ -286,13 +286,18 @@ macro trait_function(sig, opts = :())
             $(callargs...);
             $(kwargs_list...),
         ) where {$(where_exprs...)}
-            arg1 = decorated_manifold($(argnames[1]))
-            argt1 = typeof(arg1)
+            arg_manifold = decorated_manifold($(argnames[manifold_arg_no]))
+            argt_manifold = typeof(arg_manifold)
             return invoke(
                 $fname,
-                Tuple{argt1,$(argnametype_exprs[2:end]...)},
-                arg1,
-                $(argnames[2:end]...);
+                Tuple{
+                    $(argnametype_exprs[1:(manifold_arg_no - 1)]...),
+                    argt_manifold,
+                    $(argnametype_exprs[(manifold_arg_no + 1):end]...),
+                },
+                $(argnames[1:(manifold_arg_no - 1)]...),
+                arg_manifold,
+                $(argnames[(manifold_arg_no + 1):end]...);
                 $(kwargs_call...),
             )
         end
@@ -309,7 +314,11 @@ macro trait_function(sig, opts = :())
             ) where {$(where_exprs...)}
                 return invoke(
                     $fname,
-                    Tuple{supertype($(argtypes[1])),$(argnametype_exprs[2:end]...)},
+                    Tuple{
+                        $(argnametype_exprs[1:(manifold_arg_no - 1)]...),
+                        supertype($(argtypes[manifold_arg_no])),
+                        $(argnametype_exprs[(manifold_arg_no + 1):end]...),
+                    },
                     $(argnames...);
                     $(kwargs_call...),
                 )
