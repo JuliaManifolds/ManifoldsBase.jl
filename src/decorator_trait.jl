@@ -571,9 +571,9 @@ end
 
 @trait_function Random.rand!(M::AbstractDecoratorManifold, p; kwargs...)
 
-@trait_function Random.rand(rng::AbstractRNG, M::AbstractDecoratorManifold; kwargs...)
+@trait_function Random.rand(rng::AbstractRNG, M::AbstractDecoratorManifold; kwargs...) :() 2
 
-@trait_function Random.rand!(rng::AbstractRNG, M::AbstractDecoratorManifold, p; kwargs...)
+@trait_function Random.rand!(rng::AbstractRNG, M::AbstractDecoratorManifold, p; kwargs...) :() 2
 
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function representation_size(M::AbstractDecoratorManifold) (no_empty,)
