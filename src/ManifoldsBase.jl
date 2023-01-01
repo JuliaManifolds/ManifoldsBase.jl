@@ -19,7 +19,7 @@ import Base:
     ==
 import LinearAlgebra: dot, norm, det, cross, I, UniformScaling, Diagonal
 
-import Random: rand
+import Random: rand, rand!
 
 import Markdown: @doc_str
 using LinearAlgebra
