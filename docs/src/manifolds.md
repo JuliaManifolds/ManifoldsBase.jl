@@ -61,3 +61,13 @@ Modules = [ManifoldsBase]
 Pages = ["EmbeddedManifold.jl"]
 Order = [:type, :macro, :function]
 ```
+
+## Metrics
+
+Most metric-related functionality is currently defined in [`Manifolds.jl`](https://juliamanifolds.github.io/Manifolds.jl/latest/) but a few basic types are defined here.
+
+```@autodocs
+Modules = [ManifoldsBase]
+Pages = ["metric.jl"]
+Order = [:type, :function]
+```

@@ -31,6 +31,7 @@ include("bases.jl")
 include("retractions.jl")
 include("exp_log_geo.jl")
 include("projections.jl")
+include("metric.jl")
 
 """
     allocate(a)
