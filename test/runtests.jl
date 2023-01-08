@@ -34,4 +34,5 @@ using ManifoldsBase
     include("power.jl")
     include("domain_errors.jl")
     include("vector_transport.jl")
+    include("metric.jl")
 end
