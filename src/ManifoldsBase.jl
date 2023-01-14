@@ -482,6 +482,14 @@ Compute the inner product of tangent vectors `X` and `Y` at point `p` from the
 inner(M::AbstractManifold, p, X, Y)
 
 """
+    is_flat(M::AbstractManifold)
+
+Return true if the [`AbstractManifold`](@ref) `M` is flat, i.e. if its Riemann curvature
+tensor is everywhere zero.
+"""
+is_flat(M::AbstractManifold)
+
+"""
     isapprox(M::AbstractManifold, p, q; error::Symbol=none, kwargs...)
 
 Check if points `p` and `q` from [`AbstractManifold`](@ref) `M` are approximately equal.
@@ -944,6 +952,7 @@ export allocate,
     inverse_retract,
     inverse_retract!,
     isapprox,
+    is_flat,
     is_point,
     is_vector,
     isempty,

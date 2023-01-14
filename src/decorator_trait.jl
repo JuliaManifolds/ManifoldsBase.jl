@@ -343,6 +343,8 @@ end
 @trait_function isapprox(M::AbstractDecoratorManifold, p, q; kwargs...)
 @trait_function isapprox(M::AbstractDecoratorManifold, p, X, Y; kwargs...)
 
+@trait_function is_flat(M::AbstractDecoratorManifold)
+
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function is_point(M::AbstractDecoratorManifold, p, te::Bool = false; kwargs...)
 @trait_function is_point(M::AbstractDecoratorManifold, p, e::Symbol; kwargs...)
