@@ -347,20 +347,36 @@ struct SoftmaxInverseRetraction <: AbstractInverseRetractionMethod end
 
 """
     default_inverse_retraction_method(M::AbstractManifold)
+    default_inverse_retraction_method(M::AbstractManifold, ::Type{T}) where {T})
 
 The [`AbstractInverseRetractionMethod`](@ref) that is used when calling
 [`inverse_retract`](@ref) without specifying the inverse retraction method.
 By default, this is the [`LogarithmicInverseRetraction`](@ref).
+
+This method can also be specified more precisely with a point type `T`, for the case
+that on a `M` there are two different representations of points, which provide
+different inverse retraction methods.
 """
 default_inverse_retraction_method(::AbstractManifold) = LogarithmicInverseRetraction()
+function default_inverse_retraction_method(M::AbstractManifold, ::Type{T}) where {T}
+    return default_inverse_retraction_method(M)
+end
 
 """
     default_retraction_method(M::AbstractManifold)
+    default_retraction_method(M::AbstractManifold, ::Type{T}) where {T}
 
 The [`AbstractRetractionMethod`](@ref) that is used when calling [`retract`](@ref) without
 specifying the retraction method. By default, this is the [`ExponentialRetraction`](@ref).
+
+This method can also be specified more precisely with a point type `T`, for the case
+that on a `M` there are two different representations of points, which provide
+different retraction methods.
 """
 default_retraction_method(::AbstractManifold) = ExponentialRetraction()
+function default_retraction_method(M::AbstractManifold, ::Type{T}) where {T}
+    return default_retraction_method(M)
+end
 
 """
     inverse_retract!(M::AbstractManifold, X, p, q[, method::AbstractInverseRetractionMethod])
@@ -380,7 +396,7 @@ function inverse_retract!(
     X,
     p,
     q,
-    m::AbstractInverseRetractionMethod = default_inverse_retraction_method(M),
+    m::AbstractInverseRetractionMethod = default_inverse_retraction_method(M, typeof(p)),
 )
     return _inverse_retract!(M, X, p, q, m)
 end
@@ -589,7 +605,7 @@ function inverse_retract(
     M::AbstractManifold,
     p,
     q,
-    m::AbstractInverseRetractionMethod = default_inverse_retraction_method(M),
+    m::AbstractInverseRetractionMethod = default_inverse_retraction_method(M, typeof(p)),
 )
     return _inverse_retract(M, p, q, m)
 end
@@ -778,7 +794,7 @@ function retract!(
     q,
     p,
     X,
-    m::AbstractRetractionMethod = default_retraction_method(M),
+    m::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
 )
     return _retract!(M, q, p, X, m)
 end
@@ -788,7 +804,7 @@ function retract!(
     p,
     X,
     t::Real,
-    method::AbstractRetractionMethod = default_retraction_method(M),
+    method::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
 )
     return retract!(M, q, p, t * X, method)
 end
@@ -924,8 +940,8 @@ retract_softmax!(M::AbstractManifold, q, p, X)
 function retract_softmax! end
 
 @doc raw"""
-    retract(M::AbstractManifold, p, X, method::AbstractRetractionMethod=default_retraction_method(M))
-    retract(M::AbstractManifold, p, X, t::Real=1, method::AbstractRetractionMethod=default_retraction_method(M))
+    retract(M::AbstractManifold, p, X, method::AbstractRetractionMethod=default_retraction_method(M, typeof(p)))
+    retract(M::AbstractManifold, p, X, t::Real=1, method::AbstractRetractionMethod=default_retraction_method(M, typeof(p)))
 
 Compute a retraction, a cheaper, approximate version of the [`exp`](@ref)onential map,
 from `p` into direction `X`, scaled by `t`, on the [`AbstractManifold`](@ref) `M`.
@@ -950,7 +966,7 @@ function retract(
     M::AbstractManifold,
     p,
     X,
-    m::AbstractRetractionMethod = default_retraction_method(M),
+    m::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
 )
     return _retract(M, p, X, m)
 end
@@ -959,7 +975,7 @@ function retract(
     p,
     X,
     t::Real,
-    m::AbstractRetractionMethod = default_retraction_method(M),
+    m::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
 )
     return retract(M, p, t * X, m)
 end
