@@ -347,7 +347,7 @@ struct SoftmaxInverseRetraction <: AbstractInverseRetractionMethod end
 
 """
     default_inverse_retraction_method(M::AbstractManifold)
-    default_inverse_retraction_method(M::AbstractManifold, ::Type{T}) where {T})
+    default_inverse_retraction_method(M::AbstractManifold, ::Type{T}) where {T}
 
 The [`AbstractInverseRetractionMethod`](@ref) that is used when calling
 [`inverse_retract`](@ref) without specifying the inverse retraction method.
