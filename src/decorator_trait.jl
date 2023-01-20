@@ -307,7 +307,7 @@ end
     M::AbstractDecoratorManifold,
     p,
     q,
-    m::AbstractInverseRetractionMethod = default_inverse_retraction_method(M),
+    m::AbstractInverseRetractionMethod = default_inverse_retraction_method(M, typeof(p)),
 )
 # Transparent for Submanifolds
 function inverse_retract(
@@ -315,7 +315,7 @@ function inverse_retract(
     M::AbstractDecoratorManifold,
     p,
     q,
-    m::AbstractInverseRetractionMethod = default_inverse_retraction_method(M),
+    m::AbstractInverseRetractionMethod = default_inverse_retraction_method(M, typeof(p)),
 )
     return inverse_retract(get_embedding(M, p), p, q, m)
 end
@@ -335,7 +335,7 @@ function inverse_retract!(
     X,
     p,
     q,
-    m::AbstractInverseRetractionMethod = default_inverse_retraction_method(M),
+    m::AbstractInverseRetractionMethod = default_inverse_retraction_method(M, typeof(p)),
 )
     return inverse_retract!(get_embedding(M, p), X, p, q, m)
 end
@@ -591,14 +591,14 @@ end
     M::AbstractDecoratorManifold,
     p,
     X,
-    m::AbstractRetractionMethod = default_retraction_method(M),
+    m::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
 )
 function retract(
     ::TraitList{IsEmbeddedSubmanifold},
     M::AbstractDecoratorManifold,
     p,
     X,
-    m::AbstractRetractionMethod = default_retraction_method(M),
+    m::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
 )
     return retract(get_embedding(M, p), p, X, m)
 end
@@ -608,7 +608,7 @@ end
     q,
     p,
     X,
-    m::AbstractRetractionMethod = default_retraction_method(M),
+    m::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
 )
 function retract!(
     ::TraitList{IsEmbeddedSubmanifold},
@@ -616,7 +616,7 @@ function retract!(
     q,
     p,
     X,
-    m::AbstractRetractionMethod = default_retraction_method(M),
+    m::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
 )
     return retract!(get_embedding(M, p), q, p, X, m)
 end
@@ -626,7 +626,7 @@ end
     q,
     p,
     X,
-    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
 )
 function vector_transport_along(
     ::TraitList{IsEmbeddedSubmanifold},
@@ -634,7 +634,7 @@ function vector_transport_along(
     p,
     X,
     c,
-    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
 )
     return vector_transport_along(get_embedding(M, p), p, X, c, m)
 end
@@ -645,7 +645,7 @@ end
     p,
     X,
     c::AbstractVector,
-    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
 )
 function vector_transport_along!(
     ::TraitList{IsEmbeddedSubmanifold},
@@ -654,7 +654,7 @@ function vector_transport_along!(
     p,
     X,
     c::AbstractVector,
-    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
 )
     return vector_transport_along!(get_embedding(M, p), Y, p, X, c, m)
 end
@@ -664,7 +664,7 @@ end
     p,
     X,
     d,
-    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
 )
 function vector_transport_direction(
     ::TraitList{IsEmbeddedSubmanifold},
@@ -672,7 +672,7 @@ function vector_transport_direction(
     p,
     X,
     d,
-    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
 )
     return vector_transport_direction(get_embedding(M, p), p, X, d, m)
 end
@@ -683,7 +683,7 @@ end
     p,
     X,
     d,
-    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
 )
 function vector_transport_direction!(
     ::TraitList{IsEmbeddedSubmanifold},
@@ -692,7 +692,7 @@ function vector_transport_direction!(
     p,
     X,
     d,
-    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
 )
     return vector_transport_direction!(get_embedding(M, p), Y, p, X, d, m)
 end
@@ -702,7 +702,7 @@ end
     p,
     X,
     q,
-    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
 )
 function vector_transport_to(
     ::TraitList{IsEmbeddedSubmanifold},
@@ -710,7 +710,7 @@ function vector_transport_to(
     p,
     X,
     q,
-    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
 )
     return vector_transport_to(get_embedding(M, p), p, X, q, m)
 end
@@ -721,7 +721,7 @@ end
     p,
     X,
     q,
-    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
 )
 function vector_transport_to!(
     ::TraitList{IsEmbeddedSubmanifold},
@@ -730,7 +730,7 @@ function vector_transport_to!(
     p,
     X,
     q,
-    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
 )
     return vector_transport_to!(get_embedding(M, p), Y, p, X, q, m)
 end

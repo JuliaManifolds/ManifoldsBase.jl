@@ -376,6 +376,9 @@ functions defined for the power manifold, meaning that this is used elementwise.
 function default_retraction_method(M::PowerManifold)
     return default_retraction_method(M.manifold)
 end
+function default_retraction_method(M::PowerManifold, t::Type)
+    return default_retraction_method(M.manifold, eltype(t))
+end
 
 @doc raw"""
     default_inverse_retraction_method(M::PowerManifold)
@@ -386,6 +389,9 @@ functions defined for the power manifold, meaning that this is used elementwise.
 function default_inverse_retraction_method(M::PowerManifold)
     return default_inverse_retraction_method(M.manifold)
 end
+function default_inverse_retraction_method(M::PowerManifold, t::Type)
+    return default_inverse_retraction_method(M.manifold, eltype(t))
+end
 
 @doc raw"""
     default_vector_transport_method(M::PowerManifold)
@@ -395,6 +401,9 @@ functions defined for the power manifold, meaning that this is used elementwise.
 """
 function default_vector_transport_method(M::PowerManifold)
     return default_vector_transport_method(M.manifold)
+end
+function default_vector_transport_method(M::PowerManifold, t::Type)
+    return default_vector_transport_method(M.manifold, eltype(t))
 end
 
 @doc raw"""
@@ -775,7 +784,7 @@ function inverse_retract(
     M::AbstractPowerManifold,
     p,
     q,
-    m::AbstractInverseRetractionMethod = default_inverse_retraction_method(M),
+    m::AbstractInverseRetractionMethod = default_inverse_retraction_method(M, typeof(p)),
 )
     X = allocate_result(M, inverse_retract, p, q)
     return inverse_retract!(M, X, p, q, m)
@@ -786,7 +795,7 @@ function inverse_retract!(
     X,
     p,
     q,
-    m::AbstractInverseRetractionMethod = default_inverse_retraction_method(M),
+    m::AbstractInverseRetractionMethod = default_inverse_retraction_method(M, typeof(p)),
 )
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
@@ -805,7 +814,7 @@ function inverse_retract!(
     X,
     p,
     q,
-    m::AbstractInverseRetractionMethod = default_inverse_retraction_method(M),
+    m::AbstractInverseRetractionMethod = default_inverse_retraction_method(M, typeof(p)),
 )
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
@@ -1146,7 +1155,7 @@ function retract(
     M::AbstractPowerManifold,
     p,
     X,
-    m::AbstractRetractionMethod = default_retraction_method(M),
+    m::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
 )
     q = allocate_result(M, retract, p, X)
     return retract!(M, q, p, X, m)
@@ -1157,7 +1166,7 @@ function retract!(
     q,
     p,
     X,
-    m::AbstractRetractionMethod = default_retraction_method(M),
+    m::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
 )
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
@@ -1176,7 +1185,7 @@ function retract!(
     q,
     p,
     X,
-    m::AbstractRetractionMethod = default_retraction_method(M),
+    m::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
 )
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
@@ -1278,7 +1287,7 @@ function vector_transport_direction!(
     p,
     X,
     d,
-    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
 )
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
@@ -1298,7 +1307,7 @@ function vector_transport_direction(
     p,
     X,
     d,
-    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
 )
     Y = allocate_result(M, vector_transport_direction, p, X, d)
     return vector_transport_direction!(M, Y, p, X, d, m)
@@ -1310,7 +1319,7 @@ function vector_transport_direction!(
     p,
     X,
     d,
-    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
 )
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
@@ -1329,7 +1338,7 @@ function vector_transport_direction(
     p,
     X,
     d,
-    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
 )
     Y = allocate_result(M, vector_transport_direction, p, X, d)
     rep_size = representation_size(M.manifold)
@@ -1365,7 +1374,7 @@ function vector_transport_to(
     p,
     X,
     q,
-    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
 )
     Y = allocate_result(M, vector_transport_to, p, X)
     return vector_transport_to!(M, Y, p, X, q, m)
@@ -1376,7 +1385,7 @@ function vector_transport_to!(
     p,
     X,
     q,
-    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
 )
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
@@ -1397,7 +1406,7 @@ function vector_transport_to!(
     p,
     X,
     q,
-    m::AbstractVectorTransportMethod = default_vector_transport_method(M),
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
 )
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
