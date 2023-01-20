@@ -403,7 +403,7 @@ function default_vector_transport_method(M::PowerManifold)
     return default_vector_transport_method(M.manifold)
 end
 function default_vector_transport_method(M::PowerManifold, t::Type)
-    return default_vector_transport_method(M.manifold, t)
+    return default_vector_transport_method(M.manifold, eltype(t))
 end
 
 @doc raw"""
