@@ -390,7 +390,7 @@ function default_inverse_retraction_method(M::PowerManifold)
     return default_inverse_retraction_method(M.manifold)
 end
 function default_inverse_retraction_method(M::PowerManifold, t::Type)
-    return default_inverse_retraction_method(M.manifold, t)
+    return default_inverse_retraction_method(M.manifold, eltype(t))
 end
 
 @doc raw"""
