@@ -142,6 +142,7 @@ struct TestArrayRepresentation <: AbstractPowerRepresentation end
                     @test injectivity_radius(N, ExponentialRetraction()) ==
                           injectivity_radius(M)
                     @test injectivity_radius(N, p) == injectivity_radius(M, p)
+                    @test is_flat(N)
                     p2 = allocate(p)
                     copyto!(N, p2, p)
                     @test !(p === p2)

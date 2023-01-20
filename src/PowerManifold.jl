@@ -742,6 +742,14 @@ function inner(M::AbstractPowerManifold, p, X, Y)
     return result
 end
 
+"""
+    is_flat(M::AbstractPowerManifold)
+
+Return true if [`AbstractPowerManifold`](@ref) is flat. It is flat if and only if the
+wrapped manifold is flat.
+"""
+is_flat(M::AbstractPowerManifold) = is_flat(M.manifold)
+
 function Base.isapprox(M::AbstractPowerManifold, p, q; kwargs...)
     result = true
     rep_size = representation_size(M.manifold)

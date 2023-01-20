@@ -109,6 +109,8 @@ injectivity_radius(::DefaultManifold) = Inf
 
 @inline inner(::DefaultManifold, p, X, Y) = dot(X, Y)
 
+is_flat(::DefaultManifold) = true
+
 log!(::DefaultManifold, Y, p, q) = (Y .= q .- p)
 
 @generated function manifold_dimension(::DefaultManifold{T,𝔽}) where {T,𝔽}

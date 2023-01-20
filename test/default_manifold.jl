@@ -230,6 +230,8 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
     @test default_retraction_method(M) == ExponentialRetraction()
     @test default_inverse_retraction_method(M) == LogarithmicInverseRetraction()
 
+    @test is_flat(M)
+
     rm = ManifoldsBase.ExponentialRetraction()
     irm = ManifoldsBase.LogarithmicInverseRetraction()
 
