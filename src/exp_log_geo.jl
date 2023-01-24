@@ -1,6 +1,6 @@
 @doc raw"""
     exp(M::AbstractManifold, p, X)
-    exp(M::AbstractManifold, p, X, t::Real = 1)
+    exp(M::AbstractManifold, p, X, t::Number = 1)
 
 Compute the exponential map of tangent vector `X`, optionally scaled by `t`,  at point `p`
 from the manifold [`AbstractManifold`](@ref) `M`, i.e.
@@ -17,11 +17,11 @@ function exp(M::AbstractManifold, p, X)
     exp!(M, q, p, X)
     return q
 end
-exp(M::AbstractManifold, p, X, t::Real) = exp(M, p, t * X)
+exp(M::AbstractManifold, p, X, t::Number) = exp(M, p, t * X)
 
 """
     exp!(M::AbstractManifold, q, p, X)
-    exp!(M::AbstractManifold, q, p, X, t::Real = 1)
+    exp!(M::AbstractManifold, q, p, X, t::Number = 1)
 
 Compute the exponential map of tangent vector `X`, optionally scaled by `t`,  at point `p`
 from the manifold [`AbstractManifold`](@ref) `M`.
@@ -30,7 +30,7 @@ The result is saved to `q`.
 See also [`exp`](@ref).
 """
 exp!(M::AbstractManifold, q, p, X)
-exp!(M::AbstractManifold, q, p, X, t::Real) = exp!(M, q, p, t * X)
+exp!(M::AbstractManifold, q, p, X, t::Number) = exp!(M, q, p, t * X)
 
 @doc raw"""
     geodesic(M::AbstractManifold, p, X) -> Function
