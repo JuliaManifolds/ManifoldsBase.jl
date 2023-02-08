@@ -425,6 +425,35 @@ See also: [`EmbeddedManifold`](@ref), [`project!`](@ref project!(M::AbstractMani
 """
 embed!(M::AbstractManifold, Y, p, X) = copyto!(M, Y, p, X)
 
+"""
+    embed_project(M::AbstractManifold, p)
+
+Embed `p` from manifold `M` an project it back to `M`. For points from `M` this is identity
+but in case embedding is defined for points outside of `M`, this can serve as a way
+to for example remove numerical innacuracies caused by some algorithms.
+"""
+function embed_project(M::AbstractManifold, p)
+    return project(M, embed(M, p))
+end
+"""
+    embed_project(M::AbstractManifold, p, X)
+
+Embed vector `X` tangent at `p` from manifold `M` an project it back to tangent space
+at `p`. For points from that tangent space this is identity but in case embedding is
+defined for tagent vectors from outside of it, this can serve as a way to for example remove
+numerical innacuracies caused by some algorithms.
+"""
+function embed_project(M::AbstractManifold, p, X)
+    return project(M, p, embed(M, p, X))
+end
+
+function embed_project!(M::AbstractManifold, q, p)
+    return project!(M, q, embed(M, p))
+end
+function embed_project!(M::AbstractManifold, Y, p, X)
+    return project!(M, Y, p, embed(M, p, X))
+end
+
 @doc raw"""
     injectivity_radius(M::AbstractManifold)
 
@@ -935,6 +964,8 @@ export allocate,
     exp!,
     embed,
     embed!,
+    embed_project,
+    embed_project!,
     geodesic,
     geodesic!,
     get_basis,

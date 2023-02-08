@@ -256,6 +256,13 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
         push!(
             block.args,
             quote
+                function ManifoldsBase.$ra(M::$TM, p::$TP, X::$TV)
+                    return $TP(ManifoldsBase.$ra(M, p.$pfield, X.$vfield))
+                end
+                function ManifoldsBase.$rm(M::$TM, q, p::$TP, X::$TV)
+                    ManifoldsBase.$rm(M, q.$pfield, p.$pfield, X.$vfield)
+                    return q
+                end
                 function ManifoldsBase.$ra(M::$TM, p::$TP, X::$TV, t::Number)
                     return $TP(ManifoldsBase.$ra(M, p.$pfield, X.$vfield, t))
                 end
@@ -291,8 +298,27 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
                 ManifoldsBase.retract_exp_ode!(M, q.$pfield, p.$pfield, X.$vfield, t, m, B)
                 return q
             end
-            function ManifoldsBase.retract_pade(M::$TM, p::$TP, X::$TV, t::Number, n)
-                return $TP(ManifoldsBase.retract_pade(M, p.$pfield, X.$vfield, t, n))
+            function ManifoldsBase.retract_pade(M::$TM, p::$TP, X::$TV, m::PadeRetraction)
+                return $TP(ManifoldsBase.retract_pade(M, p.$pfield, X.$vfield, m))
+            end
+            function ManifoldsBase.retract_pade(
+                M::$TM,
+                p::$TP,
+                X::$TV,
+                t::Number,
+                m::PadeRetraction,
+            )
+                return $TP(ManifoldsBase.retract_pade(M, p.$pfield, X.$vfield, t, m))
+            end
+            function ManifoldsBase.retract_pade!(
+                M::$TM,
+                q::$TP,
+                p::$TP,
+                X::$TV,
+                m::PadeRetraction,
+            )
+                ManifoldsBase.retract_pade!(M, q.$pfield, p.$pfield, X.$vfield, m)
+                return q
             end
             function ManifoldsBase.retract_pade!(
                 M::$TM,
@@ -300,10 +326,18 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
                 p::$TP,
                 X::$TV,
                 t::Number,
-                n,
+                m::PadeRetraction,
             )
-                ManifoldsBase.retract_pade!(M, q.$pfield, p.$pfield, X.$vfield, t, n)
+                ManifoldsBase.retract_pade!(M, q.$pfield, p.$pfield, X.$vfield, t, m)
                 return q
+            end
+            function ManifoldsBase.retract_embedded(
+                M::$TM,
+                p::$TP,
+                X::$TV,
+                m::AbstractRetractionMethod,
+            )
+                return $TP(ManifoldsBase.retract_embedded(M, p.$pfield, X.$vfield, m))
             end
             function ManifoldsBase.retract_embedded(
                 M::$TM,
@@ -313,6 +347,16 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
                 m::AbstractRetractionMethod,
             )
                 return $TP(ManifoldsBase.retract_embedded(M, p.$pfield, X.$vfield, t, m))
+            end
+            function ManifoldsBase.retract_embedded!(
+                M::$TM,
+                q::$TP,
+                p::$TP,
+                X::$TV,
+                m::AbstractRetractionMethod,
+            )
+                ManifoldsBase.retract_embedded!(M, q.$pfield, p.$pfield, X.$vfield, m)
+                return q
             end
             function ManifoldsBase.retract_embedded!(
                 M::$TM,

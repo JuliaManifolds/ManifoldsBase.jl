@@ -17,7 +17,11 @@ function exp(M::AbstractManifold, p, X)
     exp!(M, q, p, X)
     return q
 end
-exp(M::AbstractManifold, p, X, t::Number) = exp(M, p, t * X)
+function exp(M::AbstractManifold, p, X, t::Number)
+    q = allocate_result(M, exp, p, X)
+    exp!(M, q, p, X, t)
+    return q
+end
 
 """
     exp!(M::AbstractManifold, q, p, X)

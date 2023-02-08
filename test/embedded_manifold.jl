@@ -247,6 +247,7 @@ ManifoldsBase.decorated_manifold(::FallbackManifold) = DefaultManifold(3)
         P = [1.0 1.0 2.0]
         Q = similar(P)
         @test project!(M, Q, P) == project!(M, Q, P)
+        @test project!(M, Q, P) == embed_project!(M, Q, P)
         @test project!(M, Q, P) == [1.0 1.0 0.0]
         @test isapprox(M, p, zero_vector(M, p), [0 0 0])
         XZ = similar(X)
@@ -305,6 +306,10 @@ ManifoldsBase.decorated_manifold(::FallbackManifold) = DefaultManifold(3)
         Xe = embed(M, pe, X)
         @test Xe == [2.0, 3.0, 0.0]
         @test project(M, pe) == p
+        @test embed_project(M, p) == p
+        @test embed_project(M, p, X) == X
+        Xs = similar(X)
+        @test embed_project!(M, Xs, p, X) == X
         @test project(M, pe, Xe) == X
         # isometric passtthrough
         @test injectivity_radius(M) == Inf

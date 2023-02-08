@@ -421,7 +421,7 @@ function _inverse_retract!(
     ::CayleyInverseRetraction;
     kwargs...,
 )
-    return inverse_retract_caley!(M, X, p, q; kwargs...)
+    return inverse_retract_cayley!(M, X, p, q; kwargs...)
 end
 function _inverse_retract!(
     M::AbstractManifold,
@@ -448,10 +448,10 @@ function _inverse_retract!(
     X,
     p,
     q,
-    ::PadeInverseRetraction{n};
+    m::PadeInverseRetraction;
     kwargs...,
-) where {n}
-    return inverse_retract_pade!(M, X, p, q, n; kwargs...)
+)
+    return inverse_retract_pade!(M, X, p, q, m; kwargs...)
 end
 function _inverse_retract!(
     M::AbstractManifold,
@@ -524,12 +524,12 @@ function inverse_retract_embedded!(
 end
 
 """
-    inverse_retract_caley!(M::AbstractManifold, X, p, q)
+    inverse_retract_cayley!(M::AbstractManifold, X, p, q)
 
 computes the mutating variant of the [`CayleyInverseRetraction`](@ref),
 which by default calls the first order [`PadeInverseRetraction`§(@ref).
 """
-function inverse_retract_caley!(M::AbstractManifold, X, p, q; kwargs...)
+function inverse_retract_cayley!(M::AbstractManifold, X, p, q; kwargs...)
     return inverse_retract_pade!(M, X, p, q, 1; kwargs...)
 end
 
@@ -610,7 +610,7 @@ function inverse_retract(
     return _inverse_retract(M, p, q, m)
 end
 function _inverse_retract(M::AbstractManifold, p, q, ::CayleyInverseRetraction; kwargs...)
-    return inverse_retract_caley(M, p, q; kwargs...)
+    return inverse_retract_cayley(M, p, q; kwargs...)
 end
 function _inverse_retract(
     M::AbstractManifold,
@@ -695,14 +695,14 @@ function inverse_retract_embedded(
 end
 
 """
-    inverse_retract_caley(M::AbstractManifold, p, q)
+    inverse_retract_cayley(M::AbstractManifold, p, q)
 
 computes the allocating variant of the [`CayleyInverseRetraction`](@ref),
-which by default allocates and calls [`inverse_retract_caley!`](@ref).
+which by default allocates and calls [`inverse_retract_cayley!`](@ref).
 """
-function inverse_retract_caley(M::AbstractManifold, p, q; kwargs...)
+function inverse_retract_cayley(M::AbstractManifold, p, q; kwargs...)
     X = allocate_result(M, inverse_retract, p, q)
-    return inverse_retract_caley!(M, X, p, q; kwargs...)
+    return inverse_retract_cayley!(M, X, p, q; kwargs...)
 end
 """
     inverse_retract_pade(M::AbstractManifold, p, q)
@@ -810,7 +810,7 @@ function retract!(
 end
 # dispatch to lower level
 function _retract!(M::AbstractManifold, q, p, X, t::Number, ::CayleyRetraction; kwargs...)
-    return retract_caley!(M, q, p, X, t; kwargs...)
+    return retract_cayley!(M, q, p, X, t; kwargs...)
 end
 function _retract!(
     M::AbstractManifold,
@@ -865,16 +865,8 @@ end
 function _retract!(M::AbstractManifold, q, p, X, t::Number, ::SoftmaxRetraction; kwargs...)
     return retract_softmax!(M, q, p, X, t; kwargs...)
 end
-function _retract!(
-    M::AbstractManifold,
-    q,
-    p,
-    X,
-    t::Number,
-    ::PadeRetraction{n};
-    kwargs...,
-) where {n}
-    return retract_pade!(M, q, p, X, t, n; kwargs...)
+function _retract!(M::AbstractManifold, q, p, X, t::Number, m::PadeRetraction; kwargs...)
+    return retract_pade!(M, q, p, X, t, m; kwargs...)
 end
 function _retract!(
     M::AbstractManifold,
@@ -919,13 +911,13 @@ function retract_embedded!(
 end
 
 """
-    retract_caley!(M::AbstractManifold, q, p, X, t::Number)
+    retract_cayley!(M::AbstractManifold, q, p, X, t::Number)
 
 computes the mutating variant of the [`CayleyRetraction`](@ref),
 which by default falls back to calling the first order [`PadeRetraction`](@ref).
 """
-function retract_caley!(M::AbstractManifold, q, p, X, t::Number; kwargs...)
-    return retract_pade!(M, q, p, X, t, 1; kwargs...)
+function retract_cayley!(M::AbstractManifold, q, p, X, t::Number; kwargs...)
+    return retract_pade!(M, q, p, X, t, PadeRetraction(1); kwargs...)
 end
 
 """
@@ -946,11 +938,11 @@ retract_exp_ode!(
 function retract_exp_ode! end
 
 """
-    retract_pade!(M::AbstractManifold, q, p, X, t::Number, n)
+    retract_pade!(M::AbstractManifold, q, p, X, t::Number, m::PadeRetraction)
 
-Compute the mutating variant of the [`PadeRetraction`](@ref)`(n)`.
+Compute the mutating variant of the [`PadeRetraction`](@ref) `m`.
 """
-retract_pade!(M::AbstractManifold, q, p, X, t::Number, n)
+retract_pade!(M::AbstractManifold, q, p, X, t::Number, m::PadeRetraction)
 
 function retract_pade! end
 
@@ -1059,17 +1051,17 @@ function _retract(M::AbstractManifold, p, X, t::Number, ::SoftmaxRetraction; kwa
     return retract_softmax(M, p, X, t; kwargs...)
 end
 function _retract(M::AbstractManifold, p, X, t::Number, ::CayleyRetraction; kwargs...)
-    return retract_caley(M, p, X, t; kwargs...)
+    return retract_cayley(M, p, X, t; kwargs...)
 end
 function _retract(
     M::AbstractManifold,
     p,
     X,
     t::Number,
-    ::PadeRetraction{n};
+    m::PadeRetraction;
     kwargs...,
 ) where {n}
-    return retract_pade(M, p, X, t, n; kwargs...)
+    return retract_pade(M, p, X, t, m; kwargs...)
 end
 function _retract(
     M::AbstractManifold,
@@ -1168,24 +1160,24 @@ function retract_softmax(M::AbstractManifold, p, X, t::Number; kwargs...)
 end
 
 """
-    retract_caley(M::AbstractManifold, p, X, t::Number)
+    retract_cayley(M::AbstractManifold, p, X, t::Number)
 
 Compute the allocating variant of the [`CayleyRetraction`](@ref),
-which by default allocates and calls [`retract_caley!`](@ref ManifoldsBase.retract_caley!).
+which by default allocates and calls [`retract_cayley!`](@ref ManifoldsBase.retract_cayley!).
 """
-function retract_caley(M::AbstractManifold, p, X, t::Number; kwargs...)
+function retract_cayley(M::AbstractManifold, p, X, t::Number; kwargs...)
     q = allocate_result(M, retract, p, X)
-    return retract_caley!(M, q, p, X, t; kwargs...)
+    return retract_cayley!(M, q, p, X, t; kwargs...)
 end
 """
-    retract_pade(M::AbstractManifold, p, X, t::Number)
+    retract_pade(M::AbstractManifold, p, X, t::Number, m::PadeRetraction)
 
-Compute the allocating variant of the [`PadeRetraction`](@ref)`(n)`,
+Compute the allocating variant of the [`PadeRetraction`](@ref) `m`,
 which by default allocates and calls [`retract_pade!`](@ref ManifoldsBase.retract_pade!).
 """
-function retract_pade(M::AbstractManifold, p, X, t::Number, n; kwargs...)
+function retract_pade(M::AbstractManifold, p, X, t::Number, m::PadeRetraction; kwargs...)
     q = allocate_result(M, retract, p, X)
-    return retract_pade!(M, q, p, X, t, n; kwargs...)
+    return retract_pade!(M, q, p, X, t, m; kwargs...)
 end
 
 Base.show(io::IO, ::CayleyRetraction) = print(io, "CayleyRetraction()")
