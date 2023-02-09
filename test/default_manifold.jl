@@ -658,33 +658,27 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
         Z = similar(Y)
         r = similar(p)
         # test passthrough using the dummy implementations
-        for retr in [PolarRetraction, ProjectionRetraction, QRRetraction, SoftmaxRetraction]
-            @test retract(M, q, Y, retr()) == DefaultPoint(q.value + Y.value)
-            @test retract!(M, r, q, Y, retr()) == DefaultPoint(q.value + Y.value)
+        for retr in [
+            PolarRetraction(),
+            ProjectionRetraction(),
+            QRRetraction(),
+            SoftmaxRetraction(),
+            ODEExponentialRetraction(PolarRetraction(), DefaultBasis()),
+            PadeRetraction(2),
+            EmbeddedRetraction(ExponentialRetraction()),
+        ]
+            @test retract(M, q, Y, retr) == DefaultPoint(q.value + Y.value)
+            @test retract(M, q, Y, 0.5, retr) == DefaultPoint(q.value + 0.5 * Y.value)
+            @test retract!(M, r, q, Y, retr) == DefaultPoint(q.value + Y.value)
+            @test retract!(M, r, q, Y, 0.5, retr) == DefaultPoint(q.value + 0.5 * Y.value)
         end
-        @test retract(
-            M,
-            q,
-            Y,
-            ODEExponentialRetraction(PolarRetraction(), DefaultBasis()),
-        ) == DefaultPoint(q.value + Y.value)
-        @test retract!(
-            M,
-            r,
-            q,
-            Y,
-            ODEExponentialRetraction(PolarRetraction(), DefaultBasis()),
-        ) == DefaultPoint(q.value + Y.value)
-        @test retract(M, q, Y, PadeRetraction(2)) == DefaultPoint(q.value + Y.value)
-        @test retract!(M, r, q, Y, PadeRetraction(2)) == DefaultPoint(q.value + Y.value)
-        @test retract!(M, r, q, Y, EmbeddedRetraction(ExponentialRetraction())) ==
-              DefaultPoint(q.value + Y.value)
-        @test retract(M, q, Y, EmbeddedRetraction(ExponentialRetraction())) ==
-              DefaultPoint(q.value + Y.value)
+
         mRK = RetractionWithKeywords(CustomDefinedKeywordRetraction(); scale = 3.0)
         pRK = allocate(p, eltype(p.value), size(p.value))
         @test retract(M, p, X, mRK) == DefaultPoint(3 * p.value + X.value)
+        @test retract(M, p, X, 0.5, mRK) == DefaultPoint(3 * p.value + 0.5 * X.value)
         @test retract!(M, pRK, p, X, mRK) == DefaultPoint(3 * p.value + X.value)
+        @test retract!(M, pRK, p, X, 0.5, mRK) == DefaultPoint(3 * p.value + 0.5 * X.value)
         mIRK = InverseRetractionWithKeywords(
             CustomDefinedKeywordInverseRetraction();
             scale = 3.0,

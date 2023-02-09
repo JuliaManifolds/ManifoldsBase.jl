@@ -96,7 +96,7 @@ end
 # Third example - explicitly mention an embedding.
 #
 function ManifoldsBase.embed!(
-    ::EmbeddedManifold{𝔽,DefaultManifold{nL,𝔽},DefaultManifold{mL,𝔽2}},
+    ::EmbeddedManifold{𝔽,DefaultManifold{𝔽,nL},DefaultManifold{𝔽2,mL}},
     q,
     p,
 ) where {nL,mL,𝔽,𝔽2}
@@ -120,7 +120,7 @@ function ManifoldsBase.embed!(
 end
 
 function ManifoldsBase.project!(
-    ::EmbeddedManifold{𝔽,DefaultManifold{nL,𝔽},DefaultManifold{mL,𝔽2}},
+    ::EmbeddedManifold{𝔽,DefaultManifold{𝔽,nL},DefaultManifold{𝔽2,mL}},
     q,
     p,
 ) where {nL,mL,𝔽,𝔽2}

@@ -9,12 +9,12 @@ This manifold further illustrates how to type your manifold points and tangent v
 that the interface does not require this, but it might be handy in debugging and educative
 situations to verify correctness of involved variabes.
 """
-struct DefaultManifold{T<:Tuple,𝔽} <: AbstractManifold{𝔽} end
-function DefaultManifold(n::Vararg{Int,N}; field = ℝ) where {N}
-    return DefaultManifold{Tuple{n...},field}()
+struct DefaultManifold{𝔽,T<:NTuple{N,Int} where {N}} <: AbstractManifold{𝔽}
+    size::T
 end
-
-
+function DefaultManifold(n::Vararg{Int}; field = ℝ)
+    return DefaultManifold{field,typeof(n)}(n)
+end
 
 function check_approx(M::DefaultManifold, p, q; kwargs...)
     res = isapprox(p, q; kwargs...)
@@ -94,13 +94,7 @@ function get_vector_diagonalizing!(
 )
     return copyto!(Y, reshape(c, representation_size(M)))
 end
-function get_vector_orthonormal!(
-    M::DefaultManifold{T,ℂ},
-    Y,
-    p,
-    c,
-    ::ComplexNumbers,
-) where {T}
+function get_vector_orthonormal!(M::DefaultManifold{ℂ}, Y, p, c, ::ComplexNumbers)
     n = div(length(c), 2)
     return copyto!(Y, reshape(c[1:n] + c[(n + 1):(2n)] * 1im, representation_size(M)))
 end
@@ -113,21 +107,21 @@ is_flat(::DefaultManifold) = true
 
 log!(::DefaultManifold, Y, p, q) = (Y .= q .- p)
 
-@generated function manifold_dimension(::DefaultManifold{T,𝔽}) where {T,𝔽}
-    return length(T.parameters) == 0 ? 1 : *(T.parameters...) * real_dimension(𝔽)
+function manifold_dimension(M::DefaultManifold{𝔽}) where {𝔽}
+    return length(M.size) == 0 ? 1 : *(M.size...) * real_dimension(𝔽)
 end
 
-number_system(::DefaultManifold{T,𝔽}) where {T,𝔽} = 𝔽
+number_system(::DefaultManifold{𝔽}) where {𝔽} = 𝔽
 
 norm(::DefaultManifold, p, X) = norm(X)
 
 project!(::DefaultManifold, q, p) = copyto!(q, p)
 project!(::DefaultManifold, Y, p, X) = copyto!(Y, X)
 
-@generated representation_size(::DefaultManifold{T}) where {T} = tuple(T.parameters...)
+representation_size(M::DefaultManifold) = M.size
 
-function Base.show(io::IO, ::DefaultManifold{N,𝔽}) where {N,𝔽}
-    return print(io, "DefaultManifold($(join(N.parameters, ", ")); field = $(𝔽))")
+function Base.show(io::IO, M::DefaultManifold{𝔽}) where {𝔽}
+    return print(io, "DefaultManifold($(join(M.size, ", ")); field = $(𝔽))")
 end
 
 function parallel_transport_to!(::DefaultManifold, Y, p, X, q)

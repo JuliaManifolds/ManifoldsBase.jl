@@ -1053,14 +1053,7 @@ end
 function _retract(M::AbstractManifold, p, X, t::Number, ::CayleyRetraction; kwargs...)
     return retract_cayley(M, p, X, t; kwargs...)
 end
-function _retract(
-    M::AbstractManifold,
-    p,
-    X,
-    t::Number,
-    m::PadeRetraction;
-    kwargs...,
-) where {n}
+function _retract(M::AbstractManifold, p, X, t::Number, m::PadeRetraction; kwargs...)
     return retract_pade(M, p, X, t, m; kwargs...)
 end
 function _retract(
