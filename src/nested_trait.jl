@@ -275,14 +275,14 @@ macro trait_function(sig, opts = :(), manifold_arg_no = 1)
             return ($fname)(trait($fname, $(argnames...)), $(argnames...); $(kwargs_call...))
         end
         @inline function ($fname)(
-            t::TraitList,
+            _t::TraitList,
             $(callargs...);
             $(kwargs_list...),
         ) where {$(where_exprs...)}
-            return ($fname)(next_trait(t), $(argnames...); $(kwargs_call...))
+            return ($fname)(next_trait(_t), $(argnames...); $(kwargs_call...))
         end
         @inline function ($fname)(
-            t::TraitList{IsExplicitDecorator},
+            _t::TraitList{IsExplicitDecorator},
             $(callargs...);
             $(kwargs_list...),
         ) where {$(where_exprs...)}
