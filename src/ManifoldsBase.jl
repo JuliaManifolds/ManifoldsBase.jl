@@ -538,6 +538,7 @@ function isapprox(M::AbstractManifold, p, q; error::Symbol = :none, kwargs...)
     ma = check_approx(M, p, q; kwargs...)
     if ma !== nothing
         (error === :error) && throw(ma)
+        (error === :none) && return false
         if isnan(ma.val)
             s = "$(typeof(ma))\n$(ma.msg)"
         else
@@ -574,6 +575,7 @@ function isapprox(M::AbstractManifold, p, X, Y; error::Symbol = :none, kwargs...
     mat = check_approx(M, p, X, Y; kwargs...)
     if mat !== nothing
         (error === :error) && throw(mat)
+        (error === :none) && return false
         if isnan(mat.val)
             s = "$(typeof(mat))\n$(mat.msg)"
         else
