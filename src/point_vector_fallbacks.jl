@@ -256,13 +256,6 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
         push!(
             block.args,
             quote
-                function ManifoldsBase.$ra(M::$TM, p::$TP, X::$TV)
-                    return $TP(ManifoldsBase.$ra(M, p.$pfield, X.$vfield))
-                end
-                function ManifoldsBase.$rm(M::$TM, q, p::$TP, X::$TV)
-                    ManifoldsBase.$rm(M, q.$pfield, p.$pfield, X.$vfield)
-                    return q
-                end
                 function ManifoldsBase.$ra(M::$TM, p::$TP, X::$TV, t::Number)
                     return $TP(ManifoldsBase.$ra(M, p.$pfield, X.$vfield, t))
                 end

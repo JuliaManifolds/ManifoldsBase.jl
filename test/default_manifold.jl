@@ -272,6 +272,7 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
             tv2 = log(M, pts[2], pts[1])
             tv3 = log(M, pts[2], pts[3])
             @test isapprox(M, pts[2], exp(M, pts[1], tv1))
+            @test !isapprox(M, pts[1], pts[2]; error = :other)
             @test isapprox(M, pts[1], exp(M, pts[1], tv1, 0))
             @test isapprox(M, pts[2], exp(M, pts[1], tv1, 1))
             @test isapprox(M, pts[1], exp(M, pts[2], tv2))
@@ -289,6 +290,7 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
             new_pt = exp(M, pts[1], tv1)
             retract!(M, new_pt, pts[1], tv1)
             @test is_point(M, new_pt)
+            @test !isapprox(M, pts[1], [1, 2, 3], [3, 2, 4]; error = :other)
             for p in pts
                 @test isapprox(M, p, zero_vector(M, p), log(M, p, p); atol = eps(eltype(p)))
                 @test isapprox(
@@ -653,7 +655,9 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
         @test angle(M, p, X, Y) ≈ π / 2
         @test inverse_retract(M, p, q, LogarithmicInverseRetraction()) == -Y
         @test retract(M, q, Y, CustomDefinedRetraction()) == p
+        @test retract(M, q, Y, 1.0, CustomDefinedRetraction()) == p
         @test retract(M, q, Y, ExponentialRetraction()) == p
+        @test retract(M, q, Y, 1.0, ExponentialRetraction()) == p
         # rest not implemented - so they also fall back even onto mutating
         Z = similar(Y)
         r = similar(p)
