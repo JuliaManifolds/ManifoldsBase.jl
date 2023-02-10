@@ -34,7 +34,7 @@ function ManifoldsBase.exp!(
     p,
     X,
 )
-    return log!(M.manifold, q, p, X)
+    return exp!(M.manifold, q, p, X)
 end
 
 function ManifoldsBase.rand(::TraitList{PassthoughTrait}, M::AbstractDecoratorManifold)
@@ -67,8 +67,10 @@ end
     X = [1.0, 2.0]
     Y = [0.0, 0.0]
     @test inverse_retract!(M, q, p, X) == [1.0, 2.0]
-    @test retract(M, p, q) == [1.0, 2.0]
-    @test retract!(M, Y, p, q) == [1.0, 2.0]
+    @test retract(M, p, X) == [1.0, 2.0]
+    @test retract(M, p, X, 1.0) == [1.0, 2.0]
+    @test retract!(M, Y, p, X) == [1.0, 2.0]
+    @test retract!(M, Y, p, X, 1.0) == [1.0, 2.0]
     @test rand(M) isa Vector{Float64}
     p2 = similar(p)
     rand!(M, p2)
