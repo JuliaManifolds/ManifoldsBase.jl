@@ -77,6 +77,11 @@ end
                 inverse_retract!(M, Y2, p, q, inverse_retraction)
                 @test isapprox(M, p, Y2, Y)
             end
+
+            @testset "isapprox" begin
+                @test !isapprox(M, p, q; error = :info)
+                @test !isapprox(M, p, X, zero_vector(M, p); error = :info)
+            end
         end
     end
 end
