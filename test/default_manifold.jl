@@ -272,16 +272,26 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
             tv2 = log(M, pts[2], pts[1])
             tv3 = log(M, pts[2], pts[3])
             @test isapprox(M, pts[2], exp(M, pts[1], tv1))
-            @test !isapprox(M, pts[1], pts[2]; error = :other)
-            @test !isapprox(M, pts[1], convert(T, [NaN, NaN, NaN]); error = :other)
+            @test !isapprox(M, pts[1], pts[2]; error = :info)
+            @test isapprox(M, pts[1], pts[1]; error = :info)
+            @test !isapprox(M, pts[1], convert(T, [NaN, NaN, NaN]); error = :info)
             @test isapprox(M, pts[1], exp(M, pts[1], tv1, 0))
             @test isapprox(M, pts[2], exp(M, pts[1], tv1, 1))
             @test isapprox(M, pts[1], exp(M, pts[2], tv2))
-            @test_throws ApproximatelyError isapprox(M, pts[1], pts[2]; error = :error)
-            @test_throws ApproximatelyError isapprox(M, pts[2], tv2, tv3; error = :error)
+            if T <: Array
+                @test_throws ApproximatelyError isapprox(M, pts[1], pts[2]; error = :error)
+                @test_throws ApproximatelyError isapprox(
+                    M,
+                    pts[2],
+                    tv2,
+                    tv3;
+                    error = :error,
+                )
+            end
             # test lower level fallbacks
             @test ManifoldsBase.check_approx(M, pts[1], pts[2]) isa ApproximatelyError
-            @test ManifoldsBase.check_approx(M, pts[2], tv2, tv3) isa ApproximatelyError
+            @test ManifoldsBase.check_approx(M, pts[1], pts[1]) === nothing
+            @test ManifoldsBase.check_approx(M, pts[2], tv2, tv2) === nothing
             @test is_point(M, retract(M, pts[1], tv1))
             @test isapprox(M, pts[1], retract(M, pts[1], tv1, 0))
 
@@ -293,18 +303,38 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
             @test is_point(M, new_pt)
             @test !isapprox(M, pts[1], [1, 2, 3], [3, 2, 4]; error = :other)
             for p in pts
-                @test isapprox(M, p, zero_vector(M, p), log(M, p, p); atol = eps(eltype(p)))
+                X_p_zero = zero_vector(M, p)
+                X_p_nan = NaN * X_p_zero
+                @test isapprox(M, p, X_p_zero, log(M, p, p); atol = eps(eltype(p)))
+                if T <: Array
+                    @test !isapprox(
+                        M,
+                        p,
+                        X_p_zero,
+                        X_p_nan;
+                        atol = eps(eltype(p)),
+                        error = :info,
+                    )
+                    @test isapprox(
+                        M,
+                        p,
+                        X_p_zero,
+                        log(M, p, p);
+                        atol = eps(eltype(p)),
+                        error = :info,
+                    )
+                end
                 @test isapprox(
                     M,
                     p,
-                    zero_vector(M, p),
+                    X_p_zero,
                     inverse_retract(M, p, p);
                     atol = eps(eltype(p)),
                 )
                 @test isapprox(
                     M,
                     p,
-                    zero_vector(M, p),
+                    X_p_zero,
                     inverse_retract(M, p, p, irm);
                     atol = eps(eltype(p)),
                 )
