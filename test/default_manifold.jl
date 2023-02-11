@@ -273,6 +273,7 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
             tv3 = log(M, pts[2], pts[3])
             @test isapprox(M, pts[2], exp(M, pts[1], tv1))
             @test !isapprox(M, pts[1], pts[2]; error = :other)
+            @test !isapprox(M, pts[1], convert(T, [NaN, NaN, NaN]); error = :other)
             @test isapprox(M, pts[1], exp(M, pts[1], tv1, 0))
             @test isapprox(M, pts[2], exp(M, pts[1], tv1, 1))
             @test isapprox(M, pts[1], exp(M, pts[2], tv2))
@@ -801,5 +802,9 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
         @test injectivity_radius(M, p) == Inf
         @test injectivity_radius(M, p, m) == Inf
         @test injectivity_radius(M, m) == Inf
+    end
+
+    @testset "performance" begin
+        @allocated isapprox(M, SA[1, 2], SA[3, 4]) == 0
     end
 end

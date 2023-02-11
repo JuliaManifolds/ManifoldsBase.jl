@@ -535,20 +535,23 @@ Currently the following are supported
 Keyword arguments can be used to specify tolerances.
 """
 function isapprox(M::AbstractManifold, p, q; error::Symbol = :none, kwargs...)
-    ma = check_approx(M, p, q; kwargs...)
-    if ma !== nothing
-        (error === :error) && throw(ma)
-        (error === :none) && return false
-        if isnan(ma.val)
-            s = "$(typeof(ma))\n$(ma.msg)"
-        else
-            s = "$(typeof(ma)) with $(ma.val)\n$(ma.msg)"
+    if error === :none
+        return isapprox(p, q; kwargs...)
+    else
+        ma = check_approx(M, p, q; kwargs...)
+        if ma !== nothing
+            (error === :error) && throw(ma)
+            if isnan(ma.val)
+                s = "$(typeof(ma))\n$(ma.msg)"
+            else
+                s = "$(typeof(ma)) with $(ma.val)\n$(ma.msg)"
+            end
+            (error === :info) && @info s
+            (error === :warn) && @warn s
+            return false
         end
-        (error === :info) && @info s
-        (error === :warn) && @warn s
-        return false
+        return true
     end
-    return true
 end
 
 """
@@ -572,20 +575,23 @@ By default these informations are collected by calling [`check_approx`](@ref).
 Keyword arguments can be used to specify tolerances.
 """
 function isapprox(M::AbstractManifold, p, X, Y; error::Symbol = :none, kwargs...)
-    mat = check_approx(M, p, X, Y; kwargs...)
-    if mat !== nothing
-        (error === :error) && throw(mat)
-        (error === :none) && return false
-        if isnan(mat.val)
-            s = "$(typeof(mat))\n$(mat.msg)"
-        else
-            s = "$(typeof(mat)) with $(mat.val)\n$(mat.msg)"
+    if error === :none
+        return isapprox(X, Y; kwargs...)
+    else
+        mat = check_approx(M, p, X, Y; kwargs...)
+        if mat !== nothing
+            (error === :error) && throw(mat)
+            if isnan(mat.val)
+                s = "$(typeof(mat))\n$(mat.msg)"
+            else
+                s = "$(typeof(mat)) with $(mat.val)\n$(mat.msg)"
+            end
+            (error === :info) && @info s
+            (error === :warn) && @warn s
+            return false
         end
-        (error === :info) && @info s
-        (error === :warn) && @warn s
-        return false
+        return true
     end
-    return true
 end
 
 """

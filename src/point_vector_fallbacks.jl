@@ -291,9 +291,6 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
                 ManifoldsBase.retract_exp_ode!(M, q.$pfield, p.$pfield, X.$vfield, t, m, B)
                 return q
             end
-            function ManifoldsBase.retract_pade(M::$TM, p::$TP, X::$TV, m::PadeRetraction)
-                return $TP(ManifoldsBase.retract_pade(M, p.$pfield, X.$vfield, m))
-            end
             function ManifoldsBase.retract_pade(
                 M::$TM,
                 p::$TP,
@@ -302,16 +299,6 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
                 m::PadeRetraction,
             )
                 return $TP(ManifoldsBase.retract_pade(M, p.$pfield, X.$vfield, t, m))
-            end
-            function ManifoldsBase.retract_pade!(
-                M::$TM,
-                q::$TP,
-                p::$TP,
-                X::$TV,
-                m::PadeRetraction,
-            )
-                ManifoldsBase.retract_pade!(M, q.$pfield, p.$pfield, X.$vfield, m)
-                return q
             end
             function ManifoldsBase.retract_pade!(
                 M::$TM,
@@ -328,28 +315,10 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
                 M::$TM,
                 p::$TP,
                 X::$TV,
-                m::AbstractRetractionMethod,
-            )
-                return $TP(ManifoldsBase.retract_embedded(M, p.$pfield, X.$vfield, m))
-            end
-            function ManifoldsBase.retract_embedded(
-                M::$TM,
-                p::$TP,
-                X::$TV,
                 t::Number,
                 m::AbstractRetractionMethod,
             )
                 return $TP(ManifoldsBase.retract_embedded(M, p.$pfield, X.$vfield, t, m))
-            end
-            function ManifoldsBase.retract_embedded!(
-                M::$TM,
-                q::$TP,
-                p::$TP,
-                X::$TV,
-                m::AbstractRetractionMethod,
-            )
-                ManifoldsBase.retract_embedded!(M, q.$pfield, p.$pfield, X.$vfield, m)
-                return q
             end
             function ManifoldsBase.retract_embedded!(
                 M::$TM,
