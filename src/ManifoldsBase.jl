@@ -191,23 +191,6 @@ function check_approx(M::AbstractManifold, p, X, Y; kwargs...)
 end
 
 """
-    _isapprox(M::AbstractManifold, p, q; kwargs...)
-
-See documentation of `check_approx`.
-"""
-function _isapprox(M::AbstractManifold, p, q; kwargs...)
-    return isapprox(p, q; kwargs...)
-end
-"""
-    _isapprox(M::AbstractManifold, p, X, Y; kwargs...)
-
-See documentation of `check_approx`.
-"""
-function _isapprox(M::AbstractManifold, p, X, Y; kwargs...)
-    return isapprox(X, Y; kwargs...)
-end
-
-"""
     check_point(M::AbstractManifold, p; kwargs...) -> Union{Nothing,String}
 
 Return `nothing` when `p` is a point on the [`AbstractManifold`](@ref) `M`. Otherwise, return an
@@ -597,7 +580,7 @@ Keyword arguments can be used to specify tolerances.
 """
 function isapprox(M::AbstractManifold, p, X, Y; error::Symbol = :none, kwargs...)
     if error === :none
-        return _isapprox(M, p, X, Y; kwargs...)
+        return _isapprox(M, p, X, Y; kwargs...)::Bool
     else
         mat = check_approx(M, p, X, Y; kwargs...)
         if mat !== nothing
@@ -613,6 +596,23 @@ function isapprox(M::AbstractManifold, p, X, Y; error::Symbol = :none, kwargs...
         end
         return true
     end
+end
+
+"""
+    _isapprox(M::AbstractManifold, p, q; kwargs...)
+
+See documentation of `check_approx`.
+"""
+function _isapprox(M::AbstractManifold, p, q; kwargs...)
+    return isapprox(p, q; kwargs...)
+end
+"""
+    _isapprox(M::AbstractManifold, p, X, Y; kwargs...)
+
+See documentation of `check_approx`.
+"""
+function _isapprox(M::AbstractManifold, p, X, Y; kwargs...)
+    return isapprox(X, Y; kwargs...)
 end
 
 """
