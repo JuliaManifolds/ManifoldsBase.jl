@@ -163,11 +163,15 @@ not approximately equal, containting a more detailed description/reason.
 If the two elements are approximalely equal, this method returns `nothing`.
 
 This method is an internal function and is called by `isapprox` whenever the user specifies
-an `error=` keyword therein.
+an `error=` keyword therein. `_isapprox` is another related internal function. It is
+supposed to provide a fast true/false decision whether points or vectors are equal or not,
+while `check_approx` also provides a textual explanation. If no additional explanation
+is needed, a manifold may just implement a method of `_isapprox`, while it should also
+implement `check_approx` if a more detailed explanation could be helpful.
 """
 function check_approx(M::AbstractManifold, p, q; kwargs...)
     # fall back to classical approx mode - just that we do not have a reason then
-    res = isapprox(p, q; kwargs...)
+    res = _isapprox(M, p, q; kwargs...)
     # since we can not assume distance to be implemented, we can not provide a default value
     res && return nothing
     s = "The two points $p and $q on $M are not (approximately) equal."
@@ -175,7 +179,7 @@ function check_approx(M::AbstractManifold, p, q; kwargs...)
 end
 function check_approx(M::AbstractManifold, p, X, Y; kwargs...)
     # fall back to classical mode - just that we do not have a reason then
-    res = isapprox(X, Y; kwargs...)
+    res = _isapprox(M, p, X, Y; kwargs...)
     res && return nothing
     s = "The two tangent vectors $X and $Y in the tangent space at $p on $M are not (approximately) equal."
     v = try
@@ -184,6 +188,23 @@ function check_approx(M::AbstractManifold, p, X, Y; kwargs...)
         NaN
     end
     return ApproximatelyError(v, s)
+end
+
+"""
+    _isapprox(M::AbstractManifold, p, q; kwargs...)
+
+See documentation of `check_approx`.
+"""
+function _isapprox(M::AbstractManifold, p, q; kwargs...)
+    return isapprox(p, q; kwargs...)
+end
+"""
+    _isapprox(M::AbstractManifold, p, X, Y; kwargs...)
+
+See documentation of `check_approx`.
+"""
+function _isapprox(M::AbstractManifold, p, X, Y; kwargs...)
+    return isapprox(X, Y; kwargs...)
 end
 
 """
@@ -536,7 +557,7 @@ Keyword arguments can be used to specify tolerances.
 """
 function isapprox(M::AbstractManifold, p, q; error::Symbol = :none, kwargs...)
     if error === :none
-        return isapprox(p, q; kwargs...)
+        return _isapprox(M, p, q; kwargs...)
     else
         ma = check_approx(M, p, q; kwargs...)
         if ma !== nothing
@@ -576,7 +597,7 @@ Keyword arguments can be used to specify tolerances.
 """
 function isapprox(M::AbstractManifold, p, X, Y; error::Symbol = :none, kwargs...)
     if error === :none
-        return isapprox(X, Y; kwargs...)
+        return _isapprox(M, p, X, Y; kwargs...)
     else
         mat = check_approx(M, p, X, Y; kwargs...)
         if mat !== nothing
