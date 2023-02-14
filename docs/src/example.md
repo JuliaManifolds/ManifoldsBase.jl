@@ -38,7 +38,7 @@ We usually refer to these two variants of the same function as the allocating (`
 The convention for this interface is to __document the allocation function__, which by default allocates the necessary memory and calls the mutating function. So the convention is to just __implement the mutating function__, unless there is a good reason to provide an implementation for both.
 For more details see [the design section on mutating and non-mutating functions](@ref mutating-and-nonmutating)
 
-For performance reasons scaled variants of retractions and exponential maps are expected to be implemented. Scale is specified by an optional argument that comes after the tangent vector and by default it is equal to 1. You can also add a method that does not take the scaling factor `t` but it is not required.
+For performance reasons scaled variants of retractions `retraction!(M, q, p, X, t, m)` and exponential maps `exp!(M, q, p, X, t) are should to be implemented. Scale is specified by an optional argument that comes after the tangent vector and by default it is equal to 1. The variant without scaling, e.g. `exp!(M, q, p, X)`, can be implemented as well if there is a good reason like performance, but the default fallback of this variant is to call the previous one with `t=1`.
 
 ## [Startup](@id manifold-tutorial-startup)
 
