@@ -601,7 +601,11 @@ end
 """
     _isapprox(M::AbstractManifold, p, q; kwargs...)
 
-See documentation of `check_approx`.
+An internal function for testing whether points `p` and `q` from manifold `M` are
+approximately equal. Returns either `true` or `false` and does not support errors like
+[`isapprox`](@ref).
+
+For more details see documentation of [`check_approx`](@ref).
 """
 function _isapprox(M::AbstractManifold, p, q; kwargs...)
     return isapprox(p, q; kwargs...)
@@ -609,7 +613,11 @@ end
 """
     _isapprox(M::AbstractManifold, p, X, Y; kwargs...)
 
-See documentation of `check_approx`.
+An internal function for testing whether tangent vectors `X` and `Y` from tangent space
+at point `p` from manifold `M` are approximately equal. Returns either `true` or `false`
+and does not support errors like [`isapprox`](@ref).
+    
+For more details see documentation of [`check_approx`](@ref).
 """
 function _isapprox(M::AbstractManifold, p, X, Y; kwargs...)
     return isapprox(X, Y; kwargs...)

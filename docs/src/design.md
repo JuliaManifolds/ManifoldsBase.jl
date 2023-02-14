@@ -18,7 +18,7 @@ also avoiding ambiguities in multiple dispatch using the [dispatch on one argume
 
 ## General order of parameters
 
-Since the central element for functions on a manifold is the manifold itself, it should always be the first parameter, even for mutating functions. Then the classical parametzers of a function (for example a point and a tangent vector for the retraction) follow and the final part are parameters to further dispatch on, which usually have their defaults.
+Since the central element for functions on a manifold is the manifold itself, it should always be the first parameter, even for in-place functions. Then the classical parameters of a function (for example a point and a tangent vector for the retraction) follow and the final part are parameters to further dispatch on, which usually have their defaults.
 
 ## A 3-Layer architecture for dispatch
 
@@ -115,28 +115,28 @@ This means
 * The manifold type in method signature should always be as narrow as possible.
 * The points/vectors should either be untyped (for the default representation or if there is only one implementation) or provide all type bounds (for second representations or when using [`AbstractManifoldPoint`](@ref) and [`TVector`](@ref TVector), respectively).
 
-The first step that often happens on this level is memory allocation and calling the mutating function. If faster, it might also implement the function at hand itself.
+The first step that often happens on this level is memory allocation and calling the in-place function. If faster, it might also implement the function at hand itself.
 
 Usually functions from this layer are not exported, when they have an analogue on the first layer. For example the function [`retract_polar`](@ref ManifoldsBase.retract_polar)`(M, p, X)` is not exported, since when using the interface one would use the [`PolarRetraction`](@ref) or to be precise call [`retract`](@ref)`(M, p, X, PolarRetraction())`.
 When implementing your own manifold, you have to import functions like these anyway.
 
 To summarize, with respect to the [dispatch on one argument at a time](https://docs.julialang.org/en/v1/manual/methods/#Dispatch-on-one-argument-at-a-time) paradigm, this layer dispatches the _concrete manifold and point/vector types last_.
 
-## [Mutating and allocating functions](@id mutating-and-nonmutating)
+## [Mutating and allocating functions](@id inplace-and-noninplace)
 
-Every function, where this is applicable, should provide a mutating and an allocating variant.
-For example for the exponential map `exp(M, p, X)` returns a _new_ point `q` where the result is computed in.
-On the other hand `exp!(M, q, p, X)` computes the result in place of `q`, where the design of the implementation
-should keep in mind that also `exp!(M, p, p, X)` should correctly overwrite `p`.
+Every function, where this is applicable, should provide an in-place and an allocating variant.
+For example for the exponential map `exp(M, p, X, t)` returns a _new_ point `q` where the result is computed in.
+On the other hand `exp!(M, q, p, X, t)` computes the result in place of `q`, where the design of the implementation
+should keep in mind that also `exp!(M, p, p, X, t)` should correctly overwrite `p`.
 
 The interface provides a way to determine the allocation type and a result to compute/allocate
 the resulting memory, such that the default implementation allocating functions, like [`exp`](@ref) is to allocate the resulting memory and call [`exp!`](@ref).
 
 !!! note
     It might be useful to provide two distinct implementations, for example when using AD schemes.
-    The default is meant for ease of use (concerning implementation), since then one has to just implement the mutating variants.
+    The default is meant for ease of use (concerning implementation), since then one has to just implement the in-place variants.
 
-Non-mutating functions in `ManifoldsBase.jl` are typically implemented using mutating variants after a suitable allocation of memory.
+Non-mutating functions in `ManifoldsBase.jl` are typically implemented using in-place variants after a suitable allocation of memory.
 
 Not that this allocation usually takes place only on [Layer III](@ref design-layer3) when dispatching on points.
 Both [Layer I](@ref design-layer1) and [Layer II](@ref design-layer1) are usually implemented for both variants in parallel.
@@ -182,5 +182,5 @@ log(::M, ::P, ::P)
 but the return type would be ``V``, whose internal sizes (fields/arrays) will depend on the concrete type of one of the points. This is accomplished by implementing a method `allocate_result(::M, ::typeof(log), ::P, ::P)` that returns the concrete variable for the result. This way, even with specific types, one just has to implement `log!` and the one line for the allocation.
 
 !!! note
-    This dispatch from the allocating to the mutating variant happens in Layer III, that is, functions like `exp` or [`retract_polar`](@ref ManifoldsBase.retract_polar) (but not [`retract`](@ref) itself) allocate their result (using `::typeof(retract)` for the second function)
-    and call the mutating variant `exp!` and [`retract_polar!`](@ref ManifoldsBase.retract_polar!) afterwards.
+    This dispatch from the allocating to the in-place variant happens in Layer III, that is, functions like `exp` or [`retract_polar`](@ref ManifoldsBase.retract_polar) (but not [`retract`](@ref) itself) allocate their result (using `::typeof(retract)` for the second function)
+    and call the in-place variant `exp!` and [`retract_polar!`](@ref ManifoldsBase.retract_polar!) afterwards.

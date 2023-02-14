@@ -257,7 +257,13 @@ macro invoke_maker(argnum, type, sig)
     )
 end
 
+"""
+    next_trait_function(trait_type, sig)
 
+Define a special trait-handling method for function indicated by `sig`. It is not expected
+to provide any change in the result, except the presence of such additional methods may
+prevent method recursion limits in Julia's inference from being triggered.
+"""
 macro next_trait_function(trait_type, sig)
     parts = ManifoldsBase._split_signature(sig)
     kwargs_list = parts[:kwargs_list]

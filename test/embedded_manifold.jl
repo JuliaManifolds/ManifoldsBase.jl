@@ -343,6 +343,8 @@ ManifoldsBase.decorated_manifold(::FallbackManifold) = DefaultManifold(3)
             @test vector_transport_to(M, [1, 2], [2, 3], [3, 4]) == [2, 3]
             vector_transport_to!(M, A, [1, 2], [2, 3], [3, 4])
             @test A == [2, 3]
+            @test @inferred !isapprox(M, [1, 2], [2, 3])
+            @test @inferred !isapprox(M, [1, 2], [2, 3], [4, 5])
         end
         @testset "Isometric Embedding Fallbacks & Error Tests" begin
             M2 = NotImplementedIsometricEmbeddedManifold()
@@ -396,8 +398,8 @@ ManifoldsBase.decorated_manifold(::FallbackManifold) = DefaultManifold(3)
             @test_throws MethodError norm(M3, [1, 2], [2, 3])
             @test_throws MethodError embed(M3, [1, 2], [2, 3])
             @test_throws MethodError embed(M3, [1, 2])
-            @test !isapprox(M3, [1, 2], [2, 3])
-            @test !isapprox(M3, [1, 2], [2, 3], [4, 5])
+            @test @inferred !isapprox(M3, [1, 2], [2, 3])
+            @test @inferred !isapprox(M3, [1, 2], [2, 3], [4, 5])
         end
     end
     @testset "Explicit Embeddings using EmbeddedManifold" begin

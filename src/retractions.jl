@@ -499,7 +499,7 @@ end
 """
     inverse_retract_embedded!(M::AbstractManifold, X, p, q, m::AbstractInverseRetractionMethod)
 
-computes the mutating variant of the [`EmbeddedInverseRetraction`](@ref) using
+Compute the in-place variant of the [`EmbeddedInverseRetraction`](@ref) using
 the [`AbstractInverseRetractionMethod`](@ref) `m` in the embedding (see [`get_embedding`](@ref))
 and projecting the result back.
 """
@@ -526,7 +526,7 @@ end
 """
     inverse_retract_cayley!(M::AbstractManifold, X, p, q)
 
-computes the mutating variant of the [`CayleyInverseRetraction`](@ref),
+Compute the in-place variant of the [`CayleyInverseRetraction`](@ref),
 which by default calls the first order [`PadeInverseRetraction`§(@ref).
 """
 function inverse_retract_cayley!(M::AbstractManifold, X, p, q; kwargs...)
@@ -536,7 +536,7 @@ end
 """
     inverse_retract_pade!(M::AbstractManifold, p, q, n)
 
-computes the mutating variant of the [`PadeInverseRetraction`](@ref)`(n)`,
+Compute the in-place variant of the [`PadeInverseRetraction`](@ref)`(n)`,
 """
 inverse_retract_pade!(M::AbstractManifold, p, q, n)
 
@@ -545,7 +545,7 @@ function inverse_retract_pade! end
 """
     inverse_retract_qr!(M::AbstractManifold, X, p, q)
 
-computes the mutating variant of the [`QRInverseRetraction`](@ref).
+Compute the in-place variant of the [`QRInverseRetraction`](@ref).
 """
 inverse_retract_qr!(M::AbstractManifold, X, p, q)
 
@@ -554,7 +554,7 @@ function inverse_retract_qr! end
 """
     inverse_retract_project!(M::AbstractManifold, X, p, q)
 
-computes the mutating variant of the [`ProjectionInverseRetraction`](@ref).
+Compute the in-place variant of the [`ProjectionInverseRetraction`](@ref).
 """
 inverse_retract_project!(M::AbstractManifold, X, p, q)
 
@@ -563,7 +563,7 @@ function inverse_retract_project! end
 """
     inverse_retract_polar!(M::AbstractManifold, X, p, q)
 
-computes the mutating variant of the [`PolarInverseRetraction`](@ref).
+Compute the in-place variant of the [`PolarInverseRetraction`](@ref).
 """
 inverse_retract_polar!(M::AbstractManifold, X, p, q)
 
@@ -572,7 +572,7 @@ function inverse_retract_polar! end
 """
     inverse_retract_nlsolve!(M::AbstractManifold, X, p, q, m::NLSolveInverseRetraction)
 
-computes the mutating variant of the [`NLSolveInverseRetraction`](@ref) `m`.
+Compute the in-place variant of the [`NLSolveInverseRetraction`](@ref) `m`.
 """
 inverse_retract_nlsolve!(M::AbstractManifold, X, p, q, m::NLSolveInverseRetraction)
 
@@ -581,7 +581,7 @@ function inverse_retract_nlsolve! end
 """
     inverse_retract_softmax!(M::AbstractManifold, X, p, q)
 
-computes the mutating variant of the [`SoftmaxInverseRetraction`](@ref).
+Compute the in-place variant of the [`SoftmaxInverseRetraction`](@ref).
 """
 inverse_retract_softmax!(M::AbstractManifold, X, p, q)
 
@@ -883,7 +883,7 @@ end
 """
     retract_embedded!(M::AbstractManifold, q, p, X, t::Number, m::AbstractRetractionMethod)
 
-computes the mutating variant of the [`EmbeddedRetraction`](@ref) using
+Compute the in-place variant of the [`EmbeddedRetraction`](@ref) using
 the [`AbstractRetractionMethod`](@ref) `m` in the embedding (see [`get_embedding`](@ref))
 and projecting the result back.
 """
@@ -913,7 +913,7 @@ end
 """
     retract_cayley!(M::AbstractManifold, q, p, X, t::Number)
 
-computes the mutating variant of the [`CayleyRetraction`](@ref),
+Compute the in-place variant of the [`CayleyRetraction`](@ref),
 which by default falls back to calling the first order [`PadeRetraction`](@ref).
 """
 function retract_cayley!(M::AbstractManifold, q, p, X, t::Number; kwargs...)
@@ -923,7 +923,7 @@ end
 """
     retract_exp_ode!(M::AbstractManifold, q, p, X, t::Number, m::AbstractRetractionMethod, B::AbstractBasis)
 
-computes the mutating variant of the [`ODEExponentialRetraction`](@ref)`(m, B)`.
+Compute the in-place variant of the [`ODEExponentialRetraction`](@ref)`(m, B)`.
 """
 retract_exp_ode!(
     M::AbstractManifold,
@@ -940,7 +940,7 @@ function retract_exp_ode! end
 """
     retract_pade!(M::AbstractManifold, q, p, X, t::Number, m::PadeRetraction)
 
-Compute the mutating variant of the [`PadeRetraction`](@ref) `m`.
+Compute the in-place variant of the [`PadeRetraction`](@ref) `m`.
 """
 retract_pade!(M::AbstractManifold, q, p, X, t::Number, m::PadeRetraction)
 
@@ -949,7 +949,7 @@ function retract_pade! end
 """
     retract_project!(M::AbstractManifold, q, p, X, t::Number)
 
-Compute the mutating variant of the [`ProjectionRetraction`](@ref).
+Compute the in-place variant of the [`ProjectionRetraction`](@ref).
 """
 retract_project!(M::AbstractManifold, q, p, X, t::Number)
 
@@ -958,7 +958,7 @@ function retract_project! end
 """
     retract_polar!(M::AbstractManifold, q, p, X, t::Number)
 
-Compute the mutating variant of the [`PolarRetraction`](@ref).
+Compute the in-place variant of the [`PolarRetraction`](@ref).
 """
 retract_polar!(M::AbstractManifold, q, p, X, t::Number)
 
@@ -967,7 +967,7 @@ function retract_polar! end
 """
     retract_qr!(M::AbstractManifold, q, p, X, t::Number)
 
-Compute the mutating variant of the [`QRRetraction`](@ref).
+Compute the in-place variant of the [`QRRetraction`](@ref).
 """
 retract_qr!(M::AbstractManifold, q, p, X, t::Number)
 
@@ -976,7 +976,7 @@ function retract_qr! end
 """
     retract_softmax!(M::AbstractManifold, q, p, X, t::Number)
 
-Compute the mutating variant of the [`SoftmaxRetraction`](@ref).
+Compute the in-place variant of the [`SoftmaxRetraction`](@ref).
 """
 retract_softmax!(M::AbstractManifold, q, p, X, t::Number)
 

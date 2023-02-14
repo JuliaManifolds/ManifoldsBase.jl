@@ -808,15 +808,15 @@ end
 # An unfortunate consequence of Julia's method recursion limitations
 # Add more traits and functions as needed
 
-for trait_type in [TraitList{IsEmbeddedManifold}]
+for trait_type in [TraitList{IsEmbeddedManifold}, TraitList{IsEmbeddedSubmanifold}]
     @eval begin
-        ManifoldsBase.@next_trait_function $trait_type isapprox(
+        @next_trait_function $trait_type isapprox(
             M::AbstractDecoratorManifold,
             p,
             q;
             kwargs...,
         )
-        ManifoldsBase.@next_trait_function $trait_type isapprox(
+        @next_trait_function $trait_type isapprox(
             M::AbstractDecoratorManifold,
             p,
             X,
