@@ -263,6 +263,9 @@ end
 Define a special trait-handling method for function indicated by `sig`. It is not expected
 to provide any change in the result, except the presence of such additional methods may
 prevent method recursion limits in Julia's inference from being triggered.
+
+See the "Trait recursion breaking" section of `decorator_trait.jl` file for an example
+of intended usage.
 """
 macro next_trait_function(trait_type, sig)
     parts = ManifoldsBase._split_signature(sig)
