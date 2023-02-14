@@ -163,10 +163,10 @@ not approximately equal, containting a more detailed description/reason.
 If the two elements are approximalely equal, this method returns `nothing`.
 
 This method is an internal function and is called by `isapprox` whenever the user specifies
-an `error=` keyword therein. `_isapprox` is another related internal function. It is
+an `error=` keyword therein. [`_isapprox`](@ref) is another related internal function. It is
 supposed to provide a fast true/false decision whether points or vectors are equal or not,
 while `check_approx` also provides a textual explanation. If no additional explanation
-is needed, a manifold may just implement a method of `_isapprox`, while it should also
+is needed, a manifold may just implement a method of [`_isapprox`](@ref), while it should also
 implement `check_approx` if a more detailed explanation could be helpful.
 """
 function check_approx(M::AbstractManifold, p, q; kwargs...)
