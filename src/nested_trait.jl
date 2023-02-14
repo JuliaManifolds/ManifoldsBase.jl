@@ -258,6 +258,27 @@ macro invoke_maker(argnum, type, sig)
 end
 
 
+macro next_trait_function(trait_type, sig)
+    parts = ManifoldsBase._split_signature(sig)
+    kwargs_list = parts[:kwargs_list]
+    callargs = parts[:callargs]
+    fname = parts[:fname]
+    where_exprs = parts[:where_exprs]
+    argnames = parts[:argnames]
+    kwargs_call = parts[:kwargs_call]
+
+    block = quote
+        @inline function ($fname)(
+            _t::$trait_type,
+            $(callargs...);
+            $(kwargs_list...),
+        ) where {$(where_exprs...)}
+            return ($fname)(next_trait(_t), $(argnames...); $(kwargs_call...))
+        end
+    end
+    return esc(block)
+end
+
 macro trait_function(sig, opts = :(), manifold_arg_no = 1)
     parts = ManifoldsBase._split_signature(sig)
     kwargs_list = parts[:kwargs_list]
