@@ -750,7 +750,7 @@ wrapped manifold is flat.
 """
 is_flat(M::AbstractPowerManifold) = is_flat(M.manifold)
 
-function Base.isapprox(M::AbstractPowerManifold, p, q; kwargs...)
+function _isapprox(M::AbstractPowerManifold, p, q; kwargs...)
     result = true
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
@@ -763,7 +763,7 @@ function Base.isapprox(M::AbstractPowerManifold, p, q; kwargs...)
     end
     return result
 end
-function Base.isapprox(M::AbstractPowerManifold, p, X, Y; kwargs...)
+function _isapprox(M::AbstractPowerManifold, p, X, Y; kwargs...)
     result = true
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
