@@ -803,3 +803,25 @@ end
 function zero_vector!(::TraitList{IsEmbeddedManifold}, M::AbstractDecoratorManifold, X, p)
     return zero_vector!(get_embedding(M, p), X, p)
 end
+
+# Trait recursion breaking
+# An unfortunate consequence of Julia's method recursion limitations
+# Add more traits and functions as needed
+
+for trait_type in [TraitList{IsEmbeddedManifold}]
+    @eval begin
+        ManifoldsBase.@next_trait_function $trait_type isapprox(
+            M::AbstractDecoratorManifold,
+            p,
+            q;
+            kwargs...,
+        )
+        ManifoldsBase.@next_trait_function $trait_type isapprox(
+            M::AbstractDecoratorManifold,
+            p,
+            X,
+            Y;
+            kwargs...,
+        )
+    end
+end

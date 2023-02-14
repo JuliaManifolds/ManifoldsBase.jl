@@ -31,12 +31,14 @@ There are only two small technical things we need to explain at this point befor
 First of all our [`AbstractManifold`](@ref)`{𝔽}` has a parameter `𝔽`.
 This parameter indicates the [`number_system`](@ref) the manifold is based on, for example `ℝ` for real manifolds, which is short for [`RealNumbers`](@ref)`()` or `ℂ` for complex manifolds, a shorthand for [`ComplexNumbers`](@ref)`()`.
 
-Second, this interface usually provides both an allocating and a mutating variant of each function, for example for the [`exp`](@ref)onential map [implemented below](@ref manifold-tutorial-fn) this interface provides `exp(M,p,X)` to compute the exponential map and `exp!(M, q, p, X)` to compute the exponential map in the memory provided by `q`, mutating that input.
+Second, this interface usually provides both an allocating and a mutating variant of each function, for example for the [`exp`](@ref)onential map [implemented below](@ref manifold-tutorial-fn) this interface provides `exp(M, p, X)` to compute the exponential map and `exp!(M, q, p, X)` to compute the exponential map in the memory provided by `q`, mutating that input.
 the convention is, that the manifold is the first argument -- in both function variants -- the mutating variant then has the input to be mutated in second place, and the remaining parameters are again the same (`p`and `X` here).
 We usually refer to these two variants of the same function as the allocating (`exp`) function and the mutating (`exp!`) one.
 
 The convention for this interface is to __document the allocation function__, which by default allocates the necessary memory and calls the mutating function. So the convention is to just __implement the mutating function__, unless there is a good reason to provide an implementation for both.
 For more details see [the design section on mutating and non-mutating functions](@ref mutating-and-nonmutating)
+
+For performance reasons scaled variants of retractions and exponential maps are expected to be implemented. Scale is specified by an optional argument that comes after the tangent vector and by default it is equal to 1. You can also add a method that does not take the scaling factor `t` but it is not required.
 
 ## [Startup](@id manifold-tutorial-startup)
 
@@ -181,12 +183,12 @@ Since we here only consider one metric, we do not have to specify that.
 An implementation of the mutation version, see the [technical note](@ref manifold-tutorial-prel) for the naming and reasoning, reads
 
 ```@example manifold-tutorial
-function exp!(M::ScaledSphere{N}, q, p, X) where {N}
-    nX = norm(X)
+function exp!(M::ScaledSphere{N}, q, p, X, t::Number) where {N}
+    nX = abs(t) * norm(X)
     if nX == 0
         q .= p
     else
-        q .= cos(nX/M.radius)*p + M.radius*sin(nX/M.radius) .* (X./nX)
+        q .= cos(nX/M.radius)*p + M.radius*sin(nX/M.radius) .* t .* (X./nX)
     end
     return q
 end
@@ -239,7 +241,7 @@ inner(S, p, X, Y)
 ## [Conclusion](@id manifold-tutorial-outlook)
 
 You can now just continue implementing further functions from `ManifoldsBase.jl`
-but with just [`exp!`](@ref exp!(M::AbstractManifold, q, p, X)) you for example already have
+but with just [`exp!`](@ref exp!(M::AbstractManifold, q, p, X, t::Number)) you for example already have
 
 * [`geodesic`](@ref geodesic(M::AbstractManifold, p, X)) the (not necessarily shortest) geodesic emanating from `p` in direction `X`.
 * the [`ExponentialRetraction`](@ref), that the [`retract`](@ref retract(M::AbstractManifold, p, X)) function uses by default.

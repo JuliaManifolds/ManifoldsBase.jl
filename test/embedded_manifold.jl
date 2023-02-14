@@ -396,6 +396,8 @@ ManifoldsBase.decorated_manifold(::FallbackManifold) = DefaultManifold(3)
             @test_throws MethodError norm(M3, [1, 2], [2, 3])
             @test_throws MethodError embed(M3, [1, 2], [2, 3])
             @test_throws MethodError embed(M3, [1, 2])
+            @test !isapprox(M3, [1, 2], [2, 3])
+            @test !isapprox(M3, [1, 2], [2, 3], [4, 5])
         end
     end
     @testset "Explicit Embeddings using EmbeddedManifold" begin
