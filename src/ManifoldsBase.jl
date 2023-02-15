@@ -163,11 +163,15 @@ not approximately equal, containting a more detailed description/reason.
 If the two elements are approximalely equal, this method returns `nothing`.
 
 This method is an internal function and is called by `isapprox` whenever the user specifies
-an `error=` keyword therein.
+an `error=` keyword therein. [`_isapprox`](@ref) is another related internal function. It is
+supposed to provide a fast true/false decision whether points or vectors are equal or not,
+while `check_approx` also provides a textual explanation. If no additional explanation
+is needed, a manifold may just implement a method of [`_isapprox`](@ref), while it should also
+implement `check_approx` if a more detailed explanation could be helpful.
 """
 function check_approx(M::AbstractManifold, p, q; kwargs...)
     # fall back to classical approx mode - just that we do not have a reason then
-    res = isapprox(p, q; kwargs...)
+    res = _isapprox(M, p, q; kwargs...)
     # since we can not assume distance to be implemented, we can not provide a default value
     res && return nothing
     s = "The two points $p and $q on $M are not (approximately) equal."
@@ -175,7 +179,7 @@ function check_approx(M::AbstractManifold, p, q; kwargs...)
 end
 function check_approx(M::AbstractManifold, p, X, Y; kwargs...)
     # fall back to classical mode - just that we do not have a reason then
-    res = isapprox(X, Y; kwargs...)
+    res = _isapprox(M, p, X, Y; kwargs...)
     res && return nothing
     s = "The two tangent vectors $X and $Y in the tangent space at $p on $M are not (approximately) equal."
     v = try
@@ -425,6 +429,35 @@ See also: [`EmbeddedManifold`](@ref), [`project!`](@ref project!(M::AbstractMani
 """
 embed!(M::AbstractManifold, Y, p, X) = copyto!(M, Y, p, X)
 
+"""
+    embed_project(M::AbstractManifold, p)
+
+Embed `p` from manifold `M` an project it back to `M`. For points from `M` this is identity
+but in case embedding is defined for points outside of `M`, this can serve as a way
+to for example remove numerical innacuracies caused by some algorithms.
+"""
+function embed_project(M::AbstractManifold, p)
+    return project(M, embed(M, p))
+end
+"""
+    embed_project(M::AbstractManifold, p, X)
+
+Embed vector `X` tangent at `p` from manifold `M` an project it back to tangent space
+at `p`. For points from that tangent space this is identity but in case embedding is
+defined for tagent vectors from outside of it, this can serve as a way to for example remove
+numerical innacuracies caused by some algorithms.
+"""
+function embed_project(M::AbstractManifold, p, X)
+    return project(M, p, embed(M, p, X))
+end
+
+function embed_project!(M::AbstractManifold, q, p)
+    return project!(M, q, embed(M, p))
+end
+function embed_project!(M::AbstractManifold, Y, p, X)
+    return project!(M, Y, p, embed(M, p, X))
+end
+
 @doc raw"""
     injectivity_radius(M::AbstractManifold)
 
@@ -506,19 +539,23 @@ Currently the following are supported
 Keyword arguments can be used to specify tolerances.
 """
 function isapprox(M::AbstractManifold, p, q; error::Symbol = :none, kwargs...)
-    ma = check_approx(M, p, q; kwargs...)
-    if ma !== nothing
-        (error === :error) && throw(ma)
-        if isnan(ma.val)
-            s = "$(typeof(ma))\n$(ma.msg)"
-        else
-            s = "$(typeof(ma)) with $(ma.val)\n$(ma.msg)"
+    if error === :none
+        return _isapprox(M, p, q; kwargs...)
+    else
+        ma = check_approx(M, p, q; kwargs...)
+        if ma !== nothing
+            (error === :error) && throw(ma)
+            if isnan(ma.val)
+                s = "$(typeof(ma))\n$(ma.msg)"
+            else
+                s = "$(typeof(ma)) with $(ma.val)\n$(ma.msg)"
+            end
+            (error === :info) && @info s
+            (error === :warn) && @warn s
+            return false
         end
-        (error === :info) && @info s
-        (error === :warn) && @warn s
-        return false
+        return true
     end
-    return true
 end
 
 """
@@ -542,19 +579,48 @@ By default these informations are collected by calling [`check_approx`](@ref).
 Keyword arguments can be used to specify tolerances.
 """
 function isapprox(M::AbstractManifold, p, X, Y; error::Symbol = :none, kwargs...)
-    mat = check_approx(M, p, X, Y; kwargs...)
-    if mat !== nothing
-        (error === :error) && throw(mat)
-        if isnan(mat.val)
-            s = "$(typeof(mat))\n$(mat.msg)"
-        else
-            s = "$(typeof(mat)) with $(mat.val)\n$(mat.msg)"
+    if error === :none
+        return _isapprox(M, p, X, Y; kwargs...)::Bool
+    else
+        mat = check_approx(M, p, X, Y; kwargs...)
+        if mat !== nothing
+            (error === :error) && throw(mat)
+            if isnan(mat.val)
+                s = "$(typeof(mat))\n$(mat.msg)"
+            else
+                s = "$(typeof(mat)) with $(mat.val)\n$(mat.msg)"
+            end
+            (error === :info) && @info s
+            (error === :warn) && @warn s
+            return false
         end
-        (error === :info) && @info s
-        (error === :warn) && @warn s
-        return false
+        return true
     end
-    return true
+end
+
+"""
+    _isapprox(M::AbstractManifold, p, q; kwargs...)
+
+An internal function for testing whether points `p` and `q` from manifold `M` are
+approximately equal. Returns either `true` or `false` and does not support errors like
+[`isapprox`](@ref).
+
+For more details see documentation of [`check_approx`](@ref).
+"""
+function _isapprox(M::AbstractManifold, p, q; kwargs...)
+    return isapprox(p, q; kwargs...)
+end
+"""
+    _isapprox(M::AbstractManifold, p, X, Y; kwargs...)
+
+An internal function for testing whether tangent vectors `X` and `Y` from tangent space
+at point `p` from manifold `M` are approximately equal. Returns either `true` or `false`
+and does not support errors like [`isapprox`](@ref).
+    
+For more details see documentation of [`check_approx`](@ref).
+"""
+function _isapprox(M::AbstractManifold, p, X, Y; kwargs...)
+    return isapprox(X, Y; kwargs...)
 end
 
 """
@@ -935,6 +1001,8 @@ export allocate,
     exp!,
     embed,
     embed!,
+    embed_project,
+    embed_project!,
     geodesic,
     geodesic!,
     get_basis,

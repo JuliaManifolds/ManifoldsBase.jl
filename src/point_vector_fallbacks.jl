@@ -253,15 +253,18 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
     for f_postfix in [:polar, :project, :qr, :softmax]
         ra = Symbol("retract_$(f_postfix)")
         rm = Symbol("retract_$(f_postfix)!")
-        push!(block.args, quote
-            function ManifoldsBase.$ra(M::$TM, p::$TP, X::$TV)
-                return $TP(ManifoldsBase.$ra(M, p.$pfield, X.$vfield))
-            end
-            function ManifoldsBase.$rm(M::$TM, q, p::$TP, X::$TV)
-                ManifoldsBase.$rm(M, q.$pfield, p.$pfield, X.$vfield)
-                return q
-            end
-        end)
+        push!(
+            block.args,
+            quote
+                function ManifoldsBase.$ra(M::$TM, p::$TP, X::$TV, t::Number)
+                    return $TP(ManifoldsBase.$ra(M, p.$pfield, X.$vfield, t))
+                end
+                function ManifoldsBase.$rm(M::$TM, q, p::$TP, X::$TV, t::Number)
+                    ManifoldsBase.$rm(M, q.$pfield, p.$pfield, X.$vfield, t)
+                    return q
+                end
+            end,
+        )
     end
     push!(
         block.args,
@@ -270,45 +273,62 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
                 M::$TM,
                 p::$TP,
                 X::$TV,
+                t::Number,
                 m::AbstractRetractionMethod,
                 B::ManifoldsBase.AbstractBasis,
             )
-                return $TP(ManifoldsBase.retract_exp_ode(M, p.$pfield, X.$vfield, m, B))
+                return $TP(ManifoldsBase.retract_exp_ode(M, p.$pfield, X.$vfield, t, m, B))
             end
             function ManifoldsBase.retract_exp_ode!(
                 M::$TM,
                 q::$TP,
                 p::$TP,
                 X::$TV,
+                t::Number,
                 m::AbstractRetractionMethod,
                 B::ManifoldsBase.AbstractBasis,
             )
-                ManifoldsBase.retract_exp_ode!(M, q.$pfield, p.$pfield, X.$vfield, m, B)
+                ManifoldsBase.retract_exp_ode!(M, q.$pfield, p.$pfield, X.$vfield, t, m, B)
                 return q
             end
-            function ManifoldsBase.retract_pade(M::$TM, p::$TP, X::$TV, n)
-                return $TP(ManifoldsBase.retract_pade(M, p.$pfield, X.$vfield, n))
+            function ManifoldsBase.retract_pade(
+                M::$TM,
+                p::$TP,
+                X::$TV,
+                t::Number,
+                m::PadeRetraction,
+            )
+                return $TP(ManifoldsBase.retract_pade(M, p.$pfield, X.$vfield, t, m))
             end
-            function ManifoldsBase.retract_pade!(M::$TM, q::$TP, p::$TP, X::$TV, n)
-                ManifoldsBase.retract_pade!(M, q.$pfield, p.$pfield, X.$vfield, n)
+            function ManifoldsBase.retract_pade!(
+                M::$TM,
+                q::$TP,
+                p::$TP,
+                X::$TV,
+                t::Number,
+                m::PadeRetraction,
+            )
+                ManifoldsBase.retract_pade!(M, q.$pfield, p.$pfield, X.$vfield, t, m)
                 return q
             end
             function ManifoldsBase.retract_embedded(
                 M::$TM,
                 p::$TP,
                 X::$TV,
+                t::Number,
                 m::AbstractRetractionMethod,
             )
-                return $TP(ManifoldsBase.retract_embedded(M, p.$pfield, X.$vfield, m))
+                return $TP(ManifoldsBase.retract_embedded(M, p.$pfield, X.$vfield, t, m))
             end
             function ManifoldsBase.retract_embedded!(
                 M::$TM,
                 q::$TP,
                 p::$TP,
                 X::$TV,
+                t::Number,
                 m::AbstractRetractionMethod,
             )
-                ManifoldsBase.retract_embedded!(M, q.$pfield, p.$pfield, X.$vfield, m)
+                ManifoldsBase.retract_embedded!(M, q.$pfield, p.$pfield, X.$vfield, t, m)
                 return q
             end
         end,

@@ -92,9 +92,13 @@ ManifoldsBase.representation_size(::NonDecoratorManifold) = (2,)
     @test embed!(M, Y, p, X) == X
     # the following is implemented but passes to the second and hence fails
     @test_throws MethodError exp(M, p, X)
+    @test_throws MethodError exp(M, p, X, 2.0)
     @test_throws MethodError exp!(M, q, p, X)
+    @test_throws MethodError exp!(M, q, p, X, 2.0)
     @test_throws MethodError retract(M, p, X)
+    @test_throws MethodError retract(M, p, X, 2.0)
     @test_throws MethodError retract!(M, q, p, X)
+    @test_throws MethodError retract!(M, q, p, X, 2.0)
     @test_throws MethodError log(M, p, q)
     @test_throws MethodError log!(M, Y, p, q)
     @test_throws MethodError inverse_retract(M, p, q)

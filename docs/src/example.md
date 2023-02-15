@@ -31,12 +31,14 @@ There are only two small technical things we need to explain at this point befor
 First of all our [`AbstractManifold`](@ref)`{𝔽}` has a parameter `𝔽`.
 This parameter indicates the [`number_system`](@ref) the manifold is based on, for example `ℝ` for real manifolds, which is short for [`RealNumbers`](@ref)`()` or `ℂ` for complex manifolds, a shorthand for [`ComplexNumbers`](@ref)`()`.
 
-Second, this interface usually provides both an allocating and a mutating variant of each function, for example for the [`exp`](@ref)onential map [implemented below](@ref manifold-tutorial-fn) this interface provides `exp(M,p,X)` to compute the exponential map and `exp!(M, q, p, X)` to compute the exponential map in the memory provided by `q`, mutating that input.
-the convention is, that the manifold is the first argument -- in both function variants -- the mutating variant then has the input to be mutated in second place, and the remaining parameters are again the same (`p`and `X` here).
-We usually refer to these two variants of the same function as the allocating (`exp`) function and the mutating (`exp!`) one.
+Second, this interface usually provides both an allocating and an in-place variant of each function, for example for the [`exp`](@ref)onential map [implemented below](@ref manifold-tutorial-fn) this interface provides `exp(M, p, X)` to compute the exponential map and `exp!(M, q, p, X)` to compute the exponential map in the memory provided by `q`, mutating that input.
+the convention is, that the manifold is the first argument -- in both function variants -- the in-place variant then has the input to be mutated in second place, and the remaining parameters are again the same (`p`and `X` here).
+We usually refer to these two variants of the same function as the allocating (`exp`) function and the in-place (`exp!`) one.
 
-The convention for this interface is to __document the allocation function__, which by default allocates the necessary memory and calls the mutating function. So the convention is to just __implement the mutating function__, unless there is a good reason to provide an implementation for both.
-For more details see [the design section on mutating and non-mutating functions](@ref mutating-and-nonmutating)
+The convention for this interface is to __document the allocation function__, which by default allocates the necessary memory and calls the in-place function. So the convention is to just __implement the in-place function__, unless there is a good reason to provide an implementation for both.
+For more details see [the design section on in-place and non-mutating functions](@ref inplace-and-noninplace)
+
+For performance reasons scaled variants of retractions `retraction!(M, q, p, X, t, m)` and exponential maps `exp!(M, q, p, X, t)` should be implemented. Scale is specified by an optional argument that comes after the tangent vector and by default it is equal to 1. The variant without scaling, e.g. `exp!(M, q, p, X)`, can be implemented as well if there is a good reason like performance, but the default fallback of this variant is to call the previous one with `t=1`.
 
 ## [Startup](@id manifold-tutorial-startup)
 
@@ -50,7 +52,7 @@ import Base: show
 
 We load `LinearAlgebra` for some computations. `Test` is only loaded for illustrations in the examples.
 
-We import the mutating variant of the [`exp`](@ref)onential map, as just discussed above.
+We import the in-place variant of the [`exp`](@ref)onential map, as just discussed above.
 
 ## [The manifold](@id manifold-tutorial-task)
 
@@ -181,12 +183,12 @@ Since we here only consider one metric, we do not have to specify that.
 An implementation of the mutation version, see the [technical note](@ref manifold-tutorial-prel) for the naming and reasoning, reads
 
 ```@example manifold-tutorial
-function exp!(M::ScaledSphere{N}, q, p, X) where {N}
-    nX = norm(X)
+function exp!(M::ScaledSphere{N}, q, p, X, t::Number) where {N}
+    nX = abs(t) * norm(X)
     if nX == 0
         q .= p
     else
-        q .= cos(nX/M.radius)*p + M.radius*sin(nX/M.radius) .* (X./nX)
+        q .= cos(nX/M.radius)*p + M.radius*sin(nX/M.radius) .* t .* (X./nX)
     end
     return q
 end
@@ -239,7 +241,7 @@ inner(S, p, X, Y)
 ## [Conclusion](@id manifold-tutorial-outlook)
 
 You can now just continue implementing further functions from `ManifoldsBase.jl`
-but with just [`exp!`](@ref exp!(M::AbstractManifold, q, p, X)) you for example already have
+but with just [`exp!`](@ref exp!(M::AbstractManifold, q, p, X, t::Number)) you for example already have
 
 * [`geodesic`](@ref geodesic(M::AbstractManifold, p, X)) the (not necessarily shortest) geodesic emanating from `p` in direction `X`.
 * the [`ExponentialRetraction`](@ref), that the [`retract`](@ref retract(M::AbstractManifold, p, X)) function uses by default.

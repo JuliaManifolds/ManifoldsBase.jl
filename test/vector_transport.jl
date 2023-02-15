@@ -38,7 +38,7 @@ end
             kwP = VectorTransportWithKeywords(ParallelTransport())
             @test vector_transport_along(M, pts[1], X2, [], kwP) == X2
             @test vector_transport_along!(M, X2, pts[1], X2, [], kwP) == X2
-            # check mutating ones with defaults
+            # check in-place ones with defaults
             p = allocate(pts[1])
             ManifoldsBase.pole_ladder!(M, p, pts[1], pts[2], pts[3])
             # -log_p3 p == log_p1 p2

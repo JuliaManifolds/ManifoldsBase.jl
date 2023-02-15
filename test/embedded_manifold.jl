@@ -96,7 +96,7 @@ end
 # Third example - explicitly mention an embedding.
 #
 function ManifoldsBase.embed!(
-    ::EmbeddedManifold{𝔽,DefaultManifold{nL,𝔽},DefaultManifold{mL,𝔽2}},
+    ::EmbeddedManifold{𝔽,DefaultManifold{𝔽,nL},DefaultManifold{𝔽2,mL}},
     q,
     p,
 ) where {nL,mL,𝔽,𝔽2}
@@ -120,7 +120,7 @@ function ManifoldsBase.embed!(
 end
 
 function ManifoldsBase.project!(
-    ::EmbeddedManifold{𝔽,DefaultManifold{nL,𝔽},DefaultManifold{mL,𝔽2}},
+    ::EmbeddedManifold{𝔽,DefaultManifold{𝔽,nL},DefaultManifold{𝔽2,mL}},
     q,
     p,
 ) where {nL,mL,𝔽,𝔽2}
@@ -247,6 +247,7 @@ ManifoldsBase.decorated_manifold(::FallbackManifold) = DefaultManifold(3)
         P = [1.0 1.0 2.0]
         Q = similar(P)
         @test project!(M, Q, P) == project!(M, Q, P)
+        @test project!(M, Q, P) == embed_project!(M, Q, P)
         @test project!(M, Q, P) == [1.0 1.0 0.0]
         @test isapprox(M, p, zero_vector(M, p), [0 0 0])
         XZ = similar(X)
@@ -264,14 +265,19 @@ ManifoldsBase.decorated_manifold(::FallbackManifold) = DefaultManifold(3)
         log!(M, Y, p, q)
         @test Y == q - p
         @test exp(M, p, X) == q
+        @test exp(M, p, X, 1.0) == q
         r = similar(p)
         exp!(M, r, p, X)
+        @test r == q
+        exp!(M, r, p, X, 1.0)
         @test r == q
         @test distance(M, p, r) == norm(r - p)
 
         @test retract(M, p, X) == q
+        @test retract(M, p, X, 1.0) == q
         q2 = similar(q)
         @test retract!(M, q2, p, X) == q
+        @test retract!(M, q2, p, X, 1.0) == q
         @test q2 == q
         @test inverse_retract(M, p, q) == X
         Y = similar(X)
@@ -305,6 +311,10 @@ ManifoldsBase.decorated_manifold(::FallbackManifold) = DefaultManifold(3)
         Xe = embed(M, pe, X)
         @test Xe == [2.0, 3.0, 0.0]
         @test project(M, pe) == p
+        @test embed_project(M, p) == p
+        @test embed_project(M, p, X) == X
+        Xs = similar(X)
+        @test embed_project!(M, Xs, p, X) == X
         @test project(M, pe, Xe) == X
         # isometric passtthrough
         @test injectivity_radius(M) == Inf
@@ -333,6 +343,8 @@ ManifoldsBase.decorated_manifold(::FallbackManifold) = DefaultManifold(3)
             @test vector_transport_to(M, [1, 2], [2, 3], [3, 4]) == [2, 3]
             vector_transport_to!(M, A, [1, 2], [2, 3], [3, 4])
             @test A == [2, 3]
+            @test @inferred !isapprox(M, [1, 2], [2, 3])
+            @test @inferred !isapprox(M, [1, 2], [2, 3], [4, 5])
         end
         @testset "Isometric Embedding Fallbacks & Error Tests" begin
             M2 = NotImplementedIsometricEmbeddedManifold()
@@ -340,9 +352,13 @@ ManifoldsBase.decorated_manifold(::FallbackManifold) = DefaultManifold(3)
             A = zeros(2)
             # Check that all of these report not to be implemented, i.e.
             @test_throws MethodError exp(M2, [1, 2], [2, 3])
+            @test_throws MethodError exp(M2, [1, 2], [2, 3], 1.0)
             @test_throws MethodError exp!(M2, A, [1, 2], [2, 3])
+            @test_throws MethodError exp!(M2, A, [1, 2], [2, 3], 1.0)
             @test_throws MethodError retract(M2, [1, 2], [2, 3])
+            @test_throws MethodError retract(M2, [1, 2], [2, 3], 1.0)
             @test_throws MethodError retract!(M2, A, [1, 2], [2, 3])
+            @test_throws MethodError retract!(M2, A, [1, 2], [2, 3], 1.0)
             @test_throws MethodError log(M2, [1, 2], [2, 3])
             @test_throws MethodError log!(M2, A, [1, 2], [2, 3])
             @test_throws MethodError inverse_retract(M2, [1, 2], [2, 3])
@@ -382,6 +398,8 @@ ManifoldsBase.decorated_manifold(::FallbackManifold) = DefaultManifold(3)
             @test_throws MethodError norm(M3, [1, 2], [2, 3])
             @test_throws MethodError embed(M3, [1, 2], [2, 3])
             @test_throws MethodError embed(M3, [1, 2])
+            @test @inferred !isapprox(M3, [1, 2], [2, 3])
+            @test @inferred !isapprox(M3, [1, 2], [2, 3], [4, 5])
         end
     end
     @testset "Explicit Embeddings using EmbeddedManifold" begin

@@ -57,47 +57,57 @@ ManifoldsBase.@default_manifold_fallbacks ManifoldsBase.DefaultManifold DefaultP
 function ManifoldsBase._injectivity_radius(::DefaultManifold, ::CustomDefinedRetraction)
     return 10.0
 end
-function ManifoldsBase._retract(M::DefaultManifold, p, X, ::CustomDefinedRetraction)
-    return retract_custom(M, p, X)
+function ManifoldsBase._retract(
+    M::DefaultManifold,
+    p,
+    X,
+    t::Number,
+    ::CustomDefinedRetraction,
+)
+    return retract_custom(M, p, X, t)
 end
-function retract_custom(::DefaultManifold, p::DefaultPoint, X::DefaultTVector)
-    return DefaultPoint(2 * p.value + X.value)
+function retract_custom(::DefaultManifold, p::DefaultPoint, X::DefaultTVector, t::Number)
+    return DefaultPoint(2 .* p.value .+ t .* X.value)
 end
 function ManifoldsBase._retract(
     M::DefaultManifold,
     p,
     X,
+    t::Number,
     ::CustomDefinedKeywordRetraction;
     kwargs...,
 )
-    return retract_custom_kw(M, p, X; kwargs...)
+    return retract_custom_kw(M, p, X, t; kwargs...)
 end
 function retract_custom_kw(
     ::DefaultManifold,
     p::DefaultPoint,
-    X::DefaultTVector;
+    X::DefaultTVector,
+    t::Number;
     scale = 2.0,
 )
-    return DefaultPoint(scale * p.value + X.value)
+    return DefaultPoint(scale .* p.value .+ t .* X.value)
 end
 function ManifoldsBase._retract!(
     M::DefaultManifold,
     q,
     p,
     X,
+    t::Number,
     ::CustomDefinedKeywordRetraction;
     kwargs...,
 )
-    return retract_custom_kw!(M, q, p, X; kwargs...)
+    return retract_custom_kw!(M, q, p, X, t; kwargs...)
 end
 function retract_custom_kw!(
     ::DefaultManifold,
     q::DefaultPoint,
     p::DefaultPoint,
-    X::DefaultTVector;
+    X::DefaultTVector,
+    t::Number;
     scale = 2.0,
 )
-    q.value .= scale * p.value + X.value
+    q.value .= scale .* p.value .+ t .* X.value
     return q
 end
 
@@ -155,21 +165,22 @@ struct MatrixVectorTransport{T} <: AbstractVector{T}
     m::Matrix{T}
 end
 # dummy retractions, inverse retracions for fallback tests - mutating should be enough
-ManifoldsBase.retract_polar!(::DefaultManifold, q, p, X) = (q .= p .+ X)
-ManifoldsBase.retract_project!(::DefaultManifold, q, p, X) = (q .= p .+ X)
-ManifoldsBase.retract_qr!(::DefaultManifold, q, p, X) = (q .= p .+ X)
+ManifoldsBase.retract_polar!(::DefaultManifold, q, p, X, t::Number) = (q .= p .+ t .* X)
+ManifoldsBase.retract_project!(::DefaultManifold, q, p, X, t::Number) = (q .= p .+ t .* X)
+ManifoldsBase.retract_qr!(::DefaultManifold, q, p, X, t::Number) = (q .= p .+ t .* X)
 function ManifoldsBase.retract_exp_ode!(
     ::DefaultManifold,
     q,
     p,
     X,
+    t::Number,
     m::AbstractRetractionMethod,
     B::ManifoldsBase.AbstractBasis,
 )
-    return (q .= p .+ X)
+    return (q .= p .+ t .* X)
 end
-ManifoldsBase.retract_pade!(::DefaultManifold, q, p, X, i) = (q .= p .+ X)
-ManifoldsBase.retract_softmax!(::DefaultManifold, q, p, X) = (q .= p .+ X)
+ManifoldsBase.retract_pade!(::DefaultManifold, q, p, X, t::Number, i) = (q .= p .+ t .* X)
+ManifoldsBase.retract_softmax!(::DefaultManifold, q, p, X, t::Number) = (q .= p .+ t .* X)
 ManifoldsBase.get_embedding(M::DefaultManifold) = M # dummy embedding
 ManifoldsBase.inverse_retract_polar!(::DefaultManifold, Y, p, q) = (Y .= q .- p)
 ManifoldsBase.inverse_retract_project!(::DefaultManifold, Y, p, q) = (Y .= q .- p)
@@ -261,14 +272,26 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
             tv2 = log(M, pts[2], pts[1])
             tv3 = log(M, pts[2], pts[3])
             @test isapprox(M, pts[2], exp(M, pts[1], tv1))
+            @test !isapprox(M, pts[1], pts[2]; error = :info)
+            @test isapprox(M, pts[1], pts[1]; error = :info)
+            @test !isapprox(M, pts[1], convert(T, [NaN, NaN, NaN]); error = :info)
             @test isapprox(M, pts[1], exp(M, pts[1], tv1, 0))
             @test isapprox(M, pts[2], exp(M, pts[1], tv1, 1))
             @test isapprox(M, pts[1], exp(M, pts[2], tv2))
-            @test_throws ApproximatelyError isapprox(M, pts[1], pts[2]; error = :error)
-            @test_throws ApproximatelyError isapprox(M, pts[2], tv2, tv3; error = :error)
+            if T <: Array
+                @test_throws ApproximatelyError isapprox(M, pts[1], pts[2]; error = :error)
+                @test_throws ApproximatelyError isapprox(
+                    M,
+                    pts[2],
+                    tv2,
+                    tv3;
+                    error = :error,
+                )
+            end
             # test lower level fallbacks
             @test ManifoldsBase.check_approx(M, pts[1], pts[2]) isa ApproximatelyError
-            @test ManifoldsBase.check_approx(M, pts[2], tv2, tv3) isa ApproximatelyError
+            @test ManifoldsBase.check_approx(M, pts[1], pts[1]) === nothing
+            @test ManifoldsBase.check_approx(M, pts[2], tv2, tv2) === nothing
             @test is_point(M, retract(M, pts[1], tv1))
             @test isapprox(M, pts[1], retract(M, pts[1], tv1, 0))
 
@@ -278,19 +301,40 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
             new_pt = exp(M, pts[1], tv1)
             retract!(M, new_pt, pts[1], tv1)
             @test is_point(M, new_pt)
+            @test !isapprox(M, pts[1], [1, 2, 3], [3, 2, 4]; error = :other)
             for p in pts
-                @test isapprox(M, p, zero_vector(M, p), log(M, p, p); atol = eps(eltype(p)))
+                X_p_zero = zero_vector(M, p)
+                X_p_nan = NaN * X_p_zero
+                @test isapprox(M, p, X_p_zero, log(M, p, p); atol = eps(eltype(p)))
+                if T <: Array
+                    @test !isapprox(
+                        M,
+                        p,
+                        X_p_zero,
+                        X_p_nan;
+                        atol = eps(eltype(p)),
+                        error = :info,
+                    )
+                    @test isapprox(
+                        M,
+                        p,
+                        X_p_zero,
+                        log(M, p, p);
+                        atol = eps(eltype(p)),
+                        error = :info,
+                    )
+                end
                 @test isapprox(
                     M,
                     p,
-                    zero_vector(M, p),
+                    X_p_zero,
                     inverse_retract(M, p, p);
                     atol = eps(eltype(p)),
                 )
                 @test isapprox(
                     M,
                     p,
-                    zero_vector(M, p),
+                    X_p_zero,
                     inverse_retract(M, p, p, irm);
                     atol = eps(eltype(p)),
                 )
@@ -642,38 +686,34 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
         @test angle(M, p, X, Y) ≈ π / 2
         @test inverse_retract(M, p, q, LogarithmicInverseRetraction()) == -Y
         @test retract(M, q, Y, CustomDefinedRetraction()) == p
+        @test retract(M, q, Y, 1.0, CustomDefinedRetraction()) == p
         @test retract(M, q, Y, ExponentialRetraction()) == p
+        @test retract(M, q, Y, 1.0, ExponentialRetraction()) == p
         # rest not implemented - so they also fall back even onto mutating
         Z = similar(Y)
         r = similar(p)
         # test passthrough using the dummy implementations
-        for retr in [PolarRetraction, ProjectionRetraction, QRRetraction, SoftmaxRetraction]
-            @test retract(M, q, Y, retr()) == DefaultPoint(q.value + Y.value)
-            @test retract!(M, r, q, Y, retr()) == DefaultPoint(q.value + Y.value)
+        for retr in [
+            PolarRetraction(),
+            ProjectionRetraction(),
+            QRRetraction(),
+            SoftmaxRetraction(),
+            ODEExponentialRetraction(PolarRetraction(), DefaultBasis()),
+            PadeRetraction(2),
+            EmbeddedRetraction(ExponentialRetraction()),
+        ]
+            @test retract(M, q, Y, retr) == DefaultPoint(q.value + Y.value)
+            @test retract(M, q, Y, 0.5, retr) == DefaultPoint(q.value + 0.5 * Y.value)
+            @test retract!(M, r, q, Y, retr) == DefaultPoint(q.value + Y.value)
+            @test retract!(M, r, q, Y, 0.5, retr) == DefaultPoint(q.value + 0.5 * Y.value)
         end
-        @test retract(
-            M,
-            q,
-            Y,
-            ODEExponentialRetraction(PolarRetraction(), DefaultBasis()),
-        ) == DefaultPoint(q.value + Y.value)
-        @test retract!(
-            M,
-            r,
-            q,
-            Y,
-            ODEExponentialRetraction(PolarRetraction(), DefaultBasis()),
-        ) == DefaultPoint(q.value + Y.value)
-        @test retract(M, q, Y, PadeRetraction(2)) == DefaultPoint(q.value + Y.value)
-        @test retract!(M, r, q, Y, PadeRetraction(2)) == DefaultPoint(q.value + Y.value)
-        @test retract!(M, r, q, Y, EmbeddedRetraction(ExponentialRetraction())) ==
-              DefaultPoint(q.value + Y.value)
-        @test retract(M, q, Y, EmbeddedRetraction(ExponentialRetraction())) ==
-              DefaultPoint(q.value + Y.value)
+
         mRK = RetractionWithKeywords(CustomDefinedKeywordRetraction(); scale = 3.0)
         pRK = allocate(p, eltype(p.value), size(p.value))
         @test retract(M, p, X, mRK) == DefaultPoint(3 * p.value + X.value)
+        @test retract(M, p, X, 0.5, mRK) == DefaultPoint(3 * p.value + 0.5 * X.value)
         @test retract!(M, pRK, p, X, mRK) == DefaultPoint(3 * p.value + X.value)
+        @test retract!(M, pRK, p, X, 0.5, mRK) == DefaultPoint(3 * p.value + 0.5 * X.value)
         mIRK = InverseRetractionWithKeywords(
             CustomDefinedKeywordInverseRetraction();
             scale = 3.0,
@@ -792,5 +832,9 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
         @test injectivity_radius(M, p) == Inf
         @test injectivity_radius(M, p, m) == Inf
         @test injectivity_radius(M, m) == Inf
+    end
+
+    @testset "performance" begin
+        @allocated isapprox(M, SA[1, 2], SA[3, 4]) == 0
     end
 end
