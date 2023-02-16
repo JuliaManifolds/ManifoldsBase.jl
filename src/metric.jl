@@ -39,3 +39,54 @@ but where the field type of the manifold is `ℂ`.
 This metric is the default metric for example for the [`Euclidean`](@ref) manifold.
 """
 struct EuclideanMetric <: RiemannianMetric end
+
+
+@doc raw"""
+    change_metric(M::AbstractcManifold, G2::AbstractMetric, p, X)
+
+On the [`AbstractManifold`](@ref) `M` with implicitly given metric ``g_1``
+and a second [`AbstractMetric`](@ref)
+``g_2`` this function performs a change of metric in the
+sense that it returns the tangent vector ``Z=BX`` such that the linear map ``B`` fulfills
+
+```math
+g_2(Y_1,Y_2) = g_1(BY_1,BY_2) \quad \text{for all } Y_1, Y_2 ∈ T_p\mathcal M.
+```
+"""
+function change_metric(M::AbstractManifold, G::AbstractMetric, p, X)
+    Y = allocate_result(M, change_metric, X, p) # this way we allocate a tangent
+    return change_metric!(M, Y, G, p, X)
+end
+
+@doc raw"""
+    change_metric!(M::AbstractcManifold, Y, G2::AbstractMetric, p, X)
+
+Compute the [`change_metric`](@ref) in place of `Y`.
+"""
+change_metric!(M::AbstractManifold, Y, G::AbstractMetric, p, X)
+
+@doc raw"""
+    change_representer(M::AbstractManifold, G2::AbstractMetric, p, X)
+
+Convert the representer `X` of a linear function (in other words a cotangent vector at `p`)
+in the tangent space at `p` on the [`AbstractManifold`](@ref) `M` given with respect to the
+[`AbstractMetric`](@ref) `G2` into the representer with respect to the (implicit) metric of `M`.
+
+In order to convert `X` into the representer with respect to the (implicitly given) metric ``g_1`` of `M`,
+we have to find the conversion function ``c: T_p\mathcal M \to T_p\mathcal M`` such that
+
+```math
+    g_2(X,Y) = g_1(c(X),Y)
+```
+"""
+function change_representer(M::AbstractManifold, G::AbstractMetric, p, X)
+    Y = allocate_result(M, change_representer, X, p) # this way we allocate a tangent
+    return change_representer!(M, Y, G, p, X)
+end
+
+@doc raw"""
+    change_representer!(M::AbstractcManifold, Y, G2::AbstractMetric, p, X)
+
+Compute the [`change_metric`](@ref) in place of `Y`.
+"""
+change_representer!(M::AbstractManifold, Y, G::AbstractMetric, p, X)

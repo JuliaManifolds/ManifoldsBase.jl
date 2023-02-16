@@ -272,9 +272,14 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
             tv2 = log(M, pts[2], pts[1])
             tv3 = log(M, pts[2], pts[3])
             @test isapprox(M, pts[2], exp(M, pts[1], tv1))
-            @test !isapprox(M, pts[1], pts[2]; error = :info)
+            @test_logs (:info,) !isapprox(M, pts[1], pts[2]; error = :info)
             @test isapprox(M, pts[1], pts[1]; error = :info)
-            @test !isapprox(M, pts[1], convert(T, [NaN, NaN, NaN]); error = :info)
+            @test_logs (:info,) !isapprox(
+                M,
+                pts[1],
+                convert(T, [NaN, NaN, NaN]);
+                error = :info,
+            )
             @test isapprox(M, pts[1], exp(M, pts[1], tv1, 0))
             @test isapprox(M, pts[2], exp(M, pts[1], tv1, 1))
             @test isapprox(M, pts[1], exp(M, pts[2], tv2))
@@ -307,7 +312,7 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
                 X_p_nan = NaN * X_p_zero
                 @test isapprox(M, p, X_p_zero, log(M, p, p); atol = eps(eltype(p)))
                 if T <: Array
-                    @test !isapprox(
+                    @test_logs (:info,) !isapprox(
                         M,
                         p,
                         X_p_zero,
