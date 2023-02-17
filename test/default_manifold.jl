@@ -421,6 +421,21 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
                 @test isapprox(M, pts[1], (-1) * tv1, -tv1)
             end
 
+            @testset "Change Representer and Metric" begin
+                G = ManifoldsBase.EuclideanMetric()
+                p = pts[1]
+                for X in [tv1, tv2, tv3]
+                    @test change_representer(M, G, p, X) == X
+                    Y = similar(X)
+                    change_representer!(M, Y, G, p, X)
+                    @test isapprox(M, p, Y, X)
+                    @test change_metric(M, G, p, X) == X
+                    Z = similar(X)
+                    change_metric!(M, Z, G, p, X)
+                    @test isapprox(M, p, Z, X)
+                end
+            end
+
             @testset "Hat and vee in the tangent space" begin
                 X = log(M, pts[1], pts[2])
                 a = vee(M, pts[1], X)

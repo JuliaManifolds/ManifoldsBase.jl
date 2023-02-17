@@ -16,6 +16,10 @@ function DefaultManifold(n::Vararg{Int}; field = ℝ)
     return DefaultManifold{field,typeof(n)}(n)
 end
 
+change_representer!(M::DefaultManifold, Y, ::EuclideanMetric, p, X) = copyto!(M, Y, p, X)
+
+change_metric!(M::DefaultManifold, Y, ::EuclideanMetric, p, X) = copyto!(M, Y, p, X)
+
 function check_approx(M::DefaultManifold, p, q; kwargs...)
     res = isapprox(p, q; kwargs...)
     res && return nothing
