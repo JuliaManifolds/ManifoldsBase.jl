@@ -79,8 +79,8 @@ end
             end
 
             @testset "isapprox" begin
-                @test !isapprox(M, p, q; error = :info)
-                @test !isapprox(M, p, X, zero_vector(M, p); error = :info)
+                @test_logs (:info,) !isapprox(M, p, q; error = :info)
+                @test_logs (:info,) !isapprox(M, p, X, zero_vector(M, p); error = :info)
             end
         end
     end

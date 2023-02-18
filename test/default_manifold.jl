@@ -272,9 +272,14 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
             tv2 = log(M, pts[2], pts[1])
             tv3 = log(M, pts[2], pts[3])
             @test isapprox(M, pts[2], exp(M, pts[1], tv1))
-            @test !isapprox(M, pts[1], pts[2]; error = :info)
+            @test_logs (:info,) !isapprox(M, pts[1], pts[2]; error = :info)
             @test isapprox(M, pts[1], pts[1]; error = :info)
-            @test !isapprox(M, pts[1], convert(T, [NaN, NaN, NaN]); error = :info)
+            @test_logs (:info,) !isapprox(
+                M,
+                pts[1],
+                convert(T, [NaN, NaN, NaN]);
+                error = :info,
+            )
             @test isapprox(M, pts[1], exp(M, pts[1], tv1, 0))
             @test isapprox(M, pts[2], exp(M, pts[1], tv1, 1))
             @test isapprox(M, pts[1], exp(M, pts[2], tv2))
@@ -307,7 +312,7 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
                 X_p_nan = NaN * X_p_zero
                 @test isapprox(M, p, X_p_zero, log(M, p, p); atol = eps(eltype(p)))
                 if T <: Array
-                    @test !isapprox(
+                    @test_logs (:info,) !isapprox(
                         M,
                         p,
                         X_p_zero,
@@ -414,6 +419,21 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
                 @test isapprox(M, pts[1], 2 * tv1, tv1 + tv1)
                 @test isapprox(M, pts[1], 0 * tv1, tv1 - tv1)
                 @test isapprox(M, pts[1], (-1) * tv1, -tv1)
+            end
+
+            @testset "Change Representer and Metric" begin
+                G = ManifoldsBase.EuclideanMetric()
+                p = pts[1]
+                for X in [tv1, tv2, tv3]
+                    @test change_representer(M, G, p, X) == X
+                    Y = similar(X)
+                    change_representer!(M, Y, G, p, X)
+                    @test isapprox(M, p, Y, X)
+                    @test change_metric(M, G, p, X) == X
+                    Z = similar(X)
+                    change_metric!(M, Z, G, p, X)
+                    @test isapprox(M, p, Z, X)
+                end
             end
 
             @testset "Hat and vee in the tangent space" begin

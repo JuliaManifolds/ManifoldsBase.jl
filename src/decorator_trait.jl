@@ -156,6 +156,18 @@ end
 end
 
 
+@trait_function change_metric(M::AbstractDecoratorManifold, G::AbstractMetric, X, p)
+@trait_function change_metric!(M::AbstractDecoratorManifold, Y, G::AbstractMetric, X, p)
+
+@trait_function change_representer(M::AbstractDecoratorManifold, G::AbstractMetric, X, p)
+@trait_function change_representer!(
+    M::AbstractDecoratorManifold,
+    Y,
+    G::AbstractMetric,
+    X,
+    p,
+)
+
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function check_size(M::AbstractDecoratorManifold, p)
 # Embedded

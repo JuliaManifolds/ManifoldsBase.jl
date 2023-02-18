@@ -616,7 +616,7 @@ end
 An internal function for testing whether tangent vectors `X` and `Y` from tangent space
 at point `p` from manifold `M` are approximately equal. Returns either `true` or `false`
 and does not support errors like [`isapprox`](@ref).
-    
+
 For more details see documentation of [`check_approx`](@ref).
 """
 function _isapprox(M::AbstractManifold, p, X, Y; kwargs...)
@@ -991,6 +991,10 @@ export allocate,
     base_manifold,
     change_basis,
     change_basis!,
+    change_metric,
+    change_metric!,
+    change_representer,
+    change_representer!,
     copy,
     copyto!,
     default_inverse_retraction_method,
