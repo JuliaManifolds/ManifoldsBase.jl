@@ -148,13 +148,25 @@ function Base.:^(
     return PowerManifold(M, size...)
 end
 
+"""
+    _allocate_access_nested(M::PowerManifoldNested, y, i)
+
+Helper function for `allocate_result` on `PowerManifoldNested`. In allocation `y` can be
+a number in which case `_access_nested` wouldn't work.
+"""
+_allocate_access_nested(M::PowerManifoldNested, y, i) = _access_nested(M, y, i)
+_allocate_access_nested(::PowerManifoldNested, y::Number, i) = y
+
 function allocate_result(M::PowerManifoldNested, f, x...)
     if representation_size(M.manifold) === () && length(x) > 0
         return allocate(M, x[1])
     else
         return [
-            allocate_result(M.manifold, f, map(y -> _access_nested(M, y, i), x)...) for
-            i in get_iterator(M)
+            allocate_result(
+                M.manifold,
+                f,
+                map(y -> _allocate_access_nested(M, y, i), x)...,
+            ) for i in get_iterator(M)
         ]
     end
 end
