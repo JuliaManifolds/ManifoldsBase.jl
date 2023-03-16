@@ -120,6 +120,7 @@ struct TestArrayRepresentation <: AbstractPowerRepresentation end
                 @testset "specific functions" begin
                     @test distance(N, p, q) == sqrt(sum(distance.(Ref(M), p, q) .^ 2))
                     @test exp(N, p, q) == p .+ q
+                    @test exp(N, p, q, 2) == p .+ 2 .* q
 
                     @test retract(N, p, q) == p .+ q
                     @test retract(N, p, q, ExponentialRetraction()) == p .+ q
