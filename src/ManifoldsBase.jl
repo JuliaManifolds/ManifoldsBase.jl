@@ -263,7 +263,7 @@ function check_size(M::AbstractManifold, p, X)
 end
 
 @doc raw"""
-    copy(M, p)
+    copy(M::AbstractManifold, p)
 
 Copy the value(s) from the point `p` on the [`AbstractManifold`](@ref) `M` into a new point.
 See [`allocate_result`](@ref) for the allocation of new point memory and [`copyto!`](@ref) for the copying.
@@ -273,9 +273,12 @@ function copy(M::AbstractManifold, p)
     copyto!(M, q, p)
     return q
 end
+function copy(::AbstractManifold, p::Number)
+    return p
+end
 
 @doc raw"""
-    copy(M, p, X)
+    copy(M::AbstractManifold, p, X)
 
 Copy the value(s) from the tangent vector `X` at a point `p` on the
 [`AbstractManifold`](@ref) `M` into a new tangent vector.
@@ -286,6 +289,9 @@ function copy(M::AbstractManifold, p, X)
     Y = allocate_result(M, copy, X, p)
     copyto!(M, Y, p, X)
     return Y
+end
+function copy(::AbstractManifold, p, X::Number)
+    return X
 end
 
 
