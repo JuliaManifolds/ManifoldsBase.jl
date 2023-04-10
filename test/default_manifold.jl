@@ -861,6 +861,8 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
     @testset "scalars" begin
         M = DefaultManifold()
         p = 1.0
+        X = 2.0
         @test copy(M, p) === p
+        @test copy(M, p, X) === X
     end
 end
