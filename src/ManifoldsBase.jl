@@ -274,7 +274,7 @@ function copy(M::AbstractManifold, p)
     return q
 end
 function copy(::AbstractManifold, p::Number)
-    return p
+    return copy(p)
 end
 
 @doc raw"""
@@ -291,7 +291,7 @@ function copy(M::AbstractManifold, p, X)
     return Y
 end
 function copy(::AbstractManifold, p, X::Number)
-    return X
+    return copy(X)
 end
 
 
