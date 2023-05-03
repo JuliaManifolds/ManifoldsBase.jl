@@ -262,6 +262,9 @@ function check_size(M::AbstractManifold, p, X)
     end
 end
 
+convert(T::Type, ::AbstractManifold, p) = convert(T, p)
+convert(T::Type, ::AbstractManifold, p, X) = convert(T, p, X)
+
 @doc raw"""
     copy(M::AbstractManifold, p)
 

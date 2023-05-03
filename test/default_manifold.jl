@@ -43,6 +43,7 @@ struct DefaultTVector{T} <: TVector
     value::T
 end
 DefaultTVector(v::T) where {T} = DefaultTVector{T}(v)
+convert(::Type{DefaultTVector{T}}, ::DefaultPoint, v::T) where {T} = DefaultTVector(v)
 Base.size(X::DefaultTVector) = size(X.value)
 Base.eltype(X::DefaultTVector) = eltype(X.value)
 function Base.fill!(X::DefaultTVector, x)
@@ -809,6 +810,10 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
         @test parallel_transport_to!(M, Y, p, X, q) == X
         @test parallel_transport_direction!(M, Y, p, X, X) == X
         @test parallel_transport_along!(M, Y, p, X, []) == X
+
+        # convert with manifold
+        @test convert(typeof(p), M, p.value) == p
+        @test convert(typeof(X), M, p, X.value) == X
     end
 
     @testset "DefaultManifold and ONB" begin
