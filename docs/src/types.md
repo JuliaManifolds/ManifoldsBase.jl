@@ -20,6 +20,8 @@ Usually one can just use any type. When a manifold has multiple representations,
 AbstractManifoldPoint
 ```
 
+Converting points between different representations can be performed using the `convert` function with either two or three arguments (`convert(T, M, p)` or `convert(T, p)`). For some manifolds providing `M` may be necessary. The first variant falls back to the second variant.
+
 ## Tangent and Cotangent spaces
 
 ```@autodocs
@@ -29,6 +31,8 @@ Order = [:type, :function]
 ```
 
 This interface also covers a large variety how to [model bases in tangent spaces](@ref bases).
+
+Converting tangent vectors between different representations can be performed using the `convert` function with either three or four arguments (`convert(T, M, p, X)` or `convert(T, p, X)`). For some manifolds providing `M` may be necessary. The first variant falls back to the second variant.
 
 ## Macros for automatic forwards for simple points/tangent vectors
 

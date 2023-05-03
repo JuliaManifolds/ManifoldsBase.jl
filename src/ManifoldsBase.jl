@@ -262,6 +262,19 @@ function check_size(M::AbstractManifold, p, X)
     end
 end
 
+"""
+    convert(T::Type, M::AbstractManifold, p)
+
+Convert point `p` from manifold `M` to type `T`.
+"""
+convert(T::Type, ::AbstractManifold, p) = convert(T, p)
+"""
+    convert(T::Type, M::AbstractManifold, p, X)
+
+Convert vector `X` tangent at point `p` from manifold `M` to type `T`.
+"""
+convert(T::Type, ::AbstractManifold, p, X) = convert(T, p, X)
+
 @doc raw"""
     copy(M::AbstractManifold, p)
 
