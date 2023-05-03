@@ -192,8 +192,13 @@ function exp!(M::ScaledSphere{N}, q, p, X, t::Number) where {N}
     end
     return q
 end
+function exp!(M::ScaledSphere{N}, q, p, X) where {N}
+    exp!(M, q, p, X, 1)
+end
 nothing #hide
 ```
+
+Two variants are implemented above: one with the scaling argument `t` and one without. It isn't always necessary to implement both but doing so reduces the chance of ambiguity errors.
 
 A first easy check can be done taking `p` from above and any vector `X` of length `1.5π` from its tangent space.
 The resulting point is opposite of `p`, i.e. `-p` and it is of course a valid point on `S`.
