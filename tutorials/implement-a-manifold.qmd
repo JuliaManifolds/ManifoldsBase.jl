@@ -245,7 +245,7 @@ all([is_point(M, q), is_point(M, q2)])
 ```
 
 Since the exponential map might in general be expensive, we can do a similar implementation with the [`ProjectionRetraction`](@ref).
-Here, we really have to take into account, that the interface is [designed with 3 levels](design.md) in mind:
+Here, we really have to take into account, that the interface is ``[designed with 3 levels](@ref design.md)``{=commonmark} in mind:
 While the actual function we would call in the end is `retract(M, p, X, ProjectionRetraction())` (or its `!` variant), we actually have to implement `retract_project!(M, q, p, X, t)` for technical details, that are a bit beyond this introductionary tutorial. In short this split avoids ambiguity errors for decorators of the manifolds. We define
 
 ```{julia}

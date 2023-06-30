@@ -11,6 +11,7 @@ if Base.active_project() != joinpath(@__DIR__, "Project.toml")
     Pkg.develop(PackageSpec(; path = (@__DIR__) * "/../"))
     Pkg.resolve()
     Pkg.instantiate()
+    Pkg.build("IJulia")
 end
 
 # (b) Did someone say render? Then we render!
