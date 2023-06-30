@@ -1,0 +1,283 @@
+---
+title: "Implement a Manifold using the ManifoldsBase.jl Interface"
+---
+
+```?{=commonmark}
+```@meta
+CurrentModule = ManifoldsBase
+```
+````
+
+This tutorial illustrates, how to implement your very first manifold.
+We start from the very beginning and cover the basic ideas of the interface provided by
+[`ManifoldsBase`](@ref) interface.
+
+```{julia}
+#| echo: false
+#| code-fold: true
+#| output: false
+using Pkg;
+cd(@__DIR__)
+Pkg.activate("."); # for reproducibility use the local tutorial environment.
+```
+
+## Preliminaries
+
+We will use a simple example in this tutorial, since the main focus here is to illustrate how to define a manifold.
+We will use the sphere of radius $r$ embedded in $\mathbb R^{d+1}$, i.e. all vectors of length $r$. Formally we define
+
+```math
+\mathbb S_r^d :=
+\bigl\{
+    p \in \mathbb R^{d+1}
+    \big\mid
+    \lVert p \rVert = r
+\bigr\}
+```
+
+When defining a Riemannian manifold mathematically, there is everal things to keep in mind, for example the metric imposed on the tangent spaces. For this interface we assume these things to be given implicitly for a first implementation, but they can be made more precise when necessary.
+
+The only thing we have to be aware of for now is the [`number_system`](@ref), i.e. whether our manifold is a real-valued or a complex-valued manifold.
+The abstract type all manifolds inherit from, the [`AbstractManifold`](@ref)`{𝔽}` has this number system as a parameter.
+The usual parameter we will use are the [`RealNumbers`](@ref)`()`,
+which have a short hand in `ManifoldsBase.jl`, namely `ℝ`.
+The second one are the [`ComplexNumbers`](@ref)`()`, or `ℂ` for short.
+
+```{julia}
+using LinearAlgebra, ManifoldsBase
+using ManifoldsBase: ℝ
+```
+
+## Defining a manifold
+
+A manifold itself is a `struct` that is a subtype of `AbstractManifold` and should contain. We usually recommend to also document your new manifold.
+
+Since the [`Sphere`](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/sphere.html) is already a name used within [`Manifolds.jl`](https://github.com/JuliaManifolds/Manifolds.jl/), let's use a slightly more specific name. We define
+
+```{julia}
+#| output: false
+"""
+    ScaledSphere <: AbstractManifold{ℝ}
+
+Define a sphere of fixed radius
+
+# Fields
+
+* `dimension` dimension of the sphere
+* `radius` the radius of the sphere
+
+# Constructor
+
+    ScaledSphere(dimension,radius=1.0)
+
+Initialize the manifold to a certain `dimension` and `radius`,
+which by deefault is set to `1.0`
+"""
+struct ScaledSphere <: AbstractManifold{ℝ}
+    dimension::Int
+    radius::Float64
+end
+```
+
+And we can directly use this manifold and set
+
+```{julia}
+M = ScaledSphere(2,1.5)
+```
+
+## Functions I: Manifold properties
+
+While the interface provides a lot of possible functions to define for your manifold, you only need to define those that are necessary for your implementation.
+If you are using other packages depending on `ManifoldsBase.jl` you will often just get a “Method not defined” and sometimes an ambiguity error indicating that a function is missing that is required for a certain task.
+
+We can first start with a technical function which internally ist often used. Any of our points or tangent vectors is represented as a $(d+1)$-dimensional vector. This is internally often used when allocating memory, see [`representation_size](@ref).
+It returns a tuple representing the size of arrays for valid points.
+We define
+
+```{julia}
+#| output: false
+import ManifoldsBase: representation_size
+representation_size(M::ScaledSphere) = (M.dimension+1,)
+```
+
+Similarly, we can implement the function returning the dimension of the manifold, cf. [`manifold_dimension`](@ref) as
+
+```{julia}
+#| output: false
+import ManifoldsBase: manifold_dimension
+manifold_dimension(M::ScaledSphere) = M.dimension
+```
+
+and we can now easily use them to access the dimension of the manifold
+
+```{julia}
+manifold_dimension(M)
+```
+
+## Functions II: Verifying Points and tangent vectors
+
+
+The first two functions we want to define are those to check points and tangent vectors for our manifold.
+Let's first clarify what the tangent space looks like. The directions “we can walk into” from a point $p\in \mathbb S_r^d$ are all $X$ that are orthogonal to $p$, which is the plane/vector space tangent to the sphere. Formally
+
+```math
+T_p\mathbb S_r^d :=
+\bigl\{
+    X \in \mathbb R^{d+1}
+    \big\mid
+    \langle p, X \rangle = 0
+\bigr\}, \qquad p \in \mathbb S_r^d
+```
+
+to verify either `p` or `X` one uses [`is_point`](@ref)`(M,p)`
+and [`is_vector`](@ref)`(M, p, X)` respectively. Since both involve some automatic options and possibililities, for example whether to throw an error or just return false, both mention that the actual functions to implement are [`check_point`](@ref) and [`check_vector`](@ref), which both do not throw but _return_ an error if something is wrong.
+
+In principle we would have to check two properties, namely that the size of `p` is of correct size `M.dimension+1` and that its norm is `M.radius`. Luckily, by defining [`representation_size`](@ref) the first check is automatically done already – actually for both points and vectors.
+We define
+
+```{julia}
+#| output: false
+import ManifoldsBase: check_point
+function check_point(M::ScaledSphere, p; kwargs...)
+    if !isapprox(norm(p), M.radius; kwargs...)
+        return DomainError(norm(p), "The norm of $p is not $(M.radius).")
+    end
+    return nothing
+end
+```
+
+And we can directly test the function. To see all 3 failing ones, we switch from errors to warnings in the check
+
+```{julia}
+is_point(M, [1.5, 0.0], :warn) # wrong size
+is_point(M, [1.0, 0.0, 0.0], :warn) # wrong norm
+is_point(M, [1.5, 0.0, 0.0], :warn) # on the manifold, returns true
+```
+
+similarly for vectors, we just have to implement the orthogonality check.
+
+```{julia}
+#| output: false
+import ManifoldsBase: check_vector
+function check_vector(M::ScaledSphere, p, X; kwargs...)
+    if !isapprox(dot(p,X), 0.0; kwargs...)
+        return DomainError(
+            dot(p,X),
+            "The tangent vector $X is not orthogonal to $p."
+        )
+    end
+    return nothing
+end
+```
+
+and again, the high level interface can be used to display warning for vectors not fulfilling the criterion, but we can also
+activate a check for the point using the last positional argument
+
+```{julia}
+is_vector(M, [1.5, 0.0, 0.0], [0.0, 1.0], :warn) # wrong size
+is_vector(M, [1.5, 0.0, 0.0], [1.0, 1.0, 0.0], :warn) # not orthogonal norm
+is_vector(M, [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], :warn, true) # point not valid
+is_vector(M, [1.5, 0.0, 0.0], [0.0, 1.0, 0.0], :warn, true) # returns true
+```
+
+
+## Functions on Manifolds III: The exponential map and a retraction.
+
+For the final group of functions, we want to implement the [`exp`](@ref)onential map and a [`retract`](@ref)ion. Both are ways to “move around” on the manifold, that is, given a point $p$ and a
+tangent vector indicating a “walking direction”, the two functions we define will return a new point $q$ on the manifold.
+
+For functions that compute a new point or tangent vector, [`ManifoldsBase`](@ref) always provides two varinats: One that allocates new memory and one, that allows to provide the memory, the result should be returned in – to spare memory allocations.
+
+Let's first take a look at what the exponential map is defined like. We follow the shortest curves, that is great arcs, on the sphere. Formally we have
+
+````math
+\exp_p X =
+\cos\Bigl(\frac{1}{r}\lVert X \rVert\Bigr)p +
+\sin\Bigl(\frac{1}{r}\lVert X \rVert\Bigr)\frac{X}{\lVert X \rVert}.
+````
+
+In fact, from the two functions above, [`exp`](@ref)`(M, p, X)` and [`exp!`](@ref)`(M, q, p, X)`, that works in place of `q`, we only have to implement the second.
+The first one, `exp` by default falls back to allocating memory and calling the secnod. Sp `exp` should only be defined, if there is a special reason for.
+Furthermore, we usually do not verify/check inputs to spare time. If a user feels insecure, they could for example use the [`ValidationManifold`](@ref) wrapper which adds explicitly checks of inputs and outputs.
+
+We define
+
+```{julia}
+#| output: false
+import ManifoldsBase: exp!
+function exp!(M::ScaledSphere, q, p, X)
+    nX = norm(X)
+    if nX == 0
+        q .= p
+    else
+        q .= cos(nX/M.radius)*p + M.radius*sin(nX/M.radius) .* (1/nX) .* X
+    end
+    return q
+end
+```
+
+and we can directly test our function starting in the north pole and “waling down” to the equator
+
+```{julia}
+q = exp(M, [0.0, 0.0, 1.5], [0.75π, 0.0, 0.0])
+```
+
+but we also get the other variants for free, for example
+
+```{julia}
+q2 = zero(q)
+exp!(M, q2, [0.0, 0.0, 1.5], [0.75π, 0.0, 0.0])
+q2
+```
+
+or the one that shortens or enlongates the path by a factor,
+for example, if we walk twice the distance, we reach the opposite point
+
+```{julia}
+exp!(M, q2, [0.0, 0.0, 1.5], [0.75π, 0.0, 0.0], 2.0)
+q2
+```
+
+Of course we can easliy check that both points we computed still lie on the sphere
+
+```{julia}
+all([is_point(M, q), is_point(M, q2)])
+```
+
+Since the exponential map might in general be expensive, we can do a similar implementation with the [`ProjectionRetraction`](@ref).
+Here, we really have to take into account, that the interface is [designed with 3 levels](design.md) in mind:
+While the actual function we would call in the end is `retract(M, p, X, ProjectionRetraction())` (or its `!` variant), we actually have to implement `retract_project!(M, q, p, X, t)` for technical details, that are a bit beyond this introductionary tutorial. In short this split avoids ambiguity errors for decorators of the manifolds. We define
+
+```{julia}
+import ManifoldsBase: retract_project!
+function retract_project!(M::ScaledSphere, q, p, X, t)
+    q .= (p + t*X) .* (M.radius/norm(p + t*X))
+    return q
+end
+```
+
+And to test also this function, and avoiding allocations at the same time, we call
+
+```{julia}
+retract!(M, q, [0.0, 0.0, 1.5], [0.75π, 0.0, 0.0], ProjectionRetraction())
+```
+
+Finally, there is [`default_retraction_method`](@ref) to specify which is the default retraction to use. By default this is
+
+```{julia}
+default_retraction_method(M)
+```
+
+But we can easily specify this for our manifold as well, for example defining
+
+```{julia}
+import ManifoldsBase: default_retraction_method
+default_retraction_method(::ScaledSphere) = ProjectionRetraction()
+```
+
+Then
+```{julia}
+default_retraction_method(M)
+```
+and retract without a method specified would always fall back to using the projection retraction instead of the exponential map.
+Note that for compatibilty there is the [`AbstractRetractionMethod`](@ref) called [`ExponentialRetracion`](@ref) which makes [`retract`](@ref) fall back to calling [`exp`](@ref).
