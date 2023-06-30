@@ -2,7 +2,7 @@
 title: "Implement a Manifold using the ManifoldsBase.jl Interface"
 ---
 
-```?{=commonmark}
+````{=commonmark}
 ```@meta
 CurrentModule = ManifoldsBase
 ```
