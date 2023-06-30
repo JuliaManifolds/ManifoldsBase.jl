@@ -7,3 +7,4 @@ Manifest.toml
 docs/build
 docs/src/tutorials/*.md
 tutorials/_freeze
+docs/.CondaPkg
