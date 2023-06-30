@@ -1,9 +1,11 @@
 [deps]
 CondaPkg = "992eb4ea-22a4-4c89-a5bb-47a3300528ab"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+IJulia = "7073ff75-c697-5162-941a-fcdaad2a7d2a"
 ManifoldsBase = "3362f125-f0bb-47a3-aa74-596ffd7ef2fb"
 
 [compat]
 CondaPkg = "0.2"
 Documenter = "0.27"
+IJulia = "1"
 ManifoldsBase = "0.14"
