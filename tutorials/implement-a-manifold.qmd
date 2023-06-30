@@ -35,7 +35,7 @@ We will use the sphere of radius $r$ embedded in $\mathbb R^{d+1}$, i.e. all vec
 \bigr\}
 ```
 
-When defining a Riemannian manifold mathematically, there is everal things to keep in mind, for example the metric imposed on the tangent spaces. For this interface we assume these things to be given implicitly for a first implementation, but they can be made more precise when necessary.
+When defining a Riemannian manifold mathematically, there is several things to keep in mind, for example the metric imposed on the tangent spaces. For this interface we assume these things to be given implicitly for a first implementation, but they can be made more precise when necessary.
 
 The only thing we have to be aware of for now is the [`number_system`](@ref), i.e. whether our manifold is a real-valued or a complex-valued manifold.
 The abstract type all manifolds inherit from, the [`AbstractManifold`](@ref)`{𝔽}` has this number system as a parameter.
@@ -71,7 +71,7 @@ Define a sphere of fixed radius
     ScaledSphere(dimension,radius=1.0)
 
 Initialize the manifold to a certain `dimension` and `radius`,
-which by deefault is set to `1.0`
+which by default is set to `1.0`
 """
 struct ScaledSphere <: AbstractManifold{ℝ}
     dimension::Int
