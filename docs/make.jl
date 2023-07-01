@@ -13,29 +13,21 @@ if Base.active_project() != joinpath(@__DIR__, "Project.toml")
     Pkg.instantiate()
 end
 
-# Debug Foo outside
-tutorials_folder = (@__DIR__) * "/../tutorials"
-# instantiate the tutorials environment if necessary
-Pkg.activate(tutorials_folder)
-Pkg.resolve()
-Pkg.instantiate()
-Pkg.build("IJulia") # build IJulia to the right version.
-# Debug foo
-using IJulia
-@warn "$(readdir(IJulia.kerneldir(), join=true))"
-
-Pkg.activate(@__DIR__) # but return to the docs one before
 # (b) Did someone say render? Then we render!
 if "--quarto" ∈ ARGS
     using CondaPkg
     CondaPkg.withenv() do
         @info "Rendering Quarto"
-        run(`quarto render $(tutorials_folder)`)
-        return nothing
+        tutorials_folder = (@__DIR__) * "/../tutorials"
+        # instantiate the tutorials environment if necessary
+        Pkg.activate(tutorials_folder)
+        Pkg.resolve()
+        Pkg.instantiate()
+        Pkg.build("IJulia") # build IJulia to the right version.
+        Pkg.activate(@__DIR__) # but return to the docs one before
+        return run(`quarto render $(tutorials_folder)`)
     end
 end
-
-Pkg.activate(@__DIR__) # but return to the docs one before
 
 using Documenter: DocMeta, HTML, MathJax3, deploydocs, makedocs
 using ManifoldsBase
