@@ -24,6 +24,7 @@ Pkg.build("IJulia") # build IJulia to the right version.
 using IJulia
 @warn "$(readdir(IJulia.kerneldir(), join=true))"
 
+Pkg.activate(@__DIR__) # but return to the docs one before
 # (b) Did someone say render? Then we render!
 if "--quarto" ∈ ARGS
     using CondaPkg
