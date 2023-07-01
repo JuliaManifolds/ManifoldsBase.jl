@@ -11,7 +11,6 @@ if Base.active_project() != joinpath(@__DIR__, "Project.toml")
     Pkg.develop(PackageSpec(; path = (@__DIR__) * "/../"))
     Pkg.resolve()
     Pkg.instantiate()
-    Pkg.build("IJulia")
 end
 
 # (b) Did someone say render? Then we render!
@@ -30,10 +29,11 @@ if "--quarto" ∈ ARGS
     end
 end
 
-using ManifoldsBase, Documenter
+using Documenter: DocMeta, HTML, MathJax3, deploydocs, makedocs
+using ManifoldsBase
 
 makedocs(
-    format = Documenter.HTML(prettyurls = false, assets = ["assets/favicon.ico"]),
+    format = HTML(; mathengine=MathJax3(), prettyurls=get(ENV, "CI", nothing) == "true"), assets = ["assets/favicon.ico"]),
     modules = [ManifoldsBase],
     authors = "Seth Axen, Mateusz Baran, Ronny Bergmann, and contributors.",
     sitename = "ManifoldsBase.jl",
