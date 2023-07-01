@@ -33,7 +33,11 @@ using Documenter: DocMeta, HTML, MathJax3, deploydocs, makedocs
 using ManifoldsBase
 
 makedocs(
-    format = HTML(; mathengine=MathJax3(), prettyurls=get(ENV, "CI", nothing) == "true"), assets = ["assets/favicon.ico"]),
+    format = HTML(;
+        mathengine = MathJax3(),
+        prettyurls = get(ENV, "CI", nothing) == "true",
+        assets = ["assets/favicon.ico"],
+    ),
     modules = [ManifoldsBase],
     authors = "Seth Axen, Mateusz Baran, Ronny Bergmann, and contributors.",
     sitename = "ManifoldsBase.jl",
