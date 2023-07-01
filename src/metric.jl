@@ -29,14 +29,14 @@ abstract type RiemannianMetric <: AbstractMetric end
     EuclideanMetric <: RiemannianMetric
 
 A general type for any manifold that employs the Euclidean Metric, for example
-the [`Euclidean`](@ref) manifold itself, or the [`Sphere`](@ref), where every
+the [`Euclidean`](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/euclidean.html) manifold itself, or the [`Sphere`](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/sphere.html), where every
 tangent space (as a plane in the embedding) uses this metric (in the embedding).
 
 Since the metric is independent of the field type, this metric is also used for
 the Hermitian metrics, i.e. metrics that are analogous to the `EuclideanMetric`
 but where the field type of the manifold is `ℂ`.
 
-This metric is the default metric for example for the [`Euclidean`](@ref) manifold.
+This metric is the default metric for example for the [`Euclidean`](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/euclidean.html) manifold.
 """
 struct EuclideanMetric <: RiemannianMetric end
 

@@ -1,5 +1,5 @@
 ---
-title: "Implement a Manifold using the ManifoldsBase.jl Interface"
+title: "How to Implement a Manifold"
 ---
 
 ````{=commonmark}
@@ -10,7 +10,7 @@ CurrentModule = ManifoldsBase
 
 This tutorial illustrates, how to implement your very first manifold.
 We start from the very beginning and cover the basic ideas of the interface provided by
-[`ManifoldsBase`](@ref) interface.
+`ManifoldsBase.jl` interface.
 
 ```{julia}
 #| echo: false
@@ -90,7 +90,7 @@ M = ScaledSphere(2,1.5)
 While the interface provides a lot of possible functions to define for your manifold, you only need to define those that are necessary for your implementation.
 If you are using other packages depending on `ManifoldsBase.jl` you will often just get a “Method not defined” and sometimes an ambiguity error indicating that a function is missing that is required for a certain task.
 
-We can first start with a technical function which internally ist often used. Any of our points or tangent vectors is represented as a $(d+1)$-dimensional vector. This is internally often used when allocating memory, see [`representation_size](@ref).
+We can first start with a technical function which internally ist often used. Any of our points or tangent vectors is represented as a $(d+1)$-dimensional vector. This is internally often used when allocating memory, see [`representation_size`](@ref).
 It returns a tuple representing the size of arrays for valid points.
 We define
 
@@ -186,7 +186,7 @@ is_vector(M, [1.5, 0.0, 0.0], [0.0, 1.0, 0.0], :warn, true) # returns true
 For the final group of functions, we want to implement the [`exp`](@ref)onential map and a [`retract`](@ref)ion. Both are ways to “move around” on the manifold, that is, given a point $p$ and a
 tangent vector indicating a “walking direction”, the two functions we define will return a new point $q$ on the manifold.
 
-For functions that compute a new point or tangent vector, [`ManifoldsBase`](@ref) always provides two varinats: One that allocates new memory and one, that allows to provide the memory, the result should be returned in – to spare memory allocations.
+For functions that compute a new point or tangent vector, `ManifoldsBase.jl` always provides two varinats: One that allocates new memory and one, that allows to provide the memory, the result should be returned in – to spare memory allocations.
 
 Let's first take a look at what the exponential map is defined like. We follow the shortest curves, that is great arcs, on the sphere. Formally we have
 
@@ -245,7 +245,7 @@ all([is_point(M, q), is_point(M, q2)])
 ```
 
 Since the exponential map might in general be expensive, we can do a similar implementation with the [`ProjectionRetraction`](@ref).
-Here, we really have to take into account, that the interface is ``[designed with 3 levels](@ref design.md)``{=commonmark} in mind:
+Here, we really have to take into account, that the interface is ``[designed with 3 levels](@ref Design)``{=commonmark} in mind:
 While the actual function we would call in the end is `retract(M, p, X, ProjectionRetraction())` (or its `!` variant), we actually have to implement `retract_project!(M, q, p, X, t)` for technical details, that are a bit beyond this introductionary tutorial. In short this split avoids ambiguity errors for decorators of the manifolds. We define
 
 ```{julia}
@@ -280,4 +280,4 @@ Then
 default_retraction_method(M)
 ```
 and retract without a method specified would always fall back to using the projection retraction instead of the exponential map.
-Note that for compatibilty there is the [`AbstractRetractionMethod`](@ref) called [`ExponentialRetracion`](@ref) which makes [`retract`](@ref) fall back to calling [`exp`](@ref).
+Note that for compatibilty there is the [`AbstractRetractionMethod`](@ref) called [`ExponentialRetraction`](@ref) which makes [`retract`](@ref) fall back to calling [`exp`](@ref).
