@@ -124,7 +124,7 @@ Let's first clarify what the tangent space looks like. The directions “we can 
 T_p\mathbb S_r^d :=
 \bigl\{
     X \in \mathbb R^{d+1}
-    \big\mid
+    \big|
     \langle p, X \rangle = 0
 \bigr\}, \qquad p \in \mathbb S_r^d
 ```
