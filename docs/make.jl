@@ -1,13 +1,49 @@
-using ManifoldsBase, Documenter
+#!/usr/bin/env julia
+#
+#
+
+#
+# (a) if docs is not the current active environment, switch to it
+# (from https://github.com/JuliaIO/HDF5.jl/pull/1020/) 
+if Base.active_project() != joinpath(@__DIR__, "Project.toml")
+    using Pkg
+    Pkg.activate(@__DIR__)
+    Pkg.develop(PackageSpec(; path = (@__DIR__) * "/../"))
+    Pkg.resolve()
+    Pkg.instantiate()
+end
+
+# (b) Did someone say render? Then we render!
+if "--quarto" ∈ ARGS
+    using CondaPkg
+    CondaPkg.withenv() do
+        @info "Rendering Quarto"
+        tutorials_folder = (@__DIR__) * "/../tutorials"
+        # instantiate the tutorials environment if necessary
+        Pkg.activate(tutorials_folder)
+        Pkg.resolve()
+        Pkg.instantiate()
+        Pkg.build("IJulia") # build IJulia to the right version.
+        Pkg.activate(@__DIR__) # but return to the docs one before
+        return run(`quarto render $(tutorials_folder)`)
+    end
+end
+
+using Documenter: DocMeta, HTML, MathJax3, deploydocs, makedocs
+using ManifoldsBase
 
 makedocs(
-    format = Documenter.HTML(prettyurls = false, assets = ["assets/favicon.ico"]),
+    format = HTML(;
+        mathengine = MathJax3(),
+        prettyurls = get(ENV, "CI", nothing) == "true",
+        assets = ["assets/favicon.ico"],
+    ),
     modules = [ManifoldsBase],
     authors = "Seth Axen, Mateusz Baran, Ronny Bergmann, and contributors.",
     sitename = "ManifoldsBase.jl",
     pages = [
         "Home" => "index.md",
-        "How to define a manifold" => "example.md",
+        "How to define a manifold" => "tutorials/implement-a-manifold.md",
         "Design principles" => "design.md",
         "An abstract manifold" => "types.md",
         "Functions on maniolds" => [
