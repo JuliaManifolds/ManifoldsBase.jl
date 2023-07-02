@@ -21,7 +21,7 @@ An abstract type for representing approximate inverse retraction methods.
 abstract type ApproximateInverseRetraction <: AbstractInverseRetractionMethod end
 
 """
-    ApproximateRetraction <: AbstractInverseRetractionMethod
+    ApproximateRetraction <: AbstractRetractionMethod
 
 An abstract type for representing approximate retraction methods.
 """
@@ -110,7 +110,12 @@ end
     PolarRetraction <: AbstractRetractionMethod
 
 Retractions that are based on singular value decompositions of the matrix / matrices
-for point and tangent vector on a [`AbstractManifold`](@ref)
+for point and tangent vectors.
+
+!!! note "Technical Note"
+    Though you would call e.g. [`retract`](@ref)`(M, p, X, PolarRetraction())`,
+    to implement a polar retraction, define [`retract_polar`](@ref)`(M, p, X, t)`
+    or [`retract_polar!`](@ref)`(M, q, p, X, t)` for your manifold `M`.
 """
 struct PolarRetraction <: AbstractRetractionMethod end
 
@@ -118,6 +123,11 @@ struct PolarRetraction <: AbstractRetractionMethod end
     ProjectionRetraction <: AbstractRetractionMethod
 
 Retractions that are based on projection and usually addition in the embedding.
+
+!!! note "Technical Note"
+    Though you would call e.g. [`retract`](@ref)`(M, p, X, ProjectionRetraction())`,
+    to implement a projection retraction, define [`retract_project`](@ref)`(M, p, X, t)`
+    or [`retract_project!`](@ref)`(M, q, p, X, t)` for your manifold `M`.
 """
 struct ProjectionRetraction <: AbstractRetractionMethod end
 
@@ -126,6 +136,11 @@ struct ProjectionRetraction <: AbstractRetractionMethod end
 
 Retractions that are based on a QR decomposition of the
 matrix / matrices for point and tangent vector on a [`AbstractManifold`](@ref)
+
+!!! note "Technical Note"
+    Though you would call e.g. [`retract`](@ref)`(M, p, X, QRRetraction())`,
+    to implement a QR retraction, define [`retract_qr`](@ref)`(M, p, X, t)`
+    or [`retract_qr!`](@ref)`(M, q, p, X, t)` for your manifold `M`.
 """
 struct QRRetraction <: AbstractRetractionMethod end
 
@@ -162,6 +177,11 @@ end
     SoftmaxRetraction <: AbstractRetractionMethod
 
 Describes a retraction that is based on the softmax function.
+
+!!! note "Technical Note"
+    Though you would call e.g. [`retract`](@ref)`(M, p, X, SoftmaxRetraction())`,
+    to implement a softmax retraction, define [`retract_softmax`](@ref)`(M, p, X, t)`
+    or [`retract_softmax!`](@ref)`(M, q, p, X, t)` for your manifold `M`.
 """
 struct SoftmaxRetraction <: AbstractRetractionMethod end
 
@@ -169,7 +189,15 @@ struct SoftmaxRetraction <: AbstractRetractionMethod end
 @doc raw"""
     PadeRetraction{m} <: AbstractRetractionMethod
 
-A retraction based on the Padé approximation of order $m$
+A retraction based on the Padé approximation of order ``m``
+
+# Constructor
+    PadeRetraction(m::Int)
+
+!!! note "Technical Note"
+    Though you would call e.g. [`retract`](@ref)`(M, p, X, PadeRetraction(m))`,
+    to implement a Padé retraction, define [`retract_pade`](@ref)`(M, p, X, t, m)`
+    or [`retract_pade!`](@ref)`(M, q, p, X, t, m)` for your manifold `M`.
 """
 struct PadeRetraction{m} <: AbstractRetractionMethod end
 
@@ -184,6 +212,12 @@ end
 
 A retraction based on the Cayley transform, which is realized by using the
 [`PadeRetraction`](@ref)`{1}`.
+
+!!! note "Technical Note"
+    Though you would call e.g. [`retract`](@ref)`(M, p, X, CayleyRetraction())`,
+    to implement a caley retraction, define [`retract_cayley`](@ref)`(M, p, X, t)`
+    or [`retract_cayley!`](@ref)`(M, q, p, X, t)` for your manifold `M`.
+    By default both these functions fall back to calling a [`PadeRetraction`](@ref)`(1)`.
 """
 const CayleyRetraction = PadeRetraction{1}
 
@@ -213,9 +247,14 @@ struct LogarithmicInverseRetraction <: AbstractInverseRetractionMethod end
 
 
 @doc raw"""
-    PadeInverseRetraction{m} <: AbstractRetractionMethod
+    PadeInverseRetraction{m} <: AbstractInverseRetractionMethod
 
 An inverse retraction based on the Padé approximation of order $m$ for the retraction.
+
+!!! note "Technical Note"
+    Though you would call e.g. [`inverse_retract`](@ref)`(M, p, q, PadeInverseRetraction(m))`,
+    to implement an inverse Padé retraction, define [`inverse_retract_pade`](@ref)`(M, p, q, m)`
+    or [`inverse_retract_pade!`](@ref)`(M, X, p, q, m)` for your manifold `M`.
 """
 struct PadeInverseRetraction{m} <: AbstractInverseRetractionMethod end
 
@@ -230,6 +269,12 @@ end
 
 A retraction based on the Cayley transform, which is realized by using the
 [`PadeRetraction`](@ref)`{1}`.
+
+!!! note "Technical Note"
+    Though you would call e.g. [`inverse_retract`](@ref)`(M, p, q, CayleyInverseRetraction())`,
+    to implement an inverse caley retraction, define [`inverse_retract_cayley`](@ref)`(M, p, q)`
+    or [`inverse_retract_cayley!`](@ref)`(M, X, p, q)` for your manifold `M`.
+    By default both these functions fall back to calling a [`PadeInverseRetraction`](@ref)`(1)`.
 """
 const CayleyInverseRetraction = PadeInverseRetraction{1}
 
@@ -238,6 +283,11 @@ const CayleyInverseRetraction = PadeInverseRetraction{1}
 
 Inverse retractions that are based on a singular value decomposition of the
 matrix / matrices for point and tangent vector on a [`AbstractManifold`](@ref)
+
+!!! note "Technical Note"
+    Though you would call e.g. [`inverse_retract`](@ref)`(M, p, q, PolarInverseRetraction())`,
+    to implement an inverse polar retraction, define [`inverse_retract_polar`](@ref)`(M, p, q)`
+    or [`inverse_retract_polar!`](@ref)`(M, X, p, q)` for your manifold `M`.
 """
 struct PolarInverseRetraction <: AbstractInverseRetractionMethod end
 
@@ -245,6 +295,11 @@ struct PolarInverseRetraction <: AbstractInverseRetractionMethod end
     ProjectionInverseRetraction <: AbstractInverseRetractionMethod
 
 Inverse retractions that are based on a projection (or its inversion).
+
+!!! note "Technical Note"
+    Though you would call e.g. [`inverse_retract`](@ref)`(M, p, q, ProjectionInverseRetraction())`,
+    to implement an inverse projection retraction, define [`inverse_retract_project`](@ref)`(M, p, q)`
+    or [`inverse_retract_project!`](@ref)`(M, X, p, q)` for your manifold `M`.
 """
 struct ProjectionInverseRetraction <: AbstractInverseRetractionMethod end
 
@@ -253,6 +308,11 @@ struct ProjectionInverseRetraction <: AbstractInverseRetractionMethod end
 
 Inverse retractions that are based on a QR decomposition of the
 matrix / matrices for point and tangent vector on a [`AbstractManifold`](@ref)
+
+!!! note "Technical Note"
+    Though you would call e.g. [`inverse_retract`](@ref)`(M, p, q, QRInverseRetraction())`,
+    to implement an inverse QR retraction, define [`inverse_retract_qr`](@ref)`(M, p, q)`
+    or [`inverse_retract_qr!`](@ref)`(M, X, p, q)` for your manifold `M`.
 """
 struct QRInverseRetraction <: AbstractInverseRetractionMethod end
 
@@ -306,7 +366,7 @@ end
 
 
 """
-    InverseRetractionWithKeywords{R<:AbstractRetractionMethod,K} <: AbstractRetractionMethod
+    InverseRetractionWithKeywords{R<:AbstractRetractionMethod,K} <: AbstractInverseRetractionMethod
 
 Since inverse retractions might have keywords, this type is a way to set them as an own type to be
 used as a specific inverse retraction.
@@ -342,6 +402,11 @@ end
     SoftmaxInverseRetraction <: AbstractInverseRetractionMethod
 
 Describes an inverse retraction that is based on the softmax function.
+
+!!! note "Technical Note"
+    Though you would call e.g. [`inverse_retract`](@ref)`(M, p, q, SoftmaxInverseRetraction())`,
+    to implement an inverse softmax retraction, define [`inverse_retract_softmax`](@ref)`(M, p, q)`
+    or [`inverse_retract_softmax!`](@ref)`(M, X, p, q)` for your manifold `M`.
 """
 struct SoftmaxInverseRetraction <: AbstractInverseRetractionMethod end
 
