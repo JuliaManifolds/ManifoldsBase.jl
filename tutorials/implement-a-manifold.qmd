@@ -30,7 +30,7 @@ We will use the sphere of radius $r$ embedded in $\mathbb R^{d+1}$, i.e. all vec
 \mathbb S_r^d :=
 \bigl\{
     p \in \mathbb R^{d+1}
-    \big\mid
+    \big|
     \lVert p \rVert = r
 \bigr\}
 ```
