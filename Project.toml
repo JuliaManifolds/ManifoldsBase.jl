@@ -1,7 +1,7 @@
 name = "ManifoldsBase"
 uuid = "3362f125-f0bb-47a3-aa74-596ffd7ef2fb"
 authors = ["Seth Axen <seth.axen@gmail.com>", "Mateusz Baran <mateuszbaran89@gmail.com>", "Ronny Bergmann <manopt@ronnybergmann.net>", "Antoine Levitt <antoine.levitt@gmail.com>"]
-version = "0.14.6"
+version = "0.14.7"
 
 [deps]
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
