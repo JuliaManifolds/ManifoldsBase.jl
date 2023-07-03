@@ -870,4 +870,9 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
         @test copy(M, p) === p
         @test copy(M, p, X) === X
     end
+
+    @testset "static" begin
+        MS = ManifoldsBase.DefaultManifold(3; static = true)
+        @test (@inferred representation_size(MS)) == (3,)
+    end
 end

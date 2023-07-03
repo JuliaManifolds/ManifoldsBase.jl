@@ -36,3 +36,31 @@ matrix internally, it is possible to use [`@manifold_element_forwards`](@ref) an
 [`@default_manifold_fallbacks`](@ref) to reduce implementation overhead.
 """
 abstract type AbstractManifoldPoint end
+
+"""
+    abstract type AbstractManifoldSize end
+
+Abstract representation of manifold size. Can be either [`StaticSize`](@ref) or
+[`RTSize`](@ref).
+"""
+abstract type AbstractManifoldSize end
+
+"""
+    StaticSize{T}
+
+Static size of a manifold.
+"""
+struct StaticSize{T} <: AbstractManifoldSize end
+StaticSize(t::NTuple) = StaticSize{t}()
+
+"""
+    RTSize{TS<:NTuple{N,Int} where N}
+
+Runtime size of a manifold. 
+"""
+struct RTSize{TS<:NTuple{N,Int} where {N}} <: AbstractManifoldSize
+    size::TS
+end
+
+getsize(::StaticSize{T}) where {T} = T
+getsize(S::RTSize) = S.size

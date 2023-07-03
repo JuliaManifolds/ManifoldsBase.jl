@@ -9,11 +9,20 @@ This manifold further illustrates how to type your manifold points and tangent v
 that the interface does not require this, but it might be handy in debugging and educative
 situations to verify correctness of involved variabes.
 """
-struct DefaultManifold{𝔽,T<:NTuple{N,Int} where {N}} <: AbstractManifold{𝔽}
+struct DefaultManifold{𝔽,T<:AbstractManifoldSize} <: AbstractManifold{𝔽}
     size::T
 end
-function DefaultManifold(n::Vararg{Int}; field = ℝ)
-    return DefaultManifold{field,typeof(n)}(n)
+function ManifoldsBase.DefaultManifold(
+    n::Vararg{Int};
+    field = ManifoldsBase.ℝ,
+    static = false,
+)
+    if static
+        size = ManifoldsBase.StaticSize(n)
+    else
+        size = ManifoldsBase.RTSize(n)
+    end
+    return ManifoldsBase.DefaultManifold{field,typeof(size)}(size)
 end
 
 change_representer!(M::DefaultManifold, Y, ::EuclideanMetric, p, X) = copyto!(M, Y, p, X)
@@ -112,7 +121,8 @@ is_flat(::DefaultManifold) = true
 log!(::DefaultManifold, Y, p, q) = (Y .= q .- p)
 
 function manifold_dimension(M::DefaultManifold{𝔽}) where {𝔽}
-    return length(M.size) == 0 ? 1 : *(M.size...) * real_dimension(𝔽)
+    size = getsize(M.size)
+    return length(size) == 0 ? 1 : *(size...) * real_dimension(𝔽)
 end
 
 number_system(::DefaultManifold{𝔽}) where {𝔽} = 𝔽
@@ -122,10 +132,16 @@ norm(::DefaultManifold, p, X) = norm(X)
 project!(::DefaultManifold, q, p) = copyto!(q, p)
 project!(::DefaultManifold, Y, p, X) = copyto!(Y, X)
 
-representation_size(M::DefaultManifold) = M.size
+representation_size(M::DefaultManifold) = getsize(M.size)
 
-function Base.show(io::IO, M::DefaultManifold{𝔽}) where {𝔽}
-    return print(io, "DefaultManifold($(join(M.size, ", ")); field = $(𝔽))")
+function Base.show(io::IO, M::DefaultManifold{𝔽,<:StaticSize}) where {𝔽}
+    return print(
+        io,
+        "DefaultManifold($(join(getsize(M.size), ", ")); field = $(𝔽), static = true)",
+    )
+end
+function Base.show(io::IO, M::DefaultManifold{𝔽,<:RTSize}) where {𝔽}
+    return print(io, "DefaultManifold($(join(getsize(M.size), ", ")); field = $(𝔽))")
 end
 
 function parallel_transport_to!(::DefaultManifold, Y, p, X, q)
