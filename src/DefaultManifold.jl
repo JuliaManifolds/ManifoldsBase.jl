@@ -132,7 +132,7 @@ log!(::DefaultManifold, Y, p, q) = (Y .= q .- p)
 
 function manifold_dimension(M::DefaultManifold{𝔽}) where {𝔽}
     size = get_parameter(M.size)
-    return length(size) == 0 ? 1 : *(size...) * real_dimension(𝔽)
+    return prod(size) * real_dimension(𝔽)
 end
 
 number_system(::DefaultManifold{𝔽}) where {𝔽} = 𝔽
