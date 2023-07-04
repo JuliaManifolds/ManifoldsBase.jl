@@ -38,29 +38,31 @@ matrix internally, it is possible to use [`@manifold_element_forwards`](@ref) an
 abstract type AbstractManifoldPoint end
 
 """
-    abstract type AbstractManifoldSize end
+    abstract type AbstractManifoldParameter end
 
-Abstract representation of manifold size. Can be either [`StaticSize`](@ref) or
-[`RTSize`](@ref).
+Abstract representation of numeric parameters for a manifold type. Can be either
+[`TypeParameter`](@ref) or [`FieldParameter`](@ref).
 """
-abstract type AbstractManifoldSize end
-
-"""
-    StaticSize{T}
-
-Static size of a manifold.
-"""
-struct StaticSize{T} <: AbstractManifoldSize end
-StaticSize(t::NTuple) = StaticSize{t}()
+abstract type AbstractManifoldParameter end
 
 """
-    RTSize{TS<:NTuple{N,Int} where N}
+    TypeParameter{T}
 
-Runtime size of a manifold. 
+Represents numeric parameters of a manifold type as type parameters, allowing for static
+specialization of methods.
 """
-struct RTSize{TS<:NTuple{N,Int} where {N}} <: AbstractManifoldSize
-    size::TS
+struct TypeParameter{T} <: AbstractManifoldParameter end
+TypeParameter(t::NTuple) = TypeParameter{t}()
+
+"""
+    FieldParameter{TS<:NTuple{N,Int} where N}
+
+Represents numeric parameters of a manifold type as values in a field, allowing for
+less static specialization of methods and faster TTFX.
+"""
+struct FieldParameter{TS<:NTuple{N,Int} where {N}} <: AbstractManifoldParameter
+    parameter::TS
 end
 
-getsize(::StaticSize{T}) where {T} = T
-getsize(S::RTSize) = S.size
+get_parameter(::TypeParameter{T}) where {T} = T
+get_parameter(P::FieldParameter) = P.parameter
