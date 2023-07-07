@@ -255,6 +255,12 @@ DiagonalizingBasisProxy() = DiagonalizingOrthonormalBasis([1.0, 0.0, 0.0])
 
         M = DefaultManifold(3)
 
+        @test sprint(
+            show,
+            "text/plain",
+            CachedBasis(NonBasis(), NonBroadcastBasisThing([])),
+        ) == "Cached basis of type NonBasis"
+
         @testset "Constructors" begin
             @test DefaultBasis{ℂ,TangentSpaceType}() === DefaultBasis(ℂ)
             @test DefaultOrthogonalBasis{ℂ,TangentSpaceType}() === DefaultOrthogonalBasis(ℂ)
