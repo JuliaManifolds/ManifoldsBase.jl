@@ -38,31 +38,13 @@ matrix internally, it is possible to use [`@manifold_element_forwards`](@ref) an
 abstract type AbstractManifoldPoint end
 
 """
-    abstract type AbstractManifoldParameter end
-
-Abstract representation of numeric parameters for a manifold type. Can be either
-[`TypeParameter`](@ref) or [`FieldParameter`](@ref).
-"""
-abstract type AbstractManifoldParameter end
-
-"""
     TypeParameter{T}
 
 Represents numeric parameters of a manifold type as type parameters, allowing for static
 specialization of methods.
 """
-struct TypeParameter{T} <: AbstractManifoldParameter end
+struct TypeParameter{T} end
 TypeParameter(t::NTuple) = TypeParameter{t}()
 
-"""
-    FieldParameter{TS<:NTuple{N,Int} where N}
-
-Represents numeric parameters of a manifold type as values in a field, allowing for
-less static specialization of methods and faster TTFX.
-"""
-struct FieldParameter{TS<:NTuple{N,Int} where {N}} <: AbstractManifoldParameter
-    parameter::TS
-end
-
 get_parameter(::TypeParameter{T}) where {T} = T
-get_parameter(P::FieldParameter) = P.parameter
+get_parameter(P) = P

@@ -21,12 +21,12 @@ Arguments:
 - `parameter`: whether a type parameter should be used to store `n`. By default size
   is stored in a field. Value can either be `:field` or `:type`.
 """
-struct DefaultManifold{𝔽,T<:AbstractManifoldParameter} <: AbstractManifold{𝔽}
+struct DefaultManifold{𝔽,T} <: AbstractManifold{𝔽}
     size::T
 end
 function DefaultManifold(n::Vararg{Int}; field = ℝ, parameter::Symbol = :field)
     if parameter === :field
-        size = FieldParameter(n)
+        size = n
     elseif parameter === :type
         size = TypeParameter(n)
     else
@@ -150,7 +150,7 @@ function Base.show(io::IO, M::DefaultManifold{𝔽,<:TypeParameter}) where {𝔽
         "DefaultManifold($(join(get_parameter(M.size), ", ")); field = $(𝔽), parameter = :type)",
     )
 end
-function Base.show(io::IO, M::DefaultManifold{𝔽,<:FieldParameter}) where {𝔽}
+function Base.show(io::IO, M::DefaultManifold{𝔽}) where {𝔽}
     return print(io, "DefaultManifold($(join(get_parameter(M.size), ", ")); field = $(𝔽))")
 end
 
