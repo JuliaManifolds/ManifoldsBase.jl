@@ -1010,18 +1010,23 @@ function show(
     ::MIME"text/plain",
     B::CachedBasis{𝔽,T,D},
 ) where {𝔽,T<:AbstractBasis,D}
-    vectors = _get_vectors(B)
-    print(
-        io,
-        "Cached basis of type $T with $(length(vectors)) basis vector$(length(vectors) == 1 ? "" : "s"):",
-    )
-    return _show_basis_vector_range_noheader(
-        io,
-        vectors;
-        max_vectors = 4,
-        pre = "  ",
-        sym = " E",
-    )
+    try
+        vectors = _get_vectors(B)
+        print(
+            io,
+            "Cached basis of type $T with $(length(vectors)) basis vector$(length(vectors) == 1 ? "" : "s"):",
+        )
+        return _show_basis_vector_range_noheader(
+            io,
+            vectors;
+            max_vectors = 4,
+            pre = "  ",
+            sym = " E",
+        )
+    catch e
+        # in case _get_vectors(B) is not defined
+        print(io, "Cached basis of type $T")
+    end
 end
 function show(
     io::IO,
