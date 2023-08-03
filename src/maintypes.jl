@@ -44,9 +44,9 @@ Represents numeric parameters of a manifold type as type parameters, allowing fo
 specialization of methods.
 """
 struct TypeParameter{T} end
-TypeParameter(t::NTuple) = TypeParameter{t}()
+TypeParameter(t::NTuple) = TypeParameter{Tuple{t...}}()
 
-get_parameter(::TypeParameter{T}) where {T} = T
+get_parameter(::TypeParameter{T}) where {T} = tuple(T.parameters...)
 get_parameter(P) = P
 
 """
