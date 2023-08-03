@@ -7,7 +7,7 @@ to build one's own manifold. It is a simplified/shortened variant of `Euclidean`
 
 This manifold further illustrates how to type your manifold points and tangent vectors. Note
 that the interface does not require this, but it might be handy in debugging and educative
-situations to verify correctness of involved variabes.
+situations to verify correctness of involved variables.
 
 # Constructor
 
@@ -25,13 +25,7 @@ struct DefaultManifold{𝔽,T} <: AbstractManifold{𝔽}
     size::T
 end
 function DefaultManifold(n::Vararg{Int}; field = ℝ, parameter::Symbol = :field)
-    if parameter === :field
-        size = n
-    elseif parameter === :type
-        size = TypeParameter(n)
-    else
-        throw(ArgumentError("Parameter can be either :field or :type. Given: $parameter"))
-    end
+    size = wrap_type_parameter(parameter, n)
     return DefaultManifold{field,typeof(size)}(size)
 end
 
