@@ -36,3 +36,32 @@ matrix internally, it is possible to use [`@manifold_element_forwards`](@ref) an
 [`@default_manifold_fallbacks`](@ref) to reduce implementation overhead.
 """
 abstract type AbstractManifoldPoint end
+
+"""
+    TypeParameter{T}
+
+Represents numeric parameters of a manifold type as type parameters, allowing for static
+specialization of methods.
+"""
+struct TypeParameter{T} end
+TypeParameter(t::NTuple) = TypeParameter{t}()
+
+get_parameter(::TypeParameter{T}) where {T} = T
+get_parameter(P) = P
+
+"""
+    wrap_type_parameter(parameter::Symbol, data)
+
+Wrap `data` in `TypeParameter` if `parameter` is `:type` or return `data` unchanged
+if `parameter` is `:field`. Intended for use in manifold constructors, see
+[`DefaultManifold`](@ref) for an example.
+"""
+@inline function wrap_type_parameter(parameter::Symbol, data)
+    if parameter === :field
+        return data
+    elseif parameter === :type
+        TypeParameter(data)
+    else
+        throw(ArgumentError("Parameter can be either :field or :type. Given: $parameter"))
+    end
+end

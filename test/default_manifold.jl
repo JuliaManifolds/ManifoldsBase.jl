@@ -870,4 +870,11 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
         @test copy(M, p) === p
         @test copy(M, p, X) === X
     end
+
+    @testset "static (size in type parameter)" begin
+        MS = ManifoldsBase.DefaultManifold(3; parameter = :type)
+        @test (@inferred representation_size(MS)) == (3,)
+        @test repr(MS) == "DefaultManifold(3; field = ℝ, parameter = :type)"
+        @test_throws ArgumentError ManifoldsBase.DefaultManifold(3; parameter = :foo)
+    end
 end

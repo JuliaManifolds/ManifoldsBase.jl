@@ -7,13 +7,26 @@ to build one's own manifold. It is a simplified/shortened variant of `Euclidean`
 
 This manifold further illustrates how to type your manifold points and tangent vectors. Note
 that the interface does not require this, but it might be handy in debugging and educative
-situations to verify correctness of involved variabes.
+situations to verify correctness of involved variables.
+
+# Constructor
+
+    DefaultManifold(n::Int...; field = ℝ, parameter::Symbol = :field)
+
+
+Arguments:
+
+- `n`: shape of array representing points on the manifold.
+- `field`: field over which the manifold is defined. Either `ℝ`, `ℂ` or `ℍ`.
+- `parameter`: whether a type parameter should be used to store `n`. By default size
+  is stored in a field. Value can either be `:field` or `:type`.
 """
-struct DefaultManifold{𝔽,T<:NTuple{N,Int} where {N}} <: AbstractManifold{𝔽}
+struct DefaultManifold{𝔽,T} <: AbstractManifold{𝔽}
     size::T
 end
-function DefaultManifold(n::Vararg{Int}; field = ℝ)
-    return DefaultManifold{field,typeof(n)}(n)
+function DefaultManifold(n::Vararg{Int}; field = ℝ, parameter::Symbol = :field)
+    size = wrap_type_parameter(parameter, n)
+    return DefaultManifold{field,typeof(size)}(size)
 end
 
 change_representer!(M::DefaultManifold, Y, ::EuclideanMetric, p, X) = copyto!(M, Y, p, X)
@@ -112,7 +125,8 @@ is_flat(::DefaultManifold) = true
 log!(::DefaultManifold, Y, p, q) = (Y .= q .- p)
 
 function manifold_dimension(M::DefaultManifold{𝔽}) where {𝔽}
-    return length(M.size) == 0 ? 1 : *(M.size...) * real_dimension(𝔽)
+    size = get_parameter(M.size)
+    return prod(size) * real_dimension(𝔽)
 end
 
 number_system(::DefaultManifold{𝔽}) where {𝔽} = 𝔽
@@ -122,10 +136,16 @@ norm(::DefaultManifold, p, X) = norm(X)
 project!(::DefaultManifold, q, p) = copyto!(q, p)
 project!(::DefaultManifold, Y, p, X) = copyto!(Y, X)
 
-representation_size(M::DefaultManifold) = M.size
+representation_size(M::DefaultManifold) = get_parameter(M.size)
 
+function Base.show(io::IO, M::DefaultManifold{𝔽,<:TypeParameter}) where {𝔽}
+    return print(
+        io,
+        "DefaultManifold($(join(get_parameter(M.size), ", ")); field = $(𝔽), parameter = :type)",
+    )
+end
 function Base.show(io::IO, M::DefaultManifold{𝔽}) where {𝔽}
-    return print(io, "DefaultManifold($(join(M.size, ", ")); field = $(𝔽))")
+    return print(io, "DefaultManifold($(join(get_parameter(M.size), ", ")); field = $(𝔽))")
 end
 
 function parallel_transport_to!(::DefaultManifold, Y, p, X, q)
