@@ -913,7 +913,7 @@ Base.@pure size_to_tuple(::Type{S}) where {S<:Tuple} = tuple(S.parameters...)
 Compute the Weingarten map ``\mathcal W_p\colon T_p\mathcal M × N_p\mathcal M \to T_p\mathcal M``
 in place of `Y`, see [`Weingarten`](@ref).
 """
-Weingarten!(M::AbstractManifold, Y, p, X, A)
+Weingarten!(M::AbstractManifold, Y, p, X, V)
 
 @doc raw"""
     Weingarten(M, p, X, V)
@@ -922,12 +922,12 @@ Compute the Weingarten map ``\mathcal W_p\colon T_p\mathcal M × N_p\mathcal M \
 where ``N_p\mathcal M`` is the orthogonal complement of the tangent space ``T_p\mathcal M``
 of the embedded submanifold ``\mathcal M``, where we denote the embedding by ``\mathcal E``.
 
-One interpretation can also be given by looking at the differential of the [`project`](@ref)ion
-``\operatorname{proj}_{T_p\mathcal M}\colon \mathcal E \to T_p\mathcal M`` with respect to the base point ``p``,
+The Weingarten map can be defined by restricting the differential of the orthogonal [`project`](@ref)ion
+``\operatorname{proj}_{T_p\mathcal M}\colon T_p \mathcal E \to T_p\mathcal M`` with respect to the base point ``p``,
 i.e. defining
 ```math
 \mathcal P_X \coloneqq D_p\operatorname{proj}_{T_p\mathcal M}(Y)[X],
-\qquad Y \in \mathcal E, X \in T_p\mathcal M,
+\qquad Y \in T_p \mathcal E, X \in T_p\mathcal M,
 ```
 the Weingarten map can be written as ``\mathcal W_p(X,V) = \mathcal P_X(V)``.
 
