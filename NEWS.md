@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.14.10] xx/08/2023
 
+### Added
+
 - introduce the `Weingarten` map and its inplace variant `Weingarten!`.
 
 ## [0.14.9] 03/08/2023
