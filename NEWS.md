@@ -5,7 +5,71 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.14.0]
+## [0.14.10] xx/08/2023
+
+- introduce the `Weingarten` map and its inplace variant `Weingarten!`.
+
+## [0.14.9] 03/08/2023
+
+### Added
+
+- Introduce an interface that allows the static size of a manifold to be a field as well.
+
+## [0.14.8] 07/07/2023
+
+### Changed
+
+- Improve `show` for cached bases and make it more robust
+
+## [0.14.7] 07/07/2023
+
+### Changed
+
+- the tutorial is now written in Quarto.
+
+## [0.14.6] 10/06/2023
+
+### Added
+
+- export the inplace random function `rand!`
+
+## [0.14.5] 03/05/2023
+
+### Added
+
+- Allow to specify an `AbstractManifold` when converting points or tangent vector types.
+
+## [0.14.4] 10/04/2023
+
+### Changed
+
+- Fix `copy` to work properly when copying `Number`s
+
+## [0.14.3] 16/03/2023
+
+### Changed
+
+- Fix an allocation bug in nested power manifolds
+
+## [0.14.2] 16/03/2023
+
+### Added
+
+- adds a DependaBot workflow.
+
+### Changed
+
+- Fix an allocation issue with `exp(M, p, X, t)` that did not respect the type of `t`.
+
+## [0.14.1] 18/02/2023
+
+Note that this release did not trigger a TagBot, so it appears within 0.14.2 in the tagged/created releases
+
+### Added
+
+- Introduce `change_representer` already in `ManifoldsBase`.
+
+## [0.14.0] – 15/02/2023
 
 ### Added
 
