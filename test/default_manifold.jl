@@ -482,6 +482,7 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
                 tv = similar(tv1)
                 embed!(M, tv, pts[1], tv1)
                 @test isapprox(M, pts[1], tv, tv1)
+                @test Weingarten(M, pts[1], tv, tv) == zero_vector(M, pts[1])
             end
 
             @testset "randon tests" begin
