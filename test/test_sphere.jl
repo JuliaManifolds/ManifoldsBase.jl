@@ -51,6 +51,11 @@ function ManifoldsBase.project!(::TestSphere, Y, p, X)
     return Y
 end
 
+# from Absil, Mahony, Trumpf, 2013 https://sites.uclouvain.be/absil/2013-01/Weingarten_07PA_techrep.pdf
+function ManifoldsBase.Weingarten!(::TestSphere, Y, p, X, V)
+    return Y .= -X * p' * V
+end
+
 @testset "TestSphere" begin
     @testset "ShootingInverseRetraction" begin
         vector_transports =
@@ -83,5 +88,12 @@ end
                 @test_logs (:info,) !isapprox(M, p, X, zero_vector(M, p); error = :info)
             end
         end
+    end
+    @testset "Weingarten" begin
+        M = TestSphere(2)
+        p = [1.0, 0.0, 0.0]
+        X = [0.0, 0.2, 0.0]
+        V = [0.1, 0.0, 0.0] #orthogonal to TpM -> parallel to p
+        @test isapprox(M, p, Weingarten(M, p, X, V), -0.1 * X)
     end
 end

@@ -171,6 +171,8 @@ function riemann_tensor!(::DefaultManifold, Xresult, p, X, Y, Z)
     return fill!(Xresult, 0)
 end
 
+Weingarten!(::DefaultManifold, Y, p, X, V) = fill!(Y, 0)
+
 zero_vector(::DefaultManifold, p) = zero(p)
 
 zero_vector!(::DefaultManifold, Y, p) = fill!(Y, 0)

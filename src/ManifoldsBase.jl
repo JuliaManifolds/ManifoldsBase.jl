@@ -1119,8 +1119,8 @@ export allocate,
     vector_transport_to!,
     vee,
     vee!,
-    weingarten,
-    weingarten!,
+    Weingarten,
+    Weingarten!,
     zero_vector,
     zero_vector!
 
