@@ -913,7 +913,7 @@ Base.@pure size_to_tuple(::Type{S}) where {S<:Tuple} = tuple(S.parameters...)
 Compute the Weingarten map ``\mathcal W_p\colon T_p\mathcal M × N_p\mathcal M \to T_p\mathcal M``
 in place of `Y`, see [`Weingarten`](@ref).
 """
-Weingarten!(M::AbstractManifold, Y, p, X, A)
+Weingarten!(M::AbstractManifold, Y, p, X, V)
 
 @doc raw"""
     Weingarten(M, p, X, V)
