@@ -908,15 +908,15 @@ Converts a size given by `Tuple{N, M, ...}` into a tuple `(N, M, ...)`.
 Base.@pure size_to_tuple(::Type{S}) where {S<:Tuple} = tuple(S.parameters...)
 
 @doc raw"""
-    Weingarten!(M, Y, p, X, A)
+    Weingarten!(M, Y, p, X, V)
 
 Compute the Weingarten map ``\mathcal W_p\colon T_p\mathcal M × N_p\mathcal M \to T_p\mathcal M``
-in place of `Y`, see [`weingarten`](@ref).
+in place of `Y`, see [`Weingarten`](@ref).
 """
 Weingarten!(M::AbstractManifold, Y, p, X, A)
 
 @doc raw"""
-    Weingarten(M, p, X, A)
+    Weingarten(M, p, X, V)
 
 Compute the Weingarten map ``\mathcal W_p\colon T_p\mathcal M × N_p\mathcal M \to T_p\mathcal M``,
 where ``N_p\mathcal M`` is the orthogonal complement of the tangent space ``T_p\mathcal M``
@@ -929,13 +929,13 @@ i.e. defining
 \mathcal P_X \coloneqq D_p\operatorname{proj}_{T_p\mathcal M}(Y)[X],
 \qquad Y \in \mathcal E, X \in T_p\mathcal M,
 ```
-the Weingarten map can be written as ``\mathcal W_p(X,A) = \mathcal P_X(A)``.
+the Weingarten map can be written as ``\mathcal W_p(X,V) = \mathcal P_X(V)``.
 
-The Weingarten map is named after [Julius Weingarten](https://en.wikipedia.org/wiki/Differential_geometry_of_surfaces#Shape_operator) (1836–1910).
+The Weingarten map is named after [Julius Weingarten](https://en.wikipedia.org/wiki/Julius_Weingarten) (1836–1910).
 """
-function Weingarten(M::AbstractManifold, p, X, A)
+function Weingarten(M::AbstractManifold, p, X, V)
     Y = copy(M, p, X)
-    Weingarten!(M, Y, p, X, A)
+    Weingarten!(M, Y, p, X, V)
     return Y
 end
 
