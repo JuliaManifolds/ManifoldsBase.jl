@@ -5,11 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.14.10] xx/08/2023
+## [0.14.10] 17/08/2023
 
 ### Added
 
-- introduce the `Weingarten` map and its inplace variant `Weingarten!`.
+- introduce the `Weingarten` map and its in place variant `Weingarten!`.
 
 ## [0.14.9] 03/08/2023
 
