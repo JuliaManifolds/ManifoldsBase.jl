@@ -908,6 +908,39 @@ Converts a size given by `Tuple{N, M, ...}` into a tuple `(N, M, ...)`.
 Base.@pure size_to_tuple(::Type{S}) where {S<:Tuple} = tuple(S.parameters...)
 
 @doc raw"""
+    Weingarten!(M, Y, p, X, A)
+
+Compute the Weingarten map ``\mathcal W_p\colon T_p\mathcal M × N_p\mathcal M \to T_p\mathcal M``
+in place of `Y`, see [`weingarten`](@ref).
+"""
+Weingarten!(M::AbstractManifold, Y, p, X, A)
+
+@doc raw"""
+    Weingarten(M, p, X, A)
+
+Compute the Weingarten map ``\mathcal W_p\colon T_p\mathcal M × N_p\mathcal M \to T_p\mathcal M``,
+where ``N_p\mathcal M`` is the orthogonal complement of the tangent space ``T_p\mathcal M``
+of the embedded submanifold ``\mathcal M``, where we denote the embedding by ``\mathcal E``.
+
+One interpretation can also be given by looking at the differential of the [`project`](@ref)ion
+``\operatorname{proj}_{T_p\mathcal M}\colon \mathcal E \to T_p\mathcal M`` with respect to the base point ``p``,
+i.e. defining
+```math
+\mathcal P_X \coloneqq D_p\operatorname{proj}_{T_p\mathcal M}(Y)[X],
+\qquad Y \in \mathcal E, X \in T_p\mathcal M,
+```
+the Weingarten map can be written as ``\mathcal W_p(X,A) = \mathcal P_X(A)``.
+
+The Weingarten map is named after [Julius Weingarten](https://en.wikipedia.org/wiki/Differential_geometry_of_surfaces#Shape_operator) (1836–1910).
+"""
+function Weingarten(M::AbstractManifold, p, X, A)
+    Y = copy(M, p, X)
+    Weingarten!(M, Y, p, X, A)
+    return Y
+end
+
+
+@doc raw"""
     zero_vector!(M::AbstractManifold, X, p)
 
 Save to `X` the tangent vector from the tangent space ``T_p\mathcal M`` at `p` that
@@ -1086,6 +1119,8 @@ export allocate,
     vector_transport_to!,
     vee,
     vee!,
+    weingarten,
+    weingarten!,
     zero_vector,
     zero_vector!
 
