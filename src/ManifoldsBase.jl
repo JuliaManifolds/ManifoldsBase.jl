@@ -926,7 +926,7 @@ The Weingarten map can be defined by restricting the differential of the orthogo
 ``\operatorname{proj}_{T_p\mathcal M}\colon T_p \mathcal E \to T_p\mathcal M`` with respect to the base point ``p``,
 i.e. defining
 ```math
-\mathcal P_X \coloneqq D_p\operatorname{proj}_{T_p\mathcal M}(Y)[X],
+\mathcal P_X := D_p\operatorname{proj}_{T_p\mathcal M}(Y)[X],
 \qquad Y \in T_p \mathcal E, X \in T_p\mathcal M,
 ```
 the Weingarten map can be written as ``\mathcal W_p(X,V) = \mathcal P_X(V)``.
