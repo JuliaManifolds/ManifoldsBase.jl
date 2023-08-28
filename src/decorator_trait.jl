@@ -806,6 +806,9 @@ function vector_transport_to!(
     return vector_transport_to!(get_embedding(M, p), Y, p, X, q, m)
 end
 
+@trait_function Weingarten(M::AbstractDecoratorManifold, p, X, V)
+@trait_function Weingarten!(M::AbstractDecoratorManifold, Y, p, X, V)
+
 @trait_function zero_vector(M::AbstractDecoratorManifold, p)
 function zero_vector(::TraitList{IsEmbeddedManifold}, M::AbstractDecoratorManifold, p)
     return zero_vector(get_embedding(M, p), p)
