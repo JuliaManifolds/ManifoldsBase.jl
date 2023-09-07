@@ -249,16 +249,11 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
             )
         end
     end
-    # TODO  forward retraction / inverse_retraction
     for f_postfix in [:polar, :project, :qr, :softmax]
-        ra = Symbol("retract_$(f_postfix)")
         rm = Symbol("retract_$(f_postfix)!")
         push!(
             block.args,
             quote
-                function ManifoldsBase.$ra(M::$TM, p::$TP, X::$TV, t::Number)
-                    return $TP(ManifoldsBase.$ra(M, p.$pfield, X.$vfield, t))
-                end
                 function ManifoldsBase.$rm(M::$TM, q, p::$TP, X::$TV, t::Number)
                     ManifoldsBase.$rm(M, q.$pfield, p.$pfield, X.$vfield, t)
                     return q
@@ -269,16 +264,6 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
     push!(
         block.args,
         quote
-            function ManifoldsBase.retract_exp_ode(
-                M::$TM,
-                p::$TP,
-                X::$TV,
-                t::Number,
-                m::AbstractRetractionMethod,
-                B::ManifoldsBase.AbstractBasis,
-            )
-                return $TP(ManifoldsBase.retract_exp_ode(M, p.$pfield, X.$vfield, t, m, B))
-            end
             function ManifoldsBase.retract_exp_ode!(
                 M::$TM,
                 q::$TP,
@@ -291,15 +276,6 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
                 ManifoldsBase.retract_exp_ode!(M, q.$pfield, p.$pfield, X.$vfield, t, m, B)
                 return q
             end
-            function ManifoldsBase.retract_pade(
-                M::$TM,
-                p::$TP,
-                X::$TV,
-                t::Number,
-                m::PadeRetraction,
-            )
-                return $TP(ManifoldsBase.retract_pade(M, p.$pfield, X.$vfield, t, m))
-            end
             function ManifoldsBase.retract_pade!(
                 M::$TM,
                 q::$TP,
@@ -310,15 +286,6 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
             )
                 ManifoldsBase.retract_pade!(M, q.$pfield, p.$pfield, X.$vfield, t, m)
                 return q
-            end
-            function ManifoldsBase.retract_embedded(
-                M::$TM,
-                p::$TP,
-                X::$TV,
-                t::Number,
-                m::AbstractRetractionMethod,
-            )
-                return $TP(ManifoldsBase.retract_embedded(M, p.$pfield, X.$vfield, t, m))
             end
             function ManifoldsBase.retract_embedded!(
                 M::$TM,
@@ -334,12 +301,8 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
         end,
     )
     for f_postfix in [:polar, :project, :qr, :softmax]
-        ra = Symbol("inverse_retract_$(f_postfix)")
         rm = Symbol("inverse_retract_$(f_postfix)!")
         push!(block.args, quote
-            function ManifoldsBase.$ra(M::$TM, p::$TP, q::$TP)
-                return $TV((ManifoldsBase.$ra)(M, p.$pfield, q.$pfield))
-            end
             function ManifoldsBase.$rm(M::$TM, Y::$TV, p::$TP, q::$TP)
                 ManifoldsBase.$rm(M, Y.$vfield, p.$pfield, q.$pfield)
                 return Y
@@ -349,16 +312,6 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
     push!(
         block.args,
         quote
-            function ManifoldsBase.inverse_retract_embedded(
-                M::$TM,
-                p::$TP,
-                q::$TP,
-                m::AbstractInverseRetractionMethod,
-            )
-                return $TV(
-                    ManifoldsBase.inverse_retract_embedded(M, p.$pfield, q.$pfield, m),
-                )
-            end
             function ManifoldsBase.inverse_retract_embedded!(
                 M::$TM,
                 X::$TV,
@@ -375,16 +328,7 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
                 )
                 return X
             end
-            function ManifoldsBase.inverse_retract_nlsolve(
-                M::$TM,
-                p::$TP,
-                q::$TP,
-                m::NLSolveInverseRetraction,
-            )
-                return $TV(
-                    ManifoldsBase.inverse_retract_nlsolve(M, p.$pfield, q.$pfield, m),
-                )
-            end
+
             function ManifoldsBase.inverse_retract_nlsolve!(
                 M::$TM,
                 X::$TV,
