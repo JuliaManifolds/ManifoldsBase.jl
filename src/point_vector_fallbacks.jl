@@ -190,7 +190,7 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
             m::ExponentialRetraction,
         )
             retract!(M, q.$pfield, p.$pfield, X.$vfield, m)
-            return X
+            return q
         end
 
         function ManifoldsBase.vector_transport_along!(
