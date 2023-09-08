@@ -3,7 +3,7 @@ using ManifoldsBase:
     @manifold_element_forwards, @manifold_vector_forwards, @default_manifold_fallbacks
 using ManifoldsBase: DefaultManifold, AbstractNumbers, RealNumbers, ComplexNumbers
 import ManifoldsBase:
-    number_eltype,
+    allocate_result_type,
     check_point,
     distance,
     embed!,
@@ -11,6 +11,7 @@ import ManifoldsBase:
     inner,
     isapprox,
     log!,
+    number_eltype,
     parallel_transport_to!,
     retract!,
     inverse_retract!
@@ -37,8 +38,12 @@ end
 DefaultPoint(v::T) where {T} = DefaultPoint{T}(v)
 convert(::Type{DefaultPoint{T}}, v::T) where {T} = DefaultPoint(v)
 Base.size(p::DefaultPoint) = size(p.value)
-Base.eltype(v::DefaultPoint) = eltype(v.value)
-
+Base.eltype(p::DefaultPoint) = eltype(p.value)
+Base.length(p::DefaultPoint) = length(p.value)
+function Base.copyto!(q::DefaultPoint, p::DefaultPoint)
+    copyto!(q.value, p.value)
+    return q
+end
 struct DefaultTVector{T} <: TVector
     value::T
 end
@@ -49,6 +54,20 @@ Base.eltype(X::DefaultTVector) = eltype(X.value)
 function Base.fill!(X::DefaultTVector, x)
     fill!(X.value, x)
     return X
+end
+function ManifoldsBase.allocate_result_type(
+    ::DefaultManifold,
+    ::typeof(log),
+    ::Tuple{DefaultPoint,DefaultPoint},
+)
+    return DefaultTVector
+end
+function ManifoldsBase.allocate_result_type(
+    ::DefaultManifold,
+    ::typeof(inverse_retract),
+    ::Tuple{DefaultPoint,DefaultPoint},
+)
+    return DefaultTVector
 end
 
 ManifoldsBase.@manifold_element_forwards DefaultPoint value
@@ -100,6 +119,38 @@ function inverse_retract_custom_kw!(
     X.value .= q.value - scale * p.value
     return X
 end
+function ManifoldsBase.log!(
+    ::DefaultManifold,
+    Y::DefaultTVector,
+    p::DefaultPoint,
+    q::DefaultPoint,
+)
+    Y.value .= q.value .- p.value
+    return Y
+end
+
+function ManifoldsBase.retract!(
+    ::DefaultManifold,
+    q::DefaultPoint,
+    p::DefaultPoint,
+    X::DefaultTVector,
+    t::Number,
+    ::CustomDefinedRetraction,
+)
+    q.value .= p.value .+ t * X.value
+    return q
+end
+
+function ManifoldsBase.inverse_retract!(
+    ::DefaultManifold,
+    X::DefaultTVector,
+    p::DefaultPoint,
+    q::DefaultPoint,
+    ::CustomDefinedInverseRetraction,
+)
+    X.value .= q.value .- p.value
+    return X
+end
 
 struct MatrixVectorTransport{T} <: AbstractVector{T}
     m::Matrix{T}
@@ -119,7 +170,16 @@ function ManifoldsBase.retract_exp_ode!(
 )
     return (q .= p .+ t .* X)
 end
-ManifoldsBase.retract_pade!(::DefaultManifold, q, p, X, t::Number, i) = (q .= p .+ t .* X)
+function ManifoldsBase.retract_pade!(
+    ::DefaultManifold,
+    q,
+    p,
+    X,
+    t::Number,
+    m::PadeRetraction,
+)
+    return (q .= p .+ t .* X)
+end
 ManifoldsBase.retract_softmax!(::DefaultManifold, q, p, X, t::Number) = (q .= p .+ t .* X)
 ManifoldsBase.get_embedding(M::DefaultManifold) = M # dummy embedding
 ManifoldsBase.inverse_retract_polar!(::DefaultManifold, Y, p, q) = (Y .= q .- p)
@@ -692,8 +752,8 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
         @test X3 == log(M, p, q)
         @test log!(M, X3, p, q) == log(M, p, q)
         @test X3 == log(M, p, q)
-        @test inverse_retract(M, p, q, CustomDefinedInverseRetraction()) == -2 * Y
-        @test distance(M, p, q, CustomDefinedInverseRetraction()) == 2.0
+        @test inverse_retract(M, p, q, CustomDefinedInverseRetraction()) == -Y
+        @test distance(M, p, q, CustomDefinedInverseRetraction()) == 1.0
         X4 = ManifoldsBase.allocate_result(M, inverse_retract, p, q)
         @test inverse_retract!(M, X4, p, q) == inverse_retract(M, p, q)
         @test X4 == inverse_retract(M, p, q)

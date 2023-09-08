@@ -425,7 +425,7 @@ Let $c = \gamma_{q,d}(\frac{1}{2})$ denote the mid point
 on the shortest geodesic connecting $q$ and the point $d$. Then Schild's ladder reads as
 
 ````math
-\operatorname{Sl}(p,d,q) = \operatorname{retr}_x( 2\operatorname{retr}_p^{-1} c)
+\operatorname{Sl}(p,d,q) = \operatorname{retr}_p( 2\operatorname{retr}_p^{-1} c)
 ````
 
 Where the classical Schilds ladder employs $\operatorname{retr}_d=\exp_d$
