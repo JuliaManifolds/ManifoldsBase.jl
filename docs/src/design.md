@@ -85,24 +85,26 @@ To close this section, let‘s look at an example.
 The high level (or [Layer I](@ref design-layer1)) definition of the retraction is given by
 
 ```julia
-retract(M::AbstractManifold, p, X, m::AbstractRetractionMethod=default_retraction_method(M, typeof(p))) = _retract(M, p, X, m)
+retract!(M::AbstractManifold, q, p, X, m::AbstractRetractionMethod=default_retraction_method(M, typeof(p))) = _retract!(M, q, p, X, m)
 ```
+
+Note that the convenience function `retract(M, q, p, X, m)` first allocates a `q` before calling this function as well.
 
 This level now dispatches on different retraction types `m`.
 It usually passes to specific functions implemented in [Layer III](@ref design-layer3), here for example
 
 ```julia
-_retract(M::AbstractManifold, p, X, m::Exponentialretraction) = exp(M, p, X)
-_retract(M::AbstractManifold, p, X, m::PolarRetraction) = retract_polar(M, p, X)
+_retract!(M::AbstractManifold, q, p, X, m::Exponentialretraction) = exp(M, q, p, X)
+_retract!(M::AbstractManifold, q, p, X, m::PolarRetraction) = retract_polar(M, q, p, X)
 ```
 
-where the [`ExponentialRetraction`](@ref) is resolved by again calling a function on [Layer I](@ref design-layer1) (to fill futher default values if these exist). The [`PolarRetraction`](@ref) is dispatched to [`retract_polar`](@ref ManifoldsBase.retract_polar), a function on [Layer III](@ref design-layer3).
+where the [`ExponentialRetraction`](@ref) is resolved by again calling a function on [Layer I](@ref design-layer1) (to fill futher default values if these exist). The [`PolarRetraction`](@ref) is dispatched to [`retract_polar!`](@ref ManifoldsBase.retract_polar!), a function on [Layer III](@ref design-layer3).
 
 For further details and dispatches, see [retractions and inverse retractions](@ref sec-retractions) for an overview.
 
 !!! note
     The documentation should be attached to the high level functions, since this again fosters ease of use.
-    If you implement a polar retraction, you should write a method of function [`retract_polar`](@ref ManifoldsBase.retract_polar) but the doc string should be attached to `retract(::M, ::P, ::V, ::PolarRetraction)` for your types `::M, ::P, ::V` of the manifold, points and vectors, respectively.
+    If you implement a polar retraction, you should write a method of function [`retract_polar!`](@ref ManifoldsBase.retract_polar!) but the doc string should be attached to `retract(::M, ::P, ::V, ::PolarRetraction)` for your types `::M, ::P, ::V` of the manifold, points and vectors, respectively.
 
 To summarize, with respect to the [dispatch on one argument at a time](https://docs.julialang.org/en/v1/manual/methods/#Dispatch-on-one-argument-at-a-time) paradigm, this layer dispatches the (optional) _parameters second_.
 
@@ -113,13 +115,13 @@ It should have as few as possible optional parameters and as concrete as possibl
 
 This means
 
-* the function name should be similar to its high level parent (for example [`retract`](@ref) and [`retract_polar`](@ref ManifoldsBase.retract_polar)  above)
+* the function name should be similar to its high level parent (for example [`retract!`](@ref) and [`retract_polar!`](@ref ManifoldsBase.retract_polar!)  above)
 * The manifold type in method signature should always be as narrow as possible.
 * The points/vectors should either be untyped (for the default representation or if there is only one implementation) or provide all type bounds (for second representations or when using [`AbstractManifoldPoint`](@ref) and [`TVector`](@ref TVector), respectively).
 
 The first step that often happens on this level is memory allocation and calling the in-place function. If faster, it might also implement the function at hand itself.
 
-Usually functions from this layer are not exported, when they have an analogue on the first layer. For example the function [`retract_polar`](@ref ManifoldsBase.retract_polar)`(M, p, X)` is not exported, since when using the interface one would use the [`PolarRetraction`](@ref) or to be precise call [`retract`](@ref)`(M, p, X, PolarRetraction())`.
+Usually functions from this layer are not exported, when they have an analogue on the first layer. For example the function [`retract_polar!`](@ref ManifoldsBase.retract_polar!)`(M, q, p, X)` is not exported, since when using the interface one would use the [`PolarRetraction`](@ref) or to be precise call [`retract!`](@ref)`(M, q, p, X, PolarRetraction())`.
 When implementing your own manifold, you have to import functions like these anyway.
 
 To summarize, with respect to the [dispatch on one argument at a time](https://docs.julialang.org/en/v1/manual/methods/#Dispatch-on-one-argument-at-a-time) paradigm, this layer dispatches the _concrete manifold and point/vector types last_.
@@ -184,5 +186,5 @@ log(::M, ::P, ::P)
 but the return type would be ``V``, whose internal sizes (fields/arrays) will depend on the concrete type of one of the points. This is accomplished by implementing a method `allocate_result(::M, ::typeof(log), ::P, ::P)` that returns the concrete variable for the result. This way, even with specific types, one just has to implement `log!` and the one line for the allocation.
 
 !!! note
-    This dispatch from the allocating to the in-place variant happens in Layer III, that is, functions like `exp` or [`retract_polar`](@ref ManifoldsBase.retract_polar) (but not [`retract`](@ref) itself) allocate their result (using `::typeof(retract)` for the second function)
-    and call the in-place variant `exp!` and [`retract_polar!`](@ref ManifoldsBase.retract_polar!) afterwards.
+    This dispatch from the allocating to the in-place variant happens in Layer I (which changed in ManifoldsBase.jl 0.15), that is, functions like `exp` or [`retract`](@ref) allocate their result
+    and call the in-place variant [`exp!`](@ref) and [`retract!`](@ref ManifoldsBase.retract!) afterwards, where the ladder passes down to layer III to reach [`retract_polar!`](@ref ManifoldsBase.retract_polar!).
