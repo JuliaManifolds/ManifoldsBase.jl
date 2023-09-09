@@ -137,7 +137,7 @@ function ManifoldsBase.retract!(
     t::Number,
     ::CustomDefinedRetraction,
 )
-    q.value .= p.value .+ t * X.value
+    q.value .= 2 .* p.value .+ t * X.value
     return q
 end
 
@@ -148,7 +148,7 @@ function ManifoldsBase.inverse_retract!(
     q::DefaultPoint,
     ::CustomDefinedInverseRetraction,
 )
-    X.value .= q.value .- p.value
+    X.value .= q.value .- 2 .* p.value
     return X
 end
 
@@ -752,8 +752,8 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
         @test X3 == log(M, p, q)
         @test log!(M, X3, p, q) == log(M, p, q)
         @test X3 == log(M, p, q)
-        @test inverse_retract(M, p, q, CustomDefinedInverseRetraction()) == -Y
-        @test distance(M, p, q, CustomDefinedInverseRetraction()) == 1.0
+        @test inverse_retract(M, p, q, CustomDefinedInverseRetraction()) == -2 * Y
+        @test distance(M, p, q, CustomDefinedInverseRetraction()) == 2.0
         X4 = ManifoldsBase.allocate_result(M, inverse_retract, p, q)
         @test inverse_retract!(M, X4, p, q) == inverse_retract(M, p, q)
         @test X4 == inverse_retract(M, p, q)

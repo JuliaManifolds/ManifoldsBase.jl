@@ -20,6 +20,9 @@ also avoiding ambiguities in multiple dispatch using the [dispatch on one argume
 
 Since the central element for functions on a manifold is the manifold itself, it should always be the first parameter, even for in-place functions. Then the classical parameters of a function (for example a point and a tangent vector for the retraction) follow and the final part are parameters to further dispatch on, which usually have their defaults.
 
+Besides this order the functions follow the scheme “allocate early”, i.e. to switch to the
+mutating variant when reasonable, cf. [Mutating and allocating functions](@ref inplace-and-noninplace).
+
 ## A 3-Layer architecture for dispatch
 
 The general architecture consists of three layers
@@ -45,7 +48,6 @@ The explicit case of the [`EmbeddedManifold`](@ref) can be used to distinguish d
 Note that all other parameters of a function should be as least typed as possible for all parameters besides the manifold.
 With respect to the [dispatch on one argument at a time](https://docs.julialang.org/en/v1/manual/methods/#Dispatch-on-one-argument-at-a-time) paradigm, this layer dispatches the _manifold first_.
 We also stay as abstract as possible, for example on the [`AbstractManifold`](@ref) level if possible.
-
 
 If a function has optional positional arguments, (like [`retract`](@ref)) their default values might be filled/provided on this layer.
 This layer ends usually in calling the same functions like [`retract`](@ref) but prefixed with a `_` to enter [Layer II](@ref design-layer2).
