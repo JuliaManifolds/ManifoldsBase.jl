@@ -119,15 +119,6 @@ function inverse_retract_custom_kw!(
     X.value .= q.value - scale * p.value
     return X
 end
-function ManifoldsBase.log!(
-    ::DefaultManifold,
-    Y::DefaultTVector,
-    p::DefaultPoint,
-    q::DefaultPoint,
-)
-    Y.value .= q.value .- p.value
-    return Y
-end
 
 function ManifoldsBase.retract!(
     ::DefaultManifold,
