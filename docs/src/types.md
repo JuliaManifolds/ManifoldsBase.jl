@@ -58,3 +58,14 @@ Modules = [ManifoldsBase]
 Pages = ["numbers.jl"]
 Order = [:type, :function]
 ```
+
+## [Type Parameter](@id type-parameter)
+
+An [`AbstractManifold`](@ref) usually has a type parameter that determines e.g. its siye or
+more precisely the [`manifold_dimension`](@ref). The [`TypeParameter`](@ref ManifoldsBase.TypeParameter) offers the flexibility
+to have this parameter either as type parameter or a field
+
+```@docs
+ManifoldsBase.TypeParameter
+ManifoldsBase.wrap_type_parameter
+```
