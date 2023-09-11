@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.15.0] dd/mm/2023
+
+### Changed
+
+* `retract` now behaves like `exp` in the sense that it allocates early,
+  which reduces the amount of code to dispatch through levels 1-3 twice
+* `inverse_retract` now behaves like `log` in the sense that it allocates early
+
 ## [0.14.11] 25/08/2023
 
 ### Added
