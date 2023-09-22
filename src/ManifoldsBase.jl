@@ -855,9 +855,6 @@ Optionally a random number generator `rng` to be used can be specified. An optio
 """
 Random.rand(M::AbstractManifold)
 
-# unresolvable ambiguity but this would be nice to have
-#allocate_result(M::AbstractManifold, ::typeof(rand), p) = zero_vector(M, p)
-
 function Random.rand(M::AbstractManifold, d::Integer; kwargs...)
     return [rand(M; kwargs...) for _ in 1:d]
 end
