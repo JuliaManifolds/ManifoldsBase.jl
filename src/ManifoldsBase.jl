@@ -854,21 +854,30 @@ Optionally a random number generator `rng` to be used can be specified. An optio
 
 """
 Random.rand(M::AbstractManifold)
+
 function Random.rand(M::AbstractManifold, d::Integer; kwargs...)
     return [rand(M; kwargs...) for _ in 1:d]
 end
 function Random.rand(rng::AbstractRNG, M::AbstractManifold, d::Integer; kwargs...)
     return [rand(rng, M; kwargs...) for _ in 1:d]
 end
-function Random.rand(M::AbstractManifold; kwargs...)
-    p = allocate_result(M, rand)
-    rand!(M, p; kwargs...)
-    return p
+function Random.rand(M::AbstractManifold; vector_at = nothing, kwargs...)
+    if vector_at === nothing
+        pX = allocate_result(M, rand)
+    else
+        pX = allocate_result(M, rand, vector_at)
+    end
+    rand!(M, pX; vector_at = vector_at, kwargs...)
+    return pX
 end
-function Random.rand(rng::AbstractRNG, M::AbstractManifold; kwargs...)
-    p = allocate_result(M, rand)
-    rand!(rng, M, p; kwargs...)
-    return p
+function Random.rand(rng::AbstractRNG, M::AbstractManifold; vector_at = nothing, kwargs...)
+    if vector_at === nothing
+        pX = allocate_result(M, rand)
+    else
+        pX = allocate_result(M, rand, vector_at)
+    end
+    rand!(rng, M, pX; vector_at = vector_at, kwargs...)
+    return pX
 end
 
 @doc raw"""
