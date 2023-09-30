@@ -13,6 +13,14 @@ Pages = ["src/PowerManifold.jl"]
 Order = [:macro, :type, :function]
 ```
 
+## VectorBundles and TangentSpaces
+
+```@autodocs
+Modules = [ManifoldsBase]
+Pages = ["VectorBundle.jl"]
+Order = [:macro, :type, :function]
+```
+
 ## `ValidationManifold`
 
 [`ValidationManifold`](@ref) is a simple decorator using the [`AbstractDecoratorManifold`](@ref) that “decorates” a manifold with tests that all involved points and vectors are valid for the wrapped manifold.

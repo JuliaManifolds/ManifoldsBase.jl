@@ -978,12 +978,16 @@ include("vector_spaces.jl")
 include("point_vector_fallbacks.jl")
 include("nested_trait.jl")
 include("decorator_trait.jl")
+include("VectorBundle.jl")
 include("ValidationManifold.jl")
 include("EmbeddedManifold.jl")
 include("DefaultManifold.jl")
 include("PowerManifold.jl")
 
 export AbstractManifold, AbstractManifoldPoint, TVector, CoTVector, TFVector, CoTFVector
+export TansorProductType, VectorBundleFibers, VectorSpaceAtPoint
+export CotangentSpaceAtPoint, TangentSpaceAtPoint, TangentSpace
+export VectorBundle, TangentBundle, CotangentBundle
 export AbstractDecoratorManifold
 export AbstractTrait, IsEmbeddedManifold, IsEmbeddedSubmanifold, IsIsometricEmbeddedManifold
 export IsExplicitDecorator
@@ -1007,6 +1011,7 @@ export AbstractRetractionMethod,
     PolarRetraction,
     ProjectionRetraction,
     RetractionWithKeywords,
+    SasakiRetraction,
     ShootingInverseRetraction,
     SoftmaxRetraction
 
@@ -1021,7 +1026,9 @@ export AbstractInverseRetractionMethod,
     PolarInverseRetraction,
     ProjectionInverseRetraction,
     InverseRetractionWithKeywords,
-    SoftmaxInverseRetraction
+    SoftmaxInverseRetraction,
+    VectorBundleInverseProductRetraction,
+    VectorBundleProductRetraction
 
 export AbstractVectorTransportMethod,
     DifferentiatedRetractionVectorTransport,
@@ -1030,6 +1037,8 @@ export AbstractVectorTransportMethod,
     ProjectionTransport,
     ScaledVectorTransport,
     SchildsLadderTransport,
+    VectorBundleProductVectorTransport,
+    VectorBundleVectorTransport,
     VectorTransportDirection,
     VectorTransportTo,
     VectorTransportWithKeywords
@@ -1050,6 +1059,7 @@ export CompositeManifoldError, ComponentManifoldError, ManifoldDomainError
 export allocate,
     angle,
     base_manifold,
+    bundle_projection,
     change_basis,
     change_basis!,
     change_metric,
