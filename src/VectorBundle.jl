@@ -49,7 +49,7 @@ This is modelled using [`VectorBundleFibers`](@ref) with only a vector-like part
 and fixing the point-like part to be just `p`.
 
 This vector space itself is also a `manifold`. Especially, it's flat and hence isometric
-to the [`Euclidean`](@ref) manifold.
+to the [`Euclidean`](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/euclidean.html) manifold.
 
 # Constructor
     VectorSpaceAtPoint(fiber::VectorBundleFibers, p)

@@ -984,6 +984,12 @@ include("EmbeddedManifold.jl")
 include("DefaultManifold.jl")
 include("PowerManifold.jl")
 
+#
+#
+# Export
+# ------
+#
+# (a) Manifolds and general types
 export AbstractManifold, AbstractManifoldPoint, TVector, CoTVector, TFVector, CoTFVector
 export TansorProductType, VectorBundleFibers, VectorSpaceAtPoint
 export CotangentSpaceAtPoint, TangentSpaceAtPoint, TangentSpace
@@ -997,8 +1003,7 @@ export AbstractPowerManifold, PowerManifold
 export AbstractPowerRepresentation,
     NestedPowerRepresentation, NestedReplacingPowerRepresentation
 
-export OutOfInjectivityRadiusError, ManifoldDomainError
-
+# (b) Retraction Types
 export AbstractRetractionMethod,
     ApproximateInverseRetraction,
     CayleyRetraction,
@@ -1015,6 +1020,7 @@ export AbstractRetractionMethod,
     ShootingInverseRetraction,
     SoftmaxRetraction
 
+# (c) Inverse Retraction Types
 export AbstractInverseRetractionMethod,
     ApproximateInverseRetraction,
     CayleyInverseRetraction,
@@ -1030,6 +1036,7 @@ export AbstractInverseRetractionMethod,
     VectorBundleInverseProductRetraction,
     VectorBundleProductRetraction
 
+# (d) Vector Transport Types
 export AbstractVectorTransportMethod,
     DifferentiatedRetractionVectorTransport,
     ParallelTransport,
@@ -1043,6 +1050,7 @@ export AbstractVectorTransportMethod,
     VectorTransportTo,
     VectorTransportWithKeywords
 
+# (e) Basis Types
 export CachedBasis,
     DefaultBasis,
     DefaultOrthogonalBasis,
@@ -1053,9 +1061,12 @@ export CachedBasis,
     ProjectedOrthonormalBasis,
     VeeOrthogonalBasis
 
+# (f) Error Messages
+export OutOfInjectivityRadiusError, ManifoldDomainError
 export ApproximatelyError
 export CompositeManifoldError, ComponentManifoldError, ManifoldDomainError
 
+# (g) Functions on Manifolds
 export allocate,
     angle,
     base_manifold,
