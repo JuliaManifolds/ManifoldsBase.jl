@@ -18,12 +18,12 @@ import Base:
     *,
     ==
 import LinearAlgebra: dot, norm, det, cross, I, UniformScaling, Diagonal
-
 import Random: rand, rand!
 
-import Markdown: @doc_str
 using LinearAlgebra
+using Markdown: @doc_str
 using Random
+using Requires
 
 include("maintypes.jl")
 include("numbers.jl")
