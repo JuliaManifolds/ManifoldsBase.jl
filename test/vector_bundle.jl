@@ -1,11 +1,11 @@
 using RecursiveArrayTools, ManifoldsBase, Test
-using ManifoldsBase: DefaultManifold, VectorSpaceType, ℝ
+using ManifoldsBase: DefaultManifold, VectorSpaceType, VectorSpaceFiberType, ℝ, FiberAtPoint
 struct TestVectorSpaceType <: VectorSpaceType end
 
 @testset "Tangent bundle" begin
     M = DefaultManifold(3)
-    m_prod_retr = ManifoldsBase.VectorBundleProductRetraction()
-    m_prod_invretr = ManifoldsBase.VectorBundleInverseProductRetraction()
+    m_prod_retr = ManifoldsBase.FiberBundleProductRetraction()
+    m_prod_invretr = ManifoldsBase.FiberBundleInverseProductRetraction()
     m_sasaki = SasakiRetraction(5)
 
     TB = TangentBundle(M)
@@ -22,7 +22,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
     @test default_inverse_retraction_method(TB) === m_prod_invretr
     @test default_retraction_method(TB) == m_prod_retr
     @test default_vector_transport_method(TB) isa
-          ManifoldsBase.VectorBundleProductVectorTransport
+          ManifoldsBase.FiberBundleProductVectorTransport
     CTB = CotangentBundle(M)
     @test sprint(show, CTB) == "CotangentBundle($(M))"
     @test sprint(show, VectorBundle(TestVectorSpaceType(), M)) ==
@@ -43,8 +43,8 @@ struct TestVectorSpaceType <: VectorSpaceType end
         @test base_manifold(ct_p) == M
         @test t_p.fiber.manifold == M
         @test ct_p.fiber.manifold == M
-        @test t_p.fiber.fiber == TangentSpace
-        @test ct_p.fiber.fiber == CotangentSpace
+        @test t_p.fiber.fiber == VectorSpaceFiberType(TangentSpace)
+        @test ct_p.fiber.fiber == VectorSpaceFiberType(CotangentSpace)
         @test t_p.point == p
         @test ct_p.point == p
         @test injectivity_radius(t_p) == Inf
@@ -54,14 +54,11 @@ struct TestVectorSpaceType <: VectorSpaceType end
         @test embed(t_p, X, X) == X
         # generic vector space at
         fiber = VectorBundleFibers(TestVectorSpaceType(), M)
-        X_p = VectorSpaceAtPoint(fiber, p)
+        X_p = FiberAtPoint(fiber, p)
         X_ps = sprint(show, "text/plain", X_p)
         fiber_s = sprint(show, "text/plain", fiber)
         X_ps_test = "$(typeof(X_p))\nFiber:\n $(fiber_s)\nBase point:\n $(sp)"
         @test X_ps == X_ps_test
-        @test_throws ErrorException project(fiber, p, X)
-        @test_throws ErrorException norm(fiber, p, X)
-        @test_throws ErrorException distance(fiber, p, X, X)
     end
 
     @testset "tensor product" begin
@@ -72,19 +69,6 @@ struct TestVectorSpaceType <: VectorSpaceType end
         @test vector_space_dimension(VBF) == 9
         @test base_manifold(VBF) == M
         @test sprint(show, VBF) == "VectorBundleFibers($(TTs), $(M))"
-    end
-
-    @testset "Error messages" begin
-        vbf = VectorBundleFibers(TestVectorSpaceType(), M)
-        @test_throws ErrorException inner(vbf, [1, 2, 3], [1, 2, 3], [1, 2, 3])
-        @test_throws ErrorException ManifoldsBase.project!(
-            vbf,
-            [1, 2, 3],
-            [1, 2, 3],
-            [1, 2, 3],
-        )
-        @test_throws MethodError zero_vector!(vbf, [1, 2, 3], [1, 2, 3])
-        @test_throws MethodError vector_space_dimension(vbf)
     end
 
     @testset "Weingarten Map" begin
