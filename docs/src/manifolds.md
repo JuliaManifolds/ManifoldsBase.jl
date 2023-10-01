@@ -19,6 +19,8 @@ Order = [:macro, :type, :function]
 Modules = [ManifoldsBase]
 Pages = ["VectorBundle.jl"]
 Order = [:macro, :type, :function]
+Public=true
+Private=false
 ```
 
 ## `ValidationManifold`

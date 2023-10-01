@@ -78,7 +78,7 @@ const TangentSpaceAtPoint{M} =
     TangentSpaceAtPoint(M::AbstractManifold, p)
 
 Return an object of type [`VectorSpaceAtPoint`](@ref) representing tangent
-space at `p` on the [`AbstractManifold`](@refe)  `M`.
+space at `p` on the [`AbstractManifold`](@ref)  `M`.
 """
 TangentSpaceAtPoint(M::AbstractManifold, p) = VectorSpaceAtPoint(TangentBundleFibers(M), p)
 
@@ -106,7 +106,7 @@ end
     struct SasakiRetraction <: AbstractRetractionMethod end
 
 Exponential map on [`TangentBundle`](@ref) computed via Euler integration as described
-in [MuralidharanFlecther:2012](@cite). The system of equations for $\gamma : ℝ \to T\mathcal M$ such that
+in [MuralidharanFletcher:2012](@cite). The system of equations for $\gamma : ℝ \to T\mathcal M$ such that
 $\gamma(1) = \exp_{p,X}(X_M, X_F)$ and $\gamma(0)=(p, X)$ reads
 
 ```math
