@@ -9,6 +9,26 @@ TestSphere(N::Int, 𝔽 = ℝ) = TestSphere{N,𝔽}()
 
 ManifoldsBase.representation_size(::TestSphere{N}) where {N} = (N + 1,)
 
+function ManifoldsBase.check_point(M::TestSphere, p; kwargs...)
+    if !isapprox(norm(p), 1.0; kwargs...)
+        return DomainError(
+            norm(p),
+            "The point $(p) does not lie on the $(M) since its norm is not 1.",
+        )
+    end
+    return nothing
+end
+
+function ManifoldsBase.check_vector(M::TestSphere, p, X; kwargs...)
+    if !isapprox(abs(real(dot(p, X))), 0.0; kwargs...)
+        return DomainError(
+            abs(dot(p, X)),
+            "The vector $(X) is not a tangent vector to $(p) on $(M), since it is not orthogonal in the embedding.",
+        )
+    end
+    return nothing
+end
+
 function ManifoldsBase.exp!(M::TestSphere, q, p, X)
     return exp!(M, q, p, X, one(number_eltype(X)))
 end

@@ -155,25 +155,25 @@ include("test_sphere.jl")
     end
 
     @testset "Show methods" begin
-        M2 = ProductManifold(M1, M1, M2, M2)
-        @test sprint(show, M2) == "ProductManifold($(M1), $(M1), $(M2), $(M2))"
+        M2p = ProductManifold(M1, M1, M2, M2)
+        @test sprint(show, M2p) == "ProductManifold($(M1), $(M1), $(M2), $(M2))"
         withenv("LINES" => 10, "COLUMNS" => 100) do
             @test sprint(show, "text/plain", ProductManifold(M1)) ==
                   "ProductManifold with 1 submanifold:\n $(M1)"
-            @test sprint(show, "text/plain", M2) ==
+            @test sprint(show, "text/plain", M2p) ==
                   "ProductManifold with 4 submanifolds:\n $(M1)\n $(M1)\n $(M2)\n $(M2)"
             return nothing
         end
         withenv("LINES" => 7, "COLUMNS" => 100) do
-            @test sprint(show, "text/plain", M2) ==
+            @test sprint(show, "text/plain", M2p) ==
                   "ProductManifold with 4 submanifolds:\n $(M1)\n ⋮\n $(M2)"
             return nothing
         end
 
         @test sprint(show, "text/plain", ProductManifold(M, M)) == """
         ProductManifold with 2 submanifolds:
-         ProductManifold(Sphere(2, ℝ), Euclidean(2; field=ℝ))
-         ProductManifold(Sphere(2, ℝ), Euclidean(2; field=ℝ))"""
+         ProductManifold($(M1), $(M2))
+         ProductManifold($(M1), $(M2))"""
     end
 
     @testset "product vector transport" begin
@@ -314,14 +314,14 @@ include("test_sphere.jl")
             M,
             a,
             ArrayPartition([1.0, 0.0, 0.0], [0.0, 0.0]),
-            [1.0, 2.0, 3.0, 4.0, 5.0], # this is one element too long, hence assertion error
+            [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0], # this is one element too long, hence assertion error
             B,
         )
         @test_throws MethodError get_vector!(
             M,
             a,
-            ArrayPartition([1.0, 0.0, 0.0], [0.0, 0.0]),
-            [1.0, 2.0, 3.0, 4.0],
+            ArrayPartition([1.0, 0.0, 0.0], [0.0 0.0; 0.0 0.0]),
+            [1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
             B, # empty elements yield a submanifold MethodError
         )
     end

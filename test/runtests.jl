@@ -37,5 +37,6 @@ using ManifoldsBase
     include("domain_errors.jl")
     include("vector_transport.jl")
     include("metric.jl")
+    include("product_manifold.jl")
     include("vector_bundle.jl")
 end

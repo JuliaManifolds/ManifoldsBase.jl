@@ -996,7 +996,9 @@ include("PowerManifold.jl")
 function __init__()
     @static if !isdefined(Base, :get_extension)
         @require RecursiveArrayTools = "731186ca-8d62-57ce-b412-fbd966d074cd" begin
-            include("../ext/ManifoldsBaseRecursiveArrayToolsExt.jl")
+            include(
+                "../ext/ManifoldsBaseRecursiveArrayToolsExt/ManifoldsBaseRecursiveArrayToolsExt.jl",
+            )
         end
     end
 end
