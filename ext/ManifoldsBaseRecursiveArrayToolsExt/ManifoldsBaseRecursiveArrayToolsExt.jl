@@ -18,6 +18,7 @@ if isdefined(Base, :get_extension)
         default_inverse_retraction_method,
         default_retraction_method,
         default_vector_transport_method,
+        _get_dim_ranges,
         get_vector,
         get_vectors,
         inverse_retract,
@@ -30,7 +31,8 @@ if isdefined(Base, :get_extension)
         vector_transport_direction,
         _vector_transport_direction,
         _vector_transport_to,
-        vector_transport_to
+        vector_transport_to,
+        ziptuples
     import Base: copyto!, getindex, setindex!, view
 else
     # imports need to be relative for Requires.jl-based workflows:
@@ -52,6 +54,7 @@ else
         default_inverse_retraction_method,
         default_retraction_method,
         default_vector_transport_method,
+        _get_dim_ranges,
         get_vector,
         get_vectors,
         inverse_retract,
@@ -64,7 +67,8 @@ else
         vector_transport_direction,
         _vector_transport_direction,
         _vector_transport_to,
-        vector_transport_to
+        vector_transport_to,
+        ziptuples
     import ..Base: copyto!, getindex, setindex!, view
 end
 

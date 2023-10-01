@@ -1,6 +1,6 @@
 using LinearAlgebra
 using ManifoldsBase
-using ManifoldsBase: ℝ, ℂ, DefaultManifold
+using ManifoldsBase: ℝ, ℂ, DefaultManifold, RealNumbers
 using Test
 
 # minimal sphere implementation for testing more complicated manifolds
@@ -23,6 +23,35 @@ function ManifoldsBase.exp!(::TestSphere, q, p, X, t::Number)
     return q
 end
 
+@inline function nzsign(z, absz = abs(z))
+    psignz = z / absz
+    return ifelse(iszero(absz), one(psignz), psignz)
+end
+
+function ManifoldsBase.get_coordinates_orthonormal!(M::TestSphere, Y, p, X, ::RealNumbers)
+    n = manifold_dimension(M)
+    p1 = p[1]
+    cosθ = abs(p1)
+    λ = nzsign(p1, cosθ)
+    pend, Xend = view(p, 2:(n + 1)), view(X, 2:(n + 1))
+    factor = λ * X[1] / (1 + cosθ)
+    Y .= Xend .- pend .* factor
+    return Y
+end
+
+function ManifoldsBase.get_vector_orthonormal!(M::TestSphere, Y, p, X, ::RealNumbers)
+    n = manifold_dimension(M)
+    p1 = p[1]
+    cosθ = abs(p1)
+    λ = nzsign(p1, cosθ)
+    pend = view(p, 2:(n + 1))
+    pX = dot(pend, X)
+    factor = pX / (1 + cosθ)
+    Y[1] = -λ * pX
+    Y[2:(n + 1)] .= X .- pend .* factor
+    return Y
+end
+
 ManifoldsBase.inner(::TestSphere, p, X, Y) = dot(X, Y)
 
 ManifoldsBase.injectivity_radius(::TestSphere) = π
@@ -32,6 +61,8 @@ function ManifoldsBase.inverse_retract_project!(M::TestSphere, X, p, q)
     project!(M, X, p, X)
     return X
 end
+
+ManifoldsBase.is_flat(M::TestSphere) = manifold_dimension(M) == 1
 
 function ManifoldsBase.log!(::TestSphere, X, p, q)
     cosθ = clamp(real(dot(p, q)), -1, 1)
@@ -45,7 +76,7 @@ end
 
 ManifoldsBase.manifold_dimension(::TestSphere{N}) where {N} = N
 
-function parallel_transport_to!(::TestSphere, Y, p, X, q)
+function ManifoldsBase.parallel_transport_to!(::TestSphere, Y, p, X, q)
     m = p .+ q
     mnorm2 = real(dot(m, m))
     factor = 2 * real(dot(X, q)) / mnorm2

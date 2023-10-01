@@ -154,6 +154,11 @@ components, for which the tests fail is returned.
 The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_point(M::ProductManifold, p; kwargs...)
+    try
+        submanifold_components(M, p)
+    catch e
+        return DomainError("Point $p does not support submanifold_components")
+    end
     ts = ziptuples(Tuple(1:length(M.manifolds)), M.manifolds, submanifold_components(M, p))
     e = [(t[1], check_point(t[2:end]...; kwargs...)) for t in ts]
     errors = filter((x) -> !(x[2] === nothing), e)
@@ -173,6 +178,11 @@ components, for which the tests fail is returned.
 The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_size(M::ProductManifold, p)
+    try
+        submanifold_components(M, p)
+    catch e
+        return DomainError("Point $p does not support submanifold_components")
+    end
     ts = ziptuples(Tuple(1:length(M.manifolds)), M.manifolds, submanifold_components(M, p))
     e = [(t[1], check_size(t[2:end]...)) for t in ts]
     errors = filter((x) -> !(x[2] === nothing), e)
@@ -183,6 +193,11 @@ function check_size(M::ProductManifold, p)
 end
 
 function check_size(M::ProductManifold, p, X)
+    try
+        submanifold_components(M, X)
+    catch e
+        return DomainError("Vector $X does not support submanifold_components")
+    end
     ts = ziptuples(
         Tuple(1:length(M.manifolds)),
         M.manifolds,
@@ -207,6 +222,11 @@ of all error messages of the components, for which the tests fail is returned.
 The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_vector(M::ProductManifold, p, X; kwargs...)
+    try
+        submanifold_components(M, X)
+    catch e
+        return DomainError("Vector $X does not support submanifold_components")
+    end
     ts = ziptuples(
         Tuple(1:length(M.manifolds)),
         M.manifolds,
@@ -384,7 +404,7 @@ function get_coordinates!(
 end
 
 function _get_dim_ranges(dims::NTuple{N,Any}) where {N}
-    dims_acc = accumulate(+, vcat(1, SVector(dims)))
+    dims_acc = accumulate(+, (1, dims...))
     return ntuple(i -> (dims_acc[i]:(dims_acc[i] + dims[i] - 1)), Val(N))
 end
 

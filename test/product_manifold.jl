@@ -10,7 +10,7 @@ using RecursiveArrayTools
 include("test_sphere.jl")
 
 @testset "Product manifold" begin
-    M1 = TestSphere(3)
+    M1 = TestSphere(2)
     M2 = ManifoldsBase.DefaultManifold(2, 2)
     @test (@inferred ProductManifold(M1, M2)) isa ProductManifold
 
@@ -19,7 +19,7 @@ include("test_sphere.jl")
     p1 = ArrayPartition([1, 0.0, 0.0], [4 5.0; 6 7])
     p2 = ArrayPartition([0.0, 1.0, 0.0], [4 8.0; 3 7.5])
 
-    @test is_flat(M)
+    @test !is_flat(M)
     @test M[1] == M1
     @test M[2] == M2
     @test injectivity_radius(M) ≈ π
@@ -38,9 +38,9 @@ include("test_sphere.jl")
     @test ManifoldsBase.number_of_components(M) == 2
     # test that arrays are not points
     @test_throws DomainError is_point(M, [1, 2], true)
-    @test check_point(M, [1, 2]) isa DomainError
+    @test ManifoldsBase.check_point(M, [1, 2]) isa DomainError
     @test_throws DomainError is_vector(M, 1, [1, 2], true; check_base_point = false)
-    @test check_vector(M, 1, [1, 2]; check_base_point = false) isa DomainError
+    @test ManifoldsBase.check_vector(M, 1, [1, 2]; check_base_point = false) isa DomainError
     #default fallbacks for check_size, Product not working with Arrays
     @test ManifoldsBase.check_size(M, zeros(2)) isa DomainError
     @test ManifoldsBase.check_size(M, zeros(2), zeros(3)) isa DomainError
@@ -79,9 +79,9 @@ include("test_sphere.jl")
         p1c = copy(p1)
         p1c.x[1][1] = -123.0
         @test p1c.x[1][1] == -123.0
-        @test p1.x[1][1] == 0.0
+        @test p1.x[1][1] == 1.0
         copyto!(p1c, p1)
-        @test p1c.x[1][1] == 0.0
+        @test p1c.x[1][1] == 1.0
 
         p1c.x[1][1] = -123.0
         copyto!(p1, p1c)
@@ -92,7 +92,7 @@ include("test_sphere.jl")
         q = allocate(p1)
         @test q.x[1] isa Vector
         p = ArrayPartition([[0.0, 1.0, 0.0]], [0.0, 0.0])
-        q = allocate(p1, Int)
+        q = allocate(p, Int)
         @test q.x[1] isa Vector{Vector{Int}}
     end
 
@@ -102,19 +102,22 @@ include("test_sphere.jl")
         @test q[1].x[1] isa Vector
     end
 
+    p1 = ArrayPartition([1, 0.0, 0.0], [4 5.0; 6 7])
+    p2 = ArrayPartition([0.0, 1.0, 0.0], [4 8.0; 3 7.5])
+
     @testset "Broadcasting" begin
         br_result = p1 .+ 2.0 .* p2
         @test br_result isa ArrayPartition
-        @test br_result.x[1] ≈ [6.0, 9.0, 10.0]
-        @test br_result.x[2] ≈ [4.0, 11.0]
+        @test br_result.x[1] ≈ [1.0, 2.0, 0.0]
+        @test br_result.x[2] ≈ [12.0 21.0; 12.0 22.0]
 
         br_result .= 2.0 .* p1 .+ p2
-        @test br_result.x[1] ≈ [3.0, 6.0, 5.0]
-        @test br_result.x[2] ≈ [2.0, 7.0]
+        @test br_result.x[1] ≈ [2.0, 1.0, 0.0]
+        @test br_result.x[2] ≈ [12.0 18.0; 15.0 21.5]
 
         br_result .= p1
-        @test br_result.x[1] ≈ [0.0, 1.0, 0.0]
-        @test br_result.x[2] ≈ [0.0, 1.0]
+        @test br_result.x[1] ≈ p1.x[1]
+        @test br_result.x[2] ≈ p1.x[2]
 
         @test axes(p1) == (Base.OneTo(7),)
 
@@ -126,27 +129,29 @@ include("test_sphere.jl")
 
     @testset "CompositeManifoldError" begin
         Mpr = ProductManifold(TestSphere(2), TestSphere(2))
-        p1 = [1.0, 0.0, 0.0]
-        p2 = [0.0, 1.0, 0.0]
-        X1 = [0.0, 1.0, 0.2]
-        X2 = [1.0, 0.0, 0.2]
-        p = ArrayPartition(p1, p2)
-        X = ArrayPartition(X1, X2)
-        pf = ArrayPartition(p1, X1)
-        Xf = ArrayPartition(X1, p2)
-        @test is_point(Mpr, p, true)
-        @test_throws CompositeManifoldError is_point(Mpr, X, true)
-        @test_throws ComponentManifoldError is_vector(Mpr, pf, X, true)
-        @test_throws ComponentManifoldError is_vector(Mpr, p, Xf, true)
+        let p1 = [1.0, 0.0, 0.0],
+            p2 = [0.0, 1.0, 0.0],
+            X1 = [0.0, 1.0, 0.2],
+            X2 = [1.0, 0.0, 0.2]
+
+            p = ArrayPartition(p1, p2)
+            X = ArrayPartition(X1, X2)
+            pf = ArrayPartition(p1, X1)
+            Xf = ArrayPartition(X1, p2)
+            @test is_point(Mpr, p, true)
+            @test_throws CompositeManifoldError is_point(Mpr, X, true)
+            @test_throws ComponentManifoldError is_vector(Mpr, pf, X, true)
+            @test_throws ComponentManifoldError is_vector(Mpr, p, Xf, true)
+        end
     end
 
     @testset "arithmetic" begin
-        @test isapprox(M, p1 + p2, ArrayPartition([1.0, 3.0, 0.0], [2.0, 4.0]))
-        @test isapprox(M, p1 - p2, ArrayPartition([-1.0, -1.0, 0.0], [-2.0, -2.0]))
-        @test isapprox(M, -p1, ArrayPartition([0.0, -1.0, 0.0], [0.0, -1.0]))
-        @test isapprox(M, p1 * 2, ArrayPartition([0.0, 2.0, 0.0], [0.0, 2.0]))
-        @test isapprox(M, 2 * p1, ArrayPartition([0.0, 2.0, 0.0], [0.0, 2.0]))
-        @test isapprox(M, p1 / 2, ArrayPartition([0.0, 0.5, 0.0], [0.0, 0.5]))
+        @test isapprox(M, p1 + p2, ArrayPartition([1.0, 1.0, 0.0], [8.0 13.0; 9.0 14.5]))
+        @test isapprox(M, p1 - p2, ArrayPartition([1.0, -1.0, 0.0], [0.0 -3.0; 3.0 -0.5]))
+        @test isapprox(M, -p1, ArrayPartition([-1.0, -0.0, -0.0], [-4.0 -5.0; -6.0 -7.0]))
+        @test isapprox(M, p1 * 2, ArrayPartition([2.0, 0.0, 0.0], [8.0 10.0; 12.0 14.0]))
+        @test isapprox(M, 2 * p1, ArrayPartition([2.0, 0.0, 0.0], [8.0 10.0; 12.0 14.0]))
+        @test isapprox(M, p1 / 2, ArrayPartition([0.5, 0.0, 0.0], [2.0 2.5; 3.0 3.5]))
     end
 
     @testset "Show methods" begin
@@ -266,7 +271,7 @@ include("test_sphere.jl")
     end
 
     @testset "vee/hat" begin
-        X = [0.1, 0.2, 0.3, -1.0, 2.0, -3.0, 2.0]
+        X = [0.1, 0.2, 0.3, -1.0, 2.0, -3.0]
 
         Xc = hat(M, p1, X)
         X2 = vee(M, p1, Xc)
@@ -281,15 +286,15 @@ include("test_sphere.jl")
         c = get_coordinates(Tp1M, p1, X1, DefaultOrthonormalBasis())
         @test c isa Vector
 
-        p1 = ArrayPartition([0.0, 1.0, 0.0], [0.0, 0.0])
-        X1ap = ArrayPartition([1.0, 0.0, -1.0], [1.0, 0.0])
+        p1 = ArrayPartition([0.0, 1.0, 0.0], [0.0 0.0; 3.0 20])
+        X1ap = ArrayPartition([1.0, 0.0, -1.0], [1.0 0.0; 0.0 3.0])
         Tp1M = TangentSpaceAtPoint(M, p1)
         cap = get_coordinates(Tp1M, p1, X1ap, DefaultOrthonormalBasis())
         @test cap isa Vector
     end
 
     @testset "Basis printing" begin
-        p = ArrayPartition([1.0, 0.0, 0.0], [1.0, 0.0])
+        p = ArrayPartition([1.0, 0.0, 0.0], [1.0 0.0; 1.0 2.0])
         B = DefaultOrthonormalBasis()
         Bc = get_basis(M, p, B)
         Bc_components_s = sprint.(show, "text/plain", Bc.data.parts)
@@ -303,7 +308,7 @@ include("test_sphere.jl")
     end
 
     @testset "Basis-related errors" begin
-        a = ArrayPartition([1.0, 0.0, 0.0], [0.0, 0.0])
+        a = ArrayPartition([1.0, 0.0, 0.0], [0.0 0.0; 0.0 0.0])
         B = CachedBasis(DefaultOrthonormalBasis(), ProductBasisData(([],)))
         @test_throws AssertionError get_vector!(
             M,
