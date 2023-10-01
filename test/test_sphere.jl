@@ -25,6 +25,8 @@ end
 
 ManifoldsBase.inner(::TestSphere, p, X, Y) = dot(X, Y)
 
+ManifoldsBase.injectivity_radius(::TestSphere) = π
+
 function ManifoldsBase.inverse_retract_project!(M::TestSphere, X, p, q)
     X .= q .- p
     project!(M, X, p, X)
@@ -41,6 +43,16 @@ function ManifoldsBase.log!(::TestSphere, X, p, q)
     return X
 end
 
+ManifoldsBase.manifold_dimension(::TestSphere{N}) where {N} = N
+
+function parallel_transport_to!(::TestSphere, Y, p, X, q)
+    m = p .+ q
+    mnorm2 = real(dot(m, m))
+    factor = 2 * real(dot(X, q)) / mnorm2
+    Y .= X .- m .* factor
+    return Y
+end
+
 function ManifoldsBase.project!(::TestSphere, q, p)
     q .= p ./ norm(p)
     return q
@@ -49,6 +61,13 @@ end
 function ManifoldsBase.project!(::TestSphere, Y, p, X)
     Y .= X .- p .* real(dot(p, X))
     return Y
+end
+
+function ManifoldsBase.riemann_tensor!(M::TestSphere, Xresult, p, X, Y, Z)
+    innerZX = inner(M, p, Z, X)
+    innerZY = inner(M, p, Z, Y)
+    Xresult .= innerZY .* X .- innerZX .* Y
+    return Xresult
 end
 
 # from Absil, Mahony, Trumpf, 2013 https://sites.uclouvain.be/absil/2013-01/Weingarten_07PA_techrep.pdf

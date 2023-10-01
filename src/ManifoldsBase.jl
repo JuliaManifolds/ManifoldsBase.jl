@@ -978,10 +978,15 @@ include("vector_spaces.jl")
 include("point_vector_fallbacks.jl")
 include("nested_trait.jl")
 include("decorator_trait.jl")
+
+include("Fiber.jl")
+include("FiberBundle.jl")
+include("VectorFiber.jl")
 include("VectorBundle.jl")
 include("ValidationManifold.jl")
 include("EmbeddedManifold.jl")
 include("DefaultManifold.jl")
+include("ProductManifold.jl")
 include("PowerManifold.jl")
 
 #
@@ -1013,6 +1018,7 @@ export EmbeddedManifold
 export AbstractPowerManifold, PowerManifold
 export AbstractPowerRepresentation,
     NestedPowerRepresentation, NestedReplacingPowerRepresentation
+export ProductManifold
 
 # (b) Retraction Types
 export AbstractRetractionMethod,
@@ -1025,6 +1031,7 @@ export AbstractRetractionMethod,
     QRRetraction,
     PadeRetraction,
     PolarRetraction,
+    ProductRetraction,
     ProjectionRetraction,
     RetractionWithKeywords,
     SasakiRetraction,
@@ -1036,6 +1043,7 @@ export AbstractInverseRetractionMethod,
     ApproximateInverseRetraction,
     CayleyInverseRetraction,
     EmbeddedInverseRetraction,
+    InverseProductRetraction,
     LogarithmicInverseRetraction,
     NLSolveInverseRetraction,
     QRInverseRetraction,
@@ -1052,6 +1060,7 @@ export AbstractVectorTransportMethod,
     DifferentiatedRetractionVectorTransport,
     ParallelTransport,
     PoleLadderTransport,
+    ProductVectorTransport,
     ProjectionTransport,
     ScaledVectorTransport,
     SchildsLadderTransport,
