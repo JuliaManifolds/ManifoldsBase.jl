@@ -1003,7 +1003,7 @@ end
 # (a) Manifolds and general types
 export AbstractManifold, AbstractManifoldPoint, TVector, CoTVector, TFVector, CoTFVector
 export TansorProductType, VectorBundleFibers, VectorSpaceAtPoint
-export CotangentSpaceAtPoint, TangentSpaceAtPoint, TangentSpace
+export CotangentSpaceAtPoint, TangentSpaceAtPoint, TangentSpace, CotangentSpace
 export VectorBundle, TangentBundle, CotangentBundle
 export AbstractDecoratorManifold
 export AbstractTrait, IsEmbeddedManifold, IsEmbeddedSubmanifold, IsIsometricEmbeddedManifold
@@ -1152,6 +1152,7 @@ export allocate,
     retract!,
     riemann_tensor,
     riemann_tensor!,
+    vector_space_dimension,
     vector_transport_along,
     vector_transport_along!,
     vector_transport_direction,
