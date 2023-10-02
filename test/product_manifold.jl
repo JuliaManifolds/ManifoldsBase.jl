@@ -20,6 +20,7 @@ include("test_sphere.jl")
 
     p1 = ArrayPartition([1, 0.0, 0.0], [4.0 5.0; 6.0 7.0])
     p2 = ArrayPartition([0.0, 1.0, 0.0], [4.0 8.0; 3.0 7.5])
+    X1 = ArrayPartition([0.0, 1.0, 0.2], [4.0 0.0; 2.0 7.0])
 
     @test !is_flat(M)
     @test M[1] == M1
@@ -41,6 +42,8 @@ include("test_sphere.jl")
     @test ManifoldsBase.number_of_components(M) == 2
     @test ManifoldsBase.submanifold(M, 1) === M1
     @test ManifoldsBase.submanifold(M, [2, 1]) === ProductManifold(M2, M1)
+    @test ManifoldsBase.check_point(M, p1) === nothing
+    @test ManifoldsBase.check_vector(M, p1, X1) === nothing
     # test that arrays are not points
     @test_throws DomainError is_point(M, [1, 2], true)
     @test ManifoldsBase.check_point(M, [1, 2]) isa DomainError
@@ -99,6 +102,11 @@ include("test_sphere.jl")
         p = ArrayPartition([[0.0, 1.0, 0.0]], [0.0, 0.0])
         q = allocate(p, Int)
         @test q.x[1] isa Vector{Vector{Int}}
+
+        q = allocate(p1)
+        copyto!(M, q, p1)
+        @test isapprox(q, p1)
+        @test ManifoldsBase.allocate_result(M, zero_vector) isa ArrayPartition
     end
 
     @testset "allocate on PowerManifold of ProductManifold" begin
@@ -132,6 +140,15 @@ include("test_sphere.jl")
             2 * X1,
             ProductRetraction(ExponentialRetraction(), ExponentialRetraction()),
         )
+        qr2 = similar(p1)
+        retract!(
+            M,
+            qr2,
+            p1,
+            2 * X1,
+            ProductRetraction(ExponentialRetraction(), ExponentialRetraction()),
+        )
+        @test qr2 ≈ qr
         Xr = similar(X1)
         log!(M, Xr, p1, p2)
         @test log(M, p1, p2) ≈
@@ -146,6 +163,18 @@ include("test_sphere.jl")
                 LogarithmicInverseRetraction(),
             ),
         ) ≈ Xr
+        Zr = similar(X1)
+        inverse_retract!(
+            M,
+            Zr,
+            p1,
+            p2,
+            InverseProductRetraction(
+                LogarithmicInverseRetraction(),
+                LogarithmicInverseRetraction(),
+            ),
+        )
+        @test Zr ≈ Xr
 
         @test inner(M, p1, X1, X2) ≈ 21.08
         @test norm(M, p1, X1) ≈ sqrt(70.04)
@@ -154,6 +183,9 @@ include("test_sphere.jl")
         @test zero_vector(M, p1) == zero(X1)
 
         @test rand(M) isa ArrayPartition
+        @test rand(M; vector_at = p1) isa ArrayPartition
+        @test rand(Random.default_rng(), M) isa ArrayPartition
+        @test rand(Random.default_rng(), M; vector_at = p1) isa ArrayPartition
     end
 
     @testset "Broadcasting" begin
@@ -171,6 +203,8 @@ include("test_sphere.jl")
         @test br_result.x[2] ≈ p1.x[2]
 
         @test axes(p1) == (Base.OneTo(7),)
+
+        @test ManifoldsBase._get_vector_cache_broadcast(p1) === Val(false)
 
         # errors
         p3 = ArrayPartition([3.0, 4.0, 5.0], [2.0, 5.0], [3.0, 2.0])
@@ -244,12 +278,36 @@ include("test_sphere.jl")
          ProductManifold($(M1), $(M2))"""
     end
 
+    @testset "Change Representer and Metric" begin
+        G = ManifoldsBase.EuclideanMetric()
+        @test change_representer(M, G, p1, X1) == X1
+        Y1 = similar(X1)
+        change_representer!(M, Y1, G, p1, X1)
+        @test isapprox(M, p1, Y1, X1)
+        @test change_metric(M, G, p1, X1) == X1
+        Z1 = similar(X1)
+        change_metric!(M, Z1, G, p1, X1)
+        @test isapprox(M, p1, Z1, X1)
+    end
+
     @testset "product vector transport" begin
         X = log(M, p1, p2)
         m = ProductVectorTransport(ParallelTransport(), ParallelTransport())
         Y = vector_transport_to(M, p1, X, p2, m)
+        Y2 = similar(Y)
+        vector_transport_to!(M, Y2, p1, X, p2, m)
         Z = -log(M, p2, p1)
         @test isapprox(M, p2, Y, Z)
+        @test isapprox(M, p2, Y2, Z)
+
+        Y3 = vector_transport_direction(M, p1, X, X, m)
+        Y4 = similar(Y)
+        vector_transport_direction!(M, Y4, p1, X, X, m)
+        @test isapprox(M, p2, Y3, Z)
+        @test isapprox(M, p2, Y4, Z)
+
+        @test ManifoldsBase.vector_bundle_transport(ManifoldsBase.TangentFiber, M) isa
+              ProductVectorTransport
     end
 
     @testset "Implicit product vector transport" begin

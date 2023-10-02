@@ -9,6 +9,26 @@ TestSphere(N::Int, 𝔽 = ℝ) = TestSphere{N,𝔽}()
 
 ManifoldsBase.representation_size(::TestSphere{N}) where {N} = (N + 1,)
 
+function ManifoldsBase.change_representer!(
+    M::TestSphere,
+    Y,
+    ::ManifoldsBase.EuclideanMetric,
+    p,
+    X,
+)
+    return copyto!(M, Y, p, X)
+end
+
+function ManifoldsBase.change_metric!(
+    M::TestSphere,
+    Y,
+    ::ManifoldsBase.EuclideanMetric,
+    p,
+    X,
+)
+    return copyto!(M, Y, p, X)
+end
+
 function ManifoldsBase.check_point(M::TestSphere, p; kwargs...)
     if !isapprox(norm(p), 1.0; kwargs...)
         return DomainError(
@@ -115,13 +135,7 @@ function ManifoldsBase.project!(::TestSphere, Y, p, X)
 end
 
 function Random.rand!(M::TestSphere, pX; vector_at = nothing, σ = one(eltype(pX)))
-    if vector_at === nothing
-        project!(M, pX, randn(eltype(pX), representation_size(M)))
-    else
-        n = σ * randn(eltype(pX), size(pX)) # Gaussian in embedding
-        project!(M, pX, vector_at, n) #project to TpM (keeps Gaussianness)
-    end
-    return pX
+    return rand!(Random.default_rng(), M, pX; vector_at = vector_at, σ = σ)
 end
 function Random.rand!(
     rng::AbstractRNG,
