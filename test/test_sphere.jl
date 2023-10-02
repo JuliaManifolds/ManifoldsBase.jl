@@ -33,7 +33,7 @@ function ManifoldsBase.exp!(M::TestSphere, q, p, X)
     return exp!(M, q, p, X, one(number_eltype(X)))
 end
 function ManifoldsBase.exp!(::TestSphere, q, p, X, t::Number)
-    θ = norm(X)
+    θ = abs(t) * norm(X)
     if θ == 0
         copyto!(q, p)
     else

@@ -2,6 +2,8 @@ using RecursiveArrayTools, ManifoldsBase, Test
 using ManifoldsBase: DefaultManifold, VectorSpaceType, VectorSpaceFiberType, ℝ, FiberAtPoint
 struct TestVectorSpaceType <: VectorSpaceType end
 
+include("test_sphere.jl")
+
 @testset "Tangent bundle" begin
     M = DefaultManifold(3)
     m_prod_retr = ManifoldsBase.FiberBundleProductRetraction()
@@ -23,10 +25,15 @@ struct TestVectorSpaceType <: VectorSpaceType end
     @test default_retraction_method(TB) == m_prod_retr
     @test default_vector_transport_method(TB) isa
           ManifoldsBase.FiberBundleProductVectorTransport
+    @test TB ===
+          VectorBundle(TangentSpace, M, ManifoldsBase.FiberBundleProductVectorTransport())
     CTB = CotangentBundle(M)
     @test sprint(show, CTB) == "CotangentBundle($(M))"
     @test sprint(show, VectorBundle(TestVectorSpaceType(), M)) ==
           "VectorBundle(TestVectorSpaceType(), $(M))"
+
+    @test vector_space_dimension(TB.fiber) == 3
+    @test vector_space_dimension(CTB.fiber) == 3
 
     @testset "spaces at point" begin
         p = [1.0, 0.0, 0.0]
@@ -99,4 +106,45 @@ struct TestVectorSpaceType <: VectorSpaceType end
         @test p.x[2] == [-2.0, -3.0, -5.0]
         @test_throws DomainError view(p, TB, :error)
     end
+end
+
+@testset "Tangent bundle of a sphere" begin
+    M = TestSphere(2)
+    TM = TangentBundle(M)
+    pm = [1.0, 0.0, 0.0]
+    Xm = [0.0, 1.0, -2.0]
+    Ym = [0.0, -1.0, 2.0]
+    p1 = ArrayPartition(pm, Xm)
+    X1 = ArrayPartition(Xm, Ym)
+    X2 = ArrayPartition(Ym, Xm)
+    @test distance(TM.fiber, pm, Xm, Ym) ≈ sqrt(20)
+    @test injectivity_radius(TM) == 0.0
+    @test ManifoldsBase.fiber_dimension(TM.fiber) == 2
+
+    qm = exp(M, pm, Xm)
+    Xt = vector_transport_direction(TM, p1, X1, X2)
+    p2 = ArrayPartition(
+        [1.7592245393784949, -0.6172728764571667, 1.2345457529143333],
+        [-1.7592245393784949, 0.6172728764571667, -1.2345457529143333],
+    )
+    Yt = similar(Xt)
+    vector_transport_direction!(TM, Yt, p1, X1, X2)
+    @test isapprox(Xt, p2)
+    @test isapprox(Yt, p2)
+
+    p3 = ArrayPartition(exp(M, pm, Xm), parallel_transport_direction(M, pm, Ym, Xm))
+    X3 = ArrayPartition(
+        [-1.7592245393784949, -0.6172728764571667, 1.2345457529143333],
+        [1.7592245393784949, 0.6172728764571667, -1.2345457529143333],
+    )
+    Yt = similar(Xt)
+    vector_transport_to!(TM, Yt, p1, X1, p3)
+    @test isapprox(vector_transport_to(TM, p1, X1, p3), X3)
+    @test isapprox(Yt, X3)
+    @test zero_vector(TM, p1) == zero(p1)
+
+    X1c = get_coordinates(TM, p1, X1, DefaultOrthonormalBasis())
+    @test isapprox(X1c, [1.0, -2.0, -1.0, 2.0])
+    @test isapprox(get_vector(TM, p1, X1c, DefaultOrthonormalBasis()), X1)
+
 end

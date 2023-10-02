@@ -16,8 +16,10 @@ include("test_sphere.jl")
 
     M = ProductManifold(M1, M2)
 
-    p1 = ArrayPartition([1, 0.0, 0.0], [4 5.0; 6 7])
-    p2 = ArrayPartition([0.0, 1.0, 0.0], [4 8.0; 3 7.5])
+    @test_throws MethodError ProductManifold()
+
+    p1 = ArrayPartition([1, 0.0, 0.0], [4.0 5.0; 6.0 7.0])
+    p2 = ArrayPartition([0.0, 1.0, 0.0], [4.0 8.0; 3.0 7.5])
 
     @test !is_flat(M)
     @test M[1] == M1
@@ -102,8 +104,26 @@ include("test_sphere.jl")
         @test q[1].x[1] isa Vector
     end
 
-    p1 = ArrayPartition([1, 0.0, 0.0], [4 5.0; 6 7])
-    p2 = ArrayPartition([0.0, 1.0, 0.0], [4 8.0; 3 7.5])
+    p1 = ArrayPartition([1.0, 0.0, 0.0], [4.0 5.0; 6.0 7.0])
+    p2 = ArrayPartition([0.0, 1.0, 0.0], [4.0 8.0; 3.0 7.5])
+    X1 = ArrayPartition([0.0, 1.0, 0.2], [4.0 0.0; 2.0 7.0])
+
+    @testset "Basic operations" begin
+        @test distance(M, p1, p2) ≈ 4.551637188998299
+        qr = similar(p1)
+        exp!(M, qr, p1, X1)
+        @test exp(M, p1, X1) ≈ ArrayPartition(
+            [0.5235330372543839, 0.8354600062374664, 0.1670920012474933],
+            [8.0 5.0; 8.0 14.0],
+        )
+        @test exp(M, p1, X1) ≈ qr
+        @test exp(M, p1, X1, 2.0) ≈ exp(M, p1, 2 * X1)
+        Xr = similar(X1)
+        log!(M, Xr, p1, p2)
+        @test log(M, p1, p2) ≈
+              ArrayPartition([0.0, 1.5707963267948966, 0.0], [0.0 3.0; -3.0 0.5])
+        @test log(M, p1, p2) ≈ Xr
+    end
 
     @testset "Broadcasting" begin
         br_result = p1 .+ 2.0 .* p2
