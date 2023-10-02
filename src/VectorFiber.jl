@@ -255,6 +255,10 @@ function project!(M::TangentSpaceAtPoint, Y, p, X)
     return project!(M.fiber.manifold, Y, M.point, X)
 end
 
+function Random.rand!(M::TangentSpaceAtPoint, X; vector_at = nothing)
+    rand!(M.fiber.manifold, X; vector_at = M.point)
+    return X
+end
 function Random.rand!(rng::AbstractRNG, M::TangentSpaceAtPoint, X; vector_at = nothing)
     rand!(rng, M.fiber.manifold, X; vector_at = M.point)
     return X

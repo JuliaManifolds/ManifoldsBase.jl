@@ -1,4 +1,5 @@
 using RecursiveArrayTools, ManifoldsBase, Test
+using Random
 using ManifoldsBase: DefaultManifold, VectorSpaceType, VectorSpaceFiberType, ℝ, FiberAtPoint
 struct TestVectorSpaceType <: VectorSpaceType end
 
@@ -31,12 +32,27 @@ include("test_sphere.jl")
     @test sprint(show, CTB) == "CotangentBundle($(M))"
     @test sprint(show, VectorBundle(TestVectorSpaceType(), M)) ==
           "VectorBundle(TestVectorSpaceType(), $(M))"
+    @test sprint(
+        show,
+        VectorBundleFibers(VectorSpaceFiberType(TestVectorSpaceType()), M),
+    ) == "VectorBundleFibers(TestVectorSpaceType(), $(M))"
+    @test sprint(show, VectorSpaceFiberType(TestVectorSpaceType())) ==
+          "VectorSpaceFiberType(TestVectorSpaceType())"
+
+    @test ManifoldsBase.TangentBundleFibers(M) ===
+          ManifoldsBase.BundleFibers(ManifoldsBase.TangentFiber, M)
+    @test ManifoldsBase.CotangentBundleFibers(M) ===
+          ManifoldsBase.BundleFibers(ManifoldsBase.CotangentFiber, M)
 
     @test vector_space_dimension(TB.fiber) == 3
     @test vector_space_dimension(CTB.fiber) == 3
+    @test ManifoldsBase.fiber_dimension(CTB.fiber) == 3
+    @test ManifoldsBase.fiber_dimension(M, ManifoldsBase.TangentFiber) == 3
+    @test ManifoldsBase.fiber_dimension(M, ManifoldsBase.CotangentFiber) == 3
 
     @testset "spaces at point" begin
         p = [1.0, 0.0, 0.0]
+        q = [0.0, 2.0, 0.0]
         t_p = TangentSpaceAtPoint(M, p)
         t_p2 = TangentSpace(M, p)
         @test t_p == t_p2
@@ -48,6 +64,7 @@ include("test_sphere.jl")
         @test t_ps == t_ps_test
         @test base_manifold(t_p) == M
         @test base_manifold(ct_p) == M
+        @test manifold_dimension(t_p) == 3
         @test t_p.fiber.manifold == M
         @test ct_p.fiber.manifold == M
         @test t_p.fiber.fiber == VectorSpaceFiberType(TangentSpace)
@@ -57,8 +74,20 @@ include("test_sphere.jl")
         @test injectivity_radius(t_p) == Inf
         @test representation_size(t_p) == representation_size(M)
         X = [0.0, 0.0, 1.0]
+        Y = [0.0, 2.0, -1.0]
         @test embed(t_p, X) == X
         @test embed(t_p, X, X) == X
+        @test distance(t_p, p, q) ≈ sqrt(5)
+        @test isapprox(t_p, exp(t_p, X, X), 2 * X)
+        @test inner(t_p, X, X, X) ≈ 1.0
+        @test norm(t_p, X, X) ≈ 1.0
+        @test parallel_transport_to(t_p, X, Y, X) ≈ Y
+        @test vector_transport_to(t_p, X, Y, X) ≈ Y
+        @test project(t_p, X, Y) ≈ Y
+        @test rand(t_p) isa Vector{Float64}
+        @test rand(t_p; vector_at = X) isa Vector{Float64}
+        @test rand(Random.default_rng(), t_p) isa Vector{Float64}
+        @test rand(Random.default_rng(), t_p; vector_at = X) isa Vector{Float64}
         # generic vector space at
         fiber = VectorBundleFibers(TestVectorSpaceType(), M)
         X_p = FiberAtPoint(fiber, p)
@@ -143,8 +172,17 @@ end
     @test isapprox(Yt, X3)
     @test zero_vector(TM, p1) == zero(p1)
 
-    X1c = get_coordinates(TM, p1, X1, DefaultOrthonormalBasis())
-    @test isapprox(X1c, [1.0, -2.0, -1.0, 2.0])
-    @test isapprox(get_vector(TM, p1, X1c, DefaultOrthonormalBasis()), X1)
+    for basis in [DefaultOrthonormalBasis(), get_basis(TM, p1, DefaultOrthonormalBasis())]
+        @test length(get_vectors(TM, p1, get_basis(TM, p1, basis))) == 4
+        X1c = get_coordinates(TM, p1, X1, basis)
+        @test isapprox(X1c, [1.0, -2.0, -1.0, 2.0])
+        Y1c = similar(X1c)
+        get_coordinates!(TM, Y1c, p1, X1, basis)
+        @test isapprox(X1c, Y1c)
+        @test isapprox(get_vector(TM, p1, X1c, basis), X1)
+        Z1 = similar(X1)
+        get_vector!(TM, Z1, p1, X1c, basis)
+        @test isapprox(X1, X1)
+    end
 
 end
