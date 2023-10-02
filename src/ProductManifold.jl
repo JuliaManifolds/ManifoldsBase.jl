@@ -580,14 +580,6 @@ manifold dimensions the product is made of.
 """
 manifold_dimension(M::ProductManifold) = mapreduce(manifold_dimension, +, M.manifolds)
 
-"""
-    manifold_dimension(M::ProductManifold)
-
-Return the volume of [`ProductManifold`](@ref) `M`, i.e. product of volumes of the
-manifolds `M` is constructed from.
-"""
-manifold_volume(M::ProductManifold) = mapreduce(manifold_volume, *, M.manifolds)
-
 function mid_point!(M::ProductManifold, q, p1, p2)
     map(
         mid_point!,
@@ -717,31 +709,6 @@ function representation_size(M::ProductManifold)
 end
 
 @doc raw"""
-    Y = riemannian_Hessian(M::ProductManifold, p, G, H, X)
-    riemannian_Hessian!(M::ProductManifold, Y, p, G, H, X)
-
-Compute the Riemannian Hessian ``\operatorname{Hess} f(p)[X]`` given the
-Euclidean gradient ``∇ f(\tilde p)`` in `G` and the Euclidean Hessian ``∇^2 f(\tilde p)[\tilde X]`` in `H`,
-where ``\tilde p, \tilde X`` are the representations of ``p,X`` in the embedding,.
-
-On a product manifold, this decouples and can be computed elementwise.
-"""
-riemannian_Hessian(M::ProductManifold, p, G, H, X)
-
-function riemannian_Hessian!(M::ProductManifold, Y, p, G, H, X)
-    map(
-        riemannian_Hessian!,
-        M.manifolds,
-        submanifold_components(M, Y),
-        submanifold_components(M, p),
-        submanifold_components(M, G),
-        submanifold_components(M, H),
-        submanifold_components(M, X),
-    )
-    return Y
-end
-
-@doc raw"""
     riemann_tensor(M::ProductManifold, p, X, Y, Z)
 
 Compute the Riemann tensor at point from `p` with tangent vectors `X`, `Y` and `Z` on
@@ -760,6 +727,20 @@ function riemann_tensor!(M::ProductManifold, Xresult, p, X, Y, Z)
         submanifold_components(M, Z),
     )
     return Xresult
+end
+
+"""
+    select_from_tuple(t::NTuple{N, Any}, positions::Val{P})
+
+Selects elements of tuple `t` at positions specified by the second argument.
+For example `select_from_tuple(("a", "b", "c"), Val((3, 1, 1)))` returns
+`("c", "a", "a")`.
+"""
+@generated function select_from_tuple(t::NTuple{N,Any}, positions::Val{P}) where {N,P}
+    for k in P
+        (k < 0 || k > N) && error("positions must be between 1 and $N")
+    end
+    return Expr(:tuple, [Expr(:ref, :t, k) for k in P]...)
 end
 
 """

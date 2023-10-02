@@ -35,9 +35,12 @@ include("test_sphere.jl")
         p1,
         ProductRetraction(ExponentialRetraction(), ExponentialRetraction()),
     ) ≈ π
+    @test injectivity_radius(M, p1) ≈ π
     @test injectivity_radius(M, p1, ExponentialRetraction()) ≈ π
 
     @test ManifoldsBase.number_of_components(M) == 2
+    @test ManifoldsBase.submanifold(M, 1) === M1
+    @test ManifoldsBase.submanifold(M, [2, 1]) === ProductManifold(M2, M1)
     # test that arrays are not points
     @test_throws DomainError is_point(M, [1, 2], true)
     @test ManifoldsBase.check_point(M, [1, 2]) isa DomainError
@@ -107,8 +110,11 @@ include("test_sphere.jl")
     p1 = ArrayPartition([1.0, 0.0, 0.0], [4.0 5.0; 6.0 7.0])
     p2 = ArrayPartition([0.0, 1.0, 0.0], [4.0 8.0; 3.0 7.5])
     X1 = ArrayPartition([0.0, 1.0, 0.2], [4.0 0.0; 2.0 7.0])
+    X2 = ArrayPartition([0.0, -1.0, 0.4], [3.0 1.0; -2.0 2.0])
 
     @testset "Basic operations" begin
+        @test manifold_dimension(M) == 6
+        @test representation_size(M) == (7,)
         @test distance(M, p1, p2) ≈ 4.551637188998299
         qr = similar(p1)
         exp!(M, qr, p1, X1)
@@ -118,11 +124,36 @@ include("test_sphere.jl")
         )
         @test exp(M, p1, X1) ≈ qr
         @test exp(M, p1, X1, 2.0) ≈ exp(M, p1, 2 * X1)
+        exp!(M, qr, p1, X1, 2.0)
+        @test qr ≈ exp(M, p1, 2 * X1)
+        @test qr ≈ retract(
+            M,
+            p1,
+            2 * X1,
+            ProductRetraction(ExponentialRetraction(), ExponentialRetraction()),
+        )
         Xr = similar(X1)
         log!(M, Xr, p1, p2)
         @test log(M, p1, p2) ≈
               ArrayPartition([0.0, 1.5707963267948966, 0.0], [0.0 3.0; -3.0 0.5])
         @test log(M, p1, p2) ≈ Xr
+        @test inverse_retract(
+            M,
+            p1,
+            p2,
+            InverseProductRetraction(
+                LogarithmicInverseRetraction(),
+                LogarithmicInverseRetraction(),
+            ),
+        ) ≈ Xr
+
+        @test inner(M, p1, X1, X2) ≈ 21.08
+        @test norm(M, p1, X1) ≈ sqrt(70.04)
+        @test project(M, p1) ≈ p1
+        @test project(M, p1, X1) ≈ X1
+        @test zero_vector(M, p1) == zero(X1)
+
+        @test rand(M) isa ArrayPartition
     end
 
     @testset "Broadcasting" begin
@@ -148,7 +179,7 @@ include("test_sphere.jl")
     end
 
     @testset "CompositeManifoldError" begin
-        Mpr = ProductManifold(TestSphere(2), TestSphere(2))
+        Mpr = ProductManifold(M1, M1)
         let p1 = [1.0, 0.0, 0.0],
             p2 = [0.0, 1.0, 0.0],
             X1 = [0.0, 1.0, 0.2],
@@ -163,6 +194,23 @@ include("test_sphere.jl")
             @test_throws ComponentManifoldError is_vector(Mpr, pf, X, true)
             @test_throws ComponentManifoldError is_vector(Mpr, p, Xf, true)
         end
+    end
+
+    @testset "Weingarten" begin
+        Mpr = ProductManifold(M1, M1)
+        p = [1.0, 0.0, 0.0]
+        X = [0.0, 0.2, 0.0]
+        V = [0.1, 0.0, 0.0] #orthogonal to TpM -> parallel to p
+        @test isapprox(
+            M,
+            Weingarten(
+                Mpr,
+                ArrayPartition(p, p),
+                ArrayPartition(X, X),
+                ArrayPartition(V, V),
+            ),
+            ArrayPartition(-0.1 * X, -0.1 * X),
+        )
     end
 
     @testset "arithmetic" begin
@@ -344,6 +392,27 @@ include("test_sphere.jl")
             [1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
             B, # empty elements yield a submanifold MethodError
         )
+    end
+
+    @testset "Basis -- other" begin
+        p1 = ArrayPartition([1.0, 0.0, 0.0], [1.0 0.0; 1.0 2.0])
+        X1 = ArrayPartition([0.0, 2.0, -1.0], [1.0 0.0; 2.0 1.0])
+        B = DefaultOrthonormalBasis()
+        Bc = get_basis(M, p1, B)
+
+        for basis in
+            [DefaultOrthonormalBasis(), get_basis(M, p1, DefaultOrthonormalBasis())]
+            @test length(get_vectors(M, p1, get_basis(M, p1, basis))) == 6
+            X1c = get_coordinates(M, p1, X1, basis)
+            @test isapprox(X1c, [2.0, -1.0, 1.0, 2.0, 0.0, 1.0])
+            Y1c = allocate(M, X1c)
+            get_coordinates!(M, Y1c, p1, X1, basis)
+            @test isapprox(X1c, Y1c)
+            @test isapprox(get_vector(M, p1, X1c, basis), X1)
+            Z1 = allocate(M, X1)
+            get_vector!(M, Z1, p1, X1c, basis)
+            @test isapprox(X1, X1)
+        end
     end
 
     @testset "allocation promotion" begin

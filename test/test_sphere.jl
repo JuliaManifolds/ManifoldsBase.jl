@@ -114,6 +114,31 @@ function ManifoldsBase.project!(::TestSphere, Y, p, X)
     return Y
 end
 
+function Random.rand!(M::TestSphere, pX; vector_at = nothing, σ = one(eltype(pX)))
+    if vector_at === nothing
+        project!(M, pX, randn(eltype(pX), representation_size(M)))
+    else
+        n = σ * randn(eltype(pX), size(pX)) # Gaussian in embedding
+        project!(M, pX, vector_at, n) #project to TpM (keeps Gaussianness)
+    end
+    return pX
+end
+function Random.rand!(
+    rng::AbstractRNG,
+    M::TestSphere,
+    pX;
+    vector_at = nothing,
+    σ = one(eltype(pX)),
+)
+    if vector_at === nothing
+        project!(M, pX, randn(rng, eltype(pX), representation_size(M)))
+    else
+        n = σ * randn(rng, eltype(pX), size(pX)) # Gaussian in embedding
+        project!(M, pX, vector_at, n) #project to TpM (keeps Gaussianness)
+    end
+    return pX
+end
+
 function ManifoldsBase.riemann_tensor!(M::TestSphere, Xresult, p, X, Y, Z)
     innerZX = inner(M, p, Z, X)
     innerZY = inner(M, p, Z, Y)

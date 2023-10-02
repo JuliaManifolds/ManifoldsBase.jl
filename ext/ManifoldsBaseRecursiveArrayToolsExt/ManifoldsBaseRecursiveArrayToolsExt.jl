@@ -10,6 +10,7 @@ if isdefined(Base, :get_extension)
         FiberBundleProductVectorTransport,
         ProductBasisData,
         TangentSpaceType
+    using ManifoldsBase: number_of_components
     using Random
 
     import ManifoldsBase:
@@ -46,7 +47,8 @@ else
         FiberBundleProductVectorTransport,
         ProductBasisData,
         TangentSpaceType
-    using Random
+    using ..ManifoldsBase: number_of_components
+    using ..Random
 
     import ..ManifoldsBase:
         allocate,
