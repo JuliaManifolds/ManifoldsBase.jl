@@ -270,6 +270,9 @@ function manifold_dimension(B::FiberBundle)
     return manifold_dimension(B.manifold) + fiber_dimension(B.fiber)
 end
 
+function Random.rand!(M::FiberBundle, pX; vector_at = nothing)
+    return rand!(Random.default_rng(), M, pX; vector_at = vector_at)
+end
 function Random.rand!(rng::AbstractRNG, M::FiberBundle, pX; vector_at = nothing)
     pXM, pXF = submanifold_components(M.manifold, pX)
     if vector_at === nothing

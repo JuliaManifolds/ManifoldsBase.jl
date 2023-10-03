@@ -154,9 +154,6 @@ at point `p` from manifold `B.manifold`.
 inner(B::BundleFibers, p, X, Y)
 
 inner(B::TangentBundleFibers, p, X, Y) = inner(B.manifold, p, X, Y)
-function inner(B::CotangentBundleFibers, p, X, Y)
-    return inner(B.manifold, p, sharp(B.manifold, p, X), sharp(B.manifold, p, Y))
-end
 @doc raw"""
     inner(B::VectorBundle, p, X, Y)
 
@@ -251,7 +248,7 @@ function project!(B::VectorBundle, q, p)
     px, pVx = submanifold_components(B.manifold, p)
     qx, qVx = submanifold_components(B.manifold, q)
     project!(B.manifold, qx, px)
-    project!(B.manifold, qVx, qx, pVx)
+    project!(B.fiber, qVx, qx, pVx)
     return q
 end
 
@@ -280,7 +277,7 @@ function project!(B::VectorBundle, Y, p, X)
     VXM, VXF = submanifold_components(B.manifold, X)
     VYM, VYF = submanifold_components(B.manifold, Y)
     project!(B.manifold, VYM, px, VXM)
-    project!(B.manifold, VYF, px, VXF)
+    project!(B.fiber, VYF, px, VXF)
     return Y
 end
 

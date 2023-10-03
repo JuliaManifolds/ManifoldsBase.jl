@@ -3,6 +3,8 @@ using Random
 using ManifoldsBase: DefaultManifold, VectorSpaceType, VectorSpaceFiberType, ℝ, FiberAtPoint
 struct TestVectorSpaceType <: VectorSpaceType end
 
+struct TestFiberType <: ManifoldsBase.FiberType end
+
 include("test_sphere.jl")
 
 @testset "Tangent bundle" begin
@@ -31,6 +33,11 @@ include("test_sphere.jl")
     @test TB === TangentBundle(M, ManifoldsBase.FiberBundleProductVectorTransport())
     CTB = CotangentBundle(M)
     @test CTB === CotangentBundle(M, ManifoldsBase.FiberBundleProductVectorTransport())
+    @test ManifoldsBase.FiberBundleProductVectorTransport(M) ===
+          ManifoldsBase.FiberBundleProductVectorTransport(
+        ParallelTransport(),
+        ParallelTransport(),
+    )
     @test sprint(show, CTB) == "CotangentBundle($(M))"
     @test sprint(show, VectorBundle(TestVectorSpaceType(), M)) ==
           "VectorBundle(TestVectorSpaceType(), $(M))"
@@ -40,6 +47,8 @@ include("test_sphere.jl")
     ) == "VectorBundleFibers(TestVectorSpaceType(), $(M))"
     @test sprint(show, VectorSpaceFiberType(TestVectorSpaceType())) ==
           "VectorSpaceFiberType(TestVectorSpaceType())"
+    @test sprint(show, ManifoldsBase.BundleFibers(TestFiberType(), M)) ==
+          "BundleFibers(TestFiberType(), $(M))"
 
     @test ManifoldsBase.TangentBundleFibers(M) ===
           ManifoldsBase.BundleFibers(ManifoldsBase.TangentFiber, M)
@@ -91,6 +100,8 @@ include("test_sphere.jl")
         @test parallel_transport_to(t_p, X, Y, X) ≈ Y
         @test vector_transport_to(t_p, X, Y, X) ≈ Y
         @test vector_transport_to(t_p, X, Y, X, ProjectionTransport()) ≈ Y
+        Z = similar(X)
+        @test vector_transport_to!(t_p, Z, X, Y, X, ProjectionTransport()) ≈ Y
         @test project(t_p, X, Y) ≈ Y
         @test project(t_p, Y) ≈ Y
         @test rand(t_p) isa Vector{Float64}
@@ -175,14 +186,14 @@ end
 
     qm = exp(M, pm, Xm)
     Xt = vector_transport_direction(TM, p1, X1, X2)
-    p2 = ArrayPartition(
+    Xref = ArrayPartition(
         [1.7592245393784949, -0.6172728764571667, 1.2345457529143333],
         [-1.7592245393784949, 0.6172728764571667, -1.2345457529143333],
     )
     Yt = similar(Xt)
     vector_transport_direction!(TM, Yt, p1, X1, X2)
-    @test isapprox(Xt, p2)
-    @test isapprox(Yt, p2)
+    @test isapprox(Xt, Xref)
+    @test isapprox(Yt, Xref)
 
     p3 = ArrayPartition(exp(M, pm, Xm), parallel_transport_direction(M, pm, Ym, Xm))
     X3 = ArrayPartition(
@@ -196,6 +207,7 @@ end
     @test zero_vector(TM, p1) == zero(p1)
 
     @test inner(TM, p1, X1, X2) ≈ -10.0
+    @test inner(TM.fiber, pm, Xm, Ym) ≈ -5.0
     @test norm(TM, p1, X1) ≈ sqrt(10.0)
 
     for basis in [DefaultOrthonormalBasis(), get_basis(TM, p1, DefaultOrthonormalBasis())]
@@ -208,25 +220,56 @@ end
         @test isapprox(get_vector(TM, p1, X1c, basis), X1)
         Z1 = similar(X1)
         get_vector!(TM, Z1, p1, X1c, basis)
-        @test isapprox(Z1, X1)
+        @test isapprox(TM, p1, Z1, X1)
     end
+
+    Bd = get_basis(TM, p1, DiagonalizingOrthonormalBasis(X1))
+    @test Bd.data isa ManifoldsBase.FiberBundleBasisData
 
     m_prod_retr = ManifoldsBase.FiberBundleProductRetraction()
     m_prod_invretr = ManifoldsBase.FiberBundleInverseProductRetraction()
     m_sasaki = SasakiRetraction(5)
 
-    @test inverse_retract(TM, p1, p2, m_prod_invretr) ≈ ArrayPartition(
-        [0.0, 0.0, 0.0],
-        [-0.7392904137312384, -0.6108990836533785, 1.221798167306757],
+    @test inverse_retract(TM, p1, p3, m_prod_invretr) ≈
+          ArrayPartition([0.0, 1.0, -2.0], [0.0, -2.0, 4.0])
+    Xn = similar(Xt)
+    @test inverse_retract!(TM, Xn, p1, p3, m_prod_invretr) ≈
+          ArrayPartition([0.0, 1.0, -2.0], [0.0, -2.0, 4.0])
+    @test isapprox(
+        TM,
+        retract(TM, p1, X1, m_prod_retr),
+        ArrayPartition(
+            [-0.6172728764571667, 0.35184490787569894, -0.7036898157513979],
+            [0.0, 0.0, 0.0],
+        ),
     )
-    @test retract(TM, p1, X1, m_prod_retr) ≈ ArrayPartition(
-        [-0.6172728764571667, 0.35184490787569894, -0.7036898157513979],
-        [0.0, 0.0, 0.0],
+    qn = similar(p1)
+    @test isapprox(
+        TM,
+        retract!(TM, qn, p1, X1, m_prod_retr),
+        ArrayPartition(
+            [-0.6172728764571667, 0.35184490787569894, -0.7036898157513979],
+            [0.0, 0.0, 0.0],
+        ),
     )
 
     @test retract(TM, p1, X1, m_sasaki) ≈ ArrayPartition(
         [-0.6172728764571667, 0.35184490787569894, -0.7036898157513979],
         [0.0, 0.0, 0.0],
     )
+    @test retract!(TM, qn, p1, X1, m_sasaki) ≈ ArrayPartition(
+        [-0.6172728764571667, 0.35184490787569894, -0.7036898157513979],
+        [0.0, 0.0, 0.0],
+    )
 
+    @test rand(TM) isa ArrayPartition{Float64}
+    @test rand(TM; vector_at = p1) isa ArrayPartition{Float64}
+    @test rand(Random.default_rng(), TM) isa ArrayPartition{Float64}
+    @test rand(Random.default_rng(), TM; vector_at = p1) isa ArrayPartition{Float64}
+
+    @test project(TM, p1) ≈ p1
+    @test project(TM, p1, X1) ≈ X1
+    @test project(TM.fiber, pm, Xm) ≈ Xm
+
+    @test ManifoldsBase.allocate_result(TM, rand) isa ArrayPartition
 end
