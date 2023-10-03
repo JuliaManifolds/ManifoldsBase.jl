@@ -1009,9 +1009,9 @@ end
 #
 # (a) Manifolds and general types
 export AbstractManifold, AbstractManifoldPoint, TVector, CoTVector, TFVector, CoTFVector
-export TansorProductType, VectorBundleFibers, VectorSpaceAtPoint
-export CotangentSpaceAtPoint, TangentSpaceAtPoint, TangentSpace, CotangentSpace
-export VectorBundle, TangentBundle, CotangentBundle
+export VectorBundleFibers, VectorSpaceAtPoint
+export TangentSpaceAtPoint, TangentSpace, CotangentSpace
+export VectorBundle, TangentBundle
 export AbstractDecoratorManifold
 export AbstractTrait, IsEmbeddedManifold, IsEmbeddedSubmanifold, IsIsometricEmbeddedManifold
 export IsExplicitDecorator
@@ -1045,6 +1045,8 @@ export AbstractInverseRetractionMethod,
     ApproximateInverseRetraction,
     CayleyInverseRetraction,
     EmbeddedInverseRetraction,
+    FiberBundleInverseProductRetraction,
+    FiberBundleProductRetraction,
     InverseProductRetraction,
     LogarithmicInverseRetraction,
     NLSolveInverseRetraction,
@@ -1053,21 +1055,18 @@ export AbstractInverseRetractionMethod,
     PolarInverseRetraction,
     ProjectionInverseRetraction,
     InverseRetractionWithKeywords,
-    SoftmaxInverseRetraction,
-    VectorBundleInverseProductRetraction,
-    VectorBundleProductRetraction
+    SoftmaxInverseRetraction
 
 # (d) Vector Transport Types
 export AbstractVectorTransportMethod,
     DifferentiatedRetractionVectorTransport,
+    FiberBundleProductVectorTransport,
     ParallelTransport,
     PoleLadderTransport,
     ProductVectorTransport,
     ProjectionTransport,
     ScaledVectorTransport,
     SchildsLadderTransport,
-    VectorBundleProductVectorTransport,
-    VectorBundleVectorTransport,
     VectorTransportDirection,
     VectorTransportTo,
     VectorTransportWithKeywords
@@ -1111,7 +1110,6 @@ export allocate,
     embed!,
     embed_project,
     embed_project!,
-    flat,
     geodesic,
     geodesic!,
     get_basis,
@@ -1155,7 +1153,6 @@ export allocate,
     real_dimension,
     representation_size,
     set_component!,
-    sharp,
     shortest_geodesic,
     shortest_geodesic!,
     show,

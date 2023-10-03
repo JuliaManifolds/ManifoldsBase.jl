@@ -31,14 +31,13 @@ include("test_sphere.jl")
     @test TB ===
           VectorBundle(TangentSpace, M, ManifoldsBase.FiberBundleProductVectorTransport())
     @test TB === TangentBundle(M, ManifoldsBase.FiberBundleProductVectorTransport())
-    CTB = CotangentBundle(M)
-    @test CTB === CotangentBundle(M, ManifoldsBase.FiberBundleProductVectorTransport())
+
     @test ManifoldsBase.FiberBundleProductVectorTransport(M) ===
           ManifoldsBase.FiberBundleProductVectorTransport(
         ParallelTransport(),
         ParallelTransport(),
     )
-    @test sprint(show, CTB) == "CotangentBundle($(M))"
+
     @test sprint(show, VectorBundle(TestVectorSpaceType(), M)) ==
           "VectorBundle(TestVectorSpaceType(), $(M))"
     @test sprint(
@@ -52,18 +51,12 @@ include("test_sphere.jl")
 
     @test ManifoldsBase.TangentBundleFibers(M) ===
           ManifoldsBase.BundleFibers(ManifoldsBase.TangentFiber, M)
-    @test ManifoldsBase.CotangentBundleFibers(M) ===
-          ManifoldsBase.BundleFibers(ManifoldsBase.CotangentFiber, M)
 
     @test vector_space_dimension(TB.fiber) == 3
-    @test vector_space_dimension(CTB.fiber) == 3
-    @test ManifoldsBase.fiber_dimension(CTB.fiber) == 3
     @test ManifoldsBase.fiber_dimension(M, ManifoldsBase.TangentFiber) == 3
-    @test ManifoldsBase.fiber_dimension(M, ManifoldsBase.CotangentFiber) == 3
     @test ManifoldsBase.fiber_bundle_transport(TangentSpace, M) === ParallelTransport()
 
     @test representation_size(TB.fiber) == (3,)
-    @test representation_size(CTB.fiber) == (3,)
 
     @testset "spaces at point" begin
         p = [1.0, 0.0, 0.0]
@@ -71,21 +64,16 @@ include("test_sphere.jl")
         t_p = TangentSpaceAtPoint(M, p)
         t_p2 = TangentSpace(M, p)
         @test t_p == t_p2
-        ct_p = CotangentSpaceAtPoint(M, p)
         t_ps = sprint(show, "text/plain", t_p)
         sp = sprint(show, "text/plain", p)
         sp = replace(sp, '\n' => "\n ")
         t_ps_test = "Tangent space to the manifold $(M) at point:\n $(sp)"
         @test t_ps == t_ps_test
         @test base_manifold(t_p) == M
-        @test base_manifold(ct_p) == M
         @test manifold_dimension(t_p) == 3
         @test t_p.fiber.manifold == M
-        @test ct_p.fiber.manifold == M
         @test t_p.fiber.fiber == VectorSpaceFiberType(TangentSpace)
-        @test ct_p.fiber.fiber == VectorSpaceFiberType(CotangentSpace)
         @test t_p.point == p
-        @test ct_p.point == p
         @test injectivity_radius(t_p) == Inf
         @test representation_size(t_p) == representation_size(M)
         X = [0.0, 0.0, 1.0]

@@ -81,14 +81,6 @@ function TangentBundle(M::AbstractManifold, vtm::FiberBundleProductVectorTranspo
     return VectorBundle(TangentSpace, M, vtm)
 end
 
-const CotangentBundle{𝔽,M} =
-    VectorBundle{𝔽,CotangentSpaceType,M} where {𝔽,M<:AbstractManifold{𝔽}}
-
-CotangentBundle(M::AbstractManifold) = VectorBundle(CotangentSpace, M)
-function CotangentBundle(M::AbstractManifold, vtm::FiberBundleProductVectorTransport)
-    return VectorBundle(CotangentSpace, M, vtm)
-end
-
 function default_inverse_retraction_method(::TangentBundle)
     return FiberBundleInverseProductRetraction()
 end
@@ -386,9 +378,6 @@ function retract_sasaki!(B::TangentBundle, q, p, X, t::Number, m::SasakiRetracti
     return q
 end
 
-function representation_size(B::CotangentBundleFibers)
-    return representation_size(B.manifold)
-end
 function representation_size(B::TangentBundleFibers)
     return representation_size(B.manifold)
 end
@@ -403,7 +392,6 @@ function Base.show(io::IO, vbf::VectorBundleFibers)
     return print(io, "VectorBundleFibers($(vbf.fiber.fiber), $(vbf.manifold))")
 end
 Base.show(io::IO, vb::TangentBundle) = print(io, "TangentBundle($(vb.manifold))")
-Base.show(io::IO, vb::CotangentBundle) = print(io, "CotangentBundle($(vb.manifold))")
 
 @inline function allocate_result(B::TangentBundleFibers, f::typeof(zero_vector), x...)
     return allocate_result(B.manifold, f, x...)
@@ -427,9 +415,6 @@ function vector_space_dimension(M::AbstractManifold, V::TensorProductType)
 end
 
 function vector_space_dimension(B::TangentBundleFibers)
-    return manifold_dimension(B.manifold)
-end
-function vector_space_dimension(B::CotangentBundleFibers)
     return manifold_dimension(B.manifold)
 end
 function vector_space_dimension(B::VectorBundleFibers)

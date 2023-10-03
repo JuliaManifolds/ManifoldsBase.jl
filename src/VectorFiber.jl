@@ -27,10 +27,7 @@ end
 
 const TangentFiberType = VectorSpaceFiberType{TangentSpaceType}
 
-const CotangentFiberType = VectorSpaceFiberType{CotangentSpaceType}
-
 const TangentFiber = VectorSpaceFiberType{TangentSpaceType}(TangentSpace)
-const CotangentFiber = VectorSpaceFiberType{CotangentSpaceType}(CotangentSpace)
 
 """
     VectorBundleFibers{TVS,TM}
@@ -52,11 +49,6 @@ end
 const TangentBundleFibers{M} = BundleFibers{TangentFiberType,M} where {M<:AbstractManifold}
 
 TangentBundleFibers(M::AbstractManifold) = BundleFibers(TangentFiber, M)
-
-const CotangentBundleFibers{M} =
-    BundleFibers{CotangentFiberType,M} where {M<:AbstractManifold}
-
-CotangentBundleFibers(M::AbstractManifold) = BundleFibers(CotangentFiber, M)
 
 """
     VectorSpaceAtPoint{𝔽,M,TFiber}
@@ -96,19 +88,6 @@ space at `p` on the [`AbstractManifold`](@ref) `M`.
 """
 TangentSpace(M::AbstractManifold, p) = TangentSpaceAtPoint(M, p)
 
-const CotangentSpaceAtPoint{𝔽,M} =
-    VectorSpaceAtPoint{𝔽,CotangentBundleFibers{M}} where {𝔽,M<:AbstractManifold{𝔽}}
-
-"""
-    CotangentSpaceAtPoint(M::AbstractManifold, p)
-
-Return an object of type [`VectorSpaceAtPoint`](@ref) representing cotangent
-space at `p`.
-"""
-function CotangentSpaceAtPoint(M::AbstractManifold, p)
-    return VectorSpaceAtPoint(M, CotangentFiber, p)
-end
-
 function allocate_result(M::TangentSpaceAtPoint, ::typeof(rand))
     return zero_vector(M.fiber.manifold, M.point)
 end
@@ -144,7 +123,6 @@ function exp!(M::TangentSpaceAtPoint, q, p, X)
 end
 
 fiber_dimension(M::TangentBundleFibers) = manifold_dimension(M.manifold)
-fiber_dimension(M::CotangentBundleFibers) = manifold_dimension(M.manifold)
 fiber_dimension(M::AbstractManifold, V::VectorSpaceFiberType) = fiber_dimension(M, V.fiber)
 fiber_dimension(M::AbstractManifold, ::CotangentSpaceType) = manifold_dimension(M)
 fiber_dimension(M::AbstractManifold, ::TangentSpaceType) = manifold_dimension(M)
