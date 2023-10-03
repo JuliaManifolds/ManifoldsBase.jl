@@ -28,7 +28,9 @@ include("test_sphere.jl")
           ManifoldsBase.FiberBundleProductVectorTransport
     @test TB ===
           VectorBundle(TangentSpace, M, ManifoldsBase.FiberBundleProductVectorTransport())
+    @test TB === TangentBundle(M, ManifoldsBase.FiberBundleProductVectorTransport())
     CTB = CotangentBundle(M)
+    @test CTB === CotangentBundle(M, ManifoldsBase.FiberBundleProductVectorTransport())
     @test sprint(show, CTB) == "CotangentBundle($(M))"
     @test sprint(show, VectorBundle(TestVectorSpaceType(), M)) ==
           "VectorBundle(TestVectorSpaceType(), $(M))"
@@ -49,6 +51,10 @@ include("test_sphere.jl")
     @test ManifoldsBase.fiber_dimension(CTB.fiber) == 3
     @test ManifoldsBase.fiber_dimension(M, ManifoldsBase.TangentFiber) == 3
     @test ManifoldsBase.fiber_dimension(M, ManifoldsBase.CotangentFiber) == 3
+    @test ManifoldsBase.fiber_bundle_transport(TangentSpace, M) === ParallelTransport()
+
+    @test representation_size(TB.fiber) == (3,)
+    @test representation_size(CTB.fiber) == (3,)
 
     @testset "spaces at point" begin
         p = [1.0, 0.0, 0.0]
@@ -79,11 +85,14 @@ include("test_sphere.jl")
         @test embed(t_p, X, X) == X
         @test distance(t_p, p, q) ≈ sqrt(5)
         @test isapprox(t_p, exp(t_p, X, X), 2 * X)
+        @test isapprox(t_p, log(t_p, X, Y), [0.0, 2.0, -2.0])
         @test inner(t_p, X, X, X) ≈ 1.0
         @test norm(t_p, X, X) ≈ 1.0
         @test parallel_transport_to(t_p, X, Y, X) ≈ Y
         @test vector_transport_to(t_p, X, Y, X) ≈ Y
+        @test vector_transport_to(t_p, X, Y, X, ProjectionTransport()) ≈ Y
         @test project(t_p, X, Y) ≈ Y
+        @test project(t_p, Y) ≈ Y
         @test rand(t_p) isa Vector{Float64}
         @test rand(t_p; vector_at = X) isa Vector{Float64}
         @test rand(Random.default_rng(), t_p) isa Vector{Float64}
@@ -95,6 +104,20 @@ include("test_sphere.jl")
         fiber_s = sprint(show, "text/plain", fiber)
         X_ps_test = "$(typeof(X_p))\nFiber:\n $(fiber_s)\nBase point:\n $(sp)"
         @test X_ps == X_ps_test
+
+        for basis in
+            [DefaultOrthonormalBasis(), get_basis(t_p, p, DefaultOrthonormalBasis())]
+            @test length(get_vectors(t_p, p, get_basis(t_p, p, basis))) == 3
+            X1c = get_coordinates(t_p, p, X, basis)
+            @test isapprox(X1c, [0.0, 0.0, 1.0])
+            Y1c = similar(X1c)
+            get_coordinates!(t_p, Y1c, p, X, basis)
+            @test isapprox(X1c, Y1c)
+            @test isapprox(get_vector(t_p, p, X1c, basis), X)
+            Z1 = similar(X)
+            get_vector!(t_p, Z1, p, X1c, basis)
+            @test isapprox(Z1, X)
+        end
     end
 
     @testset "tensor product" begin
@@ -172,6 +195,9 @@ end
     @test isapprox(Yt, X3)
     @test zero_vector(TM, p1) == zero(p1)
 
+    @test inner(TM, p1, X1, X2) ≈ -10.0
+    @test norm(TM, p1, X1) ≈ sqrt(10.0)
+
     for basis in [DefaultOrthonormalBasis(), get_basis(TM, p1, DefaultOrthonormalBasis())]
         @test length(get_vectors(TM, p1, get_basis(TM, p1, basis))) == 4
         X1c = get_coordinates(TM, p1, X1, basis)
@@ -182,7 +208,25 @@ end
         @test isapprox(get_vector(TM, p1, X1c, basis), X1)
         Z1 = similar(X1)
         get_vector!(TM, Z1, p1, X1c, basis)
-        @test isapprox(X1, X1)
+        @test isapprox(Z1, X1)
     end
+
+    m_prod_retr = ManifoldsBase.FiberBundleProductRetraction()
+    m_prod_invretr = ManifoldsBase.FiberBundleInverseProductRetraction()
+    m_sasaki = SasakiRetraction(5)
+
+    @test inverse_retract(TM, p1, p2, m_prod_invretr) ≈ ArrayPartition(
+        [0.0, 0.0, 0.0],
+        [-0.7392904137312384, -0.6108990836533785, 1.221798167306757],
+    )
+    @test retract(TM, p1, X1, m_prod_retr) ≈ ArrayPartition(
+        [-0.6172728764571667, 0.35184490787569894, -0.7036898157513979],
+        [0.0, 0.0, 0.0],
+    )
+
+    @test retract(TM, p1, X1, m_sasaki) ≈ ArrayPartition(
+        [-0.6172728764571667, 0.35184490787569894, -0.7036898157513979],
+        [0.0, 0.0, 0.0],
+    )
 
 end

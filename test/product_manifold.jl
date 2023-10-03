@@ -179,13 +179,21 @@ include("test_sphere.jl")
         @test inner(M, p1, X1, X2) ≈ 21.08
         @test norm(M, p1, X1) ≈ sqrt(70.04)
         @test project(M, p1) ≈ p1
+        q1 = similar(p1)
+        project!(M, q1, p1)
+        @test q1 ≈ p1
         @test project(M, p1, X1) ≈ X1
+        Y1 = similar(X1)
+        project!(M, Y1, p1, X1)
+        @test X1 ≈ Y1
         @test zero_vector(M, p1) == zero(X1)
 
         @test rand(M) isa ArrayPartition
         @test rand(M; vector_at = p1) isa ArrayPartition
         @test rand(Random.default_rng(), M) isa ArrayPartition
         @test rand(Random.default_rng(), M; vector_at = p1) isa ArrayPartition
+        @test is_point(M, rand!(M, q1))
+        @test is_vector(M, p1, rand!(M, Y1; vector_at = p1))
     end
 
     @testset "Broadcasting" begin
@@ -457,6 +465,9 @@ include("test_sphere.jl")
         X1 = ArrayPartition([0.0, 2.0, -1.0], [1.0 0.0; 2.0 1.0])
         B = DefaultOrthonormalBasis()
         Bc = get_basis(M, p1, B)
+
+        BcO = get_basis(M, p1, DiagonalizingOrthonormalBasis(X1))
+        @test BcO.data isa ProductBasisData
 
         for basis in
             [DefaultOrthonormalBasis(), get_basis(M, p1, DefaultOrthonormalBasis())]

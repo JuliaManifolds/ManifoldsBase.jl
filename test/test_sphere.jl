@@ -63,10 +63,31 @@ function ManifoldsBase.exp!(::TestSphere, q, p, X, t::Number)
     return q
 end
 
+function ManifoldsBase.get_basis_diagonalizing(
+    M::TestSphere{n},
+    p,
+    B::DiagonalizingOrthonormalBasis{ℝ},
+) where {n}
+    A = zeros(n + 1, n + 1)
+    A[1, :] = transpose(p)
+    A[2, :] = transpose(B.frame_direction)
+    V = nullspace(A)
+    κ = ones(n)
+    if !iszero(B.frame_direction)
+        # if we have a nonzero direction for the geodesic, add it and it gets curvature zero from the tensor
+        V = hcat(B.frame_direction / norm(M, p, B.frame_direction), V)
+        κ[1] = 0 # no curvature along the geodesic direction, if x!=y
+    end
+    T = typeof(similar(B.frame_direction))
+    Ξ = [convert(T, V[:, i]) for i in 1:n]
+    return CachedBasis(B, κ, Ξ)
+end
+
 @inline function nzsign(z, absz = abs(z))
     psignz = z / absz
     return ifelse(iszero(absz), one(psignz), psignz)
 end
+
 
 function ManifoldsBase.get_coordinates_orthonormal!(M::TestSphere, Y, p, X, ::RealNumbers)
     n = manifold_dimension(M)
