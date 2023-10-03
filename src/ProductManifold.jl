@@ -297,16 +297,6 @@ function exp!(M::ProductManifold, q, p, X, t::Number)
     return q
 end
 
-@doc raw"""
-    flat(M::ProductManifold, p, X::FVector{TangentSpaceType})
-
-use the musical isomorphism to transform the tangent vector `X` from the tangent space at
-`p` on the [`ProductManifold`](@ref) `M` to a cotangent vector.
-This can be done elementwise for every entry of `X` (with respect to the corresponding
-entry in `p`) separately.
-"""
-flat(::ProductManifold, ::Any...)
-
 function get_basis(M::ProductManifold, p, B::AbstractBasis)
     parts = map(t -> get_basis(t..., B), ziptuples(M.manifolds, submanifold_components(p)))
     return CachedBasis(B, ProductBasisData(parts))
@@ -761,15 +751,6 @@ Set the `i`th component of a point `q` on a [`ProductManifold`](@ref) `M` to `p`
 function set_component!(M::ProductManifold, q, p, i)
     return copyto!(submanifold_component(M, q, i), p)
 end
-
-@doc raw"""
-    sharp(M::ProductManifold, p, ξ::FVector{CotangentSpaceType})
-
-Use the musical isomorphism to transform the cotangent vector `ξ` from the tangent space at
-`p` on the [`ProductManifold`](@ref) `M` to a tangent vector.
-This can be done elementwise for every entry of `ξ` (and `p`) separately
-"""
-sharp(::ProductManifold, ::Any...)
 
 function _show_submanifold(io::IO, M::AbstractManifold; pre = "")
     sx = sprint(show, "text/plain", M, context = io, sizehint = 0)
