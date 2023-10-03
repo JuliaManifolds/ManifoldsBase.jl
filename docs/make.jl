@@ -57,6 +57,7 @@ makedocs(;
             "Vector transports" => "vector_transports.md",
         ],
         "Manifolds" => "manifolds.md",
+        "Meta-Manifolds" => "metamanifolds.md",
         "Decorating/Extending a Manifold" => "decorator.md",
         "Bases for tangent spaces" => "bases.md",
         "References" => "references.md",

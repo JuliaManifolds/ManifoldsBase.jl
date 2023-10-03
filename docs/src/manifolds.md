@@ -3,39 +3,7 @@
 While the interface `ManifoldsBase.jl` does not cover concrete manifolds, it provides a few
 helpers to build or create manifolds based on existing manifolds
 
-## [(Abstract) power manifold](@id sec-power-manifold)
-
-A power manifold is constructed like higher dimensional vector spaces are formed from the real line, just that for every point ``p = (p_1,\ldots,p_n) ∈ \mathcal M^n`` on the power manifold ``\mathcal M^n`` the entries of ``p`` are points ``p_1,\ldots,p_n ∈ \mathcal M`` on some manifold ``\mathcal M``. Note that ``n`` can also be replaced by multiple values, such that ``p`` is not a vector but a matrix or a multi-index array of points.
-
-```@autodocs
-Modules = [ManifoldsBase]
-Pages = ["src/PowerManifold.jl"]
-Order = [:macro, :type, :function]
-```
-
-## VectorBundles and TangentSpaces
-
-```@autodocs
-Modules = [ManifoldsBase]
-Pages = ["VectorBundle.jl"]
-Order = [:macro, :type, :function]
-Public=true
-Private=false
-```
-
-## `ValidationManifold`
-
-[`ValidationManifold`](@ref) is a simple decorator using the [`AbstractDecoratorManifold`](@ref) that “decorates” a manifold with tests that all involved points and vectors are valid for the wrapped manifold.
-For example involved input and output paratemers are checked before and after running a function, repectively.
-This is done by calling [`is_point`](@ref) or [`is_vector`](@ref) whenever applicable.
-
-```@autodocs
-Modules = [ManifoldsBase]
-Pages = ["ValidationManifold.jl"]
-Order = [:macro, :type, :function]
-```
-
-## `DefaultManifold`
+## A default manifold
 
 [`DefaultManifold`](@ref ManifoldsBase.DefaultManifold) is a simplified version of [`Euclidean`](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/euclidean.html) and demonstrates a basic interface implementation.
 It can be used to perform simple tests.
@@ -80,4 +48,17 @@ Most metric-related functionality is currently defined in [`Manifolds.jl`](https
 Modules = [ManifoldsBase]
 Pages = ["metric.jl"]
 Order = [:type, :function]
+```
+
+
+## A manifold for validation
+
+[`ValidationManifold`](@ref) is a simple decorator using the [`AbstractDecoratorManifold`](@ref) that “decorates” a manifold with tests that all involved points and vectors are valid for the wrapped manifold.
+For example involved input and output paratemers are checked before and after running a function, repectively.
+This is done by calling [`is_point`](@ref) or [`is_vector`](@ref) whenever applicable.
+
+```@autodocs
+Modules = [ManifoldsBase]
+Pages = ["ValidationManifold.jl"]
+Order = [:macro, :type, :function]
 ```

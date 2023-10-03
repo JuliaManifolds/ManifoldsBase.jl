@@ -399,6 +399,20 @@ function _euclidean_basis_vector(p, i)
     return X
 end
 
+@doc raw"""
+    flat(M::AbstractManifold, p, X)
+
+Compute the flat isomorphism (one of the musical isomorphisms) of tangent vector `X`
+from the vector space of type `M` at point `p` from the underlying `AbstractManifold`.
+
+The function can be used for example to transform vectors
+from the tangent bundle to vectors from the cotangent bundle
+$♭ : T\mathcal M → T^{*}\mathcal M$
+"""
+flat(M::AbstractManifold, p, X)
+
+
+
 """
     get_basis(M::AbstractManifold, p, B::AbstractBasis; kwargs...) -> CachedBasis
 
@@ -957,6 +971,18 @@ requires_caching(::CachedBasis) = false
 requires_caching(::DefaultBasis) = false
 requires_caching(::DefaultOrthogonalBasis) = false
 requires_caching(::DefaultOrthonormalBasis) = false
+
+@doc raw"""
+    sharp(M::AbstractManifold, p, ξ)
+
+Compute the sharp isomorphism (one of the musical isomorphisms) of vector `ξ`
+from the vector space `M` at point `p` from the underlying `AbstractManifold`.
+
+The function can be used for example to transform vectors
+from the cotangent bundle to vectors from the tangent bundle
+$♯ : T^{*}\mathcal M → T\mathcal M$
+"""
+sharp(::AbstractManifold, p, ξ)
 
 function _show_basis_vector(io::IO, X; pre = "", head = "")
     sX = sprint(show, "text/plain", X, context = io, sizehint = 0)
