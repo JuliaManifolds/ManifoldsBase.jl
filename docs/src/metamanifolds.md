@@ -12,6 +12,15 @@ Pages = ["src/PowerManifold.jl"]
 Order = [:macro, :type, :function]
 ```
 
+## [Product Manifold](@id ProductManifold)
+
+```@autodocs
+Modules = [ManifoldsBase]
+Pages = ["src/ProductManifold.jl"]
+Order = [:macro, :type, :function]
+```
+
+
 ## VectorBundle and Vector Fibre
 
 ```@autodocs

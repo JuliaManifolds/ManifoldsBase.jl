@@ -34,7 +34,7 @@ This is modelled using [`BundleFibers`](@ref) with only a fiber part
 and fixing the point-like part to be just `p`.
 
 This fiber itself is also a `manifold`. For vector fibers it's by default flat and hence
-isometric to the [`Euclidean`](@ref) manifold.
+isometric to the [`Euclidean`](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/euclidean.html) manifold.
 
 # Constructor
 

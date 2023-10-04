@@ -1067,6 +1067,7 @@ export AbstractVectorTransportMethod,
     ProjectionTransport,
     ScaledVectorTransport,
     SchildsLadderTransport,
+    VectorBundleVectorTransport,
     VectorTransportDirection,
     VectorTransportTo,
     VectorTransportWithKeywords
