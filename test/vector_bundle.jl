@@ -9,6 +9,8 @@ function ManifoldsBase.fiber_dimension(M::AbstractManifold, ::TestFiberType)
     return 2 * manifold_dimension(M)
 end
 
+ManifoldsBase.vector_space_dimension(M::AbstractManifold, ::TestVectorSpaceType) = 2 * manifold_dimension(M)
+
 function ManifoldsBase.inner(::VectorBundleFibers{TestVectorSpaceType}, p, X, Y)
     return 2 * dot(X, Y)
 end
@@ -66,6 +68,7 @@ include("test_sphere.jl")
           ManifoldsBase.BundleFibers(ManifoldsBase.TangentFiber, M)
 
     @test vector_space_dimension(TB.fiber) == 3
+    @test vector_space_dimension(TVBF) == 6
     @test ManifoldsBase.fiber_dimension(M, ManifoldsBase.TangentFiber) == 3
     @test ManifoldsBase.fiber_bundle_transport(TangentSpace, M) === ParallelTransport()
 

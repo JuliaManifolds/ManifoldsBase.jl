@@ -313,5 +313,21 @@ struct TestArrayRepresentation <: AbstractPowerRepresentation end
             change_representer(M, e, q, log(M, q, p)),
         ]
         @test norm(N, P, Z .- Zc) ≈ 0
+        @test ManifoldsBase.vector_bundle_transport(TestVectorSpaceType(), N) === ParallelTransport()
+    end
+
+    @testset "Other stuff" begin
+        M1 = TestSphere(2)
+        @testset "Weingarten" begin
+            Mpr = PowerManifold(M1, NestedPowerRepresentation(), 2)
+            p = [1.0, 0.0, 0.0]
+            X = [0.0, 0.2, 0.0]
+            V = [0.1, 0.0, 0.0] #orthogonal to TpM -> parallel to p
+            @test isapprox(
+                Mpr,
+                Weingarten(Mpr, [p, p], [X, X], [V, V]),
+                [-0.1 * X, -0.1 * X],
+            )
+        end
     end
 end
