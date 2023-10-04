@@ -5,6 +5,14 @@ struct TestVectorSpaceType <: VectorSpaceType end
 
 struct TestFiberType <: ManifoldsBase.FiberType end
 
+function ManifoldsBase.fiber_dimension(M::AbstractManifold, ::TestFiberType)
+    return 2 * manifold_dimension(M)
+end
+
+function ManifoldsBase.inner(::VectorBundleFibers{TestVectorSpaceType}, p, X, Y)
+    return 2 * dot(X, Y)
+end
+
 include("test_sphere.jl")
 
 @testset "Tangent bundle" begin
@@ -40,14 +48,19 @@ include("test_sphere.jl")
 
     @test sprint(show, VectorBundle(TestVectorSpaceType(), M)) ==
           "VectorBundle(TestVectorSpaceType(), $(M))"
-    @test sprint(
-        show,
-        VectorBundleFibers(VectorSpaceFiberType(TestVectorSpaceType()), M),
-    ) == "VectorBundleFibers(TestVectorSpaceType(), $(M))"
+    TVBF = ManifoldsBase.VectorBundleFibers(TestVectorSpaceType(), M)
+    @test sprint(show, TVBF) == "VectorBundleFibers(TestVectorSpaceType(), $(M))"
     @test sprint(show, VectorSpaceFiberType(TestVectorSpaceType())) ==
           "VectorSpaceFiberType(TestVectorSpaceType())"
-    @test sprint(show, ManifoldsBase.BundleFibers(TestFiberType(), M)) ==
-          "BundleFibers(TestFiberType(), $(M))"
+    @test ManifoldsBase.VectorBundleFibers(
+        VectorSpaceFiberType(TestVectorSpaceType()),
+        M,
+    ) === TVBF
+    TBF = ManifoldsBase.BundleFibers(TestFiberType(), M)
+    @test sprint(show, TBF) == "BundleFibers(TestFiberType(), $(M))"
+    @test norm(TVBF, p, [2.0, 2.0, 0.0]) ≈ 4.0
+    @test ManifoldsBase.fiber_dimension(TBF) == 6
+    @test ManifoldsBase.fiber_dimension(M, CotangentSpace) == 3
 
     @test ManifoldsBase.TangentBundleFibers(M) ===
           ManifoldsBase.BundleFibers(ManifoldsBase.TangentFiber, M)
@@ -171,6 +184,7 @@ end
     @test distance(TM.fiber, pm, Xm, Ym) ≈ sqrt(20)
     @test injectivity_radius(TM) == 0.0
     @test ManifoldsBase.fiber_dimension(TM.fiber) == 2
+    @test bundle_projection(TM, p1) === pm
 
     qm = exp(M, pm, Xm)
     Xt = vector_transport_direction(TM, p1, X1, X2)
