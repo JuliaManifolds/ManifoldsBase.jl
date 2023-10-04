@@ -49,6 +49,67 @@ Retraction using the exponential map.
 """
 struct ExponentialRetraction <: AbstractRetractionMethod end
 
+
+
+@doc raw"""
+    struct FiberBundleInverseProductRetraction <: AbstractInverseRetractionMethod end
+
+Inverse retraction of the point `y` at point `p` from vector bundle `B` over manifold
+`B.fiber` (denoted ``\mathcal M``). The inverse retraction is derived as a product manifold-style
+approximation to the logarithmic map in the Sasaki metric. The considered product manifold
+is the product between the manifold ``\mathcal M`` and the topological vector space isometric
+to the fiber.
+
+## Notation
+The point ``p = (x_p, V_p)`` where ``x_p ∈ \mathcal M`` and ``V_p`` belongs to
+the fiber ``F=π^{-1}(\{x_p\})`` of the vector bundle ``B`` where ``π`` is the canonical
+projection of that vector bundle ``B``. Similarly, ``q = (x_q, V_q)``.
+
+The inverse retraction is calculated as
+
+```math
+\operatorname{retr}^{-1}_p q = (\operatorname{retr}^{-1}_{x_p}(x_q), V_{\operatorname{retr}^{-1}} - V_p)
+```
+
+where ``V_{\operatorname{retr}^{-1}}`` is the result of vector transport of ``V_q`` to the point ``x_p``.
+The difference ``V_{\operatorname{retr}^{-1}} - V_p`` corresponds to the logarithmic map in
+the vector space ``F``.
+
+See also [`FiberBundleProductRetraction`](@ref).
+"""
+struct FiberBundleInverseProductRetraction <: AbstractInverseRetractionMethod end
+
+@doc raw"""
+    struct FiberBundleProductRetraction <: AbstractRetractionMethod end
+
+Product retraction map of tangent vector ``X`` at point ``p`` from vector bundle `B` over
+manifold `B.fiber` (denoted ``\mathcal M``). The retraction is derived as a product manifold-style
+approximation to the exponential map in the Sasaki metric. The considered product manifold
+is the product between the manifold ``\mathcal M`` and the topological vector space isometric
+to the fiber.
+
+## Notation:
+* The point ``p = (x_p, V_p)`` where ``x_p ∈ \mathcal M`` and ``V_p`` belongs to the
+  fiber ``F=π^{-1}(\{x_p\})`` of the vector bundle ``B`` where ``π`` is the
+  canonical projection of that vector bundle ``B``.
+* The tangent vector ``X = (V_{X,M}, V_{X,F}) ∈ T_pB`` where
+  ``V_{X,M}`` is a tangent vector from the tangent space ``T_{x_p}\mathcal M`` and
+  ``V_{X,F}`` is a tangent vector from the tangent space ``T_{V_p}F`` (isomorphic to ``F``).
+
+The retraction is calculated as
+
+```math
+\operatorname{retr}_p(X) = (\exp_{x_p}(V_{X,M}), V_{\exp})
+````
+
+where ``V_{\exp}`` is the result of vector transport of ``V_p + V_{X,F}``
+to the point ``\exp_{x_p}(V_{X,M})``.
+The sum ``V_p + V_{X,F}`` corresponds to the exponential map in the vector space ``F``.
+
+See also [`FiberBundleInverseProductRetraction`](@ref).
+"""
+struct FiberBundleProductRetraction <: AbstractRetractionMethod end
+
 @doc raw"""
     ODEExponentialRetraction{T<:AbstractRetractionMethod, B<:AbstractBasis} <: AbstractRetractionMethod
 
@@ -173,6 +234,29 @@ function RetractionWithKeywords(m::T; kwargs...) where {T<:AbstractRetractionMet
     return RetractionWithKeywords{T,typeof(kwargs)}(m, kwargs)
 end
 
+@doc raw"""
+    struct SasakiRetraction <: AbstractRetractionMethod end
+
+Exponential map on [`TangentBundle`](@ref) computed via Euler integration as described
+in [MuralidharanFletcher:2012](@cite). The system of equations for ``\gamma : ℝ \to T\mathcal M`` such that
+``\gamma(1) = \exp_{p,X}(X_M, X_F)`` and ``\gamma(0)=(p, X)`` reads
+
+```math
+\dot{\gamma}(t) = (\dot{p}(t), \dot{X}(t)) = (R(X(t), \dot{X}(t))\dot{p}(t), 0)
+```
+
+where ``R`` is the Riemann curvature tensor (see [`riemann_tensor`](@ref)).
+
+# Constructor
+
+    SasakiRetraction(L::Int)
+
+In this constructor `L` is the number of integration steps.
+"""
+struct SasakiRetraction <: AbstractRetractionMethod
+    L::Int
+end
+
 """
     SoftmaxRetraction <: AbstractRetractionMethod
 
@@ -249,7 +333,7 @@ struct LogarithmicInverseRetraction <: AbstractInverseRetractionMethod end
 @doc raw"""
     PadeInverseRetraction{m} <: AbstractInverseRetractionMethod
 
-An inverse retraction based on the Padé approximation of order $m$ for the retraction.
+An inverse retraction based on the Padé approximation of order ``m`` for the retraction.
 
 !!! note "Technical Note"
     Though you would call e.g. [`inverse_retract`](@ref)`(M, p, q, PadeInverseRetraction(m))`,
@@ -927,6 +1011,9 @@ end
 function _retract!(M::AbstractManifold, q, p, X, t::Number, ::QRRetraction; kwargs...)
     return retract_qr!(M, q, p, X, t; kwargs...)
 end
+function _retract!(M::AbstractManifold, q, p, X, t::Number, m::SasakiRetraction)
+    return retract_sasaki!(M, q, p, X, t, m)
+end
 function _retract!(M::AbstractManifold, q, p, X, t::Number, ::SoftmaxRetraction; kwargs...)
     return retract_softmax!(M, q, p, X, t; kwargs...)
 end
@@ -1112,6 +1199,9 @@ end
 function _retract(M::AbstractManifold, p, X, t::Number, ::QRRetraction; kwargs...)
     return retract_qr(M, p, X, t; kwargs...)
 end
+function _retract(M::AbstractManifold, p, X, t::Number, m::SasakiRetraction)
+    return retract_sasaki(M, p, X, t, m)
+end
 function _retract(M::AbstractManifold, p, X, t::Number, ::SoftmaxRetraction; kwargs...)
     return retract_softmax(M, p, X, t; kwargs...)
 end
@@ -1238,5 +1328,16 @@ function retract_pade(M::AbstractManifold, p, X, t::Number, m::PadeRetraction; k
     return retract_pade!(M, q, p, X, t, m; kwargs...)
 end
 
+"""
+    retract_sasaki(M::AbstractManifold, p, X, t::Number, m::SasakiRetraction)
+
+Compute the allocating variant of the [`SasakiRetraction`](@ref),
+which by default allocates and calls `retract_sasaki!`.
+"""
+function retract_sasaki(M::AbstractManifold, p, X, t::Number, m::SasakiRetraction)
+    q = allocate_result(M, retract, p, X)
+    return retract_sasaki!(M, q, p, X, t, m)
+end
+
 Base.show(io::IO, ::CayleyRetraction) = print(io, "CayleyRetraction()")
-Base.show(io::IO, ::PadeRetraction{m}) where {m} = print(io, "PadeRetraction($(m))")
+Base.show(io::IO, ::PadeRetraction{m}) where {m} = print(io, "PadeRetraction($m)")

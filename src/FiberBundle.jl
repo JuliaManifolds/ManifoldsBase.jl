@@ -80,61 +80,6 @@ struct FiberBundleBasisData{BBasis<:CachedBasis,TBasis<:CachedBasis}
     fiber_basis::TBasis
 end
 
-@doc raw"""
-    struct FiberBundleInverseProductRetraction <: AbstractInverseRetractionMethod end
-
-Inverse retraction of the point `y` at point `p` from vector bundle `B` over manifold
-`B.fiber` (denoted $\mathcal M$). The inverse retraction is derived as a product manifold-style
-approximation to the logarithmic map in the Sasaki metric. The considered product manifold
-is the product between the manifold $\mathcal M$ and the topological vector space isometric
-to the fiber.
-
-Notation:
-  * The point $p = (x_p, V_p)$ where $x_p ∈ \mathcal M$ and $V_p$ belongs to the
-    fiber $F=π^{-1}(\{x_p\})$ of the vector bundle $B$ where $π$ is the
-    canonical projection of that vector bundle $B$.
-    Similarly, $q = (x_q, V_q)$.
-
-The inverse retraction is calculated as
-
-$\operatorname{retr}^{-1}_p q = (\operatorname{retr}^{-1}_{x_p}(x_q), V_{\operatorname{retr}^{-1}} - V_p)$
-
-where $V_{\operatorname{retr}^{-1}}$ is the result of vector transport of $V_q$ to the point $x_p$.
-The difference $V_{\operatorname{retr}^{-1}} - V_p$ corresponds to the logarithmic map in
-the vector space $F$.
-
-See also [`FiberBundleProductRetraction`](@ref).
-"""
-struct FiberBundleInverseProductRetraction <: AbstractInverseRetractionMethod end
-
-@doc raw"""
-    struct FiberBundleProductRetraction <: AbstractRetractionMethod end
-
-Product retraction map of tangent vector $X$ at point $p$ from vector bundle `B` over
-manifold `B.fiber` (denoted $\mathcal M$). The retraction is derived as a product manifold-style
-approximation to the exponential map in the Sasaki metric. The considered product manifold
-is the product between the manifold $\mathcal M$ and the topological vector space isometric
-to the fiber.
-
-Notation:
-  * The point $p = (x_p, V_p)$ where $x_p ∈ \mathcal M$ and $V_p$ belongs to the
-    fiber $F=π^{-1}(\{x_p\})$ of the vector bundle $B$ where $π$ is the
-    canonical projection of that vector bundle $B$.
-  * The tangent vector $X = (V_{X,M}, V_{X,F}) ∈ T_pB$ where
-    $V_{X,M}$ is a tangent vector from the tangent space $T_{x_p}\mathcal M$ and
-    $V_{X,F}$ is a tangent vector from the tangent space $T_{V_p}F$ (isomorphic to $F$).
-
-The retraction is calculated as
-
-$\operatorname{retr}_p(X) = (\exp_{x_p}(V_{X,M}), V_{\exp})$
-
-where $V_{\exp}$ is the result of vector transport of $V_p + V_{X,F}$
-to the point $\exp_{x_p}(V_{X,M})$.
-The sum $V_p + V_{X,F}$ corresponds to the exponential map in the vector space $F$.
-
-See also [`FiberBundleInverseProductRetraction`](@ref).
-"""
-struct FiberBundleProductRetraction <: AbstractRetractionMethod end
 
 base_manifold(B::FiberBundle) = base_manifold(B.manifold)
 

@@ -1,27 +1,4 @@
 
-@doc raw"""
-    struct SasakiRetraction <: AbstractRetractionMethod end
-
-Exponential map on [`TangentBundle`](@ref) computed via Euler integration as described
-in [MuralidharanFletcher:2012](@cite). The system of equations for $\gamma : ℝ \to T\mathcal M$ such that
-$\gamma(1) = \exp_{p,X}(X_M, X_F)$ and $\gamma(0)=(p, X)$ reads
-
-```math
-\dot{\gamma}(t) = (\dot{p}(t), \dot{X}(t)) = (R(X(t), \dot{X}(t))\dot{p}(t), 0)
-```
-
-where $R$ is the Riemann curvature tensor (see [`riemann_tensor`](@ref)).
-
-# Constructor
-
-    SasakiRetraction(L::Int)
-
-In this constructor `L` is the number of integration steps.
-"""
-struct SasakiRetraction <: AbstractRetractionMethod
-    L::Int
-end
-
 """
     const VectorBundleVectorTransport = FiberBundleProductVectorTransport
 
@@ -183,11 +160,13 @@ function _inverse_retract!(M::FiberBundle, X, p, q, ::FiberBundleInverseProductR
 end
 
 """
-    inverse_retract_product(M::VectorBundle, p, q)
+    inverse_retract(M::VectorBundle, p, q, ::FiberBundleInverseProductRetraction)
 
 Compute the allocating variant of the [`FiberBundleInverseProductRetraction`](@ref),
 which by default allocates and calls `inverse_retract_product!`.
 """
+inverse_retract(::VectorBundle, p, q, ::FiberBundleInverseProductRetraction)
+
 function inverse_retract_product(M::VectorBundle, p, q)
     X = allocate_result(M, inverse_retract, p, q)
     return inverse_retract_product!(M, X, p, q)
@@ -296,11 +275,13 @@ function _retract!(M::VectorBundle, q, p, X, t::Number, ::FiberBundleProductRetr
 end
 
 """
-    retract_product(M::VectorBundle, p, q, t::Number)
+    retract(M::VectorBundle, p, q, t::Number, ::FiberBundleProductRetraction)
 
 Compute the allocating variant of the [`FiberBundleProductRetraction`](@ref),
 which by default allocates and calls `retract_product!`.
 """
+retract(::VectorBundle, p, q, t::Number, ::FiberBundleProductRetraction)
+
 function retract_product(M::VectorBundle, p, X, t::Number)
     q = allocate_result(M, retract, p, X)
     return retract_product!(M, q, p, X, t)
@@ -323,25 +304,6 @@ function retract_product!(B::VectorBundle, q, p, X, t::Number)
     )
     copyto!(B.manifold, xq, xqt)
     return q
-end
-
-function _retract(M::AbstractManifold, p, X, t::Number, m::SasakiRetraction)
-    return retract_sasaki(M, p, X, t, m)
-end
-
-function _retract!(M::AbstractManifold, q, p, X, t::Number, m::SasakiRetraction)
-    return retract_sasaki!(M, q, p, X, t, m)
-end
-
-"""
-    retract_sasaki(M::AbstractManifold, p, X, t::Number, m::SasakiRetraction)
-
-Compute the allocating variant of the [`SasakiRetraction`](@ref),
-which by default allocates and calls `retract_sasaki!`.
-"""
-function retract_sasaki(M::AbstractManifold, p, X, t::Number, m::SasakiRetraction)
-    q = allocate_result(M, retract, p, X)
-    return retract_sasaki!(M, q, p, X, t, m)
 end
 
 function retract_sasaki!(B::TangentBundle, q, p, X, t::Number, m::SasakiRetraction)
