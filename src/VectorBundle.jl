@@ -344,9 +344,6 @@ function representation_size(B::TangentBundleFibers)
     return representation_size(B.manifold)
 end
 
-function Base.show(io::IO, tpt::TensorProductType)
-    return print(io, "TensorProductType(", join(tpt.spaces, ", "), ")")
-end
 function Base.show(io::IO, vb::VectorBundle)
     return print(io, "VectorBundle($(vb.type.fiber), $(vb.manifold))")
 end
@@ -367,14 +364,6 @@ Determine the vector tranport used for [`exp`](@ref exp(::FiberBundle, ::Any...)
 `fiber` and manifold `M`.
 """
 fiber_bundle_transport(::VectorSpaceType, ::AbstractManifold) = ParallelTransport()
-
-function vector_space_dimension(M::AbstractManifold, V::TensorProductType)
-    dim = 1
-    for space in V.spaces
-        dim *= fiber_dimension(M, space)
-    end
-    return dim
-end
 
 function vector_space_dimension(B::TangentBundleFibers)
     return manifold_dimension(B.manifold)

@@ -225,6 +225,47 @@ function allocation_promotion_function(M::AbstractPowerManifold, f, args::Tuple)
     return allocation_promotion_function(M.manifold, f, args)
 end
 
+"""
+    change_representer(M::AbstractPowerManifold, ::AbstractMetric, p, X)
+
+Since the metric on a power manifold decouples, the change of a representer can be done elementwise
+"""
+change_representer(::AbstractPowerManifold, ::AbstractMetric, ::Any, ::Any)
+
+function change_representer!(M::AbstractPowerManifold, Y, G::AbstractMetric, p, X)
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        change_representer!(
+            M.manifold,
+            _write(M, rep_size, Y, i),
+            G,
+            _read(M, rep_size, p, i),
+            _read(M, rep_size, X, i),
+        )
+    end
+    return Y
+end
+
+"""
+    change_metric(M::AbstractPowerManifold, ::AbstractMetric, p, X)
+
+Since the metric on a power manifold decouples, the change of metric can be done elementwise.
+"""
+change_metric(M::AbstractPowerManifold, ::AbstractMetric, ::Any, ::Any)
+
+function change_metric!(M::AbstractPowerManifold, Y, G::AbstractMetric, p, X)
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        change_metric!(
+            M.manifold,
+            _write(M, rep_size, Y, i),
+            G,
+            _read(M, rep_size, p, i),
+            _read(M, rep_size, X, i),
+        )
+    end
+    return Y
+end
 
 """
     check_point(M::AbstractPowerManifold, p; kwargs...)
@@ -1301,6 +1342,10 @@ function Base.show(
     return nothing
 end
 
+function vector_bundle_transport(::VectorSpaceType, ::PowerManifold)
+    return ParallelTransport()
+end
+
 function vector_transport_direction!(
     M::AbstractPowerManifold,
     Y,
@@ -1454,6 +1499,29 @@ function Base.view(
 )
     rep_size = representation_size(M.manifold)
     return view(p[I...], rep_size_to_colons(rep_size)...)
+end
+
+@doc raw"""
+    Y = Weingarten(M::AbstractPowerManifold, p, X, V)
+    Weingarten!(M::AbstractPowerManifold, Y, p, X, V)
+
+Since the metric decouples, also the computation of the Weingarten map
+``\mathcal W_p`` can be computed elementwise on the single elements of the [`PowerManifold`](@ref) `M`.
+"""
+Weingarten(::AbstractPowerManifold, p, X, V)
+
+function Weingarten!(M::AbstractPowerManifold, Y, p, X, V)
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        Weingarten!(
+            M.manifold,
+            _write(M, rep_size, Y, i),
+            _read(M, rep_size, p, i),
+            _read(M, rep_size, X, i),
+            _read(M, rep_size, V, i),
+        )
+    end
+    return Y
 end
 
 @inline function _write(M::AbstractPowerManifold, rep_size::Tuple, x::AbstractArray, i::Int)

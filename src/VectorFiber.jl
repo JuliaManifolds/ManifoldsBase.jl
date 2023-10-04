@@ -1,17 +1,5 @@
 
 """
-    TensorProductType(spaces::VectorSpaceType...)
-
-Vector space type corresponding to the tensor product of given vector space
-types.
-"""
-struct TensorProductType{TS<:Tuple} <: VectorSpaceType
-    spaces::TS
-end
-
-TensorProductType(spaces::VectorSpaceType...) = TensorProductType{typeof(spaces)}(spaces)
-
-"""
     VectorSpaceFiberType{TVS<:VectorSpaceType}
 
 `FiberType` of a [`FiberBundle`](@ref) corresponding to [`VectorSpaceType`](@ref)

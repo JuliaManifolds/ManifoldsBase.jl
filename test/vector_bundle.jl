@@ -132,16 +132,6 @@ include("test_sphere.jl")
         end
     end
 
-    @testset "tensor product" begin
-        TT = ManifoldsBase.TensorProductType(TangentSpace, TangentSpace)
-        TTs = "TensorProductType(TangentSpace, TangentSpace)"
-        VBF = VectorBundleFibers(TT, M)
-        @test sprint(show, TT) == TTs
-        @test vector_space_dimension(VBF) == 9
-        @test base_manifold(VBF) == M
-        @test sprint(show, VBF) == "VectorBundleFibers($(TTs), $(M))"
-    end
-
     @testset "Weingarten Map" begin
         p0 = [1.0, 0.0, 0.0]
         M = TangentSpaceAtPoint(M, p0)
