@@ -1,11 +1,14 @@
 using Test
 using ManifoldsBase
-using ManifoldsBase: AbstractNumbers, ℝ, ℂ, NestedReplacingPowerRepresentation
+using ManifoldsBase:
+    AbstractNumbers, ℝ, ℂ, NestedReplacingPowerRepresentation, VectorSpaceType
 using StaticArrays
 using LinearAlgebra
 using Random
 
 include("test_manifolds.jl")
+
+struct TestVectorSpaceType <: VectorSpaceType end
 
 power_array_wrapper(::Type{NestedPowerRepresentation}, ::Int) = identity
 power_array_wrapper(::Type{NestedReplacingPowerRepresentation}, i::Int) = SVector{i}
@@ -313,7 +316,8 @@ struct TestArrayRepresentation <: AbstractPowerRepresentation end
             change_representer(M, e, q, log(M, q, p)),
         ]
         @test norm(N, P, Z .- Zc) ≈ 0
-        @test ManifoldsBase.vector_bundle_transport(TestVectorSpaceType(), N) === ParallelTransport()
+        @test ManifoldsBase.vector_bundle_transport(TestVectorSpaceType(), N) ===
+              ParallelTransport()
     end
 
     @testset "Other stuff" begin

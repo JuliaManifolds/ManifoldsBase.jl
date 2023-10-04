@@ -9,7 +9,9 @@ function ManifoldsBase.fiber_dimension(M::AbstractManifold, ::TestFiberType)
     return 2 * manifold_dimension(M)
 end
 
-ManifoldsBase.vector_space_dimension(M::AbstractManifold, ::TestVectorSpaceType) = 2 * manifold_dimension(M)
+function ManifoldsBase.vector_space_dimension(M::AbstractManifold, ::TestVectorSpaceType)
+    return 2 * manifold_dimension(M)
+end
 
 function ManifoldsBase.inner(::VectorBundleFibers{TestVectorSpaceType}, p, X, Y)
     return 2 * dot(X, Y)
