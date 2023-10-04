@@ -52,6 +52,10 @@ include("test_sphere.jl")
     @test sprint(show, TVBF) == "VectorBundleFibers(TestVectorSpaceType(), $(M))"
     @test sprint(show, VectorSpaceFiberType(TestVectorSpaceType())) ==
           "VectorSpaceFiberType(TestVectorSpaceType())"
+    @test ManifoldsBase.VectorBundleFibers(
+        VectorSpaceFiberType(TestVectorSpaceType()),
+        M,
+    ) === TVBF
     TBF = ManifoldsBase.BundleFibers(TestFiberType(), M)
     @test sprint(show, TBF) == "BundleFibers(TestFiberType(), $(M))"
     @test norm(TVBF, p, [2.0, 2.0, 0.0]) ≈ 4.0
