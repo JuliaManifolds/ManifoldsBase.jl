@@ -1,43 +1,3 @@
-
-@doc raw"""
-    FiberBundleProductVectorTransport{
-        TMP<:AbstractVectorTransportMethod,
-        TMV<:AbstractVectorTransportMethod,
-    } <: AbstractVectorTransportMethod
-
-Vector transport type on [`FiberBundle`](@ref). `method_point` is used for vector transport
-of the point part and `method_fiber` is used for transport of the fiber part.
-
-The vector transport is derived as a product manifold-style vector transport. The considered
-product manifold is the product between the manifold $\mathcal M$ and the topological vector
-space isometric to the fiber.
-
-# Constructor
-
-    FiberBundleProductVectorTransport(
-        method_point::AbstractVectorTransportMethod,
-        method_fiber::AbstractVectorTransportMethod,
-    )
-    FiberBundleProductVectorTransport()
-
-By default both methods are set to `ParallelTransport`.
-"""
-struct FiberBundleProductVectorTransport{
-    TMP<:AbstractVectorTransportMethod,
-    TMV<:AbstractVectorTransportMethod,
-} <: AbstractVectorTransportMethod
-    method_point::TMP
-    method_fiber::TMV
-end
-
-function FiberBundleProductVectorTransport()
-    return FiberBundleProductVectorTransport(ParallelTransport(), ParallelTransport())
-end
-function FiberBundleProductVectorTransport(M::AbstractManifold)
-    m = default_vector_transport_method(M)
-    return FiberBundleProductVectorTransport(m, m)
-end
-
 """
     FiberBundle{𝔽,TVS<:FiberType,TM<:AbstractManifold{𝔽},TVT<:FiberBundleProductVectorTransport} <: AbstractManifold{𝔽}
 
@@ -80,7 +40,11 @@ struct FiberBundleBasisData{BBasis<:CachedBasis,TBasis<:CachedBasis}
     fiber_basis::TBasis
 end
 
+"""
+    base_manifold(B::FiberBundle)
 
+Return the manifold the [`FiberBundle`](@ref)s is build on.
+"""
 base_manifold(B::FiberBundle) = base_manifold(B.manifold)
 
 """

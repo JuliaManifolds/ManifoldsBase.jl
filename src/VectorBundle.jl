@@ -1,12 +1,5 @@
 
 """
-    const VectorBundleVectorTransport = FiberBundleProductVectorTransport
-
-Deprecated: an alias for `FiberBundleProductVectorTransport`.
-"""
-const VectorBundleVectorTransport = FiberBundleProductVectorTransport
-
-"""
     VectorBundle{𝔽,TVS,TM,TVT}
 
 Alias for [`FiberBundle`](@ref) when fiber type is a `TVS` of type
