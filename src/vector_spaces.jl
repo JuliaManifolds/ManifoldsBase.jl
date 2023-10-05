@@ -53,10 +53,10 @@ const TFVector = FVector{TangentSpaceType}
 const CoTFVector = FVector{CotangentSpaceType}
 
 function TFVector(data, basis::AbstractBasis)
-    return TFVector{typeof(data),typeof(basis)}(TangentSpace, data, basis)
+    return TFVector{typeof(data),typeof(basis)}(TangentSpaceType(), data, basis)
 end
 function CoTFVector(data, basis::AbstractBasis)
-    return CoTFVector{typeof(data),typeof(basis)}(CotangentSpace, data, basis)
+    return CoTFVector{typeof(data),typeof(basis)}(CotangentSpaceType(), data, basis)
 end
 
 function Base.show(io::IO, fX::TFVector)
@@ -124,9 +124,6 @@ function number_eltype(
     return number_eltype(TData)
 end
 number_eltype(v::FVector) = number_eltype(v.data)
-
-Base.show(io::IO, ::TangentSpaceType) = print(io, "TangentSpace")
-Base.show(io::IO, ::CotangentSpaceType) = print(io, "CotangentSpace")
 
 """
     vector_space_dimension(M::AbstractManifold, V::VectorSpaceType)

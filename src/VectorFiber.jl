@@ -15,7 +15,7 @@ end
 
 const TangentFiberType = VectorSpaceFiberType{TangentSpaceType}
 
-const TangentFiber = VectorSpaceFiberType{TangentSpaceType}(TangentSpace)
+TangentFiberType() = VectorSpaceFiberType(TangentSpaceType())
 
 """
     VectorBundleFibers{TVS,TM}
@@ -36,7 +36,7 @@ end
 
 const TangentBundleFibers{M} = BundleFibers{TangentFiberType,M} where {M<:AbstractManifold}
 
-TangentBundleFibers(M::AbstractManifold) = BundleFibers(TangentFiber, M)
+TangentBundleFibers(M::AbstractManifold) = BundleFibers(TangentFiberType(), M)
 
 """
     VectorSpaceAtPoint{𝔽,M,TFiber}
@@ -66,15 +66,7 @@ const TangentSpaceAtPoint{𝔽,M} =
 Return an object of type [`VectorSpaceAtPoint`](@ref) representing tangent
 space at `p` on the [`AbstractManifold`](@ref) `M`.
 """
-TangentSpaceAtPoint(M::AbstractManifold, p) = VectorSpaceAtPoint(M, TangentFiber, p)
-
-"""
-    TangentSpace(M::AbstractManifold, p)
-
-Return a [`TangentSpaceAtPoint`] representing tangent
-space at `p` on the [`AbstractManifold`](@ref) `M`.
-"""
-TangentSpace(M::AbstractManifold, p) = TangentSpaceAtPoint(M, p)
+TangentSpaceAtPoint(M::AbstractManifold, p) = VectorSpaceAtPoint(M, TangentFiberType(), p)
 
 function allocate_result(M::TangentSpaceAtPoint, ::typeof(rand))
     return zero_vector(M.fiber.manifold, M.point)

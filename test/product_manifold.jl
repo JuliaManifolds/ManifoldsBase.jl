@@ -314,7 +314,7 @@ include("test_sphere.jl")
         @test isapprox(M, p2, Y3, Z)
         @test isapprox(M, p2, Y4, Z)
 
-        @test ManifoldsBase.vector_bundle_transport(ManifoldsBase.TangentFiber, M) isa
+        @test ManifoldsBase.vector_bundle_transport(ManifoldsBase.TangentFiberType(), M) isa
               ProductVectorTransport
     end
 

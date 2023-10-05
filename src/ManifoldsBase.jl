@@ -998,7 +998,7 @@ end
 # (a) Manifolds and general types
 export AbstractManifold, AbstractManifoldPoint, TVector, CoTVector, TFVector, CoTFVector
 export VectorBundleFibers, VectorSpaceAtPoint
-export TangentSpaceAtPoint, TangentSpace, CotangentSpace
+export TangentSpaceAtPoint, TangentSpaceType, CotangentSpaceType
 export VectorBundle, TangentBundle
 export AbstractDecoratorManifold
 export AbstractTrait, IsEmbeddedManifold, IsEmbeddedSubmanifold, IsIsometricEmbeddedManifold
@@ -1055,7 +1055,6 @@ export AbstractVectorTransportMethod,
     ProjectionTransport,
     ScaledVectorTransport,
     SchildsLadderTransport,
-    VectorBundleVectorTransport,
     VectorTransportDirection,
     VectorTransportTo,
     VectorTransportWithKeywords

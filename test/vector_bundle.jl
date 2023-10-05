@@ -40,8 +40,11 @@ include("test_sphere.jl")
     @test default_retraction_method(TB) == m_prod_retr
     @test default_vector_transport_method(TB) isa
           ManifoldsBase.FiberBundleProductVectorTransport
-    @test TB ===
-          VectorBundle(TangentSpace, M, ManifoldsBase.FiberBundleProductVectorTransport())
+    @test TB === VectorBundle(
+        TangentSpaceType(),
+        M,
+        ManifoldsBase.FiberBundleProductVectorTransport(),
+    )
     @test TB === TangentBundle(M, ManifoldsBase.FiberBundleProductVectorTransport())
 
     @test ManifoldsBase.FiberBundleProductVectorTransport(M) ===
@@ -64,15 +67,16 @@ include("test_sphere.jl")
     @test sprint(show, TBF) == "BundleFibers(TestFiberType(), $(M))"
     @test norm(TVBF, p, [2.0, 2.0, 0.0]) ≈ 4.0
     @test ManifoldsBase.fiber_dimension(TBF) == 6
-    @test ManifoldsBase.fiber_dimension(M, CotangentSpace) == 3
+    @test ManifoldsBase.fiber_dimension(M, CotangentSpaceType()) == 3
 
     @test ManifoldsBase.TangentBundleFibers(M) ===
-          ManifoldsBase.BundleFibers(ManifoldsBase.TangentFiber, M)
+          ManifoldsBase.BundleFibers(ManifoldsBase.TangentFiberType(), M)
 
     @test vector_space_dimension(TB.fiber) == 3
     @test vector_space_dimension(TVBF) == 6
-    @test ManifoldsBase.fiber_dimension(M, ManifoldsBase.TangentFiber) == 3
-    @test ManifoldsBase.fiber_bundle_transport(TangentSpace, M) === ParallelTransport()
+    @test ManifoldsBase.fiber_dimension(M, ManifoldsBase.TangentFiberType()) == 3
+    @test ManifoldsBase.fiber_bundle_transport(TangentSpaceType(), M) ===
+          ParallelTransport()
 
     @test representation_size(TB.fiber) == (3,)
 
@@ -80,8 +84,6 @@ include("test_sphere.jl")
         p = [1.0, 0.0, 0.0]
         q = [0.0, 2.0, 0.0]
         t_p = TangentSpaceAtPoint(M, p)
-        t_p2 = TangentSpace(M, p)
-        @test t_p == t_p2
         t_ps = sprint(show, "text/plain", t_p)
         sp = sprint(show, "text/plain", p)
         sp = replace(sp, '\n' => "\n ")
@@ -90,7 +92,7 @@ include("test_sphere.jl")
         @test base_manifold(t_p) == M
         @test manifold_dimension(t_p) == 3
         @test t_p.fiber.manifold == M
-        @test t_p.fiber.fiber == VectorSpaceFiberType(TangentSpace)
+        @test t_p.fiber.fiber == VectorSpaceFiberType(TangentSpaceType())
         @test t_p.point == p
         @test injectivity_radius(t_p) == Inf
         @test representation_size(t_p) == representation_size(M)

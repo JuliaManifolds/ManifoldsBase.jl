@@ -46,9 +46,9 @@ Exact retraction and inverse retraction can be approximated using [`FiberBundleP
 const TangentBundle{𝔽,M} =
     VectorBundle{𝔽,TangentSpaceType,M} where {𝔽,M<:AbstractManifold{𝔽}}
 
-TangentBundle(M::AbstractManifold) = VectorBundle(TangentSpace, M)
+TangentBundle(M::AbstractManifold) = VectorBundle(TangentSpaceType(), M)
 function TangentBundle(M::AbstractManifold, vtm::FiberBundleProductVectorTransport)
-    return VectorBundle(TangentSpace, M, vtm)
+    return VectorBundle(TangentSpaceType(), M, vtm)
 end
 
 function default_inverse_retraction_method(::TangentBundle)
