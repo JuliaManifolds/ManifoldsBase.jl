@@ -2,7 +2,8 @@
     FiberBundle{𝔽,TVS<:FiberType,TM<:AbstractManifold{𝔽},TVT<:FiberBundleProductVectorTransport} <: AbstractManifold{𝔽}
 
 Fiber bundle on a [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold) `M`
-of type [`FiberType`](@ref). Examples include vector bundles, principal bundles or unit tangent bundles.
+of type [`FiberType`](@ref).
+Examples include vector bundles, principal bundles or unit tangent bundles, see also [📖 Fiber Bundle](https://en.wikipedia.org/wiki/Fiber_bundle).
 
 # Constructor
 
