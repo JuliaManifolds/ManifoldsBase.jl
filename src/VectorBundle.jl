@@ -1,9 +1,9 @@
 
 """
-    VectorBundle{𝔽,TVS,TM,TVT}
+    VectorBundle{𝔽,TVS,TM,VTV} =  = FiberBundle{𝔽, VectorSpaceFiberType{TVS},TM,TVT}
 
 Alias for [`FiberBundle`](@ref) when fiber type is a `TVS` of type
-[`VectorSpaceType`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/bases.html#ManifoldsBase.VectorSpaceType).
+[`VectorSpaceType`](@ref).
 
 `VectorSpaceFiberType` is used to encode vector spaces as fiber types.
 """

@@ -1,9 +1,12 @@
 """
     FiberBundle{𝔽,TVS<:FiberType,TM<:AbstractManifold{𝔽},TVT<:FiberBundleProductVectorTransport} <: AbstractManifold{𝔽}
 
-Fiber bundle on a [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold) `M`
-of type [`FiberType`](@ref).
+Fiber bundle on a [`AbstractManifold`](@ref) `M` of type [`FiberType`](@ref).
 Examples include vector bundles, principal bundles or unit tangent bundles, see also [📖 Fiber Bundle](https://en.wikipedia.org/wiki/Fiber_bundle).
+
+# Fields
+* `manifold` – the [`AbstractManifold`](@ref) manifold the Fiber bundle is defined on
+* `type`     – representing the type of fiber we use.
 
 # Constructor
 
@@ -21,8 +24,6 @@ struct FiberBundle{
     vector_transport::TVT
 end
 
-vector_bundle_transport(::FiberType, M::AbstractManifold) = ParallelTransport()
-
 function FiberBundle(
     fiber::TVS,
     M::TM,
@@ -35,6 +36,8 @@ function FiberBundle(fiber::FiberType, M::AbstractManifold)
     vtbm = FiberBundleProductVectorTransport(vtmm, vtmm)
     return FiberBundle(fiber, M, vtbm)
 end
+
+vector_bundle_transport(::FiberType, M::AbstractManifold) = ParallelTransport()
 
 struct FiberBundleBasisData{BBasis<:CachedBasis,TBasis<:CachedBasis}
     base_basis::BBasis
