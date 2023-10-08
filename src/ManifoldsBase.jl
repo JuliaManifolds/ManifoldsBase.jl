@@ -997,7 +997,6 @@ end
 export AbstractManifold, AbstractManifoldPoint, TVector, CoTVector, TFVector, CoTFVector
 export VectorSpaceFiber
 export TangentSpace, TangentSpaceType, CotangentSpaceType
-export VectorBundle, TangentBundle
 export AbstractDecoratorManifold
 export AbstractTrait, IsEmbeddedManifold, IsEmbeddedSubmanifold, IsIsometricEmbeddedManifold
 export IsExplicitDecorator
