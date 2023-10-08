@@ -3,13 +3,7 @@ module ManifoldsBaseRecursiveArrayToolsExt
 if isdefined(Base, :get_extension)
     using ManifoldsBase
     using RecursiveArrayTools
-    using ManifoldsBase:
-        AbstractBasis,
-        FiberBundle,
-        FiberBundleBasisData,
-        FiberBundleProductVectorTransport,
-        ProductBasisData,
-        TangentSpaceType
+    using ManifoldsBase: AbstractBasis, ProductBasisData, TangentSpaceType
     using ManifoldsBase: number_of_components
     using Random
 
@@ -41,13 +35,7 @@ else
     # https://github.com/JuliaArrays/ArrayInterface.jl/pull/387
     using ..ManifoldsBase
     using ..RecursiveArrayTools
-    using ..ManifoldsBase:
-        AbstractBasis,
-        FiberBundle,
-        FiberBundleBasisData,
-        FiberBundleProductVectorTransport,
-        ProductBasisData,
-        TangentSpaceType
+    using ..ManifoldsBase: AbstractBasis, ProductBasisData, TangentSpaceType
     using ..ManifoldsBase: number_of_components
     using ..Random
 
@@ -77,6 +65,5 @@ else
 end
 
 include("ProductManifoldRecursiveArrayToolsExt.jl")
-include("FiberBundleRecursiveArrayToolsExt.jl")
 
 end

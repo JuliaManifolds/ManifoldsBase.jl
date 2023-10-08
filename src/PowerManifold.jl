@@ -1342,10 +1342,6 @@ function Base.show(
     return nothing
 end
 
-function vector_bundle_transport(::VectorSpaceType, ::PowerManifold)
-    return ParallelTransport()
-end
-
 function vector_transport_direction!(
     M::AbstractPowerManifold,
     Y,

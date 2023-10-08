@@ -316,8 +316,6 @@ struct TestArrayRepresentation <: AbstractPowerRepresentation end
             change_representer(M, e, q, log(M, q, p)),
         ]
         @test norm(N, P, Z .- Zc) ≈ 0
-        @test ManifoldsBase.vector_bundle_transport(TestVectorSpaceType(), N) ===
-              ParallelTransport()
     end
 
     @testset "Other stuff" begin

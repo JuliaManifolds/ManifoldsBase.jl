@@ -58,52 +58,6 @@ struct DifferentiatedRetractionVectorTransport{R<:AbstractRetractionMethod} <:
 end
 
 @doc raw"""
-    FiberBundleProductVectorTransport{
-        TMP<:AbstractVectorTransportMethod,
-        TMV<:AbstractVectorTransportMethod,
-    } <: AbstractVectorTransportMethod
-
-Vector transport type on [`FiberBundle`](@ref).
-
-# Fields
-
-* `method_point` – vector transport method of the point part
-* `method_fiber` – vector transport method of the fiber part.
-
-The vector transport is derived as a product manifold-style vector transport.
-The considered product manifold is the product between the manifold ``\mathcal M``
-and the topological vector space isometric to the fiber.
-
-# Constructor
-
-    FiberBundleProductVectorTransport(
-        M::AbstractManifold=DefaultManifold();
-        vector_tansport_method_point = default_vector_transport_method(M),
-        vector_transport_method_fiber = default_vector_transport_method(M),
-    )
-
-Construct the `FiberBundleProductVectorTransport` using the [`default_vector_transport_method`](@ref),
-which uses [`ParallelTransport`](@ref) if no manifold is provied.
-"""
-struct FiberBundleProductVectorTransport{
-    TMP<:AbstractVectorTransportMethod,
-    TMV<:AbstractVectorTransportMethod,
-} <: AbstractVectorTransportMethod
-    method_point::TMP
-    method_fiber::TMV
-end
-function FiberBundleProductVectorTransport(
-    M::AbstractManifold = DefaultManifold();
-    vector_tansport_method_point = default_vector_transport_method(M),
-    vector_transport_method_fiber = default_vector_transport_method(M),
-)
-    return FiberBundleProductVectorTransport(
-        vector_tansport_method_point,
-        vector_transport_method_fiber,
-    )
-end
-
-@doc raw"""
     ParallelTransport <: AbstractVectorTransportMethod
 
 Compute the vector transport by parallel transport, see

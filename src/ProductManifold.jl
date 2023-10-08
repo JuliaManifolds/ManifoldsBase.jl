@@ -842,10 +842,6 @@ function submanifold(M::ProductManifold, i::Val)
 end
 submanifold(M::ProductManifold, i::AbstractVector) = submanifold(M, Val(tuple(i...)))
 
-function vector_bundle_transport(::FiberType, M::ProductManifold)
-    return ProductVectorTransport(map(_ -> ParallelTransport(), M.manifolds))
-end
-
 function vector_transport_direction!(
     M::ProductManifold,
     Y,

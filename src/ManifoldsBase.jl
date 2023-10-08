@@ -968,9 +968,7 @@ include("nested_trait.jl")
 include("decorator_trait.jl")
 
 include("Fiber.jl")
-include("FiberBundle.jl")
 include("VectorFiber.jl")
-include("VectorBundle.jl")
 include("ValidationManifold.jl")
 include("EmbeddedManifold.jl")
 include("DefaultManifold.jl")
@@ -997,8 +995,8 @@ end
 #
 # (a) Manifolds and general types
 export AbstractManifold, AbstractManifoldPoint, TVector, CoTVector, TFVector, CoTFVector
-export VectorBundleFibers, VectorSpaceAtPoint
-export TangentSpaceAtPoint, TangentSpaceType, CotangentSpaceType
+export VectorSpaceFiber
+export TangentSpace, TangentSpaceType, CotangentSpaceType
 export VectorBundle, TangentBundle
 export AbstractDecoratorManifold
 export AbstractTrait, IsEmbeddedManifold, IsEmbeddedSubmanifold, IsIsometricEmbeddedManifold
@@ -1048,7 +1046,6 @@ export AbstractInverseRetractionMethod,
 # (d) Vector Transport Types
 export AbstractVectorTransportMethod,
     DifferentiatedRetractionVectorTransport,
-    FiberBundleProductVectorTransport,
     ParallelTransport,
     PoleLadderTransport,
     ProductVectorTransport,
@@ -1079,7 +1076,6 @@ export CompositeManifoldError, ComponentManifoldError, ManifoldDomainError
 export allocate,
     angle,
     base_manifold,
-    bundle_projection,
     change_basis,
     change_basis!,
     change_metric,

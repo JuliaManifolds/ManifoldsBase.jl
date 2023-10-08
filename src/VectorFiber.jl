@@ -18,215 +18,197 @@ const TangentFiberType = VectorSpaceFiberType{TangentSpaceType}
 TangentFiberType() = VectorSpaceFiberType(TangentSpaceType())
 
 """
-    VectorBundleFibers{TVS,TM}
+    VectorSpaceFiber{𝔽,M,TFiber}
 
-Alias for [`BundleFibers`](@ref) when the fiber is a vector space.
+Alias for [`Fiber`](@ref) when the fiber is a vector space.
 """
-const VectorBundleFibers{TVS,TM} = BundleFibers{
-    VectorSpaceFiberType{TVS},
-    TM,
-} where {TVS<:VectorSpaceType,TM<:AbstractManifold}
-
-function VectorBundleFibers(fiber::VectorSpaceType, M::AbstractManifold)
-    return BundleFibers(VectorSpaceFiberType(fiber), M)
-end
-function VectorBundleFibers(fiber::VectorSpaceFiberType, M::AbstractManifold)
-    return BundleFibers(fiber, M)
-end
-
-const TangentBundleFibers{M} = BundleFibers{TangentFiberType,M} where {M<:AbstractManifold}
-
-TangentBundleFibers(M::AbstractManifold) = BundleFibers(TangentFiberType(), M)
-
-"""
-    VectorSpaceAtPoint{𝔽,M,TFiber}
-
-Alias for [`FiberAtPoint`](@ref) when the fiber is a vector space.
-"""
-const VectorSpaceAtPoint{𝔽,M,TSpaceType} = FiberAtPoint{
+const VectorSpaceFiber{𝔽,M,TSpaceType} = Fiber{
     𝔽,
-    VectorBundleFibers{TSpaceType,M},
+    VectorSpaceFiberType{TSpaceType},
+    M,
 } where {𝔽,M<:AbstractManifold{𝔽},TSpaceType<:VectorSpaceType}
 
-function VectorSpaceAtPoint(M::AbstractManifold, fiber::VectorSpaceFiberType, p)
-    return FiberAtPoint(BundleFibers(fiber, M), p)
+function VectorSpaceFiber(M::AbstractManifold, fiber::VectorSpaceFiberType, p)
+    return Fiber(fiber, M, p)
+end
+function VectorSpaceFiber(M::AbstractManifold, vs::VectorSpaceType, p)
+    return VectorSpaceFiber(M, VectorSpaceFiberType(vs), p)
 end
 
 """
-    TangentSpaceAtPoint{𝔽,M}
+    TangentSpace{𝔽,M}
 
-Alias for [`VectorSpaceAtPoint`](@ref) for the tangent space at a point.
+Alias for [`VectorSpaceFiber`](@ref) for the tangent space at a point.
 """
-const TangentSpaceAtPoint{𝔽,M} =
-    VectorSpaceAtPoint{𝔽,M,TangentSpaceType} where {𝔽,M<:AbstractManifold{𝔽}}
+const TangentSpace{𝔽,M} =
+    VectorSpaceFiber{𝔽,M,TangentSpaceType} where {𝔽,M<:AbstractManifold{𝔽}}
 
 """
-    TangentSpaceAtPoint(M::AbstractManifold, p)
+    TangentSpace(M::AbstractManifold, p)
 
-Return an object of type [`VectorSpaceAtPoint`](@ref) representing tangent
+Return an object of type [`VectorSpaceFiber`](@ref) representing tangent
 space at `p` on the [`AbstractManifold`](@ref) `M`.
 """
-TangentSpaceAtPoint(M::AbstractManifold, p) = VectorSpaceAtPoint(M, TangentFiberType(), p)
+TangentSpace(M::AbstractManifold, p) = VectorSpaceFiber(M, TangentFiberType(), p)
 
-function allocate_result(M::TangentSpaceAtPoint, ::typeof(rand))
-    return zero_vector(M.fiber.manifold, M.point)
+function allocate_result(M::TangentSpace, ::typeof(rand))
+    return zero_vector(M.manifold, M.point)
 end
 
 """
-    distance(M::TangentSpaceAtPoint, p, q)
+    distance(M::TangentSpace, p, q)
 
 Distance between vectors `p` and `q` from the vector space `M`. It is calculated as the norm
 of their difference.
 """
-function distance(M::TangentSpaceAtPoint, p, q)
-    return norm(M.fiber.manifold, M.point, q - p)
+function distance(M::TangentSpace, p, q)
+    return norm(M.manifold, M.point, q - p)
 end
 
-function embed!(M::TangentSpaceAtPoint, q, p)
-    return embed!(M.fiber.manifold, q, M.point, p)
+function embed!(M::TangentSpace, q, p)
+    return embed!(M.manifold, q, M.point, p)
 end
-function embed!(M::TangentSpaceAtPoint, Y, p, X)
-    return embed!(M.fiber.manifold, Y, M.point, X)
+function embed!(M::TangentSpace, Y, p, X)
+    return embed!(M.manifold, Y, M.point, X)
 end
 
 @doc raw"""
-    exp(M::TangentSpaceAtPoint, p, X)
+    exp(M::TangentSpace, p, X)
 
 Exponential map of tangent vectors `X` and `p` from the tangent space `M`. It is
 calculated as their sum.
 """
-exp(::TangentSpaceAtPoint, ::Any, ::Any)
+exp(::TangentSpace, ::Any, ::Any)
 
-function exp!(M::TangentSpaceAtPoint, q, p, X)
-    copyto!(M.fiber.manifold, q, p + X)
+function exp!(M::TangentSpace, q, p, X)
+    copyto!(M.manifold, q, p + X)
     return q
 end
 
-fiber_dimension(M::TangentBundleFibers) = manifold_dimension(M.manifold)
 fiber_dimension(M::AbstractManifold, V::VectorSpaceFiberType) = fiber_dimension(M, V.fiber)
 fiber_dimension(M::AbstractManifold, ::CotangentSpaceType) = manifold_dimension(M)
 fiber_dimension(M::AbstractManifold, ::TangentSpaceType) = manifold_dimension(M)
 
-function get_basis(M::TangentSpaceAtPoint, p, B::CachedBasis)
+function get_basis(M::TangentSpace, p, B::CachedBasis)
     return invoke(
         get_basis,
         Tuple{AbstractManifold,Any,CachedBasis},
-        M.fiber.manifold,
+        M.manifold,
         M.point,
         B,
     )
 end
-function get_basis(M::TangentSpaceAtPoint, p, B::AbstractBasis{<:Any,TangentSpaceType})
-    return get_basis(M.fiber.manifold, M.point, B)
+function get_basis(M::TangentSpace, p, B::AbstractBasis{<:Any,TangentSpaceType})
+    return get_basis(M.manifold, M.point, B)
 end
 
-function get_coordinates(M::TangentSpaceAtPoint, p, X, B::AbstractBasis)
-    return get_coordinates(M.fiber.manifold, M.point, X, B)
+function get_coordinates(M::TangentSpace, p, X, B::AbstractBasis)
+    return get_coordinates(M.manifold, M.point, X, B)
 end
 
-function get_coordinates!(M::TangentSpaceAtPoint, Y, p, X, B::AbstractBasis)
-    return get_coordinates!(M.fiber.manifold, Y, M.point, X, B)
+function get_coordinates!(M::TangentSpace, Y, p, X, B::AbstractBasis)
+    return get_coordinates!(M.manifold, Y, M.point, X, B)
 end
 
-function get_vector(M::TangentSpaceAtPoint, p, X, B::AbstractBasis)
-    return get_vector(M.fiber.manifold, M.point, X, B)
+function get_vector(M::TangentSpace, p, X, B::AbstractBasis)
+    return get_vector(M.manifold, M.point, X, B)
 end
 
-function get_vector!(M::TangentSpaceAtPoint, Y, p, X, B::AbstractBasis)
-    return get_vector!(M.fiber.manifold, Y, M.point, X, B)
+function get_vector!(M::TangentSpace, Y, p, X, B::AbstractBasis)
+    return get_vector!(M.manifold, Y, M.point, X, B)
 end
 
-function get_vectors(M::TangentSpaceAtPoint, p, B::CachedBasis)
-    return get_vectors(M.fiber.manifold, M.point, B)
+function get_vectors(M::TangentSpace, p, B::CachedBasis)
+    return get_vectors(M.manifold, M.point, B)
 end
 
 @doc raw"""
-    injectivity_radius(M::TangentSpaceAtPoint)
+    injectivity_radius(M::TangentSpace)
 
-Return the injectivity radius on the [`TangentSpaceAtPoint`](@ref) `M`, which is $∞$.
+Return the injectivity radius on the [`TangentSpace`](@ref) `M`, which is $∞$.
 """
-injectivity_radius(::TangentSpaceAtPoint) = Inf
+injectivity_radius(::TangentSpace) = Inf
 
 """
-    inner(M::TangentSpaceAtPoint, p, X, Y)
+    inner(M::TangentSpace, p, X, Y)
 
 Inner product of vectors `X` and `Y` from the tangent space at `M`.
 """
-function inner(M::TangentSpaceAtPoint, p, X, Y)
-    return inner(M.fiber.manifold, M.point, X, Y)
+function inner(M::TangentSpace, p, X, Y)
+    return inner(M.manifold, M.point, X, Y)
 end
 
 """
-    is_flat(::TangentSpaceAtPoint)
+    is_flat(::TangentSpace)
 
-Return true. [`TangentSpaceAtPoint`](@ref) is a flat manifold.
+Return true. [`TangentSpace`](@ref) is a flat manifold.
 """
-is_flat(::TangentSpaceAtPoint) = true
+is_flat(::TangentSpace) = true
 
-function _isapprox(M::TangentSpaceAtPoint, X, Y; kwargs...)
-    return isapprox(M.fiber.manifold, M.point, X, Y; kwargs...)
+function _isapprox(M::TangentSpace, X, Y; kwargs...)
+    return isapprox(M.manifold, M.point, X, Y; kwargs...)
 end
 
 """
-    log(M::TangentSpaceAtPoint, p, q)
+    log(M::TangentSpace, p, q)
 
 Logarithmic map on the tangent space manifold `M`, calculated as the difference of tangent
 vectors `q` and `p` from `M`.
 """
-log(::TangentSpaceAtPoint, ::Any...)
-function log!(::TangentSpaceAtPoint, X, p, q)
+log(::TangentSpace, ::Any...)
+function log!(::TangentSpace, X, p, q)
     copyto!(X, q - p)
     return X
 end
 
-function manifold_dimension(M::FiberAtPoint)
-    return fiber_dimension(M.fiber)
+function manifold_dimension(M::TangentSpace)
+    return manifold_dimension(M.manifold)
 end
 
-LinearAlgebra.norm(M::VectorSpaceAtPoint, p, X) = norm(M.fiber.manifold, M.point, X)
+LinearAlgebra.norm(M::VectorSpaceFiber, p, X) = norm(M.manifold, M.point, X)
 
-function parallel_transport_to!(M::TangentSpaceAtPoint, Y, p, X, q)
-    return copyto!(M.fiber.manifold, Y, p, X)
+function parallel_transport_to!(M::TangentSpace, Y, p, X, q)
+    return copyto!(M.manifold, Y, p, X)
 end
 
 @doc raw"""
-    project(M::TangentSpaceAtPoint, p)
+    project(M::TangentSpace, p)
 
 Project the point `p` from the tangent space `M`, that is project the vector `p`
 tangent at `M.point`.
 """
-project(::TangentSpaceAtPoint, ::Any)
+project(::TangentSpace, ::Any)
 
-function project!(M::TangentSpaceAtPoint, q, p)
-    return project!(M.fiber.manifold, q, M.point, p)
+function project!(M::TangentSpace, q, p)
+    return project!(M.manifold, q, M.point, p)
 end
 
 @doc raw"""
-    project(M::TangentSpaceAtPoint, p, X)
+    project(M::TangentSpace, p, X)
 
 Project the vector `X` from the tangent space `M`, that is project the vector `X`
 tangent at `M.point`.
 """
-project(::TangentSpaceAtPoint, ::Any, ::Any)
+project(::TangentSpace, ::Any, ::Any)
 
-function project!(M::TangentSpaceAtPoint, Y, p, X)
-    return project!(M.fiber.manifold, Y, M.point, X)
+function project!(M::TangentSpace, Y, p, X)
+    return project!(M.manifold, Y, M.point, X)
 end
 
-function Random.rand!(M::TangentSpaceAtPoint, X; vector_at = nothing)
-    rand!(M.fiber.manifold, X; vector_at = M.point)
+function Random.rand!(M::TangentSpace, X; vector_at = nothing)
+    rand!(M.manifold, X; vector_at = M.point)
     return X
 end
-function Random.rand!(rng::AbstractRNG, M::TangentSpaceAtPoint, X; vector_at = nothing)
-    rand!(rng, M.fiber.manifold, X; vector_at = M.point)
+function Random.rand!(rng::AbstractRNG, M::TangentSpace, X; vector_at = nothing)
+    rand!(rng, M.manifold, X; vector_at = M.point)
     return X
 end
 
-function representation_size(B::TangentSpaceAtPoint)
-    return representation_size(B.fiber.manifold)
+function representation_size(B::TangentSpace)
+    return representation_size(B.manifold)
 end
 
-function Base.show(io::IO, ::MIME"text/plain", TpM::TangentSpaceAtPoint)
+function Base.show(io::IO, ::MIME"text/plain", TpM::TangentSpace)
     println(io, "Tangent space to the manifold $(base_manifold(TpM)) at point:")
     pre = " "
     sp = sprint(show, "text/plain", TpM.point; context = io, sizehint = 0)
@@ -234,38 +216,31 @@ function Base.show(io::IO, ::MIME"text/plain", TpM::TangentSpaceAtPoint)
     return print(io, pre, sp)
 end
 
-function vector_transport_to!(
-    M::TangentSpaceAtPoint,
-    Y,
-    p,
-    X,
-    q,
-    ::AbstractVectorTransportMethod,
-)
-    return copyto!(M.fiber.manifold, Y, p, X)
+function vector_transport_to!(M::TangentSpace, Y, p, X, q, ::AbstractVectorTransportMethod)
+    return copyto!(M.manifold, Y, p, X)
 end
 
 @doc raw"""
-    Y = Weingarten(M::TangentSpaceAtPoint, p, X, V)
-    Weingarten!(M::TangentSpaceAtPoint, Y, p, X, V)
+    Y = Weingarten(M::TangentSpace, p, X, V)
+    Weingarten!(M::TangentSpace, Y, p, X, V)
 
-Compute the Weingarten map ``\mathcal W_p`` at `p` on the [`TangentSpaceAtPoint`](@ref) `M` with respect to the
+Compute the Weingarten map ``\mathcal W_p`` at `p` on the [`TangentSpace`](@ref) `M` with respect to the
 tangent vector ``X \in T_p\mathcal M`` and the normal vector ``V \in N_p\mathcal M``.
 
 Since this a flat space by itself, the result is always the zero tangent vector.
 """
-Weingarten(::TangentSpaceAtPoint, p, X, V)
+Weingarten(::TangentSpace, p, X, V)
 
-Weingarten!(::TangentSpaceAtPoint, Y, p, X, V) = fill!(Y, 0)
+Weingarten!(::TangentSpace, Y, p, X, V) = fill!(Y, 0)
 
 @doc raw"""
-    zero_vector(M::TangentSpaceAtPoint, p)
+    zero_vector(M::TangentSpace, p)
 
 Zero tangent vector at point `p` from the tangent space `M`, that is the zero tangent vector
 at point `M.point`.
 """
-zero_vector(::TangentSpaceAtPoint, ::Any...)
+zero_vector(::TangentSpace, ::Any...)
 
-function zero_vector!(M::VectorSpaceAtPoint, X, p)
-    return zero_vector!(M.fiber.manifold, X, M.point)
+function zero_vector!(M::TangentSpace, X, p)
+    return zero_vector!(M.manifold, X, M.point)
 end

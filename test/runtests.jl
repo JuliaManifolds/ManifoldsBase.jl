@@ -38,5 +38,5 @@ using ManifoldsBase
     include("vector_transport.jl")
     include("metric.jl")
     include("product_manifold.jl")
-    include("vector_bundle.jl")
+    include("fibers.jl")
 end

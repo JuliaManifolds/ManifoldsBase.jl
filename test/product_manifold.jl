@@ -313,9 +313,6 @@ include("test_sphere.jl")
         vector_transport_direction!(M, Y4, p1, X, X, m)
         @test isapprox(M, p2, Y3, Z)
         @test isapprox(M, p2, Y4, Z)
-
-        @test ManifoldsBase.vector_bundle_transport(ManifoldsBase.TangentFiberType(), M) isa
-              ProductVectorTransport
     end
 
     @testset "Implicit product vector transport" begin
@@ -416,13 +413,13 @@ include("test_sphere.jl")
         # make sure `get_coordinates` does not return an `ArrayPartition`
         p1 = ArrayPartition([0.0, 1.0, 0.0], [0.0 0.0; 1.0 2.0])
         X1 = ArrayPartition([1.0, 0.0, -1.0], [1.0 0.0; 2.0 1.0])
-        Tp1M = TangentSpaceAtPoint(M, p1)
+        Tp1M = TangentSpace(M, p1)
         c = get_coordinates(Tp1M, p1, X1, DefaultOrthonormalBasis())
         @test c isa Vector
 
         p1 = ArrayPartition([0.0, 1.0, 0.0], [0.0 0.0; 3.0 20])
         X1ap = ArrayPartition([1.0, 0.0, -1.0], [1.0 0.0; 0.0 3.0])
-        Tp1M = TangentSpaceAtPoint(M, p1)
+        Tp1M = TangentSpace(M, p1)
         cap = get_coordinates(Tp1M, p1, X1ap, DefaultOrthonormalBasis())
         @test cap isa Vector
     end
@@ -489,61 +486,6 @@ include("test_sphere.jl")
         Mc = ProductManifold(M1, M2c)
         @test ManifoldsBase.allocation_promotion_function(Mc, get_vector, ()) === complex
         @test ManifoldsBase.allocation_promotion_function(M, get_vector, ()) === identity
-    end
-
-    @testset "default retraction, inverse retraction and VT" begin
-        Mstb = ProductManifold(M1, TangentBundle(M1))
-        T_p_ap = ArrayPartition{
-            Float64,
-            Tuple{
-                Matrix{Float64},
-                ArrayPartition{Float64,Tuple{Matrix{Float64},Matrix{Float64}}},
-            },
-        }
-        @test ManifoldsBase.default_retraction_method(Mstb) === ProductRetraction(
-            ExponentialRetraction(),
-            ManifoldsBase.FiberBundleProductRetraction(),
-        )
-        @test ManifoldsBase.default_retraction_method(Mstb, T_p_ap) === ProductRetraction(
-            ExponentialRetraction(),
-            ManifoldsBase.FiberBundleProductRetraction(),
-        )
-
-        @test ManifoldsBase.default_inverse_retraction_method(Mstb) ===
-              ManifoldsBase.InverseProductRetraction(
-            LogarithmicInverseRetraction(),
-            ManifoldsBase.FiberBundleInverseProductRetraction(),
-        )
-        @test ManifoldsBase.default_inverse_retraction_method(Mstb, T_p_ap) ===
-              ManifoldsBase.InverseProductRetraction(
-            LogarithmicInverseRetraction(),
-            ManifoldsBase.FiberBundleInverseProductRetraction(),
-        )
-
-        @test ManifoldsBase.default_vector_transport_method(Mstb) ===
-              ProductVectorTransport(
-            ParallelTransport(),
-            ManifoldsBase.FiberBundleProductVectorTransport(
-                ParallelTransport(),
-                ParallelTransport(),
-            ),
-        )
-        @test ManifoldsBase.default_vector_transport_method(Mstb, T_p_ap) ===
-              ProductVectorTransport(
-            ParallelTransport(),
-            ManifoldsBase.FiberBundleProductVectorTransport(
-                ParallelTransport(),
-                ParallelTransport(),
-            ),
-        )
-        @test ManifoldsBase.default_vector_transport_method(Mstb, T_p_ap) ===
-              ProductVectorTransport(
-            ParallelTransport(),
-            ManifoldsBase.FiberBundleProductVectorTransport(
-                ParallelTransport(),
-                ParallelTransport(),
-            ),
-        )
     end
 
     @testset "Riemann tensor" begin
