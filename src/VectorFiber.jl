@@ -36,19 +36,20 @@ function VectorSpaceFiber(M::AbstractManifold, vs::VectorSpaceType, p)
 end
 
 """
-    TangentSpace{𝔽,M}
+    TangentSpace{𝔽,M} = VectorSpaceFiber{𝔽,M,TangentSpaceType}
 
-Alias for [`VectorSpaceFiber`](@ref) for the tangent space at a point.
-"""
-const TangentSpace{𝔽,M} =
-    VectorSpaceFiber{𝔽,M,TangentSpaceType} where {𝔽,M<:AbstractManifold{𝔽}}
+A manifold for the tangent space ``T_p\mathcal M`` at a point ``p\in\mathcal M``.
+This is modelled as an alias for [`VectorSpaceFiber`](@ref).
 
-"""
+# Constructor
+
     TangentSpace(M::AbstractManifold, p)
 
-Return an object of type [`VectorSpaceFiber`](@ref) representing tangent
-space at `p` on the [`AbstractManifold`](@ref) `M`.
+Return the manifold (vector space) of the tangent space ``T_p\mathcal M`` at a point ``p\in\mathcal M``.
 """
+const TangentSpace{𝔽,M} =
+    VectorSpaceFiber{𝔽,M,TangentSpaceType,P} where {𝔽,M<:AbstractManifold{𝔽},P}
+
 TangentSpace(M::AbstractManifold, p) = VectorSpaceFiber(M, TangentFiberType(), p)
 
 function allocate_result(M::TangentSpace, ::typeof(rand))
@@ -130,12 +131,14 @@ Return the injectivity radius on the [`TangentSpace`](@ref) `M`, which is $∞$.
 injectivity_radius(::TangentSpace) = Inf
 
 """
-    inner(M::TangentSpace, p, X, Y)
+    inner(M::TangentSpace, X, Y,Z)
 
-Inner product of vectors `X` and `Y` from the tangent space at `M`.
+For any ``X∈T_p\mathcal M`` we identify the tangent space ``T_X(T_p\mathcal M)``
+with ``T_p\mathcal M`` again. Hence an inner product of ``Y,Z`` is just the inner product of
+the tangent space itself. ``⟨Y,Z⟩_X = ⟨Y,Z⟩_p``.
 """
-function inner(M::TangentSpace, p, X, Y)
-    return inner(M.manifold, M.point, X, Y)
+function inner(M::TangentSpace, X, Y, Z)
+    return inner(M.manifold, M.point, Y, Z)
 end
 
 """
@@ -150,10 +153,10 @@ function _isapprox(M::TangentSpace, X, Y; kwargs...)
 end
 
 """
-    log(M::TangentSpace, p, q)
+    log(TpM::TangentSpace, p, q)
 
-Logarithmic map on the tangent space manifold `M`, calculated as the difference of tangent
-vectors `q` and `p` from `M`.
+Logarithmic map on the tangent space manifold `TpM`, calculated as the difference of tangent
+vectors `q` and `p` from `TpM`.
 """
 log(::TangentSpace, ::Any...)
 function log!(::TangentSpace, X, p, q)
@@ -161,14 +164,29 @@ function log!(::TangentSpace, X, p, q)
     return X
 end
 
-function manifold_dimension(M::TangentSpace)
-    return manifold_dimension(M.manifold)
+"""
+    manifold_dimension(TpM::TangentSpace)
+
+Return the dimension of the tangent space ``T_p\mathcal M`` at ``p∈\mathcal M``,
+which is the same as the dimension of the manifold ``\mathcal M``.
+"""
+function manifold_dimension(TpM::TangentSpace)
+    return manifold_dimension(TpM.manifold)
 end
 
 LinearAlgebra.norm(M::VectorSpaceFiber, p, X) = norm(M.manifold, M.point, X)
 
-function parallel_transport_to!(M::TangentSpace, Y, p, X, q)
-    return copyto!(M.manifold, Y, p, X)
+@doc raw"""
+    parallel_transport_to(::TangentSpace, X, Z, Y)
+
+Transport the tangent vector ``Z ∈ T_X(T_p\mathcal M)`` from `X` to `Y`.
+Since we identify ``T_X\mathcal M = T_p\mathcal M`` and the tangent space is a vector space,
+parallel transport simplifies to the identity, so this function yield ``Z`` as a result.
+"""
+parallel_transport_to(TpM::TangentSpace, X, Z, Y)
+
+function parallel_transport_to!(TpM::TangentSpace, Y, p, X, q)
+    return copyto!(TpM.manifold, Y, p, X)
 end
 
 @doc raw"""
