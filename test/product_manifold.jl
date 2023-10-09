@@ -66,6 +66,10 @@ include("test_sphere.jl")
         ),
     ]
 
+    @test ManifoldsBase.default_retraction_method(M) === retraction_methods[1]
+    @test ManifoldsBase.default_inverse_retraction_method(M) ===
+          inverse_retraction_methods[1]
+
     @testset "get_component, set_component!, getindex and setindex!" begin
         @test get_component(M, p1, 1) == p1.x[1]
         @test get_component(M, p1, Val(1)) == p1.x[1]
@@ -301,6 +305,7 @@ include("test_sphere.jl")
     @testset "product vector transport" begin
         X = log(M, p1, p2)
         m = ProductVectorTransport(ParallelTransport(), ParallelTransport())
+        @test default_vector_transport_method(M) === m
         Y = vector_transport_to(M, p1, X, p2, m)
         Y2 = similar(Y)
         vector_transport_to!(M, Y2, p1, X, p2, m)

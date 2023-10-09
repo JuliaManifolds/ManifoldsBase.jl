@@ -204,10 +204,6 @@ function Base.show(io::IO, ::MIME"text/plain", TpM::TangentSpace)
     return print(io, pre, sp)
 end
 
-function vector_transport_to!(M::TangentSpace, Y, p, X, q, ::AbstractVectorTransportMethod)
-    return copyto!(M.manifold, Y, p, X)
-end
-
 @doc raw"""
     Y = Weingarten(M::TangentSpace, p, X, V)
     Weingarten!(M::TangentSpace, Y, p, X, V)
