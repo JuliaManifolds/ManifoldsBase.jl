@@ -1,6 +1,6 @@
 using RecursiveArrayTools, ManifoldsBase, Test
 using Random
-using ManifoldsBase: DefaultManifold, VectorSpaceType, VectorSpaceFiberType, ℝ, Fiber
+using ManifoldsBase: DefaultManifold, VectorSpaceType, ℝ, Fiber
 struct TestVectorSpaceType <: VectorSpaceType end
 
 struct TestFiberType <: ManifoldsBase.FiberType end
@@ -25,7 +25,7 @@ include("test_sphere.jl")
 
     @test ManifoldsBase.fiber_dimension(M, CotangentSpaceType()) == 3
 
-    @test ManifoldsBase.fiber_dimension(M, ManifoldsBase.TangentFiberType()) == 3
+    @test ManifoldsBase.fiber_dimension(M, ManifoldsBase.TangentSpaceType()) == 3
 
     @testset "spaces at point" begin
         p = [1.0, 0.0, 0.0]
@@ -39,7 +39,7 @@ include("test_sphere.jl")
         @test base_manifold(t_p) == M
         @test manifold_dimension(t_p) == 3
         @test t_p.manifold == M
-        @test t_p.fiber_type == VectorSpaceFiberType(TangentSpaceType())
+        @test t_p.fiber_type == TangentSpaceType()
         @test t_p.point == p
         @test injectivity_radius(t_p) == Inf
         @test representation_size(t_p) == representation_size(M)
@@ -64,9 +64,9 @@ include("test_sphere.jl")
         @test rand(Random.default_rng(), t_p) isa Vector{Float64}
         @test rand(Random.default_rng(), t_p; vector_at = X) isa Vector{Float64}
         # generic vector space at
-        X_p = VectorSpaceFiber(M, TestVectorSpaceType(), p)
+        X_p = Fiber(M, TestVectorSpaceType(), p)
         X_ps = sprint(show, "text/plain", X_p)
-        X_ps_test = "VectorSpaceFiber{ℝ, DefaultManifold{ℝ, Tuple{Int64}}, TestVectorSpaceType, Vector{Float64}}\nFiber:\n VectorSpaceFiberType(TestVectorSpaceType())DefaultManifold(3; field = ℝ)\nBase point:\n $(sp)"
+        X_ps_test = "VectorSpaceFiber{ℝ, DefaultManifold{ℝ, Tuple{Int64}}, TestVectorSpaceType, Vector{Float64}}\nFiber:\n TestVectorSpaceType()DefaultManifold(3; field = ℝ)\nBase point:\n $(sp)"
         @test X_ps == X_ps_test
 
         for basis in

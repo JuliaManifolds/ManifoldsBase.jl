@@ -27,6 +27,7 @@ using Requires
 
 include("maintypes.jl")
 include("numbers.jl")
+include("Fiber.jl")
 include("bases.jl")
 include("retractions.jl")
 include("exp_log_geo.jl")
@@ -967,7 +968,6 @@ include("point_vector_fallbacks.jl")
 include("nested_trait.jl")
 include("decorator_trait.jl")
 
-include("Fiber.jl")
 include("VectorFiber.jl")
 include("ValidationManifold.jl")
 include("EmbeddedManifold.jl")
@@ -1030,8 +1030,6 @@ export AbstractInverseRetractionMethod,
     ApproximateInverseRetraction,
     CayleyInverseRetraction,
     EmbeddedInverseRetraction,
-    FiberBundleInverseProductRetraction,
-    FiberBundleProductRetraction,
     InverseProductRetraction,
     LogarithmicInverseRetraction,
     NLSolveInverseRetraction,

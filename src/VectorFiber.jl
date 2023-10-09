@@ -1,42 +1,14 @@
 
 """
-    VectorSpaceFiberType{TVS<:VectorSpaceType}
-
-`FiberType` of a [`FiberBundle`](@ref) corresponding to [`VectorSpaceType`](@ref)
-`TVS`.
-"""
-struct VectorSpaceFiberType{TVS<:VectorSpaceType} <: FiberType
-    fiber::TVS
-end
-
-function Base.show(io::IO, vsf::VectorSpaceFiberType)
-    return print(io, "VectorSpaceFiberType($(vsf.fiber))")
-end
-
-const TangentFiberType = VectorSpaceFiberType{TangentSpaceType}
-
-TangentFiberType() = VectorSpaceFiberType(TangentSpaceType())
-
-"""
     VectorSpaceFiber{𝔽,M,TFiber}
 
 Alias for [`Fiber`](@ref) when the fiber is a vector space.
 """
-const VectorSpaceFiber{𝔽,M,TSpaceType} = Fiber{
-    𝔽,
-    VectorSpaceFiberType{TSpaceType},
-    M,
-} where {𝔽,M<:AbstractManifold{𝔽},TSpaceType<:VectorSpaceType}
+const VectorSpaceFiber{𝔽,M,TSpaceType} =
+    Fiber{𝔽,TSpaceType,M} where {𝔽,M<:AbstractManifold{𝔽},TSpaceType<:VectorSpaceType}
 
-function VectorSpaceFiber(M::AbstractManifold, fiber::VectorSpaceFiberType, p)
-    return Fiber(fiber, M, p)
-end
-function VectorSpaceFiber(M::AbstractManifold, vs::VectorSpaceType, p)
-    return VectorSpaceFiber(M, VectorSpaceFiberType(vs), p)
-end
-
-"""
-    TangentSpace{𝔽,M} = VectorSpaceFiber{𝔽,M,TangentSpaceType}
+@doc raw"""
+    TangentSpace{𝔽,M} = Fiber{𝔽,TangentSpaceType,M} where {𝔽,M<:AbstractManifold{𝔽}}
 
 A manifold for the tangent space ``T_p\mathcal M`` at a point ``p\in\mathcal M``.
 This is modelled as an alias for [`VectorSpaceFiber`](@ref).
@@ -47,10 +19,9 @@ This is modelled as an alias for [`VectorSpaceFiber`](@ref).
 
 Return the manifold (vector space) of the tangent space ``T_p\mathcal M`` at a point ``p\in\mathcal M``.
 """
-const TangentSpace{𝔽,M} =
-    VectorSpaceFiber{𝔽,M,TangentSpaceType,P} where {𝔽,M<:AbstractManifold{𝔽},P}
+const TangentSpace{𝔽,M} = Fiber{𝔽,TangentSpaceType,M} where {𝔽,M<:AbstractManifold{𝔽}}
 
-TangentSpace(M::AbstractManifold, p) = VectorSpaceFiber(M, TangentFiberType(), p)
+TangentSpace(M::AbstractManifold, p) = Fiber(M, TangentSpaceType(), p)
 
 function allocate_result(M::TangentSpace, ::typeof(rand))
     return zero_vector(M.manifold, M.point)
@@ -86,7 +57,6 @@ function exp!(M::TangentSpace, q, p, X)
     return q
 end
 
-fiber_dimension(M::AbstractManifold, V::VectorSpaceFiberType) = fiber_dimension(M, V.fiber)
 fiber_dimension(M::AbstractManifold, ::CotangentSpaceType) = manifold_dimension(M)
 fiber_dimension(M::AbstractManifold, ::TangentSpaceType) = manifold_dimension(M)
 
@@ -130,8 +100,8 @@ Return the injectivity radius on the [`TangentSpace`](@ref) `M`, which is $∞$.
 """
 injectivity_radius(::TangentSpace) = Inf
 
-"""
-    inner(M::TangentSpace, X, Y,Z)
+@doc raw"""
+    inner(M::TangentSpace, X, Y, Z)
 
 For any ``X∈T_p\mathcal M`` we identify the tangent space ``T_X(T_p\mathcal M)``
 with ``T_p\mathcal M`` again. Hence an inner product of ``Y,Z`` is just the inner product of
@@ -164,7 +134,7 @@ function log!(::TangentSpace, X, p, q)
     return X
 end
 
-"""
+@doc raw"""
     manifold_dimension(TpM::TangentSpace)
 
 Return the dimension of the tangent space ``T_p\mathcal M`` at ``p∈\mathcal M``,

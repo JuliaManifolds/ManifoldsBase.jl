@@ -23,7 +23,7 @@ Optionally:
 * [`representation_size`](@ref),
 * broadcasting for basic operations.
 """
-abstract type VectorSpaceType end
+abstract type VectorSpaceType <: FiberType end
 
 """
     struct TangentSpaceType <: VectorSpaceType end
