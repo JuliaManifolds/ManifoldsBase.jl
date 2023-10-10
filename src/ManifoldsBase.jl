@@ -969,6 +969,7 @@ include("nested_trait.jl")
 include("decorator_trait.jl")
 
 include("VectorFiber.jl")
+include("TangentSpace.jl")
 include("ValidationManifold.jl")
 include("EmbeddedManifold.jl")
 include("DefaultManifold.jl")
