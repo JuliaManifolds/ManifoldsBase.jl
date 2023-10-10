@@ -5,11 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.15.0] xx/xx/2023
+
+### Added
+
+- `ProductManifold` type was migrated from Manifolds.jl.
+- `Fiber`, `VectorSpaceFiber` and `TangentSpace` types. `TangentSpace` is a generalized version of `TangentSpaceAtPoint` from Manifolds.jl.
+- `change_representer!`, `change_metric!` and `Weingarten!` methods added to `PowerManifold`.
+
+### Changed
+
+- `Requires.jl` is added as a dependency to facilitate loading some methods related to `ProductManifolds` on Julia 1.6 to 1.8. Later versions rely on package extensions.
+- `Documenter.jl` was updated to 1.0.
+
+### Removed
+
+- Julia 1.0 is no longer supported. From now on, the earliest supported Julia version is 1.6.
+
 ## [0.14.11] 25/08/2023
 
 ### Added
 
-- MAke the `Weingarten` map a decorator capable function.
+- Make the `Weingarten` map a decorator capable function.
 
 ## [0.14.10] 17/08/2023
 
