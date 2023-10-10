@@ -1074,6 +1074,15 @@ retract_softmax!(M::AbstractManifold, q, p, X, t::Number)
 
 function retract_softmax! end
 
+"""
+    retract_sasaki!(M::AbstractManifold, q, p, X, t::Number, m::SasakiRetraction)
+
+Compute the in-place variant of the [`SasakiRetraction`](@ref) `m`.
+"""
+retract_pade!(M::AbstractManifold, q, p, X, t::Number, m::SasakiRetraction)
+
+function retract_sasaki! end
+
 @doc raw"""
     retract(M::AbstractManifold, p, X, method::AbstractRetractionMethod=default_retraction_method(M, typeof(p)))
     retract(M::AbstractManifold, p, X, t::Number=1, method::AbstractRetractionMethod=default_retraction_method(M, typeof(p)))
