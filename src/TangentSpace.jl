@@ -10,12 +10,12 @@ This is modelled as an alias for [`VectorSpaceFiber`](@ref) corresponding to
 
     TangentSpace(M::AbstractManifold, p)
 
-Return the manifold (vector space) representing the tangent space ``T_p\mathcal M`` 
+Return the manifold (vector space) representing the tangent space ``T_p\mathcal M``
 at point `p`, ``p\in\mathcal M``.
 """
 const TangentSpace{𝔽,M} = Fiber{𝔽,TangentSpaceType,M} where {𝔽,M<:AbstractManifold{𝔽}}
 
-TangentSpace(M::AbstractManifold, p) = Fiber(M, TangentSpaceType(), p)
+TangentSpace(M::AbstractManifold, p) = Fiber(M, p, TangentSpaceType())
 
 function allocate_result(M::TangentSpace, ::typeof(rand))
     return zero_vector(M.manifold, M.point)

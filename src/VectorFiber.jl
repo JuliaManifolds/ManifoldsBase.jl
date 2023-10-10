@@ -1,8 +1,9 @@
 
 """
-    VectorSpaceFiber{𝔽,M,TFiber}
+    VectorSpaceFiber{𝔽,M,TSpaceType} = Fiber{𝔽,TSpaceType,M}
+        where {𝔽,M<:AbstractManifold{𝔽},TSpaceType<:VectorSpaceType}
 
-Alias for [`Fiber`](@ref) when the fiber is a vector space.
+Alias for a [`Fiber`](@ref) when the fiber is a vector space.
 """
 const VectorSpaceFiber{𝔽,M,TSpaceType} =
     Fiber{𝔽,TSpaceType,M} where {𝔽,M<:AbstractManifold{𝔽},TSpaceType<:VectorSpaceType}

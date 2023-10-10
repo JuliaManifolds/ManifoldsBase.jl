@@ -28,14 +28,14 @@ abstract type VectorSpaceType <: FiberType end
 """
     struct TangentSpaceType <: VectorSpaceType end
 
-A type that indicates that a [`VectorBundle`](@ref) is a [`TangentBundle`](@ref).
+A type that indicates that a [`Fiber`](@ref) is a [`TangentSpace`](@ref).
 """
 struct TangentSpaceType <: VectorSpaceType end
 
 """
     struct CotangentSpaceType <: VectorSpaceType end
 
-A type that indicates that a [`VectorBundle`](@ref) is a [`CotangentBundle`](@ref).
+A type that indicates that a [`Fiber`](@ref) is a [`CotangentSpace`](@ref).
 """
 struct CotangentSpaceType <: VectorSpaceType end
 

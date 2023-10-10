@@ -22,6 +22,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Julia 1.0 is no longer supported. From now on, the earliest supported Julia version is 1.6.
 
+## [0.14.12] 23/09/2023
+
+### Changed
+
+- Introduce a thorough way to allocate tangent vectors for `rand`
+
 ## [0.14.11] 25/08/2023
 
 ### Added

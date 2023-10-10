@@ -20,26 +20,7 @@ Pages = ["src/ProductManifold.jl"]
 Order = [:macro, :type, :function]
 ```
 
-
-## VectorBundle and Vector Fibre
-
-```@autodocs
-Modules = [ManifoldsBase]
-Pages = ["VectorBundle.jl"]
-Order = [:macro, :type, :function]
-Public=true
-Private=false
-```
-
-```@autodocs
-Modules = [ManifoldsBase]
-Pages = ["VectorFiber.jl"]
-Order = [:macro, :type, :function]
-Public=true
-Private=false
-```
-
-## Fiber and FiberBundle
+## Fiber
 
 ```@autodocs
 Modules = [ManifoldsBase]
@@ -47,8 +28,10 @@ Pages = ["Fiber.jl"]
 Order = [:macro, :type, :function]
 ```
 
+## Tangent Space
+
 ```@autodocs
 Modules = [ManifoldsBase]
-Pages = ["FiberBundle.jl"]
+Pages = ["TangentSpace.jl"]
 Order = [:macro, :type, :function]
 ```

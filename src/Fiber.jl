@@ -2,7 +2,7 @@
 """
     abstract type FiberType end
 
-An abstract type for fiber types.
+An abstract type for fiber types that can be used within [`Fiber`](@ref).
 """
 abstract type FiberType end
 
@@ -13,23 +13,27 @@ abstract type FiberType end
         TX,
     } <: AbstractManifold{𝔽}
 
-A fiber of a [`FiberBundle`](@ref) at a point `p` on the manifold.
-This is modelled using [`BundleFibers`](@ref) with only a fiber part
-and fixing the point-like part to be just `p`.
+A fiber of a fiber bundle at a point `p` on the manifold.
 
 This fiber itself is also a `manifold`. For vector fibers it's by default flat and hence
 isometric to the [`Euclidean`](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/euclidean.html) manifold.
 
+# Fields
+
+* `manifold`    –
+* `point`
+
+
 # Constructor
 
-    Fiber(fiber_type::FiberType, manifold::AbstractManifold, p)
+    Fiber(M::AbstractManifold, p, fiber_type::FiberType)
 
 A fiber of type `fiber_type` at point `p` from the manifold `manifold`.
 """
 struct Fiber{𝔽,TFiber<:FiberType,TM<:AbstractManifold{𝔽},TX} <: AbstractManifold{𝔽}
     manifold::TM
-    fiber_type::TFiber
     point::TX
+    fiber_type::TFiber
 end
 
 base_manifold(B::Fiber) = B.manifold

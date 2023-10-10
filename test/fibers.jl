@@ -64,7 +64,7 @@ include("test_sphere.jl")
         @test rand(Random.default_rng(), t_p) isa Vector{Float64}
         @test rand(Random.default_rng(), t_p; vector_at = X) isa Vector{Float64}
         # generic vector space at
-        X_p = Fiber(M, TestVectorSpaceType(), p)
+        X_p = Fiber(M, p, TestVectorSpaceType())
         X_ps = sprint(show, "text/plain", X_p)
         X_ps_test = "VectorSpaceFiber{ℝ, DefaultManifold{ℝ, Tuple{Int64}}, TestVectorSpaceType, Vector{Float64}}\nFiber:\n TestVectorSpaceType()DefaultManifold(3; field = ℝ)\nBase point:\n $(sp)"
         @test X_ps == X_ps_test
