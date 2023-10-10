@@ -1079,7 +1079,7 @@ function retract_softmax! end
 
 Compute the in-place variant of the [`SasakiRetraction`](@ref) `m`.
 """
-retract_pade!(M::AbstractManifold, q, p, X, t::Number, m::SasakiRetraction)
+retract_sasaki!(M::AbstractManifold, q, p, X, t::Number, m::SasakiRetraction)
 
 function retract_sasaki! end
 
