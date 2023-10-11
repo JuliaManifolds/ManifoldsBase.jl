@@ -17,6 +17,25 @@ const TangentSpace{𝔽,M} = Fiber{𝔽,TangentSpaceType,M} where {𝔽,M<:Abstr
 
 TangentSpace(M::AbstractManifold, p) = Fiber(M, p, TangentSpaceType())
 
+@doc raw"""
+    CotangentSpace{𝔽,M} = Fiber{𝔽,CotangentSpaceType,M} where {𝔽,M<:AbstractManifold{𝔽}}
+
+A manifold for the Cotangent space ``T^*_p\mathcal M`` at a point ``p\in\mathcal M``.
+This is modelled as an alias for [`VectorSpaceFiber`](@ref) corresponding to
+[`CotangentSpaceType`](@ref).
+
+# Constructor
+
+    CotangentSpace(M::AbstractManifold, p)
+
+Return the manifold (vector space) representing the cotangent space ``T^*_p\mathcal M``
+at point `p`, ``p\in\mathcal M``.
+"""
+const CotangentSpace{𝔽,M} = Fiber{𝔽,CotangentSpaceType,M} where {𝔽,M<:AbstractManifold{𝔽}}
+
+CotangentSpace(M::AbstractManifold, p) = Fiber(M, p, CotangentSpaceType())
+
+
 function allocate_result(M::TangentSpace, ::typeof(rand))
     return zero_vector(M.manifold, M.point)
 end

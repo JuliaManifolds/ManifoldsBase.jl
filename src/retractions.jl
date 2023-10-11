@@ -177,7 +177,7 @@ end
 @doc raw"""
     struct SasakiRetraction <: AbstractRetractionMethod end
 
-Exponential map on [`TangentBundle`](@ref) computed via Euler integration as described
+Exponential map on [`TangentBundle`](https://juliamanifolds.github.io/Manifolds.jl/stable/manifolds/vector_bundle.html#Manifolds.TangentBundle) computed via Euler integration as described
 in [MuralidharanFletcher:2012](@cite). The system of equations for ``\gamma : ℝ \to T\mathcal M`` such that
 ``\gamma(1) = \exp_{p,X}(X_M, X_F)`` and ``\gamma(0)=(p, X)`` reads
 
