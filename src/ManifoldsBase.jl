@@ -997,7 +997,8 @@ end
 # (a) Manifolds and general types
 export AbstractManifold, AbstractManifoldPoint, TVector, CoTVector, TFVector, CoTFVector
 export VectorSpaceFiber
-export TangentSpace, TangentSpaceType, CotangentSpaceType
+export TangentSpace, TangentSpaceType
+export CotangentSpace, CotangentSpaceType
 export AbstractDecoratorManifold
 export AbstractTrait, IsEmbeddedManifold, IsEmbeddedSubmanifold, IsIsometricEmbeddedManifold
 export IsExplicitDecorator
