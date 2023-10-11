@@ -36,6 +36,10 @@ include("test_sphere.jl")
         sp = replace(sp, '\n' => "\n ")
         t_ps_test = "Tangent space to the manifold $(M) at point:\n $(sp)"
         @test t_ps == t_ps_test
+        ct_p = CotangentSpace(M, p)
+        ct_ps = sprint(show, "text/plain", ct_p)
+        ct_ps_test = "Cotangent space to the manifold $(M) at point:\n $(sp)"
+        @test ct_ps == ct_ps_test
         @test base_manifold(t_p) == M
         @test manifold_dimension(t_p) == 3
         @test t_p.manifold == M

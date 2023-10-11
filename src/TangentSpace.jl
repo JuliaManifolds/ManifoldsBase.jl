@@ -215,6 +215,15 @@ function Base.show(io::IO, ::MIME"text/plain", TpM::TangentSpace)
     return print(io, pre, sp)
 end
 
+
+function Base.show(io::IO, ::MIME"text/plain", cTpM::CotangentSpace)
+    println(io, "Cotangent space to the manifold $(base_manifold(cTpM)) at point:")
+    pre = " "
+    sp = sprint(show, "text/plain", cTpM.point; context = io, sizehint = 0)
+    sp = replace(sp, '\n' => "\n$(pre)")
+    return print(io, pre, sp)
+end
+
 @doc raw"""
     Y = Weingarten(M::TangentSpace, p, X, V)
     Weingarten!(M::TangentSpace, Y, p, X, V)
