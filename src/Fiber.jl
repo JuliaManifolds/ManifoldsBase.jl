@@ -6,12 +6,8 @@ An abstract type for fiber types that can be used within [`Fiber`](@ref).
 """
 abstract type FiberType end
 
-"""
-    Fiber{
-        𝔽,
-        TFiber<:BundleFibers{<:FiberType,<:AbstractManifold{𝔽}},
-        TX,
-    } <: AbstractManifold{𝔽}
+@doc raw"""
+    Fiber{𝔽,TFiber<:FiberType,TM<:AbstractManifold{𝔽},TX} <: AbstractManifold{𝔽}
 
 A fiber of a fiber bundle at a point `p` on the manifold.
 
@@ -20,8 +16,9 @@ isometric to the [`Euclidean`](https://juliamanifolds.github.io/Manifolds.jl/lat
 
 # Fields
 
-* `manifold`    –
-* `point`
+* `manifold`    – base space of the fiber bundle
+* `point`       – a point ``p`` from the base space; the fiber corresponds to the preimage
+                  by bundle projection ``\pi^{-1}(\{p\})``.
 
 
 # Constructor
