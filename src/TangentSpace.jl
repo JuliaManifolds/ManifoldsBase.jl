@@ -41,116 +41,121 @@ function allocate_result(M::TangentSpace, ::typeof(rand))
 end
 
 """
-    distance(M::TangentSpace, p, q)
+    distance(M::TangentSpace, X, Y)
 
-Distance between vectors `p` and `q` from the vector space `M`. It is calculated as the norm
-of their difference.
+Distance between vectors `X` and `Y` from the [`TangentSpace`](@ref) `TpM`.
+It is calculated as the [`norm`](@ref) (induced by the metric on `TpM`) of their difference.
 """
-function distance(M::TangentSpace, p, q)
-    return norm(M.manifold, M.point, q - p)
+function distance(TpM::TangentSpace, X, Y)
+    return norm(TpM.manifold, TpM.point, Y - X)
 end
 
-function embed!(M::TangentSpace, q, p)
-    return embed!(M.manifold, q, M.point, p)
+function embed!(TpM::TangentSpace, Y, X)
+    return embed!(TpM.manifold, Y, TpM.point, X)
 end
-function embed!(M::TangentSpace, Y, p, X)
-    return embed!(M.manifold, Y, M.point, X)
+function embed!(TpM::TangentSpace, W, X, V)
+    return embed!(TpM.manifold, W, TpM.point, V)
 end
 
 @doc raw"""
-    exp(M::TangentSpace, p, X)
+    exp(TpM::TangentSpace, X, V)
 
-Exponential map of tangent vectors `X` and `p` from the tangent space `M`. It is
-calculated as their sum.
+Exponential map of tangent vectors `X` from `TpM` and a direction `V`,
+which is also from the [`TangentSpace`](@ref) `TpM` since we identify the tangent space of `TpM` with `TpM`.
+The exponential map then simplifies to the sum `X+V`.
 """
 exp(::TangentSpace, ::Any, ::Any)
 
-function exp!(M::TangentSpace, q, p, X)
-    copyto!(M.manifold, q, p + X)
-    return q
+function exp!(TpM::TangentSpace, Y, X, V)
+    copyto!(TpM.manifold, Y, TpM.point, X + V)
+    return Y
 end
 
 fiber_dimension(M::AbstractManifold, ::CotangentSpaceType) = manifold_dimension(M)
 fiber_dimension(M::AbstractManifold, ::TangentSpaceType) = manifold_dimension(M)
 
-function get_basis(M::TangentSpace, p, B::CachedBasis)
+function get_basis(TpM::TangentSpace, X, B::CachedBasis)
     return invoke(
         get_basis,
         Tuple{AbstractManifold,Any,CachedBasis},
-        M.manifold,
-        M.point,
+        TpM.manifold,
+        TpM.point,
         B,
     )
 end
-function get_basis(M::TangentSpace, p, B::AbstractBasis{<:Any,TangentSpaceType})
-    return get_basis(M.manifold, M.point, B)
+function get_basis(TpM::TangentSpace, X, B::AbstractBasis{<:Any,TangentSpaceType})
+    return get_basis(TpM.manifold, TpM.point, B)
 end
 
-function get_coordinates(M::TangentSpace, p, X, B::AbstractBasis)
-    return get_coordinates(M.manifold, M.point, X, B)
+function get_coordinates(TpM::TangentSpace, X, V, B::AbstractBasis)
+    return get_coordinates(TpM.manifold, TpM.point, V, B)
 end
 
-function get_coordinates!(M::TangentSpace, Y, p, X, B::AbstractBasis)
-    return get_coordinates!(M.manifold, Y, M.point, X, B)
+function get_coordinates!(TpM::TangentSpace, c, X, V, B::AbstractBasis)
+    return get_coordinates!(TpM.manifold, c, TpM.point, V, B)
 end
 
-function get_vector(M::TangentSpace, p, X, B::AbstractBasis)
-    return get_vector(M.manifold, M.point, X, B)
+function get_vector(TpM::TangentSpace, X, c, B::AbstractBasis)
+    return get_vector(TpM.manifold, TpM.point, c, B)
 end
 
-function get_vector!(M::TangentSpace, Y, p, X, B::AbstractBasis)
-    return get_vector!(M.manifold, Y, M.point, X, B)
+function get_vector!(TpM::TangentSpace, V, X, c, B::AbstractBasis)
+    return get_vector!(TpM.manifold, V, TpM.point, c, B)
 end
 
-function get_vectors(M::TangentSpace, p, B::CachedBasis)
-    return get_vectors(M.manifold, M.point, B)
+function get_vectors(TpM::TangentSpace, X, B::CachedBasis)
+    return get_vectors(TpM.manifold, TpM.point, B)
 end
 
 @doc raw"""
-    injectivity_radius(M::TangentSpace)
+    injectivity_radius(TpM::TangentSpace)
 
-Return the injectivity radius on the [`TangentSpace`](@ref) `M`, which is $∞$.
+Return the injectivity radius on the [`TangentSpace`](@ref) `TpM`, which is $∞$.
 """
 injectivity_radius(::TangentSpace) = Inf
 
 @doc raw"""
-    inner(M::TangentSpace, X, Y, Z)
+    inner(M::TangentSpace, X, V, W)
 
-For any ``X∈T_p\mathcal M`` we identify the tangent space ``T_X(T_p\mathcal M)``
-with ``T_p\mathcal M`` again. Hence an inner product of ``Y,Z`` is just the inner product of
-the tangent space itself. ``⟨Y,Z⟩_X = ⟨Y,Z⟩_p``.
+For any ``X ∈ T_p\mathcal M`` we identify the tangent space ``T_X(T_p\mathcal M)``
+with ``T_p\mathcal M`` again. Hence an inner product of ``V,W`` is just the inner product of
+the tangent space itself. ``⟨V,W⟩_X = ⟨V,W⟩_p``.
 """
-function inner(M::TangentSpace, X, Y, Z)
-    return inner(M.manifold, M.point, Y, Z)
+function inner(TpM::TangentSpace, X, V, W)
+    return inner(TpM.manifold, TpM.point, V, W)
 end
 
 """
     is_flat(::TangentSpace)
 
-Return true. [`TangentSpace`](@ref) is a flat manifold.
+The [`TangentSpace`](@ref) is a flat manifold, so this returns `true`.
 """
 is_flat(::TangentSpace) = true
 
-function _isapprox(M::TangentSpace, X, Y; kwargs...)
-    return isapprox(M.manifold, M.point, X, Y; kwargs...)
+function _isapprox(TpM::TangentSpace, X, Y; kwargs...)
+    return isapprox(TpM.manifold, TpM.point, X, Y; kwargs...)
+end
+
+function _isapprox(TpM::TangentSpace, X, V, W; kwargs...)
+    return isapprox(TpM.manifold, TpM.point, V, W; kwargs...)
 end
 
 """
-    log(TpM::TangentSpace, p, q)
+    log(TpM::TangentSpace, X, Y)
 
-Logarithmic map on the tangent space manifold `TpM`, calculated as the difference of tangent
+Logarithmic map on the [`TangentSpace`](@ref) `TpM`, calculated as the difference of tangent
 vectors `q` and `p` from `TpM`.
 """
 log(::TangentSpace, ::Any...)
-function log!(::TangentSpace, X, p, q)
-    copyto!(X, q - p)
-    return X
+function log!(TpM::TangentSpace, V, X, Y)
+    copyto!(TpM, V, TpM.point, Y - X)
+    return V
 end
 
 @doc raw"""
     manifold_dimension(TpM::TangentSpace)
 
-Return the dimension of the tangent space ``T_p\mathcal M`` at ``p∈\mathcal M``,
+Return the dimension of the [`TangentSpace`](@ref) ``T_p\mathcal M`` at ``p∈\mathcal M``,
 which is the same as the dimension of the manifold ``\mathcal M``.
 """
 function manifold_dimension(TpM::TangentSpace)
@@ -158,53 +163,52 @@ function manifold_dimension(TpM::TangentSpace)
 end
 
 @doc raw"""
-    parallel_transport_to(::TangentSpace, X, Z, Y)
+    parallel_transport_to(::TangentSpace, X, V, Y)
 
 Transport the tangent vector ``Z ∈ T_X(T_p\mathcal M)`` from `X` to `Y`.
-Since we identify ``T_X\mathcal M = T_p\mathcal M`` and the tangent space is a vector space,
-parallel transport simplifies to the identity, so this function yield ``Z`` as a result.
+Since we identify ``T_X(T_p\mathcal M) = T_p\mathcal M`` and the tangent space is a vector space,
+parallel transport simplifies to the identity, so this function yields ``V`` as a result.
 """
-parallel_transport_to(TpM::TangentSpace, X, Z, Y)
+parallel_transport_to(TpM::TangentSpace, X, V, Y)
 
-function parallel_transport_to!(TpM::TangentSpace, Y, p, X, q)
-    return copyto!(TpM.manifold, Y, p, X)
+function parallel_transport_to!(TpM::TangentSpace, W, X, V, Y)
+    return copyto!(TpM.manifold, W, TpM.point, V)
 end
 
 @doc raw"""
-    project(M::TangentSpace, p)
+    project(TpM::TangentSpace, X)
 
-Project the point `p` from the tangent space `M`, that is project the vector `p`
-tangent at `M.point`.
+Project the point `X` from embedding of the [`TangentSpace`](@ref) `TpM` onto `TpM`.
 """
 project(::TangentSpace, ::Any)
 
-function project!(M::TangentSpace, q, p)
-    return project!(M.manifold, q, M.point, p)
+function project!(TpM::TangentSpace, Y, X)
+    return project!(TpM.manifold, Y, TpM.point, X)
 end
 
 @doc raw"""
-    project(M::TangentSpace, p, X)
+    project(TpM::TangentSpace, X, V)
 
-Project the vector `X` from the tangent space `M`, that is project the vector `X`
-tangent at `M.point`.
+Project the vector `V` from the embedding of the tangent space `TpM` (identified with ``T_X(T_p\mathcal M)``),
+that is project the vector `V` onto the tangent space at `TpM.point`.
 """
 project(::TangentSpace, ::Any, ::Any)
 
-function project!(M::TangentSpace, Y, p, X)
-    return project!(M.manifold, Y, M.point, X)
+function project!(TpM::TangentSpace, W, X, V)
+    return project!(TpM.manifold, W, TpM.point, V)
 end
 
-function Random.rand!(M::TangentSpace, X; vector_at = nothing)
-    rand!(M.manifold, X; vector_at = M.point)
+function Random.rand!(TpM::TangentSpace, X; vector_at = nothing)
+    rand!(TpM.manifold, X; vector_at = TpM.point)
     return X
 end
-function Random.rand!(rng::AbstractRNG, M::TangentSpace, X; vector_at = nothing)
-    rand!(rng, M.manifold, X; vector_at = M.point)
+function Random.rand!(rng::AbstractRNG, TpM::TangentSpace, X; vector_at = nothing)
+    rand!(rng, TpM.manifold, X; vector_at = TpM.point)
     return X
 end
 
-function representation_size(B::TangentSpace)
-    return representation_size(B.manifold)
+function representation_size(TpM::TangentSpace)
+    return representation_size(TpM.manifold)
 end
 
 function Base.show(io::IO, ::MIME"text/plain", TpM::TangentSpace)
@@ -225,26 +229,26 @@ function Base.show(io::IO, ::MIME"text/plain", cTpM::CotangentSpace)
 end
 
 @doc raw"""
-    Y = Weingarten(M::TangentSpace, p, X, V)
-    Weingarten!(M::TangentSpace, Y, p, X, V)
+    Y = Weingarten(TpM::TangentSpace, X, V, A)
+    Weingarten!(TpM::TangentSpace, Y, p, X, V)
 
-Compute the Weingarten map ``\mathcal W_p`` at `p` on the [`TangentSpace`](@ref) `M` with respect to the
-tangent vector ``X \in T_p\mathcal M`` and the normal vector ``V \in N_p\mathcal M``.
+Compute the Weingarten map ``\mathcal W_X`` at `X` on the [`TangentSpace`](@ref) `TpM` with respect to the
+tangent vector ``V \in T_p\mathcal M`` and the normal vector ``A \in N_p\mathcal M``.
 
 Since this a flat space by itself, the result is always the zero tangent vector.
 """
-Weingarten(::TangentSpace, p, X, V)
+Weingarten(::TangentSpace, ::Any, ::Any, ::Any)
 
-Weingarten!(::TangentSpace, Y, p, X, V) = fill!(Y, 0)
+Weingarten!(::TangentSpace, W, X, V, A) = fill!(W, 0)
 
 @doc raw"""
-    zero_vector(M::TangentSpace, p)
+    zero_vector(TpM::TangentSpace, X)
 
-Zero tangent vector at point `p` from the tangent space `M`, that is the zero tangent vector
-at point `M.point`.
+Zero tangent vector at point `X` from the [`TangentSpace`](@ref) `TpM`,
+that is the zero tangent vector at point `TpM.point`.
 """
 zero_vector(::TangentSpace, ::Any...)
 
-function zero_vector!(M::TangentSpace, X, p)
-    return zero_vector!(M.manifold, X, M.point)
+function zero_vector!(M::TangentSpace, V, X)
+    return zero_vector!(M.manifold, V, M.point)
 end
