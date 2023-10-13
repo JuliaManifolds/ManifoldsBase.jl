@@ -674,18 +674,22 @@ end
 function is_point(M::AbstractManifold, p; error::Symbol = :none, kwargs...)
     mps = check_size(M, p)
     if mps !== nothing
-        s = "$(typeof(mps)) with $(mps.val)\n$(mps.msg)"
-        (error === :info) && @info s
-        (error === :warn) && @warn s
         (error === :error) && throw(mps)
+        if (error === :info) || (error === :warn)
+            s = "$(typeof(mps)) with $(mps.val)\n$(mps.msg)"
+            (error === :info) && @info s
+            (error === :warn) && @warn s
+        end
         return false
     end
     mpe = check_point(M, p; kwargs...)
     if mpe !== nothing
-        s = "$(typeof(mpe)) with $(mpe.val)\n$(mpe.msg)"
-        (error === :info) && @info s
-        (error === :warn) && @warn s
         (error === :error) && throw(mpe)
+        if (error === :info) || (error === :warn)
+            s = "$(typeof(mpe)) with $(mpe.val)\n$(mpe.msg)"
+            (error === :info) && @info s
+            (error === :warn) && @warn s
+        end
         return false
     end
     return true
@@ -749,17 +753,21 @@ function is_vector(
     mXs = check_size(M, p, X)
     if mXs !== nothing
         (error === :error) && throw(mXs)
-        s = "$(typeof(mXs)) with $(mXs.val)\n$(mXs.msg)"
-        (error === :info) && @info s
-        (error === :warn) && @warn s
+        if (error === :info) || (error === :warn)
+            s = "$(typeof(mXs)) with $(mXs.val)\n$(mXs.msg)"
+            (error === :info) && @info s
+            (error === :warn) && @warn s
+        end
         return false
     end
     mXe = check_vector(M, p, X; kwargs...)
     if mXe !== nothing
         (error === :error) && throw(mXe)
-        s = "$(typeof(mXe)) with $(mXe.val)\n$(mXe.msg)"
-        (error === :info) && @info s
-        (error === :warn) && @warn s
+        if (error === :info) || (error === :warn)
+            s = "$(typeof(mXe)) with $(mXe.val)\n$(mXe.msg)"
+            (error === :info) && @info s
+            (error === :warn) && @warn s
+        end
         return false
     end
     return true

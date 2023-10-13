@@ -379,24 +379,26 @@ end
 @trait_function is_flat(M::AbstractDecoratorManifold)
 
 # Introduce Deco Trait | automatic foward | fallback
-@trait_function is_point(M::AbstractDecoratorManifold, p, te::Bool = false; kwargs...)
-@trait_function is_point(M::AbstractDecoratorManifold, p, e::Symbol; kwargs...)
+@trait_function is_point(M::AbstractDecoratorManifold, p; kwargs...)
 # Embedded
 function is_point(
     ::TraitList{IsEmbeddedManifold},
     M::AbstractDecoratorManifold,
-    p,
-    te::Bool = false;
+    p;
+    error::Symbol = :none,
     kwargs...,
 )
     # to be safe check_size first
     es = check_size(M, p)
     if es !== nothing
-        te && throw(es)
+        (error === :error) && throw(es)
+        s = "$(typeof(es)) with $(es)"
+        (error === :info) && @info s
+        (error === :warn) && @warn s
         return false
     end
     try
-        pt = is_point(get_embedding(M, p), embed(M, p), te; kwargs...)
+        pt = is_point(get_embedding(M, p), embed(M, p); error = error, kwargs...)
         !pt && return false # no error thrown (deactivated) but returned false -> return false
     catch e
         if e isa DomainError || e isa AbstractManifoldDomainError
@@ -408,9 +410,14 @@ function is_point(
         throw(e) #an error occured that we do not handle ourselves -> rethrow.
     end
     mpe = check_point(M, p; kwargs...)
-    mpe === nothing && return true
-    te && throw(mpe)
-    return false
+    if mpe !== nothing
+        s = "$(typeof(mpe)) with $(mpe.val)\n$(mpe.msg)"
+        (error === :info) && @info s
+        (error === :warn) && @warn s
+        (error === :error) && throw(mpe)
+        return false
+    end
+    return true
 end
 
 # Introduce Deco Trait | automatic foward | fallback
@@ -429,7 +436,7 @@ function is_vector(
     es = check_size(M, p, X)
     if es !== nothing
         (error === :error) && throw(es)
-        s = "$(typeof(es)) with $(es.val)\n$(es.msg)"
+        s = "$(typeof(es)) with $(es)"
         (error === :info) && @info s
         (error === :warn) && @warn s
         return false

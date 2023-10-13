@@ -222,15 +222,15 @@ ManifoldsBase.decorated_manifold(::FallbackManifold) = DefaultManifold(3)
         @test !is_vector(M, [1 0 0], [-1 0 0])
         @test is_vector(M, [1 0 0], [1 0 1], true)
         @test !is_vector(M, [-1, 0, 0], [0, 0, 0])
-        @test_throws ManifoldDomainError is_vector(M, [-1, 0, 0], [0, 0, 0]; error = :error)
+        @test_throws DomainError is_vector(M, [-1, 0, 0], [0, 0, 0]; error = :error)
         @test_throws DomainError is_vector(M, [1, 0, 0], [-1, 0, 0]; error = :error)
         @test !is_vector(M, [-1, 0, 0], [0, 0, 0])
         @test !is_vector(M, [1, 0, 0], [-1, 0, 0])
         # check manifold domain error from embedding to obtain ManifoldDomainErrors
         @test !is_point(N, [0, 0, 0])
-        @test_throws ManifoldDomainError is_point(N, [0, 0, 0], true)
+        @test_throws ManifoldDomainError is_point(N, [0, 0, 0]; error = :error)
         @test !is_vector(N, [1, 1, 0], [0, 0, 0])
-        @test_throws ManifoldDomainError is_vector(N, [1, 1, 0], [0, 0, 0], true)
+        @test_throws ManifoldDomainError is_vector(N, [1, 1, 0], [0, 0, 0]; error = :error)
         p = [1.0 1.0 0.0]
         q = [1.0 0.0 0.0]
         X = q - p
