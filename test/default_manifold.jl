@@ -852,8 +852,8 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
         XF = [0.0, 0.0]
         m = ExponentialRetraction()
         @test_throws DomainError is_point(M, pF, true)
-        @test_throws DomainError is_vector(M, p, XF, true)
-        @test_throws DomainError is_vector(M, pF, XF, true; check_point = true)
+        @test_throws DomainError is_vector(M, p, XF; error = :error)
+        @test_throws DomainError is_vector(M, pF, XF, true; error = :error)
         @test injectivity_radius(M) == Inf
         @test injectivity_radius(M, p) == Inf
         @test injectivity_radius(M, p, m) == Inf

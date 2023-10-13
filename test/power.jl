@@ -113,8 +113,18 @@ struct TestArrayRepresentation <: AbstractPowerRepresentation end
                         @test is_vector(N, p, p, true)
                         @test !is_vector(N, p, pE1)
                         @test !is_vector(N, p, pE2)
-                        @test_throws ComponentManifoldError is_vector(N, p, pE1, true)
-                        @test_throws CompositeManifoldError is_vector(N, p, pE2, true)
+                        @test_throws ComponentManifoldError is_vector(
+                            N,
+                            p,
+                            pE1;
+                            error = :error,
+                        )
+                        @test_throws CompositeManifoldError is_vector(
+                            N,
+                            p,
+                            pE2;
+                            error = :error,
+                        )
                     end
                 end
                 @testset "specific functions" begin

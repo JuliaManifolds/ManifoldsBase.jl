@@ -418,16 +418,8 @@ end
     M::AbstractDecoratorManifold,
     p,
     X,
-    te::Bool = false,
-    cbp = true;
-    kwargs...,
-)
-@trait_function is_vector(
-    M::AbstractDecoratorManifold,
-    p,
-    X,
-    e::Symbol,
-    cbp = true;
+    cbp::Bool = true,
+    te::Bool = false;
     kwargs...,
 )
 # EmbeddedManifold
@@ -437,34 +429,33 @@ function is_vector(
     M::AbstractDecoratorManifold,
     p,
     X,
-    te::Bool = false,
-    cbp = true;
+    check_base_point::Bool = true;
+    error::Symbol = :none,
     kwargs...,
 )
-    es = check_size(M, p, X)
-    if es !== nothing
-        te && throw(es) # error & throw?
-        return false
-    end
-    if cbp
-        # check whether p is valid before embedding the tangent vector
-        # throws it te=true
+    if check_base_point
         try
-            ep = is_point(M, p, te; kwargs...)
+            ep = is_point(M, p; error = error, kwargs...)
             !ep && return false
         catch e
             if e isa DomainError || e isa AbstractManifoldDomainError
-                e = ManifoldDomainError(
-                    "$X is not a tangent vector to $p on $M because its bas epoint is not valid point on $M.",
+                ManifoldDomainError(
+                    "$X is not a tangent vector to $p on $M because $p is not a valid point on $p",
                     e,
                 )
             end
             throw(e)
         end
     end
-    # Check vector in embedding
     try
-        tv = is_vector(get_embedding(M, p), embed(M, p), embed(M, p, X), te, cbp; kwargs...)
+        tv = is_vector(
+            get_embedding(M, p),
+            embed(M, p),
+            embed(M, p, X),
+            cbp;
+            error = error,
+            kwargs...,
+        )
         !tv && return false # no error thrown (deactivated) but returned false -> return false
     catch e
         if e isa DomainError || e isa AbstractManifoldDomainError
@@ -476,9 +467,12 @@ function is_vector(
         throw(e)
     end
     # Check (additional) local stuff
-    mtve = check_vector(M, p, X; kwargs...)
-    mtve === nothing && return true
-    te && throw(mtve)
+    mXe = check_vector(M, p, X; kwargs...)
+    mXe === nothing && return true
+    (error === :error) && throw(mXe)
+    s = "$(typeof(mXe)) with $(mXe.val)\n$(mXe.msg)"
+    (error === :info) && @info s
+    (error === :warn) && @warn s
     return false
 end
 

@@ -672,7 +672,6 @@ function is_point(
     return is_point(M, p; error = throw_error ? :error : :none)
 end
 function is_point(M::AbstractManifold, p; error::Symbol = :none, kwargs...)
-    (error === :error) && return is_point(M, p, true; kwargs...)
     mps = check_size(M, p)
     if mps !== nothing
         s = "$(typeof(mps)) with $(mps.val)\n$(mps.msg)"
@@ -721,41 +720,46 @@ function is_vector(
     M::AbstractManifold,
     p,
     X,
-    check_base_point,
-    throw_error::Bool
-    ;
+    check_base_point::Bool,
+    throw_error::Bool;
     error::Symbol = :none,
     kwargs...,
 )
-return is_vector(M, p, X, check_base_point; error = throw_error ? :error : :none, kwargs...)
+    return is_vector(
+        M,
+        p,
+        X,
+        check_base_point;
+        error = throw_error ? :error : :none,
+        kwargs...,
+    )
 end
 function is_vector(
     M::AbstractManifold,
     p,
     X,
-    check_base_point = true;
+    check_base_point::Bool = true;
     error::Symbol = :none,
     kwargs...,
 )
-    (error === :error) && return is_vector(M, p, X, true, check_base_point; kwargs...)
     if check_base_point
-        s = is_point(M, p, error; kwargs...) # if error, is_point throws,
+        s = is_point(M, p; error = error, kwargs...) # if error, is_point throws,
         !s && return false # otherwise if not a point return false
     end
     mXs = check_size(M, p, X)
     if mXs !== nothing
+        (error === :error) && throw(mXs)
         s = "$(typeof(mXs)) with $(mXs.val)\n$(mXs.msg)"
         (error === :info) && @info s
         (error === :warn) && @warn s
-        (error === :error) && throw(mXs)
         return false
     end
     mXe = check_vector(M, p, X; kwargs...)
     if mXe !== nothing
+        (error === :error) && throw(mXe)
         s = "$(typeof(mXe)) with $(mXe.val)\n$(mXe.msg)"
         (error === :info) && @info s
         (error === :warn) && @warn s
-        (error === :error) && throw(mXe)
         return false
     end
     return true

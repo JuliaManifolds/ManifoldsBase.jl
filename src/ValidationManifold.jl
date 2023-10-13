@@ -267,17 +267,17 @@ function inner(M::ValidationManifold, p, X, Y; kwargs...)
 end
 
 
-function is_point(M::ValidationManifold, p, te::Bool = false; kw...)
+function is_point(M::ValidationManifold, p, te::Bool; kw...)
     return is_point(M.manifold, array_value(p), te; kw...)
 end
-function is_point(M::ValidationManifold, p, e::Symbol; kw...)
-    return is_point(M.manifold, array_value(p), e; kw...)
+function is_point(M::ValidationManifold, p; kw...)
+    return is_point(M.manifold, array_value(p); kw...)
 end
-function is_vector(M::ValidationManifold, p, X, te::Bool = false, cbp = true; kw...)
-    return is_vector(M.manifold, array_value(p), array_value(X), te, cbp; kw...)
+function is_vector(M::ValidationManifold, p, X, cbp::Bool, te::Bool; kw...)
+    return is_vector(M.manifold, array_value(p), array_value(X), cbp, te; kw...)
 end
-function is_vector(M::ValidationManifold, p, X, e::Symbol, cbp = true; kw...)
-    return is_vector(M.manifold, array_value(p), array_value(X), e, cbp; kw...)
+function is_vector(M::ValidationManifold, p, X, cbp::Bool = true; kw...)
+    return is_vector(M.manifold, array_value(p), array_value(X), cbp; kw...)
 end
 
 function isapprox(M::ValidationManifold, p, q; kwargs...)

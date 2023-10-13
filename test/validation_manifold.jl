@@ -36,10 +36,10 @@ end
         @test ManifoldsBase.check_size(A, x2) === ManifoldsBase.check_size(M, x)
     end
     @testset "is_point / is_vector error." begin
-        @test is_point(A, x, :error)
-        @test_throws DomainError is_point(A, [1, 2, 3, 4], :error)
-        @test is_vector(A, x, v, :error)
-        @test_throws DomainError is_vector(A, x, [1, 2, 3, 4], :error)
+        @test is_point(A, x; error = :error)
+        @test_throws DomainError is_point(A, [1, 2, 3, 4]; error = :error)
+        @test is_vector(A, x, v; error = :error)
+        @test_throws DomainError is_vector(A, x, [1, 2, 3, 4]; error = :error)
     end
     @testset "Types and Conversion" begin
         @test convert(typeof(M), A) == M
@@ -157,6 +157,7 @@ end
         for BT in (DefaultBasis, DefaultOrthonormalBasis, DefaultOrthogonalBasis)
             @testset "Basis $(BT)" begin
                 cb = BT()
+                println(cb)
                 @test b == get_vectors(M, x, get_basis(A, x, cb))
                 v = similar(x)
                 v2 = similar(x)
