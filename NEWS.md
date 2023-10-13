@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.15.0] xx/xx/xx
+
+### Changed
+
+- The signature of `is_point` was changed to be consistent with `isapprox.`.
+  The error positional symbol (third argument) is now a keyword argument.
+  We left the boolean shortcut in place.
+  That means
+  * `is_point(M, p, true)` works the same as before (`false` is the default anyways)
+  * `is_point(M, p, :warn)` has to be changed to `is_point(M, p; error=:warn)`
+- The signature of `is_vector` was changed to be consistent with `isapprox` and `is_point`.
+  The error positional symbol (fourth argument) is now a keyword argument.
+  The error positional boolean (fourth argument) hence moved to fifth place (after `check_base_point`)
+  This means
+  * `is_vector(M, p, X, true)` should now be `is_vector(M, p, X; error=:error)`
+  * `is_vector(M, p, X, err, base)` for two booleans `err, base` should now be `is_vector(M, p, X, base, err)`
+  * `is_vector(M, p, X, err, base)` for a symbol `err` should now be `is_vector(M, p, X, base; error=err)`
+
 ## [0.14.11] 25/08/2023
 
 ### Added
