@@ -21,6 +21,7 @@ if "--quarto" ∈ ARGS
         tutorials_folder = (@__DIR__) * "/../tutorials"
         # instantiate the tutorials environment if necessary
         Pkg.activate(tutorials_folder)
+        Pkg.develop(PackageSpec(; path = (@__DIR__) * "/../"))
         Pkg.resolve()
         Pkg.instantiate()
         Pkg.build("IJulia") # build IJulia to the right version.

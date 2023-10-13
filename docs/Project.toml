@@ -5,5 +5,5 @@ ManifoldsBase = "3362f125-f0bb-47a3-aa74-596ffd7ef2fb"
 
 [compat]
 CondaPkg = "0.2"
-Documenter = "0.27"
-ManifoldsBase = "0.14"
+Documenter = "1"
+ManifoldsBase = "0.15"
