@@ -13,7 +13,8 @@ function ManifoldsBase.vector_space_dimension(M::AbstractManifold, ::TestVectorS
     return 2 * manifold_dimension(M)
 end
 
-include("test_sphere.jl")
+include("test_manifolds.jl")
+
 
 @testset "vector space fibers" begin
     M = DefaultManifold(3)
@@ -54,6 +55,7 @@ include("test_sphere.jl")
         @test distance(t_p, p, q) ≈ sqrt(5)
         @test isapprox(t_p, exp(t_p, X, X), 2 * X)
         @test isapprox(t_p, log(t_p, X, Y), [0.0, 2.0, -2.0])
+        @test isapprox(t_p, X, log(t_p, X, Y), [0.0, 2.0, -2.0])
         @test inner(t_p, X, X, X) ≈ 1.0
         @test norm(t_p, X, X) ≈ 1.0
         @test parallel_transport_to(t_p, X, Y, X) ≈ Y
