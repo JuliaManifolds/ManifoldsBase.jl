@@ -216,14 +216,14 @@ ManifoldsBase.decorated_manifold(::FallbackManifold) = DefaultManifold(3)
         @test !is_point(M, [-1 0 0]) # right size but <0 1st
         @test_throws DomainError is_point(M, [-1 0 0], true) # right size but <0 1st
         @test !is_vector(M, [1 0 0], [1]) # right point, wrong size vector
-        @test_throws ManifoldDomainError is_vector(M, [1 0 0], [1], true)
+        @test_throws ManifoldDomainError is_vector(M, [1 0 0], [1]; error = :error)
         @test !is_vector(M, [1 0 0], [1])
-        @test_throws DomainError is_vector(M, [1 0 0], [-1 0 0], true) # right point, vec 1st <0
+        @test_throws DomainError is_vector(M, [1 0 0], [-1 0 0]; error = :error) # right point, vec 1st <0
         @test !is_vector(M, [1 0 0], [-1 0 0])
         @test is_vector(M, [1 0 0], [1 0 1], true)
         @test !is_vector(M, [-1, 0, 0], [0, 0, 0])
-        @test_throws ManifoldDomainError is_vector(M, [-1, 0, 0], [0, 0, 0], true)
-        @test_throws DomainError is_vector(M, [1, 0, 0], [-1, 0, 0], true)
+        @test_throws ManifoldDomainError is_vector(M, [-1, 0, 0], [0, 0, 0]; error = :error)
+        @test_throws DomainError is_vector(M, [1, 0, 0], [-1, 0, 0]; error = :error)
         @test !is_vector(M, [-1, 0, 0], [0, 0, 0])
         @test !is_vector(M, [1, 0, 0], [-1, 0, 0])
         # check manifold domain error from embedding to obtain ManifoldDomainErrors

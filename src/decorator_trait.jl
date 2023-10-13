@@ -414,14 +414,7 @@ function is_point(
 end
 
 # Introduce Deco Trait | automatic foward | fallback
-@trait_function is_vector(
-    M::AbstractDecoratorManifold,
-    p,
-    X,
-    cbp::Bool = true,
-    te::Bool = false;
-    kwargs...,
-)
+@trait_function is_vector(M::AbstractDecoratorManifold, p, X, cbp::Bool = true; kwargs...)
 # EmbeddedManifold
 # I am not yet sure how to properly document this embedding behaviour here in a docstring.
 function is_vector(
@@ -433,6 +426,14 @@ function is_vector(
     error::Symbol = :none,
     kwargs...,
 )
+    es = check_size(M, p, X)
+    if es !== nothing
+        (error === :error) && throw(es)
+        s = "$(typeof(es)) with $(es.val)\n$(es.msg)"
+        (error === :info) && @info s
+        (error === :warn) && @warn s
+        return false
+    end
     if check_base_point
         try
             ep = is_point(M, p; error = error, kwargs...)
@@ -452,7 +453,7 @@ function is_vector(
             get_embedding(M, p),
             embed(M, p),
             embed(M, p, X),
-            cbp;
+            check_base_point;
             error = error,
             kwargs...,
         )

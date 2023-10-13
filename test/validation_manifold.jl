@@ -157,7 +157,6 @@ end
         for BT in (DefaultBasis, DefaultOrthonormalBasis, DefaultOrthogonalBasis)
             @testset "Basis $(BT)" begin
                 cb = BT()
-                println(cb)
                 @test b == get_vectors(M, x, get_basis(A, x, cb))
                 v = similar(x)
                 v2 = similar(x)

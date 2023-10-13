@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.15.0] xx/xx/xx
 
+### Added
+- A keyword to `ValidationManifold` which `error=` mode to use.
+  This is by default the previous `:error` mode.
+
 ### Changed
 
 - The signature of `is_point` was changed to be consistent with `isapprox.`.
