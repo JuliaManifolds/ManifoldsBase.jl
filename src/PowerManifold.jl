@@ -43,73 +43,94 @@ abstract type AbstractPowerManifold{
 } <: AbstractManifold{𝔽} end
 
 @doc raw"""
-    PowerManifold{𝔽,TM<:AbstractManifold,TSize<:Tuple,TPR<:AbstractPowerRepresentation} <: AbstractPowerManifold{𝔽,TM}
+    PowerManifold{𝔽,TM<:AbstractManifold,TSize,TPR<:AbstractPowerRepresentation} <: AbstractPowerManifold{𝔽,TM}
 
-The power manifold $\mathcal M^{n_1× n_2 × … × n_d}$ with power geometry
- `TSize` statically defines the number of elements along each axis.
+The power manifold ``\mathcal M^{n_1× n_2 × … × n_d}`` with power geometry.
+ `TSize` defines the number of elements along each axis, either statically using
+ `TypeParameter` or storing it in a field.
 
 For example, a manifold-valued time series would be represented by a power manifold with
-$d$ equal to 1 and $n_1$ equal to the number of samples. A manifold-valued image
+``d`` equal to 1 and ``n_1`` equal to the number of samples. A manifold-valued image
 (for example in diffusion tensor imaging) would be represented by a two-axis power
-manifold ($d=2$) with $n_1$ and $n_2$ equal to width and height of the image.
+manifold (``d=2``) with ``n_1`` and ``n_2`` equal to width and height of the image.
 
 While the size of the manifold is static, points on the power manifold
 would not be represented by statically-sized arrays.
 
 # Constructor
 
-    PowerManifold(M::PowerManifold, N_1, N_2, ..., N_d)
-    PowerManifold(M::AbstractManifold, NestedPowerRepresentation(), N_1, N_2, ..., N_d)
+    PowerManifold(M::PowerManifold, N_1, N_2, ..., N_d; parameter::Symbol=:field)
+    PowerManifold(M::AbstractManifold, NestedPowerRepresentation(), N_1, N_2, ..., N_d; parameter::Symbol=:field)
     M^(N_1, N_2, ..., N_d)
 
-Generate the power manifold $M^{N_1 × N_2 × … × N_d}$.
+Generate the power manifold ``M^{N_1 × N_2 × … × N_d}``.
 By default, a [`PowerManifold`](@ref} is expanded further, i.e. for `M=PowerManifold(N,3)`
-`PowerManifold(M,2)` is equivalend to `PowerManifold(N,3,2)`. Points are then 3×2 matrices
+`PowerManifold(M, 2)` is equivalent to `PowerManifold(N,3,2)`. Points are then 3×2 matrices
 of points on `N`.
 Providing a [`NestedPowerRepresentation`](@ref) as the second argument to the constructor
-can be used to nest manifold, i.e. `PowerManifold(M,NestedPowerRepresentation(),2)`
+can be used to nest manifold, i.e. `PowerManifold(M, NestedPowerRepresentation(), 2)`
 represents vectors of length 2 whose elements are vectors of length 3 of points on N
 in a nested array representation.
 
 Since there is no default [`AbstractPowerRepresentation`](@ref) within this interface, the
 `^` operator is only available for `PowerManifold`s and concatenates dimensions.
+
+`parameter`: whether a type parameter should be used to store `n`. By default size
+is stored in a field. Value can either be `:field` or `:type`.
 """
 struct PowerManifold{𝔽,TM<:AbstractManifold{𝔽},TSize,TPR<:AbstractPowerRepresentation} <:
        AbstractPowerManifold{𝔽,TM,TPR}
     manifold::TM
+    size::TSize
+end
+
+"""
+    _parameter_symbol(M::PowerManifold)
+
+Return `:field` if size of [`PowerManifold`](@ref) `M` is stored in a field and `:type`
+if in a `TypeParameter`.
+"""
+_parameter_symbol(::PowerManifold) = :field
+function _parameter_symbol(
+    ::PowerManifold{𝔽,<:AbstractManifold{𝔽},<:TypeParameter},
+) where {𝔽}
+    return :type
 end
 
 function PowerManifold(
     M::AbstractManifold{𝔽},
     ::TPR,
-    size::Integer...,
+    size::Integer...;
+    parameter::Symbol = :field,
 ) where {𝔽,TPR<:AbstractPowerRepresentation}
-    return PowerManifold{𝔽,typeof(M),Tuple{size...},TPR}(M)
+    size_w = wrap_type_parameter(parameter, size)
+    return PowerManifold{𝔽,typeof(M),typeof(size_w),TPR}(M, size_w)
 end
 function PowerManifold(
     M::PowerManifold{𝔽,TM,TSize,TPR},
-    size::Integer...,
+    size::Integer...;
+    parameter::Symbol = _parameter_symbol(M),
 ) where {𝔽,TM<:AbstractManifold{𝔽},TSize,TPR<:AbstractPowerRepresentation}
-    return PowerManifold{𝔽,TM,Tuple{TSize.parameters...,size...},TPR}(M.manifold)
+    size_w = wrap_type_parameter(parameter, (get_parameter(M.size)..., size...))
+    return PowerManifold{𝔽,TM,typeof(size_w),TPR}(M.manifold, size_w)
 end
 function PowerManifold(
-    M::PowerManifold{𝔽,TM,TSize},
+    M::PowerManifold{𝔽,TM},
     ::TPR,
-    size::Integer...,
-) where {𝔽,TM<:AbstractManifold{𝔽},TSize,TPR<:AbstractPowerRepresentation}
-    return PowerManifold{𝔽,TM,Tuple{TSize.parameters...,size...},TPR}(M.manifold)
+    size::Integer...;
+    parameter::Symbol = _parameter_symbol(M),
+) where {𝔽,TM<:AbstractManifold{𝔽},TPR<:AbstractPowerRepresentation}
+    size_w = wrap_type_parameter(parameter, (get_parameter(M.size)..., size...))
+    return PowerManifold{𝔽,TM,typeof(size_w),TPR}(M.manifold, size_w)
 end
 function PowerManifold(
-    M::PowerManifold{𝔽,TM,TSize},
+    M::PowerManifold{𝔽},
     ::TPR,
-    size::Integer...,
-) where {
-    𝔽,
-    TM<:AbstractManifold{𝔽},
-    TSize,
-    TPR<:Union{NestedPowerRepresentation,NestedReplacingPowerRepresentation},
-}
-    return PowerManifold{𝔽,PowerManifold{𝔽,TM,TSize},Tuple{size...},TPR}(M)
+    size::Integer...;
+    parameter::Symbol = _parameter_symbol(M),
+) where {𝔽,TPR<:Union{NestedPowerRepresentation,NestedReplacingPowerRepresentation}}
+    size_w = wrap_type_parameter(parameter, size)
+    return PowerManifold{𝔽,typeof(M),typeof(size_w),TPR}(M, size_w)
 end
 
 """
@@ -294,7 +315,8 @@ end
     check_power_size(M, p)
     check_power_size(M, p, X)
 
-Check whether p hase the right size to represent points on M generically, i.e. just cheking the overall sizes, not the individual ones per manifold
+Check whether `p`` has the right size to represent points on `M`` generically, i.e. just
+checking the overall sizes, not the individual ones per manifold.
 """
 function check_power_size(M::AbstractPowerManifold, p)
     d = prod(representation_size(M.manifold)) * prod(power_dimensions(M))
@@ -596,11 +618,22 @@ function get_coordinates!(
     return c
 end
 
-get_iterator(::PowerManifold{𝔽,<:AbstractManifold{𝔽},Tuple{N}}) where {𝔽,N} = Base.OneTo(N)
+function get_iterator(
+    ::PowerManifold{𝔽,<:AbstractManifold{𝔽},TypeParameter{Tuple{N}}},
+) where {𝔽,N}
+    return Base.OneTo(N)
+end
+function get_iterator(M::PowerManifold{𝔽,<:AbstractManifold{𝔽},Tuple{Int}}) where {𝔽}
+    return Base.OneTo(M.size[1])
+end
 @generated function get_iterator(
-    ::PowerManifold{𝔽,<:AbstractManifold{𝔽},SizeTuple},
+    ::PowerManifold{𝔽,<:AbstractManifold{𝔽},TypeParameter{SizeTuple}},
 ) where {𝔽,SizeTuple}
     size_tuple = size_to_tuple(SizeTuple)
+    return Base.product(map(Base.OneTo, size_tuple)...)
+end
+function get_iterator(M::PowerManifold{𝔽,<:AbstractManifold{𝔽},NTuple{N,Int}}) where {𝔽,N}
+    size_tuple = M.size
     return Base.product(map(Base.OneTo, size_tuple)...)
 end
 
@@ -921,16 +954,17 @@ end
     manifold_dimension(M::PowerManifold)
 
 Returns the manifold-dimension of an [`PowerManifold`](@ref) `M`
-$=\mathcal N = (\mathcal M)^{n_1,…,n_d}$, i.e. with $n=(n_1,…,n_d)$ the array
-size of the power manifold and $d_{\mathcal M}$ the dimension of the base manifold
-$\mathcal M$, the manifold is of dimension
+``=\mathcal N = (\mathcal M)^{n_1,…,n_d}``, i.e. with ``n=(n_1,…,n_d)`` the array
+size of the power manifold and ``d_{\mathcal M}`` the dimension of the base manifold
+``\mathcal M``, the manifold is of dimension
 
 ````math
 \dim(\mathcal N) = \dim(\mathcal M)\prod_{i=1}^d n_i = n_1n_2\cdot…\cdot n_d \dim(\mathcal M).
 ````
 """
-function manifold_dimension(M::PowerManifold{𝔽,<:AbstractManifold,TSize}) where {𝔽,TSize}
-    return manifold_dimension(M.manifold) * prod(size_to_tuple(TSize))
+function manifold_dimension(M::PowerManifold)
+    size = get_parameter(M.size)
+    return manifold_dimension(M.manifold) * prod(size)
 end
 
 function mid_point!(M::AbstractPowerManifold, q, p1, p2)
@@ -1051,8 +1085,8 @@ end
 
 return the power of `M`,
 """
-function power_dimensions(::PowerManifold{𝔽,<:AbstractManifold,TSize}) where {𝔽,TSize}
-    return size_to_tuple(TSize)
+function power_dimensions(M::PowerManifold)
+    return get_parameter(M.size)
 end
 
 @doc raw"""
@@ -1321,10 +1355,21 @@ Base.@propagate_inbounds function Base.setindex!(
     return set_component!(M, q, p, I...)
 end
 
-function Base.show(io::IO, M::PowerManifold{𝔽,TM,TSize,TPR}) where {𝔽,TM,TSize,TPR}
+function Base.show(
+    io::IO,
+    M::PowerManifold{𝔽,TM,TSize,TPR},
+) where {𝔽,TM<:AbstractManifold{𝔽},TSize,TPR<:AbstractPowerRepresentation}
+    size = get_parameter(M.size)
+    return print(io, "PowerManifold($(M.manifold), $(TPR()), $(join(size, ", ")))")
+end
+function Base.show(
+    io::IO,
+    M::PowerManifold{𝔽,TM,TypeParameter{TSize},TPR},
+) where {𝔽,TM<:AbstractManifold{𝔽},TSize,TPR<:AbstractPowerRepresentation}
+    size = get_parameter(M.size)
     return print(
         io,
-        "PowerManifold($(M.manifold), $(TPR()), $(join(TSize.parameters, ", ")))",
+        "PowerManifold($(M.manifold), $(TPR()), $(join(size, ", ")); parameter=:type)",
     )
 end
 

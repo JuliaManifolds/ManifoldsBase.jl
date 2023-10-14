@@ -332,4 +332,16 @@ struct TestArrayRepresentation <: AbstractPowerRepresentation end
             )
         end
     end
+
+    @testset "Type size" begin
+        M = ManifoldsBase.DefaultManifold(3)
+        N = PowerManifold(M, NestedPowerRepresentation(), 2; parameter = :type)
+        p = [[1, 2, 3], [3, 4, 5]]
+        @test zero_vector(N, p) == 0 .* p
+
+        M = ManifoldsBase.DefaultManifold(3)
+        N = PowerManifold(M, NestedPowerRepresentation(), 2, 3; parameter = :type)
+        p = rand(N)
+        @test zero_vector(N, p) == 0 .* p
+    end
 end

@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `Requires.jl` is added as a dependency to facilitate loading some methods related to `ProductManifolds` on Julia 1.6 to 1.8. Later versions rely on package extensions.
 - `Documenter.jl` was updated to 1.0.
+- `PowerManifold` can now store its size either in a field or in a type, similarly to `DefaultManifold`. By default the size is stored in a field.
 
 ### Removed
 
