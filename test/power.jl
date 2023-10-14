@@ -338,6 +338,16 @@ struct TestArrayRepresentation <: AbstractPowerRepresentation end
         N = PowerManifold(M, NestedPowerRepresentation(), 2; parameter = :type)
         p = [[1, 2, 3], [3, 4, 5]]
         @test zero_vector(N, p) == 0 .* p
+        @test PowerManifold(N, 3) isa PowerManifold{
+            ℝ,
+            <:DefaultManifold,
+            ManifoldsBase.TypeParameter{Tuple{2,3}},
+            NestedPowerRepresentation,
+        }
+        @test PowerManifold(N, 3; parameter = :field) isa
+              PowerManifold{ℝ,<:DefaultManifold,Tuple{Int,Int},NestedPowerRepresentation}
+        @test repr(N) ==
+              "PowerManifold(DefaultManifold(3; field = ℝ), NestedPowerRepresentation(), 2; parameter=:type)"
 
         M = ManifoldsBase.DefaultManifold(3)
         N = PowerManifold(M, NestedPowerRepresentation(), 2, 3; parameter = :type)
