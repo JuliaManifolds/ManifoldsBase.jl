@@ -17,7 +17,7 @@ import Base:
     -,
     *,
     ==
-import LinearAlgebra: dot, norm, det, cross, I, UniformScaling, Diagonal
+import LinearAlgebra: ×, dot, norm, det, cross, I, UniformScaling, Diagonal
 import Random: rand, rand!
 
 using LinearAlgebra
@@ -1072,7 +1072,10 @@ export ApproximatelyError
 export CompositeManifoldError, ComponentManifoldError, ManifoldDomainError
 
 # (g) Functions on Manifolds
-export allocate,
+export ×,
+    ℝ,
+    ℂ,
+    allocate,
     angle,
     base_manifold,
     change_basis,
@@ -1158,5 +1161,4 @@ export allocate,
     Weingarten!,
     zero_vector,
     zero_vector!
-
 end # module

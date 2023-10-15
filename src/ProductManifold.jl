@@ -309,16 +309,16 @@ function LinearAlgebra.cross(
     m::InverseProductRetraction,
     n::AbstractInverseRetractionMethod,
 )
-    return InverseProductRetraction(m.retractions..., n)
+    return InverseProductRetraction(m.inverse_retractions..., n)
 end
 function LinearAlgebra.cross(
     m::AbstractInverseRetractionMethod,
     n::InverseProductRetraction,
 )
-    return InverseProductRetraction(m, n.retractions...)
+    return InverseProductRetraction(m, n.inverse_retractions...)
 end
 function LinearAlgebra.cross(m::InverseProductRetraction, n::InverseProductRetraction)
-    return InverseProductRetraction(m.manifolds..., n.manifolds...)
+    return InverseProductRetraction(m.inverse_retractions..., n.inverse_retractions...)
 end
 
 
@@ -340,13 +340,13 @@ function LinearAlgebra.cross(
     return ProductVectorTransport(m, n)
 end
 function LinearAlgebra.cross(m::ProductVectorTransport, n::AbstractVectorTransportMethod)
-    return ProductVectorTransport(m.retractions..., n)
+    return ProductVectorTransport(m.methods..., n)
 end
 function LinearAlgebra.cross(m::AbstractVectorTransportMethod, n::ProductVectorTransport)
-    return ProductVectorTransport(m, n.retractions...)
+    return ProductVectorTransport(m, n.methods...)
 end
 function LinearAlgebra.cross(m::ProductVectorTransport, n::ProductVectorTransport)
-    return ProductVectorTransport(m.manifolds..., n.manifolds...)
+    return ProductVectorTransport(m.methods..., n.methods...)
 end
 
 function default_retraction_method(M::ProductManifold)

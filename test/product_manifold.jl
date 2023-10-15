@@ -508,4 +508,34 @@ include("test_sphere.jl")
         @test isapprox(Xresult2, Xresult)
     end
 
+    @testset "× constructors" begin
+        r1 = ExponentialRetraction()
+        r2 = ProjectionRetraction()
+        s1 = r1 × r2
+        @test s1 == ProductRetraction(r1, r2)
+        @test "$(s1)" == "ProductRetraction($(r1), $(r2))"
+        @test s1 × r2 == ProductRetraction(r1, r2, r2)
+        @test r2 × s1 == ProductRetraction(r2, r1, r2)
+        @test r1 × r1 × r1 == ProductRetraction(r1, r1, r1)
+
+        ir1 = LogarithmicInverseRetraction()
+        ir2 = ProjectionInverseRetraction()
+        is1 = ir1 × ir2
+        @test is1 == InverseProductRetraction(ir1, ir2)
+        @test "$(is1)" == "InverseProductRetraction($(ir1), $(ir2))"
+        @test is1 × ir2 == InverseProductRetraction(ir1, ir2, ir2)
+        @test ir2 × is1 == InverseProductRetraction(ir2, ir1, ir2)
+        @test ir1 × ir1 × ir1 == InverseProductRetraction(ir1, ir1, ir1)
+
+        tr1 = ParallelTransport()
+        tr2 = ProjectionTransport()
+        ts1 = tr1 × tr2
+        @test ts1 == ProductVectorTransport(tr1, tr2)
+        @test "$(ts1)" == "ProductVectorTransport($(tr1), $(tr2))"
+        @test ts1 × tr2 == ProductVectorTransport(tr1, tr2, tr2)
+        @test tr2 × ts1 == ProductVectorTransport(tr2, tr1, tr2)
+        @test tr1 × tr1 × tr1 == ProductVectorTransport(tr1, tr1, tr1)
+    end
+
+
 end
