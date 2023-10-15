@@ -612,9 +612,9 @@ so the encapsulated inverse retraction methods have to be available per factor.
 """
 inverse_retract(::ProductManifold, ::Any, ::Any, ::Any, ::InverseProductRetraction)
 
-function inverse_retract!(M::ProductManifold, Y, p, q, method::InverseProductRetraction)
+function _inverse_retract!(M::ProductManifold, Y, p, q, method::InverseProductRetraction)
     map(
-        inverse_retract!,
+        (iM, iY, ip, iq, im) -> inverse_retract!(iM, iY, ip, iq, im),
         M.manifolds,
         submanifold_components(M, Y),
         submanifold_components(M, p),
@@ -623,7 +623,22 @@ function inverse_retract!(M::ProductManifold, Y, p, q, method::InverseProductRet
     )
     return Y
 end
-
+function inverse_retract!(
+    M::ProductManifold,
+    Y,
+    p,
+    q,
+    method::IRM,
+) where {IRM<:AbstractInverseRetractionMethod}
+    map(
+        (iM, iY, ip, iq) -> inverse_retract!(iM, iY, ip, iq, method),
+        M.manifolds,
+        submanifold_components(M, Y),
+        submanifold_components(M, p),
+        submanifold_components(M, q),
+    )
+    return Y
+end
 function _isapprox(M::ProductManifold, p, q; kwargs...)
     return all(
         t -> isapprox(t...; kwargs...),
@@ -815,6 +830,23 @@ function _retract!(M::ProductManifold, q, p, X, t::Number, method::ProductRetrac
     )
     return q
 end
+function retract!(
+    M::ProductManifold,
+    q,
+    p,
+    X,
+    t::Number,
+    method::RTM,
+) where {RTM<:AbstractRetractionMethod}
+    map(
+        (N, qc, pc, Xc) -> retract!(N, qc, pc, Xc, t, method),
+        M.manifolds,
+        submanifold_components(M, q),
+        submanifold_components(M, p),
+        submanifold_components(M, X),
+    )
+    return q
+end
 
 function representation_size(M::ProductManifold)
     return (mapreduce(m -> prod(representation_size(m)), +, M.manifolds),)
@@ -967,7 +999,7 @@ function submanifold(M::ProductManifold, i::Val)
 end
 submanifold(M::ProductManifold, i::AbstractVector) = submanifold(M, Val(tuple(i...)))
 
-function vector_transport_direction!(
+function _vector_transport_direction!(
     M::ProductManifold,
     Y,
     p,
@@ -986,6 +1018,25 @@ function vector_transport_direction!(
     )
     return Y
 end
+function vector_transport_direction!(
+    M::ProductManifold,
+    Y,
+    p,
+    X,
+    d,
+    m::VTM,
+) where {VTM<:AbstractVectorTransportMethod}
+    map(
+        (iM, iY, ip, id) -> vector_transport_direction!(iM, iY, ip, id, m),
+        M.manifolds,
+        submanifold_components(M, Y),
+        submanifold_components(M, p),
+        submanifold_components(M, X),
+        submanifold_components(M, d),
+        m,
+    )
+    return Y
+end
 
 @doc raw"""
     vector_transport_to(M::ProductManifold, p, X, q, m::ProductVectorTransport)
@@ -997,7 +1048,7 @@ base manifold.
 """
 vector_transport_to(::ProductManifold, ::Any, ::Any, ::Any, ::ProductVectorTransport)
 
-function vector_transport_to!(M::ProductManifold, Y, p, X, q, m::ProductVectorTransport)
+function _vector_transport_to!(M::ProductManifold, Y, p, X, q, m::ProductVectorTransport)
     map(
         vector_transport_to!,
         M.manifolds,
@@ -1009,9 +1060,16 @@ function vector_transport_to!(M::ProductManifold, Y, p, X, q, m::ProductVectorTr
     )
     return Y
 end
-function vector_transport_to!(M::ProductManifold, Y, p, X, q, m::ParallelTransport)
+function vector_transport_to!(
+    M::ProductManifold,
+    Y,
+    p,
+    X,
+    q,
+    m::AbstractVectorTransportMethod,
+)
     map(
-        (iM, iY, ip, iX, id) -> vector_transport_to!(iM, iY, ip, iX, id, m),
+        (iM, iY, ip, iX, iq) -> vector_transport_to!(iM, iY, ip, iX, iq, m),
         M.manifolds,
         submanifold_components(M, Y),
         submanifold_components(M, p),
