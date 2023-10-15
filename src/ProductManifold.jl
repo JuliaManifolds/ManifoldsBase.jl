@@ -612,7 +612,16 @@ so the encapsulated inverse retraction methods have to be available per factor.
 """
 inverse_retract(::ProductManifold, ::Any, ::Any, ::Any, ::InverseProductRetraction)
 
-function _inverse_retract!(M::ProductManifold, Y, p, q, method::InverseProductRetraction)
+@doc raw"""
+    inverse_retract(M::ProductManifold, p, q, m::AbstractInverseRetractionMethod)
+
+Compute the inverse retraction from `p` with respect to `q` on the [`ProductManifold`](@ref)
+`M` using an [`AbstractInverseRetractionMethod`](@ref), which is used on each manifold of
+the product.
+"""
+inverse_retract(::ProductManifold, ::Any, ::Any, ::Any, ::AbstractInverseRetractionMethod)
+
+function inverse_retract!(M::ProductManifold, Y, p, q, method::InverseProductRetraction)
     map(
         (iM, iY, ip, iq, im) -> inverse_retract!(iM, iY, ip, iq, im),
         M.manifolds,
@@ -817,9 +826,17 @@ using an [`ProductRetraction`](@ref), which by default encapsulates retractions 
 base manifolds. Then this method is performed elementwise, so the encapsulated retractions
 method has to be one that is available on the manifolds.
 """
-retract(::ProductManifold, ::Any...)
+retract(::ProductManifold, ::Any, ::Any, ::ProductRetraction)
 
-function _retract!(M::ProductManifold, q, p, X, t::Number, method::ProductRetraction)
+@doc raw"""
+    retract(M::ProductManifold, p, X, m::AbstractRetractionMethod)
+
+Compute the retraction from `p` with tangent vector `X` on the [`ProductManifold`](@ref) `M`
+using the [`AbstractRetraction`](@ref) `m` on every manifold.
+"""
+retract(::ProductManifold, ::Any, ::Any, ::AbstractRetractionMethod)
+
+function retract!(M::ProductManifold, q, p, X, t::Number, method::ProductRetraction)
     map(
         (N, qc, pc, Xc, rm) -> retract!(N, qc, pc, Xc, t, rm),
         M.manifolds,
@@ -999,7 +1016,7 @@ function submanifold(M::ProductManifold, i::Val)
 end
 submanifold(M::ProductManifold, i::AbstractVector) = submanifold(M, Val(tuple(i...)))
 
-function _vector_transport_direction!(
+function vector_transport_direction!(
     M::ProductManifold,
     Y,
     p,
@@ -1041,14 +1058,22 @@ end
 @doc raw"""
     vector_transport_to(M::ProductManifold, p, X, q, m::ProductVectorTransport)
 
-Compute the vector transport the tangent vector `X`at `p` to `q` on the
-[`ProductManifold`](@ref) `M` using an [`ProductVectorTransport`](@ref) `m`.
-This method is performed elementwise, i.e. the method `m` has to be implemented on the
-base manifold.
+Compute the vector transport the tangent vector `X` at `p` to `q` on the
+[`ProductManifold`](@ref) `M` using a [`ProductVectorTransport`](@ref) `m`.
 """
 vector_transport_to(::ProductManifold, ::Any, ::Any, ::Any, ::ProductVectorTransport)
 
-function _vector_transport_to!(M::ProductManifold, Y, p, X, q, m::ProductVectorTransport)
+@doc raw"""
+    vector_transport_to(M::ProductManifold, p, X, q, m::AbstractVectorTransportMethod)
+
+Compute the vector transport the tangent vector `X` at `p` to `q` on the
+[`ProductManifold`](@ref) `M` using an [`AbstractVectorTransportMethod`](@ref) `m`
+on each manifold.
+"""
+vector_transport_to(::ProductManifold, ::Any, ::Any, ::Any, ::AbstractVectorTransportMethod)
+
+
+function vector_transport_to!(M::ProductManifold, Y, p, X, q, m::ProductVectorTransport)
     map(
         vector_transport_to!,
         M.manifolds,

@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `ProductManifold` type was migrated from Manifolds.jl.
 - `Fiber`, `VectorSpaceFiber` and `TangentSpace` types. `TangentSpace` is a generalized version of `TangentSpaceAtPoint` from Manifolds.jl.
 - `change_representer!`, `change_metric!` and `Weingarten!` methods added to `PowerManifold`.
+- `×` now also works for retractions, inverse retractions, and vector transports to create their product versions
+- `retract`, `inverse_retract`, and `vector_transport_to` (and `_dir`) now also accept arbirtrary retractions on the product manifold. These act the same as the n-fold product of a retraction.
 
 ### Changed
 
