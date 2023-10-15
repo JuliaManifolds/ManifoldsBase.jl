@@ -515,6 +515,11 @@ include("test_sphere.jl")
     end
 
     @testset "× constructors" begin
+        @test M1 × M2 == M
+        @test M × M2 == ProductManifold(M1, M2, M2)
+        @test M2 × M == ProductManifold(M2, M1, M2)
+        @test M × M == ProductManifold(M1, M2, M1, M2)
+
         r1 = ExponentialRetraction()
         r2 = ProjectionRetraction()
         s1 = r1 × r2
@@ -523,6 +528,7 @@ include("test_sphere.jl")
         @test s1 × r2 == ProductRetraction(r1, r2, r2)
         @test r2 × s1 == ProductRetraction(r2, r1, r2)
         @test r1 × r1 × r1 == ProductRetraction(r1, r1, r1)
+        @test s1 × s1 == ProductRetraction(r1, r2, r1, r2)
 
         ir1 = LogarithmicInverseRetraction()
         ir2 = ProjectionInverseRetraction()
@@ -532,6 +538,7 @@ include("test_sphere.jl")
         @test is1 × ir2 == InverseProductRetraction(ir1, ir2, ir2)
         @test ir2 × is1 == InverseProductRetraction(ir2, ir1, ir2)
         @test ir1 × ir1 × ir1 == InverseProductRetraction(ir1, ir1, ir1)
+        @test is1 × is1 == InverseProductRetraction(ir1, ir2, ir1, ir2)
 
         tr1 = ParallelTransport()
         tr2 = ProjectionTransport()
@@ -541,7 +548,7 @@ include("test_sphere.jl")
         @test ts1 × tr2 == ProductVectorTransport(tr1, tr2, tr2)
         @test tr2 × ts1 == ProductVectorTransport(tr2, tr1, tr2)
         @test tr1 × tr1 × tr1 == ProductVectorTransport(tr1, tr1, tr1)
+        @test ts1 × ts1 == ProductVectorTransport(tr1, tr2, tr1, tr2)
     end
-
 
 end

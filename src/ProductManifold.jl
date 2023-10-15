@@ -285,7 +285,7 @@ function LinearAlgebra.cross(m::AbstractRetractionMethod, n::ProductRetraction)
     return ProductRetraction(m, n.retractions...)
 end
 function LinearAlgebra.cross(m::ProductRetraction, n::ProductRetraction)
-    return ProductRetraction(m.manifolds..., n.manifolds...)
+    return ProductRetraction(m.retractions..., n.retractions...)
 end
 
 @doc raw"""
