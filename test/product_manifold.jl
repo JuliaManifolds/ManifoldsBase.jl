@@ -146,6 +146,8 @@ include("test_sphere.jl")
             2 * X1,
             ProductRetraction(ExponentialRetraction(), ExponentialRetraction()),
         )
+        # single retraction gets “broadcasted”
+        @test qr ≈ retract(M, p1, 2 * X1, ExponentialRetraction())
         qr2 = similar(p1)
         retract!(
             M,
@@ -169,6 +171,9 @@ include("test_sphere.jl")
                 LogarithmicInverseRetraction(),
             ),
         ) ≈ Xr
+        # single inverse retraction gets “broadcasted”
+        @test inverse_retract(M, p1, p2, LogarithmicInverseRetraction()) ≈ Xr
+
         Zr = similar(X1)
         inverse_retract!(
             M,
@@ -362,6 +367,7 @@ include("test_sphere.jl")
             @test isapprox(M, q, Y, Z)
         end
     end
+
     @testset "Parallel transport" begin
         p = ArrayPartition([1, 0.0, 0.0], [4 5.0; 6 7])
         q = ArrayPartition([0.0, 1.0, 0.0], [4 8.0; 3 7.5])
