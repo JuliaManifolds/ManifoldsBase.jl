@@ -237,6 +237,118 @@ function check_vector(M::ProductManifold, p, X; kwargs...)
     return nothing
 end
 
+@doc raw"""
+    ×(M, N)
+    cross(M, N)
+    cross(M1, M2, M3,...)
+
+Return the [`ProductManifold`](@ref) For two `AbstractManifold`s `M` and `N`,
+where for the case that one of them is a [`ProductManifold`](@ref) itself,
+the other is either prepended (if `N` is a product) or appenden (if `M`) is.
+If both are product manifold, they are combined into one product manifold,
+keeping the order.
+
+For the case that more than one is a product manifold of these is build with the
+same approach as above
+"""
+cross(::AbstractManifold...)
+LinearAlgebra.cross(M::AbstractManifold, N::AbstractManifold) = ProductManifold(M, N)
+function LinearAlgebra.cross(M::ProductManifold, N::AbstractManifold)
+    return ProductManifold(M.manifolds..., N)
+end
+function LinearAlgebra.cross(M::AbstractManifold, N::ProductManifold)
+    return ProductManifold(M, N.manifolds...)
+end
+function LinearAlgebra.cross(M::ProductManifold, N::ProductManifold)
+    return ProductManifold(M.manifolds..., N.manifolds...)
+end
+
+
+@doc raw"""
+    ×(m, n)
+    cross(m, n)
+    cross(m1, m2, m3,...)
+
+Return the [`ProductRetraction`](@ref) For two or more [`AbstractRetractionMethod`](@ref)s,
+where for the case that one of them is a [`ProductRetraction`](@ref) itself,
+the other is either prepended (if `m` is a product) or appenden (if `n`) is.
+If both [`ProductRetraction`](@ref)s, they are combined into one keeping the order.
+"""
+cross(::AbstractRetractionMethod...)
+function LinearAlgebra.cross(m::AbstractRetractionMethod, n::AbstractRetractionMethod)
+    return ProductRetraction(m, n)
+end
+function LinearAlgebra.cross(m::ProductRetraction, n::AbstractRetractionMethod)
+    return ProductRetraction(m.retractions..., n)
+end
+function LinearAlgebra.cross(m::AbstractRetractionMethod, n::ProductRetraction)
+    return ProductRetraction(m, n.retractions...)
+end
+function LinearAlgebra.cross(m::ProductRetraction, n::ProductRetraction)
+    return ProductRetraction(m.manifolds..., n.manifolds...)
+end
+
+@doc raw"""
+    ×(m, n)
+    cross(m, n)
+    cross(m1, m2, m3,...)
+
+Return the [`InverseProductRetraction`](@ref) For two or more [`AbstractInverseRetractionMethod`](@ref)s,
+where for the case that one of them is a [`InverseProductRetraction`](@ref) itself,
+the other is either prepended (if `r` is a product) or appenden (if `s`) is.
+If both [`InverseProductRetraction`](@ref)s, they are combined into one keeping the order.
+"""
+cross(::AbstractInverseRetractionMethod...)
+function LinearAlgebra.cross(
+    m::AbstractInverseRetractionMethod,
+    n::AbstractInverseRetractionMethod,
+)
+    return InverseProductRetraction(m, n)
+end
+function LinearAlgebra.cross(
+    m::InverseProductRetraction,
+    n::AbstractInverseRetractionMethod,
+)
+    return InverseProductRetraction(m.retractions..., n)
+end
+function LinearAlgebra.cross(
+    m::AbstractInverseRetractionMethod,
+    n::InverseProductRetraction,
+)
+    return InverseProductRetraction(m, n.retractions...)
+end
+function LinearAlgebra.cross(m::InverseProductRetraction, n::InverseProductRetraction)
+    return InverseProductRetraction(m.manifolds..., n.manifolds...)
+end
+
+
+@doc raw"""
+    ×(m, n)
+    cross(m, n)
+    cross(m1, m2, m3,...)
+
+Return the [`ProductVectorTransport`](@ref) For two or more [`AbstractVectorTransportMethod`](@ref)s,
+where for the case that one of them is a [`ProductVectorTransport`](@ref) itself,
+the other is either prepended (if `r` is a product) or appenden (if `s`) is.
+If both [`ProductVectorTransport`](@ref)s, they are combined into one keeping the order.
+"""
+cross(::AbstractVectorTransportMethod...)
+function LinearAlgebra.cross(
+    m::AbstractVectorTransportMethod,
+    n::AbstractVectorTransportMethod,
+)
+    return ProductVectorTransport(m, n)
+end
+function LinearAlgebra.cross(m::ProductVectorTransport, n::AbstractVectorTransportMethod)
+    return ProductVectorTransport(m.retractions..., n)
+end
+function LinearAlgebra.cross(m::AbstractVectorTransportMethod, n::ProductVectorTransport)
+    return ProductVectorTransport(m, n.retractions...)
+end
+function LinearAlgebra.cross(m::ProductVectorTransport, n::ProductVectorTransport)
+    return ProductVectorTransport(m.manifolds..., n.manifolds...)
+end
+
 function default_retraction_method(M::ProductManifold)
     return ProductRetraction(map(default_retraction_method, M.manifolds)...)
 end
@@ -805,6 +917,19 @@ end
 function Base.show(io::IO, M::ProductManifold)
     return print(io, "ProductManifold(", join(M.manifolds, ", "), ")")
 end
+
+function Base.show(io::IO, m::ProductRetraction)
+    return print(io, "ProductRetraction(", join(m.retractions, ", "), ")")
+end
+
+function Base.show(io::IO, m::InverseProductRetraction)
+    return print(io, "InverseProductRetraction(", join(m.inverse_retractions, ", "), ")")
+end
+
+function Base.show(io::IO, m::ProductVectorTransport)
+    return print(io, "ProductVectorTransport(", join(m.methods, ", "), ")")
+end
+
 
 function Base.show(
     io::IO,
