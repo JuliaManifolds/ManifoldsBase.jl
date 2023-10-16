@@ -19,6 +19,8 @@ We start from the very beginning and cover the basic ideas of the interface prov
 using Pkg;
 cd(@__DIR__)
 Pkg.activate("."); # for reproducibility use the local tutorial environment.
+# But for this version use here the most recent dev version from the parent folder
+Pkg.develop(PackageSpec(; path=(@__DIR__) * "/../"))
 ```
 
 ## Preliminaries
@@ -276,8 +278,18 @@ default_retraction_method(::ScaledSphere) = ProjectionRetraction()
 ```
 
 Then
+
 ```{julia}
 default_retraction_method(M)
 ```
+
 and retract without a method specified would always fall back to using the projection retraction instead of the exponential map.
 Note that for compatibilty there is the [`AbstractRetractionMethod`](@ref) called [`ExponentialRetraction`](@ref) which makes [`retract`](@ref) fall back to calling [`exp`](@ref).
+
+## Technical Details
+
+This notebook was rendered with the following environment
+
+```{julia}
+Pkg.status()
+```

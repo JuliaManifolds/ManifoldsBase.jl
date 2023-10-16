@@ -20,7 +20,6 @@ if isdefined(Base, :get_extension)
         parallel_transport_direction,
         parallel_transport_to,
         project,
-        _retract,
         riemann_tensor,
         submanifold_component,
         submanifold_components,

@@ -9,12 +9,7 @@ Throughout the documentation of `ManifoldsBase.jl` we might use the [Euclidean S
 AbstractManifold
 ```
 
-which should store information about the manifold, for example parameters inherent to the manifold. The parameters are stored in two possible ways, as a type parameter to dispatch on or as a field. For these the following internal functions exist
-
-```@docs
-ManifoldsBase.wrap_type_parameter
-ManifoldsBase.TypeParameter
-```
+which should store information about the manifold, for example parameters inherent to the manifold.
 
 ## Points on a manifold
 
@@ -62,4 +57,14 @@ The [`AbstractManifold`](@ref) has one parameter to distinguish the number syste
 Modules = [ManifoldsBase]
 Pages = ["numbers.jl"]
 Order = [:type, :function]
+```
+
+## [Type Parameter](@id type-parameter)
+
+Concrete [`AbstractManifold`](@ref)s usually correspond to families of manifolds that are parameterized by some numbers, for example determining their [`manifold_dimension`](@ref). Those numbers can either be stored in a field or as a type parameter of the structure. The [`TypeParameter`](@ref ManifoldsBase.TypeParameter) offers the flexibility
+to have this parameter either as type parameter or a field.
+
+```@docs
+ManifoldsBase.TypeParameter
+ManifoldsBase.wrap_type_parameter
 ```
