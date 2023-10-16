@@ -36,7 +36,7 @@ by differentiation this retraction, is given by
 = D_Y\operatorname{retr}_p(Y)[X]
 = \frac{\mathrm{d}}{\mathrm{d}t}\operatorname{retr}_p(Y+tX)\Bigr|_{t=0}.
 ```
-see [^AbsilMahonySepulchre2008], Section 8.1.2 for more details.
+see [AbsilMahonySepulchre:2008](@cite), Section 8.1.2 for more details.
 
 This can be phrased similarly as a [`vector_transport_to`](@ref) by introducing
 ``q=\operatorname{retr}_pX`` and defining
@@ -92,9 +92,9 @@ The [`PoleLadderTransport`](@ref) posesses two advantages compared to
 * it is cheaper to evaluate, if you want to transport several vectors, since the
   mid point $c$ then stays unchanged.
 * while both methods are exact if the curvature is zero, pole ladder is even exact in
-  symmetric Riemannian manifolds[^Pennec2018]
+  symmetric Riemannian manifolds [Pennec:2018](@cite)
 
-The pole ladder was was proposed in [^LorenziPennec2014]. Its name stems from the fact that
+The pole ladder was was proposed in [LorenziPennec:2013](@cite). Its name stems from the fact that
 it resembles a pole ladder when applied to a sequence of points usccessively.
 
 # Constructor
@@ -105,20 +105,9 @@ PoleLadderTransport(
 )
 ````
 Construct the classical pole ladder that employs exp and log, i.e. as proposed
-in[^LorenziPennec2014]. For an even cheaper transport the inner operations can be
+in[LorenziPennec:2013](@cite). For an even cheaper transport the inner operations can be
 changed to an [`AbstractRetractionMethod`](@ref) `retraction` and an
 [`AbstractInverseRetractionMethod`](@ref) `inverse_retraction`, respectively.
-
-[^LorenziPennec2014]:
-    > Lorenzi, M. and Pennec, X: Efficient parallel transport of deformations in time
-    > series of images: From Schild’s to pole ladder.
-    > Journal of Mathematical Imaging and Vision (2014), 50(1), pp. 5–17
-    > doi [10.1007/s10851-013-0470-3](https://doi.org/10.1007/s10851-013-0470-3),
-    > hal: [hal-00870489](https://hal.inria.fr/hal-00870489)
-[^Pennec2018]:
-    > Pennec, X: Parallel Transport with Pole Ladder: a Third Order Scheme in Affine
-    > Connection Spaces which is Exact in Affine Symmetric Spaces.
-    > arXiv: [1805.11436](https://arxiv.org/abs/1805.11436)
 """
 struct PoleLadderTransport{
     RT<:AbstractRetractionMethod,
@@ -141,7 +130,7 @@ end
     ScaledVectorTransport{T} <: AbstractVectorTransportMethod
 
 Introduce a scaled variant of any [`AbstractVectorTransportMethod`](@ref) `T`,
-as introduced in [^SatoIwai2013] for some ``X∈ T_p\mathcal M`` as
+as introduced in [SatoIwai:2013](@cite) for some ``X∈ T_p\mathcal M`` as
 
 ```math
     \mathcal T^{\mathrm{S}}(X) = \frac{\lVert X\rVert_p}{\lVert \mathcal T(X)\rVert_q}\mathcal T(X).
@@ -154,12 +143,6 @@ retraction). Therefore a default implementation is only provided for the [`vecto
 # Constructor
 
     ScaledVectorTransport(m::AbstractVectorTransportMethod)
-
-[^SatoIwai2013]:
-    > Sato, H., Iwai, T.: _A new, globally convergent Riemannian conjugate gradient method_,
-    > Optimization, 2013, Volume 64(4), pp. 1011–1031.
-    > doi: [10.1080/02331934.2013.836650](https://doi.org/10.1080/02331934.2013.836650),
-    > arXiv: [1302.0125](https://arxiv.org/abs/1302.0125).
 """
 struct ScaledVectorTransport{T<:AbstractVectorTransportMethod} <:
        AbstractVectorTransportMethod
@@ -187,7 +170,7 @@ This method employs the internal function [`schilds_ladder`](@ref)`(M, p, d, q)`
 leaving the manifold.
 
 The name stems from the image of this paralleltogram in a repeated application yielding the
-image of a ladder. The approximation was proposed in [^EhlersPiraniSchild1972].
+image of a ladder. The approximation was proposed in [EhlersPiraniSchild:1972](@cite).
 
 # Constructor
 ````julia
@@ -197,15 +180,9 @@ SchildsLadderTransport(
 )
 ````
 Construct the classical Schilds ladder that employs exp and log, i.e. as proposed
-in[^EhlersPiraniSchild1972]. For an even cheaper transport these inner operations can be
+in [EhlersPiraniSchild:1972](@cite). For an even cheaper transport these inner operations can be
 changed to an [`AbstractRetractionMethod`](@ref) `retraction` and an
 [`AbstractInverseRetractionMethod`](@ref) `inverse_retraction`, respectively.
-
-[^EhlersPiraniSchild1972]:
-    > Ehlers, J., Pirani, F.A.E., Schild, A.: The geometry of free fall and light
-    > propagation. In: O’Raifeartaigh, L. (ed.) General Relativity: Papers in Honour of
-    > J. L. Synge, pp. 63–84. Clarendon Press, Oxford (1972).
-    > reprint doi: [10.1007/s10714-012-1353-4](https://doi.org/10.1007/s10714-012-1353-4)
 """
 struct SchildsLadderTransport{
     RT<:AbstractRetractionMethod,
@@ -875,7 +852,7 @@ end
 Given an [`AbstractManifold`](@ref) ``\mathcal M`` the vector transport is a generalization of the
 [`parallel_transport_direction`](@ref) that identifies vectors from different tangent spaces.
 
-More precisely using [^AbsilMahonySepulchre2008], Def. 8.1.1, a vector transport
+More precisely using [AbsilMahonySepulchre:2008](@cite), Def. 8.1.1, a vector transport
 ``T_{p,d}: T_p\mathcal M \to T_q\mathcal M``, ``p∈ \mathcal M``, ``Y∈ T_p\mathcal M`` is a smooth mapping
 associated to a retraction ``\operatorname{retr}_p(Y) = q`` such that
 
@@ -903,13 +880,6 @@ Instead of spcifying a start direction `d` one can equivalently also specify a t
 ``T_q\mathcal M``, see [`vector_transport_to`](@ref).
 By default [`vector_transport_direction`](@ref) falls back to using [`vector_transport_to`](@ref),
 using the [`default_retraction_method`](@ref) on `M`.
-
-[^AbsilMahonySepulchre2008]:
-    > Absil, P.-A., Mahony, R. and Sepulchre R.,
-    > _Optimization Algorithms on Matrix Manifolds_
-    > Princeton University Press, 2008,
-    > doi: [10.1515/9781400830244](https://doi.org/10.1515/9781400830244)
-    > [open access](http://press.princeton.edu/chapters/absil/)
 """
 function vector_transport_direction(
     M::AbstractManifold,

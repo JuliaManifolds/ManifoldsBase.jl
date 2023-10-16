@@ -161,6 +161,7 @@ function ManifoldsBase.retract_exp_ode!(
 )
     return (q .= p .+ t .* X)
 end
+
 function ManifoldsBase.retract_pade!(
     ::DefaultManifold,
     q,
@@ -168,6 +169,16 @@ function ManifoldsBase.retract_pade!(
     X,
     t::Number,
     m::PadeRetraction,
+)
+    return (q .= p .+ t .* X)
+end
+function ManifoldsBase.retract_sasaki!(
+    ::DefaultManifold,
+    q,
+    p,
+    X,
+    t::Number,
+    ::SasakiRetraction,
 )
     return (q .= p .+ t .* X)
 end
@@ -713,6 +724,7 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
             ODEExponentialRetraction(PolarRetraction(), DefaultBasis()),
             PadeRetraction(2),
             EmbeddedRetraction(ExponentialRetraction()),
+            SasakiRetraction(5),
         ]
             @test retract(M, q, Y, retr) == DefaultPoint(q.value + Y.value)
             @test retract(M, q, Y, 0.5, retr) == DefaultPoint(q.value + 0.5 * Y.value)

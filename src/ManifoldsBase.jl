@@ -17,16 +17,17 @@ import Base:
     -,
     *,
     ==
-import LinearAlgebra: dot, norm, det, cross, I, UniformScaling, Diagonal
-
+import LinearAlgebra: ×, dot, norm, det, cross, I, UniformScaling, Diagonal
 import Random: rand, rand!
 
-import Markdown: @doc_str
 using LinearAlgebra
+using Markdown: @doc_str
 using Random
+using Requires
 
 include("maintypes.jl")
 include("numbers.jl")
+include("Fiber.jl")
 include("bases.jl")
 include("retractions.jl")
 include("exp_log_geo.jl")
@@ -842,21 +843,30 @@ Optionally a random number generator `rng` to be used can be specified. An optio
 
 """
 Random.rand(M::AbstractManifold)
+
 function Random.rand(M::AbstractManifold, d::Integer; kwargs...)
     return [rand(M; kwargs...) for _ in 1:d]
 end
 function Random.rand(rng::AbstractRNG, M::AbstractManifold, d::Integer; kwargs...)
     return [rand(rng, M; kwargs...) for _ in 1:d]
 end
-function Random.rand(M::AbstractManifold; kwargs...)
-    p = allocate_result(M, rand)
-    rand!(M, p; kwargs...)
-    return p
+function Random.rand(M::AbstractManifold; vector_at = nothing, kwargs...)
+    if vector_at === nothing
+        pX = allocate_result(M, rand)
+    else
+        pX = allocate_result(M, rand, vector_at)
+    end
+    rand!(M, pX; vector_at = vector_at, kwargs...)
+    return pX
 end
-function Random.rand(rng::AbstractRNG, M::AbstractManifold; kwargs...)
-    p = allocate_result(M, rand)
-    rand!(rng, M, p; kwargs...)
-    return p
+function Random.rand(rng::AbstractRNG, M::AbstractManifold; vector_at = nothing, kwargs...)
+    if vector_at === nothing
+        pX = allocate_result(M, rand)
+    else
+        pX = allocate_result(M, rand, vector_at)
+    end
+    rand!(rng, M, pX; vector_at = vector_at, kwargs...)
+    return pX
 end
 
 @doc raw"""
@@ -957,12 +967,38 @@ include("vector_spaces.jl")
 include("point_vector_fallbacks.jl")
 include("nested_trait.jl")
 include("decorator_trait.jl")
+
+include("VectorFiber.jl")
+include("TangentSpace.jl")
 include("ValidationManifold.jl")
 include("EmbeddedManifold.jl")
 include("DefaultManifold.jl")
+include("ProductManifold.jl")
 include("PowerManifold.jl")
 
+#
+#
+# Requires
+# -----
+function __init__()
+    @static if !isdefined(Base, :get_extension)
+        @require RecursiveArrayTools = "731186ca-8d62-57ce-b412-fbd966d074cd" begin
+            include(
+                "../ext/ManifoldsBaseRecursiveArrayToolsExt/ManifoldsBaseRecursiveArrayToolsExt.jl",
+            )
+        end
+    end
+end
+#
+#
+# Export
+# ------
+#
+# (a) Manifolds and general types
 export AbstractManifold, AbstractManifoldPoint, TVector, CoTVector, TFVector, CoTFVector
+export VectorSpaceFiber
+export TangentSpace, TangentSpaceType
+export CotangentSpace, CotangentSpaceType
 export AbstractDecoratorManifold
 export AbstractTrait, IsEmbeddedManifold, IsEmbeddedSubmanifold, IsIsometricEmbeddedManifold
 export IsExplicitDecorator
@@ -971,9 +1007,9 @@ export EmbeddedManifold
 export AbstractPowerManifold, PowerManifold
 export AbstractPowerRepresentation,
     NestedPowerRepresentation, NestedReplacingPowerRepresentation
+export ProductManifold
 
-export OutOfInjectivityRadiusError, ManifoldDomainError
-
+# (b) Retraction Types
 export AbstractRetractionMethod,
     ApproximateInverseRetraction,
     CayleyRetraction,
@@ -984,15 +1020,19 @@ export AbstractRetractionMethod,
     QRRetraction,
     PadeRetraction,
     PolarRetraction,
+    ProductRetraction,
     ProjectionRetraction,
     RetractionWithKeywords,
+    SasakiRetraction,
     ShootingInverseRetraction,
     SoftmaxRetraction
 
+# (c) Inverse Retraction Types
 export AbstractInverseRetractionMethod,
     ApproximateInverseRetraction,
     CayleyInverseRetraction,
     EmbeddedInverseRetraction,
+    InverseProductRetraction,
     LogarithmicInverseRetraction,
     NLSolveInverseRetraction,
     QRInverseRetraction,
@@ -1002,10 +1042,12 @@ export AbstractInverseRetractionMethod,
     InverseRetractionWithKeywords,
     SoftmaxInverseRetraction
 
+# (d) Vector Transport Types
 export AbstractVectorTransportMethod,
     DifferentiatedRetractionVectorTransport,
     ParallelTransport,
     PoleLadderTransport,
+    ProductVectorTransport,
     ProjectionTransport,
     ScaledVectorTransport,
     SchildsLadderTransport,
@@ -1013,6 +1055,7 @@ export AbstractVectorTransportMethod,
     VectorTransportTo,
     VectorTransportWithKeywords
 
+# (e) Basis Types
 export CachedBasis,
     DefaultBasis,
     DefaultOrthogonalBasis,
@@ -1023,10 +1066,16 @@ export CachedBasis,
     ProjectedOrthonormalBasis,
     VeeOrthogonalBasis
 
+# (f) Error Messages
+export OutOfInjectivityRadiusError, ManifoldDomainError
 export ApproximatelyError
 export CompositeManifoldError, ComponentManifoldError, ManifoldDomainError
 
-export allocate,
+# (g) Functions on Manifolds
+export ×,
+    ℝ,
+    ℂ,
+    allocate,
     angle,
     base_manifold,
     change_basis,
@@ -1099,6 +1148,7 @@ export allocate,
     retract!,
     riemann_tensor,
     riemann_tensor!,
+    vector_space_dimension,
     vector_transport_along,
     vector_transport_along!,
     vector_transport_direction,
@@ -1111,5 +1161,4 @@ export allocate,
     Weingarten!,
     zero_vector,
     zero_vector!
-
 end # module

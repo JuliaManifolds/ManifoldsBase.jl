@@ -49,6 +49,7 @@ Retraction using the exponential map.
 """
 struct ExponentialRetraction <: AbstractRetractionMethod end
 
+
 @doc raw"""
     ODEExponentialRetraction{T<:AbstractRetractionMethod, B<:AbstractBasis} <: AbstractRetractionMethod
 
@@ -171,6 +172,29 @@ function RetractionWithKeywords(m::T; kwargs...) where {T<:AbstractRetractionMet
     return RetractionWithKeywords{T,typeof(kwargs)}(m, kwargs)
 end
 
+@doc raw"""
+    struct SasakiRetraction <: AbstractRetractionMethod end
+
+Exponential map on [`TangentBundle`](https://juliamanifolds.github.io/Manifolds.jl/stable/manifolds/vector_bundle.html#Manifolds.TangentBundle) computed via Euler integration as described
+in [MuralidharanFletcher:2012](@cite). The system of equations for ``\gamma : ℝ \to T\mathcal M`` such that
+``\gamma(1) = \exp_{p,X}(X_M, X_F)`` and ``\gamma(0)=(p, X)`` reads
+
+```math
+\dot{\gamma}(t) = (\dot{p}(t), \dot{X}(t)) = (R(X(t), \dot{X}(t))\dot{p}(t), 0)
+```
+
+where ``R`` is the Riemann curvature tensor (see [`riemann_tensor`](@ref)).
+
+# Constructor
+
+    SasakiRetraction(L::Int)
+
+In this constructor `L` is the number of integration steps.
+"""
+struct SasakiRetraction <: AbstractRetractionMethod
+    L::Int
+end
+
 """
     SoftmaxRetraction <: AbstractRetractionMethod
 
@@ -244,7 +268,7 @@ struct LogarithmicInverseRetraction <: AbstractInverseRetractionMethod end
 @doc raw"""
     PadeInverseRetraction{m} <: AbstractInverseRetractionMethod
 
-An inverse retraction based on the Padé approximation of order $m$ for the retraction.
+An inverse retraction based on the Padé approximation of order ``m`` for the retraction.
 
 !!! note "Technical Note"
     Though you would call e.g. [`inverse_retract`](@ref)`(M, p, q, PadeInverseRetraction(m))`,
@@ -765,7 +789,10 @@ end
 function _retract!(M::AbstractManifold, q, p, X, t, ::QRRetraction; kwargs...)
     return retract_qr!(M, q, p, X, t; kwargs...)
 end
-function _retract!(M::AbstractManifold, q, p, X, t, ::SoftmaxRetraction; kwargs...)
+function _retract!(M::AbstractManifold, q, p, X, t::Number, m::SasakiRetraction)
+    return retract_sasaki!(M, q, p, X, t, m)
+end
+function _retract!(M::AbstractManifold, q, p, X, t::Number, ::SoftmaxRetraction; kwargs...)
     return retract_softmax!(M, q, p, X, t; kwargs...)
 end
 function _retract!(M::AbstractManifold, q, p, X, t, m::PadeRetraction; kwargs...)
@@ -880,9 +907,223 @@ end
 
 Compute the in-place variant of the [`SoftmaxRetraction`](@ref).
 """
-function retract_softmax!(M::AbstractManifold, q, p, X, t)
+function retract_softmax!(M::AbstractManifold, q, p, X, t::Number)
     return retract_softmax!(M, q, p, t * X)
 end
 
+"""
+    retract_sasaki!(M::AbstractManifold, q, p, X, t::Number, m::SasakiRetraction)
+
+Compute the in-place variant of the [`SasakiRetraction`](@ref) `m`.
+"""
+retract_sasaki!(M::AbstractManifold, q, p, X, t::Number, m::SasakiRetraction)
+
+function retract_sasaki! end
+
+@doc raw"""
+    retract(M::AbstractManifold, p, X, method::AbstractRetractionMethod=default_retraction_method(M, typeof(p)))
+    retract(M::AbstractManifold, p, X, t::Number=1, method::AbstractRetractionMethod=default_retraction_method(M, typeof(p)))
+
+Compute a retraction, a cheaper, approximate version of the [`exp`](@ref)onential map,
+from `p` into direction `X`, scaled by `t`, on the [`AbstractManifold`](@ref) `M`.
+
+A retraction ``\operatorname{retr}_p: T_p\mathcal M → \mathcal M`` is a smooth map that fulfils
+
+1. ``\operatorname{retr}_p(0) = p``
+2. ``D\operatorname{retr}_p(0): T_p\mathcal M \to T_p\mathcal M`` is the identity map,
+i.e. ``D\operatorname{retr}_p(0)[X]=X`` holds for all ``X\in T_p\mathcal M``,
+
+where ``D\operatorname{retr}_p`` denotes the differential of the retraction
+
+The retraction is called of second order if for all ``X`` the curves ``c(t) = R_p(tX)``
+have a zero acceleration at ``t=0``, i.e. ``c''(0) = 0``.
+
+Retraction method can be specified by the last argument, defaulting to
+[`default_retraction_method`](@ref)`(M)`. For further available retractions see the documentation of respective manifolds.
+
+Locally, the retraction is invertible. For the inverse operation, see [`inverse_retract`](@ref).
+"""
+function retract(
+    M::AbstractManifold,
+    p,
+    X,
+    m::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
+)
+    return retract(M, p, X, one(number_eltype(X)), m)
+end
+function retract(
+    M::AbstractManifold,
+    p,
+    X,
+    t::Number,
+    m::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
+)
+    return _retract(M, p, X, t, m)
+end
+function _retract(M::AbstractManifold, p, X, t::Number, m::EmbeddedRetraction; kwargs...)
+    return retract_embedded(M, p, X, t, m.retraction; kwargs...)
+end
+function _retract(M::AbstractManifold, p, X, t::Number, ::ExponentialRetraction; kwargs...)
+    return exp(M, p, X, t)
+end
+function _retract(
+    M::AbstractManifold,
+    p,
+    X,
+    t::Number,
+    m::ODEExponentialRetraction;
+    kwargs...,
+)
+    return retract_exp_ode(M, p, X, t, m.retraction, m.basis)
+end
+function _retract(M::AbstractManifold, p, X, t::Number, ::PolarRetraction; kwargs...)
+    return retract_polar(M, p, X, t; kwargs...)
+end
+function _retract(M::AbstractManifold, p, X, t::Number, ::ProjectionRetraction; kwargs...)
+    return retract_project(M, p, X, t; kwargs...)
+end
+function _retract(M::AbstractManifold, p, X, t::Number, ::QRRetraction; kwargs...)
+    return retract_qr(M, p, X, t; kwargs...)
+end
+function _retract(M::AbstractManifold, p, X, t::Number, m::SasakiRetraction)
+    return retract_sasaki(M, p, X, t, m)
+end
+function _retract(M::AbstractManifold, p, X, t::Number, ::SoftmaxRetraction; kwargs...)
+    return retract_softmax(M, p, X, t; kwargs...)
+end
+function _retract(M::AbstractManifold, p, X, t::Number, ::CayleyRetraction; kwargs...)
+    return retract_cayley(M, p, X, t; kwargs...)
+end
+function _retract(M::AbstractManifold, p, X, t::Number, m::PadeRetraction; kwargs...)
+    return retract_pade(M, p, X, t, m; kwargs...)
+end
+function _retract(
+    M::AbstractManifold,
+    p,
+    X,
+    t::Number,
+    m::RetractionWithKeywords;
+    kwargs...,
+)
+    return _retract(M, p, X, t, m.retraction; kwargs..., m.kwargs...)
+end
+"""
+    retract_embedded(M::AbstractManifold, p, X, t::Number, m::AbstractRetractionMethod)
+
+computes the allocating variant of the [`EmbeddedRetraction`](@ref) using
+the [`AbstractRetractionMethod`](@ref) `m` in the embedding (see [`get_embedding`](@ref))
+and projecting the result back.
+"""
+function retract_embedded(
+    M::AbstractManifold,
+    p,
+    X,
+    t::Number,
+    m::AbstractRetractionMethod;
+    kwargs...,
+)
+    return project(
+        M,
+        retract(
+            get_embedding(M),
+            embed(get_embedding(M), p),
+            embed(get_embedding(M), p, X),
+            t,
+            m;
+            kwargs...,
+        ),
+    )
+end
+"""
+    retract_polar(M::AbstractManifold, p, X, t::Number)
+
+computes the allocating variant of the [`PolarRetraction`](@ref),
+which by default allocates and calls [`retract_polar!`](@ref ManifoldsBase.retract_polar!).
+"""
+function retract_polar(M::AbstractManifold, p, X, t::Number; kwargs...)
+    q = allocate_result(M, retract, p, X)
+    return retract_polar!(M, q, p, X, t; kwargs...)
+end
+"""
+    retract_project(M::AbstractManifold, p, X, t::Number)
+
+Compute the allocating variant of the [`ProjectionRetraction`](@ref),
+which by default allocates and calls [`retract_project!`](@ref ManifoldsBase.retract_project!).
+"""
+function retract_project(M::AbstractManifold, p, X, t::Number; kwargs...)
+    q = allocate_result(M, retract, p, X)
+    return retract_project!(M, q, p, X, t; kwargs...)
+end
+"""
+    retract_qr(M::AbstractManifold, p, X, t::Number)
+
+Compute the allocating variant of the [`QRRetraction`](@ref),
+which by default allocates and calls [`retract_qr!`](@ref ManifoldsBase.retract_qr!).
+"""
+function retract_qr(M::AbstractManifold, p, X, t::Number; kwargs...)
+    q = allocate_result(M, retract, p, X, t::Number)
+    return retract_qr!(M, q, p, X, t; kwargs...)
+end
+"""
+    retract_exp_ode(M::AbstractManifold, p, q, m::AbstractRetractionMethod, B::AbstractBasis)
+
+Compute the allocating variant of the [`ODEExponentialRetraction`](@ref)`(m,B)`,
+which by default allocates and calls [`retract_exp_ode!`](@ref ManifoldsBase.retract_exp_ode!).
+"""
+function retract_exp_ode(
+    M::AbstractManifold,
+    p,
+    X,
+    t::Number,
+    m::AbstractRetractionMethod,
+    B::AbstractBasis;
+    kwargs...,
+)
+    q = allocate_result(M, retract, p, X)
+    return retract_exp_ode!(M, q, p, X, t, m, B; kwargs...)
+end
+"""
+    retract_softmax(M::AbstractManifold, p, X, t::Number)
+
+Compute the allocating variant of the [`SoftmaxRetraction`](@ref),
+which by default allocates and calls [`retract_softmax!`](@ref ManifoldsBase.retract_softmax!).
+"""
+function retract_softmax(M::AbstractManifold, p, X, t::Number; kwargs...)
+    q = allocate_result(M, retract, p, X)
+    return retract_softmax!(M, q, p, X, t; kwargs...)
+end
+
+"""
+    retract_cayley(M::AbstractManifold, p, X, t::Number)
+
+Compute the allocating variant of the [`CayleyRetraction`](@ref),
+which by default allocates and calls [`retract_cayley!`](@ref ManifoldsBase.retract_cayley!).
+"""
+function retract_cayley(M::AbstractManifold, p, X, t::Number; kwargs...)
+    q = allocate_result(M, retract, p, X)
+    return retract_cayley!(M, q, p, X, t; kwargs...)
+end
+"""
+    retract_pade(M::AbstractManifold, p, X, t::Number, m::PadeRetraction)
+
+Compute the allocating variant of the [`PadeRetraction`](@ref) `m`,
+which by default allocates and calls [`retract_pade!`](@ref ManifoldsBase.retract_pade!).
+"""
+function retract_pade(M::AbstractManifold, p, X, t::Number, m::PadeRetraction; kwargs...)
+    q = allocate_result(M, retract, p, X)
+    return retract_pade!(M, q, p, X, t, m; kwargs...)
+end
+
+"""
+    retract_sasaki(M::AbstractManifold, p, X, t::Number, m::SasakiRetraction)
+
+Compute the allocating variant of the [`SasakiRetraction`](@ref),
+which by default allocates and calls `retract_sasaki!`.
+"""
+function retract_sasaki(M::AbstractManifold, p, X, t::Number, m::SasakiRetraction)
+    q = allocate_result(M, retract, p, X)
+    return retract_sasaki!(M, q, p, X, t, m)
+end
+
 Base.show(io::IO, ::CayleyRetraction) = print(io, "CayleyRetraction()")
-Base.show(io::IO, ::PadeRetraction{m}) where {m} = print(io, "PadeRetraction($(m))")
+Base.show(io::IO, ::PadeRetraction{m}) where {m} = print(io, "PadeRetraction($m)")

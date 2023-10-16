@@ -1,7 +1,7 @@
 using LinearAlgebra
 using ManifoldsBase
 using ManifoldsBase: DefaultManifold, ℝ, ℂ, RealNumbers, ComplexNumbers
-using ManifoldsBase: CotangentSpace, CotangentSpaceType, TangentSpace, TangentSpaceType
+using ManifoldsBase: CotangentSpaceType, TangentSpaceType
 using ManifoldsBase: FVector
 using Test
 import Base: +, -, *, copyto!, isapprox
@@ -267,11 +267,12 @@ DiagonalizingBasisProxy() = DiagonalizingOrthonormalBasis([1.0, 0.0, 0.0])
             @test DefaultOrthonormalBasis{ℂ,TangentSpaceType}() ===
                   DefaultOrthonormalBasis(ℂ)
 
-            @test DefaultBasis{ℂ}(CotangentSpace) === DefaultBasis(ℂ, CotangentSpace)
-            @test DefaultOrthogonalBasis{ℂ}(CotangentSpace) ===
-                  DefaultOrthogonalBasis(ℂ, CotangentSpace)
-            @test DefaultOrthonormalBasis{ℂ}(CotangentSpace) ===
-                  DefaultOrthonormalBasis(ℂ, CotangentSpace)
+            @test DefaultBasis{ℂ}(CotangentSpaceType()) ===
+                  DefaultBasis(ℂ, CotangentSpaceType())
+            @test DefaultOrthogonalBasis{ℂ}(CotangentSpaceType()) ===
+                  DefaultOrthogonalBasis(ℂ, CotangentSpaceType())
+            @test DefaultOrthonormalBasis{ℂ}(CotangentSpaceType()) ===
+                  DefaultOrthonormalBasis(ℂ, CotangentSpaceType())
         end
 
         _pts = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
@@ -403,7 +404,7 @@ DiagonalizingBasisProxy() = DiagonalizingOrthonormalBasis([1.0, 0.0, 0.0])
         M = DefaultManifold(2, 3)
         x = collect(reshape(1.0:6.0, (2, 3)))
         pb = get_basis(M, x, DefaultOrthonormalBasis())
-        B2 = DefaultOrthonormalBasis(ManifoldsBase.ℝ, ManifoldsBase.CotangentSpace)
+        B2 = DefaultOrthonormalBasis(ManifoldsBase.ℝ, ManifoldsBase.CotangentSpaceType())
         pb2 = get_basis(M, x, B2)
 
         test_basis_string = """
@@ -496,24 +497,24 @@ DiagonalizingBasisProxy() = DiagonalizingOrthonormalBasis([1.0, 0.0, 0.0])
     end
 
     @testset "Bases of cotangent spaces" begin
-        b1 = DefaultOrthonormalBasis(ℝ, CotangentSpace)
-        @test b1.vector_space == CotangentSpace
+        b1 = DefaultOrthonormalBasis(ℝ, CotangentSpaceType())
+        @test b1.vector_space == CotangentSpaceType()
 
-        b2 = DefaultOrthogonalBasis(ℝ, CotangentSpace)
-        @test b2.vector_space == CotangentSpace
+        b2 = DefaultOrthogonalBasis(ℝ, CotangentSpaceType())
+        @test b2.vector_space == CotangentSpaceType()
 
-        b3 = DefaultBasis(ℝ, CotangentSpace)
-        @test b3.vector_space == CotangentSpace
+        b3 = DefaultBasis(ℝ, CotangentSpaceType())
+        @test b3.vector_space == CotangentSpaceType()
 
         M = DefaultManifold(2; field = ℂ)
         p = [1.0, 2.0im]
         b1_d = ManifoldsBase.dual_basis(M, p, b1)
         @test b1_d isa DefaultOrthonormalBasis
-        @test b1_d.vector_space == TangentSpace
+        @test b1_d.vector_space == TangentSpaceType()
 
         b1_d_d = ManifoldsBase.dual_basis(M, p, b1_d)
         @test b1_d_d isa DefaultOrthonormalBasis
-        @test b1_d_d.vector_space == CotangentSpace
+        @test b1_d_d.vector_space == CotangentSpaceType()
     end
 
     @testset "Complex Basis - Mutating cases" begin
@@ -544,25 +545,25 @@ DiagonalizingBasisProxy() = DiagonalizingOrthonormalBasis([1.0, 0.0, 0.0])
     end
 
     @testset "FVector" begin
-        @test sprint(show, TangentSpace) == "TangentSpace"
-        @test sprint(show, CotangentSpace) == "CotangentSpace"
+        @test sprint(show, TangentSpaceType()) == "TangentSpaceType()"
+        @test sprint(show, CotangentSpaceType()) == "CotangentSpaceType()"
         tvs = ([1.0, 0.0, 0.0], [0.0, 1.0, 0.0])
         fv_tvs = map(v -> TFVector(v, DefaultOrthonormalBasis()), tvs)
         fv1 = fv_tvs[1]
         tv1s = allocate(fv_tvs[1])
         @test isa(tv1s, FVector)
-        @test tv1s.type == TangentSpace
+        @test tv1s.type == TangentSpaceType()
         @test size(tv1s.data) == size(tvs[1])
         @test number_eltype(tv1s) == number_eltype(tvs[1])
         @test number_eltype(tv1s) == number_eltype(typeof(tv1s))
         @test isa(fv1 + fv1, FVector)
-        @test (fv1 + fv1).type == TangentSpace
+        @test (fv1 + fv1).type == TangentSpaceType()
         @test isa(fv1 - fv1, FVector)
-        @test (fv1 - fv1).type == TangentSpace
+        @test (fv1 - fv1).type == TangentSpaceType()
         @test isa(-fv1, FVector)
-        @test (-fv1).type == TangentSpace
+        @test (-fv1).type == TangentSpaceType()
         @test isa(2 * fv1, FVector)
-        @test (2 * fv1).type == TangentSpace
+        @test (2 * fv1).type == TangentSpaceType()
         tv1s_32 = allocate(fv_tvs[1], Float32)
         @test isa(tv1s, FVector)
         @test eltype(tv1s_32.data) === Float32
@@ -571,7 +572,7 @@ DiagonalizingBasisProxy() = DiagonalizingOrthonormalBasis([1.0, 0.0, 0.0])
 
         @test sprint(show, fv1) == "TFVector([1.0, 0.0, 0.0], $(fv1.basis))"
 
-        cofv1 = CoTFVector(tvs[1], DefaultOrthonormalBasis(ℝ, CotangentSpace))
+        cofv1 = CoTFVector(tvs[1], DefaultOrthonormalBasis(ℝ, CotangentSpaceType()))
         @test cofv1 isa CoTFVector
         @test sprint(show, cofv1) == "CoTFVector([1.0, 0.0, 0.0], $(fv1.basis))"
     end
@@ -579,10 +580,10 @@ DiagonalizingBasisProxy() = DiagonalizingOrthonormalBasis([1.0, 0.0, 0.0])
     @testset "vector_space_dimension" begin
         M = ManifoldsBase.DefaultManifold(3)
         MC = ManifoldsBase.DefaultManifold(3; field = ℂ)
-        @test ManifoldsBase.vector_space_dimension(M, TangentSpace) == 3
-        @test ManifoldsBase.vector_space_dimension(M, CotangentSpace) == 3
-        @test ManifoldsBase.vector_space_dimension(MC, TangentSpace) == 6
-        @test ManifoldsBase.vector_space_dimension(MC, CotangentSpace) == 6
+        @test ManifoldsBase.vector_space_dimension(M, TangentSpaceType()) == 3
+        @test ManifoldsBase.vector_space_dimension(M, CotangentSpaceType()) == 3
+        @test ManifoldsBase.vector_space_dimension(MC, TangentSpaceType()) == 6
+        @test ManifoldsBase.vector_space_dimension(MC, CotangentSpaceType()) == 6
     end
 
     @testset "requires_caching" begin

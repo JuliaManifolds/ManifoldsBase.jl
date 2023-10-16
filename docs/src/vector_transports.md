@@ -7,7 +7,7 @@ A _vector transport_ is a way to transport a vector between two tangent spaces.
 Let ``p,q ∈ \mathcal M`` be given, ``c`` the curve along which we want to transport (cf. [parallel transport](@ref subsec-parallel-transport), for example a geodesic or curve given by a retraction.
 We can specify the geodesic or curve a retraction realises for example by a direction ``d``.
 
-More precisely using [^AbsilMahonySepulchre2008], Def. 8.1.1, a vector transport
+More precisely using [AbsilMahonySepulchre:2008](@cite), Def. 8.1.1, a vector transport
 ``T_{p,d}: T_p\mathcal M \to T_q\mathcal M``, ``p∈ \mathcal M``, ``Y∈ T_p\mathcal M`` is a smooth mapping
 associated to a retraction ``\operatorname{retr}_p(Y) = q`` such that
 

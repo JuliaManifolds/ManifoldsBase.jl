@@ -30,9 +30,13 @@ if "--quarto" ∈ ARGS
 end
 
 using Documenter: DocMeta, HTML, MathJax3, deploydocs, makedocs
+using DocumenterCitations
 using ManifoldsBase
 
-makedocs(
+# (e) ...finally! make docs
+bib = CitationBibliography(joinpath(@__DIR__, "src", "references.bib"); style = :alpha)
+makedocs(;
+    # for development, we disable prettyurls
     format = HTML(;
         mathengine = MathJax3(),
         prettyurls = get(ENV, "CI", nothing) == "true",
@@ -53,8 +57,11 @@ makedocs(
             "Vector transports" => "vector_transports.md",
         ],
         "Manifolds" => "manifolds.md",
+        "Meta-Manifolds" => "metamanifolds.md",
         "Decorating/Extending a Manifold" => "decorator.md",
         "Bases for tangent spaces" => "bases.md",
+        "References" => "references.md",
     ],
+    plugins = [bib],
 )
 deploydocs(repo = "github.com/JuliaManifolds/ManifoldsBase.jl.git", push_preview = true)
