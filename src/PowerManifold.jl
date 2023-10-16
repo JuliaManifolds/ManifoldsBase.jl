@@ -64,8 +64,8 @@ would not be represented by statically-sized arrays.
     M^(N_1, N_2, ..., N_d)
 
 Generate the power manifold ``M^{N_1 × N_2 × … × N_d}``.
-By default, a [`PowerManifold`](@ref} is expanded further, i.e. for `M=PowerManifold(N,3)`
-`PowerManifold(M, 2)` is equivalent to `PowerManifold(N,3,2)`. Points are then 3×2 matrices
+By default, a [`PowerManifold`](@ref) is expanded further, i.e. for `M=PowerManifold(N, 3)`
+`PowerManifold(M, 2)` is equivalent to `PowerManifold(N, 3, 2)`. Points are then 3×2 matrices
 of points on `N`.
 Providing a [`NestedPowerRepresentation`](@ref) as the second argument to the constructor
 can be used to nest manifold, i.e. `PowerManifold(M, NestedPowerRepresentation(), 2)`
