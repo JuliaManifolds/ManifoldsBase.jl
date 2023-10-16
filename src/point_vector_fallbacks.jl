@@ -331,6 +331,26 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
                 ManifoldsBase.retract_embedded!(M, q.$pfield, p.$pfield, X.$vfield, t, m)
                 return q
             end
+            function ManifoldsBase.retract_sasaki(
+                M::$TM,
+                p::$TP,
+                X::$TV,
+                t::Number,
+                m::SasakiRetraction,
+            )
+                return $TP(ManifoldsBase.retract_sasaki(M, p.$pfield, X.$vfield, t, m))
+            end
+            function ManifoldsBase.retract_sasaki!(
+                M::$TM,
+                q::$TP,
+                p::$TP,
+                X::$TV,
+                t::Number,
+                m::SasakiRetraction,
+            )
+                ManifoldsBase.retract_sasaki!(M, q.$pfield, p.$pfield, X.$vfield, t, m)
+                return q
+            end
         end,
     )
     for f_postfix in [:polar, :project, :qr, :softmax]

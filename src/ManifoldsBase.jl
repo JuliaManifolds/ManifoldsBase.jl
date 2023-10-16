@@ -17,16 +17,17 @@ import Base:
     -,
     *,
     ==
-import LinearAlgebra: dot, norm, det, cross, I, UniformScaling, Diagonal
-
+import LinearAlgebra: ×, dot, norm, det, cross, I, UniformScaling, Diagonal
 import Random: rand, rand!
 
-import Markdown: @doc_str
 using LinearAlgebra
+using Markdown: @doc_str
 using Random
+using Requires
 
 include("maintypes.jl")
 include("numbers.jl")
+include("Fiber.jl")
 include("bases.jl")
 include("retractions.jl")
 include("exp_log_geo.jl")
@@ -797,18 +798,6 @@ function mid_point!(M::AbstractManifold, q, p1, p2)
     return exp!(M, q, p1, X / 2)
 end
 
-@static if VERSION <= v"1.1"
-    function mid_point!(
-        M::AbstractManifold,
-        q::AbstractArray{T1,0},
-        p1::AbstractArray{T2,0},
-        p2::AbstractArray{T3,0},
-    ) where {T1,T2,T3}
-        X = log(M, p1, p2)
-        return exp!(M, q, p1, fill(X / 2))
-    end
-end
-
 """
     norm(M::AbstractManifold, p, X)
 
@@ -978,12 +967,38 @@ include("vector_spaces.jl")
 include("point_vector_fallbacks.jl")
 include("nested_trait.jl")
 include("decorator_trait.jl")
+
+include("VectorFiber.jl")
+include("TangentSpace.jl")
 include("ValidationManifold.jl")
 include("EmbeddedManifold.jl")
 include("DefaultManifold.jl")
+include("ProductManifold.jl")
 include("PowerManifold.jl")
 
+#
+#
+# Requires
+# -----
+function __init__()
+    @static if !isdefined(Base, :get_extension)
+        @require RecursiveArrayTools = "731186ca-8d62-57ce-b412-fbd966d074cd" begin
+            include(
+                "../ext/ManifoldsBaseRecursiveArrayToolsExt/ManifoldsBaseRecursiveArrayToolsExt.jl",
+            )
+        end
+    end
+end
+#
+#
+# Export
+# ------
+#
+# (a) Manifolds and general types
 export AbstractManifold, AbstractManifoldPoint, TVector, CoTVector, TFVector, CoTFVector
+export VectorSpaceFiber
+export TangentSpace, TangentSpaceType
+export CotangentSpace, CotangentSpaceType
 export AbstractDecoratorManifold
 export AbstractTrait, IsEmbeddedManifold, IsEmbeddedSubmanifold, IsIsometricEmbeddedManifold
 export IsExplicitDecorator
@@ -992,9 +1007,9 @@ export EmbeddedManifold
 export AbstractPowerManifold, PowerManifold
 export AbstractPowerRepresentation,
     NestedPowerRepresentation, NestedReplacingPowerRepresentation
+export ProductManifold
 
-export OutOfInjectivityRadiusError, ManifoldDomainError
-
+# (b) Retraction Types
 export AbstractRetractionMethod,
     ApproximateInverseRetraction,
     CayleyRetraction,
@@ -1005,15 +1020,19 @@ export AbstractRetractionMethod,
     QRRetraction,
     PadeRetraction,
     PolarRetraction,
+    ProductRetraction,
     ProjectionRetraction,
     RetractionWithKeywords,
+    SasakiRetraction,
     ShootingInverseRetraction,
     SoftmaxRetraction
 
+# (c) Inverse Retraction Types
 export AbstractInverseRetractionMethod,
     ApproximateInverseRetraction,
     CayleyInverseRetraction,
     EmbeddedInverseRetraction,
+    InverseProductRetraction,
     LogarithmicInverseRetraction,
     NLSolveInverseRetraction,
     QRInverseRetraction,
@@ -1023,10 +1042,12 @@ export AbstractInverseRetractionMethod,
     InverseRetractionWithKeywords,
     SoftmaxInverseRetraction
 
+# (d) Vector Transport Types
 export AbstractVectorTransportMethod,
     DifferentiatedRetractionVectorTransport,
     ParallelTransport,
     PoleLadderTransport,
+    ProductVectorTransport,
     ProjectionTransport,
     ScaledVectorTransport,
     SchildsLadderTransport,
@@ -1034,6 +1055,7 @@ export AbstractVectorTransportMethod,
     VectorTransportTo,
     VectorTransportWithKeywords
 
+# (e) Basis Types
 export CachedBasis,
     DefaultBasis,
     DefaultOrthogonalBasis,
@@ -1044,10 +1066,16 @@ export CachedBasis,
     ProjectedOrthonormalBasis,
     VeeOrthogonalBasis
 
+# (f) Error Messages
+export OutOfInjectivityRadiusError, ManifoldDomainError
 export ApproximatelyError
 export CompositeManifoldError, ComponentManifoldError, ManifoldDomainError
 
-export allocate,
+# (g) Functions on Manifolds
+export ×,
+    ℝ,
+    ℂ,
+    allocate,
     angle,
     base_manifold,
     change_basis,
@@ -1120,6 +1148,7 @@ export allocate,
     retract!,
     riemann_tensor,
     riemann_tensor!,
+    vector_space_dimension,
     vector_transport_along,
     vector_transport_along!,
     vector_transport_direction,
@@ -1132,5 +1161,4 @@ export allocate,
     Weingarten!,
     zero_vector,
     zero_vector!
-
 end # module

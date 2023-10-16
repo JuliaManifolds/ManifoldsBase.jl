@@ -49,6 +49,7 @@ Retraction using the exponential map.
 """
 struct ExponentialRetraction <: AbstractRetractionMethod end
 
+
 @doc raw"""
     ODEExponentialRetraction{T<:AbstractRetractionMethod, B<:AbstractBasis} <: AbstractRetractionMethod
 
@@ -173,6 +174,29 @@ function RetractionWithKeywords(m::T; kwargs...) where {T<:AbstractRetractionMet
     return RetractionWithKeywords{T,typeof(kwargs)}(m, kwargs)
 end
 
+@doc raw"""
+    struct SasakiRetraction <: AbstractRetractionMethod end
+
+Exponential map on [`TangentBundle`](https://juliamanifolds.github.io/Manifolds.jl/stable/manifolds/vector_bundle.html#Manifolds.TangentBundle) computed via Euler integration as described
+in [MuralidharanFletcher:2012](@cite). The system of equations for ``\gamma : ℝ \to T\mathcal M`` such that
+``\gamma(1) = \exp_{p,X}(X_M, X_F)`` and ``\gamma(0)=(p, X)`` reads
+
+```math
+\dot{\gamma}(t) = (\dot{p}(t), \dot{X}(t)) = (R(X(t), \dot{X}(t))\dot{p}(t), 0)
+```
+
+where ``R`` is the Riemann curvature tensor (see [`riemann_tensor`](@ref)).
+
+# Constructor
+
+    SasakiRetraction(L::Int)
+
+In this constructor `L` is the number of integration steps.
+"""
+struct SasakiRetraction <: AbstractRetractionMethod
+    L::Int
+end
+
 """
     SoftmaxRetraction <: AbstractRetractionMethod
 
@@ -249,7 +273,7 @@ struct LogarithmicInverseRetraction <: AbstractInverseRetractionMethod end
 @doc raw"""
     PadeInverseRetraction{m} <: AbstractInverseRetractionMethod
 
-An inverse retraction based on the Padé approximation of order $m$ for the retraction.
+An inverse retraction based on the Padé approximation of order ``m`` for the retraction.
 
 !!! note "Technical Note"
     Though you would call e.g. [`inverse_retract`](@ref)`(M, p, q, PadeInverseRetraction(m))`,
@@ -927,6 +951,9 @@ end
 function _retract!(M::AbstractManifold, q, p, X, t::Number, ::QRRetraction; kwargs...)
     return retract_qr!(M, q, p, X, t; kwargs...)
 end
+function _retract!(M::AbstractManifold, q, p, X, t::Number, m::SasakiRetraction)
+    return retract_sasaki!(M, q, p, X, t, m)
+end
 function _retract!(M::AbstractManifold, q, p, X, t::Number, ::SoftmaxRetraction; kwargs...)
     return retract_softmax!(M, q, p, X, t; kwargs...)
 end
@@ -1047,6 +1074,15 @@ retract_softmax!(M::AbstractManifold, q, p, X, t::Number)
 
 function retract_softmax! end
 
+"""
+    retract_sasaki!(M::AbstractManifold, q, p, X, t::Number, m::SasakiRetraction)
+
+Compute the in-place variant of the [`SasakiRetraction`](@ref) `m`.
+"""
+retract_sasaki!(M::AbstractManifold, q, p, X, t::Number, m::SasakiRetraction)
+
+function retract_sasaki! end
+
 @doc raw"""
     retract(M::AbstractManifold, p, X, method::AbstractRetractionMethod=default_retraction_method(M, typeof(p)))
     retract(M::AbstractManifold, p, X, t::Number=1, method::AbstractRetractionMethod=default_retraction_method(M, typeof(p)))
@@ -1111,6 +1147,9 @@ function _retract(M::AbstractManifold, p, X, t::Number, ::ProjectionRetraction; 
 end
 function _retract(M::AbstractManifold, p, X, t::Number, ::QRRetraction; kwargs...)
     return retract_qr(M, p, X, t; kwargs...)
+end
+function _retract(M::AbstractManifold, p, X, t::Number, m::SasakiRetraction)
+    return retract_sasaki(M, p, X, t, m)
 end
 function _retract(M::AbstractManifold, p, X, t::Number, ::SoftmaxRetraction; kwargs...)
     return retract_softmax(M, p, X, t; kwargs...)
@@ -1238,5 +1277,16 @@ function retract_pade(M::AbstractManifold, p, X, t::Number, m::PadeRetraction; k
     return retract_pade!(M, q, p, X, t, m; kwargs...)
 end
 
+"""
+    retract_sasaki(M::AbstractManifold, p, X, t::Number, m::SasakiRetraction)
+
+Compute the allocating variant of the [`SasakiRetraction`](@ref),
+which by default allocates and calls `retract_sasaki!`.
+"""
+function retract_sasaki(M::AbstractManifold, p, X, t::Number, m::SasakiRetraction)
+    q = allocate_result(M, retract, p, X)
+    return retract_sasaki!(M, q, p, X, t, m)
+end
+
 Base.show(io::IO, ::CayleyRetraction) = print(io, "CayleyRetraction()")
-Base.show(io::IO, ::PadeRetraction{m}) where {m} = print(io, "PadeRetraction($(m))")
+Base.show(io::IO, ::PadeRetraction{m}) where {m} = print(io, "PadeRetraction($m)")

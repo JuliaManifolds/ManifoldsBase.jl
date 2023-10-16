@@ -181,6 +181,16 @@ function ManifoldsBase.retract_exp_ode!(
     return (q .= p .+ t .* X)
 end
 ManifoldsBase.retract_pade!(::DefaultManifold, q, p, X, t::Number, i) = (q .= p .+ t .* X)
+function ManifoldsBase.retract_sasaki!(
+    ::DefaultManifold,
+    q,
+    p,
+    X,
+    t::Number,
+    ::SasakiRetraction,
+)
+    return (q .= p .+ t .* X)
+end
 ManifoldsBase.retract_softmax!(::DefaultManifold, q, p, X, t::Number) = (q .= p .+ t .* X)
 ManifoldsBase.get_embedding(M::DefaultManifold) = M # dummy embedding
 ManifoldsBase.inverse_retract_polar!(::DefaultManifold, Y, p, q) = (Y .= q .- p)
@@ -723,6 +733,7 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
             ODEExponentialRetraction(PolarRetraction(), DefaultBasis()),
             PadeRetraction(2),
             EmbeddedRetraction(ExponentialRetraction()),
+            SasakiRetraction(5),
         ]
             @test retract(M, q, Y, retr) == DefaultPoint(q.value + Y.value)
             @test retract(M, q, Y, 0.5, retr) == DefaultPoint(q.value + 0.5 * Y.value)

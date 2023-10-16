@@ -5,11 +5,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.15.0] xx/xx/2023
+
+### Added
+
+- `ProductManifold` type was migrated from Manifolds.jl.
+- `Fiber`, `VectorSpaceFiber` and `TangentSpace` types. `TangentSpace` is a generalized version of `TangentSpaceAtPoint` from Manifolds.jl.
+- `change_representer!`, `change_metric!` and `Weingarten!` methods added to `PowerManifold`.
+- `×` now also works for retractions, inverse retractions, and vector transports to create their product versions
+- `retract`, `inverse_retract`, and `vector_transport_to` (and `_dir`) now also accept arbirtrary retractions on the product manifold. These act the same as the n-fold product of a retraction.
+
+### Changed
+
+- `Requires.jl` is added as a dependency to facilitate loading some methods related to `ProductManifolds` on Julia 1.6 to 1.8. Later versions rely on package extensions.
+- `Documenter.jl` was updated to 1.0.
+- `PowerManifold` can now store its size either in a field or in a type, similarly to `DefaultManifold`. By default the size is stored in a field.
+
+### Removed
+
+- Julia 1.0 is no longer supported. From now on, the earliest supported Julia version is 1.6.
+
+## [0.14.12] 23/09/2023
+
+### Changed
+
+- Introduce a thorough way to allocate tangent vectors for `rand`
+
 ## [0.14.11] 25/08/2023
 
 ### Added
 
-- MAke the `Weingarten` map a decorator capable function.
+- Make the `Weingarten` map a decorator capable function.
 
 ## [0.14.10] 17/08/2023
 
