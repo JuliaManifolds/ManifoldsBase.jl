@@ -263,24 +263,6 @@ function Random.rand(
     end
 end
 
-function _retract(
-    M::ProductManifold,
-    p::ArrayPartition,
-    X::ArrayPartition,
-    t::Number,
-    method::ProductRetraction,
-)
-    return ArrayPartition(
-        map(
-            (N, pc, Xc, rm) -> retract(N, pc, Xc, t, rm),
-            M.manifolds,
-            submanifold_components(M, p),
-            submanifold_components(M, X),
-            method.retractions,
-        ),
-    )
-end
-
 function riemann_tensor(
     M::ProductManifold,
     p::ArrayPartition,
