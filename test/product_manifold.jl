@@ -157,6 +157,9 @@ include("test_sphere.jl")
             ProductRetraction(ExponentialRetraction(), ExponentialRetraction()),
         )
         @test qr2 ≈ qr
+        qr3 = similar(p1)
+        retract!(M, qr3, p1, 2 * X1, ExponentialRetraction())
+        @test qr3 ≈ qr
         Xr = similar(X1)
         log!(M, Xr, p1, p2)
         @test log(M, p1, p2) ≈
@@ -324,8 +327,11 @@ include("test_sphere.jl")
         Y3 = vector_transport_direction(M, p1, X, X, m)
         Y4 = similar(Y)
         vector_transport_direction!(M, Y4, p1, X, X, m)
+        Y5 = similar(Y)
+        vector_transport_direction!(M, Y5, p1, X, X, ParallelTransport())
         @test isapprox(M, p2, Y3, Z)
         @test isapprox(M, p2, Y4, Z)
+        @test isapprox(M, p2, Y5, Z)
     end
 
     @testset "Implicit product vector transport" begin
