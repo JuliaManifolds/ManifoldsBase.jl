@@ -29,6 +29,14 @@ function DefaultManifold(n::Vararg{Int}; field = ℝ, parameter::Symbol = :field
     return DefaultManifold{field,typeof(size)}(size)
 end
 
+function allocation_promotion_function(
+    ::DefaultManifold{ℂ},
+    ::Union{typeof(get_vector),typeof(get_coordinates)},
+    ::Tuple,
+)
+    return complex
+end
+
 change_representer!(M::DefaultManifold, Y, ::EuclideanMetric, p, X) = copyto!(M, Y, p, X)
 
 change_metric!(M::DefaultManifold, Y, ::EuclideanMetric, p, X) = copyto!(M, Y, p, X)

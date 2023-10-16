@@ -1,9 +1,14 @@
 using Test
 using ManifoldsBase
-using ManifoldsBase: AbstractNumbers, ℝ, ℂ, NestedReplacingPowerRepresentation
+using ManifoldsBase:
+    AbstractNumbers, ℝ, ℂ, NestedReplacingPowerRepresentation, VectorSpaceType
 using StaticArrays
 using LinearAlgebra
 using Random
+
+include("test_manifolds.jl")
+
+struct TestVectorSpaceType <: VectorSpaceType end
 
 power_array_wrapper(::Type{NestedPowerRepresentation}, ::Int) = identity
 power_array_wrapper(::Type{NestedReplacingPowerRepresentation}, i::Int) = SVector{i}
@@ -302,5 +307,61 @@ struct TestArrayRepresentation <: AbstractPowerRepresentation end
             @test rand(MersenneTwister(123), N; vector_at = p) ==
                   rand(MersenneTwister(123), N; vector_at = p)
         end
+    end
+
+    @testset "metric conversion" begin
+        M = TestSPD(3)
+        N = PowerManifold(M, NestedPowerRepresentation(), 2)
+        e = EuclideanMetric()
+        p = [1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1]
+        q = [2.0 0.0 0.0; 0.0 2.0 0.0; 0.0 0.0 1]
+        P = [p, q]
+        X = [log(M, p, q), log(M, q, p)]
+        Y = change_metric(N, e, P, X)
+        Yc = [change_metric(M, e, p, log(M, p, q)), change_metric(M, e, q, log(M, q, p))]
+        @test norm(N, P, Y .- Yc) ≈ 0
+        Z = change_representer(N, e, P, X)
+        Zc = [
+            change_representer(M, e, p, log(M, p, q)),
+            change_representer(M, e, q, log(M, q, p)),
+        ]
+        @test norm(N, P, Z .- Zc) ≈ 0
+    end
+
+    @testset "Other stuff" begin
+        M1 = TestSphere(2)
+        @testset "Weingarten" begin
+            Mpr = PowerManifold(M1, NestedPowerRepresentation(), 2)
+            p = [1.0, 0.0, 0.0]
+            X = [0.0, 0.2, 0.0]
+            V = [0.1, 0.0, 0.0] #orthogonal to TpM -> parallel to p
+            @test isapprox(
+                Mpr,
+                Weingarten(Mpr, [p, p], [X, X], [V, V]),
+                [-0.1 * X, -0.1 * X],
+            )
+        end
+    end
+
+    @testset "Type size" begin
+        M = ManifoldsBase.DefaultManifold(3)
+        N = PowerManifold(M, NestedPowerRepresentation(), 2; parameter = :type)
+        p = [[1, 2, 3], [3, 4, 5]]
+        @test zero_vector(N, p) == 0 .* p
+        @test PowerManifold(N, 3) isa PowerManifold{
+            ℝ,
+            <:DefaultManifold,
+            ManifoldsBase.TypeParameter{Tuple{2,3}},
+            NestedPowerRepresentation,
+        }
+        @test PowerManifold(N, 3; parameter = :field) isa
+              PowerManifold{ℝ,<:DefaultManifold,Tuple{Int,Int},NestedPowerRepresentation}
+        @test repr(N) ==
+              "PowerManifold(DefaultManifold(3; field = ℝ), NestedPowerRepresentation(), 2; parameter=:type)"
+
+        M = ManifoldsBase.DefaultManifold(3)
+        N = PowerManifold(M, NestedPowerRepresentation(), 2, 3; parameter = :type)
+        p = rand(N)
+        @test zero_vector(N, p) == 0 .* p
     end
 end

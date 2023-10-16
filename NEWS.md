@@ -5,14 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.15.0] xx/xx/xx
+## [0.15.0] dd/mm/2023
 
 ### Added
+
+- `ProductManifold` type was migrated from Manifolds.jl.
+- `Fiber`, `VectorSpaceFiber` and `TangentSpace` types. `TangentSpace` is a generalized version of `TangentSpaceAtPoint` from Manifolds.jl.
 - A keyword to `ValidationManifold` which `error=` mode to use.
   This is by default the previous `:error` mode.
+- `change_representer!`, `change_metric!` and `Weingarten!` methods added to `PowerManifold`.
+- `×` now also works for retractions, inverse retractions, and vector transports to create their product versions
+- `retract`, `inverse_retract`, and `vector_transport_to` (and `_dir`) now also accept arbirtrary retractions on the product manifold. These act the same as the n-fold product of a retraction.
 
 ### Changed
 
+- `retract` now behaves like `exp` in the sense that it allocates early,
+  which reduces the amount of code to dispatch through levels 1-3 twice
+- `inverse_retract` now behaves like `log` in the sense that it allocates early
+- `Requires.jl` is added as a dependency to facilitate loading some methods related to `ProductManifolds` on Julia 1.6 to 1.8. Later versions rely on package extensions.
+- `Documenter.jl` was updated to 1.0.
+- `PowerManifold` can now store its size either in a field or in a type, similarly to `DefaultManifold`. By default the size is stored in a field.
 - The signature of `is_point` was changed to be consistent with `isapprox.`.
   The error positional symbol (third argument) is now a keyword argument.
   We left the boolean shortcut in place.
@@ -27,11 +39,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * `is_vector(M, p, X, err, base)` for two booleans `err, base` should now be `is_vector(M, p, X, base, err)`
   * `is_vector(M, p, X, err, base)` for a symbol `err` should now be `is_vector(M, p, X, base; error=err)`
 
+### Removed
+
+- Julia 1.0 is no longer supported. From now on, the earliest supported Julia version is 1.6.
+
+## [0.14.12] 23/09/2023
+
+### Changed
+
+- Introduce a thorough way to allocate tangent vectors for `rand`
+
 ## [0.14.11] 25/08/2023
 
 ### Added
 
-- MAke the `Weingarten` map a decorator capable function.
+- Make the `Weingarten` map a decorator capable function.
 
 ## [0.14.10] 17/08/2023
 

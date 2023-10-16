@@ -23,16 +23,23 @@ Optionally:
 * [`representation_size`](@ref),
 * broadcasting for basic operations.
 """
-abstract type VectorSpaceType end
+abstract type VectorSpaceType <: FiberType end
 
+"""
+    struct TangentSpaceType <: VectorSpaceType end
+
+A type that indicates that a [`Fiber`](@ref) is a [`TangentSpace`](@ref).
+"""
 struct TangentSpaceType <: VectorSpaceType end
 
+"""
+    struct CotangentSpaceType <: VectorSpaceType end
+
+A type that indicates that a [`Fiber`](@ref) is a [`CotangentSpace`](@ref).
+"""
 struct CotangentSpaceType <: VectorSpaceType end
 
 TCoTSpaceType = Union{TangentSpaceType,CotangentSpaceType}
-
-const TangentSpace = TangentSpaceType()
-const CotangentSpace = CotangentSpaceType()
 
 """
     AbstractBasis{𝔽,VST<:VectorSpaceType}
@@ -65,14 +72,14 @@ for the vectors elements.
 struct DefaultBasis{𝔽,VST<:VectorSpaceType} <: AbstractBasis{𝔽,VST}
     vector_space::VST
 end
-function DefaultBasis(𝔽::AbstractNumbers = ℝ, vs::VectorSpaceType = TangentSpace)
+function DefaultBasis(𝔽::AbstractNumbers = ℝ, vs::VectorSpaceType = TangentSpaceType())
     return DefaultBasis{𝔽,typeof(vs)}(vs)
 end
-function DefaultBasis{𝔽}(vs::VectorSpaceType = TangentSpace) where {𝔽}
+function DefaultBasis{𝔽}(vs::VectorSpaceType = TangentSpaceType()) where {𝔽}
     return DefaultBasis{𝔽,typeof(vs)}(vs)
 end
 function DefaultBasis{𝔽,TangentSpaceType}() where {𝔽}
-    return DefaultBasis{𝔽,TangentSpaceType}(TangentSpace)
+    return DefaultBasis{𝔽,TangentSpaceType}(TangentSpaceType())
 end
 
 """
@@ -106,14 +113,17 @@ for the vectors elements.
 struct DefaultOrthogonalBasis{𝔽,VST<:VectorSpaceType} <: AbstractOrthogonalBasis{𝔽,VST}
     vector_space::VST
 end
-function DefaultOrthogonalBasis(𝔽::AbstractNumbers = ℝ, vs::VectorSpaceType = TangentSpace)
+function DefaultOrthogonalBasis(
+    𝔽::AbstractNumbers = ℝ,
+    vs::VectorSpaceType = TangentSpaceType(),
+)
     return DefaultOrthogonalBasis{𝔽,typeof(vs)}(vs)
 end
-function DefaultOrthogonalBasis{𝔽}(vs::VectorSpaceType = TangentSpace) where {𝔽}
+function DefaultOrthogonalBasis{𝔽}(vs::VectorSpaceType = TangentSpaceType()) where {𝔽}
     return DefaultOrthogonalBasis{𝔽,typeof(vs)}(vs)
 end
 function DefaultOrthogonalBasis{𝔽,TangentSpaceType}() where {𝔽}
-    return DefaultOrthogonalBasis{𝔽,TangentSpaceType}(TangentSpace)
+    return DefaultOrthogonalBasis{𝔽,TangentSpaceType}(TangentSpaceType())
 end
 
 
@@ -137,7 +147,7 @@ abstract type AbstractOrthonormalBasis{𝔽,VST<:VectorSpaceType} <:
               AbstractOrthogonalBasis{𝔽,VST} end
 
 """
-    DefaultOrthonormalBasis(𝔽::AbstractNumbers = ℝ, vs::VectorSpaceType = TangentSpace)
+    DefaultOrthonormalBasis(𝔽::AbstractNumbers = ℝ, vs::VectorSpaceType = TangentSpaceType())
 
 An arbitrary orthonormal basis of vector space of type `VST` on a manifold. This will usually
 be the fastest orthonormal basis available for a manifold.
@@ -153,14 +163,17 @@ struct DefaultOrthonormalBasis{𝔽,VST<:VectorSpaceType} <: AbstractOrthonormal
     vector_space::VST
 end
 
-function DefaultOrthonormalBasis(𝔽::AbstractNumbers = ℝ, vs::VectorSpaceType = TangentSpace)
+function DefaultOrthonormalBasis(
+    𝔽::AbstractNumbers = ℝ,
+    vs::VectorSpaceType = TangentSpaceType(),
+)
     return DefaultOrthonormalBasis{𝔽,typeof(vs)}(vs)
 end
-function DefaultOrthonormalBasis{𝔽}(vs::VectorSpaceType = TangentSpace) where {𝔽}
+function DefaultOrthonormalBasis{𝔽}(vs::VectorSpaceType = TangentSpaceType()) where {𝔽}
     return DefaultOrthonormalBasis{𝔽,typeof(vs)}(vs)
 end
 function DefaultOrthonormalBasis{𝔽,TangentSpaceType}() where {𝔽}
-    return DefaultOrthonormalBasis{𝔽,TangentSpaceType}(TangentSpace)
+    return DefaultOrthonormalBasis{𝔽,TangentSpaceType}(TangentSpaceType())
 end
 
 """
@@ -376,14 +389,14 @@ function _dual_basis(
     p,
     ::DefaultOrthonormalBasis{𝔽,TangentSpaceType},
 ) where {𝔽}
-    return DefaultOrthonormalBasis{𝔽}(CotangentSpace)
+    return DefaultOrthonormalBasis{𝔽}(CotangentSpaceType())
 end
 function _dual_basis(
     ::AbstractManifold,
     p,
     ::DefaultOrthonormalBasis{𝔽,CotangentSpaceType},
 ) where {𝔽}
-    return DefaultOrthonormalBasis{𝔽}(TangentSpace)
+    return DefaultOrthonormalBasis{𝔽}(TangentSpaceType())
 end
 
 function _euclidean_basis_vector(p::StridedArray, i)
