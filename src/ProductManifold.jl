@@ -1044,13 +1044,12 @@ function vector_transport_direction!(
     m::VTM,
 ) where {VTM<:AbstractVectorTransportMethod}
     map(
-        (iM, iY, ip, id) -> vector_transport_direction!(iM, iY, ip, id, m),
+        (iM, iY, ip, iX, id) -> vector_transport_direction!(iM, iY, ip, iX, id, m),
         M.manifolds,
         submanifold_components(M, Y),
         submanifold_components(M, p),
         submanifold_components(M, X),
         submanifold_components(M, d),
-        m,
     )
     return Y
 end
