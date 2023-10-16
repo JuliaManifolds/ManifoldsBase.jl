@@ -11,7 +11,7 @@ with types points, vectors, and covectors.
 
 # Constructor
 
-ValidationManifold(M; error::Symbol = :error)
+    ValidationManifold(M::AbstractManifold; error::Symbol = :error)
 
 Generate the Validation manifold, where `error` is used as the symbol passed to all checks.
 This `:error`s by default but could also be set to `:warn` for example
