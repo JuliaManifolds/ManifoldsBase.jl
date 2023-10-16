@@ -9,12 +9,7 @@ Throughout the documentation of `ManifoldsBase.jl` we might use the [Euclidean S
 AbstractManifold
 ```
 
-which should store information about the manifold, for example parameters inherent to the manifold. The parameters are stored in two possible ways, as a type parameter to dispatch on or as a field. For these the following internal functions exist
-
-```@docs
-ManifoldsBase.wrap_type_parameter
-ManifoldsBase.TypeParameter
-```
+which should store information about the manifold, for example parameters inherent to the manifold.
 
 ## Points on a manifold
 
