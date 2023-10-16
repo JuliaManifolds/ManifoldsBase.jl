@@ -476,6 +476,12 @@ function inverse_retract(
     q,
     m::AbstractInverseRetractionMethod = default_inverse_retraction_method(M, typeof(p)),
 )
+    return _inverse_retract(M, p, q, m)
+end
+function _inverse_retract(M::AbstractManifold, p, q, ::LogarithmicInverseRetraction)
+    return log(M, p, q)
+end
+function _inverse_retract(M::AbstractManifold, p, q, m::AbstractInverseRetractionMethod)
     X = allocate_result(M, inverse_retract, p, q)
     return inverse_retract!(M, X, p, q, m)
 end
@@ -718,8 +724,7 @@ function retract(
     X,
     m::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
 )
-    q = allocate_result(M, retract, p, X)
-    return retract!(M, q, p, X, m)
+    return _retract(M, p, X, one(number_eltype(X)), m)
 end
 function retract(
     M::AbstractManifold,
@@ -728,6 +733,13 @@ function retract(
     t::Number,
     m::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
 )
+    return _retract(M, p, X, t, m)
+end
+
+function _retract(M::AbstractManifold, p, X, t::Number, ::ExponentialRetraction)
+    return exp(M, p, X, t)
+end
+function _retract(M::AbstractManifold, p, X, t, m::AbstractRetractionMethod)
     q = allocate_result(M, retract, p, X)
     return retract!(M, q, p, X, t, m)
 end
