@@ -66,9 +66,8 @@ Order = [:type, :function]
 
 ## [Type Parameter](@id type-parameter)
 
-An [`AbstractManifold`](@ref) usually has a type parameter that determines e.g. its siye or
-more precisely the [`manifold_dimension`](@ref). The [`TypeParameter`](@ref ManifoldsBase.TypeParameter) offers the flexibility
-to have this parameter either as type parameter or a field
+Concrete [`AbstractManifold`](@ref)s usually correspond to families of manifolds that are parameterized by some numbers, for example determining their [`manifold_dimension`](@ref). Those numbers can either be stored in a field or as a type parameter of the structure. The [`TypeParameter`](@ref ManifoldsBase.TypeParameter) offers the flexibility
+to have this parameter either as type parameter or a field.
 
 ```@docs
 ManifoldsBase.TypeParameter
