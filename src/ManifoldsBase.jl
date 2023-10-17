@@ -670,7 +670,7 @@ function is_point(
     error::Symbol = :none,
     kwargs...,
 )
-    return is_point(M, p; error = throw_error ? :error : :none)
+    return is_point(M, p; error = throw_error ? :error : :none, kwargs...)
 end
 function is_point(M::AbstractManifold, p; error::Symbol = :none, kwargs...)
     mps = check_size(M, p)
@@ -748,8 +748,8 @@ function is_vector(
     kwargs...,
 )
     if check_base_point
-        s = is_point(M, p; error = error, kwargs...) # if error, is_point throws,
-        !s && return false # otherwise if not a point return false
+        # if error, is_point throws, otherwise if not a point return false
+        !is_point(M, p; error = error, kwargs...) && return false
     end
     mXs = check_size(M, p, X)
     if mXs !== nothing

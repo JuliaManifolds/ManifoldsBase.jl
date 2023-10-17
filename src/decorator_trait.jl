@@ -411,10 +411,10 @@ function is_point(
     end
     mpe = check_point(M, p; kwargs...)
     if mpe !== nothing
+        (error === :error) && throw(mpe)
         s = "$(typeof(mpe)) with $(mpe.val)\n$(mpe.msg)"
         (error === :info) && @info s
         (error === :warn) && @warn s
-        (error === :error) && throw(mpe)
         return false
     end
     return true
