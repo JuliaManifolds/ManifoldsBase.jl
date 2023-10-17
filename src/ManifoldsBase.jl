@@ -543,7 +543,7 @@ tensor is everywhere zero.
 is_flat(M::AbstractManifold)
 
 """
-    isapprox(M::AbstractManifold, p, q; error::Symbol=none, kwargs...)
+    isapprox(M::AbstractManifold, p, q; error::Symbol=:none, kwargs...)
 
 Check if points `p` and `q` from [`AbstractManifold`](@ref) `M` are approximately equal.
 
