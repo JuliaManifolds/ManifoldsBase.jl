@@ -151,9 +151,9 @@ end
 And we can directly test the function. To see all 3 failing ones, we switch from errors to warnings in the check
 
 ```{julia}
-is_point(M, [1.5, 0.0], :warn) # wrong size
-is_point(M, [1.0, 0.0, 0.0], :warn) # wrong norm
-is_point(M, [1.5, 0.0, 0.0], :warn) # on the manifold, returns true
+is_point(M, [1.5, 0.0], error=:warn) # wrong size
+is_point(M, [1.0, 0.0, 0.0], error=:warn) # wrong norm
+is_point(M, [1.5, 0.0, 0.0], error=:warn) # on the manifold, returns true
 ```
 
 similarly for vectors, we just have to implement the orthogonality check.
@@ -176,10 +176,10 @@ and again, the high level interface can be used to display warning for vectors n
 activate a check for the point using the last positional argument
 
 ```{julia}
-is_vector(M, [1.5, 0.0, 0.0], [0.0, 1.0], :warn) # wrong size
-is_vector(M, [1.5, 0.0, 0.0], [1.0, 1.0, 0.0], :warn) # not orthogonal norm
-is_vector(M, [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], :warn, true) # point not valid
-is_vector(M, [1.5, 0.0, 0.0], [0.0, 1.0, 0.0], :warn, true) # returns true
+is_vector(M, [1.5, 0.0, 0.0], [0.0, 1.0]; error=:warn) # wrong size
+is_vector(M, [1.5, 0.0, 0.0], [1.0, 1.0, 0.0]; error=:warn) # not orthogonal norm
+is_vector(M, [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], true; error=:warn) # point not valid
+is_vector(M, [1.5, 0.0, 0.0], [0.0, 1.0, 0.0], true; error=:warn) # returns true
 ```
 
 

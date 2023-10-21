@@ -5,5 +5,5 @@ Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 
 [compat]
 IJulia = "1"
-ManifoldsBase = "0.14.11, 0.15"
+ManifoldsBase = "0.15"
 Plots = "1.38"

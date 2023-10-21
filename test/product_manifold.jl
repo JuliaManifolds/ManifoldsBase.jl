@@ -47,7 +47,13 @@ include("test_sphere.jl")
     # test that arrays are not points
     @test_throws DomainError is_point(M, [1, 2], true)
     @test ManifoldsBase.check_point(M, [1, 2]) isa DomainError
-    @test_throws DomainError is_vector(M, 1, [1, 2], true; check_base_point = false)
+    @test_throws DomainError is_vector(
+        M,
+        1,
+        [1, 2];
+        error = :error,
+        check_base_point = false,
+    )
     @test ManifoldsBase.check_vector(M, 1, [1, 2]; check_base_point = false) isa DomainError
     #default fallbacks for check_size, Product not working with Arrays
     @test ManifoldsBase.check_size(M, zeros(2)) isa DomainError
@@ -247,8 +253,8 @@ include("test_sphere.jl")
             Xf = ArrayPartition(X1, p2)
             @test is_point(Mpr, p, true)
             @test_throws CompositeManifoldError is_point(Mpr, X, true)
-            @test_throws ComponentManifoldError is_vector(Mpr, pf, X, true)
-            @test_throws ComponentManifoldError is_vector(Mpr, p, Xf, true)
+            @test_throws ComponentManifoldError is_vector(Mpr, pf, X; error = :error)
+            @test_throws ComponentManifoldError is_vector(Mpr, p, Xf; error = :error)
         end
     end
 

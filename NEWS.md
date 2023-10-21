@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `ProductManifold` type was migrated from Manifolds.jl.
 - `Fiber`, `VectorSpaceFiber` and `TangentSpace` types. `TangentSpace` is a generalized version of `TangentSpaceAtPoint` from Manifolds.jl.
+- A keyword to `ValidationManifold` which `error=` mode to use.
+  This is by default the previous `:error` mode.
 - `change_representer!`, `change_metric!` and `Weingarten!` methods added to `PowerManifold`.
 - `×` now also works for retractions, inverse retractions, and vector transports to create their product versions
 - `retract`, `inverse_retract`, and `vector_transport_to` (and `_dir`) now also accept arbirtrary retractions on the product manifold. These act the same as the n-fold product of a retraction.
@@ -23,6 +25,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Requires.jl` is added as a dependency to facilitate loading some methods related to `ProductManifolds` on Julia 1.6 to 1.8. Later versions rely on package extensions.
 - `Documenter.jl` was updated to 1.0.
 - `PowerManifold` can now store its size either in a field or in a type, similarly to `DefaultManifold`. By default the size is stored in a field.
+- The signature of `is_point` was changed to be consistent with `isapprox.`.
+  The error positional symbol (third argument) is now a keyword argument.
+  We left the boolean shortcut in place.
+  That means
+  * `is_point(M, p, true)` works the same as before (`false` is the default anyways)
+  * `is_point(M, p, :warn)` has to be changed to `is_point(M, p; error=:warn)`
+- The signature of `is_vector` was changed to be consistent with `isapprox` and `is_point`.
+  The error positional symbol (fourth argument) is now a keyword argument.
+  The error positional boolean (fourth argument) hence moved to fifth place (after `check_base_point`)
+  This means
+  * `is_vector(M, p, X, true)` should now be `is_vector(M, p, X; error=:error)`
+  * `is_vector(M, p, X, err, base)` for two booleans `err, base` should now be `is_vector(M, p, X, base, err)`
+  * `is_vector(M, p, X, err, base)` for a symbol `err` should now be `is_vector(M, p, X, base; error=err)`
 
 ### Removed
 

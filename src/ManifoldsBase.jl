@@ -543,13 +543,14 @@ tensor is everywhere zero.
 is_flat(M::AbstractManifold)
 
 """
-    isapprox(M::AbstractManifold, p, q; error::Symbol=none, kwargs...)
+    isapprox(M::AbstractManifold, p, q; error::Symbol=:none, kwargs...)
 
 Check if points `p` and `q` from [`AbstractManifold`](@ref) `M` are approximately equal.
 
 The keyword argument can be used to get more information for the case that
 the result is false, if the concrete manifold provides such information.
 Currently the following are supported
+
 * `:error` - throws an error if `isapprox` evaluates to false, providing possibly a more detailed error.
   Note that this turns `isapprox` basically to an `@assert`.
 * `:info` – prints the information in an `@info`
@@ -644,48 +645,52 @@ function _isapprox(M::AbstractManifold, p, X, Y; kwargs...)
 end
 
 """
-    is_point(M::AbstractManifold, p, throw_error::Boolean = false; kwargs...)
-    is_point(M::AbstractManifold, p, report_error::Symbol; kwargs...)
+    is_point(M::AbstractManifold, p; error::Symbol = :none, kwargs...)
+    is_point(M::AbstractManifold, p, throw_error::Bool; kwargs...)
 
 Return whether `p` is a valid point on the [`AbstractManifold`](@ref) `M`.
+By default the function calls [`check_point`](@ref), which returns an `ErrorException` or `nothing`.
 
-If `throw_error` is `false`, the function returns either `true` or `false`. If `throw_error`
-is `true`, the function either returns `true` or throws an error. By default the function
-calls [`check_point`](@ref) and checks whether the returned value
-is `nothing` or an error.
+How to report a potential error can be set using the `error=` keyword
 
-A more precise way can be set using a symbol as the optional parameter, where
-' `:error` is the same as setting `throw_error=true`
-' `:info` displays the error message as an `@info`
-* `:warn` displays the error message as a `@warning`
+* `:error`          - throws an error if `p` is not a point
+* `:info`           - displays the error message as an `@info`
+* `:warn`           - displays the error message as a `@warning`
+* `:none` (default) – the function just returns `true`/`false`
 
-all other symbols are equivalent to `throw_error=false`.
+all other symbols are equivalent to `error=:none`.
+
+The second signature is a shorthand, where the boolean is used for `error=:error` (`true`)
+and `error=:none` (default, `false`). This case ignores the `error=` keyword
 """
-function is_point(M::AbstractManifold, p, throw_error = false; kwargs...)
-    mps = check_size(M, p)
-    if mps !== nothing
-        throw_error && throw(mps)
-        return false
-    end
-    mpe = check_point(M, p; kwargs...)
-    mpe === nothing && return true
-    return throw_error ? throw(mpe) : false
+function is_point(
+    M::AbstractManifold,
+    p,
+    throw_error::Bool;
+    error::Symbol = :none,
+    kwargs...,
+)
+    return is_point(M, p; error = throw_error ? :error : :none, kwargs...)
 end
-
-function is_point(M::AbstractManifold, p, error::Symbol; kwargs...)
-    (error === :error) && return is_point(M, p, true; kwargs...)
+function is_point(M::AbstractManifold, p; error::Symbol = :none, kwargs...)
     mps = check_size(M, p)
     if mps !== nothing
-        s = "$(typeof(mps)) with $(mps.val)\n$(mps.msg)"
-        (error === :info) && @info s
-        (error === :warn) && @warn s
+        (error === :error) && throw(mps)
+        if (error === :info) || (error === :warn)
+            s = "$(typeof(mps)) with $(mps.val)\n$(mps.msg)"
+            (error === :info) && @info s
+            (error === :warn) && @warn s
+        end
         return false
     end
     mpe = check_point(M, p; kwargs...)
     if mpe !== nothing
-        s = "$(typeof(mpe)) with $(mpe.val)\n$(mpe.msg)"
-        (error === :info) && @info s
-        (error === :warn) && @warn s
+        (error === :error) && throw(mpe)
+        if (error === :info) || (error === :warn)
+            s = "$(typeof(mpe)) with $(mpe.val)\n$(mpe.msg)"
+            (error === :info) && @info s
+            (error === :warn) && @warn s
+        end
         return false
     end
     return true
@@ -693,75 +698,77 @@ end
 
 
 """
-    is_vector(M::AbstractManifold, p, X, throw_error = false, check_base_point=true; kwargs...)
-    is_vector(M::AbstractManifold, p, X, error::Symbol, check_base_point::Bool=true; kwargs...)
+    is_vector(M::AbstractManifold, p, X, check_base_point::Bool=true; error::Symbol=:none, kwargs...)
+    is_vector(M::AbstractManifold, p, X, check_base_point::Bool=true, throw_error::Boolean; kwargs...)
 
 Return whether `X` is a valid tangent vector at point `p` on the [`AbstractManifold`](@ref) `M`.
 Returns either `true` or `false`.
 
-If `throw_error` is `false`, the function returns either `true` or `false`. If `throw_error`
-is `true`, the function either returns `true` or throws an error. By default the function
-calls [`check_vector`](@ref) and checks whether the returned
+If `check_base_point` is set to true, this function also (first) calls [`is_point`](@ref)
+on `p`.
+Then, the function calls [`check_vector`](@ref) and checks whether the returned
 value is `nothing` or an error.
 
-If `check_base_point` is true, then the point `p` will be first checked using the
-[`check_point`](@ref) function.
+How to report a potential error can be set using the `error=` keyword
 
-A more precise way can be set using a symbol as the optional parameter, where
-' `:error` is the same as setting `throw_error=true`
-' `:info` displays the error message as an `@info`
-* `:warn` displays the error message as a `@warn`ing.
+* `:error`          - throws an error if `X` is not a tangent vector and/or `p` is not point
+^ `:info`           - displays the error message as an `@info`
+* `:warn`           - displays the error message as a `@warn`ing.
+* `:none`           - (default) the function just returns `true`/`false`
 
-all other symbols are equivalent to `throw_error=false`.
+all other symbols are equivalent to `error=:none`
+
+The second signature is a shorthand, where `throw_error` is used for `error=:error` (`true`)
+and `error=:none` (default, `false`). This case ignores the `error=` keyword.
 """
 function is_vector(
     M::AbstractManifold,
     p,
     X,
-    throw_error = false,
-    check_base_point = true;
+    check_base_point::Bool,
+    throw_error::Bool;
+    error::Symbol = :none,
     kwargs...,
 )
-    if check_base_point
-        s = is_point(M, p, throw_error; kwargs...) # if throw_error, is_point throws,
-        !s && return false # otherwise if not a point return false
-    end
-    mXs = check_size(M, p, X)
-    if mXs !== nothing
-        throw_error && throw(mXs)
-        return false
-    end
-    mXe = check_vector(M, p, X; kwargs...)
-    mXe === nothing && return true
-    throw_error && throw(mXe)
-    return false
+    return is_vector(
+        M,
+        p,
+        X,
+        check_base_point;
+        error = throw_error ? :error : :none,
+        kwargs...,
+    )
 end
-
 function is_vector(
     M::AbstractManifold,
     p,
     X,
-    error::Symbol,
-    check_base_point = true;
+    check_base_point::Bool = true;
+    error::Symbol = :none,
     kwargs...,
 )
-    (error === :error) && return is_vector(M, p, X, true, check_base_point; kwargs...)
     if check_base_point
-        s = is_point(M, p, error; kwargs...) # if error, is_point throws,
-        !s && return false # otherwise if not a point return false
+        # if error, is_point throws, otherwise if not a point return false
+        !is_point(M, p; error = error, kwargs...) && return false
     end
     mXs = check_size(M, p, X)
     if mXs !== nothing
-        s = "$(typeof(mXs)) with $(mXs.val)\n$(mXs.msg)"
-        (error === :info) && @info s
-        (error === :warn) && @warn s
+        (error === :error) && throw(mXs)
+        if (error === :info) || (error === :warn)
+            s = "$(typeof(mXs)) with $(mXs.val)\n$(mXs.msg)"
+            (error === :info) && @info s
+            (error === :warn) && @warn s
+        end
         return false
     end
     mXe = check_vector(M, p, X; kwargs...)
     if mXe !== nothing
-        s = "$(typeof(mXe)) with $(mXe.val)\n$(mXe.msg)"
-        (error === :info) && @info s
-        (error === :warn) && @warn s
+        (error === :error) && throw(mXe)
+        if (error === :info) || (error === :warn)
+            s = "$(typeof(mXe)) with $(mXe.val)\n$(mXe.msg)"
+            (error === :info) && @info s
+            (error === :warn) && @warn s
+        end
         return false
     end
     return true
