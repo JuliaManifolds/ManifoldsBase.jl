@@ -5,7 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.15.0] dd/mm/2023
+## [0.15.1] 30/10/2023
+
+### Added
+
+- `zero_vector(TpM)` to generate a zero vector in the tangent space
+- a GitHub CI action that errors, when this file was not updated on a PR
+
+### Fixed
+
+- `is_point` and `is_vector` for the tangent space now correctly forward to
+  vector checks on the corresponding manifold. The same for both `check_size`s
+
+## [0.15.0] 21/10/2023
 
 ### Added
 

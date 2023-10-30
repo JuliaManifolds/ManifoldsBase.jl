@@ -1,5 +1,5 @@
 using ManifoldsBase: ℝ, ℂ, DefaultManifold, RealNumbers, EuclideanMetric
-using LinearAlgebra
+using LinearAlgebra, Random
 
 # minimal sphere implementation for testing more complicated manifolds
 struct TestSphere{N,𝔽} <: AbstractManifold{𝔽} end

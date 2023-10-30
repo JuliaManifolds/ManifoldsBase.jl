@@ -40,6 +40,22 @@ function allocate_result(M::TangentSpace, ::typeof(rand))
     return zero_vector(M.manifold, M.point)
 end
 
+# forward both point checks to tangent vector checks
+function check_point(TpM::TangentSpace, p; kwargs...)
+    return check_vector(TpM.manifold, TpM.point, p; kwargs...)
+end
+function check_size(TpM::TangentSpace, p; kwargs...)
+    return check_size(TpM.manifold, TpM.point, p; kwargs...)
+end
+# fix tangent vector checks to use the right base point
+function check_vector(TpM::TangentSpace, p, X; kwargs...)
+    return check_vector(TpM.manifold, TpM.point, X; kwargs...)
+end
+function check_size(TpM::TangentSpace, p, X; kwargs...)
+    return check_size(TpM.manifold, TpM.point, X; kwargs...)
+end
+
+
 """
     distance(M::TangentSpace, X, Y)
 
@@ -242,10 +258,19 @@ Weingarten(::TangentSpace, ::Any, ::Any, ::Any)
 Weingarten!(::TangentSpace, W, X, V, A) = fill!(W, 0)
 
 @doc raw"""
+    zero_vector(TpM::TangentSpace)
+
+Zero tangent vector in the [`TangentSpace`](@ref) `TpM`,
+that is the zero tangent vector at point `TpM.point`.
+"""
+zero_vector(TpM::TangentSpace) = zero_vector(TpM.manifold, TpM.point)
+
+@doc raw"""
     zero_vector(TpM::TangentSpace, X)
 
 Zero tangent vector at point `X` from the [`TangentSpace`](@ref) `TpM`,
-that is the zero tangent vector at point `TpM.point`.
+that is the zero tangent vector at point `TpM.point`,
+since we identify the tangent space ``T_X(T_p\mathcal M)`` with ``T_p\mathcal M``.
 """
 zero_vector(::TangentSpace, ::Any...)
 

@@ -45,4 +45,15 @@ include("test_manifolds.jl")
         V = [0.1, 0.0, 0.0] #orthogonal to TpM -> parallel to p
         @test isapprox(M, p, Weingarten(M, p, X, V), -0.1 * X)
     end
+    @testset "Tangent Space" begin
+        M = TestSphere(2)
+        p = [1.0, 0.0, 0.0]
+        X = [0.0, 0.2, 0.0]
+        TpM = TangentSpace(M, p)
+        @test is_point(TpM, X)
+        @test !is_point(TpM, p)
+        @test is_vector(TpM, X, X)
+        @test !is_vector(TpM, X, p)
+        @test zero_vector(TpM) == zero_vector(M, p)
+    end
 end
