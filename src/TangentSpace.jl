@@ -40,6 +40,22 @@ function allocate_result(M::TangentSpace, ::typeof(rand))
     return zero_vector(M.manifold, M.point)
 end
 
+# forward both point checks to tangent vector checks
+function check_point(TpM::TangentSpace, p; kwargs...)
+    return check_vector(TpM.manifold, TpM.point, p; kwargs...)
+end
+function check_size(TpM::TangentSpace, p; kwargs...)
+    return check_size(TpM.manifold, TpM.point, p; kwargs...)
+end
+# fix tangent vector checks to use the right base point
+function check_vector(TpM::TangentSpace, p, X; kwargs...)
+    return check_vector(TpM.manifold, TpM.point, X; kwargs...)
+end
+function check_size(TpM::TangentSpace, p, X; kwargs...)
+    return check_size(TpM.manifold, TpM.point, X; kwargs...)
+end
+
+
 """
     distance(M::TangentSpace, X, Y)
 
