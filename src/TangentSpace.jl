@@ -258,10 +258,19 @@ Weingarten(::TangentSpace, ::Any, ::Any, ::Any)
 Weingarten!(::TangentSpace, W, X, V, A) = fill!(W, 0)
 
 @doc raw"""
+    zero_vector(TpM::TangentSpace)
+
+Zero tangent vector in the [`TangentSpace`](@ref) `TpM`,
+that is the zero tangent vector at point `TpM.point`.
+"""
+zero_vector(TpM::TangentSpace) = zero_vector(TpM.manifold, TpM.point)
+
+@doc raw"""
     zero_vector(TpM::TangentSpace, X)
 
 Zero tangent vector at point `X` from the [`TangentSpace`](@ref) `TpM`,
-that is the zero tangent vector at point `TpM.point`.
+that is the zero tangent vector at point `TpM.point`,
+since we identify the tangent space ``T_X(T_p\mathcal M)`` with ``T_p\mathcal M``.
 """
 zero_vector(::TangentSpace, ::Any...)
 

@@ -54,5 +54,6 @@ include("test_manifolds.jl")
         @test !is_point(TpM, p)
         @test is_vector(TpM, X, X)
         @test !is_vector(TpM, X, p)
+        @test zero_vector(TpM) == zero_vector(M, p)
     end
 end
