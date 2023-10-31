@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `is_point` and `is_vector` for the tangent space now correctly forward to
   vector checks on the corresponding manifold. The same for both `check_size`s
+- add `[compat]` entries for the standard libraries.
 
 ## [0.15.0] 21/10/2023
 
