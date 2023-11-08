@@ -215,7 +215,7 @@ GramSchmidtOrthonormalBasis(𝔽::AbstractNumbers = ℝ) = GramSchmidtOrthonorma
 
 An orthonormal basis `Ξ` as a vector of tangent vectors (of length determined by
 [`manifold_dimension`](@ref)) in the tangent space that diagonalizes the curvature
-tensor $R(u,v)w$ and where the direction `frame_direction` $v$ has curvature `0`.
+tensor ``R(u,v)w`` and where the direction `frame_direction` ``v`` has curvature `0`.
 
 The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used
 for the vectors elements.
@@ -373,8 +373,8 @@ end
 
 Get the dual basis to `B`, a basis of a vector space at point `p` from manifold `M`.
 
-The dual to the $i$th vector $v_i$ from basis `B` is a vector $v^i$ from the dual space
-such that $v^i(v_j) = δ^i_j$, where $δ^i_j$ is the Kronecker delta symbol:
+The dual to the ``i``th vector ``v_i`` from basis `B` is a vector ``v^i`` from the dual space
+such that ``v^i(v_j) = δ^i_j``, where ``δ^i_j`` is the Kronecker delta symbol:
 ````math
 δ^i_j = \begin{cases}
 1 & \text{ if } i=j, \\
@@ -920,9 +920,9 @@ end
 @doc raw"""
     hat(M::AbstractManifold, p, Xⁱ)
 
-Given a basis $e_i$ on the tangent space at a point `p` and tangent
-component vector $X^i$, compute the equivalent vector representation
-$X=X^i e_i$, where Einstein summation notation is used:
+Given a basis ``e_i`` on the tangent space at a point `p` and tangent
+component vector ``X^i ∈ ℝ``, compute the equivalent vector representation
+``X=X^i e_i``, where Einstein summation notation is used:
 
 ````math
 ∧ : X^i ↦ X^i e_i
@@ -932,8 +932,10 @@ For array manifolds, this converts a vector representation of the tangent
 vector to an array representation. The [`vee`](@ref) map is the `hat` map's
 inverse.
 """
-@inline hat(M::AbstractManifold, p, X) = get_vector(M, p, X, VeeOrthogonalBasis())
-@inline hat!(M::AbstractManifold, Y, p, X) = get_vector!(M, Y, p, X, VeeOrthogonalBasis())
+@inline hat(M::AbstractManifold, p, X) =
+    get_vector(M, p, X, VeeOrthogonalBasis(number_system(M)))
+@inline hat!(M::AbstractManifold, Y, p, X) =
+    get_vector!(M, Y, p, X, VeeOrthogonalBasis(number_system(M)))
 
 """
     number_of_coordinates(M::AbstractManifold{𝔽}, B::AbstractBasis)
@@ -1063,8 +1065,8 @@ end
 @doc raw"""
     vee(M::AbstractManifold, p, X)
 
-Given a basis $e_i$ on the tangent space at a point `p` and tangent
-vector `X`, compute the vector components $X^i$, such that $X = X^i e_i$, where
+Given a basis ``e_i`` on the tangent space at a point `p` and tangent
+vector `X`, compute the vector components ``X^i ∈ ℝ``, such that ``X = X^i e_i``, where
 Einstein summation notation is used:
 
 ````math
@@ -1075,5 +1077,8 @@ For array manifolds, this converts an array representation of the tangent
 vector to a vector representation. The [`hat`](@ref) map is the `vee` map's
 inverse.
 """
-vee(M::AbstractManifold, p, X) = get_coordinates(M, p, X, VeeOrthogonalBasis())
-vee!(M::AbstractManifold, Y, p, X) = get_coordinates!(M, Y, p, X, VeeOrthogonalBasis())
+vee(M::AbstractManifold, p, X) =
+    get_coordinates(M, p, X, VeeOrthogonalBasis(number_system(M)))
+function vee!(M::AbstractManifold, Y, p, X)
+    return get_coordinates!(M, Y, p, X, VeeOrthogonalBasis(number_system(M)))
+end

@@ -880,4 +880,11 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
         @test repr(MS) == "DefaultManifold(3; field = ℝ, parameter = :type)"
         @test_throws ArgumentError ManifoldsBase.DefaultManifold(3; parameter = :foo)
     end
+
+    @testset "complex vee and hat" begin
+        MC = ManifoldsBase.DefaultManifold(3; field = ManifoldsBase.ℂ)
+        p = [1im, 2 + 2im, 3.0]
+        @test isapprox(vee(MC, p, [1 + 2im, 3 + 4im, 5 + 6im]), [1, 3, 5, 2, 4, 6])
+        @test isapprox(hat(MC, p, [1, 3, 5, 2, 4, 6]), [1 + 2im, 3 + 4im, 5 + 6im])
+    end
 end
