@@ -1152,7 +1152,7 @@ function Random.rand!(M::AbstractPowerManifold, pX; vector_at = nothing, kwargs.
                 M.manifold,
                 _write(M, rep_size, pX, i);
                 vector_at = _read(M, rep_size, vector_at, i),
-                kwargs...
+                kwargs...,
             )
         end
     end
@@ -1177,7 +1177,7 @@ function Random.rand!(
                 M.manifold,
                 _write(M, rep_size, pX, i);
                 vector_at = _read(M, rep_size, vector_at, i),
-                kwargs...
+                kwargs...,
             )
         end
     end
