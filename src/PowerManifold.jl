@@ -1144,7 +1144,7 @@ function Random.rand!(M::AbstractPowerManifold, pX; vector_at = nothing, kwargs.
     rep_size = representation_size(M.manifold)
     if vector_at === nothing
         for i in get_iterator(M)
-            rand!(M.manifold, _write(M, rep_size, pX, i))
+            rand!(M.manifold, _write(M, rep_size, pX, i); kwargs...)
         end
     else
         for i in get_iterator(M)
@@ -1152,6 +1152,7 @@ function Random.rand!(M::AbstractPowerManifold, pX; vector_at = nothing, kwargs.
                 M.manifold,
                 _write(M, rep_size, pX, i);
                 vector_at = _read(M, rep_size, vector_at, i),
+                kwargs...,
             )
         end
     end
@@ -1167,7 +1168,7 @@ function Random.rand!(
     rep_size = representation_size(M.manifold)
     if vector_at === nothing
         for i in get_iterator(M)
-            rand!(rng, M.manifold, _write(M, rep_size, pX, i))
+            rand!(rng, M.manifold, _write(M, rep_size, pX, i); kwargs...)
         end
     else
         for i in get_iterator(M)
@@ -1176,6 +1177,7 @@ function Random.rand!(
                 M.manifold,
                 _write(M, rep_size, pX, i);
                 vector_at = _read(M, rep_size, vector_at, i),
+                kwargs...,
             )
         end
     end
