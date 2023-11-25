@@ -1257,16 +1257,6 @@ function retract(
     q = allocate_result(M, retract, p, X)
     return retract!(M, q, p, X, m)
 end
-function retract(
-    M::AbstractPowerManifold,
-    p,
-    X,
-    t::Number,
-    m::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
-)
-    q = allocate_result(M, retract, p, X)
-    return retract!(M, q, p, X, t, m)
-end
 
 function retract!(
     M::AbstractPowerManifold,
@@ -1300,7 +1290,6 @@ function retract!(
     end
     return q
 end
-
 function retract!(
     M::AbstractPowerManifold,
     q,
