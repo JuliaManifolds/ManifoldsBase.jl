@@ -1257,6 +1257,16 @@ function retract(
     q = allocate_result(M, retract, p, X)
     return retract!(M, q, p, X, m)
 end
+function retract(
+    M::AbstractPowerManifold,
+    p,
+    X,
+    t::Number,
+    m::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
+)
+    q = allocate_result(M, retract, p, X)
+    return retract!(M, q, p, X, t, m)
+end
 
 function retract!(
     M::AbstractPowerManifold,
@@ -1287,6 +1297,28 @@ function retract!(
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         q[i...] = retract(M.manifold, _read(M, rep_size, p, i), _read(M, rep_size, X, i), m)
+    end
+    return q
+end
+
+function retract!(
+    M::AbstractPowerManifold,
+    q,
+    p,
+    X,
+    t::Number,
+    m::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
+)
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        retract!(
+            M.manifold,
+            _write(M, rep_size, q, i),
+            _read(M, rep_size, p, i),
+            _read(M, rep_size, X, i),
+            t,
+            m,
+        )
     end
     return q
 end
