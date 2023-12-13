@@ -2,6 +2,26 @@
 #
 #
 
+if "--help" ∈ ARGS
+    println(
+        """
+docs/make.jl
+
+Render the `Manopt.jl` documenation with optinal arguments
+
+Arguments
+* `--help`              - print this help and exit without rendering the documentation
+* `--prettyurls`        – toggle the prettyurls part to true (which is otherwise only true on CI)
+* `--quarto`            – run the Quarto notebooks from the `tutorials/` folder before generating the documentation
+  this has to be run locally at least once for the `tutorials/*.md` files to exist that are included in
+  the documentation (see `--exclude-tutorials`) for the alternative.
+  If they are generated ones they are cached accordingly.
+  Then you can spare time in the rendering by not passing this argument.
+""",
+    )
+    exit(0)
+end
+
 #
 # (a) if docs is not the current active environment, switch to it
 # (from https://github.com/JuliaIO/HDF5.jl/pull/1020/) 
@@ -38,10 +58,11 @@ using ManifoldsBase
 bib = CitationBibliography(joinpath(@__DIR__, "src", "references.bib"); style = :alpha)
 makedocs(;
     # for development, we disable prettyurls
-    format = HTML(;
-        mathengine = MathJax3(),
-        prettyurls = get(ENV, "CI", nothing) == "true",
-        assets = ["assets/favicon.ico"],
+    format = Documenter.HTML(;
+        prettyurls = (get(ENV, "CI", nothing) == "true") || ("--prettyurls" ∈ ARGS),
+        assets = ["assets/favicon.ico", "assets/citations.css"],
+        size_threshold_warn = 200 * 2^10, # raise slightly from 100 to 200 KiB
+        size_threshold = 300 * 2^10,      # raise slightly 200 to to 300 KiB
     ),
     modules = [ManifoldsBase],
     authors = "Seth Axen, Mateusz Baran, Ronny Bergmann, and contributors.",

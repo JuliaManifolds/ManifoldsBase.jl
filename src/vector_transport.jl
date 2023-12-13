@@ -1,6 +1,6 @@
 
 """
-    AbstractVectorTransportMethod
+    AbstractVectorTransportMethod <: AbstractEstimationMethod
 
 Abstract type for methods for transporting vectors. Such vector transports are not
 necessarily linear.
@@ -9,7 +9,7 @@ necessarily linear.
 
 [`AbstractLinearVectorTransportMethod`](@ref)
 """
-abstract type AbstractVectorTransportMethod end
+abstract type AbstractVectorTransportMethod <: AbstractEstimationMethod end
 
 """
     AbstractLinearVectorTransportMethod <: AbstractVectorTransportMethod
@@ -309,6 +309,7 @@ end
 function default_vector_transport_method(M::AbstractManifold, ::Type{T}) where {T}
     return default_vector_transport_method(M)
 end
+
 
 @doc raw"""
     pole_ladder(
@@ -1356,4 +1357,60 @@ function _vector_transport_to!(
         ),
         m.inverse_retraction,
     )
+end
+
+# default estimation fallbacks with and without the T
+function default_estimation_method(
+    M::AbstractManifold,
+    ::typeof(vector_transport_direction),
+)
+    return default_vector_transport_method(M)
+end
+function default_estimation_method(
+    M::AbstractManifold,
+    ::typeof(vector_transport_direction!),
+)
+    return default_vector_transport_method(M)
+end
+function default_estimation_method(M::AbstractManifold, ::typeof(vector_transport_along))
+    return default_vector_transport_method(M)
+end
+function default_estimation_method(M::AbstractManifold, ::typeof(vector_transport_to))
+    return default_vector_transport_method(M)
+end
+function default_estimation_method(M::AbstractManifold, ::typeof(vector_transport_along!))
+    return default_vector_transport_method(M)
+end
+function default_estimation_method(M::AbstractManifold, ::typeof(vector_transport_to!))
+    return default_vector_transport_method(M)
+end
+function default_estimation_method(
+    M::AbstractManifold,
+    ::typeof(vector_transport_direction),
+    T,
+)
+    return default_vector_transport_method(M, T)
+end
+function default_estimation_method(
+    M::AbstractManifold,
+    ::typeof(vector_transport_direction!),
+    T,
+)
+    return default_vector_transport_method(M, T)
+end
+function default_estimation_method(M::AbstractManifold, ::typeof(vector_transport_along), T)
+    return default_vector_transport_method(M, T)
+end
+function default_estimation_method(M::AbstractManifold, ::typeof(vector_transport_to), T)
+    return default_vector_transport_method(M, T)
+end
+function default_estimation_method(
+    M::AbstractManifold,
+    ::typeof(vector_transport_along!),
+    T,
+)
+    return default_vector_transport_method(M, T)
+end
+function default_estimation_method(M::AbstractManifold, ::typeof(vector_transport_to!), T)
+    return default_vector_transport_method(M, T)
 end
