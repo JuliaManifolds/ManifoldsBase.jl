@@ -55,7 +55,6 @@ Method for estimation based on geodesic interpolation that is restricted to some
 """
 struct GeodesicInterpolationWithinRadius{T} <: AbstractEstimationMethod
     radius::T
-
     function GeodesicInterpolationWithinRadius(radius::T) where {T}
         radius > 0 && return new{T}(radius)
         return throw(
@@ -81,5 +80,5 @@ The exceptional functions are
 """
 default_estimation_method(M::AbstractManifold)
 
-default_estimation_method(M::AbstractManifold, f, T) = get_default_estimation_method(M, f)
-default_estimation_method(M::AbstractManifold, f) = get_default_estimation_method(M)
+default_estimation_method(M::AbstractManifold, f, T) = default_estimation_method(M, f)
+default_estimation_method(M::AbstractManifold, f) = default_estimation_method(M)

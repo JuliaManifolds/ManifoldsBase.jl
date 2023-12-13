@@ -212,6 +212,8 @@ Base.getindex(x::MatrixVectorTransport, i) = x.m[:, i]
 
 Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
 
+ManifoldsBase.default_estimation_method(::DefaultManifold) = GradientDescentEstimation()
+
 @testset "Testing Default (Euclidean)" begin
     M = ManifoldsBase.DefaultManifold(3)
     types = [
@@ -886,5 +888,57 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
         p = [1im, 2 + 2im, 3.0]
         @test isapprox(vee(MC, p, [1 + 2im, 3 + 4im, 5 + 6im]), [1, 3, 5, 2, 4, 6])
         @test isapprox(hat(MC, p, [1, 3, 5, 2, 4, 6]), [1 + 2im, 3 + 4im, 5 + 6im])
+    end
+
+    @testset "Estimation Method defaults" begin
+        M = ManifoldsBase.DefaultManifold(3)
+        @test default_estimation_method(M) == GradientDescentEstimation()
+        # fallbacks
+        @test default_estimation_method(M, manifold_dimension) ==
+              default_estimation_method(M)
+        @test default_estimation_method(M, manifold_dimension, DefaultPoint) ==
+              default_estimation_method(M)
+        # Retraction
+        @test default_estimation_method(M, retract) == default_retraction_method(M)
+        @test default_estimation_method(M, retract, DefaultPoint) ==
+              default_retraction_method(M)
+        @test default_estimation_method(M, retract!) == default_retraction_method(M)
+        @test default_estimation_method(M, retract!, DefaultPoint) ==
+              default_retraction_method(M)
+        # Inverse Retraction
+        @test default_estimation_method(M, inverse_retract) ==
+              default_inverse_retraction_method(M)
+        @test default_estimation_method(M, inverse_retract, DefaultPoint) ==
+              default_inverse_retraction_method(M)
+        @test default_estimation_method(M, inverse_retract!) ==
+              default_inverse_retraction_method(M)
+        @test default_estimation_method(M, inverse_retract!, DefaultPoint) ==
+              default_inverse_retraction_method(M)
+        # Vector Transsports – all 3: to
+        @test default_estimation_method(M, vector_transport_to) ==
+              default_vector_transport_method(M)
+        @test default_estimation_method(M, vector_transport_to, DefaultPoint) ==
+              default_vector_transport_method(M)
+        @test default_estimation_method(M, vector_transport_to!) ==
+              default_vector_transport_method(M)
+        @test default_estimation_method(M, vector_transport_to!, DefaultPoint) ==
+              default_vector_transport_method(M)
+        # along
+        @test default_estimation_method(M, vector_transport_along) ==
+              default_vector_transport_method(M)
+        @test default_estimation_method(M, vector_transport_along, DefaultPoint) ==
+              default_vector_transport_method(M)
+        @test default_estimation_method(M, vector_transport_along!) ==
+              default_vector_transport_method(M)
+        @test default_estimation_method(M, vector_transport_along!, DefaultPoint) ==
+              default_vector_transport_method(M)
+        @test default_estimation_method(M, vector_transport_direction) ==
+              default_vector_transport_method(M)
+        @test default_estimation_method(M, vector_transport_direction, DefaultPoint) ==
+              default_vector_transport_method(M)
+        @test default_estimation_method(M, vector_transport_direction!) ==
+              default_vector_transport_method(M)
+        @test default_estimation_method(M, vector_transport_direction!, DefaultPoint) ==
+              default_vector_transport_method(M)
     end
 end
