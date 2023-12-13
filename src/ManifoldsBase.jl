@@ -1052,6 +1052,7 @@ export AbstractInverseRetractionMethod,
 # (d) Vector Transport Types
 export AbstractVectorTransportMethod,
     DifferentiatedRetractionVectorTransport,
+    EmbeddedVectorTransport,
     ParallelTransport,
     PoleLadderTransport,
     ProductVectorTransport,
