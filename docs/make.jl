@@ -50,7 +50,7 @@ if "--quarto" ∈ ARGS
     end
 end
 
-using Documenter: DocMeta, HTML, MathJax3, deploydocs, makedocs
+using Documenter
 using DocumenterCitations
 using ManifoldsBase
 
