@@ -1043,11 +1043,11 @@ The default implementataion requires one allocation for the points and tangent v
 embedding and the resulting point, but the final projection is performed in place of `Y`
 """
 function vector_transport_direction_embedded!(M, Y, p, X, d, m)
-    q = exp(M, p, d)
     p_e = embed(M, p)
     d_e = embed(M, d)
     X_e = embed(M, p, X)
     Y_e = vector_transport_direction(get_embedding(M), p_e, X_e, d_e, m)
+    q = exp(M, p, d)
     return project!(M, Y, q, Y_e)
 end
 
