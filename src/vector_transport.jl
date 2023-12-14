@@ -663,13 +663,13 @@ function _vector_transport_along!(
 end
 
 @doc raw"""
-    vector_transport_along_embedded!(M, Y, p, X, c, m::AbstractVectorTransportMethod; kwargs...)
+    vector_transport_along_embedded!(M::AbstractManifold, Y, p, X, c, m::AbstractVectorTransportMethod; kwargs...)
 
 Compute the vector transport of `X` from ``T_p\mathcal M`` along the curve `c`
 using the vector transport method `m` in the embedding and projecting the result back on
 the corresponding tangent space. The result is computed in place of `Y`.
 """
-vector_transport_along_embedded!(M, Y, p, X, c, ::AbstractVectorTransportMethod)
+vector_transport_along_embedded!(M::AbstractManifold, Y, p, X, c, ::AbstractVectorTransportMethod)
 
 function vector_transport_along_embedded! end
 
@@ -1034,7 +1034,7 @@ function _vector_transport_direction!(
 end
 
 @doc raw"""
-    vector_transport_direction_embedded!(M::AbstractManifold, Y, p, X, d, m::AbstractRetractionMethod)
+    vector_transport_direction_embedded!(M::AbstractManifold, Y, p, X, d, m::AbstractVectorTransportMethod)
 
 Compute the vector transport of `X` from ``T_p\mathcal M`` into the direction `d`
 using the [`AbstractRetractionMethod`](@ref) `m` in the embedding.
@@ -1042,7 +1042,7 @@ using the [`AbstractRetractionMethod`](@ref) `m` in the embedding.
 The default implementataion requires one allocation for the points and tangent vectors in the
 embedding and the resulting point, but the final projection is performed in place of `Y`
 """
-function vector_transport_direction_embedded!(M, Y, p, X, d, m)
+function vector_transport_direction_embedded!(M::AbstractManifold, Y, p, X, d, m::AbstractVectorTransportMethod)
     p_e = embed(M, p)
     d_e = embed(M, d)
     X_e = embed(M, p, X)
