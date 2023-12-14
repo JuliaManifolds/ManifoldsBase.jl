@@ -22,7 +22,7 @@ struct CyclicProximalPointEstimation <: AbstractApproximationMethod end
 @doc raw"""
     EfficientEstimator <: AbstractApproximationMethod
 
-Method for estimation in the best possible sense, see [📖 Efficiency (Statictsics)](https://en.wikipedia.org/wiki/Efficiency_(statistics)) for mroe details.
+Method for estimation in the best possible sense, see [📖 Efficiency (Statictsics)](https://en.wikipedia.org/wiki/Efficiency_(statistics)) for more details.
 This can for example be used when computing the usual mean on an Euclidean space, which is the best estimator.
 """
 struct EfficientEstimator <: AbstractApproximationMethod end
@@ -34,7 +34,7 @@ struct EfficientEstimator <: AbstractApproximationMethod end
 Method for estimation in the ambient space with a method of type `T` and projecting the result back
 to the manifold.
 """
-struct ExtrinsicEstimation{T} <: AbstractApproximationMethod
+struct ExtrinsicEstimation{T<:AbstractApproximationMethod} <: AbstractApproximationMethod
     extrinsic_estimation::T
 end
 
@@ -60,11 +60,11 @@ Method for estimation based on geodesic interpolation that is restricted to some
 
 # Constructor
 
-    GeodesicInterpolationWithinRadius(radius)
+    GeodesicInterpolationWithinRadius(radius::Real)
 """
-struct GeodesicInterpolationWithinRadius{T} <: AbstractApproximationMethod
+struct GeodesicInterpolationWithinRadius{T<:Real} <: AbstractApproximationMethod
     radius::T
-    function GeodesicInterpolationWithinRadius(radius::T) where {T}
+    function GeodesicInterpolationWithinRadius(radius::T) where {T<:Real}
         radius > 0 && return new{T}(radius)
         return throw(
             DomainError("The radius must be strictly postive, received $(radius)."),
@@ -81,7 +81,7 @@ for a specific function `f` and a type `T` to distinguish different (point or ve
 representations on M.
 
 By default, all functions `f` call the signature for just a manifold.
-The exceptional functions are
+The exceptional functions are:
 
 * `retract` and `retract!` which fall back to [`default_retraction_method`](@ref)
 * `inverse_retract` and `inverse_retract!` which fall back to [`default_inverse_retraction_method`](@ref)
