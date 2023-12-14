@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-* EmbeddedVectorTransport to use a vector transport in the embedding and a final projection.
+* `EmbeddedVectorTransport` to use a vector transport in the embedding and a final projection.
 
 ## [0.15.5] 13/12/2023
 
