@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-* An `AbstractEstimationMethod` to specify estimation methods for other more general functions,
+* An `AbstractApproximationMethod` to specify estimation methods for other more general functions,
 as well as a `default_estimation_method` to specify defaults on manifolds.
 
 ## [0.15.5] 13/12/2023

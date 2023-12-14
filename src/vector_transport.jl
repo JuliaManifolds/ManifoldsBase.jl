@@ -1,6 +1,6 @@
 
 """
-    AbstractVectorTransportMethod <: AbstractEstimationMethod
+    AbstractVectorTransportMethod <: AbstractApproximationMethod
 
 Abstract type for methods for transporting vectors. Such vector transports are not
 necessarily linear.
@@ -9,7 +9,7 @@ necessarily linear.
 
 [`AbstractLinearVectorTransportMethod`](@ref)
 """
-abstract type AbstractVectorTransportMethod <: AbstractEstimationMethod end
+abstract type AbstractVectorTransportMethod <: AbstractApproximationMethod end
 
 """
     AbstractLinearVectorTransportMethod <: AbstractVectorTransportMethod

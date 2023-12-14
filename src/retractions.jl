@@ -1,16 +1,16 @@
 """
-    AbstractInverseRetractionMethod <: AbstractEstimationMethod
+    AbstractInverseRetractionMethod <: AbstractApproximationMethod
 
 Abstract type for methods for inverting a retraction (see [`inverse_retract`](@ref)).
 """
-abstract type AbstractInverseRetractionMethod <: AbstractEstimationMethod end
+abstract type AbstractInverseRetractionMethod <: AbstractApproximationMethod end
 
 """
-    AbstractRetractionMethod <: AbstractEstimationMethod
+    AbstractRetractionMethod <: AbstractApproximationMethod
 
 Abstract type for methods for [`retract`](@ref)ing a tangent vector to a manifold.
 """
-abstract type AbstractRetractionMethod <: AbstractEstimationMethod end
+abstract type AbstractRetractionMethod <: AbstractApproximationMethod end
 
 """
     ApproximateInverseRetraction <: AbstractInverseRetractionMethod

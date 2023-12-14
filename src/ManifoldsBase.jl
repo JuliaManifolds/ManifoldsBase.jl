@@ -29,7 +29,7 @@ include("maintypes.jl")
 include("numbers.jl")
 include("Fiber.jl")
 include("bases.jl")
-include("estimation_methods.jl")
+include("approximation_methods.jl")
 include("retractions.jl")
 include("exp_log_geo.jl")
 include("projections.jl")
@@ -1024,7 +1024,7 @@ export GeodesicInterpolationWithinRadius,
     ExtrinsicEstimation,
     GradientDescentEstimation,
     WeiszfeldEstimation,
-    AbstractEstimationMethod,
+    AbstractApproximationMethod,
     GeodesicInterpolation
 
 

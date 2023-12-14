@@ -1,51 +1,51 @@
 @doc raw"""
-    AbstractEstimationMethod
+    AbstractApproximationMethod
 
 Abstract type for defining estimation methods on manifolds.
 """
-abstract type AbstractEstimationMethod end
+abstract type AbstractApproximationMethod end
 
 @doc raw"""
-    GradientDescentEstimation <: AbstractEstimationMethod
+    GradientDescentEstimation <: AbstractApproximationMethod
 
 Method for estimation using [📖 gradient descent](https://en.wikipedia.org/wiki/Gradient_descent).
 """
-struct GradientDescentEstimation <: AbstractEstimationMethod end
+struct GradientDescentEstimation <: AbstractApproximationMethod end
 
 @doc raw"""
-    CyclicProximalPointEstimation <: AbstractEstimationMethod
+    CyclicProximalPointEstimation <: AbstractApproximationMethod
 
 Method for estimation using the cyclic proximal point technique, which is based on [📖 proximal maps](https://en.wikipedia.org/wiki/Proximal_operator).
 """
-struct CyclicProximalPointEstimation <: AbstractEstimationMethod end
+struct CyclicProximalPointEstimation <: AbstractApproximationMethod end
 
 @doc raw"""
-    ExtrinsicEstimation{T} <: AbstractEstimationMethod
+    ExtrinsicEstimation{T} <: AbstractApproximationMethod
 
 Method for estimation in the ambient space with a method of type `T` and projecting the result back
 to the manifold.
 """
-struct ExtrinsicEstimation{T} <: AbstractEstimationMethod
+struct ExtrinsicEstimation{T} <: AbstractApproximationMethod
     extrinsic_estimation::T
 end
 
 @doc raw"""
-    WeiszfeldEstimation <: AbstractEstimationMethod
+    WeiszfeldEstimation <: AbstractApproximationMethod
 
 Method for estimation using the Weiszfeld algorithm, compare for example the computation of the
 [📖 Geometric median](https://en.wikipedia.org/wiki/Geometric_median).
 """
-struct WeiszfeldEstimation <: AbstractEstimationMethod end
+struct WeiszfeldEstimation <: AbstractApproximationMethod end
 
 @doc raw"""
-    GeodesicInterpolation <: AbstractEstimationMethod
+    GeodesicInterpolation <: AbstractApproximationMethod
 
 Method for estimation based on geodesic interpolation.
 """
-struct GeodesicInterpolation <: AbstractEstimationMethod end
+struct GeodesicInterpolation <: AbstractApproximationMethod end
 
 @doc raw"""
-    GeodesicInterpolationWithinRadius{T} <: AbstractEstimationMethod
+    GeodesicInterpolationWithinRadius{T} <: AbstractApproximationMethod
 
 Method for estimation based on geodesic interpolation that is restricted to some `radius`
 
@@ -53,7 +53,7 @@ Method for estimation based on geodesic interpolation that is restricted to some
 
     GeodesicInterpolationWithinRadius(radius)
 """
-struct GeodesicInterpolationWithinRadius{T} <: AbstractEstimationMethod
+struct GeodesicInterpolationWithinRadius{T} <: AbstractApproximationMethod
     radius::T
     function GeodesicInterpolationWithinRadius(radius::T) where {T}
         radius > 0 && return new{T}(radius)
