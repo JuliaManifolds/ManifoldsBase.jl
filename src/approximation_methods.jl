@@ -20,6 +20,15 @@ Method for estimation using the cyclic proximal point technique, which is based 
 struct CyclicProximalPointEstimation <: AbstractApproximationMethod end
 
 @doc raw"""
+    EfficientEstimator <: AbstractApproximationMethod
+
+Method for estimation in the best possible sense, see [📖 Efficiency (Statictsics)](https://en.wikipedia.org/wiki/Efficiency_(statistics)) for mroe details.
+This can for example be used when computing the usual mean on an Euclidean space, which is the best estimator.
+"""
+struct EfficientEstimator <: AbstractApproximationMethod end
+
+
+@doc raw"""
     ExtrinsicEstimation{T} <: AbstractApproximationMethod
 
 Method for estimation in the ambient space with a method of type `T` and projecting the result back
