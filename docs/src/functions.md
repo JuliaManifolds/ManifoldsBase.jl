@@ -58,11 +58,11 @@ Public=false
 Private=true
 ```
 
-## Estimation Methods
+## Approximation Methods
 
 ```@autodocs
 Modules = [ManifoldsBase]
-Pages = ["estimation_methods.jl"]
+Pages = ["approximation_methods.jl"]
 Order = [:type, :function]
 ```
 
