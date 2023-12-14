@@ -1037,7 +1037,7 @@ end
     vector_transport_direction_embedded!(M::AbstractManifold, Y, p, X, d, m::AbstractRetractionMethod)
 
 Compute the vector transport of `X` from ``T_p\mathcal M`` into the direction `d`
-using the  of the [`AbstractRetractionMethod`](@ref) `m` in th embedding.
+using the [`AbstractRetractionMethod`](@ref) `m` in the embedding.
 
 The default implementataion requires one allocation for the points and tangent vectors in the
 embedding and the resulting point, but the final projection is performed in place of `Y`

@@ -73,9 +73,12 @@ include("test_manifolds.jl")
     ]
 
     @test ManifoldsBase.default_retraction_method(M) === retraction_methods[1]
+    @test ManifoldsBase.default_retraction_method(M, typeof(p1)) === retraction_methods[1]
     @test ManifoldsBase.default_inverse_retraction_method(M) ===
           inverse_retraction_methods[1]
     @test ManifoldsBase.default_inverse_retraction_method(M, typeof(X1)) ===
+          inverse_retraction_methods[1]
+    @test ManifoldsBase.default_inverse_retraction_method(M, typeof(p1)) ===
           inverse_retraction_methods[1]
 
     @testset "get_component, set_component!, getindex and setindex!" begin
