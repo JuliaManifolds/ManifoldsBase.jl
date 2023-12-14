@@ -7,7 +7,7 @@ using LinearAlgebra
 using Random
 using RecursiveArrayTools
 
-include("test_sphere.jl")
+include("test_manifolds.jl")
 
 @testset "Product manifold" begin
     M1 = TestSphere(2)
@@ -195,7 +195,9 @@ include("test_sphere.jl")
             ),
         )
         @test Zr ≈ Xr
-
+        Zr2 = similar(X1)
+        inverse_retract!(M, Zr2, p1, p2, LogarithmicInverseRetraction())
+        @test Zr2 ≈ Xr
         @test inner(M, p1, X1, X2) ≈ 21.08
         @test norm(M, p1, X1) ≈ sqrt(70.04)
         @test project(M, p1) ≈ p1
@@ -214,6 +216,23 @@ include("test_sphere.jl")
         @test rand(Random.default_rng(), M; vector_at = p1) isa ArrayPartition
         @test is_point(M, rand!(M, q1))
         @test is_vector(M, p1, rand!(M, Y1; vector_at = p1))
+
+        #explicit mid point test
+        q = ArrayPartition(
+            mid_point(
+                M1,
+                ManifoldsBase.submanifold_components(M, p1)[1],
+                ManifoldsBase.submanifold_components(M, p2)[1],
+            ),
+            mid_point(
+                M2,
+                ManifoldsBase.submanifold_components(M, p1)[2],
+                ManifoldsBase.submanifold_components(M, p2)[2],
+            ),
+        )
+        q2 = copy(M, p1)
+        mid_point!(M, q2, p1, p2)
+        @test isapprox(M, q, q2)
     end
 
     @testset "Broadcasting" begin
