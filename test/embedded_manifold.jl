@@ -91,7 +91,19 @@ end
 function ManifoldsBase.project!(::AnotherHalfPlanemanifold, Y, p, X)
     return Y .= [X[1], X[2]]
 end
-
+function ManifoldsBase.exp!(::AnotherHalfPlanemanifold, q, p, X)
+    return q .= p .+ X
+end
+function ManifoldsBase.vector_transport_along_embedded!(
+    ::AnotherHalfPlanemanifold,
+    Y,
+    p,
+    X,
+    c,
+    ::ParallelTransport,
+)
+    return Y .= X .+ 1 # +1 for check
+end
 #
 # Third example - explicitly mention an embedding.
 #
@@ -321,6 +333,13 @@ ManifoldsBase.decorated_manifold(::FallbackManifold) = DefaultManifold(3)
         @test injectivity_radius(M, p) == Inf
         @test injectivity_radius(M, p, ExponentialRetraction()) == Inf
         @test injectivity_radius(M, ExponentialRetraction()) == Inf
+
+        # test vector transports in the embedding
+        m = EmbeddedVectorTransport(ParallelTransport())
+        q = [2.0, 2.0]
+        @test vector_transport_to(M, p, X, q, m) == X #since its PT on R^3
+        @test vector_transport_direction(M, p, X, q, m) == X
+        @test vector_transport_along(M, p, X, [], m) == X .+ 1 #as specified in definition above
     end
 
     @testset "Test nonimplemented fallbacks" begin
