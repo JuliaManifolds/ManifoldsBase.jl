@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * `EmbeddedVectorTransport` to use a vector transport in the embedding and a final projection.
 
+### Fixed
+
+* `number_eltype` correctly returns scalar type for nested array types like `number_eltype(Vector{Vector{Float64}})`.
+
 ## [0.15.5] 13/12/2023
 
 ### Added
