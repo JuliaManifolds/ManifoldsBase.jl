@@ -1360,57 +1360,32 @@ function _vector_transport_to!(
 end
 
 # default estimation fallbacks with and without the T
-function default_estimation_method(
+function default_approximation_method(
     M::AbstractManifold,
     ::typeof(vector_transport_direction),
 )
     return default_vector_transport_method(M)
 end
-function default_estimation_method(
-    M::AbstractManifold,
-    ::typeof(vector_transport_direction!),
-)
+function default_approximation_method(M::AbstractManifold, ::typeof(vector_transport_along))
     return default_vector_transport_method(M)
 end
-function default_estimation_method(M::AbstractManifold, ::typeof(vector_transport_along))
+function default_approximation_method(M::AbstractManifold, ::typeof(vector_transport_to))
     return default_vector_transport_method(M)
 end
-function default_estimation_method(M::AbstractManifold, ::typeof(vector_transport_to))
-    return default_vector_transport_method(M)
-end
-function default_estimation_method(M::AbstractManifold, ::typeof(vector_transport_along!))
-    return default_vector_transport_method(M)
-end
-function default_estimation_method(M::AbstractManifold, ::typeof(vector_transport_to!))
-    return default_vector_transport_method(M)
-end
-function default_estimation_method(
+function default_approximation_method(
     M::AbstractManifold,
     ::typeof(vector_transport_direction),
     T,
 )
     return default_vector_transport_method(M, T)
 end
-function default_estimation_method(
+function default_approximation_method(
     M::AbstractManifold,
-    ::typeof(vector_transport_direction!),
+    ::typeof(vector_transport_along),
     T,
 )
     return default_vector_transport_method(M, T)
 end
-function default_estimation_method(M::AbstractManifold, ::typeof(vector_transport_along), T)
-    return default_vector_transport_method(M, T)
-end
-function default_estimation_method(M::AbstractManifold, ::typeof(vector_transport_to), T)
-    return default_vector_transport_method(M, T)
-end
-function default_estimation_method(
-    M::AbstractManifold,
-    ::typeof(vector_transport_along!),
-    T,
-)
-    return default_vector_transport_method(M, T)
-end
-function default_estimation_method(M::AbstractManifold, ::typeof(vector_transport_to!), T)
+function default_approximation_method(M::AbstractManifold, ::typeof(vector_transport_to), T)
     return default_vector_transport_method(M, T)
 end

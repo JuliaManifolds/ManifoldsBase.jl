@@ -937,27 +937,27 @@ Base.show(io::IO, ::PadeRetraction{m}) where {m} = print(io, "PadeRetraction($m)
 
 #
 # default estimation methods pass down with and without the point type
-function default_estimation_method(M::AbstractManifold, ::typeof(inverse_retract))
+function default_approximation_method(M::AbstractManifold, ::typeof(inverse_retract))
     return default_inverse_retraction_method(M)
 end
-function default_estimation_method(M::AbstractManifold, ::typeof(inverse_retract), T)
+function default_approximation_method(M::AbstractManifold, ::typeof(inverse_retract), T)
     return default_inverse_retraction_method(M, T)
 end
-function default_estimation_method(M::AbstractManifold, ::typeof(inverse_retract!))
+function default_approximation_method(M::AbstractManifold, ::typeof(inverse_retract!))
     return default_inverse_retraction_method(M)
 end
-function default_estimation_method(M::AbstractManifold, ::typeof(inverse_retract!), T)
+function default_approximation_method(M::AbstractManifold, ::typeof(inverse_retract!), T)
     return default_inverse_retraction_method(M, T)
 end
-function default_estimation_method(M::AbstractManifold, ::typeof(retract))
+function default_approximation_method(M::AbstractManifold, ::typeof(retract))
     return default_retraction_method(M)
 end
-function default_estimation_method(M::AbstractManifold, ::typeof(retract), T)
+function default_approximation_method(M::AbstractManifold, ::typeof(retract), T)
     return default_retraction_method(M, T)
 end
-function default_estimation_method(M::AbstractManifold, ::typeof(retract!))
+function default_approximation_method(M::AbstractManifold, ::typeof(retract!))
     return default_retraction_method(M)
 end
-function default_estimation_method(M::AbstractManifold, ::typeof(retract!), T)
+function default_approximation_method(M::AbstractManifold, ::typeof(retract!), T)
     return default_retraction_method(M, T)
 end
