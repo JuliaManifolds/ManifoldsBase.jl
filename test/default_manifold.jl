@@ -888,11 +888,15 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
         @test isapprox(hat(MC, p, [1, 3, 5, 2, 4, 6]), [1 + 2im, 3 + 4im, 5 + 6im])
     end
 
+    ManifoldsBase.default_approximation_method(
+        ::ManifoldsBase.DefaultManifold,
+        ::typeof(exp),
+    ) = GradientDescentEstimation()
     @testset "Estimation Method defaults" begin
         M = ManifoldsBase.DefaultManifold(3)
-        # Point type fallback
-        @test default_approximation_method(M, retract, Float64) ==
-              default_retraction_method(M)
+        # Point generic type fallback
+        @test default_approximation_method(M, exp, Float64) ==
+              default_approximation_method(M, exp)
         # Retraction
         @test default_approximation_method(M, retract) == default_retraction_method(M)
         @test default_approximation_method(M, retract, DefaultPoint) ==
