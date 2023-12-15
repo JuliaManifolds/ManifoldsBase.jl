@@ -29,17 +29,22 @@ We would be very interested to hear where you are using the interface or manifol
 
 ## Citation
 
-If you use `ManifoldsBase.jl` in your work, please cite the following
+If you use `ManifoldsBase.jl` in your work, please cite the following open access article
 
 ```biblatex
-@online{2106.08777,
-Author = {Seth D. Axen and Mateusz Baran and Ronny Bergmann and Krzysztof Rzecki},
-Title = {Manifolds.jl: An Extensible Julia Framework for Data Analysis on Manifolds},
-Year = {2021},
-Eprint = {2106.08777},
-Eprinttype = {arXiv},
+@article{AxenBaranBergmannRzecki:2023,
+    author = {Axen, Seth D. and Baran, Mateusz and Bergmann, Ronny and Rzecki, Krzysztof},
+    articleno = {33},
+    doi = {10.1145/3618296},
+    journal = {ACM Transactions on Mathematical Software},
+    month = {dec},
+    number = {4},
+    title = {Manifolds.Jl: An Extensible Julia Framework for Data Analysis on Manifolds},
+    volume = {49},
+    year = {2023},
 }
 ```
+
 
 To refer to a certain version we recommend to also cite for example
 
