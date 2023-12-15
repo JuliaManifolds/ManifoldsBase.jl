@@ -943,21 +943,9 @@ end
 function default_approximation_method(M::AbstractManifold, ::typeof(inverse_retract), T)
     return default_inverse_retraction_method(M, T)
 end
-function default_approximation_method(M::AbstractManifold, ::typeof(inverse_retract!))
-    return default_inverse_retraction_method(M)
-end
-function default_approximation_method(M::AbstractManifold, ::typeof(inverse_retract!), T)
-    return default_inverse_retraction_method(M, T)
-end
 function default_approximation_method(M::AbstractManifold, ::typeof(retract))
     return default_retraction_method(M)
 end
 function default_approximation_method(M::AbstractManifold, ::typeof(retract), T)
-    return default_retraction_method(M, T)
-end
-function default_approximation_method(M::AbstractManifold, ::typeof(retract!))
-    return default_retraction_method(M)
-end
-function default_approximation_method(M::AbstractManifold, ::typeof(retract!), T)
     return default_retraction_method(M, T)
 end
