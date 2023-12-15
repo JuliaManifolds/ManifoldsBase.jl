@@ -1,16 +1,16 @@
 """
-    AbstractInverseRetractionMethod
+    AbstractInverseRetractionMethod <: AbstractApproximationMethod
 
 Abstract type for methods for inverting a retraction (see [`inverse_retract`](@ref)).
 """
-abstract type AbstractInverseRetractionMethod end
+abstract type AbstractInverseRetractionMethod <: AbstractApproximationMethod end
 
 """
-    AbstractRetractionMethod
+    AbstractRetractionMethod <: AbstractApproximationMethod
 
 Abstract type for methods for [`retract`](@ref)ing a tangent vector to a manifold.
 """
-abstract type AbstractRetractionMethod end
+abstract type AbstractRetractionMethod <: AbstractApproximationMethod end
 
 """
     ApproximateInverseRetraction <: AbstractInverseRetractionMethod
@@ -934,3 +934,18 @@ function retract_sasaki! end
 
 Base.show(io::IO, ::CayleyRetraction) = print(io, "CayleyRetraction()")
 Base.show(io::IO, ::PadeRetraction{m}) where {m} = print(io, "PadeRetraction($m)")
+
+#
+# default estimation methods pass down with and without the point type
+function default_approximation_method(M::AbstractManifold, ::typeof(inverse_retract))
+    return default_inverse_retraction_method(M)
+end
+function default_approximation_method(M::AbstractManifold, ::typeof(inverse_retract), T)
+    return default_inverse_retraction_method(M, T)
+end
+function default_approximation_method(M::AbstractManifold, ::typeof(retract))
+    return default_retraction_method(M)
+end
+function default_approximation_method(M::AbstractManifold, ::typeof(retract), T)
+    return default_retraction_method(M, T)
+end

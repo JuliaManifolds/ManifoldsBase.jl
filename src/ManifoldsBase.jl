@@ -29,6 +29,7 @@ include("maintypes.jl")
 include("numbers.jl")
 include("Fiber.jl")
 include("bases.jl")
+include("approximation_methods.jl")
 include("retractions.jl")
 include("exp_log_geo.jl")
 include("projections.jl")
@@ -1022,6 +1023,17 @@ export AbstractPowerRepresentation,
     NestedPowerRepresentation, NestedReplacingPowerRepresentation
 export ProductManifold
 
+# (b) Generic Estimation Types
+
+export GeodesicInterpolationWithinRadius,
+    CyclicProximalPointEstimation,
+    ExtrinsicEstimation,
+    GradientDescentEstimation,
+    WeiszfeldEstimation,
+    AbstractApproximationMethod,
+    GeodesicInterpolation
+
+
 # (b) Retraction Types
 export AbstractRetractionMethod,
     ApproximateInverseRetraction,
@@ -1100,6 +1112,7 @@ export ×,
     change_representer!,
     copy,
     copyto!,
+    default_approximation_method,
     default_inverse_retraction_method,
     default_retraction_method,
     default_vector_transport_method,

@@ -21,12 +21,16 @@ If you use `ManifoldsBase.jl` in your work, please cite the following paper,
 which covers both the basic interface as well as the performance for `Manifolds.jl`.
 
 ```biblatex
-@online{2106.08777,
-    Author = {Seth D. Axen and Mateusz Baran and Ronny Bergmann and Krzysztof Rzecki},
-    Title = {Manifolds.jl: An Extensible Julia Framework for Data Analysis on Manifolds},
-    Year = {2021},
-    Eprint = {2106.08777},
-    Eprinttype = {arXiv},
+@article{AxenBaranBergmannRzecki:2023,
+    AUTHOR    = {Axen, Seth D. and Baran, Mateusz and Bergmann, Ronny and Rzecki, Krzysztof},
+    ARTICLENO = {33},
+    DOI       = {10.1145/3618296},
+    JOURNAL   = {ACM Transactions on Mathematical Software},
+    MONTH     = {dec},
+    NUMBER    = {4},
+    TITLE     = {Manifolds.Jl: An Extensible Julia Framework for Data Analysis on Manifolds},
+    VOLUME    = {49},
+    YEAR      = {2023}
 }
 ```
 

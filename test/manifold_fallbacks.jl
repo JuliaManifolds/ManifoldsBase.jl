@@ -96,3 +96,7 @@ end
     @test_throws DomainError ODEExponentialRetraction(ExponentialRetraction(), B)
     @test_throws ErrorException PadeRetraction(0)
 end
+
+@testset "Approximation errors" begin
+    @test_throws DomainError GeodesicInterpolationWithinRadius(-1)
+end

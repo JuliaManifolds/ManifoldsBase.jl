@@ -58,6 +58,14 @@ Public=false
 Private=true
 ```
 
+## Approximation Methods
+
+```@autodocs
+Modules = [ManifoldsBase]
+Pages = ["approximation_methods.jl"]
+Order = [:type, :function]
+```
+
 ## Error Messages
 
 This interface introduces a small set of own error messages.

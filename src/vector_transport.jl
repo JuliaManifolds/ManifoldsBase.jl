@@ -1,6 +1,6 @@
 
 """
-    AbstractVectorTransportMethod
+    AbstractVectorTransportMethod <: AbstractApproximationMethod
 
 Abstract type for methods for transporting vectors. Such vector transports are not
 necessarily linear.
@@ -9,7 +9,7 @@ necessarily linear.
 
 [`AbstractLinearVectorTransportMethod`](@ref)
 """
-abstract type AbstractVectorTransportMethod end
+abstract type AbstractVectorTransportMethod <: AbstractApproximationMethod end
 
 """
     AbstractLinearVectorTransportMethod <: AbstractVectorTransportMethod
@@ -325,6 +325,7 @@ end
 function default_vector_transport_method(M::AbstractManifold, ::Type{T}) where {T}
     return default_vector_transport_method(M)
 end
+
 
 @doc raw"""
     pole_ladder(
@@ -1311,4 +1312,35 @@ space ``T_q\mathcal M`` at ``q`` in place of `Y`.
 function vector_transport_to_project!(M::AbstractManifold, Y, p, X, q; kwargs...)
     # Note that we have to use embed (not embed!) since we do not have memory to store this embedded value in
     return project!(M, Y, q, embed(M, p, X); kwargs...)
+end
+
+# default estimation fallbacks with and without the T
+function default_approximation_method(
+    M::AbstractManifold,
+    ::typeof(vector_transport_direction),
+)
+    return default_vector_transport_method(M)
+end
+function default_approximation_method(M::AbstractManifold, ::typeof(vector_transport_along))
+    return default_vector_transport_method(M)
+end
+function default_approximation_method(M::AbstractManifold, ::typeof(vector_transport_to))
+    return default_vector_transport_method(M)
+end
+function default_approximation_method(
+    M::AbstractManifold,
+    ::typeof(vector_transport_direction),
+    T,
+)
+    return default_vector_transport_method(M, T)
+end
+function default_approximation_method(
+    M::AbstractManifold,
+    ::typeof(vector_transport_along),
+    T,
+)
+    return default_vector_transport_method(M, T)
+end
+function default_approximation_method(M::AbstractManifold, ::typeof(vector_transport_to), T)
+    return default_vector_transport_method(M, T)
 end
