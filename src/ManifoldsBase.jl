@@ -827,7 +827,7 @@ end
 @inline function number_eltype(::Type{<:AbstractArray{T}}) where {T}
     return number_eltype(T)
 end
-@inline function number_eltype(::Type{<:AbstractArray{T}}) where {T<:Real}
+@inline function number_eltype(::Type{<:AbstractArray{T}}) where {T<:Number}
     return T
 end
 @inline function number_eltype(x::Tuple)
