@@ -58,6 +58,22 @@ struct DifferentiatedRetractionVectorTransport{R<:AbstractRetractionMethod} <:
 end
 
 @doc raw"""
+    EmbeddedVectorTransport{T<:AbstractVectorTransportMethod} <: AbstractVectorTransportMethod
+
+Compute a vector transport by using the vector transport of type `T` in the embedding and projecting the result.
+
+# Constructor
+
+    EmbeddedVectorTransport(vt::AbstractVectorTransportMethod)
+
+Generate the vector transport with vector transport `vt` to use in the embedding.
+"""
+struct EmbeddedVectorTransport{T<:AbstractVectorTransportMethod} <:
+       AbstractVectorTransportMethod
+    vector_transport::T
+end
+
+@doc raw"""
     ParallelTransport <: AbstractVectorTransportMethod
 
 Compute the vector transport by parallel transport, see
@@ -505,38 +521,24 @@ function _vector_transport_along(
     p,
     X,
     c,
-    m::DifferentiatedRetractionVectorTransport;
+    m::VectorTransportWithKeywords;
     kwargs...,
 )
-    return vector_transport_along_diff(M, p, X, c, m.retraction; kwargs...)
+    return _vector_transport_along(M, p, X, c, m.vector_transport; kwargs..., m.kwargs...)
 end
 function _vector_transport_along(
     M::AbstractManifold,
     p,
     X,
     c,
-    m::VectorTransportWithKeywords;
+    m::AbstractVectorTransportMethod;
     kwargs...,
 )
-    return _vector_transport_along(M, p, X, c, m.vector_transport; kwargs..., m.kwargs...)
-end
-
-@doc raw"""
-    vector_transport_along_diff(M::AbstractManifold, p, X, c, m::AbstractRetractionMethod)
-
-Compute the vector transport of `X` from ``T_p\mathcal M`` along the curve `c`
-using the differential of the [`AbstractRetractionMethod`](@ref) `m`.
-"""
-function vector_transport_along_diff(
-    M::AbstractManifold,
-    p,
-    X,
-    c,
-    m::AbstractRetractionMethod,
-)
     Y = allocate_result(M, vector_transport_along, X, p)
-    return vector_transport_along_diff!(M, Y, p, X, c, m)
+    return vector_transport_along!(M, Y, p, X, c, m; kwargs...)
 end
+
+
 @doc raw"""
     vector_transport_along_diff!(M::AbstractManifold, Y, p, X, c, m::AbstractRetractionMethod)
 
@@ -547,32 +549,6 @@ vector_transport_along_diff!(M::AbstractManifold, Y, p, X, c, m)
 
 function vector_transport_along_diff! end
 
-function _vector_transport_along(
-    M::AbstractManifold,
-    p,
-    X,
-    c,
-    ::ProjectionTransport;
-    kwargs...,
-)
-    return vector_transport_along_project(M, p, X, c; kwargs...)
-end
-@doc raw"""
-    vector_transport_along_project(M::AbstractManifold, p, X, c::AbstractVector)
-
-Compute the vector transport of `X` from ``T_p\mathcal M`` along the curve `c`
-using a projection.
-"""
-function vector_transport_along_project(
-    M::AbstractManifold,
-    p,
-    X,
-    c::AbstractVector;
-    kwargs...,
-)
-    Y = allocate_result(M, vector_transport_along, X, p)
-    return vector_transport_along_project!(M, Y, p, X, c; kwargs...)
-end
 @doc raw"""
     vector_transport_along_project!(M::AbstractManifold, Y, p, X, c::AbstractVector)
 
@@ -582,29 +558,6 @@ using a projection. The result is computed in place of `Y`.
 vector_transport_along_project!(M::AbstractManifold, Y, p, X, c::AbstractVector)
 
 function vector_transport_along_project! end
-
-function _vector_transport_along(
-    M::AbstractManifold,
-    p,
-    X,
-    c::AbstractVector,
-    m::PoleLadderTransport;
-    kwargs...,
-)
-    Y = allocate_result(M, vector_transport_along, X, p)
-    return _vector_transport_along!(M, Y, p, X, c, m; kwargs...)
-end
-function _vector_transport_along(
-    M::AbstractManifold,
-    p,
-    X,
-    c::AbstractVector,
-    m::SchildsLadderTransport;
-    kwargs...,
-)
-    Y = allocate_result(M, vector_transport_along, X, p)
-    return _vector_transport_along!(M, Y, p, X, c, m; kwargs...)
-end
 
 """
     vector_transport_along!(M::AbstractManifold, Y, p, X, c::AbstractVector)
@@ -698,6 +651,35 @@ function _vector_transport_along!(
         m.kwargs...,
     )
 end
+function _vector_transport_along!(
+    M::AbstractManifold,
+    Y,
+    p,
+    X,
+    c::AbstractVector,
+    m::EmbeddedVectorTransport;
+    kwargs...,
+)
+    return vector_transport_along_embedded!(M, Y, p, X, c, m.vector_transport; kwargs...)
+end
+
+@doc raw"""
+    vector_transport_along_embedded!(M::AbstractManifold, Y, p, X, c, m::AbstractVectorTransportMethod; kwargs...)
+
+Compute the vector transport of `X` from ``T_p\mathcal M`` along the curve `c`
+using the vector transport method `m` in the embedding and projecting the result back on
+the corresponding tangent space. The result is computed in place of `Y`.
+"""
+vector_transport_along_embedded!(
+    M::AbstractManifold,
+    Y,
+    p,
+    X,
+    c,
+    ::AbstractVectorTransportMethod,
+)
+
+function vector_transport_along_embedded! end
 
 @doc raw"""
     function vector_transport_along(
@@ -899,9 +881,9 @@ function _vector_transport_direction(
     m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p));
     kwargs...,
 )
-    r = default_retraction_method(M, typeof(p))
-    v = length(kwargs) > 0 ? VectorTransportWithKeywords(m; kwargs...) : m
-    return vector_transport_to(M, p, X, retract(M, p, d, r), v)
+    # allocate first
+    Y = allocate_result(M, vector_transport_direction, X, p, d)
+    return vector_transport_direction!(M, Y, p, X, d, m; kwargs...)
 end
 function _vector_transport_direction(
     M::AbstractManifold,
@@ -922,16 +904,6 @@ function _vector_transport_direction(
     p,
     X,
     d,
-    m::DifferentiatedRetractionVectorTransport{R};
-    kwargs...,
-) where {R<:AbstractRetractionMethod}
-    return vector_transport_direction_diff(M, p, X, d, m.retraction; kwargs...)
-end
-function _vector_transport_direction(
-    M::AbstractManifold,
-    p,
-    X,
-    d,
     m::VectorTransportWithKeywords;
     kwargs...,
 )
@@ -944,33 +916,6 @@ function _vector_transport_direction(
         kwargs...,
         m.kwargs...,
     )
-end
-@doc raw"""
-    vector_transport_direction_diff(M::AbstractManifold, p, X, d, m::AbstractRetractionMethod)
-
-Compute the vector transport of `X` from ``T_p\mathcal M`` into the direction `d`
-using the differential of the [`AbstractRetractionMethod`](@ref) `m`.
-"""
-function vector_transport_direction_diff(
-    M::AbstractManifold,
-    p,
-    X,
-    d,
-    r::AbstractRetractionMethod;
-    kwargs...,
-)
-    Y = allocate_result(M, vector_transport_direction, p, X, d)
-    return vector_transport_direction_diff!(M, Y, p, X, d, r; kwargs...)
-end
-function _vector_transport_direction(
-    M::AbstractManifold,
-    p,
-    X,
-    d,
-    ::ParallelTransport;
-    kwargs...,
-)
-    return parallel_transport_direction(M, p, X, d; kwargs...)
 end
 
 """
@@ -991,9 +936,10 @@ function vector_transport_direction!(
     p,
     X,
     d,
-    m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
+    m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p));
+    kwargs...,
 )
-    return _vector_transport_direction!(M, Y, p, X, d, m)
+    return _vector_transport_direction!(M, Y, p, X, d, m; kwargs...)
 end
 function _vector_transport_direction!(
     M::AbstractManifold,
@@ -1032,6 +978,25 @@ function _vector_transport_direction!(
     kwargs...,
 )
     return vector_transport_direction_diff!(M, Y, p, X, d, m.retraction; kwargs...)
+end
+function _vector_transport_direction!(
+    M::AbstractManifold,
+    Y,
+    p,
+    X,
+    d,
+    m::EmbeddedVectorTransport;
+    kwargs...,
+)
+    return vector_transport_direction_embedded!(
+        M,
+        Y,
+        p,
+        X,
+        d,
+        m.vector_transport;
+        kwargs...,
+    )
 end
 @doc raw"""
     vector_transport_direction_diff!(M::AbstractManifold, Y, p, X, d, m::AbstractRetractionMethod)
@@ -1077,6 +1042,31 @@ function _vector_transport_direction!(
 end
 
 @doc raw"""
+    vector_transport_direction_embedded!(M::AbstractManifold, Y, p, X, d, m::AbstractVectorTransportMethod)
+
+Compute the vector transport of `X` from ``T_p\mathcal M`` into the direction `d`
+using the [`AbstractRetractionMethod`](@ref) `m` in the embedding.
+
+The default implementataion requires one allocation for the points and tangent vectors in the
+embedding and the resulting point, but the final projection is performed in place of `Y`
+"""
+function vector_transport_direction_embedded!(
+    M::AbstractManifold,
+    Y,
+    p,
+    X,
+    d,
+    m::AbstractVectorTransportMethod,
+)
+    p_e = embed(M, p)
+    d_e = embed(M, d)
+    X_e = embed(M, p, X)
+    Y_e = vector_transport_direction(get_embedding(M), p_e, X_e, d_e, m)
+    q = exp(M, p, d)
+    return project!(M, Y, q, Y_e)
+end
+
+@doc raw"""
     vector_transport_to(M::AbstractManifold, p, X, q)
     vector_transport_to(M::AbstractManifold, p, X, q, m::AbstractVectorTransportMethod)
     vector_transport_to(M::AbstractManifold, p, X, q, m::AbstractVectorTransportMethod)
@@ -1115,10 +1105,11 @@ function _vector_transport_to(
     p,
     X,
     q,
-    m::DifferentiatedRetractionVectorTransport;
+    m::AbstractVectorTransportMethod;
     kwargs...,
 )
-    return vector_transport_to_diff(M, p, X, q, m.retraction; kwargs...)
+    Y = allocate_result(M, vector_transport_to, X, p)
+    return vector_transport_to!(M, Y, p, X, q, m; kwargs...)
 end
 function _vector_transport_to(
     M::AbstractManifold,
@@ -1130,55 +1121,6 @@ function _vector_transport_to(
 )
     return _vector_transport_to(M, p, X, q, m.vector_transport; kwargs..., m.kwargs...)
 end
-@doc raw"""
-    vector_transport_to_diff(M::AbstractManifold, p, X, q, r)
-
-Compute a vector transport by using a [`DifferentiatedRetractionVectorTransport`](@ref) `r`.
-"""
-function vector_transport_to_diff(M::AbstractManifold, p, X, q, r; kwargs...)
-    Y = allocate_result(M, vector_transport_to, X, p)
-    return vector_transport_to_diff!(M, Y, p, X, q, r; kwargs...)
-end
-@doc raw"""
-    vector_transport_to_diff(M::AbstractManifold, p, X, q, r)
-
-Compute a vector transport by using a [`DifferentiatedRetractionVectorTransport`](@ref) `r` in place of `Y`.
-"""
-vector_transport_to_diff!(M::AbstractManifold, Y, p, X, q, r)
-
-function vector_transport_to_diff! end
-
-function _vector_transport_to(
-    M::AbstractManifold,
-    p,
-    X,
-    q,
-    ::ProjectionTransport;
-    kwargs...,
-)
-    return vector_transport_to_project(M, p, X, q; kwargs...)
-end
-@doc raw"""
-    vector_transport_to_project(M::AbstractManifold, p, X, q)
-
-Compute a vector transport by projecting ``X\in T_p\mathcal M`` onto the tangent
-space ``T_q\mathcal M`` at ``q``.
-"""
-function vector_transport_to_project(M::AbstractManifold, p, X, q; kwargs...)
-    Y = allocate_result(M, vector_transport_to, X, p)
-    return vector_transport_to_project!(M, Y, p, X, q; kwargs...)
-end
-@doc raw"""
-    vector_transport_to_project!(M::AbstractManifold, Y, p, X, q)
-
-Compute a vector transport by projecting ``X\in T_p\mathcal M`` onto the tangent
-space ``T_q\mathcal M`` at ``q`` in place of `Y`.
-"""
-function vector_transport_to_project!(M::AbstractManifold, Y, p, X, q; kwargs...)
-    # Note that we have to use embed (not embed!) since we do not have memory to store this embedded value in
-    return project!(M, Y, q, embed(M, p, X); kwargs...)
-end
-
 
 """
     vector_transport_to!(M::AbstractManifold, Y, p, X, q)
@@ -1241,22 +1183,21 @@ function _vector_transport_to!(
     p,
     X,
     q,
+    m::EmbeddedVectorTransport;
+    kwargs...,
+)
+    return vector_transport_to_embedded!(M, Y, p, X, q, m.vector_transport; kwargs...)
+end
+function _vector_transport_to!(
+    M::AbstractManifold,
+    Y,
+    p,
+    X,
+    q,
     ::ProjectionTransport;
     kwargs...,
 )
     return vector_transport_to_project!(M, Y, p, X, q; kwargs...)
-end
-
-function _vector_transport_to(
-    M::AbstractManifold,
-    p,
-    X,
-    q,
-    m::PoleLadderTransport;
-    kwargs...,
-)
-    Y = allocate_result(M, vector_transport_to, X, p)
-    return _vector_transport_to!(M, Y, p, X, q, m; kwargs...)
 end
 function _vector_transport_to!(
     M::AbstractManifold,
@@ -1285,17 +1226,6 @@ function _vector_transport_to!(
     copyto!(Y, -Y)
     return Y
 end
-function _vector_transport_to(
-    M::AbstractManifold,
-    p,
-    X,
-    c,
-    m::ScaledVectorTransport;
-    kwargs...,
-)
-    Y = allocate_result(M, vector_transport_to, X, p)
-    return _vector_transport_to!(M, Y, p, X, c, m; kwargs...)
-end
 function _vector_transport_to!(
     M::AbstractManifold,
     Y,
@@ -1321,18 +1251,6 @@ function _vector_transport_to!(
 )
     return _vector_transport_to!(M, Y, p, X, q, m.vector_transport; kwargs..., m.kwargs...)
 end
-
-function _vector_transport_to(
-    M::AbstractManifold,
-    p,
-    X,
-    c,
-    m::SchildsLadderTransport;
-    kwargs...,
-)
-    Y = allocate_result(M, vector_transport_to, X, p)
-    return _vector_transport_to!(M, Y, p, X, c, m; kwargs...)
-end
 function _vector_transport_to!(
     M::AbstractManifold,
     Y,
@@ -1357,6 +1275,43 @@ function _vector_transport_to!(
         ),
         m.inverse_retraction,
     )
+end
+
+@doc raw"""
+    vector_transport_to_diff(M::AbstractManifold, p, X, q, r)
+
+Compute a vector transport by using a [`DifferentiatedRetractionVectorTransport`](@ref) `r` in place of `Y`.
+"""
+vector_transport_to_diff!(M::AbstractManifold, Y, p, X, q, r)
+
+function vector_transport_to_diff! end
+
+@doc raw"""
+    vector_transport_to_embedded!(M::AbstractManifold, Y, p, X, q, m::AbstractRetractionMethod)
+
+Compute the vector transport of `X` from ``T_p\mathcal M`` to the point `q`
+using the  of the [`AbstractRetractionMethod`](@ref) `m` in th embedding.
+
+The default implementataion requires one allocation for the points and tangent vectors in the
+embedding and the resulting point, but the final projection is performed in place of `Y`
+"""
+function vector_transport_to_embedded!(M::AbstractManifold, Y, p, X, q, m)
+    p_e = embed(M, p)
+    X_e = embed(M, p, X)
+    q_e = embed(M, q)
+    Y_e = vector_transport_to(get_embedding(M), p_e, X_e, q_e, m)
+    return project!(M, Y, q, Y_e)
+end
+
+@doc raw"""
+    vector_transport_to_project!(M::AbstractManifold, Y, p, X, q)
+
+Compute a vector transport by projecting ``X\in T_p\mathcal M`` onto the tangent
+space ``T_q\mathcal M`` at ``q`` in place of `Y`.
+"""
+function vector_transport_to_project!(M::AbstractManifold, Y, p, X, q; kwargs...)
+    # Note that we have to use embed (not embed!) since we do not have memory to store this embedded value in
+    return project!(M, Y, q, embed(M, p, X); kwargs...)
 end
 
 # default estimation fallbacks with and without the T

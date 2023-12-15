@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * An `AbstractApproximationMethod` to specify estimation methods for other more general functions,
 as well as a `default_approximation_method` to specify defaults on manifolds.
+* An `EmbeddedVectorTransport` to use a vector transport in the embedding and a final projection.
 
 ### Fixed
 

@@ -360,18 +360,13 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
     )
     # forward vector transports
 
-    for sub in [:project, :diff]
+    for sub in [:project, :diff, :embedded]
         # project & diff
-        vtaa = Symbol("vector_transport_along_$(sub)")
         vtam = Symbol("vector_transport_along_$(sub)!")
-        vtta = Symbol("vector_transport_to_$(sub)")
         vttm = Symbol("vector_transport_to_$(sub)!")
         push!(
             block.args,
             quote
-                function ManifoldsBase.$vtaa(M::$TM, p::$TP, X::$TV, c::AbstractVector)
-                    return $TV(ManifoldsBase.$vtaa(M, p.$pfield, X.$vfield, c))
-                end
                 function ManifoldsBase.$vtam(
                     M::$TM,
                     Y::$TV,
@@ -381,9 +376,6 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
                 )
                     ManifoldsBase.$vtam(M, Y.$vfield, p.$pfield, X.$vfield, c)
                     return Y
-                end
-                function ManifoldsBase.$vtta(M::$TM, p::$TP, X::$TV, q::$TP)
-                    return $TV(ManifoldsBase.$vtta(M, p.$pfield, X.$vfield, q.$pfield))
                 end
                 function ManifoldsBase.$vttm(M::$TM, Y::$TV, p::$TP, X::$TV, q::$TP)
                     ManifoldsBase.$vttm(M, Y.$vfield, p.$pfield, X.$vfield, q.$pfield)
