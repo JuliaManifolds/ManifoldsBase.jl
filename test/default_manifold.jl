@@ -212,8 +212,6 @@ Base.getindex(x::MatrixVectorTransport, i) = x.m[:, i]
 
 Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
 
-ManifoldsBase.default_approximation_method(::DefaultManifold) = GradientDescentEstimation()
-
 @testset "Testing Default (Euclidean)" begin
     M = ManifoldsBase.DefaultManifold(3)
     types = [
@@ -892,12 +890,6 @@ ManifoldsBase.default_approximation_method(::DefaultManifold) = GradientDescentE
 
     @testset "Estimation Method defaults" begin
         M = ManifoldsBase.DefaultManifold(3)
-        @test default_approximation_method(M) == GradientDescentEstimation()
-        # fallbacks
-        @test default_approximation_method(M, manifold_dimension) ==
-              default_approximation_method(M)
-        @test default_approximation_method(M, manifold_dimension, DefaultPoint) ==
-              default_approximation_method(M)
         # Retraction
         @test default_approximation_method(M, retract) == default_retraction_method(M)
         @test default_approximation_method(M, retract, DefaultPoint) ==

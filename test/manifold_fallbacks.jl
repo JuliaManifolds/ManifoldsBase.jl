@@ -97,6 +97,6 @@ end
     @test_throws ErrorException PadeRetraction(0)
 end
 
-@testset "Estimation errors" begin
+@testset "Approximation errors" begin
     @test_throws DomainError GeodesicInterpolationWithinRadius(-1)
 end
