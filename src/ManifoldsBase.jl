@@ -825,6 +825,12 @@ number_eltype(x) = eltype(x)
     return typeof(mapreduce(eti -> one(number_eltype(eti)), +, x))
 end
 @inline number_eltype(::AbstractArray{T}) where {T<:Number} = T
+@inline function number_eltype(::Type{<:AbstractArray{T}}) where {T}
+    return number_eltype(T)
+end
+@inline function number_eltype(::Type{<:AbstractArray{T}}) where {T<:Number}
+    return T
+end
 @inline function number_eltype(x::Tuple)
     @inline eti_to_one(eti) = one(number_eltype(eti))
     return typeof(sum(map(eti_to_one, x)))

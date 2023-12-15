@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * An `AbstractApproximationMethod` to specify estimation methods for other more general functions,
 as well as a `default_approximation_method` to specify defaults on manifolds.
 
+### Fixed
+
+* `number_eltype` correctly returns scalar type for nested array types like `number_eltype(Vector{Vector{Float64}})`.
+
 ## [0.15.5] 13/12/2023
 
 ### Added
