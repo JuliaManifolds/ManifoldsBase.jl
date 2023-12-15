@@ -890,6 +890,9 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
 
     @testset "Estimation Method defaults" begin
         M = ManifoldsBase.DefaultManifold(3)
+        # Point type fallback
+        @test default_approximation_method(M, retract, Float64) ==
+              default_retraction_method(M)
         # Retraction
         @test default_approximation_method(M, retract) == default_retraction_method(M)
         @test default_approximation_method(M, retract, DefaultPoint) ==
