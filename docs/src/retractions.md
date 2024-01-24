@@ -3,11 +3,11 @@
 The [exponential and logarithmic map](@ref exp-and-log) might be too expensive to evaluate or not be available in a very stable numerical way on certain manifolds ``\mathcal M``.
 Retractions provide a possibly cheap, fast and stable alternative.
 
-A _retraction_ ``\operatorname{retr}_p: T_p\mathcal M → \mathcal M`` is a smooth map that fulfils (for all ``p\in\mathcal M``) that
+A _retraction_ ``\operatorname{retr}_p: T_p\mathcal M → \mathcal M`` is a smooth map that fulfils (for all ``p∈\mathcal M``) that
 
 1. ``\operatorname{retr}_p(0) = p``
 2. ``D\operatorname{retr}_p(0): T_p\mathcal M \to T_p\mathcal M`` is the identity map,
-i.e. ``D\operatorname{retr}_p(0)[X]=X`` holds for all ``X\in T_p\mathcal M``,
+i.e. ``D\operatorname{retr}_p(0)[X]=X`` holds for all ``X∈ T_p\mathcal M``,
 
 where ``D\operatorname{retr}_p`` denotes the differential of the retraction.
 

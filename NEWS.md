@@ -5,7 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.15.6] unreleased
+## [0.15.7] 24/01/2024
+
+### Fixed
+
+* `is_point` and `is_vector` can now more stably `:info` or `:warn` when they return false,
+  since they emply `showerror` for these displays.
+
+## [0.15.6] 15/12/2023
 
 ### Added
 
