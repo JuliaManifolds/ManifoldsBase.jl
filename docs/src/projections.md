@@ -14,18 +14,18 @@ the embedding can be chosen to be the manifold ``\mathcal N = ℂ`` and due to o
 The first projection we can consider is for a given a point ``p∈\mathcal N`` in the embedding we can look for the closest point on the manifold ``\mathcal M``, i.e.
 
 ```math
-  \operatorname*{arg\,min}_{q\in \mathcal M}\ d_{\mathcal N}(i(q),p)
+  \operatorname*{arg\,min}_{q∈ \mathcal M}\ d_{\mathcal N}(i(q),p)
 ```
 
 And this resulting ``q`` we call the projection of ``p`` onto the manifold ``\mathcal M``.
 
-The second projection we can look at is for a given a point ``p∈\mathcal M`` and a vector in ``X\in T_{i(p)}\mathcal N`` in the embedding,
+The second projection we can look at is for a given a point ``p∈\mathcal M`` and a vector in ``X∈ T_{i(p)}\mathcal N`` in the embedding,
 where we can similarly look for the closest tangent vector ``Y∈ T_p\mathcal M``, which we have to embed itself before itself.
 Embedding a tangent vector is usually the same as using the pushforward ``\mathrm{d}i_p`` of the embedding (at ``p``).
 We obtain
 
 ```math
-  \operatorname*{arg\,min}_{Y\in T_p\mathcal M}\ \bigl\lVert \mathrm{d}i(p)[Y] - X \bigr\rVert_{i(p)}
+  \operatorname*{arg\,min}_{Y∈ T_p\mathcal M}\ \bigl\lVert \mathrm{d}i(p)[Y] - X \bigr\rVert_{i(p)}
 ```
 
 And we call the resulting ``Y`` the projection of ``X`` onto the tangent space ``T_p\mathcal M`` at ``p``.

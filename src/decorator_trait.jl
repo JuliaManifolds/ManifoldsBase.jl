@@ -412,7 +412,10 @@ function is_point(
     mpe = check_point(M, p; kwargs...)
     if mpe !== nothing
         (error === :error) && throw(mpe)
-        s = "$(typeof(mpe)) with $(mpe.val)\n$(mpe.msg)"
+        # else: collect and info showerror
+        io = IOBuffer()
+        showerror(io, mpe)
+        s = String(take!(io))
         (error === :info) && @info s
         (error === :warn) && @warn s
         return false
@@ -436,7 +439,10 @@ function is_vector(
     es = check_size(M, p, X)
     if es !== nothing
         (error === :error) && throw(es)
-        s = "$(typeof(es)) with $(es)"
+        # else: collect and info showerror
+        io = IOBuffer()
+        showerror(io, es)
+        s = String(take!(io))
         (error === :info) && @info s
         (error === :warn) && @warn s
         return false
@@ -478,7 +484,10 @@ function is_vector(
     mXe = check_vector(M, p, X; kwargs...)
     mXe === nothing && return true
     (error === :error) && throw(mXe)
-    s = "$(typeof(mXe)) with $(mXe.val)\n$(mXe.msg)"
+    # else: collect and info showerror
+    io = IOBuffer()
+    showerror(io, mXe)
+    s = String(take!(io))
     (error === :info) && @info s
     (error === :warn) && @warn s
     return false

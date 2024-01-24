@@ -567,11 +567,10 @@ function isapprox(M::AbstractManifold, p, q; error::Symbol = :none, kwargs...)
         ma = check_approx(M, p, q; kwargs...)
         if ma !== nothing
             (error === :error) && throw(ma)
-            if isnan(ma.val)
-                s = "$(typeof(ma))\n$(ma.msg)"
-            else
-                s = "$(typeof(ma)) with $(ma.val)\n$(ma.msg)"
-            end
+            # else: collect and info showerror
+            io = IOBuffer()
+            showerror(io, ma)
+            s = String(take!(io))
             (error === :info) && @info s
             (error === :warn) && @warn s
             return false
@@ -607,11 +606,10 @@ function isapprox(M::AbstractManifold, p, X, Y; error::Symbol = :none, kwargs...
         mat = check_approx(M, p, X, Y; kwargs...)
         if mat !== nothing
             (error === :error) && throw(mat)
-            if isnan(mat.val)
-                s = "$(typeof(mat))\n$(mat.msg)"
-            else
-                s = "$(typeof(mat)) with $(mat.val)\n$(mat.msg)"
-            end
+            # else: collect and info showerror
+            io = IOBuffer()
+            showerror(io, mat)
+            s = String(take!(io))
             (error === :info) && @info s
             (error === :warn) && @warn s
             return false
@@ -678,7 +676,10 @@ function is_point(M::AbstractManifold, p; error::Symbol = :none, kwargs...)
     if mps !== nothing
         (error === :error) && throw(mps)
         if (error === :info) || (error === :warn)
-            s = "$(typeof(mps)) with $(mps.val)\n$(mps.msg)"
+            # else: collect and info showerror
+            io = IOBuffer()
+            showerror(io, mps)
+            s = String(take!(io))
             (error === :info) && @info s
             (error === :warn) && @warn s
         end
@@ -688,7 +689,10 @@ function is_point(M::AbstractManifold, p; error::Symbol = :none, kwargs...)
     if mpe !== nothing
         (error === :error) && throw(mpe)
         if (error === :info) || (error === :warn)
-            s = "$(typeof(mpe)) with $(mpe.val)\n$(mpe.msg)"
+            # else: collect and info showerror
+            io = IOBuffer()
+            showerror(io, mpe)
+            s = String(take!(io))
             (error === :info) && @info s
             (error === :warn) && @warn s
         end
@@ -756,7 +760,10 @@ function is_vector(
     if mXs !== nothing
         (error === :error) && throw(mXs)
         if (error === :info) || (error === :warn)
-            s = "$(typeof(mXs)) with $(mXs.val)\n$(mXs.msg)"
+            # else: collect and info showerror
+            io = IOBuffer()
+            showerror(io, mXs)
+            s = String(take!(io))
             (error === :info) && @info s
             (error === :warn) && @warn s
         end
@@ -766,7 +773,10 @@ function is_vector(
     if mXe !== nothing
         (error === :error) && throw(mXe)
         if (error === :info) || (error === :warn)
-            s = "$(typeof(mXe)) with $(mXe.val)\n$(mXe.msg)"
+            # else: collect and info showerror
+            io = IOBuffer()
+            showerror(io, mXe)
+            s = String(take!(io))
             (error === :info) && @info s
             (error === :warn) && @warn s
         end
