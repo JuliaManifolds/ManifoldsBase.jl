@@ -548,6 +548,18 @@ include("test_manifolds.jl")
         @test isapprox(Xresult2, Xresult)
     end
 
+    @testset "sectional curvature" begin
+        @test sectional_curvature_max(M) == 1.0
+        @test sectional_curvature_min(M) == 0.0
+
+        Mss = ProductManifold(M1, M1)
+        @test sectional_curvature_max(Mss) == 1.0
+        @test sectional_curvature_min(Mss) == 0.0
+
+        @test sectional_curvature_max(ProductManifold(M1)) == 1.0
+        @test sectional_curvature_min(ProductManifold(M1)) == 1.0
+    end
+
     @testset "× constructors" begin
         @test M1 × M2 == M
         @test M × M2 == ProductManifold(M1, M2, M2)

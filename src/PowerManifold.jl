@@ -1364,6 +1364,42 @@ function riemann_tensor!(M::PowerManifoldNestedReplacing, Xresult, p, X, Y, Z)
     return Xresult
 end
 
+@doc raw"""
+    sectional_curvature_max(M::AbstractPowerManifold)
+
+Upper bound on sectional curvature of [`AbstractPowerManifold`](@ref) `M`. It is the maximum
+of sectional curvature of the wrapped manifold and 0 in case there are two or more component
+manifolds, as the sectional curvature corresponding to the plane spanned by vectors
+`(X_1, 0, ... 0)` and `(0, X_2, 0, ..., 0)` is 0.
+"""
+function sectional_curvature_max(M::AbstractPowerManifold)
+    d = prod(power_dimensions(M))
+    mscm = sectional_curvature_max(M.manifold)
+    if d > 1
+        return max(mscm, zero(mscm))
+    else
+        return mscm
+    end
+end
+
+@doc raw"""
+    sectional_curvature_min(M::AbstractPowerManifold)
+
+Lower bound on sectional curvature of [`AbstractPowerManifold`](@ref) `M`. It is the minimum
+of sectional curvature of the wrapped manifold and 0 in case there are two or more component
+manifolds, as the sectional curvature corresponding to the plane spanned by vectors
+`(X_1, 0, ... 0)` and `(0, X_2, 0, ..., 0)` is 0.
+"""
+function sectional_curvature_min(M::AbstractPowerManifold)
+    d = prod(power_dimensions(M))
+    mscm = sectional_curvature_max(M.manifold)
+    if d > 1
+        return min(mscm, zero(mscm))
+    else
+        return mscm
+    end
+end
+
 """
     set_component!(M::AbstractPowerManifold, q, p, idx...)
 

@@ -345,6 +345,16 @@ struct TestArrayRepresentation <: AbstractPowerRepresentation end
                 [-0.1 * X, -0.1 * X],
             )
         end
+
+        @testset "sectional curvature" begin
+            Mpr = PowerManifold(M1, NestedPowerRepresentation(), 2)
+            @test sectional_curvature_max(Mpr) == 1.0
+            @test sectional_curvature_min(Mpr) == 0.0
+
+            Mss = PowerManifold(M1, NestedPowerRepresentation(), 1)
+            @test sectional_curvature_max(Mss) == 1.0
+            @test sectional_curvature_min(Mss) == 1.0
+        end
     end
 
     @testset "Type size" begin

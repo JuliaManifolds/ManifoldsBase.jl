@@ -179,6 +179,13 @@ function ManifoldsBase.riemann_tensor!(M::TestSphere, Xresult, p, X, Y, Z)
     return Xresult
 end
 
+function ManifoldsBase.sectional_curvature_max(M::TestSphere)
+    return ifelse(manifold_dimension(M) == 1, 0.0, 1.0)
+end
+function ManifoldsBase.sectional_curvature_min(M::TestSphere)
+    return ifelse(manifold_dimension(M) == 1, 0.0, 1.0)
+end
+
 # from Absil, Mahony, Trumpf, 2013 https://sites.uclouvain.be/absil/2013-01/Weingarten_07PA_techrep.pdf
 function ManifoldsBase.Weingarten!(::TestSphere, Y, p, X, V)
     return Y .= -X * p' * V
