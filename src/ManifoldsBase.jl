@@ -153,8 +153,7 @@ function are_linearly_independent(M::AbstractManifold, p, X, Y)
     innerXY = inner(M, p, X, Y)
     return norm_X > eps_abs &&
            norm_Y > eps_abs &&
-           !isapprox(innerXY, norm_X * norm_Y) &&
-           !isapprox(innerXY, -norm_X * norm_Y)
+           !isapprox(abs(innerXY), norm_X * norm_Y)
 end
 
 """
