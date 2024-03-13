@@ -151,12 +151,12 @@ function are_linearly_independent(
     p,
     X,
     Y;
-    eps_abs::Real = sqrt(eps(number_eltype(X))),
+    atol::Real = sqrt(eps(number_eltype(X))),
 )
     norm_X = norm(M, p, X)
     norm_Y = norm(M, p, Y)
     innerXY = inner(M, p, X, Y)
-    return norm_X > eps_abs && norm_Y > eps_abs && !isapprox(abs(innerXY), norm_X * norm_Y)
+    return norm_X > atol && norm_Y > atol && !isapprox(abs(innerXY), norm_X * norm_Y)
 end
 
 """
