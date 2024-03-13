@@ -179,6 +179,9 @@ function riemann_tensor!(::DefaultManifold, Xresult, p, X, Y, Z)
     return fill!(Xresult, 0)
 end
 
+sectional_curvature_max(::DefaultManifold) = 0.0
+sectional_curvature_min(::DefaultManifold) = 0.0
+
 Weingarten!(::DefaultManifold, Y, p, X, V) = fill!(Y, 0)
 
 zero_vector(::DefaultManifold, p) = zero(p)

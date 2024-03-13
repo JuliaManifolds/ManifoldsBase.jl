@@ -890,6 +890,63 @@ function riemann_tensor!(M::ProductManifold, Xresult, p, X, Y, Z)
     return Xresult
 end
 
+@doc raw"""
+    sectional_curvature(M::ProductManifold, p, X, Y)
+
+Compute the sectional curvature of a manifold ``\mathcal M`` at a point ``p \in \mathcal M``
+on two linearly independent tangent vectors at ``p``. It may be 0 for a product of non-flat
+manifolds if projections of `X` and `Y` on subspaces corresponding to component manifolds
+are not linearly independent.
+"""
+function sectional_curvature(M::ProductManifold, p, X, Y)
+    curvature = zero(number_eltype(X))
+    map(
+        M.manifolds,
+        submanifold_components(M, p),
+        submanifold_components(M, X),
+        submanifold_components(M, Y),
+    ) do M_i, p_i, X_i, Y_i
+        if are_linearly_independent(M_i, p_i, X_i, Y_i)
+            curvature += sectional_curvature(M_i, p_i, X_i, Y_i)
+        end
+    end
+    return curvature
+end
+
+@doc raw"""
+    sectional_curvature_max(M::ProductManifold)
+
+Upper bound on sectional curvature of [`ProductManifold`](@ref) `M`. It is the maximum of
+sectional curvatures of component manifolds and 0 in case there are two or more component
+manifolds, as the sectional curvature corresponding to the plane spanned by vectors
+`(X_1, 0)` and `(0, X_2)` is 0.
+"""
+function sectional_curvature_max(M::ProductManifold)
+    max_sc = mapreduce(sectional_curvature_max, max, M.manifolds)
+    if length(M.manifolds) > 1
+        return max(max_sc, zero(max_sc))
+    else
+        return max_sc
+    end
+end
+
+@doc raw"""
+    sectional_curvature_min(M::ProductManifold)
+
+Lower bound on sectional curvature of [`ProductManifold`](@ref) `M`. It is the minimum of
+sectional curvatures of component manifolds and 0 in case there are two or more component
+manifolds, as the sectional curvature corresponding to the plane spanned by vectors
+`(X_1, 0)` and `(0, X_2)` is 0.
+"""
+function sectional_curvature_min(M::ProductManifold)
+    min_sc = mapreduce(sectional_curvature_min, min, M.manifolds)
+    if length(M.manifolds) > 1
+        return min(min_sc, zero(min_sc))
+    else
+        return min_sc
+    end
+end
+
 """
     select_from_tuple(t::NTuple{N, Any}, positions::Val{P})
 

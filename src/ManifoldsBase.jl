@@ -140,6 +140,25 @@ Compute the angle between tangent vectors `X` and `Y` at point `p` from the
 function angle(M::AbstractManifold, p, X, Y)
     return acos(real(inner(M, p, X, Y)) / norm(M, p, X) / norm(M, p, Y))
 end
+
+"""
+    are_linearly_independent(M::AbstractManifold, p, X, Y)
+
+Check is vectors `X`, `Y` tangent at `p` to `M` are linearly independent.
+"""
+function are_linearly_independent(
+    M::AbstractManifold,
+    p,
+    X,
+    Y;
+    atol::Real = sqrt(eps(number_eltype(X))),
+)
+    norm_X = norm(M, p, X)
+    norm_Y = norm(M, p, Y)
+    innerXY = inner(M, p, X, Y)
+    return norm_X > atol && norm_Y > atol && !isapprox(abs(innerXY), norm_X * norm_Y)
+end
+
 """
     base_manifold(M::AbstractManifold, depth = Val(-1))
 
@@ -922,6 +941,52 @@ function riemann_tensor(M::AbstractManifold, p, X, Y, Z)
     return riemann_tensor!(M, Xresult, p, X, Y, Z)
 end
 
+@doc raw"""
+    sectional_curvature(M::AbstractManifold, p, X, Y)
+
+Compute the sectional curvature of a manifold ``\mathcal M`` at a point ``p \in \mathcal M``
+on two linearly independent tangent vectors at ``p``.
+The formula reads
+```math
+
+    \kappa_p(X, Y) = \frac{⟨R(X, Y, Y), X⟩_p}{\lVert X \rVert^2_p \lVert Y \rVert^2_p - ⟨X, Y⟩^2_p}
+
+```
+where ``R(X, Y, Y)`` is the [`riemann_tensor`](@ref) on ``\mathcal M``.
+
+# Input
+
+* `M`:   a manifold ``\mathcal M``
+* `p`:   a point ``p \in \mathcal M``
+* `X`:   a tangent vector ``X \in T_p \mathcal M``
+* `Y`:   a tangent vector ``Y \in T_p \mathcal M``
+
+"""
+function sectional_curvature(M::AbstractManifold, p, X, Y)
+    R = riemann_tensor(M, p, X, Y, Y)
+    return inner(M, p, R, X) / ((norm(M, p, X)^2 * norm(M, p, Y)^2) - (inner(M, p, X, Y)^2))
+end
+
+@doc raw"""
+    sectional_curvature_max(M::AbstractManifold)
+
+Upper bound on sectional curvature of manifold `M`. The formula reads
+```math
+\omega = \operatorname{sup}_{p\in\mathcal M, X\in T_p\mathcal M, Y\in T_p\mathcal M, ⟨X, Y⟩ ≠ 0} \kappa_p(X, Y)
+```
+"""
+sectional_curvature_max(M::AbstractManifold)
+
+@doc raw"""
+    sectional_curvature_min(M::AbstractManifold)
+
+Lower bound on sectional curvature of manifold `M`. The formula reads
+```math
+\omega = \operatorname{inf}_{p\in\mathcal M, X\in T_p\mathcal M, Y\in T_p\mathcal M, ⟨X, Y⟩ ≠ 0} \kappa_p(X, Y)
+```
+"""
+sectional_curvature_min(M::AbstractManifold)
+
 """
     size_to_tuple(::Type{S}) where S<:Tuple
 
@@ -1185,6 +1250,9 @@ export ×,
     retract!,
     riemann_tensor,
     riemann_tensor!,
+    sectional_curvature,
+    sectional_curvature_max,
+    sectional_curvature_min,
     vector_space_dimension,
     vector_transport_along,
     vector_transport_along!,

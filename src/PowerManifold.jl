@@ -1364,6 +1364,64 @@ function riemann_tensor!(M::PowerManifoldNestedReplacing, Xresult, p, X, Y, Z)
     return Xresult
 end
 
+@doc raw"""
+    sectional_curvature(M::AbstractPowerManifold, p, X, Y)
+
+Compute the sectional curvature of a power manifold manifold ``\mathcal M`` at a point
+``p \in \mathcal M`` on two linearly independent tangent vectors at ``p``. It may be 0 for
+ if projections of `X` and `Y` on subspaces corresponding to component manifolds
+are not linearly independent.
+"""
+function sectional_curvature(M::AbstractPowerManifold, p, X, Y)
+    curvature = zero(number_eltype(X))
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        p_i = _read(M, rep_size, p, i)
+        X_i = _read(M, rep_size, X, i)
+        Y_i = _read(M, rep_size, Y, i)
+        if are_linearly_independent(M.manifold, p_i, X_i, Y_i)
+            curvature += sectional_curvature(M.manifold, p_i, X_i, Y_i)
+        end
+    end
+    return curvature
+end
+
+@doc raw"""
+    sectional_curvature_max(M::AbstractPowerManifold)
+
+Upper bound on sectional curvature of [`AbstractPowerManifold`](@ref) `M`. It is the maximum
+of sectional curvature of the wrapped manifold and 0 in case there are two or more component
+manifolds, as the sectional curvature corresponding to the plane spanned by vectors
+`(X_1, 0, ... 0)` and `(0, X_2, 0, ..., 0)` is 0.
+"""
+function sectional_curvature_max(M::AbstractPowerManifold)
+    d = prod(power_dimensions(M))
+    mscm = sectional_curvature_max(M.manifold)
+    if d > 1
+        return max(mscm, zero(mscm))
+    else
+        return mscm
+    end
+end
+
+@doc raw"""
+    sectional_curvature_min(M::AbstractPowerManifold)
+
+Lower bound on sectional curvature of [`AbstractPowerManifold`](@ref) `M`. It is the minimum
+of sectional curvature of the wrapped manifold and 0 in case there are two or more component
+manifolds, as the sectional curvature corresponding to the plane spanned by vectors
+`(X_1, 0, ... 0)` and `(0, X_2, 0, ..., 0)` is 0.
+"""
+function sectional_curvature_min(M::AbstractPowerManifold)
+    d = prod(power_dimensions(M))
+    mscm = sectional_curvature_max(M.manifold)
+    if d > 1
+        return min(mscm, zero(mscm))
+    else
+        return mscm
+    end
+end
+
 """
     set_component!(M::AbstractPowerManifold, q, p, idx...)
 
