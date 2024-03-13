@@ -351,6 +351,14 @@ struct TestArrayRepresentation <: AbstractPowerRepresentation end
             @test sectional_curvature_max(Mpr) == 1.0
             @test sectional_curvature_min(Mpr) == 0.0
 
+            p = [[0.0, 1.0, 0.0], [0.0, 1.0, 0.0]]
+            X1 = [[1.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
+            X2 = [[0.0, 0.0, 1.0], [0.0, 0.0, 0.0]]
+            X3 = [[0.0, 0.0, 0.0], [0.0, 0.0, 1.0]]
+
+            @test sectional_curvature(Mpr, p, X1, X2) == 1.0
+            @test sectional_curvature(Mpr, p, X1, X3) == 0.0
+
             Mss = PowerManifold(M1, NestedPowerRepresentation(), 1)
             @test sectional_curvature_max(Mss) == 1.0
             @test sectional_curvature_min(Mss) == 1.0

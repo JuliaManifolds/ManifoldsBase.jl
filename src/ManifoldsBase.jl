@@ -140,6 +140,23 @@ Compute the angle between tangent vectors `X` and `Y` at point `p` from the
 function angle(M::AbstractManifold, p, X, Y)
     return acos(real(inner(M, p, X, Y)) / norm(M, p, X) / norm(M, p, Y))
 end
+
+"""
+    are_linearly_independent(M::AbstractManifold, p, X, Y)
+
+Check is vectors `X`, `Y` tangent at `p` to `M` are linearly independent.
+"""
+function are_linearly_independent(M::AbstractManifold, p, X, Y)
+    eps_abs = sqrt(eps(number_eltype(X)))
+    norm_X = norm(M, p, X)
+    norm_Y = norm(M, p, Y)
+    innerXY = inner(M, p, X, Y)
+    return norm_X > eps_abs &&
+           norm_Y > eps_abs &&
+           !isapprox(innerXY, norm_X * norm_Y) &&
+           !isapprox(innerXY, -norm_X * norm_Y)
+end
+
 """
     base_manifold(M::AbstractManifold, depth = Val(-1))
 

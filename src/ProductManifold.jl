@@ -891,6 +891,29 @@ function riemann_tensor!(M::ProductManifold, Xresult, p, X, Y, Z)
 end
 
 @doc raw"""
+    sectional_curvature(M::ProductManifold, p, X, Y)
+
+Compute the sectional curvature of a manifold ``\mathcal M`` at a point ``p \in \mathcal M``
+on two linearly independent tangent vectors at ``p``. It may be 0 for a product of non-flat
+manifolds if projections of `X` and `Y` on subspaces corresponding to component manifolds
+are not linearly independent.
+"""
+function sectional_curvature(M::ProductManifold, p, X, Y)
+    curvature = zero(number_eltype(X))
+    map(
+        M.manifolds,
+        submanifold_components(M, p),
+        submanifold_components(M, X),
+        submanifold_components(M, Y),
+    ) do M_i, p_i, X_i, Y_i
+        if are_linearly_independent(M_i, p_i, X_i, Y_i)
+            curvature += sectional_curvature(M_i, p_i, X_i, Y_i)
+        end
+    end
+    return curvature
+end
+
+@doc raw"""
     sectional_curvature_max(M::ProductManifold)
 
 Upper bound on sectional curvature of [`ProductManifold`](@ref) `M`. It is the maximum of

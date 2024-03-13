@@ -1365,6 +1365,28 @@ function riemann_tensor!(M::PowerManifoldNestedReplacing, Xresult, p, X, Y, Z)
 end
 
 @doc raw"""
+    sectional_curvature(M::AbstractPowerManifold, p, X, Y)
+
+Compute the sectional curvature of a power manifold manifold ``\mathcal M`` at a point
+``p \in \mathcal M`` on two linearly independent tangent vectors at ``p``. It may be 0 for
+ if projections of `X` and `Y` on subspaces corresponding to component manifolds
+are not linearly independent.
+"""
+function sectional_curvature(M::AbstractPowerManifold, p, X, Y)
+    curvature = zero(number_eltype(X))
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        p_i = _read(M, rep_size, p, i)
+        X_i = _read(M, rep_size, X, i)
+        Y_i = _read(M, rep_size, Y, i)
+        if are_linearly_independent(M.manifold, p_i, X_i, Y_i)
+            curvature += sectional_curvature(M.manifold, p_i, X_i, Y_i)
+        end
+    end
+    return curvature
+end
+
+@doc raw"""
     sectional_curvature_max(M::AbstractPowerManifold)
 
 Upper bound on sectional curvature of [`AbstractPowerManifold`](@ref) `M`. It is the maximum
