@@ -368,7 +368,7 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
             @test riemann_tensor!(M, tv_rt, pts[1], tv1, tv2, tv1) === tv_rt
             @test tv_rt == zero(tv1)
 
-            @test sectional_curvature(M, pts[1], tv1, tv2) == 0.0
+            @test sectional_curvature(M, pts[1], tv1, log(M, pts[1], pts[3])) == 0.0
             @test sectional_curvature_max(M) == 0.0
             @test sectional_curvature_min(M) == 0.0
 
