@@ -216,14 +216,14 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
     M = ManifoldsBase.DefaultManifold(3)
     types = [
         Vector{Float64},
-        SizedVector{3,Float64},
+        SizedVector{3,Float64,Vector{Float64}},
         MVector{3,Float64},
         Vector{Float32},
-        SizedVector{3,Float32},
+        SizedVector{3,Float32,Vector{Float32}},
         MVector{3,Float32},
         Vector{Double64},
         MVector{3,Double64},
-        SizedVector{3,Double64},
+        SizedVector{3,Double64,Vector{Double64}},
         DefaultPoint{Vector{Float64}},
     ]
 
