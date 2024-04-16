@@ -216,14 +216,14 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
     M = ManifoldsBase.DefaultManifold(3)
     types = [
         Vector{Float64},
-        SizedVector{3,Float64},
+        SizedVector{3,Float64,Vector{Float64}},
         MVector{3,Float64},
         Vector{Float32},
-        SizedVector{3,Float32},
+        SizedVector{3,Float32,Vector{Float32}},
         MVector{3,Float32},
         Vector{Double64},
         MVector{3,Double64},
-        SizedVector{3,Double64},
+        SizedVector{3,Double64,Vector{Double64}},
         DefaultPoint{Vector{Float64}},
     ]
 
@@ -368,7 +368,7 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
             @test riemann_tensor!(M, tv_rt, pts[1], tv1, tv2, tv1) === tv_rt
             @test tv_rt == zero(tv1)
 
-            @test sectional_curvature(M, pts[1], tv1, tv2) == 0.0
+            @test sectional_curvature(M, pts[1], tv1, log(M, pts[1], pts[3])) == 0.0
             @test sectional_curvature_max(M) == 0.0
             @test sectional_curvature_min(M) == 0.0
 

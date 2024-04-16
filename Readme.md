@@ -9,6 +9,8 @@
 [![](https://img.shields.io/badge/docs-dev-blue.svg)](https://juliamanifolds.github.io/ManifoldsBase.jl/dev/)
 [![CI](https://github.com/JuliaManifolds/ManifoldsBase.jl/workflows/CI/badge.svg)](https://github.com/JuliaManifolds/ManifoldsBase.jl/actions?query=workflow%3ACI+branch%3Amaster)
 [![codecov.io](http://codecov.io/github/JuliaManifolds/ManifoldsBase.jl/coverage.svg?branch=master)](https://codecov.io/gh/JuliaManifolds/ManifoldsBase.jl/)
+[![Aqua QA](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
+
 [![arXiv](https://img.shields.io/badge/arXiv%20CS.MS-2106.08777-blue.svg)](https://arxiv.org/abs/2106.08777)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5964340.svg)](https://doi.org/10.5281/zenodo.5964340)
 ## Installation
