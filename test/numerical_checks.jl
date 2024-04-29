@@ -26,7 +26,7 @@ include("test_manifolds.jl")
         @test_throws ErrorException Manopt.find_best_slope_window(
             zeros(2), zeros(2), [2, 20]
         )
-        # Linear Exponential Map -> exact
+        # Exponential Map -> exact
         @test check_retraction(M, ExponentialRetraction(), p, X)
         check_retraction(M, ExponentialRetraction(), p, X; plot=true)
     end

@@ -25,6 +25,7 @@ using Markdown: @doc_str
 using Printf: @sprintf
 using Random
 using Requires
+using Statistics: cor, cov, mean, median, std
 
 include("maintypes.jl")
 include("numbers.jl")

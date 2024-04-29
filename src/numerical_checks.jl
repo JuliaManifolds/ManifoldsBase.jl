@@ -67,7 +67,7 @@ function check_retraction(
     # points `p_i` to evaluate the error function at
     points = map(t -> exp(M, p, Xn, t), T)
     approx_points = map(t -> retract(M, p, Xn, t, retraction_method), T)
-    errors = [distance(M, p, q) for (p, q) in zip(points, approximate_points)]
+    errors = [distance(M, p, q) for (p, q) in zip(points, approx_points)]
     return prepare_check_result(
         log_range,
         errors,
