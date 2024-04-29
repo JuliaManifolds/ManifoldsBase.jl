@@ -22,6 +22,7 @@ import Random: rand, rand!
 
 using LinearAlgebra
 using Markdown: @doc_str
+using Printf: @sprintf
 using Random
 using Requires
 
@@ -1056,6 +1057,7 @@ include("vector_spaces.jl")
 include("point_vector_fallbacks.jl")
 include("nested_trait.jl")
 include("decorator_trait.jl")
+include("numerical_checks.jl")
 
 include("VectorFiber.jl")
 include("TangentSpace.jl")
@@ -1185,6 +1187,7 @@ export ×,
     change_metric!,
     change_representer,
     change_representer!,
+    check_retraction,
     copy,
     copyto!,
     default_approximation_method,

@@ -43,3 +43,5 @@ function ManifoldsBase.plot_slope(x, y; slope=2, line_base=0, a=0, b=2.0, i=1, j
     end
     return fig
 end
+
+end
