@@ -19,16 +19,24 @@ ManifoldsBaseRecursiveArrayToolsExt = "RecursiveArrayTools"
 ManifoldsBasePlotsExt = "Plots"
 
 [compat]
+Aqua = "0.8"
 DoubleFloats = ">= 0.9.2"
+ForwardDiff = "0.10"
+julia = "1.6"
 LinearAlgebra = "1.6"
 Markdown = "1.6"
+OrdinaryDiffEq = "6"
+Plots = "1"
 Printf = "1.6"
 Random = "1.6"
 RecursiveArrayTools = "2, 3"
 Requires = "1"
-julia = "1.6"
+ReverseDiff = "1"
+StaticArrays = "1"
+Test = "1.6"
 
 [extras]
+Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
 DoubleFloats = "497a8b3b-efae-58df-a0af-a86822472b78"
 ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
 OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed"
@@ -39,4 +47,4 @@ StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test", "DoubleFloats", "ForwardDiff", "OrdinaryDiffEq", "ReverseDiff", "StaticArrays", "RecursiveArrayTools"]
+test = ["Test", "Aqua", "DoubleFloats", "ForwardDiff", "OrdinaryDiffEq", "Plots", "ReverseDiff", "StaticArrays", "RecursiveArrayTools"]

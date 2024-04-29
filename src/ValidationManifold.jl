@@ -176,9 +176,9 @@ end
 function get_basis(
     M::ValidationManifold,
     p,
-    B::Union{AbstractOrthogonalBasis,CachedBasis{𝔽,<:AbstractOrthogonalBasis{𝔽}}};
+    B::Union{AbstractOrthogonalBasis,CachedBasis{𝔽,<:AbstractOrthogonalBasis{𝔽}} where {𝔽}};
     kwargs...,
-) where {𝔽}
+)
     is_point(M, p; error = M.mode, kwargs...)
     Ξ = invoke(get_basis, Tuple{ValidationManifold,Any,AbstractBasis}, M, p, B; kwargs...)
     bvectors = get_vectors(M, p, Ξ)
@@ -200,9 +200,12 @@ end
 function get_basis(
     M::ValidationManifold,
     p,
-    B::Union{AbstractOrthonormalBasis,CachedBasis{𝔽,<:AbstractOrthonormalBasis{𝔽}}};
+    B::Union{
+        AbstractOrthonormalBasis,
+        <:CachedBasis{𝔽,<:AbstractOrthonormalBasis{𝔽}} where {𝔽},
+    };
     kwargs...,
-) where {𝔽}
+)
     is_point(M, p; error = M.mode, kwargs...)
     get_basis_invoke_types = Tuple{
         ValidationManifold,
