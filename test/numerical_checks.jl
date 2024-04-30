@@ -25,7 +25,7 @@ using ManifoldsBaseTestUtils
             p,
             X;
             limits = (-2.5, 2.0),
-            throw_error = true,
+            error = :error,
         )
         @test !check_retraction(M, ProjectionRetraction(), p, X)
 

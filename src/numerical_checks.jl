@@ -15,7 +15,7 @@
         plot = false,
         second_order = true
         slope_tol = 0.1,
-        throw_error = false,
+        error = :none,
         window = nothing,
     )
 
@@ -39,7 +39,7 @@ no plot is generated,
   The plot is in log-log-scale. This is returned and can then also be saved.
 * `second_order`:      check whether the retraction is of second order. if set to `false`, first order is checked.
 * `slope_tol`:         tolerance for the slope (global) of the approximation
-* `throw_error`:       throw an error message if the differential is wrong
+* `error`:             specify how to report errors: `:none`, `:info`, `:warn`, or `:error` are availablem, cf. [is_point](@ref)
 * `window`:            specify window sizes within the `log_range` that are used for the slope estimation.
   the default is, to use all window sizes `2:N`.
 """
@@ -57,7 +57,7 @@ function check_retraction(
     log_range = range(limits[1], limits[2]; length = N),
     plot = false,
     slope_tol = 0.1,
-    throw_error = false,
+    error::Symbol = :none,
     window = nothing,
 )
     Xn = X ./ norm(M, p, X) # normalize tangent direction
@@ -77,7 +77,7 @@ function check_retraction(
         name = name,
         plot = plot,
         slope_tol = slope_tol,
-        throw_error = throw_error,
+        error = error,
         window = window,
     )
 end
@@ -112,7 +112,7 @@ plot_slope(x, y)
         name = "estimated slope",
         plot = false,
         slope_tol = 0.1,
-        throw_error = false,
+        error = :none,
     )
 
 Given a range of values `log_range`, with computed `errors`,
@@ -129,8 +129,9 @@ no plot is be generated,
 * `plot`:          whether to plot the result, see [`plot_slope`](@ref)
   The plot is in log-log-scale. This is returned and can then also be saved.
 * `slope_tol`:     tolerance for the slope (global) of the approximation
-* `throw_error`:   throw an error message if the given errors do not fit the slope within the given tolerance.
+* `error`:         specify how to handle errors, `:none`, `:info`, `:warn`, `:error`
 """
+
 function prepare_check_result(
     log_range,
     errors,
@@ -139,7 +140,7 @@ function prepare_check_result(
     name = "estimated slope",
     slope_tol = 1e-1,
     plot = false,
-    throw_error = false,
+    error::Symbol = :none,
     window = nothing,
     exactness_tol = 1e3 * eps(eltype(errors)),
 )
@@ -186,7 +187,9 @@ function prepare_check_result(
         i = ib,
         j = jb,
     )
-    throw_error && throw(ErrorException(msg))
+    (error === :info) && @info msg
+    (error === :warn) && @warn msg
+    (error === :error) && throw(ErrorException(msg))
     return false
 end
 
