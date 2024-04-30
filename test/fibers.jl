@@ -2,21 +2,8 @@ using RecursiveArrayTools, ManifoldsBase, Test
 using Random
 using ManifoldsBase: DefaultManifold, VectorSpaceType, ℝ, Fiber
 
-push!(LOAD_PATH, pwd())
+!(pwd() in LOAD_PATH) && (push!(LOAD_PATH, pwd()))
 using ManifoldsBaseTestUtils
-
-struct TestVectorSpaceType <: VectorSpaceType end
-
-struct TestFiberType <: ManifoldsBase.FiberType end
-
-function ManifoldsBase.fiber_dimension(M::AbstractManifold, ::TestFiberType)
-    return 2 * manifold_dimension(M)
-end
-
-function ManifoldsBase.vector_space_dimension(M::AbstractManifold, ::TestVectorSpaceType)
-    return 2 * manifold_dimension(M)
-end
-
 
 @testset "vector space fibers" begin
     M = DefaultManifold(3)

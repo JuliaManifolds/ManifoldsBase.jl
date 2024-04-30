@@ -3,7 +3,7 @@ using ManifoldsBase
 using ManifoldsBase: ℝ, ℂ, DefaultManifold, RealNumbers
 using Test
 
-push!(LOAD_PATH, pwd())
+!(pwd() in LOAD_PATH) && (push!(LOAD_PATH, pwd()))
 
 using ManifoldsBaseTestUtils
 

@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Tests now also use `Aqua.jl` to spot problems in the code such as ambiguities.
 * introduce a `check_retration` funtion to numerically check whether a retraction method is a retraction.
 
+### Changed
+
+* introduced a `ManifoldsBaseTestUtils` module to encapsulate comon types and function definitions in different parts of the tests.
+
 ## [0.15.8] 13/03/2024
 
 ### Added

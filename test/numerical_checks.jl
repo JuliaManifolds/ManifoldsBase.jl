@@ -2,7 +2,7 @@ using ManifoldsBase, Plots, Test
 # don't show plots actually
 default(; show = false, reuse = true)
 
-push!(LOAD_PATH, pwd())
+!(pwd() in LOAD_PATH) && (push!(LOAD_PATH, pwd()))
 using ManifoldsBaseTestUtils
 
 @testset "Numerical Check functions" begin

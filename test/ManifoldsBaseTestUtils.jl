@@ -381,6 +381,21 @@ DiagonalizingBasisProxy() = DiagonalizingOrthonormalBasis([1.0, 0.0, 0.0])
 
 #
 #
+# Vector Space types
+struct TestVectorSpaceType <: ManifoldsBase.VectorSpaceType end
+
+struct TestFiberType <: ManifoldsBase.FiberType end
+
+function ManifoldsBase.fiber_dimension(M::AbstractManifold, ::TestFiberType)
+    return 2 * manifold_dimension(M)
+end
+
+function ManifoldsBase.vector_space_dimension(M::AbstractManifold, ::TestVectorSpaceType)
+    return 2 * manifold_dimension(M)
+end
+
+#
+#
 # DefaultManifold with a few artificiual retrations
 
 struct CustomDefinedRetraction <: ManifoldsBase.AbstractRetractionMethod end
@@ -569,5 +584,5 @@ export NonMPoint, NonTVector, NonCoTVector
 export NotImplementedRetraction, NotImplementedInverseRetraction
 export ProjManifold, ProjectionTestManifold
 export TestSphere, TestSPD
-
+export TestVectorSpaceType, TestFiberType
 end

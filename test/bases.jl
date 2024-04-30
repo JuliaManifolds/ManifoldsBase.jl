@@ -5,7 +5,7 @@ using ManifoldsBase: CotangentSpaceType, TangentSpaceType
 using ManifoldsBase: FVector
 using Test
 
-push!(LOAD_PATH, pwd())
+!(pwd() in LOAD_PATH) && (push!(LOAD_PATH, pwd()))
 using ManifoldsBaseTestUtils
 
 @testset "Bases" begin

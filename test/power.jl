@@ -6,7 +6,7 @@ using StaticArrays
 using LinearAlgebra
 using Random
 
-push!(LOAD_PATH, pwd())
+!(pwd() in LOAD_PATH) && (push!(LOAD_PATH, pwd()))
 using ManifoldsBaseTestUtils
 
 struct TestVectorSpaceType <: VectorSpaceType end
