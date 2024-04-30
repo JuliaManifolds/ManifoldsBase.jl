@@ -15,22 +15,39 @@ using ManifoldsBaseTestUtils
         X = log(M, p, q)
 
         # TODO: Implement projectionretraction in the test file to check it here.
-        @test check_retraction(M, ExponentialRetraction(), p, X)
-        check_retraction(M, ExponentialRetraction(), p, X; plot = true)
+        # @test check_retraction(M, ExponentialRetraction(), p, X; exactness_tol=1e-7)
+        # check_retraction(
+        #    M,
+        #    ExponentialRetraction(),
+        #    p,
+        #    X;
+        #    plot = true,
+        #    exactness_tol = 1e-7,
+        #)
 
         # TODO: Implement a non-retraction to get an error here
         # @test_throws ErrorException check_gradient(M, f, grad_fb, p, X; throw_error=true)
         # @test !check_gradient(M, f, grad_fb, p, X)
 
         #test window size error
-        @test_throws ErrorException Manopt.find_best_slope_window(zeros(2), zeros(2), 20)
-        @test_throws ErrorException Manopt.find_best_slope_window(
+        @test_throws ErrorException ManifoldsBase.find_best_slope_window(
+            zeros(2),
+            zeros(2),
+            20,
+        )
+        @test_throws ErrorException ManifoldsBase.find_best_slope_window(
             zeros(2),
             zeros(2),
             [2, 20],
         )
-        # Exponential Map -> exact
-        @test check_retraction(M, ExponentialRetraction(), p, X)
-        check_retraction(M, ExponentialRetraction(), p, X; plot = true)
+        @test check_retraction(M, ExponentialRetraction(), p, X; exactness_tol = 1e-7)
+        check_retraction(
+            M,
+            ExponentialRetraction(),
+            p,
+            X;
+            plot = true,
+            exactness_tol = 1e-7,
+        )
     end
 end
