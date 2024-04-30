@@ -1,5 +1,89 @@
 
 @doc raw"""
+    check_inverse_retraction(
+        M::AbstractManifold,
+        inverse_rectraction_method::AbstractInverseRetractionMethod,
+        p=rand(M),
+        X=rand(M; vector_at=p);
+        #
+        exactness_tol = 1e-12,
+        io = nothing,
+        limits = (-8.0,1),
+        log_range = range(limits[1], limits[2]; length=N),
+        N = 101,
+        name = "inverse retraction",
+        plot = false,
+        second_order = true
+        slope_tol = 0.1,
+        error = :none,
+        window = nothing,
+    )
+
+Check numerically wether the inverse retraction `inverse_retraction_method` is correct.
+This requires the [`log`](@ref) and [`norm`](@ref) functions to be implemented for the [`AbstractManifold`](@ref) `M`.
+
+This implements a method similar to [Boumal:2023; Section 4.8 or Section 6.8](@cite).
+
+Note that if the errors are below the given tolerance and the method is exact,
+no plot is generated,
+
+# Keyword arguments
+
+* `exactness_tol`:     if all errors are below this tolerance, the differential is considered to be exact
+* `io`:                provide an `IO` to print the result to
+* `limits`:            specify the limits in the `log_range`, that is the exponent for the range
+* `log_range`:         specify the range of points (in log scale) to sample the differential line
+* `N`:                 number of points to verify within the `log_range` default range ``[10^{-8},10^{0}]``
+* `name`:              name to display in the plot
+* `plot`:              whether to plot the result (if `Plots.jl` is loaded).
+  The plot is in log-log-scale. This is returned and can then also be saved.
+* `second_order`:      check whether the retraction is of second order. if set to `false`, first order is checked.
+* `slope_tol`:         tolerance for the slope (global) of the approximation
+* `error`:             specify how to report errors: `:none`, `:info`, `:warn`, or `:error` are available
+* `window`:            specify window sizes within the `log_range` that are used for the slope estimation.
+  the default is, to use all window sizes `2:N`.
+"""
+function check_inverse_retraction(
+    M::AbstractManifold,
+    inverse_retraction_method::AbstractInverseRetractionMethod,
+    p = rand(M),
+    X = rand(M; vector_at = p);
+    exactness_tol = 1e-12,
+    io::Union{IO,Nothing} = nothing,
+    limits = (-8.0, 0.0),
+    N = 101,
+    second_order = true,
+    name = second_order ? "second order inverse retraction" : "inverse retraction",
+    log_range = range(limits[1], limits[2]; length = N),
+    plot = false,
+    slope_tol = 0.1,
+    error::Symbol = :none,
+    window = nothing,
+)
+    Xn = X ./ norm(M, p, X) # normalize tangent direction
+    # function for the directional derivative
+    #
+    T = exp10.(log_range)
+    # points `p_i` to evaluate the error function at
+    points = [exp(M, p, Xn, t) for t in T]
+    Xs = [t * Xn for t in T]
+    approx_Xs = [inverse_retract(M, p, q, inverse_retraction_method) for q in points]
+    errors = [norm(M, p, X - Y) for (X, Y) in zip(Xs, approx_Xs)]
+    return prepare_check_result(
+        log_range,
+        errors,
+        second_order ? 3.0 : 2.0;
+        exactness_tol = exactness_tol,
+        io = io,
+        name = name,
+        plot = plot,
+        slope_tol = slope_tol,
+        error = error,
+        window = window,
+    )
+end
+
+@doc raw"""
     check_retraction(
         M::AbstractManifold,
         rectraction_method::AbstractRetractionMethod,
@@ -20,7 +104,7 @@
     )
 
 Check numerically wether the retraction `retraction_method` is correct.
-This requires the [`exp`](@ref) function to be implemented for the [`AbstractManifold`](@ref) `M`.
+This requires the [`exp`](@ref) and [`distance`](@ref) function to be implemented for the [`AbstractManifold`](@ref) `M`.
 
 This implements a method similar to [Boumal:2023; Section 4.8 or Section 6.8](@cite).
 
@@ -39,7 +123,7 @@ no plot is generated,
   The plot is in log-log-scale. This is returned and can then also be saved.
 * `second_order`:      check whether the retraction is of second order. if set to `false`, first order is checked.
 * `slope_tol`:         tolerance for the slope (global) of the approximation
-* `error`:             specify how to report errors: `:none`, `:info`, `:warn`, or `:error` are availablem, cf. [is_point](@ref)
+* `error`:             specify how to report errors: `:none`, `:info`, `:warn`, or `:error` are available
 * `window`:            specify window sizes within the `log_range` that are used for the slope estimation.
   the default is, to use all window sizes `2:N`.
 """
