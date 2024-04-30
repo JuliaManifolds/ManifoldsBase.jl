@@ -3,7 +3,9 @@ using ManifoldsBase
 using ManifoldsBase: ℝ, ℂ, DefaultManifold, RealNumbers
 using Test
 
-include("test_manifolds.jl")
+push!(LOAD_PATH, pwd())
+
+using ManifoldsBaseTestUtils
 
 @testset "TestSphere" begin
     @testset "ShootingInverseRetraction" begin

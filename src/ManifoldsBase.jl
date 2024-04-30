@@ -1070,14 +1070,36 @@ include("PowerManifold.jl")
 
 #
 #
-# Requires
+# Init
 # -----
 function __init__()
+    #
+    # Error Hints
+    #
+    @static if isdefined(Base.Experimental, :register_error_hint)
+        Base.Experimental.register_error_hint(MethodError) do io, exc, argtypes, kwargs
+            if exc.f === plot_slope
+                print(
+                    io,
+                    """
+                    `plot_slope` has to be implemented using your favourite plotting package.
+                    A default is available when Plots.jl  was added to the current environment.
+                    To then get the plotting functionality activated, do
+                    """,
+                )
+                printstyled(io, "`using Plots`"; color = :cyan)
+            end
+        end
+    end
+    # Extensions in the pre 1.9 fallback using Requires.jl
     @static if !isdefined(Base, :get_extension)
         @require RecursiveArrayTools = "731186ca-8d62-57ce-b412-fbd966d074cd" begin
             include(
                 "../ext/ManifoldsBaseRecursiveArrayToolsExt/ManifoldsBaseRecursiveArrayToolsExt.jl",
             )
+        end
+        @require Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80" begin
+            include("../ext/ManifoldsBasePlotsExt.jl")
         end
     end
 end

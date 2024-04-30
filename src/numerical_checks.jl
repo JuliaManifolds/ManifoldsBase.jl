@@ -52,10 +52,10 @@ function check_retraction(
     io::Union{IO,Nothing} = nothing,
     limits = (-8.0, 0.0),
     N = 101,
-    name = "retraction",
+    second_order = true,
+    name = second_order ? "second order retraction" : "retraction",
     log_range = range(limits[1], limits[2]; length = N),
     plot = false,
-    second_order = true,
     slope_tol = 0.1,
     throw_error = false,
     window = nothing,
@@ -100,7 +100,6 @@ Plot the result from the verification functions on data `x,y` with two compariso
 2) `a` + `b*t` on the interval [`x[i]`, `x[j]`] for some (best fitting) comparison slope
 """
 plot_slope(x, y)
-
 
 """
     prepare_check_result(log_range, errors, slope, kwargs...)

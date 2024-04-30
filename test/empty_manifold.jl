@@ -1,14 +1,9 @@
-using ManifoldsBase
+using ManifoldsBase, Test
+
+
 
 using Test
-import Base: *
-struct NonManifold <: AbstractManifold{ManifoldsBase.ℝ} end
-struct NonMPoint <: AbstractManifoldPoint end
-struct NonTVector <: TVector end
-struct NonCoTVector <: CoTVector end
-struct NotImplementedRetraction <: AbstractRetractionMethod end
-struct NotImplementedInverseRetraction <: AbstractInverseRetractionMethod end
-*(t::Float64, X::NonTVector) = X
+
 @testset "AbstractManifold with empty implementation" begin
     M = NonManifold()
     p = NonMPoint()

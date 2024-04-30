@@ -2,7 +2,8 @@ using ManifoldsBase, Plots, Test
 # don't show plots actually
 default(; show = false, reuse = true)
 
-include("test_manifolds.jl")
+push!(LOAD_PATH, pwd())
+using ManifoldsBaseTestUtils
 
 @testset "Numerical Check functions" begin
     @testset "Test Retraction checks" begin

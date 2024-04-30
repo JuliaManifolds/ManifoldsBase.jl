@@ -1,6 +1,10 @@
 using RecursiveArrayTools, ManifoldsBase, Test
 using Random
 using ManifoldsBase: DefaultManifold, VectorSpaceType, ℝ, Fiber
+
+push!(LOAD_PATH, pwd())
+using ManifoldsBaseTestUtils
+
 struct TestVectorSpaceType <: VectorSpaceType end
 
 struct TestFiberType <: ManifoldsBase.FiberType end
@@ -12,8 +16,6 @@ end
 function ManifoldsBase.vector_space_dimension(M::AbstractManifold, ::TestVectorSpaceType)
     return 2 * manifold_dimension(M)
 end
-
-include("test_manifolds.jl")
 
 
 @testset "vector space fibers" begin

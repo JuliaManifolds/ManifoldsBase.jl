@@ -113,11 +113,11 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
         end
 
         function ManifoldsBase.angle(M::$TM, p::$TP, X::$TV, Y::$TV)
-            return angle(M, p.$pfield, X.$vfield, Y.$vfield)
+            return ManifoldsBase.angle(M, p.$pfield, X.$vfield, Y.$vfield)
         end
 
         function ManifoldsBase.check_point(M::$TM, p::$TP; kwargs...)
-            return check_point(M, p.$pfield; kwargs...)
+            return ManifoldsBase.check_point(M, p.$pfield; kwargs...)
         end
 
         function ManifoldsBase.check_vector(M::$TM, p::$TP, X::$TV; kwargs...)
@@ -132,26 +132,26 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
         end
 
         function ManifoldsBase.distance(M::$TM, p::$TP, q::$TP)
-            return distance(M, p.$pfield, q.$pfield)
+            return ManifoldsBase.distance(M, p.$pfield, q.$pfield)
         end
 
         function ManifoldsBase.embed!(M::$TM, q::$TP, p::$TP)
-            embed!(M, q.$pfield, p.$pfield)
+            ManifoldsBase.embed!(M, q.$pfield, p.$pfield)
             return q
         end
 
         function ManifoldsBase.embed!(M::$TM, Y::$TV, p::$TP, X::$TV)
-            embed!(M, Y.$vfield, p.$pfield, X.$vfield)
+            ManifoldsBase.embed!(M, Y.$vfield, p.$pfield, X.$vfield)
             return Y
         end
 
         function ManifoldsBase.exp!(M::$TM, q::$TP, p::$TP, X::$TV)
-            exp!(M, q.$pfield, p.$pfield, X.$vfield)
+            ManifoldsBase.exp!(M, q.$pfield, p.$pfield, X.$vfield)
             return q
         end
 
         function ManifoldsBase.inner(M::$TM, p::$TP, X::$TV, Y::$TV)
-            return inner(M, p.$pfield, X.$vfield, Y.$vfield)
+            return ManifoldsBase.inner(M, p.$pfield, X.$vfield, Y.$vfield)
         end
 
         function ManifoldsBase.inverse_retract!(
@@ -161,25 +161,25 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
             q::$TP,
             m::LogarithmicInverseRetraction,
         )
-            inverse_retract!(M, X.$vfield, p.$pfield, q.$pfield, m)
+            ManifoldsBase.inverse_retract!(M, X.$vfield, p.$pfield, q.$pfield, m)
             return X
         end
 
         function ManifoldsBase.isapprox(M::$TM, p::$TP, q::$TP; kwargs...)
-            return isapprox(M, p.$pfield, q.$pfield; kwargs...)
+            return ManifoldsBase.isapprox(M, p.$pfield, q.$pfield; kwargs...)
         end
 
         function ManifoldsBase.isapprox(M::$TM, p::$TP, X::$TV, Y::$TV; kwargs...)
-            return isapprox(M, p.$pfield, X.$vfield, Y.$vfield; kwargs...)
+            return ManifoldsBase.isapprox(M, p.$pfield, X.$vfield, Y.$vfield; kwargs...)
         end
 
         function ManifoldsBase.log!(M::$TM, X::$TV, p::$TP, q::$TP)
-            log!(M, X.$vfield, p.$pfield, q.$pfield)
+            ManifoldsBase.log!(M, X.$vfield, p.$pfield, q.$pfield)
             return X
         end
 
         function ManifoldsBase.norm(M::$TM, p::$TP, X::$TV)
-            return norm(M, p.$pfield, X.$vfield)
+            return ManifoldsBase.norm(M, p.$pfield, X.$vfield)
         end
 
         function ManifoldsBase.retract!(
@@ -189,7 +189,7 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
             X::$TV,
             m::ExponentialRetraction,
         )
-            retract!(M, q.$pfield, p.$pfield, X.$vfield, m)
+            ManifoldsBase.retract!(M, q.$pfield, p.$pfield, X.$vfield, m)
             return q
         end
 
@@ -200,7 +200,7 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
             X::$TV,
             c::AbstractVector,
         )
-            vector_transport_along!(M, Y.$vfield, p.$pfield, X.$vfield, c)
+            ManifoldsBase.vector_transport_along!(M, Y.$vfield, p.$pfield, X.$vfield, c)
             return Y
         end
 
@@ -209,7 +209,7 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
         end
 
         function ManifoldsBase.zero_vector!(M::$TM, X::$TV, p::$TP)
-            zero_vector!(M, X.$vfield, p.$pfield)
+            ManifoldsBase.zero_vector!(M, X.$vfield, p.$pfield)
             return X
         end
     end

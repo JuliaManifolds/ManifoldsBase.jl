@@ -7,7 +7,8 @@ using LinearAlgebra
 using Random
 using RecursiveArrayTools
 
-include("test_manifolds.jl")
+push!(LOAD_PATH, pwd())
+using ManifoldsBaseTestUtils
 
 @testset "Product manifold" begin
     M1 = TestSphere(2)
