@@ -2,10 +2,10 @@
 @doc raw"""
     check_retraction(
         M::AbstractManifold,
-        rectraction_method::AbstractRetractionMethod.
+        rectraction_method::AbstractRetractionMethod,
         p=rand(M),
-        X=rand(M; vector_at=p)
-        ;
+        X=rand(M; vector_at=p);
+        #
         exactness_tol = 1e-12,
         io = nothing,
         limits = (-8.0,1),
@@ -98,11 +98,22 @@ Plot the result from the verification functions on data `x,y` with two compariso
 
 1) `line_base` + t`slope`  as the global slope(s) the plot could have
 2) `a` + `b*t` on the interval [`x[i]`, `x[j]`] for some (best fitting) comparison slope
+
+!!! note
+    This function has to be implemented for a certain plotting package.
+    loading [Plots.jl](https://docs.juliaplots.org/stable/) provides a default implementation.
 """
 plot_slope(x, y)
 
 """
-    prepare_check_result(log_range, errors, slope, kwargs...)
+    prepare_check_result(log_range, errors, slope;
+        exactness_to = 1e3*eps(eltype(errors)),
+        io = nothing
+        name = "estimated slope"`,
+        plot = false,
+        slope_tol = 0.1,
+        throw_error = false,
+    )
 
 Given a range of values `log_range`, with computed `errors`,
 verify whether this yields a slope of `slope` in log-scale
@@ -112,13 +123,13 @@ no plot is be generated,
 
 # Keyword arguments
 
-* `exactness_tol`: (`1e3*eps(eltype(errors))`) is all errors are below this tolerance, the verification is considered to be exact
-* `io`:            (`nothing`) provide an `IO` to print the result to
-* `name`:          (`"differential"`) name to display in the plot title
-* `plot`:          (`false`) whether to plot the result (if `Plots.jl` is loaded).
+* `exactness_tol`: is all errors are below this tolerance, the verification is considered to be exact
+* `io`:            provide an `IO` to print the result to
+* `name`:          name to display in the plot title
+* `plot`:          whether to plot the result, see [`plot_slope`](@ref)
   The plot is in log-log-scale. This is returned and can then also be saved.
-* `slope_tol`:     (`0.1`) tolerance for the slope (global) of the approximation
-* `throw_error`:   (`false`) throw an error message if the gradient or Hessian is wrong
+* `slope_tol`:     tolerance for the slope (global) of the approximation
+* `throw_error`:   throw an error message if the given errors do not fit the slope within the given tolerance.
 """
 function prepare_check_result(
     log_range,

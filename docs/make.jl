@@ -82,6 +82,7 @@ makedocs(;
         "Meta-Manifolds" => "metamanifolds.md",
         "Decorating/Extending a Manifold" => "decorator.md",
         "Bases for tangent spaces" => "bases.md",
+        "Numerical Verification" => "numerical_verification.md",
         "References" => "references.md",
     ],
     plugins = [bib],
