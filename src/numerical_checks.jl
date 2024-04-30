@@ -20,7 +20,7 @@
     )
 
 Check numerically wether the inverse retraction `inverse_retraction_method` is correct.
-This requires the [`log`](@ref) and [`norm`](@ref) functions to be implemented for the [`AbstractManifold`](@ref) `M`.
+This requires the [`exp`](@ref) and [`norm`](@ref) functions to be implemented for the [`AbstractManifold`](@ref) `M`.
 
 This implements a method similar to [Boumal:2023; Section 4.8 or Section 6.8](@cite).
 
