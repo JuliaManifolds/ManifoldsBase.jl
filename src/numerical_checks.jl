@@ -8,7 +8,7 @@
         ;
         exactness_tol = 1e-12,
         io = nothing,
-        limits = (1e-8,1),
+        limits = (-8.0,1),
         log_range = range(limits[1], limits[2]; length=N),
         N = 101,
         name = "retraction",
@@ -31,7 +31,7 @@ no plot is generated,
 
 * `exactness_tol`:     if all errors are below this tolerance, the differential is considered to be exact
 * `io`:                provide an `IO` to print the result to
-* `limits`:            specify the limits in the `log_range`
+* `limits`:            specify the limits in the `log_range`, that is the exponent for the range
 * `log_range`:         specify the range of points (in log scale) to sample the differential line
 * `N`:                 number of points to verify within the `log_range` default range ``[10^{-8},10^{0}]``
 * `name`:              name to display in the plot
@@ -65,8 +65,8 @@ function check_retraction(
     #
     T = exp10.(log_range)
     # points `p_i` to evaluate the error function at
-    points = map(t -> exp(M, p, Xn, t), T)
-    approx_points = map(t -> retract(M, p, Xn, t, retraction_method), T)
+    points = [exp(M, p, Xn, t) for t in T]
+    approx_points = [retract(M, p, Xn, t, retraction_method) for t in T]
     errors = [distance(M, p, q) for (p, q) in zip(points, approx_points)]
     return prepare_check_result(
         log_range,

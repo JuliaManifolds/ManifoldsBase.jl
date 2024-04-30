@@ -167,9 +167,9 @@ function Random.rand!(
     return pX
 end
 ManifoldsBase.representation_size(::TestSphere{N}) where {N} = (N + 1,)
-function ManifoldsBase.retract_project!(M::TestSphere, q, p, X)
-    q .= p .+ X
-    project!(M, q, p, q)
+function ManifoldsBase.retract_project!(M::TestSphere, q, p, X, t::Number)
+    q .= p .+ t .* X
+    project!(M, q, q)
     return q
 end
 function ManifoldsBase.riemann_tensor!(M::TestSphere, Xresult, p, X, Y, Z)

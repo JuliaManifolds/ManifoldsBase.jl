@@ -14,20 +14,20 @@ using ManifoldsBaseTestUtils
         p[1:4] .= 1 / sqrt(4)
         X = log(M, p, q)
 
-        # TODO: Implement projectionretraction in the test file to check it here.
-        # @test check_retraction(M, ExponentialRetraction(), p, X; exactness_tol=1e-7)
-        # check_retraction(
-        #    M,
-        #    ExponentialRetraction(),
-        #    p,
-        #    X;
-        #    plot = true,
-        #    exactness_tol = 1e-7,
-        #)
+        @test check_retraction(M, ProjectionRetraction(), p, X; limits = (-2.5, 0.0))
+        # One call with generating a plot
+        check_retraction(M, ProjectionRetraction(), p, X; limits = (-2.5, 0.0), plot = true)
 
-        # TODO: Implement a non-retraction to get an error here
-        # @test_throws ErrorException check_gradient(M, f, grad_fb, p, X; throw_error=true)
-        # @test !check_gradient(M, f, grad_fb, p, X)
+        # ProjectionRetraction only works <= 1 well in stepsize
+        @test_throws ErrorException check_retraction(
+            M,
+            ProjectionRetraction(),
+            p,
+            X;
+            limits = (-2.5, 2.0),
+            throw_error = true,
+        )
+        @test !check_retraction(M, ProjectionRetraction(), p, X)
 
         #test window size error
         @test_throws ErrorException ManifoldsBase.find_best_slope_window(
