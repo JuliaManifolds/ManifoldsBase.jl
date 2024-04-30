@@ -109,7 +109,7 @@ plot_slope(x, y)
     prepare_check_result(log_range, errors, slope;
         exactness_to = 1e3*eps(eltype(errors)),
         io = nothing
-        name = "estimated slope"`,
+        name = "estimated slope",
         plot = false,
         slope_tol = 0.1,
         throw_error = false,
