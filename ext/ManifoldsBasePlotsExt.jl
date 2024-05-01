@@ -3,14 +3,14 @@ module ManifoldsBasePlotsExt
 if isdefined(Base, :get_extension)
     using ManifoldsBase
     using Plots
-    using Printf
+    using Printf: @sprintf
     import ManifoldsBase: plot_slope
 else
     # imports need to be relative for Requires.jl-based workflows:
     # https://github.com/JuliaArrays/ArrayInterface.jl/pull/387
     using ..ManifoldsBase
     using ..Plots
-    using ..Printf
+    using ..ManifoldsBase: @sprintf # is from Printf, but loaded in ManifoldsBase, and since Printf loading works here only on full moon days between 12 and noon, this trick might do it?
     import ..ManifoldsBase: plot_slope
 end
 
