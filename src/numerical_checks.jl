@@ -29,13 +29,13 @@ no plot is generated,
 
 # Keyword arguments
 
-* `exactness_tol`:     if all errors are below this tolerance, the differential is considered to be exact
+* `exactness_tol`:     if all errors are below this tolerance, the inverse retraction is considered to be exact
 * `io`:                provide an `IO` to print the result to
 * `limits`:            specify the limits in the `log_range`, that is the exponent for the range
-* `log_range`:         specify the range of points (in log scale) to sample the differential line
+* `log_range`:         specify the range of points (in log scale) to sample the length of the tangent vector `X`
 * `N`:                 number of points to verify within the `log_range` default range ``[10^{-8},10^{0}]``
 * `name`:              name to display in the plot
-* `plot`:              whether to plot the result (if `Plots.jl` is loaded).
+* `plot`:              whether to plot the result (see [`plot_slope`](@ref))
   The plot is in log-log-scale. This is returned and can then also be saved.
 * `second_order`:      check whether the retraction is of second order. if set to `false`, first order is checked.
 * `slope_tol`:         tolerance for the slope (global) of the approximation
@@ -88,7 +88,8 @@ end
         M::AbstractManifold,
         rectraction_method::AbstractRetractionMethod,
         p=rand(M),
-        X=rand(M; vector_at=p);
+        X=rand(M; vector_at=p),
+        Y=rand(M; vetor_at=p);
         #
         exactness_tol = 1e-12,
         io = nothing,
@@ -103,8 +104,13 @@ end
         window = nothing,
     )
 
-Check numerically wether the retraction `retraction_method` is correct.
-This requires the [`exp`](@ref) and [`distance`](@ref) function to be implemented for the [`AbstractManifold`](@ref) `M`.
+Check numerically wether the retraction `vector_transport_to` is correct, by selecting
+a set of points ``q_i = \exp_p (t_i X)`` where ``t`` takes all values from `log_range`,
+to then compare [`parallel_transport_to`](@ref) to the `vector_transport_method`
+applied to the vector `Y`.
+
+This requires the [`exp`](@ref), [`parallel_transport_to`](@ref) and [`norm`](@ref) function
+to be implemented for the [`AbstractManifold`](@ref) `M`.
 
 This implements a method similar to [Boumal:2023; Section 4.8 or Section 6.8](@cite).
 
@@ -113,10 +119,10 @@ no plot is generated,
 
 # Keyword arguments
 
-* `exactness_tol`:     if all errors are below this tolerance, the differential is considered to be exact
+* `exactness_tol`:     if all errors are below this tolerance, the retraction is considered to be exact
 * `io`:                provide an `IO` to print the result to
 * `limits`:            specify the limits in the `log_range`, that is the exponent for the range
-* `log_range`:         specify the range of points (in log scale) to sample the differential line
+* `log_range`:         specify the range of points (in log scale) to sample the length of the tangent vector `X`
 * `N`:                 number of points to verify within the `log_range` default range ``[10^{-8},10^{0}]``
 * `name`:              name to display in the plot
 * `plot`:              whether to plot the result (if `Plots.jl` is loaded).
@@ -152,6 +158,96 @@ function check_retraction(
     points = [exp(M, p, Xn, t) for t in T]
     approx_points = [retract(M, p, Xn, t, retraction_method) for t in T]
     errors = [distance(M, p, q) for (p, q) in zip(points, approx_points)]
+    return prepare_check_result(
+        log_range,
+        errors,
+        second_order ? 3.0 : 2.0;
+        exactness_tol = exactness_tol,
+        io = io,
+        name = name,
+        plot = plot,
+        slope_tol = slope_tol,
+        error = error,
+        window = window,
+    )
+end
+
+@doc raw"""
+    check_vector_transport(
+        M::AbstractManifold,
+        vector_transport_method::AbstractVectorTransportMethod,
+        p=rand(M),
+        X=rand(M; vector_at=p);
+        #
+        exactness_tol = 1e-12,
+        io = nothing,
+        limits = (-8.0,1),
+        log_range = range(limits[1], limits[2]; length=N),
+        N = 101,
+        name = "inverse retraction",
+        plot = false,
+        second_order = true
+        slope_tol = 0.1,
+        error = :none,
+        window = nothing,
+    )
+
+Check numerically wether the retraction `vector_transport_to` is correct, by selecting
+a set of points ``q_i = \exp_p (t_i X)`` where ``t`` takes all values from `log_range`,
+to then compare [`parallel_transport_to`](@ref) to the `vector_transport_method`
+applied to the vector `Y`.
+
+This requires the [`exp`](@ref), [`parallel_transport_to`](@ref) and [`norm`](@ref) function
+to be implemented for the [`AbstractManifold`](@ref) `M`.
+
+This implements a method similar to [Boumal:2023; Section 4.8 or Section 6.8](@cite).
+
+Note that if the errors are below the given tolerance and the method is exact,
+no plot is generated,
+
+# Keyword arguments
+
+* `exactness_tol`:     if all errors are below this tolerance, the differential is considered to be exact
+* `io`:                provide an `IO` to print the result to
+* `limits`:            specify the limits in the `log_range`, that is the exponent for the range
+* `log_range`:         specify the range of points (in log scale) to sample the differential line
+* `N`:                 number of points to verify within the `log_range` default range ``[10^{-8},10^{0}]``
+* `name`:              name to display in the plot
+* `plot`:              whether to plot the result (if `Plots.jl` is loaded).
+  The plot is in log-log-scale. This is returned and can then also be saved.
+* `second_order`:      check whether the retraction is of second order. if set to `false`, first order is checked.
+* `slope_tol`:         tolerance for the slope (global) of the approximation
+* `error`:             specify how to report errors: `:none`, `:info`, `:warn`, or `:error` are available
+* `window`:            specify window sizes within the `log_range` that are used for the slope estimation.
+  the default is, to use all window sizes `2:N`.
+"""
+function check_vector_transport(
+    M::AbstractManifold,
+    vector_transport_method::AbstractVectorTransportMethod,
+    p = rand(M),
+    X = rand(M; vector_at = p),
+    Y = rand(M; vector_at = p);
+    exactness_tol = 1e-12,
+    io::Union{IO,Nothing} = nothing,
+    limits = (-8.0, 0.0),
+    N = 101,
+    second_order = true,
+    name = second_order ? "second order vector transport" : "vector transport",
+    log_range = range(limits[1], limits[2]; length = N),
+    plot = false,
+    slope_tol = 0.1,
+    error::Symbol = :none,
+    window = nothing,
+)
+    Xn = X ./ norm(M, p, X) # normalize tangent direction
+    # function for the directional derivative
+    #
+    T = exp10.(log_range)
+    # points `p_i` to evaluate the error function at
+    points = [exp(M, p, Xn, t) for t in T]
+    Yv = [vector_transport_to(M, p, Y, q, vector_transport_method) for q in points]
+    Yp = [parallel_transport_to(M, p, Y, q) for q in points]
+    errors = [norm(M, q, X - Y) for (q, X, Y) in zip(points, Yv, Yp)]
     return prepare_check_result(
         log_range,
         errors,
