@@ -10,8 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 * Tests now also use `Aqua.jl` to spot problems in the code such as ambiguities.
-* introduce a `check_retraction` function to numerically check whether a retraction method is a retraction.
-* introduce a `check_inverse_retraction` function to numerically check whether an inverse retraction method is an inverse retraction.
+* introduce a `check_inverse_retraction` function to numerically check whether an inverse retraction method is a (correct) inverse retraction.
+* introduce a `check_retraction` function to numerically check whether a retraction method is a (correct) retraction.
+* introduce a `check_vector_transport` function to numerically check whether a vector transport is a (correct) vector transport.
 
 ### Changed
 
