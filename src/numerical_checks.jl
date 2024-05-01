@@ -6,16 +6,16 @@
         p=rand(M),
         X=rand(M; vector_at=p);
         #
-        exactness_tol = 1e-12,
-        io = nothing,
-        limits = (-8.0,1),
-        log_range = range(limits[1], limits[2]; length=N),
-        N = 101,
-        name = "inverse retraction",
-        plot = false,
-        second_order = true
-        slope_tol = 0.1,
-        error = :none,
+        exactness_tol::Real = 1e-12,
+        io::Union{IO,Nothing} = nothing,
+        limits::Tuple = (-8.0, 0.0),
+        log_range::AbstractVector = range(limits[1], limits[2]; length=N),
+        N::Int = 101,
+        name::String = "inverse retraction",
+        plot::Bool = false,
+        second_order::Bool = true
+        slope_tol::Real = 0.1,
+        error::Symbol = :none,
         window = nothing,
     )
 
@@ -48,15 +48,15 @@ function check_inverse_retraction(
     inverse_retraction_method::AbstractInverseRetractionMethod,
     p = rand(M),
     X = rand(M; vector_at = p);
-    exactness_tol = 1e-12,
+    exactness_tol::Real = 1e-12,
     io::Union{IO,Nothing} = nothing,
     limits = (-8.0, 0.0),
-    N = 101,
-    second_order = true,
-    name = second_order ? "second order inverse retraction" : "inverse retraction",
-    log_range = range(limits[1], limits[2]; length = N),
-    plot = false,
-    slope_tol = 0.1,
+    N::Int = 101,
+    second_order::Bool = true,
+    name::String = second_order ? "second order inverse retraction" : "inverse retraction",
+    log_range::AbstractVector = range(limits[1], limits[2]; length = N),
+    plot::Bool = false,
+    slope_tol::Real = 0.1,
     error::Symbol = :none,
     window = nothing,
 )
@@ -88,19 +88,18 @@ end
         M::AbstractManifold,
         rectraction_method::AbstractRetractionMethod,
         p=rand(M),
-        X=rand(M; vector_at=p),
-        Y=rand(M; vetor_at=p);
+        X=rand(M; vector_at=p);
         #
-        exactness_tol = 1e-12,
-        io = nothing,
-        limits = (-8.0,1),
-        log_range = range(limits[1], limits[2]; length=N),
-        N = 101,
-        name = "retraction",
-        plot = false,
-        second_order = true
-        slope_tol = 0.1,
-        error = :none,
+        exactness_tol::Real = 1e-12,
+        io::Union{IO,Nothing} = nothing,
+        limits::Tuple = (-8.0, 0.0),
+        log_range::AbstractVector = range(limits[1], limits[2]; length=N),
+        N::Int = 101,
+        name::String = "retraction",
+        plot::Bool = false,
+        second_order::Bool = true
+        slope_tol::Real = 0.1,
+        error::Symbol = :none,
         window = nothing,
     )
 
@@ -138,15 +137,15 @@ function check_retraction(
     retraction_method::AbstractRetractionMethod,
     p = rand(M),
     X = rand(M; vector_at = p);
-    exactness_tol = 1e-12,
+    exactness_tol::Real = 1e-12,
     io::Union{IO,Nothing} = nothing,
-    limits = (-8.0, 0.0),
-    N = 101,
-    second_order = true,
-    name = second_order ? "second order retraction" : "retraction",
+    limits::Tuple = (-8.0, 0.0),
+    N::Int = 101,
+    second_order::Bool = true,
+    name::String = second_order ? "second order retraction" : "retraction",
     log_range = range(limits[1], limits[2]; length = N),
-    plot = false,
-    slope_tol = 0.1,
+    plot::Bool = false,
+    slope_tol::Real = 0.1,
     error::Symbol = :none,
     window = nothing,
 )
@@ -177,18 +176,19 @@ end
         M::AbstractManifold,
         vector_transport_method::AbstractVectorTransportMethod,
         p=rand(M),
-        X=rand(M; vector_at=p);
+        X=rand(M; vector_at=p),
+        Y=rand(M; vector_at=p);
         #
-        exactness_tol = 1e-12,
-        io = nothing,
-        limits = (-8.0,1),
-        log_range = range(limits[1], limits[2]; length=N),
-        N = 101,
-        name = "inverse retraction",
-        plot = false,
-        second_order = true
-        slope_tol = 0.1,
-        error = :none,
+        exactness_tol::Real = 1e-12,
+        io::Union{IO,Nothing} = nothing,
+        limits::Tuple = (-8.0, 0.0),
+        log_range::AbstractVector = range(limits[1], limits[2]; length=N),
+        N::Int = 101,
+        name::String = "inverse retraction",
+        plot::Bool = false,
+        second_order::Bool = true
+        slope_tol::Real = 0.1,
+        error::Symbol = :none,
         window = nothing,
     )
 
@@ -227,15 +227,15 @@ function check_vector_transport(
     p = rand(M),
     X = rand(M; vector_at = p),
     Y = rand(M; vector_at = p);
-    exactness_tol = 1e-12,
+    exactness_tol::Real = 1e-12,
     io::Union{IO,Nothing} = nothing,
-    limits = (-8.0, 0.0),
-    N = 101,
-    second_order = true,
-    name = second_order ? "second order vector transport" : "vector transport",
-    log_range = range(limits[1], limits[2]; length = N),
-    plot = false,
-    slope_tol = 0.1,
+    limits::Tuple = (-8.0, 0.0),
+    N::Int = 101,
+    second_order::Bool = true,
+    name::String = second_order ? "second order vector transport" : "vector transport",
+    log_range::AbstractVector = range(limits[1], limits[2]; length = N),
+    plot::Bool = false,
+    slope_tol::Real = 0.1,
     error::Symbol = :none,
     window = nothing,
 )
@@ -286,13 +286,16 @@ Plot the result from the verification functions on data `x,y` with two compariso
 plot_slope(x, y)
 
 """
-    prepare_check_result(log_range, errors, slope;
-        exactness_to = 1e3*eps(eltype(errors)),
-        io = nothing
-        name = "estimated slope",
-        plot = false,
-        slope_tol = 0.1,
-        error = :none,
+    prepare_check_result(
+        log_range::AbstractVector,
+        errors::AbstractVector,
+        slope::Real;
+        exactness_to::Real = 1e3*eps(eltype(errors)),
+        io::Union{IO,Nothing} = nothing
+        name::String = "estimated slope",
+        plot::Bool = false,
+        slope_tol::Real = 0.1,
+        error::Symbol = :none,
     )
 
 Given a range of values `log_range`, with computed `errors`,
@@ -313,16 +316,16 @@ no plot is be generated,
 """
 
 function prepare_check_result(
-    log_range,
-    errors,
-    slope;
+    log_range::AbstractVector,
+    errors::AbstractVector,
+    slope::Real;
     io::Union{IO,Nothing} = nothing,
-    name = "estimated slope",
-    slope_tol = 1e-1,
-    plot = false,
+    name::String = "estimated slope",
+    slope_tol::Real = 1e-1,
+    plot::Bool = false,
     error::Symbol = :none,
     window = nothing,
-    exactness_tol = 1e3 * eps(eltype(errors)),
+    exactness_tol::Real = 1e3 * eps(eltype(errors)),
 )
     if max(errors...) < exactness_tol
         (io !== nothing) && print(
@@ -374,7 +377,7 @@ function prepare_check_result(
 end
 
 """
-    (a,b,i,j) = find_best_slope_window(X,Y,window=nothing; slope=2.0, slope_tol=0.1)
+    (a, b, i, j) = find_best_slope_window(X, Y, window=nothing; slope::Real=2.0, slope_tol::Real=0.1)
 
 Check data X,Y for the largest contiguous interval (window) with a regression line fitting “best”.
 Among all intervals with a slope within `slope_tol` to `slope` the longest one is taken.
@@ -392,7 +395,13 @@ From the best line the following data is returned
 * `a`, `b` specifying the regression line `a + t*b`
 * `i`, `j` determining the window, i.e the regression line stems from data `X[i], ..., X[j]`
 """
-function find_best_slope_window(X, Y, window = nothing; slope = 2.0, slope_tol = 0.1)
+function find_best_slope_window(
+    X,
+    Y,
+    window = nothing;
+    slope::Real = 2.0,
+    slope_tol::Real = 0.1,
+)
     n = length(X)
     if window !== nothing && (any(window .> n))
         error(
