@@ -3,14 +3,14 @@ module ManifoldsBasePlotsExt
 if isdefined(Base, :get_extension)
     using ManifoldsBase
     using Plots
-    using Printf: @sprintf
+    using Printf
     import ManifoldsBase: plot_slope
 else
     # imports need to be relative for Requires.jl-based workflows:
     # https://github.com/JuliaArrays/ArrayInterface.jl/pull/387
     using ..ManifoldsBase
     using ..Plots
-    using ..Printf: @sprintf
+    using ..Printf
     import ..ManifoldsBase: plot_slope
 end
 

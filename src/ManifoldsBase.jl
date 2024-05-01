@@ -1081,6 +1081,7 @@ function __init__()
                 print(
                     io,
                     """
+
                     `plot_slope` has to be implemented using your favourite plotting package.
                     A default is available when Plots.jl  was added to the current environment.
                     To then get the plotting functionality activated, do
@@ -1092,6 +1093,7 @@ function __init__()
                 print(
                     io,
                     """
+
                     `find_best_slope_window` has to be implemented using some statistics package
                     A default is available when Statistics.jl  was added to the current environment.
                     To then get the functionality activated, do
