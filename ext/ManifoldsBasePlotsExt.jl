@@ -1,7 +1,5 @@
 module ManifoldsBasePlotsExt
 
-using ManifoldsBase, Printf
-
 if isdefined(Base, :get_extension)
     using Plots
     using ManifoldsBase

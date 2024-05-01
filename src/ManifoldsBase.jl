@@ -25,7 +25,6 @@ using Markdown: @doc_str
 using Printf: @sprintf
 using Random
 using Requires
-using Statistics: cor, cov, mean, median, std
 
 include("maintypes.jl")
 include("numbers.jl")
@@ -1089,6 +1088,17 @@ function __init__()
                 )
                 printstyled(io, "`using Plots`"; color = :cyan)
             end
+            if exc.f === find_best_slope_window
+                print(
+                    io,
+                    """
+                    `find_best_slope_window` has to be implemented using some statistics package
+                    A default is available when Statistics.jl  was added to the current environment.
+                    To then get the functionality activated, do
+                    """,
+                )
+                printstyled(io, "`using Statistics`"; color = :cyan)
+            end
         end
     end
     # Extensions in the pre 1.9 fallback using Requires.jl
@@ -1100,6 +1110,9 @@ function __init__()
         end
         @require Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80" begin
             include("../ext/ManifoldsBasePlotsExt.jl")
+        end
+        @require Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2" begin
+            include("../ext/ManifoldsBaseStatisticsExt.jl")
         end
     end
 end
