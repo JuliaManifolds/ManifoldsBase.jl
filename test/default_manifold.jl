@@ -8,7 +8,8 @@ using ReverseDiff
 using StaticArrays
 using Test
 
-!(pwd() in LOAD_PATH) && (push!(LOAD_PATH, pwd()))
+s = @__DIR__
+!(s in LOAD_PATH) && (push!(LOAD_PATH, s))
 using ManifoldsBaseTestUtils
 
 @testset "Testing Default (Euclidean)" begin

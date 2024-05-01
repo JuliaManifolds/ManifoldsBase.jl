@@ -6,7 +6,8 @@ using StaticArrays
 using LinearAlgebra
 using Random
 
-!(pwd() in LOAD_PATH) && (push!(LOAD_PATH, pwd()))
+s = @__DIR__
+!(s in LOAD_PATH) && (push!(LOAD_PATH, s))
 using ManifoldsBaseTestUtils
 
 struct TestVectorSpaceType <: VectorSpaceType end

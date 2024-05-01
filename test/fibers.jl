@@ -2,7 +2,8 @@ using RecursiveArrayTools, ManifoldsBase, Test
 using Random
 using ManifoldsBase: DefaultManifold, VectorSpaceType, ℝ, Fiber
 
-!(pwd() in LOAD_PATH) && (push!(LOAD_PATH, pwd()))
+s = @__DIR__
+!(s in LOAD_PATH) && (push!(LOAD_PATH, s))
 using ManifoldsBaseTestUtils
 
 @testset "vector space fibers" begin

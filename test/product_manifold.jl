@@ -7,7 +7,8 @@ using LinearAlgebra
 using Random
 using RecursiveArrayTools
 
-!(pwd() in LOAD_PATH) && (push!(LOAD_PATH, pwd()))
+s = @__DIR__
+!(s in LOAD_PATH) && (push!(LOAD_PATH, s))
 using ManifoldsBaseTestUtils
 
 @testset "Product manifold" begin

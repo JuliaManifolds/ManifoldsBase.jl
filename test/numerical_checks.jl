@@ -2,7 +2,8 @@ using ManifoldsBase, Plots, Statistics, Test
 # don't show plots actually
 default(; show = false, reuse = true)
 
-!(pwd() in LOAD_PATH) && (push!(LOAD_PATH, pwd()))
+s = @__DIR__
+!(s in LOAD_PATH) && (push!(LOAD_PATH, s))
 using ManifoldsBaseTestUtils
 
 @testset "Numerical Check functions" begin
