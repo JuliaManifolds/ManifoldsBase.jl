@@ -1075,7 +1075,7 @@ function __init__()
     #
     # Error Hints
     #
-    @static if isdefined(Base.Experimental, :register_error_hint)
+    @static if isdefined(Base.Experimental, :register_error_hint) # COV_EXCL_LINE
         Base.Experimental.register_error_hint(MethodError) do io, exc, argtypes, kwargs
             if exc.f === plot_slope
                 print(
