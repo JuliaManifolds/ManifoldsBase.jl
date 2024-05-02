@@ -38,4 +38,5 @@ using ManifoldsBase
     include("metric.jl")
     include("product_manifold.jl")
     include("fibers.jl")
+    include("numerical_checks.jl")
 end

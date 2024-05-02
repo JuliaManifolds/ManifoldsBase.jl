@@ -5,11 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.15.9] unreleased
+## [0.15.9] 2024-05-02
 
 ### Added
 
 * Tests now also use `Aqua.jl` to spot problems in the code such as ambiguities.
+* introduce a `check_inverse_retraction` function to numerically check whether an inverse retraction method is a (correct) inverse retraction.
+* introduce a `check_retraction` function to numerically check whether a retraction method is a (correct) retraction.
+* introduce a `check_vector_transport` function to numerically check whether a vector transport is a (correct) vector transport.
+
+### Changed
+
+* introduced a `ManifoldsBaseTestUtils` module to encapsulate common types and function definitions in different parts of the tests.
 
 ## [0.15.8] 13/03/2024
 

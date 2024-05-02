@@ -22,6 +22,7 @@ import Random: rand, rand!
 
 using LinearAlgebra
 using Markdown: @doc_str
+using Printf: @sprintf
 using Random
 using Requires
 
@@ -1056,6 +1057,7 @@ include("vector_spaces.jl")
 include("point_vector_fallbacks.jl")
 include("nested_trait.jl")
 include("decorator_trait.jl")
+include("numerical_checks.jl")
 
 include("VectorFiber.jl")
 include("TangentSpace.jl")
@@ -1067,14 +1069,52 @@ include("PowerManifold.jl")
 
 #
 #
-# Requires
+# Init
 # -----
 function __init__()
+    #
+    # Error Hints
+    #
+    @static if isdefined(Base.Experimental, :register_error_hint) # COV_EXCL_LINE
+        Base.Experimental.register_error_hint(MethodError) do io, exc, argtypes, kwargs
+            if exc.f === plot_slope
+                print(
+                    io,
+                    """
+
+                    `plot_slope` has to be implemented using your favourite plotting package.
+                    A default is available when Plots.jl is added to the current environment.
+                    To then get the plotting functionality activated, do
+                    """,
+                )
+                printstyled(io, "`using Plots`"; color = :cyan)
+            end
+            if exc.f === find_best_slope_window
+                print(
+                    io,
+                    """
+
+                    `find_best_slope_window` has to be implemented using some statistics package
+                    A default is available when Statistics.jl is added to the current environment.
+                    To then get the functionality activated, do
+                    """,
+                )
+                printstyled(io, "`using Statistics`"; color = :cyan)
+            end
+        end
+    end
+    # Extensions in the pre 1.9 fallback using Requires.jl
     @static if !isdefined(Base, :get_extension)
         @require RecursiveArrayTools = "731186ca-8d62-57ce-b412-fbd966d074cd" begin
             include(
                 "../ext/ManifoldsBaseRecursiveArrayToolsExt/ManifoldsBaseRecursiveArrayToolsExt.jl",
             )
+        end
+        @require Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80" begin
+            include("../ext/ManifoldsBasePlotsExt.jl")
+        end
+        @require Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2" begin
+            include("../ext/ManifoldsBaseStatisticsExt.jl")
         end
     end
 end
@@ -1185,6 +1225,9 @@ export ×,
     change_metric!,
     change_representer,
     change_representer!,
+    check_inverse_retraction,
+    check_retraction,
+    check_vector_transport,
     copy,
     copyto!,
     default_approximation_method,

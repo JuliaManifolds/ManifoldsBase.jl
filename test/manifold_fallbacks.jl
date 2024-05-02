@@ -1,7 +1,9 @@
 using Test
 using ManifoldsBase
 
-struct NonManifold <: AbstractManifold{ManifoldsBase.ℝ} end
+s = @__DIR__
+!(s in LOAD_PATH) && (push!(LOAD_PATH, s))
+using ManifoldsBaseTestUtils
 
 @testset "NotImplemented Errors" begin
     M = NonManifold()

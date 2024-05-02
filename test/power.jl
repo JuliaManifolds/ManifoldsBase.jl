@@ -6,7 +6,9 @@ using StaticArrays
 using LinearAlgebra
 using Random
 
-include("test_manifolds.jl")
+s = @__DIR__
+!(s in LOAD_PATH) && (push!(LOAD_PATH, s))
+using ManifoldsBaseTestUtils
 
 struct TestVectorSpaceType <: VectorSpaceType end
 
@@ -316,7 +318,7 @@ struct TestArrayRepresentation <: AbstractPowerRepresentation end
     @testset "metric conversion" begin
         M = TestSPD(3)
         N = PowerManifold(M, NestedPowerRepresentation(), 2)
-        e = EuclideanMetric()
+        e = ManifoldsBase.EuclideanMetric()
         p = [1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1]
         q = [2.0 0.0 0.0; 0.0 2.0 0.0; 0.0 0.0 1]
         P = [p, q]
