@@ -1075,7 +1075,7 @@ function __init__()
     #
     # Error Hints
     #
-    @static if isdefined(Base.Experimental, :register_error_hint)
+    @static if isdefined(Base.Experimental, :register_error_hint) # COV_EXCL_LINE
         Base.Experimental.register_error_hint(MethodError) do io, exc, argtypes, kwargs
             if exc.f === plot_slope
                 print(
@@ -1083,7 +1083,7 @@ function __init__()
                     """
 
                     `plot_slope` has to be implemented using your favourite plotting package.
-                    A default is available when Plots.jl  was added to the current environment.
+                    A default is available when Plots.jl is added to the current environment.
                     To then get the plotting functionality activated, do
                     """,
                 )
@@ -1095,7 +1095,7 @@ function __init__()
                     """
 
                     `find_best_slope_window` has to be implemented using some statistics package
-                    A default is available when Statistics.jl  was added to the current environment.
+                    A default is available when Statistics.jl is added to the current environment.
                     To then get the functionality activated, do
                     """,
                 )
