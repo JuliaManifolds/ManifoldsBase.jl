@@ -334,7 +334,7 @@ struct TestArrayRepresentation <: AbstractPowerRepresentation end
         @test norm(N, P, Z .- Zc) ≈ 0
     end
 
-    @testset "Other stuff" begin
+    @testset "Curvature" begin
         M1 = TestSphere(2)
         @testset "Weingarten" begin
             Mpr = PowerManifold(M1, NestedPowerRepresentation(), 2)
@@ -387,5 +387,18 @@ struct TestArrayRepresentation <: AbstractPowerRepresentation end
         N = PowerManifold(M, NestedPowerRepresentation(), 2, 3; parameter = :type)
         p = rand(N)
         @test zero_vector(N, p) == 0 .* p
+    end
+
+    @testset "fill" begin
+        M = ManifoldsBase.DefaultManifold(3)
+        N = PowerManifold(M, NestedPowerRepresentation(), 2)
+        p = [1.0, 2.0, 3.0]
+        P1 = fill(N, p)
+        @test P1[N, 1] == p
+        @test P1[N, 1] == p
+        P2 = [zeros(3), zeros(3)]
+        fill!(N, P2, p)
+        @test P2[N, 1] == p
+        @test P2[N, 1] == p
     end
 end

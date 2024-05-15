@@ -528,6 +528,31 @@ function exp!(M::PowerManifoldNestedReplacing, q, p, X)
     return q
 end
 
+@doc raw"""
+    fill(M::AbstractPowerManifold, p)
+
+Create a point on the [`AbstractPowerManifold`](@ref) `M`, where every entry is set to the
+point `p`.
+"""
+function fill(M::AbstractPowerManifold, p)
+    P = allocate_result(M, rand) # rand finds the right way to allocate our point usually
+    return fill!(M, P, p)
+end
+
+@doc raw"""
+    fill!(M::AbstractPowerManifold, P, p)
+
+Fill a point `P` on the [`AbstractPowerManifold`](@ref) `M`, where every entry is set to the
+point `p`.
+"""
+function fill!(M::AbstractPowerManifold, P, p)
+    for i in get_iterator(M)
+        P[M, i] = p # can we do something that this is closer to fill/fill! and set the ref to p?
+    end
+    return P
+end
+
+
 function get_basis(M::AbstractPowerManifold, p, B::AbstractBasis)
     rep_size = representation_size(M.manifold)
     vs = [get_basis(M.manifold, _read(M, rep_size, p, i), B) for i in get_iterator(M)]
