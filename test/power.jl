@@ -393,12 +393,12 @@ struct TestArrayRepresentation <: AbstractPowerRepresentation end
         M = ManifoldsBase.DefaultManifold(3)
         N = PowerManifold(M, NestedPowerRepresentation(), 2)
         p = [1.0, 2.0, 3.0]
-        P1 = fill(N, p)
+        P1 = fill(p, N)
         @test P1[N, 1] == p
-        @test P1[N, 1] == p
+        @test P1[N, 2] == p
         P2 = [zeros(3), zeros(3)]
-        fill!(N, P2, p)
+        fill!(P2, p, N)
         @test P2[N, 1] == p
-        @test P2[N, 1] == p
+        @test P2[N, 2] == p
     end
 end

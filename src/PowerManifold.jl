@@ -529,23 +529,30 @@ function exp!(M::PowerManifoldNestedReplacing, q, p, X)
 end
 
 @doc raw"""
-    fill(M::AbstractPowerManifold, p)
+    fill(p, M::AbstractPowerManifold)
 
 Create a point on the [`AbstractPowerManifold`](@ref) `M`, where every entry is set to the
 point `p`.
+
+!!! note
+    while usually the manifold is a first argument in all functions in `ManifoldsBase.jl`,
+    we follow the signature of `fill`, where the power manifold serves are the size information.
 """
-function fill(M::AbstractPowerManifold, p)
+function fill(p, M::AbstractPowerManifold)
     P = allocate_result(M, rand) # rand finds the right way to allocate our point usually
-    return fill!(M, P, p)
+    return fill!(P, p, M)
 end
 
 @doc raw"""
-    fill!(M::AbstractPowerManifold, P, p)
+    fill!(P, p, M::AbstractPowerManifold)
 
-Fill a point `P` on the [`AbstractPowerManifold`](@ref) `M`, where every entry is set to the
-point `p`.
+Fill a point `P` on the [`AbstractPowerManifold`](@ref) `M`, setting every entry to `p`.
+
+!!! note
+    while usually the manifold is a first argument in all functions in `ManifoldsBase.jl`,
+    we follow the signature of `fill!`, where the power manifold serves are the size information.
 """
-function fill!(M::AbstractPowerManifold, P, p)
+function fill!(P, p, M::AbstractPowerManifold)
     for i in get_iterator(M)
         P[M, i] = p # can we do something that this is closer to fill/fill! and set the ref to p?
     end
