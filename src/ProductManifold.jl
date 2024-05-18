@@ -28,6 +28,17 @@ access the `i`th manifold component from the [`ProductManifold`](@ref) `M`.
 """
 @inline Base.getindex(M::ProductManifold, i::Integer) = M.manifolds[i]
 
+"""
+    getindex(M::TangentSpace{𝔽, ProductManifold}, i)
+    TpM[i]
+
+access the `i`th manifold component from a [`ProductManifold`](@ref)s tangent space `TpM`.
+"""
+function Base.getindex(TpM::TangentSpace{𝔽,<:ProductManifold}, i::Integer) where {𝔽}
+    M = base_manifold(TpM)
+    return TangentSpace(M[i], base_point(TpM)[M, i])
+end
+
 ProductManifold() = throw(MethodError("No method matching ProductManifold()."))
 
 const PRODUCT_BASIS_LIST = [

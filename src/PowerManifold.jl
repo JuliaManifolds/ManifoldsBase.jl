@@ -778,6 +778,23 @@ Base.@propagate_inbounds function Base.getindex(
     return get_component(M, p, I...)
 end
 
+"""
+    getindex(M::TangentSpace{𝔽, AbstractPowerManifold}, i...)
+    TpM[i...]
+
+access the `i`th manifold component from a [`AbstractPowerManifold`](@ref)s tangent space `TpM`.
+"""
+function Base.getindex(
+    TpM::TangentSpace{𝔽,<:AbstractPowerManifold},
+    I::Union{Integer,Colon,AbstractVector}...,
+) where {𝔽}
+    M = base_manifold(TpM).manifold
+    p = base_point(TpM)[base_manifold(TpM), I]
+    return TangentSpace(M, p)
+end
+
+
+
 @doc raw"""
     injectivity_radius(M::AbstractPowerManifold[, p])
 

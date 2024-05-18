@@ -388,4 +388,13 @@ struct TestArrayRepresentation <: AbstractPowerRepresentation end
         p = rand(N)
         @test zero_vector(N, p) == 0 .* p
     end
+
+    @testset "TangentSpace" begin
+        M = ManifoldsBase.DefaultManifold(3)
+        N = PowerManifold(M, NestedPowerRepresentation(), 2)
+        p = [[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]]
+        TpN = TangentSpace(N, p)
+        Tp1M = TangentSpace(M, p[N, 1])
+        @test base_point(Tp1M) === p[1]
+    end
 end

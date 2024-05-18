@@ -1,6 +1,6 @@
 using Test
 using ManifoldsBase
-using ManifoldsBase: submanifold_component, submanifold_components
+using ManifoldsBase: DefaultManifold, submanifold_component, submanifold_components
 using ManifoldsBase:
     AbstractNumbers, ℝ, ℂ, NestedReplacingPowerRepresentation, ProductBasisData
 using LinearAlgebra
@@ -606,4 +606,10 @@ using ManifoldsBaseTestUtils
         @test ts1 × ts1 == ProductVectorTransport(tr1, tr2, tr1, tr2)
     end
 
+    @testset "TangentSpace" begin
+        TpM = TangentSpace(M, p1)
+        Tp1M1 = TpM[1]
+        @test base_point(Tp1M1) === p1[M, 1]
+        @test base_manifold(Tp1M1) === M[1]
+    end
 end
