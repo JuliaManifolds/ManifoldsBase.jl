@@ -788,12 +788,10 @@ function Base.getindex(
     TpM::TangentSpace{𝔽,<:AbstractPowerManifold},
     I::Union{Integer,Colon,AbstractVector}...,
 ) where {𝔽}
-    M = base_manifold(TpM).manifold
-    p = base_point(TpM)[base_manifold(TpM), I]
-    return TangentSpace(M, p)
+    M = base_manifold(TpM)
+    p = base_point(TpM)
+    return TangentSpace(M.manifold, p[M, I...])
 end
-
-
 
 @doc raw"""
     injectivity_radius(M::AbstractPowerManifold[, p])

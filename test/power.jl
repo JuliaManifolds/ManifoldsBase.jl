@@ -1,7 +1,12 @@
 using Test
 using ManifoldsBase
 using ManifoldsBase:
-    AbstractNumbers, ℝ, ℂ, NestedReplacingPowerRepresentation, VectorSpaceType
+    AbstractNumbers,
+    ℝ,
+    ℂ,
+    NestedReplacingPowerRepresentation,
+    VectorSpaceType,
+    DefaultManifold
 using StaticArrays
 using LinearAlgebra
 using Random
@@ -394,7 +399,8 @@ struct TestArrayRepresentation <: AbstractPowerRepresentation end
         N = PowerManifold(M, NestedPowerRepresentation(), 2)
         p = [[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]]
         TpN = TangentSpace(N, p)
-        Tp1M = TangentSpace(M, p[N, 1])
-        @test base_point(Tp1M) === p[1]
+        Tp1M = TpN[1]
+        @test base_point(Tp1M) === p[N, 1]
+        @test base_manifold(Tp1M) === M
     end
 end
