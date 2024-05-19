@@ -782,7 +782,7 @@ end
     getindex(M::TangentSpace{𝔽, AbstractPowerManifold}, i...)
     TpM[i...]
 
-access the `i`th manifold component from a [`AbstractPowerManifold`](@ref)s tangent space `TpM`.
+Access the `i`th manifold component from an [`AbstractPowerManifold`](@ref)s' tangent space `TpM`.
 """
 function Base.getindex(
     TpM::TangentSpace{𝔽,<:AbstractPowerManifold},
