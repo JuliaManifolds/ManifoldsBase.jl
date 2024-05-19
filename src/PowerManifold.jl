@@ -73,7 +73,7 @@ represents vectors of length 2 whose elements are vectors of length 3 of points 
 in a nested array representation.
 
 The third signature `M^(...)` is equivalent to the first one, and hence either yields
-a combination of power manifolds to _one_ larger power manifold, or an
+a combination of power manifolds to _one_ larger power manifold, or an power manifold with the default representation.
 
 Since there is no default [`AbstractPowerRepresentation`](@ref) within this interface, the
 `^` operator is only available for `PowerManifold`s and concatenates dimensions.
