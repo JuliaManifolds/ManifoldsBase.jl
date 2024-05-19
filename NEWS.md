@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-* functions `fill(N, p)` and `fill!(N, P, p)` to fill values into a point on a power manifold `N`.
+* Functions `fill(p, N)` and `fill!(P, p, N)` to fill values into a point on a power manifold `N`.
 
 ## [0.15.9] 02/05/2024
 
