@@ -554,7 +554,7 @@ Fill a point `P` on the [`AbstractPowerManifold`](@ref) `M`, setting every entry
 """
 function fill!(P, p, M::AbstractPowerManifold)
     for i in get_iterator(M)
-        P[M, i] = p # can we do something that this is closer to fill/fill! and set the ref to p?
+        P[M, i] = p
     end
     return P
 end
