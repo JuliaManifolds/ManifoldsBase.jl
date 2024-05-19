@@ -29,10 +29,10 @@ access the `i`th manifold component from the [`ProductManifold`](@ref) `M`.
 @inline Base.getindex(M::ProductManifold, i::Integer) = M.manifolds[i]
 
 """
-    getindex(M::TangentSpace{𝔽, ProductManifold}, i)
+    getindex(M::TangentSpace{𝔽,<:ProductManifold}, i::Integer)
     TpM[i]
 
-access the `i`th manifold component from a [`ProductManifold`](@ref)s tangent space `TpM`.
+Access the `i`th manifold component from a [`ProductManifold`](@ref)s' tangent space `TpM`.
 """
 function Base.getindex(TpM::TangentSpace{𝔽,<:ProductManifold}, i::Integer) where {𝔽}
     M = base_manifold(TpM)

@@ -41,7 +41,7 @@ function allocate_result(M::TangentSpace, ::typeof(rand))
 end
 
 @doc raw"""
-    bae_point(TpM::TangentSpace)
+    base_point(TpM::TangentSpace)
 
 Return the base point of the [`TangentSpace`](@ref).
 """
