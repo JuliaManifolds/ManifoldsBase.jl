@@ -423,6 +423,16 @@ end
         @test P2[N, 1] == p
         @test P2[N, 2] == p
 
+        M = ManifoldsBase.DefaultManifold(3)
+        NR = PowerManifold(M, NestedReplacingPowerRepresentation(), 2)
+        P1 = fill(p, NR)
+        @test P1[NR, 1] === p
+        @test P1[NR, 2] === p
+        P2 = [zeros(3), zeros(3)]
+        fill!(P2, p, NR)
+        @test P2[NR, 1] === p
+        @test P2[NR, 2] === p
+
         NAR = PowerManifold(M, TestArrayRepresentation(), 2)
         P1 = fill(p, NAR)
         @test P1 isa Matrix{Float64}
