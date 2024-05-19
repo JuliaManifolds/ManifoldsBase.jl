@@ -1,7 +1,12 @@
 using Test
 using ManifoldsBase
 using ManifoldsBase:
-    AbstractNumbers, ℝ, ℂ, NestedReplacingPowerRepresentation, VectorSpaceType
+    AbstractNumbers,
+    DefaultManifold,
+    ℝ,
+    ℂ,
+    NestedReplacingPowerRepresentation,
+    VectorSpaceType
 using StaticArrays
 using LinearAlgebra
 using Random
@@ -23,6 +28,23 @@ function ManifoldsBase.allocate(
 end
 
 struct TestArrayRepresentation <: AbstractPowerRepresentation end
+
+const TestPowerManifoldMultidimensional =
+    AbstractPowerManifold{𝔽,<:AbstractManifold{𝔽},TestArrayRepresentation} where {𝔽}
+
+function ManifoldsBase.representation_size(M::TestPowerManifoldMultidimensional)
+    return (representation_size(M.manifold)..., ManifoldsBase.get_parameter(M.size)...)
+end
+
+@inline function ManifoldsBase._write(
+    ::TestPowerManifoldMultidimensional,
+    rep_size::Tuple,
+    x::AbstractArray,
+    i::Tuple,
+)
+    return view(x, ManifoldsBase.rep_size_to_colons(rep_size)..., i...)
+end
+
 
 @testset "Power Manifold" begin
 
@@ -400,5 +422,14 @@ struct TestArrayRepresentation <: AbstractPowerRepresentation end
         fill!(P2, p, N)
         @test P2[N, 1] == p
         @test P2[N, 2] == p
+
+        NAR = PowerManifold(M, TestArrayRepresentation(), 2)
+        P1 = fill(p, NAR)
+        @test P1 isa Matrix{Float64}
+        @test P1 == [1.0 1.0; 2.0 2.0; 3.0 3.0]
+
+        P2 = similar(P1)
+        fill!(P2, p, NAR)
+        @test P2 == [1.0 1.0; 2.0 2.0; 3.0 3.0]
     end
 end
