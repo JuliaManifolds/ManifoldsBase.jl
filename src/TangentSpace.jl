@@ -40,6 +40,13 @@ function allocate_result(M::TangentSpace, ::typeof(rand))
     return zero_vector(M.manifold, M.point)
 end
 
+@doc raw"""
+    base_point(TpM::TangentSpace)
+
+Return the base point of the [`TangentSpace`](@ref).
+"""
+base_point(TpM::TangentSpace) = TpM.point
+
 # forward both point checks to tangent vector checks
 function check_point(TpM::TangentSpace, p; kwargs...)
     return check_vector(TpM.manifold, TpM.point, p; kwargs...)
