@@ -549,12 +549,19 @@ end
 Fill a point `P` on the [`AbstractPowerManifold`](@ref) `M`, setting every entry to `p`.
 
 !!! note
-    while usually the manifold is a first argument in all functions in `ManifoldsBase.jl`,
+    while usually the manifold is the first argument in all functions in `ManifoldsBase.jl`,
     we follow the signature of `fill!`, where the power manifold serves are the size information.
 """
-function fill!(P, p, M::AbstractPowerManifold)
+function fill!(P, p, M::PowerManifoldNestedReplacing)
     for i in get_iterator(M)
         P[M, i] = p
+    end
+    return P
+end
+function fill!(P, p, M::AbstractPowerManifold)
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        copyto!(M.manifold, _write(M, rep_size, P, i), p)
     end
     return P
 end
