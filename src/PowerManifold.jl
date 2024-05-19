@@ -72,6 +72,9 @@ can be used to nest manifold, i.e. `PowerManifold(M, NestedPowerRepresentation()
 represents vectors of length 2 whose elements are vectors of length 3 of points on N
 in a nested array representation.
 
+The third signature `M^(...)` is equivalent to the first one, and hence either yields
+a combination of power manifolds to _one_ larger power manifold, or a power manifold with the default representation.
+
 Since there is no default [`AbstractPowerRepresentation`](@ref) within this interface, the
 `^` operator is only available for `PowerManifold`s and concatenates dimensions.
 
@@ -524,6 +527,45 @@ function exp!(M::PowerManifoldNestedReplacing, q, p, X)
     end
     return q
 end
+
+@doc raw"""
+    fill(p, M::AbstractPowerManifold)
+
+Create a point on the [`AbstractPowerManifold`](@ref) `M`, where every entry is set to the
+point `p`.
+
+!!! note
+    while usually the manifold is a first argument in all functions in `ManifoldsBase.jl`,
+    we follow the signature of `fill`, where the power manifold serves are the size information.
+"""
+function fill(p, M::AbstractPowerManifold)
+    P = allocate_result(M, rand) # rand finds the right way to allocate our point usually
+    return fill!(P, p, M)
+end
+
+@doc raw"""
+    fill!(P, p, M::AbstractPowerManifold)
+
+Fill a point `P` on the [`AbstractPowerManifold`](@ref) `M`, setting every entry to `p`.
+
+!!! note
+    while usually the manifold is the first argument in all functions in `ManifoldsBase.jl`,
+    we follow the signature of `fill!`, where the power manifold serves are the size information.
+"""
+function fill!(P, p, M::PowerManifoldNestedReplacing)
+    for i in get_iterator(M)
+        P[M, i] = p
+    end
+    return P
+end
+function fill!(P, p, M::AbstractPowerManifold)
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        copyto!(M.manifold, _write(M, rep_size, P, i), p)
+    end
+    return P
+end
+
 
 function get_basis(M::AbstractPowerManifold, p, B::AbstractBasis)
     rep_size = representation_size(M.manifold)
