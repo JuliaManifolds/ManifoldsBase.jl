@@ -172,6 +172,52 @@ function Base.:^(
     return PowerManifold(M, size...)
 end
 
+function allocate_as(
+    M::PowerManifold{
+        𝔽,
+        TM,
+        TSize,
+        <:Union{NestedPowerRepresentation,NestedReplacingPowerRepresentation},
+    },
+) where {𝔽,TM<:AbstractManifold{𝔽},TSize}
+    return [allocate_as(M.manifold) for _ in get_iterator(M)]
+end
+function allocate_as(
+    M::PowerManifold{
+        𝔽,
+        TM,
+        TSize,
+        <:Union{NestedPowerRepresentation,NestedReplacingPowerRepresentation},
+    },
+    ::Type{<:Array{U}},
+) where {𝔽,TM<:AbstractManifold{𝔽},TSize,U}
+    return [allocate_as(M.manifold, U) for _ in get_iterator(M)]
+end
+
+function allocate_as(
+    M::PowerManifold{
+        𝔽,
+        TM,
+        TSize,
+        <:Union{NestedPowerRepresentation,NestedReplacingPowerRepresentation},
+    },
+    ft::TangentSpaceType,
+) where {𝔽,TM<:AbstractManifold{𝔽},TSize}
+    return [allocate_as(M.manifold, ft) for _ in get_iterator(M)]
+end
+function allocate_as(
+    M::PowerManifold{
+        𝔽,
+        TM,
+        TSize,
+        <:Union{NestedPowerRepresentation,NestedReplacingPowerRepresentation},
+    },
+    ft::TangentSpaceType,
+    ::Type{<:Array{U}},
+) where {𝔽,TM<:AbstractManifold{𝔽},TSize,U}
+    return [allocate_as(M.manifold, ft, U) for _ in get_iterator(M)]
+end
+
 """
     _allocate_access_nested(M::PowerManifoldNested, y, i)
 
@@ -194,7 +240,7 @@ function allocate_result(M::PowerManifoldNested, f, x...)
         ]
     end
 end
-# avoid ambituities - though usually not used
+# avoid ambiguities - though usually not used
 function allocate_result(
     M::PowerManifoldNested,
     f::typeof(get_coordinates),

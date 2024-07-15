@@ -1,4 +1,3 @@
-using Revise
 using Test
 using ManifoldsBase
 using ManifoldsBase: DefaultManifold, submanifold_component, submanifold_components
