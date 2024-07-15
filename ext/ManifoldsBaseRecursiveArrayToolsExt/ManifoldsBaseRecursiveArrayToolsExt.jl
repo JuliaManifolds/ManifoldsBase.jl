@@ -9,6 +9,7 @@ if isdefined(Base, :get_extension)
 
     import ManifoldsBase:
         allocate,
+        allocate_as,
         allocate_result,
         default_inverse_retraction_method,
         default_retraction_method,
@@ -40,6 +41,7 @@ else
 
     import ..ManifoldsBase:
         allocate,
+        allocate_as,
         allocate_result,
         default_inverse_retraction_method,
         default_retraction_method,

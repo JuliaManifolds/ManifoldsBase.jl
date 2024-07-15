@@ -1,3 +1,4 @@
+using Revise
 using Test
 using ManifoldsBase
 using ManifoldsBase: DefaultManifold, submanifold_component, submanifold_components
@@ -130,6 +131,24 @@ using ManifoldsBaseTestUtils
         q = allocate([p1])
         @test q[1] isa ArrayPartition
         @test q[1].x[1] isa Vector
+    end
+
+    @testset "allocate_as" begin
+        p1 = allocate_as(M)
+        @test p1 isa ArrayPartition{Float64,Tuple{Vector{Float64},Matrix{Float64}}}
+
+        p1 = allocate_as(M, ArrayPartition{Float32,Tuple{Vector{Float32},Matrix{Float32}}})
+        @test p1 isa ArrayPartition{Float32,Tuple{Vector{Float32},Matrix{Float32}}}
+
+        X1 = allocate_as(M, TangentSpaceType())
+        @test X1 isa ArrayPartition{Float64,Tuple{Vector{Float64},Matrix{Float64}}}
+
+        X1 = allocate_as(
+            M,
+            TangentSpaceType(),
+            ArrayPartition{Float32,Tuple{Vector{Float32},Matrix{Float32}}},
+        )
+        @test X1 isa ArrayPartition{Float32,Tuple{Vector{Float32},Matrix{Float32}}}
     end
 
     p1 = ArrayPartition([1.0, 0.0, 0.0], [4.0 5.0; 6.0 7.0])

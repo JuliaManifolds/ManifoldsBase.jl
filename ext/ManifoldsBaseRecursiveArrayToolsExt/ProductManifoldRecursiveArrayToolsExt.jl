@@ -5,6 +5,23 @@ function allocate(x::ArrayPartition, T::Type)
     return ArrayPartition(map(t -> allocate(t, T), submanifold_components(x))...)
 end
 
+allocate_as(M::ProductManifold) = ArrayPartition(map(N -> allocate_as(N), M.manifolds)...)
+function allocate_as(M::ProductManifold, ::Type{ArrayPartition{T,U}}) where {T,U}
+    return ArrayPartition(map((N, V) -> allocate_as(N, V), M.manifolds, U.parameters)...)
+end
+function allocate_as(M::ProductManifold, ft::TangentSpaceType)
+    return ArrayPartition(map(N -> allocate_as(N, ft), M.manifolds)...)
+end
+function allocate_as(
+    M::ProductManifold,
+    ft::TangentSpaceType,
+    ::Type{ArrayPartition{T,U}},
+) where {T,U}
+    return ArrayPartition(
+        map((N, V) -> allocate_as(N, ft, V), M.manifolds, U.parameters)...,
+    )
+end
+
 @inline function allocate_result(M::ProductManifold, f)
     return ArrayPartition(map(N -> allocate_result(N, f), M.manifolds))
 end
