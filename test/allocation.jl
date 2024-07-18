@@ -89,4 +89,5 @@ ManifoldsBase.representation_size(::AllocManifold3) = (2, 3)
     @test size(an) == representation_size(M2)
 
     @test default_type(M2) === Matrix{Float64}
+    @test default_type(M2, TangentSpaceType()) === Matrix{Float64}
 end
