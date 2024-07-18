@@ -407,6 +407,21 @@ function at the level, where also information from `p` and `M` can be accessed.
 """
 copyto!(::AbstractManifold, Y, p, X) = copyto!(Y, X)
 
+"""
+    default_type(M::AbstractManifold)
+
+Get the default type of points on manifold `M`.
+"""
+default_type(M::AbstractManifold) = typeof(allocate_as(M))
+"""
+    default_type(M::AbstractManifold, ft::FiberType)
+
+Get the default type of points from the fiber `ft` of the fiber bundle based on manifold `M`.
+For example, call `default_type(MyManifold(), TangentSpaceType())` to get the default type
+of a tangent vector.
+"""
+default_type(M::AbstractManifold, ft::FiberType) = typeof(allocate_as(M, ft))
+
 @doc raw"""
     distance(M::AbstractManifold, p, q)
 
@@ -1293,6 +1308,7 @@ export ×,
     default_approximation_method,
     default_inverse_retraction_method,
     default_retraction_method,
+    default_type,
     default_vector_transport_method,
     distance,
     exp,

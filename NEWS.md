@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 * Function `allocate_as` to generically allocate point and tangent vectors on a manifold without a pre-existing instance but of a particular type.
+* Function `default_type` to get the default type of points and tangent vectors for a manifold.
 
 ## [0.15.10] 19/05/2024
 
