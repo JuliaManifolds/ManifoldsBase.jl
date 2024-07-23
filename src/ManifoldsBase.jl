@@ -87,8 +87,8 @@ end
 allocate(::AbstractManifold, a, T::Type, dims::Tuple) = allocate(a, T, dims)
 
 """
-    allocate_as(M::AbstractManifold, [T:::Type])
-    allocate_as(M::AbstractManifold, F::FiberType, [T:::Type])
+    allocate_on(M::AbstractManifold, [T:::Type])
+    allocate_on(M::AbstractManifold, F::FiberType, [T:::Type])
 
 Allocate a new point on manifold `M` with optional type given by `T`. Note that `T` is not
 number element type as in [`allocate`](@ref) but rather the type of the entire point to be
@@ -107,28 +107,28 @@ julia> using ManifoldsBase
 julia> M = ManifoldsBase.DefaultManifold(4)
 DefaultManifold(4; field = ℝ)
 
-julia> allocate_as(M)
+julia> allocate_on(M)
 4-element Vector{Float64}:
  0.0
  0.0
  0.0
  0.0
 
-julia> allocate_as(M, Array{Float64})
+julia> allocate_on(M, Array{Float64})
 4-element Vector{Float64}:
  0.0
  0.0
  0.0
  0.0
 
-julia> allocate_as(M, TangentSpaceType())
+julia> allocate_on(M, TangentSpaceType())
 4-element Vector{Float64}:
  0.0
  0.0
  0.0
  0.0
 
-julia> allocate_as(M, TangentSpaceType(), Array{Float64})
+julia> allocate_on(M, TangentSpaceType(), Array{Float64})
 4-element Vector{Float64}:
  0.0
  0.0
@@ -137,8 +137,8 @@ julia> allocate_as(M, TangentSpaceType(), Array{Float64})
 
 ```
 """
-allocate_as(M::AbstractManifold) = similar(Array{Float64}, representation_size(M))
-function allocate_as(M::AbstractManifold, T::Type{<:AbstractArray})
+allocate_on(M::AbstractManifold) = similar(Array{Float64}, representation_size(M))
+function allocate_on(M::AbstractManifold, T::Type{<:AbstractArray})
     return similar(T, representation_size(M))
 end
 
@@ -412,7 +412,7 @@ copyto!(::AbstractManifold, Y, p, X) = copyto!(Y, X)
 
 Get the default type of points on manifold `M`.
 """
-default_type(M::AbstractManifold) = typeof(allocate_as(M))
+default_type(M::AbstractManifold) = typeof(allocate_on(M))
 """
     default_type(M::AbstractManifold, ft::FiberType)
 
@@ -420,7 +420,7 @@ Get the default type of points from the fiber `ft` of the fiber bundle based on 
 For example, call `default_type(MyManifold(), TangentSpaceType())` to get the default type
 of a tangent vector.
 """
-default_type(M::AbstractManifold, ft::FiberType) = typeof(allocate_as(M, ft))
+default_type(M::AbstractManifold, ft::FiberType) = typeof(allocate_on(M, ft))
 
 @doc raw"""
     distance(M::AbstractManifold, p, q)
@@ -1290,7 +1290,7 @@ export ×,
     ℝ,
     ℂ,
     allocate,
-    allocate_as,
+    allocate_on,
     angle,
     base_manifold,
     base_point,

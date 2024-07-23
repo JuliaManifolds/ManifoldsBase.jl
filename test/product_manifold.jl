@@ -132,17 +132,17 @@ using ManifoldsBaseTestUtils
         @test q[1].x[1] isa Vector
     end
 
-    @testset "allocate_as" begin
-        p1 = allocate_as(M)
+    @testset "allocate_on" begin
+        p1 = allocate_on(M)
         @test p1 isa ArrayPartition{Float64,Tuple{Vector{Float64},Matrix{Float64}}}
 
-        p1 = allocate_as(M, ArrayPartition{Float32,Tuple{Vector{Float32},Matrix{Float32}}})
+        p1 = allocate_on(M, ArrayPartition{Float32,Tuple{Vector{Float32},Matrix{Float32}}})
         @test p1 isa ArrayPartition{Float32,Tuple{Vector{Float32},Matrix{Float32}}}
 
-        X1 = allocate_as(M, TangentSpaceType())
+        X1 = allocate_on(M, TangentSpaceType())
         @test X1 isa ArrayPartition{Float64,Tuple{Vector{Float64},Matrix{Float64}}}
 
-        X1 = allocate_as(
+        X1 = allocate_on(
             M,
             TangentSpaceType(),
             ArrayPartition{Float32,Tuple{Vector{Float32},Matrix{Float32}}},

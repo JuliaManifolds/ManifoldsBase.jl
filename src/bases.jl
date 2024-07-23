@@ -280,10 +280,10 @@ const all_uncached_bases{T} = Union{
     DefaultOrthonormalBasis{<:Any,T},
 }
 
-function allocate_as(M::AbstractManifold, ::TangentSpaceType)
+function allocate_on(M::AbstractManifold, ::TangentSpaceType)
     return similar(Array{Float64}, representation_size(M))
 end
-function allocate_as(M::AbstractManifold, ::TangentSpaceType, T::Type{<:AbstractArray})
+function allocate_on(M::AbstractManifold, ::TangentSpaceType, T::Type{<:AbstractArray})
     return similar(T, representation_size(M))
 end
 

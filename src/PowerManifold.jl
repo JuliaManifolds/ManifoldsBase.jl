@@ -172,7 +172,7 @@ function Base.:^(
     return PowerManifold(M, size...)
 end
 
-function allocate_as(
+function allocate_on(
     M::PowerManifold{
         𝔽,
         TM,
@@ -180,9 +180,9 @@ function allocate_as(
         <:Union{NestedPowerRepresentation,NestedReplacingPowerRepresentation},
     },
 ) where {𝔽,TM<:AbstractManifold{𝔽},TSize}
-    return [allocate_as(M.manifold) for _ in get_iterator(M)]
+    return [allocate_on(M.manifold) for _ in get_iterator(M)]
 end
-function allocate_as(
+function allocate_on(
     M::PowerManifold{
         𝔽,
         TM,
@@ -191,10 +191,10 @@ function allocate_as(
     },
     ::Type{<:Array{U}},
 ) where {𝔽,TM<:AbstractManifold{𝔽},TSize,U}
-    return [allocate_as(M.manifold, U) for _ in get_iterator(M)]
+    return [allocate_on(M.manifold, U) for _ in get_iterator(M)]
 end
 
-function allocate_as(
+function allocate_on(
     M::PowerManifold{
         𝔽,
         TM,
@@ -203,9 +203,9 @@ function allocate_as(
     },
     ft::TangentSpaceType,
 ) where {𝔽,TM<:AbstractManifold{𝔽},TSize}
-    return [allocate_as(M.manifold, ft) for _ in get_iterator(M)]
+    return [allocate_on(M.manifold, ft) for _ in get_iterator(M)]
 end
-function allocate_as(
+function allocate_on(
     M::PowerManifold{
         𝔽,
         TM,
@@ -215,7 +215,7 @@ function allocate_as(
     ft::TangentSpaceType,
     ::Type{<:Array{U}},
 ) where {𝔽,TM<:AbstractManifold{𝔽},TSize,U}
-    return [allocate_as(M.manifold, ft, U) for _ in get_iterator(M)]
+    return [allocate_on(M.manifold, ft, U) for _ in get_iterator(M)]
 end
 
 """

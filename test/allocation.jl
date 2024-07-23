@@ -74,17 +74,17 @@ ManifoldsBase.representation_size(::AllocManifold3) = (2, 3)
 
     @test ManifoldsBase.allocate_result(AllocManifold3(), rand) isa Matrix{ComplexF64}
 
-    an = allocate_as(M2)
+    an = allocate_on(M2)
     @test an isa Matrix{Float64}
     @test size(an) == representation_size(M2)
-    an = allocate_as(M2, Array{Float32})
+    an = allocate_on(M2, Array{Float32})
     @test an isa Matrix{Float32}
     @test size(an) == representation_size(M2)
 
-    an = allocate_as(M2, TangentSpaceType())
+    an = allocate_on(M2, TangentSpaceType())
     @test an isa Matrix{Float64}
     @test size(an) == representation_size(M2)
-    an = allocate_as(M2, TangentSpaceType(), Array{Float32})
+    an = allocate_on(M2, TangentSpaceType(), Array{Float32})
     @test an isa Matrix{Float32}
     @test size(an) == representation_size(M2)
 

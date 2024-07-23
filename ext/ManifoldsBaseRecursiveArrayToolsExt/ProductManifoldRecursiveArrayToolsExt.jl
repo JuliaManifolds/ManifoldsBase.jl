@@ -5,20 +5,20 @@ function allocate(x::ArrayPartition, T::Type)
     return ArrayPartition(map(t -> allocate(t, T), submanifold_components(x))...)
 end
 
-allocate_as(M::ProductManifold) = ArrayPartition(map(N -> allocate_as(N), M.manifolds)...)
-function allocate_as(M::ProductManifold, ::Type{ArrayPartition{T,U}}) where {T,U}
-    return ArrayPartition(map((N, V) -> allocate_as(N, V), M.manifolds, U.parameters)...)
+allocate_on(M::ProductManifold) = ArrayPartition(map(N -> allocate_on(N), M.manifolds)...)
+function allocate_on(M::ProductManifold, ::Type{ArrayPartition{T,U}}) where {T,U}
+    return ArrayPartition(map((N, V) -> allocate_on(N, V), M.manifolds, U.parameters)...)
 end
-function allocate_as(M::ProductManifold, ft::TangentSpaceType)
-    return ArrayPartition(map(N -> allocate_as(N, ft), M.manifolds)...)
+function allocate_on(M::ProductManifold, ft::TangentSpaceType)
+    return ArrayPartition(map(N -> allocate_on(N, ft), M.manifolds)...)
 end
-function allocate_as(
+function allocate_on(
     M::ProductManifold,
     ft::TangentSpaceType,
     ::Type{ArrayPartition{T,U}},
 ) where {T,U}
     return ArrayPartition(
-        map((N, V) -> allocate_as(N, ft, V), M.manifolds, U.parameters)...,
+        map((N, V) -> allocate_on(N, ft, V), M.manifolds, U.parameters)...,
     )
 end
 
