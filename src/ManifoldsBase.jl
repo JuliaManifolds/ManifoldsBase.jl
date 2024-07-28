@@ -59,7 +59,7 @@ Type `T` is the new number element type [`number_eltype`](@ref), if it is not gi
 the element type of `a` is retained. The `dims` argument can be given for non-nested
 allocation and is forwarded to the function `similar`.
 
-It's behavior can be overriden by a specific manifold, for example power manifold with
+It's behavior can be overridden by a specific manifold, for example power manifold with
 nested replacing representation can decide that `allocate` for `Array{<:SArray}` returns
 another `Array{<:SArray}` instead of `Array{<:MArray}`, as would be done by default.
 """
@@ -85,6 +85,62 @@ function allocate(::AbstractManifold, a, T::Type, dim1::Integer, dims::Integer..
     return allocate(a, T, dim1, dims...)
 end
 allocate(::AbstractManifold, a, T::Type, dims::Tuple) = allocate(a, T, dims)
+
+"""
+    allocate_on(M::AbstractManifold, [T:::Type])
+    allocate_on(M::AbstractManifold, F::FiberType, [T:::Type])
+
+Allocate a new point on manifold `M` with optional type given by `T`. Note that `T` is not
+number element type as in [`allocate`](@ref) but rather the type of the entire point to be
+returned.
+
+If `F` is provided, then an element of the corresponding fiber is allocated, assuming it is
+independent of the base point.
+
+To allocate a tangent vector, use ``
+
+# Example
+
+```julia-repl
+julia> using ManifoldsBase
+
+julia> M = ManifoldsBase.DefaultManifold(4)
+DefaultManifold(4; field = ℝ)
+
+julia> allocate_on(M)
+4-element Vector{Float64}:
+ 0.0
+ 0.0
+ 0.0
+ 0.0
+
+julia> allocate_on(M, Array{Float64})
+4-element Vector{Float64}:
+ 0.0
+ 0.0
+ 0.0
+ 0.0
+
+julia> allocate_on(M, TangentSpaceType())
+4-element Vector{Float64}:
+ 0.0
+ 0.0
+ 0.0
+ 0.0
+
+julia> allocate_on(M, TangentSpaceType(), Array{Float64})
+4-element Vector{Float64}:
+ 0.0
+ 0.0
+ 0.0
+ 0.0
+
+```
+"""
+allocate_on(M::AbstractManifold) = similar(Array{Float64}, representation_size(M))
+function allocate_on(M::AbstractManifold, T::Type{<:AbstractArray})
+    return similar(T, representation_size(M))
+end
 
 """
     _pick_basic_allocation_argument(::AbstractManifold, f, x...)
@@ -130,8 +186,8 @@ Return type of element of the array that will represent the result of function `
     @inline eti_to_one(eti) = one(number_eltype(eti))
     return typeof(sum(map(eti_to_one, args)))
 end
-@inline function allocate_result_type(::AbstractManifold, f::TF, args::Tuple{}) where {TF}
-    return Float64
+@inline function allocate_result_type(M::AbstractManifold, f::TF, args::Tuple{}) where {TF}
+    return allocation_promotion_function(M, f, ())(Float64)
 end
 
 """
@@ -351,6 +407,21 @@ function at the level, where also information from `p` and `M` can be accessed.
 """
 copyto!(::AbstractManifold, Y, p, X) = copyto!(Y, X)
 
+"""
+    default_type(M::AbstractManifold)
+
+Get the default type of points on manifold `M`.
+"""
+default_type(M::AbstractManifold) = typeof(allocate_on(M))
+"""
+    default_type(M::AbstractManifold, ft::FiberType)
+
+Get the default type of points from the fiber `ft` of the fiber bundle based on manifold `M`.
+For example, call `default_type(MyManifold(), TangentSpaceType())` to get the default type
+of a tangent vector.
+"""
+default_type(M::AbstractManifold, ft::FiberType) = typeof(allocate_on(M, ft))
+
 @doc raw"""
     distance(M::AbstractManifold, p, q)
 
@@ -477,7 +548,7 @@ embed!(M::AbstractManifold, Y, p, X) = copyto!(M, Y, p, X)
 
 Embed `p` from manifold `M` an project it back to `M`. For points from `M` this is identity
 but in case embedding is defined for points outside of `M`, this can serve as a way
-to for example remove numerical innacuracies caused by some algorithms.
+to for example remove numerical inaccuracies caused by some algorithms.
 """
 function embed_project(M::AbstractManifold, p)
     return project(M, embed(M, p))
@@ -487,8 +558,8 @@ end
 
 Embed vector `X` tangent at `p` from manifold `M` an project it back to tangent space
 at `p`. For points from that tangent space this is identity but in case embedding is
-defined for tagent vectors from outside of it, this can serve as a way to for example remove
-numerical innacuracies caused by some algorithms.
+defined for tangent vectors from outside of it, this can serve as a way to for example remove
+numerical inaccuracies caused by some algorithms.
 """
 function embed_project(M::AbstractManifold, p, X)
     return project(M, p, embed(M, p, X))
@@ -1115,6 +1186,9 @@ function __init__()
         @require Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80" begin
             include("../ext/ManifoldsBasePlotsExt.jl")
         end
+        @require Quaternions = "94ee1d12-ae83-5a48-8b1c-48b8ff168ae0" begin
+            include("../ext/ManifoldsBaseQuaternionsExt.jl")
+        end
         @require Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2" begin
             include("../ext/ManifoldsBaseStatisticsExt.jl")
         end
@@ -1219,6 +1293,7 @@ export ×,
     ℝ,
     ℂ,
     allocate,
+    allocate_on,
     angle,
     base_manifold,
     base_point,
@@ -1236,6 +1311,7 @@ export ×,
     default_approximation_method,
     default_inverse_retraction_method,
     default_retraction_method,
+    default_type,
     default_vector_transport_method,
     distance,
     exp,

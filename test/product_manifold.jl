@@ -132,6 +132,24 @@ using ManifoldsBaseTestUtils
         @test q[1].x[1] isa Vector
     end
 
+    @testset "allocate_on" begin
+        p1 = allocate_on(M)
+        @test p1 isa ArrayPartition{Float64,Tuple{Vector{Float64},Matrix{Float64}}}
+
+        p1 = allocate_on(M, ArrayPartition{Float32,Tuple{Vector{Float32},Matrix{Float32}}})
+        @test p1 isa ArrayPartition{Float32,Tuple{Vector{Float32},Matrix{Float32}}}
+
+        X1 = allocate_on(M, TangentSpaceType())
+        @test X1 isa ArrayPartition{Float64,Tuple{Vector{Float64},Matrix{Float64}}}
+
+        X1 = allocate_on(
+            M,
+            TangentSpaceType(),
+            ArrayPartition{Float32,Tuple{Vector{Float32},Matrix{Float32}}},
+        )
+        @test X1 isa ArrayPartition{Float32,Tuple{Vector{Float32},Matrix{Float32}}}
+    end
+
     p1 = ArrayPartition([1.0, 0.0, 0.0], [4.0 5.0; 6.0 7.0])
     p2 = ArrayPartition([0.0, 1.0, 0.0], [4.0 8.0; 3.0 7.5])
     X1 = ArrayPartition([0.0, 1.0, 0.2], [4.0 0.0; 2.0 7.0])

@@ -90,6 +90,26 @@ end
         allocate(M, p) isa Vector{SMatrix{2,2,Float64,4}}
     end
 
+    @testset "allocate_on" begin
+        M = ManifoldsBase.DefaultManifold(2, 2)
+        N = PowerManifold(M, NestedReplacingPowerRepresentation(), 2)
+        p = allocate_on(N)
+        @test p isa Vector{Matrix{Float64}}
+        @test size(p) == (2,)
+
+        p = allocate_on(N, Vector{Matrix{Float32}})
+        @test p isa Vector{Matrix{Float32}}
+        @test size(p) == (2,)
+
+        X = allocate_on(N, TangentSpaceType())
+        @test X isa Vector{Matrix{Float64}}
+        @test size(X) == (2,)
+
+        X = allocate_on(N, TangentSpaceType(), Vector{Matrix{Float32}})
+        @test X isa Vector{Matrix{Float32}}
+        @test size(X) == (2,)
+    end
+
     for PowerRepr in [NestedPowerRepresentation, NestedReplacingPowerRepresentation]
         @testset "PowerManifold with $(PowerRepr)" begin
             M = ManifoldsBase.DefaultManifold(3)

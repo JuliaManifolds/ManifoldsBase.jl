@@ -1,7 +1,8 @@
 using ManifoldsBase
 using Test
 using ManifoldsBase:
-    combine_allocation_promotion_functions, allocation_promotion_function, ℝ, ℂ
+    combine_allocation_promotion_functions, allocation_promotion_function, ℝ, ℂ, ℍ
+using Quaternions
 
 struct AllocManifold{𝔽} <: AbstractManifold{𝔽} end
 AllocManifold() = AllocManifold{ℝ}()
@@ -18,6 +19,9 @@ ManifoldsBase.representation_size(::AllocManifold2) = (2, 3)
 
 struct AllocManifold3 <: AbstractManifold{ℂ} end
 ManifoldsBase.representation_size(::AllocManifold3) = (2, 3)
+
+struct AllocManifold4 <: AbstractManifold{ℍ} end
+ManifoldsBase.representation_size(::AllocManifold4) = (2, 3)
 
 @testset "Allocation" begin
     a = [[1.0], [2.0], [3.0]]
@@ -67,9 +71,28 @@ ManifoldsBase.representation_size(::AllocManifold3) = (2, 3)
     @test number_eltype(Any[[2.0], [3.0]]) === Float64
     @test number_eltype(typeof([[1.0, 2.0]])) === Float64
 
-    alloc2 = ManifoldsBase.allocate_result(AllocManifold2(), rand)
+    M2 = AllocManifold2()
+    alloc2 = ManifoldsBase.allocate_result(M2, rand)
     @test alloc2 isa Matrix{Float64}
-    @test size(alloc2) == representation_size(AllocManifold2())
+    @test size(alloc2) == representation_size(M2)
 
     @test ManifoldsBase.allocate_result(AllocManifold3(), rand) isa Matrix{ComplexF64}
+    @test ManifoldsBase.allocate_result(AllocManifold4(), rand) isa Matrix{QuaternionF64}
+
+    an = allocate_on(M2)
+    @test an isa Matrix{Float64}
+    @test size(an) == representation_size(M2)
+    an = allocate_on(M2, Array{Float32})
+    @test an isa Matrix{Float32}
+    @test size(an) == representation_size(M2)
+
+    an = allocate_on(M2, TangentSpaceType())
+    @test an isa Matrix{Float64}
+    @test size(an) == representation_size(M2)
+    an = allocate_on(M2, TangentSpaceType(), Array{Float32})
+    @test an isa Matrix{Float32}
+    @test size(an) == representation_size(M2)
+
+    @test default_type(M2) === Matrix{Float64}
+    @test default_type(M2, TangentSpaceType()) === Matrix{Float64}
 end
