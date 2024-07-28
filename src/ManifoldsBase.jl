@@ -1186,6 +1186,9 @@ function __init__()
         @require Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80" begin
             include("../ext/ManifoldsBasePlotsExt.jl")
         end
+        @require Quaternions = "94ee1d12-ae83-5a48-8b1c-48b8ff168ae0" begin
+            include("../ext/ManifoldsBaseQuaternionsExt.jl")
+        end
         @require Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2" begin
             include("../ext/ManifoldsBaseStatisticsExt.jl")
         end
