@@ -12,11 +12,13 @@ Requires = "ae029012-a4dd-5104-9daa-d747884805df"
 
 [weakdeps]
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
+Quaternions = "94ee1d12-ae83-5a48-8b1c-48b8ff168ae0"
 RecursiveArrayTools = "731186ca-8d62-57ce-b412-fbd966d074cd"
 Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 
 [extensions]
 ManifoldsBasePlotsExt = "Plots"
+ManifoldsBaseQuaternionsExt = "Quaternions"
 ManifoldsBaseRecursiveArrayToolsExt = "RecursiveArrayTools"
 ManifoldsBaseStatisticsExt = "Statistics"
 
@@ -35,6 +37,7 @@ Requires = "1"
 ReverseDiff = "1"
 StaticArrays = "1"
 Statistics = "1.6"
+Quaternions = "0.7"
 Test = "1.6"
 julia = "1.6"
 

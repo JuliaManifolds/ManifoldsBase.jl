@@ -11,6 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * Function `allocate_on` to generically allocate point and tangent vectors on a manifold without a pre-existing instance but of a particular type.
 * Function `default_type` to get the default type of points and tangent vectors for a manifold.
+* Package extension for the `Quaternions.jl` package that handles allocation.
+
+### Changed
+
+* Default allocation method was made more robust to custom promotion functions.
 
 ## [0.15.10] 19/05/2024
 

@@ -186,8 +186,8 @@ Return type of element of the array that will represent the result of function `
     @inline eti_to_one(eti) = one(number_eltype(eti))
     return typeof(sum(map(eti_to_one, args)))
 end
-@inline function allocate_result_type(::AbstractManifold, f::TF, args::Tuple{}) where {TF}
-    return Float64
+@inline function allocate_result_type(M::AbstractManifold, f::TF, args::Tuple{}) where {TF}
+    return allocation_promotion_function(M, f, ())(Float64)
 end
 
 """
