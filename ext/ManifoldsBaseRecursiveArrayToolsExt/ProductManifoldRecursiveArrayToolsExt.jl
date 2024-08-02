@@ -148,7 +148,7 @@ Access the element(s) at index `i` of a point `p` on a [`ProductManifold`](@ref)
 linear indexing.
 See also [Array Indexing](https://docs.julialang.org/en/v1/manual/arrays/#man-array-indexing-1) in Julia.
 """
-Base.@propagate_inbounds function Base.getindex(
+@inline Base.@propagate_inbounds function Base.getindex(
     p::ArrayPartition,
     M::ProductManifold,
     i::Union{Integer,Colon,AbstractVector,Val},

@@ -445,7 +445,7 @@ end
 
 Get the `i`th component of a point `p` on a [`ProductManifold`](@ref) `M`.
 """
-function get_component(M::ProductManifold, p, i)
+@inline function get_component(M::ProductManifold, p, i)
     return submanifold_component(M, p, i)
 end
 
