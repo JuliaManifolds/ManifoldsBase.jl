@@ -100,7 +100,7 @@ function _parameter_symbol(
     return :type
 end
 
-function PowerManifold(
+@aggressive_constprop function PowerManifold(
     M::AbstractManifold{𝔽},
     ::TPR,
     size::Integer...;
@@ -109,7 +109,7 @@ function PowerManifold(
     size_w = wrap_type_parameter(parameter, size)
     return PowerManifold{𝔽,typeof(M),typeof(size_w),TPR}(M, size_w)
 end
-function PowerManifold(
+@aggressive_constprop function PowerManifold(
     M::PowerManifold{𝔽,TM,TSize,TPR},
     size::Integer...;
     parameter::Symbol = _parameter_symbol(M),
@@ -117,7 +117,7 @@ function PowerManifold(
     size_w = wrap_type_parameter(parameter, (get_parameter(M.size)..., size...))
     return PowerManifold{𝔽,TM,typeof(size_w),TPR}(M.manifold, size_w)
 end
-function PowerManifold(
+@aggressive_constprop function PowerManifold(
     M::PowerManifold{𝔽,TM},
     ::TPR,
     size::Integer...;

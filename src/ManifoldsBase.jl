@@ -38,6 +38,16 @@ include("exp_log_geo.jl")
 include("projections.jl")
 include("metric.jl")
 
+if isdefined(Base, Symbol("@constprop"))
+    macro aggressive_constprop(ex)
+        return esc(:(Base.@constprop :aggressive $ex))
+    end
+else
+    macro aggressive_constprop(ex)
+        return esc(ex)
+    end
+end
+
 """
     allocate(a)
     allocate(a, dims::Integer...)
