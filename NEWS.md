@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.15.13] 10/08/2024
+
+### Changed
+
+* Fixed a small bug that caused calling `get_vectors` on PowerManifolds
+to sometimes cause an error, cf [#199](https://github.com/JuliaManifolds/ManifoldsBase.jl/issues/199).
+
 ## [0.15.12] 03/08/2024
 
 ### Changed

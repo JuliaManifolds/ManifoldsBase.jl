@@ -824,7 +824,7 @@ function _get_vectors(
     for i in get_iterator(M)
         b_i = _access_nested(M, B.data.bases, i)
         p_i = _read(M, rep_size, p, i)
-        for v in b_i.data
+        for v in get_vectors(M.manifold, p_i, b_i) #a bit safer than just b_i.data
             new_v = copy(M, p, zero_tv)
             copyto!(M.manifold, _write(M, rep_size, new_v, i), p_i, v)
             push!(vs, new_v)
