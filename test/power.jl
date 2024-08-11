@@ -10,6 +10,7 @@ using ManifoldsBase:
 using StaticArrays
 using LinearAlgebra
 using Random
+using RecursiveArrayTools
 
 s = @__DIR__
 !(s in LOAD_PATH) && (push!(LOAD_PATH, s))
@@ -471,5 +472,17 @@ end
         P2 = similar(P1)
         fill!(P2, p, NAR)
         @test P2 == [1.0 1.0; 2.0 2.0; 3.0 3.0]
+    end
+
+    @testset "get vectors on Power of product" begin
+        N = ManifoldsBase.DefaultManifold(1) × ManifoldsBase.DefaultManifold(1)
+        M = PowerManifold(N, NestedPowerRepresentation(), 2)
+        p = [ArrayPartition([1.0], [2.0]), ArrayPartition([3.0], [4.0])]
+        B = get_basis(M, p, DefaultOrthonormalBasis())
+        V = get_vectors(M, p, B)
+        for v in V
+            @test is_vector(M, p, v)
+            @test norm(M, p, v) == 1
+        end
     end
 end
