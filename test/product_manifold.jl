@@ -5,11 +5,20 @@ using ManifoldsBase:
     AbstractNumbers, ℝ, ℂ, NestedReplacingPowerRepresentation, ProductBasisData
 using LinearAlgebra
 using Random
-using RecursiveArrayTools
 
-s = @__DIR__
+s = (@__DIR__) * "/test/"
 !(s in LOAD_PATH) && (push!(LOAD_PATH, s))
 using ManifoldsBaseTestUtils
+
+@testset "Product manifold without RecursiveArrayTools.jl" begin
+    M1 = TestSphere(2)
+    M2 = ManifoldsBase.DefaultManifold(2, 2)
+
+    M = ProductManifold(M1, M2)
+    @test_throws ErrorException rand(M)
+end
+
+using RecursiveArrayTools
 
 @testset "Product manifold" begin
     M1 = TestSphere(2)

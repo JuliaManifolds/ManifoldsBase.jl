@@ -179,7 +179,16 @@ isomorphisms.
 end
 @inline function allocate_result(M::AbstractManifold, f)
     T = allocate_result_type(M, f, ())
-    return Array{T}(undef, representation_size(M)...)
+    rs = representation_size(M)
+    if isnothing(rs)
+        msg = "Could not allocate result of function $f on manifold $M."
+        if M isa ProductManifold
+            msg *= " This error could be resolved by importing RecursiveArrayTools.jl. If this is not the case, please open report an issue."
+        end
+        error(msg)
+    else
+        return Array{T}(undef, rs...)
+    end
 end
 
 """
