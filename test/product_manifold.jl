@@ -5,11 +5,20 @@ using ManifoldsBase:
     AbstractNumbers, ℝ, ℂ, NestedReplacingPowerRepresentation, ProductBasisData
 using LinearAlgebra
 using Random
-using RecursiveArrayTools
 
-s = @__DIR__
+s = (@__DIR__) * "/test/"
 !(s in LOAD_PATH) && (push!(LOAD_PATH, s))
 using ManifoldsBaseTestUtils
+
+@testset "Product manifold without RecursiveArrayTools.jl" begin
+    M1 = TestSphere(2)
+    M2 = ManifoldsBase.DefaultManifold(2, 2)
+
+    M = ProductManifold(M1, M2)
+    @test_throws ErrorException rand(M)
+end
+
+using RecursiveArrayTools
 
 @testset "Product manifold" begin
     M1 = TestSphere(2)
@@ -157,7 +166,7 @@ using ManifoldsBaseTestUtils
 
     @testset "Basic operations" begin
         @test manifold_dimension(M) == 6
-        @test representation_size(M) == (7,)
+        @test representation_size(M) === nothing
         @test distance(M, p1, p2) ≈ 4.551637188998299
         qr = similar(p1)
         exp!(M, qr, p1, X1)

@@ -1319,7 +1319,7 @@ end
 
 Base.@propagate_inbounds @inline function _read(
     M::AbstractPowerManifold,
-    rep_size::Tuple,
+    rep_size::Union{Tuple,Nothing},
     x::AbstractArray,
     i::Int,
 )
@@ -1328,7 +1328,7 @@ end
 
 Base.@propagate_inbounds @inline function _read(
     ::Union{PowerManifoldNested,PowerManifoldNestedReplacing},
-    rep_size::Tuple,
+    rep_size::Union{Tuple,Nothing},
     x::AbstractArray,
     i::Tuple,
 )
@@ -1765,7 +1765,12 @@ function Weingarten!(M::AbstractPowerManifold, Y, p, X, V)
     return Y
 end
 
-@inline function _write(M::AbstractPowerManifold, rep_size::Tuple, x::AbstractArray, i::Int)
+@inline function _write(
+    M::AbstractPowerManifold,
+    rep_size::Union{Tuple,Nothing},
+    x::AbstractArray,
+    i::Int,
+)
     return _write(M, rep_size, x, (i,))
 end
 
@@ -1773,7 +1778,12 @@ end
     return !isbitstype(eltype(x))
 end
 
-@inline function _write(M::PowerManifoldNested, ::Tuple, x::AbstractArray, i::Tuple)
+@inline function _write(
+    M::PowerManifoldNested,
+    ::Union{Tuple,Nothing},
+    x::AbstractArray,
+    i::Tuple,
+)
     if _is_nested_write_getindex(M, x)
         return x[i...]
     else

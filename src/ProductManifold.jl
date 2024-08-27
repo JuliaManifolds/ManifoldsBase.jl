@@ -876,8 +876,8 @@ function retract!(
     return q
 end
 
-function representation_size(M::ProductManifold)
-    return (mapreduce(m -> prod(representation_size(m)), +, M.manifolds),)
+function representation_size(::ProductManifold)
+    return nothing
 end
 
 @doc raw"""
