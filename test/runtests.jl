@@ -32,11 +32,11 @@ using ManifoldsBase
     include("validation_manifold.jl")
     include("embedded_manifold.jl")
     include("test_sphere.jl")
+    include("product_manifold.jl")
     include("power.jl")
     include("domain_errors.jl")
     include("vector_transport.jl")
     include("metric.jl")
-    include("product_manifold.jl")
     include("fibers.jl")
     include("numerical_checks.jl")
 end
