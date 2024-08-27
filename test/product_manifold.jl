@@ -157,7 +157,7 @@ using ManifoldsBaseTestUtils
 
     @testset "Basic operations" begin
         @test manifold_dimension(M) == 6
-        @test representation_size(M) == (7,)
+        @test representation_size(M) === nothing
         @test distance(M, p1, p2) ≈ 4.551637188998299
         qr = similar(p1)
         exp!(M, qr, p1, X1)
