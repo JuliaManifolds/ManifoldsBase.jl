@@ -180,15 +180,18 @@ end
 @inline function allocate_result(M::AbstractManifold, f)
     T = allocate_result_type(M, f, ())
     rs = representation_size(M)
-    if isnothing(rs)
-        msg = "Could not allocate result of function $f on manifold $M."
-        if M isa ProductManifold
-            msg *= " This error could be resolved by importing RecursiveArrayTools.jl. If this is not the case, please open report an issue."
-        end
-        error(msg)
-    else
-        return Array{T}(undef, rs...)
+    return allocate_result_array(M, f, T, rs)
+end
+
+function allocate_result_array(M::AbstractManifold, f, ::Type, ::Nothing)
+    msg = "Could not allocate result of function $f on manifold $M."
+    if base_manifold(M) isa ProductManifold
+        msg *= " This error could be resolved by importing RecursiveArrayTools.jl. If this is not the case, please open report an issue."
     end
+    return error(msg)
+end
+function allocate_result_array(::AbstractManifold, f, T::Type, rs::Tuple)
+    return Array{T}(undef, rs...)
 end
 
 """
