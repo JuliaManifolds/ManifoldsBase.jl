@@ -306,14 +306,14 @@ macro trait_function(sig, opts = :(), manifold_arg_no = 1)
             return ($fname)(trait($fname, $(argnames...)), $(argnames...); $(kwargs_call...))
         end
         @inline function ($fname)(
-            _t::TraitList,
+            _t::ManifoldsBase.TraitList,
             $(callargs...);
             $(kwargs_list...),
         ) where {$(where_exprs...)}
             return ($fname)(next_trait(_t), $(argnames...); $(kwargs_call...))
         end
         @inline function ($fname)(
-            _t::TraitList{IsExplicitDecorator},
+            _t::ManifoldsBase.TraitList{ManifoldsBase.IsExplicitDecorator},
             $(callargs...);
             $(kwargs_list...),
         ) where {$(where_exprs...)}
@@ -339,7 +339,7 @@ macro trait_function(sig, opts = :(), manifold_arg_no = 1)
             # See https://discourse.julialang.org/t/extremely-slow-invoke-when-inlined/90665
             # for the reasoning behind @noinline
             @noinline function ($fname)(
-                ::EmptyTrait,
+                ::ManifoldsBase.EmptyTrait,
                 $(callargs...);
                 $(kwargs_list...),
             ) where {$(where_exprs...)}
