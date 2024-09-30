@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.15.17] unreleased
+
+### Changed
+
+* **Mildly breaking**: the number system parameter now corresponds to the coefficients standing in front of basis vectors in a linear combination instead of components of a vector. For example, `DefaultOrthonormalBasis() == DefaultOrthonormalBasis(ℝ)` of `DefaultManifold(3, field=ℂ)` now has 6 vectors, and `DefaultOrthonormalBasis(ℂ)` of the same manifold has 3 basis vectors.
+
 ## [0.15.16] 13/09/2024
 
 ### Changed

@@ -306,7 +306,7 @@ function ManifoldsBase.exp!(
 end
 
 function ManifoldsBase.get_basis_orthonormal(
-    ::DefaultManifold,
+    ::DefaultManifold{ℝ},
     p::NonBroadcastBasisThing,
     𝔽::RealNumbers,
 )
@@ -319,7 +319,7 @@ function ManifoldsBase.get_basis_orthonormal(
     )
 end
 function ManifoldsBase.get_basis_orthogonal(
-    ::DefaultManifold,
+    ::DefaultManifold{ℝ},
     p::NonBroadcastBasisThing,
     𝔽::RealNumbers,
 )
@@ -332,7 +332,7 @@ function ManifoldsBase.get_basis_orthogonal(
     )
 end
 function ManifoldsBase.get_basis_default(
-    ::DefaultManifold,
+    ::DefaultManifold{ℝ},
     p::NonBroadcastBasisThing,
     N::ManifoldsBase.RealNumbers,
 )

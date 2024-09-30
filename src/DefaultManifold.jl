@@ -65,23 +65,19 @@ embed!(::DefaultManifold, Y, p, X) = copyto!(Y, X)
 
 exp!(::DefaultManifold, q, p, X) = (q .= p .+ X)
 
-function get_basis_orthonormal(::DefaultManifold, p, N::RealNumbers)
-    return CachedBasis(
-        DefaultOrthonormalBasis(N),
-        [_euclidean_basis_vector(p, i) for i in eachindex(p)],
+for fname in [:get_basis_orthonormal, :get_basis_orthogonal, :get_basis_default]
+    BD = Dict(
+        :get_basis_orthonormal => :DefaultOrthonormalBasis,
+        :get_basis_orthogonal => :DefaultOrthogonalBasis,
+        :get_basis_default => :DefaultBasis,
     )
-end
-function get_basis_orthogonal(::DefaultManifold, p, N::RealNumbers)
-    return CachedBasis(
-        DefaultOrthogonalBasis(N),
-        [_euclidean_basis_vector(p, i) for i in eachindex(p)],
-    )
-end
-function get_basis_default(::DefaultManifold, p, N::RealNumbers)
-    return CachedBasis(
-        DefaultBasis(N),
-        [_euclidean_basis_vector(p, i) for i in eachindex(p)],
-    )
+    BT = BD[fname]
+    @eval function $fname(::DefaultManifold{ℝ}, p, N::RealNumbers)
+        return CachedBasis($BT(N), [_euclidean_basis_vector(p, i) for i in eachindex(p)])
+    end
+    @eval function $fname(::DefaultManifold{ℂ}, p, N::ComplexNumbers)
+        return CachedBasis($BT(N), [_euclidean_basis_vector(p, i) for i in eachindex(p)])
+    end
 end
 function get_basis_diagonalizing(M::DefaultManifold, p, B::DiagonalizingOrthonormalBasis)
     vecs = get_vectors(M, p, get_basis(M, p, DefaultOrthonormalBasis()))
@@ -89,10 +85,10 @@ function get_basis_diagonalizing(M::DefaultManifold, p, B::DiagonalizingOrthonor
     return CachedBasis(B, DiagonalizingBasisData(B.frame_direction, eigenvalues, vecs))
 end
 
-# Complex manifold, real basis -> coefficients c are complesx -> reshape
+# Complex manifold, real basis -> coefficients c are complex -> reshape
 # Real manifold, real basis -> reshape
-function get_coordinates_orthonormal!(M::DefaultManifold, c, p, X, ::RealNumbers)
-    return copyto!(c, reshape(X, number_of_coordinates(M, ℝ)))
+function get_coordinates_orthonormal!(M::DefaultManifold, c, p, X, N::AbstractNumbers)
+    return copyto!(c, reshape(X, number_of_coordinates(M, N)))
 end
 function get_coordinates_diagonalizing!(
     M::DefaultManifold,
@@ -103,11 +99,11 @@ function get_coordinates_diagonalizing!(
 )
     return copyto!(c, reshape(X, number_of_coordinates(M, ℝ)))
 end
-function get_coordinates_orthonormal!(::DefaultManifold, c, p, X, ::ComplexNumbers)
+function get_coordinates_orthonormal!(::DefaultManifold{ℂ}, c, p, X, ::RealNumbers)
     m = length(X)
     return copyto!(c, [reshape(real(X), m); reshape(imag(X), m)])
 end
-function get_vector_orthonormal!(M::DefaultManifold, Y, p, c, ::RealNumbers)
+function get_vector_orthonormal!(M::DefaultManifold, Y, p, c, ::AbstractNumbers)
     return copyto!(Y, reshape(c, representation_size(M)))
 end
 function get_vector_diagonalizing!(
@@ -119,7 +115,7 @@ function get_vector_diagonalizing!(
 )
     return copyto!(Y, reshape(c, representation_size(M)))
 end
-function get_vector_orthonormal!(M::DefaultManifold{ℂ}, Y, p, c, ::ComplexNumbers)
+function get_vector_orthonormal!(M::DefaultManifold{ℂ}, Y, p, c, ::RealNumbers)
     n = div(length(c), 2)
     return copyto!(Y, reshape(c[1:n] + c[(n + 1):(2n)] * 1im, representation_size(M)))
 end
