@@ -95,4 +95,6 @@ ManifoldsBase.representation_size(::AllocManifold4) = (2, 3)
 
     @test default_type(M2) === Matrix{Float64}
     @test default_type(M2, TangentSpaceType()) === Matrix{Float64}
+
+    @test ManifoldsBase.coordinate_eltype(AllocManifold4(), a4, ℍ) === QuaternionF64
 end
