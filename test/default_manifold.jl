@@ -641,7 +641,14 @@ using ManifoldsBaseTestUtils
         @test ManifoldsBase.coordinate_eltype(MC, p, ManifoldsBase.ℂ) === ComplexF64
         @test ManifoldsBase.coordinate_eltype(MC, p, ManifoldsBase.ℝ) === Float64
         CBR = get_basis(MC, p, DefaultOrthonormalBasis())
-        @test CBR.data == [[1.0 + 0.0im, 0.0 + 0.0im, 0.0 + 0.0im], [0.0 + 0.0im, 1.0 + 0.0im, 0.0 + 0.0im], [0.0 + 0.0im, 0.0 + 0.0im, 1.0 + 0.0im], [0.0 + 1.0im, 0.0 + 0.0im, 0.0 + 0.0im], [0.0 + 0.0im, 0.0 + 1.0im, 0.0 + 0.0im], [0.0 + 0.0im, 0.0 + 0.0im, 0.0 + 1.0im]]
+        @test CBR.data == [
+            [1.0 + 0.0im, 0.0 + 0.0im, 0.0 + 0.0im],
+            [0.0 + 0.0im, 1.0 + 0.0im, 0.0 + 0.0im],
+            [0.0 + 0.0im, 0.0 + 0.0im, 1.0 + 0.0im],
+            [0.0 + 1.0im, 0.0 + 0.0im, 0.0 + 0.0im],
+            [0.0 + 0.0im, 0.0 + 1.0im, 0.0 + 0.0im],
+            [0.0 + 0.0im, 0.0 + 0.0im, 0.0 + 1.0im],
+        ]
     end
 
     @testset "Show methods" begin

@@ -63,7 +63,7 @@ An arbitrary basis of vector space of type `VST` on a manifold. This will usuall
 be the fastest basis available for a manifold.
 
 The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used
-as coefficients in linear combinations of vectors.
+as coefficients in linear combinations of the basis vectors.
 
 # See also
 
@@ -89,7 +89,7 @@ Abstract type that represents an orthonormal basis of vector space of type `VST`
 manifold or a subset of it.
 
 The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used
-as coefficients in linear combinations of vectors.
+as coefficients in linear combinations of the basis vectors.
 
 # See also
 
@@ -104,7 +104,7 @@ An arbitrary orthogonal basis of vector space of type `VST` on a manifold. This 
 be the fastest orthogonal basis available for a manifold.
 
 The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used
-as coefficients in linear combinations of vectors.
+as coefficients in linear combinations of the basis vectors.
 
 # See also
 
@@ -137,7 +137,7 @@ Abstract type that represents an orthonormal basis of vector space of type `VST`
 manifold or a subset of it.
 
 The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used
-as coefficients in linear combinations of vectors.
+as coefficients in linear combinations of the basis vectors.
 
 # See also
 
@@ -153,7 +153,7 @@ An arbitrary orthonormal basis of vector space of type `VST` on a manifold. This
 be the fastest orthonormal basis available for a manifold.
 
 The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used
-as coefficients in linear combinations of vectors.
+as coefficients in linear combinations of the basis vectors.
 
 # See also
 
@@ -184,7 +184,7 @@ of the ambient space projected onto the subspace representing the tangent space
 at a given point.
 
 The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used
-as coefficients in linear combinations of vectors.
+as coefficients in linear combinations of the basis vectors.
 
 Available methods:
   - `:gram_schmidt` uses a modified Gram-Schmidt orthonormalization.
@@ -219,7 +219,7 @@ An orthonormal basis `Ξ` as a vector of tangent vectors (of length determined b
 tensor ``R(u,v)w`` and where the direction `frame_direction` ``v`` has curvature `0`.
 
 The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used
-as coefficients in linear combinations of vectors.
+as coefficients in linear combinations of the basis vectors.
 
 # Constructor
 
@@ -1080,8 +1080,7 @@ For array manifolds, this converts an array representation of the tangent
 vector to a vector representation. The [`hat`](@ref) map is the `vee` map's
 inverse.
 """
-vee(M::AbstractManifold, p, X) =
-    get_coordinates(M, p, X, VeeOrthogonalBasis(ℝ))
+vee(M::AbstractManifold, p, X) = get_coordinates(M, p, X, VeeOrthogonalBasis(ℝ))
 function vee!(M::AbstractManifold, Y, p, X)
     return get_coordinates!(M, Y, p, X, VeeOrthogonalBasis(ℝ))
 end
