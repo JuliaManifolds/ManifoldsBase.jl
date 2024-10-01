@@ -303,15 +303,15 @@ function allocate_result(
     f::typeof(get_coordinates),
     p,
     X,
-    basis::AbstractBasis,
-)
-    T = allocate_result_type(M, f, (p, X))
+    basis::AbstractBasis{𝔽},
+) where {𝔽}
+    T = coordinate_eltype(M, p, 𝔽)
     return allocate_coordinates(M, p, T, number_of_coordinates(M, basis))
 end
 
 @inline function allocate_result_type(
     M::AbstractManifold,
-    f::Union{typeof(get_coordinates),typeof(get_vector)},
+    f::typeof(get_vector),
     args::Tuple{Any,Vararg{Any}},
 )
     apf = allocation_promotion_function(M, f, args)
@@ -559,8 +559,8 @@ function _get_coordinates(M::AbstractManifold, p, X, B::DefaultOrthonormalBasis)
     return get_coordinates_orthonormal(M, p, X, number_system(B))
 end
 function get_coordinates_orthonormal(M::AbstractManifold, p, X, N)
-    Y = allocate_result(M, get_coordinates, p, X, DefaultOrthonormalBasis(N))
-    return get_coordinates_orthonormal!(M, Y, p, X, N)
+    c = allocate_result(M, get_coordinates, p, X, DefaultOrthonormalBasis(N))
+    return get_coordinates_orthonormal!(M, c, p, X, N)
 end
 
 function _get_coordinates(M::AbstractManifold, p, X, B::DiagonalizingOrthonormalBasis)
@@ -572,8 +572,8 @@ function get_coordinates_diagonalizing(
     X,
     B::DiagonalizingOrthonormalBasis,
 )
-    Y = allocate_result(M, get_coordinates, p, X, B)
-    return get_coordinates_diagonalizing!(M, Y, p, X, B)
+    c = allocate_result(M, get_coordinates, p, X, B)
+    return get_coordinates_diagonalizing!(M, c, p, X, B)
 end
 
 function _get_coordinates(M::AbstractManifold, p, X, B::CachedBasis)
