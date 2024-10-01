@@ -48,7 +48,7 @@ Abstract type that represents a basis of vector space of type `VST` on a manifol
 a subset of it.
 
 The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used
-as coefficients in linear combinations of vectors.
+as coefficients in linear combinations of the basis vectors.
 
 # See also
 
