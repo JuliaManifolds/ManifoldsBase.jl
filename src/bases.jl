@@ -48,7 +48,7 @@ Abstract type that represents a basis of vector space of type `VST` on a manifol
 a subset of it.
 
 The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used
-for the vectors elements.
+as coefficients in linear combinations of the basis vectors.
 
 # See also
 
@@ -63,7 +63,7 @@ An arbitrary basis of vector space of type `VST` on a manifold. This will usuall
 be the fastest basis available for a manifold.
 
 The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used
-for the vectors elements.
+as coefficients in linear combinations of the basis vectors.
 
 # See also
 
@@ -89,7 +89,7 @@ Abstract type that represents an orthonormal basis of vector space of type `VST`
 manifold or a subset of it.
 
 The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used
-for the vectors elements.
+as coefficients in linear combinations of the basis vectors.
 
 # See also
 
@@ -104,7 +104,7 @@ An arbitrary orthogonal basis of vector space of type `VST` on a manifold. This 
 be the fastest orthogonal basis available for a manifold.
 
 The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used
-for the vectors elements.
+as coefficients in linear combinations of the basis vectors.
 
 # See also
 
@@ -137,7 +137,7 @@ Abstract type that represents an orthonormal basis of vector space of type `VST`
 manifold or a subset of it.
 
 The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used
-for the vectors elements.
+as coefficients in linear combinations of the basis vectors.
 
 # See also
 
@@ -153,7 +153,7 @@ An arbitrary orthonormal basis of vector space of type `VST` on a manifold. This
 be the fastest orthonormal basis available for a manifold.
 
 The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used
-for the vectors elements.
+as coefficients in linear combinations of the basis vectors.
 
 # See also
 
@@ -184,7 +184,7 @@ of the ambient space projected onto the subspace representing the tangent space
 at a given point.
 
 The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used
-for the vectors elements.
+as coefficients in linear combinations of the basis vectors.
 
 Available methods:
   - `:gram_schmidt` uses a modified Gram-Schmidt orthonormalization.
@@ -205,6 +205,7 @@ end
 An orthonormal basis obtained from a basis.
 
 # Constructor
+
     GramSchmidtOrthonormalBasis(𝔽::AbstractNumbers = ℝ)
 """
 struct GramSchmidtOrthonormalBasis{𝔽} <: AbstractOrthonormalBasis{𝔽,TangentSpaceType} end
@@ -218,7 +219,7 @@ An orthonormal basis `Ξ` as a vector of tangent vectors (of length determined b
 tensor ``R(u,v)w`` and where the direction `frame_direction` ``v`` has curvature `0`.
 
 The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used
-for the vectors elements.
+as coefficients in linear combinations of the basis vectors.
 
 # Constructor
 
@@ -302,15 +303,15 @@ function allocate_result(
     f::typeof(get_coordinates),
     p,
     X,
-    basis::AbstractBasis,
-)
-    T = allocate_result_type(M, f, (p, X))
+    basis::AbstractBasis{𝔽},
+) where {𝔽}
+    T = coordinate_eltype(M, p, 𝔽)
     return allocate_coordinates(M, p, T, number_of_coordinates(M, basis))
 end
 
 @inline function allocate_result_type(
     M::AbstractManifold,
-    f::Union{typeof(get_coordinates),typeof(get_vector)},
+    f::typeof(get_vector),
     args::Tuple{Any,Vararg{Any}},
 )
     apf = allocation_promotion_function(M, f, args)
@@ -361,18 +362,17 @@ function combine_allocation_promotion_functions(::typeof(identity), ::typeof(com
 end
 
 """
-    coordinate_eltype(M::AbstractManifold{M𝔽}, p, 𝔽::AbstractNumbers) where {M𝔽}
+    coordinate_eltype(M::AbstractManifold, p, 𝔽::AbstractNumbers)
 
 Get the element type for 𝔽-field coordinates of the tangent space at a point `p` from
 manifold `M`. This default assumes that usually complex bases of complex manifolds have
 real coordinates but it can be overridden by a more specific method.
 """
-@inline function coordinate_eltype(::AbstractManifold{M𝔽}, p, 𝔽::AbstractNumbers) where {M𝔽}
-    if M𝔽 === 𝔽
-        return real(number_eltype(p))
-    else
-        return number_eltype(p)
-    end
+@inline function coordinate_eltype(::AbstractManifold, p, 𝔽::ComplexNumbers)
+    return complex(float(number_eltype(p)))
+end
+@inline function coordinate_eltype(::AbstractManifold, p, ::RealNumbers)
+    return real(float(number_eltype(p)))
 end
 
 @doc raw"""
@@ -406,15 +406,17 @@ function _dual_basis(
     return DefaultOrthonormalBasis{𝔽}(TangentSpaceType())
 end
 
-function _euclidean_basis_vector(p::StridedArray, i)
-    X = zero(p)
+# if `p` has complex eltype but you'd like to have real basis vectors,
+# you can pass `real` as a third argument to get that
+function _euclidean_basis_vector(p::StridedArray, i, eltype_transform = identity)
+    X = zeros(eltype_transform(eltype(p)), size(p)...)
     X[i] = 1
     return X
 end
-function _euclidean_basis_vector(p, i)
+function _euclidean_basis_vector(p, i, eltype_transform = identity)
     # when p is for example a SArray
-    X = similar(p)
-    copyto!(X, zero(p))
+    X = similar(p, eltype_transform(eltype(p)))
+    fill!(X, zero(eltype(X)))
     X[i] = 1
     return X
 end
@@ -559,8 +561,8 @@ function _get_coordinates(M::AbstractManifold, p, X, B::DefaultOrthonormalBasis)
     return get_coordinates_orthonormal(M, p, X, number_system(B))
 end
 function get_coordinates_orthonormal(M::AbstractManifold, p, X, N)
-    Y = allocate_result(M, get_coordinates, p, X, DefaultOrthonormalBasis(N))
-    return get_coordinates_orthonormal!(M, Y, p, X, N)
+    c = allocate_result(M, get_coordinates, p, X, DefaultOrthonormalBasis(N))
+    return get_coordinates_orthonormal!(M, c, p, X, N)
 end
 
 function _get_coordinates(M::AbstractManifold, p, X, B::DiagonalizingOrthonormalBasis)
@@ -572,8 +574,8 @@ function get_coordinates_diagonalizing(
     X,
     B::DiagonalizingOrthonormalBasis,
 )
-    Y = allocate_result(M, get_coordinates, p, X, B)
-    return get_coordinates_diagonalizing!(M, Y, p, X, B)
+    c = allocate_result(M, get_coordinates, p, X, B)
+    return get_coordinates_diagonalizing!(M, c, p, X, B)
 end
 
 function _get_coordinates(M::AbstractManifold, p, X, B::CachedBasis)
@@ -585,7 +587,7 @@ function get_coordinates_cached(
     p,
     X,
     B::CachedBasis,
-    ::RealNumbers,
+    ::ComplexNumbers,
 )
     return map(vb -> conj(inner(M, p, X, vb)), get_vectors(M, p, B))
 end
@@ -595,7 +597,7 @@ function get_coordinates_cached(
     p,
     X,
     C::CachedBasis,
-    ::𝔽,
+    ::RealNumbers,
 ) where {𝔽}
     return map(vb -> real(inner(M, p, X, vb)), get_vectors(M, p, C))
 end
@@ -644,7 +646,7 @@ function get_coordinates_cached!(
     p,
     X,
     B::CachedBasis,
-    ::RealNumbers,
+    ::ComplexNumbers,
 )
     map!(vb -> conj(inner(M, p, X, vb)), Y, get_vectors(M, p, B))
     return Y
@@ -656,7 +658,7 @@ function get_coordinates_cached!(
     p,
     X,
     C::CachedBasis,
-    ::𝔽,
+    ::RealNumbers,
 ) where {𝔽}
     map!(vb -> real(inner(M, p, X, vb)), Y, get_vectors(M, p, C))
     return Y
@@ -939,26 +941,22 @@ For array manifolds, this converts a vector representation of the tangent
 vector to an array representation. The [`vee`](@ref) map is the `hat` map's
 inverse.
 """
-@inline hat(M::AbstractManifold, p, X) =
-    get_vector(M, p, X, VeeOrthogonalBasis(number_system(M)))
-@inline hat!(M::AbstractManifold, Y, p, X) =
-    get_vector!(M, Y, p, X, VeeOrthogonalBasis(number_system(M)))
+@inline hat(M::AbstractManifold, p, X) = get_vector(M, p, X, VeeOrthogonalBasis(ℝ))
+@inline hat!(M::AbstractManifold, Y, p, X) = get_vector!(M, Y, p, X, VeeOrthogonalBasis(ℝ))
 
 """
-    number_of_coordinates(M::AbstractManifold{𝔽}, B::AbstractBasis)
-    number_of_coordinates(M::AbstractManifold{𝔽}, ::𝔾)
+    number_of_coordinates(M::AbstractManifold, B::AbstractBasis)
+    number_of_coordinates(M::AbstractManifold, ::𝔾)
 
 Compute the number of coordinates in basis of field type `𝔾` on a manifold `M`.
 This also corresponds to the number of vectors represented by `B`,
 or stored within `B` in case of a [`CachedBasis`](@ref).
 """
-function number_of_coordinates(M::AbstractManifold{𝔽}, ::AbstractBasis{𝔾}) where {𝔽,𝔾}
+function number_of_coordinates(M::AbstractManifold, ::AbstractBasis{𝔾}) where {𝔾}
     return number_of_coordinates(M, 𝔾)
 end
-function number_of_coordinates(M::AbstractManifold{𝔽}, f::𝔾) where {𝔽,𝔾}
-    # for odd manifolds this first case has to match.
-    (real_dimension(𝔽) == real_dimension(f)) && return manifold_dimension(M)
-    return div(manifold_dimension(M), real_dimension(𝔽)) * real_dimension(f)
+function number_of_coordinates(M::AbstractManifold, f::𝔾) where {𝔾}
+    return div(manifold_dimension(M), real_dimension(f))
 end
 
 """
@@ -1084,8 +1082,7 @@ For array manifolds, this converts an array representation of the tangent
 vector to a vector representation. The [`hat`](@ref) map is the `vee` map's
 inverse.
 """
-vee(M::AbstractManifold, p, X) =
-    get_coordinates(M, p, X, VeeOrthogonalBasis(number_system(M)))
+vee(M::AbstractManifold, p, X) = get_coordinates(M, p, X, VeeOrthogonalBasis(ℝ))
 function vee!(M::AbstractManifold, Y, p, X)
-    return get_coordinates!(M, Y, p, X, VeeOrthogonalBasis(number_system(M)))
+    return get_coordinates!(M, Y, p, X, VeeOrthogonalBasis(ℝ))
 end

@@ -219,14 +219,15 @@ using ManifoldsBaseTestUtils
         p = [1.0, 2.0im, 3.0]
         X = [1.2, 2.2im, 2.3im]
         b = [Matrix{Float64}(I, 3, 3)[:, i] for i in 1:3]
-        Bℝ = CachedBasis(DefaultOrthonormalBasis{ℝ}(), b)
+        bℂ = [b..., (b .* 1im)...]
+
+        Bℝ = CachedBasis(DefaultOrthonormalBasis{ℂ}(), b)
         aℝ = get_coordinates(M, p, X, Bℝ)
         Yℝ = get_vector(M, p, aℝ, Bℝ)
         @test Yℝ ≈ X
         @test ManifoldsBase.number_of_coordinates(M, Bℝ) == 3
 
-        bℂ = [b..., (b .* 1im)...]
-        Bℂ = CachedBasis(DefaultOrthonormalBasis{ℂ}(), bℂ)
+        Bℂ = CachedBasis(DefaultOrthonormalBasis{ℝ}(), bℂ)
         aℂ = get_coordinates(M, p, X, Bℂ)
         Yℂ = get_vector(M, p, aℂ, Bℂ)
         @test Yℂ ≈ X
@@ -380,23 +381,23 @@ using ManifoldsBaseTestUtils
         X = [2.0, 1.0im]
         Bc = DefaultOrthonormalBasis(ManifoldsBase.ℂ)
         CBc = get_basis(Mc, p, Bc)
-        @test CBc.data == [[1.0, 0.0], [0.0, 1.0], [1.0im, 0.0], [0.0, 1.0im]]
+        @test CBc.data == [[1.0, 0.0], [0.0, 1.0]]
         B = DefaultOrthonormalBasis(ManifoldsBase.ℝ)
         CB = get_basis(Mc, p, B)
-        @test CB.data == [[1.0, 0.0], [0.0, 1.0]]
-        @test get_coordinates(Mc, p, X, CBc) == [2.0, 0.0, 0.0, 1.0]
-        @test get_coordinates(Mc, p, X, CB) == [2.0, 1.0im]
+        @test CB.data == [[1.0, 0.0], [0.0, 1.0], [1.0im, 0.0], [0.0, 1.0im]]
+        @test get_coordinates(Mc, p, X, CB) == [2.0, 0.0, 0.0, 1.0]
+        @test get_coordinates(Mc, p, X, CBc) == [2.0, 1.0im]
         # ONB
         cc = zeros(4)
-        @test get_coordinates!(Mc, cc, p, X, Bc) == [2.0, 0.0, 0.0, 1.0]
+        @test get_coordinates!(Mc, cc, p, X, B) == [2.0, 0.0, 0.0, 1.0]
         @test cc == [2.0, 0.0, 0.0, 1.0]
         c = zeros(ComplexF64, 2)
-        @test get_coordinates!(Mc, c, p, X, B) == [2.0, 1.0im]
+        @test get_coordinates!(Mc, c, p, X, Bc) == [2.0, 1.0im]
         @test c == [2.0, 1.0im]
         # Cached
-        @test get_coordinates!(Mc, cc, p, X, CBc) == [2.0, 0.0, 0.0, 1.0]
+        @test get_coordinates!(Mc, cc, p, X, CB) == [2.0, 0.0, 0.0, 1.0]
         @test cc == [2.0, 0.0, 0.0, 1.0]
-        @test get_coordinates!(Mc, c, p, X, CB) == [2.0, 1.0im]
+        @test get_coordinates!(Mc, c, p, X, CBc) == [2.0, 1.0im]
         @test c == [2.0, 1.0im]
 
     end

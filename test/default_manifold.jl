@@ -636,11 +636,19 @@ using ManifoldsBaseTestUtils
         MC = ManifoldsBase.DefaultManifold(3; field = ManifoldsBase.ℂ)
         p = [1.0im, 2.0im, -1.0im]
         CB = get_basis(MC, p, DefaultOrthonormalBasis(ManifoldsBase.ℂ))
-        @test CB.data isa Vector{Vector{ComplexF64}}
-        @test ManifoldsBase.coordinate_eltype(MC, p, ManifoldsBase.ℂ) === Float64
-        @test ManifoldsBase.coordinate_eltype(MC, p, ManifoldsBase.ℝ) === ComplexF64
+        @test CB.data == [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
+        @test CB.data isa Vector{Vector{Float64}}
+        @test ManifoldsBase.coordinate_eltype(MC, p, ManifoldsBase.ℂ) === ComplexF64
+        @test ManifoldsBase.coordinate_eltype(MC, p, ManifoldsBase.ℝ) === Float64
         CBR = get_basis(MC, p, DefaultOrthonormalBasis())
-        @test CBR.data == [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
+        @test CBR.data == [
+            [1.0 + 0.0im, 0.0 + 0.0im, 0.0 + 0.0im],
+            [0.0 + 0.0im, 1.0 + 0.0im, 0.0 + 0.0im],
+            [0.0 + 0.0im, 0.0 + 0.0im, 1.0 + 0.0im],
+            [0.0 + 1.0im, 0.0 + 0.0im, 0.0 + 0.0im],
+            [0.0 + 0.0im, 0.0 + 1.0im, 0.0 + 0.0im],
+            [0.0 + 0.0im, 0.0 + 0.0im, 0.0 + 1.0im],
+        ]
     end
 
     @testset "Show methods" begin
@@ -671,7 +679,7 @@ using ManifoldsBaseTestUtils
     end
 
     @testset "scalars" begin
-        M = DefaultManifold()
+        M = ManifoldsBase.DefaultManifold()
         p = 1.0
         X = 2.0
         @test copy(M, p) === p
