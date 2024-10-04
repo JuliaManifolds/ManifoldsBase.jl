@@ -369,10 +369,10 @@ manifold `M`. This default assumes that usually complex bases of complex manifol
 real coordinates but it can be overridden by a more specific method.
 """
 @inline function coordinate_eltype(::AbstractManifold, p, 𝔽::ComplexNumbers)
-    return complex(number_eltype(p))
+    return complex(float(number_eltype(p)))
 end
 @inline function coordinate_eltype(::AbstractManifold, p, ::RealNumbers)
-    return real(number_eltype(p))
+    return real(float(number_eltype(p)))
 end
 
 @doc raw"""
