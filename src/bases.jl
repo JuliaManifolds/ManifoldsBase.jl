@@ -406,15 +406,17 @@ function _dual_basis(
     return DefaultOrthonormalBasis{𝔽}(TangentSpaceType())
 end
 
-function _euclidean_basis_vector(p::StridedArray, i)
-    X = zero(p)
+# if `p` has complex eltype but you'd like to have real basis vectors,
+# you can pass `real` as a third argument to get that
+function _euclidean_basis_vector(p::StridedArray, i, eltype_transform = identity)
+    X = zeros(eltype_transform(eltype(p)), size(p)...)
     X[i] = 1
     return X
 end
-function _euclidean_basis_vector(p, i)
+function _euclidean_basis_vector(p, i, eltype_transform = identity)
     # when p is for example a SArray
-    X = similar(p)
-    copyto!(X, zero(p))
+    X = similar(p, eltype_transform(eltype(p)))
+    fill!(X, zero(eltype(X)))
     X[i] = 1
     return X
 end

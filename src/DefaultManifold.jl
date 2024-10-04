@@ -76,7 +76,10 @@ for fname in [:get_basis_orthonormal, :get_basis_orthogonal, :get_basis_default]
         return CachedBasis($BT(N), [_euclidean_basis_vector(p, i) for i in eachindex(p)])
     end
     @eval function $fname(::DefaultManifold{ℂ}, p, N::ComplexNumbers)
-        return CachedBasis($BT(N), [_euclidean_basis_vector(p, i) for i in eachindex(p)])
+        return CachedBasis(
+            $BT(N),
+            [_euclidean_basis_vector(p, i, real) for i in eachindex(p)],
+        )
     end
 end
 function get_basis_diagonalizing(M::DefaultManifold, p, B::DiagonalizingOrthonormalBasis)
