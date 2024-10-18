@@ -140,7 +140,7 @@ end
 
 number_system(::DefaultManifold{𝔽}) where {𝔽} = 𝔽
 
-norm(::DefaultManifold, p, X, r) = norm(X, r)
+norm(::DefaultManifold, p, X, r=2.0) = norm(X, r)
 
 project!(::DefaultManifold, q, p) = copyto!(q, p)
 project!(::DefaultManifold, Y, p, X) = copyto!(Y, X)
