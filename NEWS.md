@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `distance(M, p, q, r)` to compute `r`-norms on manifolds that have components.
 * `distance(M, p, q, m, r)` to compute (approximate) `r`-norms on manifolds that have components
   using an `AbstractInverseRetractionMethod m` within every (inner) distance call.
+* `norm(M, p, X, r)` to compute `r`-norms on manifolds that have components.
 
 ## [0.15.17] 04/10/2024
 

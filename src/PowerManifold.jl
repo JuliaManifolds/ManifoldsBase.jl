@@ -1182,11 +1182,11 @@ function mid_point!(M::PowerManifoldNestedReplacing, q, p1, p2)
 end
 
 @doc raw"""
-    norm(M::AbstractPowerManifold, p, X)
+    norm(M::AbstractPowerManifold, p, X, r::REal=2.0)
 
 Compute the norm of `X` from the tangent space of `p` on an
-[`AbstractPowerManifold`](@ref) `M`, i.e. from the element wise norms the
-Frobenius norm is computed.
+[`AbstractPowerManifold`](@ref) `M`, i.e. from the element wise norms `r`-norm is computed,
+where the default `r=2.0` yields the Frobenius norm is computed.
 """
 function LinearAlgebra.norm(M::AbstractPowerManifold, p, X, r::Real = 2.0)
     isinf(r) && return _norm_Inf(M, p, X)

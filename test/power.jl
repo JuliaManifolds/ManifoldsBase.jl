@@ -182,10 +182,14 @@ end
                 @testset "specific functions" begin
                     nsq = sqrt(sum(distance.(Ref(M), p, q) .^ 2))
                     @test distance(N, p, q) == nsq
-                    @test distance(N, p, q, LogarithmicInterseRetraction(), 2.0) == nsq
+                    @test distance(N, p, q, LogarithmicInverseRetraction(), 2.0) == nsq
                     @test distance(N, p, q, 2.0) == sqrt(sum(distance.(Ref(M), p, q) .^ 2))
-                    @test distance(N, p, q, 1) == sum(distance.(Ref(M), p, q))
-                    @test distance(N, p, q, Inf) == maximum(distance.(Ref(M), p, q))
+                    absn = sum(distance.(Ref(M), p, q))
+                    @test distance(N, p, q, 1) == absn
+                    @test distance(N, p, q, LogarithmicInverseRetraction(), 1) == absn
+                    Infn = maximum(distance.(Ref(M), p, q))
+                    @test distance(N, p, q, Inf) == Infn
+                    @test distance(N, p, q, LogarithmicInverseRetraction(), Inf) == Infn
                     @test exp(N, p, q) == p .+ q
                     @test exp(N, p, q, 2) == p .+ 2 .* q
 
@@ -233,6 +237,10 @@ end
                     @test manifold_dimension(N) == prod(pow_size) * manifold_dimension(M)
                     @test mid_point(N, p, q) == mid_point.(Ref(M), p, q)
                     @test sqrt(inner(N, p, q, q)) ≈ norm(N, p, q)
+                    norms = norm.(Ref(M), p, q)
+                    #@test norm(N, p, q, 1.0) = sum(norms)
+                    #@test norm(N, p, q, 2.0) = sqrt(sum(norms.^2))
+                    #@test norm(N, p, q, Inf) = maximum(norms)
                     @test project(N, p) == p
                     @test project(N, p, q) == q
                     @test power_dimensions(N) == pow_size
