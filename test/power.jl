@@ -180,7 +180,10 @@ end
                     end
                 end
                 @testset "specific functions" begin
-                    @test distance(N, p, q) == sqrt(sum(distance.(Ref(M), p, q) .^ 2))
+                    nsq = sqrt(sum(distance.(Ref(M), p, q) .^ 2))
+                    @test distance(N, p, q) == nsq
+                    @test distance(N, p, q, LogarithmicInterseRetraction(), 2.0) == nsq
+                    @test distance(N, p, q, 2.0) == sqrt(sum(distance.(Ref(M), p, q) .^ 2))
                     @test distance(N, p, q, 1) == sum(distance.(Ref(M), p, q))
                     @test distance(N, p, q, Inf) == maximum(distance.(Ref(M), p, q))
                     @test exp(N, p, q) == p .+ q

@@ -548,7 +548,7 @@ end
 @doc "$(_doc_distance_pow)"
 function distance(M::AbstractPowerManifold, p, q, r::Real)
     isinf(r) && return _distance_Inf(M, p, q)
-    r == 1 && return _distance_1(M, p, q)
+    (r == 1) && return _distance_1(M, p, q)
     return _distance_r(M, p, q, r)
 end
 function distance(
@@ -570,7 +570,7 @@ function distance(
     r::Real = 2.0,
 )
     isinf(r) && return _distance_Inf(M, p, q, m)
-    r == 1 && return _distance_1(M, p, q, m)
+    (r == 1) && return _distance_1(M, p, q, m)
     return _distance_Inf(M, p, q, r)
 end
 #
@@ -1188,15 +1188,38 @@ Compute the norm of `X` from the tangent space of `p` on an
 [`AbstractPowerManifold`](@ref) `M`, i.e. from the element wise norms the
 Frobenius norm is computed.
 """
-function LinearAlgebra.norm(M::AbstractPowerManifold, p, X)
-    sum_squares = zero(number_eltype(X))
+function LinearAlgebra.norm(M::AbstractPowerManifold, p, X, r::Real = 2.0)
+    isinf(r) && return _norm_Inf(M, p, X)
+    (r == 1) && return _norm_1(M, p, X)
+    return _norm_r(M, p, X, r)
+end
+function _norm_r(M::AbstractPowerManifold, p, X, r)
+    rep_size = representation_size(M.manifold)
+    values = [
+        norm(M.manifold, _read(M, rep_size, p, i), _read(M, rep_size, X, i)) for
+        i in get_iterator(M)
+    ]
+    return norm(values, r)
+end
+function _norm_1(M::AbstractPowerManifold, p, X)
+    s = zero(number_eltype(p))
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
-        sum_squares +=
-            norm(M.manifold, _read(M, rep_size, p, i), _read(M, rep_size, X, i))^2
+        s += norm(M.manifold, _read(M, rep_size, p, i), _read(M, rep_size, X, i))
     end
-    return sqrt(sum_squares)
+    return s
 end
+function _norm_Inf(M::AbstractPowerManifold, p, X)
+    d = 0.0
+    v = 0.0
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        v = norm(M.manifold, _read(M, rep_size, p, i), _read(M, rep_size, X, i))
+        d = (v > d) ? v : d
+    end
+    return d
+end
+
 
 
 function parallel_transport_direction!(M::AbstractPowerManifold, Y, p, X, d)
