@@ -57,7 +57,7 @@ function check_approx(M::DefaultManifold, p, X, Y; kwargs...)
     return ApproximatelyError(v, s)
 end
 
-distance(::DefaultManifold, p, q, r=2.0) = norm(p - q, r)
+distance(::DefaultManifold, p, q, r::Real = 2.0) = norm(p - q, r)
 
 embed!(::DefaultManifold, q, p) = copyto!(q, p)
 
