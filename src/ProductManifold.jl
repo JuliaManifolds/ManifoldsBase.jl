@@ -372,22 +372,49 @@ function default_vector_transport_method(M::ProductManifold)
     return ProductVectorTransport(map(default_vector_transport_method, M.manifolds)...)
 end
 
-@doc raw"""
-    distance(M::ProductManifold, p, q)
+_doc_distance_prod = """
+    distance(M::ProductManifold, p, q, r::Real=2.0)
+    distance(M::ProductManifold, p, q, m::AbstractInverseRetractionMethod=LogarithmicInverseRetraction(), r::Real=2.0)
 
-Compute the distance between two points `p` and `q` on the [`ProductManifold`](@ref) `M`, which is
-the 2-norm of the elementwise distances on the internal manifolds that build `M`.
+Compute the distance between `q` and `p` on an [`ProductManifold`](@ref).
+
+First, the componentwise distances are computed. These can be approximated using the
+`norm` of an [`AbstractInverseRetractionMethod`](@ref) `m`.
+Then, the `r`-norm of these elements is computed.
 """
-function distance(M::ProductManifold, p, q)
-    return sqrt(
-        sum(
-            map(
-                distance,
-                M.manifolds,
-                submanifold_components(M, p),
-                submanifold_components(M, q),
-            ) .^ 2,
+
+@doc "$(_doc_distance_prod)"
+function distance(M::ProductManifold, p, q, r::Real = 2.0)
+    return norm(
+        map(
+            distance,
+            M.manifolds,
+            submanifold_components(M, p),
+            submanifold_components(M, q),
         ),
+        r,
+    )
+end
+function distance(M::ProductManifold, p, q, ::LogarithmicInverseRetraction, r::Real = 2.0)
+    return distance(M, p, q, r)
+end
+
+@doc "$(_doc_distance_prod)"
+function distance(
+    M::ProductManifold,
+    p,
+    q,
+    m::AbstractInverseRetractionMethod,
+    r::Real = 2.0,
+)
+    return norm(
+        map(
+            (M, p, q) -> distance(M, p, q, m),
+            M.manifolds,
+            submanifold_components(M, p),
+            submanifold_components(M, q),
+        ),
+        r,
     )
 end
 
@@ -556,6 +583,13 @@ function get_vector!(
     end
     return X
 end
+
+"""
+    has_components(::ProductManifold)
+
+Return `true` since points on an [`ProductManifold`](@ref) consist of components.
+"""
+has_components(::ProductManifold) = true
 
 @doc raw"""
     injectivity_radius(M::ProductManifold)
