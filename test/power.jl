@@ -57,6 +57,8 @@ end
               "PowerManifold(DefaultManifold(3; field = ℝ), TestArrayRepresentation(), 2, 3)"
         p = zeros(6)
         X = zeros(6)
+        @test has_components(N)
+        @test has_components(O)
         @test ManifoldsBase.check_power_size(N, p) === nothing
         @test ManifoldsBase.check_power_size(O, p) isa DomainError
         @test ManifoldsBase.check_power_size(N, p, X) === nothing
@@ -179,6 +181,8 @@ end
                 end
                 @testset "specific functions" begin
                     @test distance(N, p, q) == sqrt(sum(distance.(Ref(M), p, q) .^ 2))
+                    @test distance(N, p, q, 1) == sum(distance.(Ref(M), p, q))
+                    @test distance(N, p, q, Inf) == maximum(distance.(Ref(M), p, q))
                     @test exp(N, p, q) == p .+ q
                     @test exp(N, p, q, 2) == p .+ 2 .* q
 

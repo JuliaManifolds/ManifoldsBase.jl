@@ -759,21 +759,15 @@ function mid_point!(M::ProductManifold, q, p1, p2)
 end
 
 @doc raw"""
-    norm(M::ProductManifold, p, X)
+    norm(M::ProductManifold, p, X, r::Real=2.0)
 
-Compute the norm of `X` from the tangent space of `p` on the [`ProductManifold`](@ref),
+Compute the (`r`-)norm of `X` from the tangent space of `p` on the [`ProductManifold`](@ref),
 i.e. from the element wise norms the 2-norm is computed.
 """
-function LinearAlgebra.norm(M::ProductManifold, p, X)
-    norms_squared = (
-        map(
-            norm,
-            M.manifolds,
-            submanifold_components(M, p),
-            submanifold_components(M, X),
-        ) .^ 2
-    )
-    return sqrt(sum(norms_squared))
+function LinearAlgebra.norm(M::ProductManifold, p, X, r::Real = 2.0)
+    norms =
+        (map(norm, M.manifolds, submanifold_components(M, p), submanifold_components(M, X)))
+    return norm(norms, r)
 end
 
 """

@@ -6,7 +6,7 @@ using ManifoldsBase:
 using LinearAlgebra
 using Random
 
-s = (@__DIR__) * "/test/"
+s = (@__DIR__)
 !(s in LOAD_PATH) && (push!(LOAD_PATH, s))
 using ManifoldsBaseTestUtils
 
@@ -34,6 +34,7 @@ using RecursiveArrayTools
     X1 = ArrayPartition([0.0, 1.0, 0.2], [4.0 0.0; 2.0 7.0])
 
     @test !is_flat(M)
+    @test has_components(M)
     @test M[1] == M1
     @test M[2] == M2
     @test injectivity_radius(M) ≈ π
@@ -163,11 +164,14 @@ using RecursiveArrayTools
     p2 = ArrayPartition([0.0, 1.0, 0.0], [4.0 8.0; 3.0 7.5])
     X1 = ArrayPartition([0.0, 1.0, 0.2], [4.0 0.0; 2.0 7.0])
     X2 = ArrayPartition([0.0, -1.0, 0.4], [3.0 1.0; -2.0 2.0])
-
+    d1 = distance(M1, p1.x[1], p2.x[1])
+    d2 = distance(M2, p1.x[2], p2.x[2])
     @testset "Basic operations" begin
         @test manifold_dimension(M) == 6
         @test representation_size(M) === nothing
-        @test distance(M, p1, p2) ≈ 4.551637188998299
+        @test distance(M, p1, p2) ≈ norm([d1, d2])
+        @test distance(M, p1, p2, 1) ≈ norm([d1, d2], 1)
+        @test distance(M, p1, p2, Inf) ≈ norm([d1, d2], Inf)
         qr = similar(p1)
         exp!(M, qr, p1, X1)
         @test exp(M, p1, X1) ≈ ArrayPartition(

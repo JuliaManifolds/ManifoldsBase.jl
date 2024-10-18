@@ -598,6 +598,7 @@ function _distance_1(M::AbstractPowerManifold, p, q, m::AbstractInverseRetractio
     for i in get_iterator(M)
         s += distance(M.manifold, _read(M, rep_size, p, i), _read(M, rep_size, q, i), m)
     end
+    return s
 end
 function _distance_1(M::AbstractPowerManifold, p, q)
     s = zero(number_eltype(p))
@@ -605,6 +606,7 @@ function _distance_1(M::AbstractPowerManifold, p, q)
     for i in get_iterator(M)
         s += distance(M.manifold, _read(M, rep_size, p, i), _read(M, rep_size, q, i))
     end
+    return s
 end
 function _distance_Inf(M::AbstractPowerManifold, p, q, m::AbstractInverseRetractionMethod)
     d = 0.0

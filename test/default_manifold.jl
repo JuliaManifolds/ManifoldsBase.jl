@@ -31,6 +31,7 @@ using ManifoldsBaseTestUtils
     @test isa(manifold_dimension(M), Integer)
     @test manifold_dimension(M) ≥ 0
     @test base_manifold(M) == M
+    @test has_components(M)
     @test number_system(M) == ManifoldsBase.ℝ
     @test ManifoldsBase.representation_size(M) == (3,)
 
