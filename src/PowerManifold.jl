@@ -582,7 +582,13 @@ end
 #
 #
 # The three special cases
-function _distance_r(M::AbstractPowerManifold, p, q, m::AbstractInverseRetractionMethod, r::Real)
+function _distance_r(
+    M::AbstractPowerManifold,
+    p,
+    q,
+    m::AbstractInverseRetractionMethod,
+    r::Real,
+)
     rep_size = representation_size(M.manifold)
     values = [
         distance(M.manifold, _read(M, rep_size, p, i), _read(M, rep_size, q, i), m) for
