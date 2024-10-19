@@ -615,7 +615,7 @@ function _distance_1(M::AbstractPowerManifold, p, q)
     return s
 end
 function _distance_max(M::AbstractPowerManifold, p, q, m::AbstractInverseRetractionMethod)
-    d = float(zero(number_eltype(p))
+    d = float(zero(number_eltype(p)))
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         v = distance(M.manifold, _read(M, rep_size, p, i), _read(M, rep_size, q, i), m)
@@ -624,7 +624,7 @@ function _distance_max(M::AbstractPowerManifold, p, q, m::AbstractInverseRetract
     return d
 end
 function _distance_max(M::AbstractPowerManifold, p, q)
-    d = float(zero(number_eltype(p))
+    d = float(zero(number_eltype(p)))
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         v = distance(M.manifold, _read(M, rep_size, p, i), _read(M, rep_size, q, i))
