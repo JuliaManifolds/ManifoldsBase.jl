@@ -661,7 +661,7 @@ using RecursiveArrayTools
         p1 = ArrayPartition([1.0, 0.0, 0.0], 1 / sqrt(2) .* [1.0, 1.0, 0.0])
         p2 = ArrayPartition(1 / sqrt(2) .* [1.0, 1.0, 0.0], [0.0, 1.0, 0.0])
         m = ProjectionInverseRetraction()
-        ds = distance.(Ref(M1), p1, p2, Ref(m))
+        ds = [distance(M1, p1.x[i], p2.x[i], m) for i in [1, 2]]
         @test distance(M, p1, p2, m) == norm(ds)
         @test distance(M, p1, p2, m, 1) == norm(ds, 1)
         @test distance(M, p1, p2, m, 2) == norm(ds, 2)
