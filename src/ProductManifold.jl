@@ -395,7 +395,7 @@ function distance(M::ProductManifold, p, q, r::Real = 2.0)
         r,
     )
 end
-function distance(M::ProductManifold, p, q, ::LogarithmicInverseRetraction, r::Real = 2.0)
+function distance(M::ProductManifold, p, q, ::LogarithmicInverseRetraction, r::Real = 2)
     return distance(M, p, q, r)
 end
 
@@ -405,7 +405,7 @@ function distance(
     p,
     q,
     m::AbstractInverseRetractionMethod,
-    r::Real = 2.0,
+    r::Real = 2,
 )
     return norm(
         map(
@@ -764,7 +764,7 @@ end
 Compute the (`r`-)norm of `X` from the tangent space of `p` on the [`ProductManifold`](@ref),
 i.e. from the element wise norms the 2-norm is computed.
 """
-function LinearAlgebra.norm(M::ProductManifold, p, X, r::Real = 2.0)
+function LinearAlgebra.norm(M::ProductManifold, p, X, r::Real = 2)
     norms =
         (map(norm, M.manifolds, submanifold_components(M, p), submanifold_components(M, X)))
     return norm(norms, r)
