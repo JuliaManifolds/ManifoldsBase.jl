@@ -654,4 +654,18 @@ using RecursiveArrayTools
         @test base_point(Tp1M1) === p1[M, 1]
         @test base_manifold(Tp1M1) === M[1]
     end
+
+    @testset "Special Case for r-distance" begin
+        M1 = TestSphere(2)
+        M = ProductManifold(M1, M1)
+        p1 = ArrayPartition([1.0, 0.0, 0.0], 1 / sqrt(2) .* [1.0, 1.0, 0.0])
+        p2 = ArrayPartition(1 / sqrt(2) .* [1.0, 1.0, 0.0], [0.0, 1.0, 0.0])
+        m = ProjectionInverseRetraction()
+        ds = distance.(Ref(M1), p1, p2, Ref(m))
+        @test distance(M, p1, p2, m) == norm(ds)
+        @test distance(M, p1, p2, m, 1) == norm(ds, 1)
+        @test distance(M, p1, p2, m, 2) == norm(ds, 2)
+        @test distance(M, p1, p2, m, Inf) == norm(ds, Inf)
+        @test distance(M, p1, p2, m, -Inf) == norm(ds, -Inf)
+    end
 end
