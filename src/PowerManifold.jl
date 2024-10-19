@@ -536,11 +536,13 @@ _doc_distance_pow = """
 
 Compute the distance between `q` and `p` on an [`AbstractPowerManifold`](@ref).
 
-First, the componentwise distances are computed. These can be approximated using the
+First, the componentwise distances are computed using the Riemannian distance function
+on `M.manifold`. These can be approximated using the
 `norm` of an [`AbstractInverseRetractionMethod`](@ref) `m`.
-Then, the `r`-norm of these elements is computed.
+This yields an array of distance values.
 
-Note that the `r` argument is *not* passed recursively to components when the distance is computed.
+Second, we compute the `r`-norm on this array of distances.
+This is also the only place, there the `r` is used.
 """
 
 function distance(M::AbstractPowerManifold, p, q)
