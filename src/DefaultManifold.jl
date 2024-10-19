@@ -57,7 +57,7 @@ function check_approx(M::DefaultManifold, p, X, Y; kwargs...)
     return ApproximatelyError(v, s)
 end
 
-distance(::DefaultManifold, p, q, r::Real = 2.0) = norm(p - q, r)
+distance(::DefaultManifold, p, q, r::Real = 2) = norm(p - q, r)
 
 embed!(::DefaultManifold, q, p) = copyto!(q, p)
 
@@ -140,7 +140,7 @@ end
 
 number_system(::DefaultManifold{𝔽}) where {𝔽} = 𝔽
 
-norm(::DefaultManifold, p, X, r = 2.0) = norm(X, r)
+norm(::DefaultManifold, p, X, r::Real = 2) = norm(X, r)
 
 project!(::DefaultManifold, q, p) = copyto!(q, p)
 project!(::DefaultManifold, Y, p, X) = copyto!(Y, X)
