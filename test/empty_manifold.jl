@@ -11,6 +11,7 @@ using Test
     @test base_manifold(M) === M
     @test number_system(M) === ℝ
     @test representation_size(M) === nothing
+    @test !has_components(M)
 
     @test_throws MethodError manifold_dimension(M)
 

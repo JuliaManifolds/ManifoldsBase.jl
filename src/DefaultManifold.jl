@@ -57,7 +57,7 @@ function check_approx(M::DefaultManifold, p, X, Y; kwargs...)
     return ApproximatelyError(v, s)
 end
 
-distance(::DefaultManifold, p, q) = norm(p - q)
+distance(::DefaultManifold, p, q, r::Real = 2) = norm(p - q, r)
 
 embed!(::DefaultManifold, q, p) = copyto!(q, p)
 
@@ -123,6 +123,8 @@ function get_vector_orthonormal!(M::DefaultManifold{ℂ}, Y, p, c, ::RealNumbers
     return copyto!(Y, reshape(c[1:n] + c[(n + 1):(2n)] * 1im, representation_size(M)))
 end
 
+has_components(::DefaultManifold) = true
+
 injectivity_radius(::DefaultManifold) = Inf
 
 @inline inner(::DefaultManifold, p, X, Y) = dot(X, Y)
@@ -138,7 +140,7 @@ end
 
 number_system(::DefaultManifold{𝔽}) where {𝔽} = 𝔽
 
-norm(::DefaultManifold, p, X) = norm(X)
+norm(::DefaultManifold, p, X, r::Real = 2) = norm(X, r)
 
 project!(::DefaultManifold, q, p) = copyto!(q, p)
 project!(::DefaultManifold, Y, p, X) = copyto!(Y, X)

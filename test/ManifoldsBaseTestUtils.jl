@@ -575,6 +575,11 @@ end
 Base.getindex(x::MatrixVectorTransport, i) = x.m[:, i]
 Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
 
+struct TestArrayRepresentation <: AbstractPowerRepresentation end
+
+const TestPowerManifoldMultidimensional =
+    AbstractPowerManifold{𝔽,<:AbstractManifold{𝔽},TestArrayRepresentation} where {𝔽}
+
 export CustomDefinedInverseRetraction, CustomDefinedKeywordInverseRetraction
 export CustomDefinedKeywordRetraction, CustomDefinedRetraction, CustomUndefinedRetraction
 export DefaultPoint, DefaultTVector

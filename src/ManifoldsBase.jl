@@ -594,6 +594,15 @@ function embed_project!(M::AbstractManifold, Y, p, X)
     return project!(M, Y, p, embed(M, p, X))
 end
 
+"""
+    has_components(M::AbstractManifold)
+
+Return whether the [`AbstractManifold`](@ref)`(M)` consists of components,
+like the [`PowerManifold`](@ref) or the [`ProductManifold`](@ref), that one can iterate over.
+By default, this function returns `false`.
+"""
+has_components(M::AbstractManifold) = false
+
 @doc raw"""
     injectivity_radius(M::AbstractManifold)
 
@@ -1354,6 +1363,7 @@ export ×,
     get_vector,
     get_vector!,
     get_vectors,
+    has_components,
     hat,
     hat!,
     injectivity_radius,

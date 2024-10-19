@@ -372,25 +372,57 @@ function default_vector_transport_method(M::ProductManifold)
     return ProductVectorTransport(map(default_vector_transport_method, M.manifolds)...)
 end
 
-@doc raw"""
-    distance(M::ProductManifold, p, q)
+_doc_distance_prod = """
+    distance(M::ProductManifold, p, q, r::Real=2)
+    distance(M::ProductManifold, p, q, m::AbstractInverseRetractionMethod=LogarithmicInverseRetraction(), r::Real=2)
 
-Compute the distance between two points `p` and `q` on the [`ProductManifold`](@ref) `M`, which is
-the 2-norm of the elementwise distances on the internal manifolds that build `M`.
+Compute the distance between `q` and `p` on an [`ProductManifold`](@ref).
+
+First, the componentwise distances are computed. These can be approximated using the
+`norm` of an [`AbstractInverseRetractionMethod`](@ref) `m`.
+Then, the `r`-norm of the tuple of these elements is computed.
 """
-function distance(M::ProductManifold, p, q)
-    return sqrt(
-        sum(
-            map(
-                distance,
-                M.manifolds,
-                submanifold_components(M, p),
-                submanifold_components(M, q),
-            ) .^ 2,
+
+@doc "$(_doc_distance_prod)"
+function distance(M::ProductManifold, p, q, r::Real = 2)
+    return norm(
+        map(
+            distance,
+            M.manifolds,
+            submanifold_components(M, p),
+            submanifold_components(M, q),
         ),
+        r,
     )
 end
+function distance(M::ProductManifold, p, q, ::LogarithmicInverseRetraction, r::Real = 2)
+    return distance(M, p, q, r)
+end
 
+@doc "$(_doc_distance_prod)"
+function distance(M::ProductManifold, p, q, m::AbstractInverseRetractionMethod, r::Real = 2)
+    return norm(
+        map(
+            (M, p, q) -> distance(M, p, q, m),
+            M.manifolds,
+            submanifold_components(M, p),
+            submanifold_components(M, q),
+        ),
+        r,
+    )
+end
+function distance(M::ProductManifold, p, q, method::InverseProductRetraction, r::Real = 2)
+    return norm(
+        map(
+            (M, p, q, m) -> distance(M, p, q, m),
+            M.manifolds,
+            submanifold_components(M, p),
+            submanifold_components(M, q),
+            method.inverse_retractions,
+        ),
+        r,
+    )
+end
 @doc raw"""
     exp(M::ProductManifold, p, X)
 
@@ -556,6 +588,13 @@ function get_vector!(
     end
     return X
 end
+
+"""
+    has_components(::ProductManifold)
+
+Return `true` since points on an [`ProductManifold`](@ref) consist of components.
+"""
+has_components(::ProductManifold) = true
 
 @doc raw"""
     injectivity_radius(M::ProductManifold)
@@ -725,21 +764,15 @@ function mid_point!(M::ProductManifold, q, p1, p2)
 end
 
 @doc raw"""
-    norm(M::ProductManifold, p, X)
+    norm(M::ProductManifold, p, X, r::Real=2)
 
-Compute the norm of `X` from the tangent space of `p` on the [`ProductManifold`](@ref),
+Compute the (`r`-)norm of `X` from the tangent space of `p` on the [`ProductManifold`](@ref),
 i.e. from the element wise norms the 2-norm is computed.
 """
-function LinearAlgebra.norm(M::ProductManifold, p, X)
-    norms_squared = (
-        map(
-            norm,
-            M.manifolds,
-            submanifold_components(M, p),
-            submanifold_components(M, X),
-        ) .^ 2
-    )
-    return sqrt(sum(norms_squared))
+function LinearAlgebra.norm(M::ProductManifold, p, X, r::Real = 2)
+    norms =
+        (map(norm, M.manifolds, submanifold_components(M, p), submanifold_components(M, X)))
+    return norm(norms, r)
 end
 
 """

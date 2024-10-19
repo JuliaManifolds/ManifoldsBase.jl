@@ -6,7 +6,7 @@ using ManifoldsBase:
 using LinearAlgebra
 using Random
 
-s = (@__DIR__) * "/test/"
+s = (@__DIR__)
 !(s in LOAD_PATH) && (push!(LOAD_PATH, s))
 using ManifoldsBaseTestUtils
 
@@ -34,6 +34,7 @@ using RecursiveArrayTools
     X1 = ArrayPartition([0.0, 1.0, 0.2], [4.0 0.0; 2.0 7.0])
 
     @test !is_flat(M)
+    @test has_components(M)
     @test M[1] == M1
     @test M[2] == M2
     @test injectivity_radius(M) ≈ π
@@ -160,20 +161,34 @@ using RecursiveArrayTools
     end
 
     p1 = ArrayPartition([1.0, 0.0, 0.0], [4.0 5.0; 6.0 7.0])
-    p2 = ArrayPartition([0.0, 1.0, 0.0], [4.0 8.0; 3.0 7.5])
+    p2 = ArrayPartition(1 / sqrt(2) .* [1.0, 1.0, 0.0], [4.0 8.0; 3.0 7.5])
     X1 = ArrayPartition([0.0, 1.0, 0.2], [4.0 0.0; 2.0 7.0])
     X2 = ArrayPartition([0.0, -1.0, 0.4], [3.0 1.0; -2.0 2.0])
-
+    d1 = distance(M1, p1.x[1], p2.x[1])
+    d1r = distance(M1, p1.x[1], p2.x[1], ProjectionInverseRetraction())
+    d2 = distance(M2, p1.x[2], p2.x[2])
     @testset "Basic operations" begin
         @test manifold_dimension(M) == 6
         @test representation_size(M) === nothing
-        @test distance(M, p1, p2) ≈ 4.551637188998299
+        @test distance(M, p1, p2) ≈ norm([d1, d2])
+        @test distance(M, p1, p2, 1) ≈ norm([d1, d2], 1)
+        @test distance(M, p1, p2, Inf) ≈ norm([d1, d2], Inf)
+        # Fallback log
+        m1 = LogarithmicInverseRetraction()
+        @test distance(M, p1, p2, m1) ≈ norm([d1, d2])
+        @test distance(M, p1, p2, m1, 1) ≈ norm([d1, d2], 1)
+        @test distance(M, p1, p2, m1, Inf) ≈ norm([d1, d2], Inf)
+        m2 = InverseProductRetraction(
+            ProjectionInverseRetraction(),
+            LogarithmicInverseRetraction(),
+        )
+        @test distance(M, p1, p2, m2) ≈ norm([d1r, d2])
+        @test distance(M, p1, p2, m2, 1) ≈ norm([d1r, d2], 1)
+        @test distance(M, p1, p2, m2, Inf) ≈ norm([d1r, d2], Inf)
         qr = similar(p1)
         exp!(M, qr, p1, X1)
-        @test exp(M, p1, X1) ≈ ArrayPartition(
-            [0.5235330372543839, 0.8354600062374664, 0.1670920012474933],
-            [8.0 5.0; 8.0 14.0],
-        )
+        @test exp(M, p1, X1) ≈
+              ArrayPartition(exp(M1, p1[M, 1], X1[M, 1]), exp(M2, p1[M, 2], X1[M, 2]))
         @test exp(M, p1, X1) ≈ qr
         @test exp(M, p1, X1, 2.0) ≈ exp(M, p1, 2 * X1)
         exp!(M, qr, p1, X1, 2.0)
@@ -200,8 +215,7 @@ using RecursiveArrayTools
         @test qr3 ≈ qr
         Xr = similar(X1)
         log!(M, Xr, p1, p2)
-        @test log(M, p1, p2) ≈
-              ArrayPartition([0.0, 1.5707963267948966, 0.0], [0.0 3.0; -3.0 0.5])
+        @test log(M, p1, p2) ≈ ArrayPartition([0.0, π / 4, 0.0], [0.0 3.0; -3.0 0.5])
         @test log(M, p1, p2) ≈ Xr
         @test inverse_retract(
             M,
@@ -270,11 +284,11 @@ using RecursiveArrayTools
     @testset "Broadcasting" begin
         br_result = p1 .+ 2.0 .* p2
         @test br_result isa ArrayPartition
-        @test br_result.x[1] ≈ [1.0, 2.0, 0.0]
+        @test br_result.x[1] ≈ [1 + sqrt(2), sqrt(2), 0.0]
         @test br_result.x[2] ≈ [12.0 21.0; 12.0 22.0]
 
         br_result .= 2.0 .* p1 .+ p2
-        @test br_result.x[1] ≈ [2.0, 1.0, 0.0]
+        @test br_result.x[1] ≈ [2.0 + 1 / sqrt(2), 1 / sqrt(2), 0.0]
         @test br_result.x[2] ≈ [12.0 18.0; 15.0 21.5]
 
         br_result .= p1
@@ -327,8 +341,9 @@ using RecursiveArrayTools
     end
 
     @testset "arithmetic" begin
-        @test isapprox(M, p1 + p2, ArrayPartition([1.0, 1.0, 0.0], [8.0 13.0; 9.0 14.5]))
-        @test isapprox(M, p1 - p2, ArrayPartition([1.0, -1.0, 0.0], [0.0 -3.0; 3.0 -0.5]))
+        a = 1 / sqrt(2)
+        @test isapprox(M, p1 + p2, ArrayPartition([1.0 + a, a, 0.0], [8.0 13.0; 9.0 14.5]))
+        @test isapprox(M, p1 - p2, ArrayPartition([1.0 - a, -a, 0.0], [0.0 -3.0; 3.0 -0.5]))
         @test isapprox(M, -p1, ArrayPartition([-1.0, -0.0, -0.0], [-4.0 -5.0; -6.0 -7.0]))
         @test isapprox(M, p1 * 2, ArrayPartition([2.0, 0.0, 0.0], [8.0 10.0; 12.0 14.0]))
         @test isapprox(M, 2 * p1, ArrayPartition([2.0, 0.0, 0.0], [8.0 10.0; 12.0 14.0]))
@@ -638,5 +653,19 @@ using RecursiveArrayTools
         Tp1M1 = TpM[1]
         @test base_point(Tp1M1) === p1[M, 1]
         @test base_manifold(Tp1M1) === M[1]
+    end
+
+    @testset "Special Case for r-distance" begin
+        M1 = TestSphere(2)
+        M = ProductManifold(M1, M1)
+        p1 = ArrayPartition([1.0, 0.0, 0.0], 1 / sqrt(2) .* [1.0, 1.0, 0.0])
+        p2 = ArrayPartition(1 / sqrt(2) .* [1.0, 1.0, 0.0], [0.0, 1.0, 0.0])
+        m = ProjectionInverseRetraction()
+        ds = [distance(M1, p1[M, i], p2[M, i], m) for i in [1, 2]]
+        @test distance(M, p1, p2, m) == norm(ds)
+        @test distance(M, p1, p2, m, 1) == norm(ds, 1)
+        @test distance(M, p1, p2, m, 2) == norm(ds, 2)
+        @test distance(M, p1, p2, m, Inf) == norm(ds, Inf)
+        @test distance(M, p1, p2, m, -Inf) == norm(ds, -Inf)
     end
 end
