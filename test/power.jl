@@ -233,9 +233,9 @@ end
                     @test mid_point(N, p, q) == mid_point.(Ref(M), p, q)
                     @test sqrt(inner(N, p, q, q)) ≈ norm(N, p, q)
                     norms = norm.(Ref(M), p, q)
-                    #@test norm(N, p, q, 1.0) = sum(norms)
-                    #@test norm(N, p, q, 2.0) = sqrt(sum(norms.^2))
-                    #@test norm(N, p, q, Inf) = maximum(norms)
+                    @test norm(N, p, q, 1.0) = sum(norms)
+                    @test norm(N, p, q, 2.0) = sqrt(sum(norms.^2))
+                    @test norm(N, p, q, Inf) = maximum(norms)
                     @test project(N, p) == p
                     @test project(N, p, q) == q
                     @test power_dimensions(N) == pow_size
