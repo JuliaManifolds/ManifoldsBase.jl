@@ -400,13 +400,7 @@ function distance(M::ProductManifold, p, q, ::LogarithmicInverseRetraction, r::R
 end
 
 @doc "$(_doc_distance_prod)"
-function distance(
-    M::ProductManifold,
-    p,
-    q,
-    m::AbstractInverseRetractionMethod,
-    r::Real = 2,
-)
+function distance(M::ProductManifold, p, q, m::AbstractInverseRetractionMethod, r::Real = 2)
     return norm(
         map(
             (M, p, q) -> distance(M, p, q, m),

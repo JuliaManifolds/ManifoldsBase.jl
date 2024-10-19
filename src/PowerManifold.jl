@@ -556,7 +556,7 @@ function distance(
     p,
     q,
     ::LogarithmicInverseRetraction,
-    r::Real = 2,
+    r::Real = 2.0,
 )
     return distance(M, p, q, r)
 end
@@ -567,7 +567,7 @@ function distance(
     p,
     q,
     m::AbstractInverseRetractionMethod,
-    r::Real = 2,
+    r::Real = 2.0,
 )
     isinf(r) && return _distance_Inf(M, p, q, m)
     (r == 1) && return _distance_1(M, p, q, m)
@@ -1210,7 +1210,8 @@ function _norm_1(M::AbstractPowerManifold, p, X)
     return s
 end
 function _norm_Inf(M::AbstractPowerManifold, p, X)
-    d = float(zero(eltype(X))
+    d = 0.0
+    v = 0.0
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         v = norm(M.manifold, _read(M, rep_size, p, i), _read(M, rep_size, X, i))
