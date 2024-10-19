@@ -571,7 +571,7 @@ function distance(
 )
     isinf(r) && return _distance_Inf(M, p, q, m)
     (r == 1) && return _distance_1(M, p, q, m)
-    return _distance_Inf(M, p, q, r)
+    return _distance_r(M, p, q, m, r)
 end
 #
 #
@@ -587,7 +587,7 @@ end
 function _distance_r(M::AbstractPowerManifold, p, q, r)
     rep_size = representation_size(M.manifold)
     values = [
-        distance(M.manifold, _read(M, rep_size, p, i), _read(M, rep_size, q, i)) for
+        distance(M.manifold, _read(M, rep_size, p, i), _read(M, rep_size, q, i))^r for
         i in get_iterator(M)
     ]
     return norm(values, r)

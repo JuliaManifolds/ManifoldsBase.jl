@@ -21,6 +21,14 @@ import Base: +, *, -
 struct TestSphere{N,𝔽} <: AbstractManifold{𝔽} end
 TestSphere(N::Int, 𝔽 = ℝ) = TestSphere{N,𝔽}()
 
+
+struct TestVectorSpaceType <: ManifoldsBase.VectorSpaceType end
+
+struct TestArrayRepresentation <: AbstractPowerRepresentation end
+
+const TestPowerManifoldMultidimensional =
+    AbstractPowerManifold{𝔽,<:AbstractManifold{𝔽},TestArrayRepresentation} where {𝔽}
+
 function ManifoldsBase.change_metric!(
     M::TestSphere,
     Y,
