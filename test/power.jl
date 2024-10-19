@@ -508,12 +508,15 @@ end
         @test distance(N, p1, p2) == norm(Xns)
         @test distance(N, p1, p2, 1) == norm(Xns, 1)
         @test distance(N, p1, p2, Inf) == norm(Xns, Inf)
+        @test distance(N, p1, p2, -Inf) == norm(Xns, -Inf)
         @test distance(N, p1, p2, m) == norm(dRns)
         @test distance(N, p1, p2, m, 1) == norm(dRns, 1)
         @test distance(N, p1, p2, m, Inf) == norm(dRns, Inf)
+        @test distance(N, p1, p2, m, -Inf) == norm(dRns, -Inf)
 
         @test norm(N, p1, X) == norm(Xns)
         @test norm(N, p1, X, 1) == norm(Xns, 1)
         @test norm(N, p1, X, Inf) == norm(Xns, Inf)
+        @test norm(N, p1, X, -Inf) == norm(Xns, -Inf)
     end
 end

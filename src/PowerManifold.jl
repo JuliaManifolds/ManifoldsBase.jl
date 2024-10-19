@@ -547,7 +547,8 @@ end
 
 @doc "$(_doc_distance_pow)"
 function distance(M::AbstractPowerManifold, p, q, r::Real)
-    isinf(r) && return _distance_Inf(M, p, q)
+    (isinf(r) && r > 0) && return _distance_max(M, p, q)
+    (isinf(r) && r < 0) && return _distance_min(M, p, q)
     (r == 1) && return _distance_1(M, p, q)
     return _distance_r(M, p, q, r)
 end
@@ -556,7 +557,7 @@ function distance(
     p,
     q,
     ::LogarithmicInverseRetraction,
-    r::Real = 2.0,
+    r::Real = 2,
 )
     return distance(M, p, q, r)
 end
@@ -567,9 +568,10 @@ function distance(
     p,
     q,
     m::AbstractInverseRetractionMethod,
-    r::Real = 2.0,
+    r::Real = 2,
 )
-    isinf(r) && return _distance_Inf(M, p, q, m)
+    (isinf(r) && r > 0) && return _distance_max(M, p, q, m)
+    (isinf(r) && r < 0) && return _distance_min(M, p, q, m)
     (r == 1) && return _distance_1(M, p, q, m)
     return _distance_r(M, p, q, m, r)
 end
@@ -608,9 +610,8 @@ function _distance_1(M::AbstractPowerManifold, p, q)
     end
     return s
 end
-function _distance_Inf(M::AbstractPowerManifold, p, q, m::AbstractInverseRetractionMethod)
+function _distance_max(M::AbstractPowerManifold, p, q, m::AbstractInverseRetractionMethod)
     d = 0.0
-    v = 0.0
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         v = distance(M.manifold, _read(M, rep_size, p, i), _read(M, rep_size, q, i), m)
@@ -618,9 +619,8 @@ function _distance_Inf(M::AbstractPowerManifold, p, q, m::AbstractInverseRetract
     end
     return d
 end
-function _distance_Inf(M::AbstractPowerManifold, p, q)
+function _distance_max(M::AbstractPowerManifold, p, q)
     d = 0.0
-    v = 0.0
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         v = distance(M.manifold, _read(M, rep_size, p, i), _read(M, rep_size, q, i))
@@ -628,7 +628,24 @@ function _distance_Inf(M::AbstractPowerManifold, p, q)
     end
     return d
 end
-
+function _distance_min(M::AbstractPowerManifold, p, q, m::AbstractInverseRetractionMethod)
+    d = Inf
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        v = distance(M.manifold, _read(M, rep_size, p, i), _read(M, rep_size, q, i), m)
+        d = (v < d) ? v : d
+    end
+    return d
+end
+function _distance_min(M::AbstractPowerManifold, p, q)
+    d = 0.0
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        v = distance(M.manifold, _read(M, rep_size, p, i), _read(M, rep_size, q, i))
+        d = (v < d) ? v : d
+    end
+    return d
+end
 @doc raw"""
     exp(M::AbstractPowerManifold, p, X)
 
@@ -1189,7 +1206,8 @@ Compute the norm of `X` from the tangent space of `p` on an
 where the default `r=2.0` yields the Frobenius norm is computed.
 """
 function LinearAlgebra.norm(M::AbstractPowerManifold, p, X, r::Real = 2.0)
-    isinf(r) && return _norm_Inf(M, p, X)
+    (isinf(r) && r > 0) && return _norm_max(M, p, X)
+    (isinf(r) && r < 0) && return _norm_min(M, p, X)
     (r == 1) && return _norm_1(M, p, X)
     return _norm_r(M, p, X, r)
 end
@@ -1209,9 +1227,8 @@ function _norm_1(M::AbstractPowerManifold, p, X)
     end
     return s
 end
-function _norm_Inf(M::AbstractPowerManifold, p, X)
+function _norm_max(M::AbstractPowerManifold, p, X)
     d = 0.0
-    v = 0.0
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         v = norm(M.manifold, _read(M, rep_size, p, i), _read(M, rep_size, X, i))
@@ -1219,7 +1236,15 @@ function _norm_Inf(M::AbstractPowerManifold, p, X)
     end
     return d
 end
-
+function _norm_min(M::AbstractPowerManifold, p, X)
+    d = Inf
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        v = norm(M.manifold, _read(M, rep_size, p, i), _read(M, rep_size, X, i))
+        d = (v < d) ? v : d
+    end
+    return d
+end
 
 
 function parallel_transport_direction!(M::AbstractPowerManifold, Y, p, X, d)
