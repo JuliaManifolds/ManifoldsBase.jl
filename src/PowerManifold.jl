@@ -587,7 +587,7 @@ end
 function _distance_r(M::AbstractPowerManifold, p, q, r)
     rep_size = representation_size(M.manifold)
     values = [
-        distance(M.manifold, _read(M, rep_size, p, i), _read(M, rep_size, q, i))^r for
+        distance(M.manifold, _read(M, rep_size, p, i), _read(M, rep_size, q, i)) for
         i in get_iterator(M)
     ]
     return norm(values, r)

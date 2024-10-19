@@ -177,8 +177,8 @@ end
                 @testset "specific functions" begin
                     nsq = sqrt(sum(distance.(Ref(M), p, q) .^ 2))
                     @test distance(N, p, q) == nsq
-                    @test distance(N, p, q, LogarithmicInverseRetraction(), 2.0) == nsq
-                    @test distance(N, p, q, 2.0) == sqrt(sum(distance.(Ref(M), p, q) .^ 2))
+                    @test distance(N, p, q, LogarithmicInverseRetraction(), 2) == nsq
+                    @test distance(N, p, q, 2) == sqrt(sum(distance.(Ref(M), p, q) .^ 2))
                     absn = sum(distance.(Ref(M), p, q))
                     @test distance(N, p, q, 1) == absn
                     @test distance(N, p, q, LogarithmicInverseRetraction(), 1) == absn
