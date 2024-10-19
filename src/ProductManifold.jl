@@ -373,14 +373,14 @@ function default_vector_transport_method(M::ProductManifold)
 end
 
 _doc_distance_prod = """
-    distance(M::ProductManifold, p, q, r::Real=2.0)
-    distance(M::ProductManifold, p, q, m::AbstractInverseRetractionMethod=LogarithmicInverseRetraction(), r::Real=2.0)
+    distance(M::ProductManifold, p, q, r::Real=2)
+    distance(M::ProductManifold, p, q, m::AbstractInverseRetractionMethod=LogarithmicInverseRetraction(), r::Real=2)
 
 Compute the distance between `q` and `p` on an [`ProductManifold`](@ref).
 
 First, the componentwise distances are computed. These can be approximated using the
 `norm` of an [`AbstractInverseRetractionMethod`](@ref) `m`.
-Then, the `r`-norm of these elements is computed.
+Then, the `r`-norm of the tuple of these elements is computed.
 """
 
 @doc "$(_doc_distance_prod)"
@@ -764,7 +764,7 @@ function mid_point!(M::ProductManifold, q, p1, p2)
 end
 
 @doc raw"""
-    norm(M::ProductManifold, p, X, r::Real=2.0)
+    norm(M::ProductManifold, p, X, r::Real=2)
 
 Compute the (`r`-)norm of `X` from the tangent space of `p` on the [`ProductManifold`](@ref),
 i.e. from the element wise norms the 2-norm is computed.

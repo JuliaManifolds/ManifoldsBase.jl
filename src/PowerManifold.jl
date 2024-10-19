@@ -994,7 +994,7 @@ end
 """
     has_components(::AbstractPowerManifold)
 
-Return `true, since points on an [`AbstractPowerManifold`](@ref) consist of components.
+Return `true`, since points on an [`AbstractPowerManifold`](@ref) consist of components.
 """
 has_components(::AbstractPowerManifold) = true
 
@@ -1213,7 +1213,7 @@ end
 
 Compute the norm of `X` from the tangent space of `p` on an
 [`AbstractPowerManifold`](@ref) `M`, i.e. from the element wise norms `r`-norm is computed,
-where the default `r=2.0` yields the Frobenius norm is computed.
+where the default `r=2` yields the Frobenius norm is computed.
 """
 function LinearAlgebra.norm(M::AbstractPowerManifold, p, X, r::Real = 2)
     (isinf(r) && r > 0) && return _norm_max(M, p, X)
