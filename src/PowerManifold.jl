@@ -638,7 +638,7 @@ function _distance_min(M::AbstractPowerManifold, p, q, m::AbstractInverseRetract
     return d
 end
 function _distance_min(M::AbstractPowerManifold, p, q)
-    d = 0.0
+    d = Inf
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         v = distance(M.manifold, _read(M, rep_size, p, i), _read(M, rep_size, q, i))
