@@ -384,7 +384,7 @@ Then, the `r`-norm of these elements is computed.
 """
 
 @doc "$(_doc_distance_prod)"
-function distance(M::ProductManifold, p, q, r::Real = 2.0)
+function distance(M::ProductManifold, p, q, r::Real = 2)
     return norm(
         map(
             distance,
@@ -411,7 +411,18 @@ function distance(M::ProductManifold, p, q, m::AbstractInverseRetractionMethod, 
         r,
     )
 end
-
+function distance(M::ProductManifold, p, q, method::InverseProductRetraction, r::Real = 2)
+    return norm(
+        map(
+            (M, p, q, m) -> distance(M, p, q, m),
+            M.manifolds,
+            submanifold_components(M, p),
+            submanifold_components(M, q),
+            method.inverse_retractions,
+        ),
+        r,
+    )
+end
 @doc raw"""
     exp(M::ProductManifold, p, X)
 
