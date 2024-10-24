@@ -47,7 +47,8 @@ using ManifoldsBaseTestUtils
         @test isapprox(t_p, log(t_p, X, Y), [0.0, 2.0, -2.0])
         @test isapprox(t_p, X, log(t_p, X, Y), [0.0, 2.0, -2.0])
         @test inner(t_p, X, X, X) ≈ 1.0
-        @test norm(t_p, X, X) ≈ 1.0
+        @test norm(t_p, X) ≈ 1.0
+        @test norm(t_p, X) ≈ 1.0
         @test parallel_transport_to(t_p, X, Y, X) ≈ Y
         @test vector_transport_to(t_p, X, Y, X) ≈ Y
         @test vector_transport_to(t_p, X, Y, X, ProjectionTransport()) ≈ Y
@@ -77,6 +78,13 @@ using ManifoldsBaseTestUtils
             Z1 = similar(X)
             get_vector!(t_p, Z1, p, X1c, basis)
             @test isapprox(Z1, X)
+        end
+
+        @testset "scalar fiber" begin
+            Ms = DefaultManifold()
+            p = 1.0
+            t_p = TangentSpace(Ms, p)
+            @test norm(t_p, 2.0) == 2.0
         end
     end
 
