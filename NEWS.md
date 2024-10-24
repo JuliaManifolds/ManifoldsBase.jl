@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-* `norm` function on `VectorSpaceFiber` (such as `TangentSpace`) now needs to be called without the point.
+* `norm` function on `VectorSpaceFiber` (such as `TangentSpace`) now needs to be called without the point. The passed point was already ignored before.
 
 ## [0.15.19] 20/10/2024
 
