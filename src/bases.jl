@@ -561,7 +561,9 @@ function _get_coordinates(M::AbstractManifold, p, X, B::DefaultOrthonormalBasis)
     return get_coordinates_orthonormal(M, p, X, number_system(B))
 end
 function get_coordinates_orthonormal(M::AbstractManifold, p, X, N)
-    c = allocate_result(M, get_coordinates, p, X, DefaultOrthonormalBasis(N))
+    # arguments X and p for allocate_result are intentionally reversed
+    # to make ManifoldDiff.jl tests pass
+    c = allocate_result(M, get_coordinates, X, p, DefaultOrthonormalBasis(N))
     return get_coordinates_orthonormal!(M, c, p, X, N)
 end
 
