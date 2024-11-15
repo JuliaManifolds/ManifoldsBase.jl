@@ -144,13 +144,13 @@ using ManifoldsBaseTestUtils
             if BT == DiagonalizingBasisProxy && pts !== _pts
                 continue
             end
-            v1 = log(M, pts[1], pts[2])
+            X1 = log(M, pts[1], pts[2])
             @test ManifoldsBase.number_of_coordinates(M, BT()) == 3
 
-            vb = get_coordinates(M, pts[1], v1, BT())
-            @test isa(vb, AbstractVector)
-            vbi = get_vector(M, pts[1], vb, BT())
-            @test isapprox(M, pts[1], v1, vbi)
+            Xb = get_coordinates(M, pts[1], X1, BT())
+            @test isa(Xb, AbstractVector)
+            Xbi = get_vector(M, pts[1], Xb, BT())
+            @test isapprox(M, pts[1], X1, Xbi)
 
             b = get_basis(M, pts[1], BT())
             if BT != DiagonalizingBasisProxy
@@ -188,23 +188,39 @@ using ManifoldsBaseTestUtils
                 end
                 # check that the coefficients correspond to the basis
                 for i in 1:N
-                    @test inner(M, pts[1], v1, get_vectors(M, pts[1], b)[i]) ≈ vb[i]
+                    @test inner(M, pts[1], X1, get_vectors(M, pts[1], b)[i]) ≈ Xb[i]
                 end
             end
 
             if BT != DiagonalizingBasisProxy
-                @test get_coordinates(M, pts[1], v1, b) ≈
-                      get_coordinates(M, pts[1], v1, BT())
-                @test get_vector(M, pts[1], vb, b) ≈ get_vector(M, pts[1], vb, BT())
+                @test get_coordinates(M, pts[1], X1, b) ≈
+                      get_coordinates(M, pts[1], X1, BT())
+                @test get_vector(M, pts[1], Xb, b) ≈ get_vector(M, pts[1], Xb, BT())
             end
 
-            v1c = Vector{Float64}(undef, 3)
-            get_coordinates!(M, v1c, pts[1], v1, b)
-            @test v1c ≈ get_coordinates(M, pts[1], v1, b)
+            X1c = Vector{Float64}(undef, 3)
+            get_coordinates!(M, X1c, pts[1], X1, b)
+            @test X1c ≈ get_coordinates(M, pts[1], X1, b)
 
-            v1cv = allocate(v1)
-            get_vector!(M, v1cv, pts[1], v1c, b)
-            @test isapprox(M, pts[1], v1, v1cv)
+            X1cv = allocate(X1)
+            get_vector!(M, X1cv, pts[1], X1c, b)
+            @test isapprox(M, pts[1], X1, X1cv)
+        end
+
+        @testset "Convencience defaults" begin
+            p = [1.0, 0.0, 0.0]
+            X1 = [2.0, 1.0, -1.0]
+            X1c = [2.0, 1.0, -1.0]
+            X1cm = similar(X1c)
+            X1m = similar(X1)
+            @test get_coordinates(M, p, X1) == X1c
+            get_coordinates!(M, X1cm, p, X1)
+            @test X1cm == X1c
+            @test get_vector(M, p, X1c) == X1c
+            get_vector!(M, X1m, p, X1c)
+            @test X1m == X1
+            @test get_vectors(M, p) ==
+                  get_vectors(M, p, get_basis(M, p, DefaultOrthonormalBasis()))
         end
         @testset "() Manifolds" begin
             M = ManifoldsBase.DefaultManifold()
