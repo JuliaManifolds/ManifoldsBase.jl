@@ -11,7 +11,7 @@ Every vector space `fiber` is supposed to provide:
 * `zero_vector(fiber, p)` to construct zero vectors at point `p`,
 * `allocate(X)` and `allocate(X, T)` for vector `X` and type `T`,
 * `copyto!(X, Y)` for vectors `X` and `Y`,
-* `number_eltype(v)` for vector `v`,
+* `number_eltype(X)` for vector `X`,
 * [`vector_space_dimension`](@ref).
 
 Optionally:
