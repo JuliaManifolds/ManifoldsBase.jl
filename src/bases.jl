@@ -11,7 +11,7 @@ Every vector space `fiber` is supposed to provide:
 * `zero_vector(fiber, p)` to construct zero vectors at point `p`,
 * `allocate(X)` and `allocate(X, T)` for vector `X` and type `T`,
 * `copyto!(X, Y)` for vectors `X` and `Y`,
-* `number_eltype(v)` for vector `v`,
+* `number_eltype(X)` for vector `X`,
 * [`vector_space_dimension`](@ref).
 
 Optionally:
@@ -516,7 +516,7 @@ function get_basis_orthonormal(M::AbstractManifold, p, N::AbstractNumbers; kwarg
 end
 
 @doc raw"""
-    get_coordinates(M::AbstractManifold, p, X, B::AbstractBasis)
+    get_coordinates(M::AbstractManifold, p, X, B::AbstractBasis=DefaultOrthonormalBasis())
     get_coordinates(M::AbstractManifold, p, X, B::CachedBasis)
 
 Compute a one-dimensional vector of coefficients of the tangent vector `X`
@@ -532,7 +532,12 @@ requires either a dual basis or the cached basis to be selfdual, for example ort
 
 See also: [`get_vector`](@ref), [`get_basis`](@ref)
 """
-function get_coordinates(M::AbstractManifold, p, X, B::AbstractBasis)
+function get_coordinates(
+    M::AbstractManifold,
+    p,
+    X,
+    B::AbstractBasis = DefaultOrthonormalBasis(),
+)
     return _get_coordinates(M, p, X, B)
 end
 
@@ -604,7 +609,13 @@ function get_coordinates_cached(
     return map(vb -> real(inner(M, p, X, vb)), get_vectors(M, p, C))
 end
 
-function get_coordinates!(M::AbstractManifold, Y, p, X, B::AbstractBasis)
+function get_coordinates!(
+    M::AbstractManifold,
+    Y,
+    p,
+    X,
+    B::AbstractBasis = DefaultOrthonormalBasis(),
+)
     return _get_coordinates!(M, Y, p, X, B)
 end
 function _get_coordinates!(M::AbstractManifold, Y, p, X, B::VeeOrthogonalBasis)
@@ -667,7 +678,7 @@ function get_coordinates_cached!(
 end
 
 """
-    X = get_vector(M::AbstractManifold, p, c, B::AbstractBasis)
+    X = get_vector(M::AbstractManifold, p, c, B::AbstractBasis=DefaultOrthonormalBasis())
 
 Convert a one-dimensional vector of coefficients in a basis `B` of
 the tangent space at `p` on manifold `M` to a tangent vector `X` at `p`.
@@ -681,7 +692,12 @@ requires either a dual basis or the cached basis to be selfdual, for example ort
 
 See also: [`get_coordinates`](@ref), [`get_basis`](@ref)
 """
-@inline function get_vector(M::AbstractManifold, p, c, B::AbstractBasis)
+@inline function get_vector(
+    M::AbstractManifold,
+    p,
+    c,
+    B::AbstractBasis = DefaultOrthonormalBasis(),
+)
     return _get_vector(M, p, c, B)
 end
 
@@ -751,7 +767,13 @@ function get_vector_cached(M::AbstractManifold, p, X, B::CachedBasis)
     end
     return Xt
 end
-@inline function get_vector!(M::AbstractManifold, Y, p, c, B::AbstractBasis)
+@inline function get_vector!(
+    M::AbstractManifold,
+    Y,
+    p,
+    c,
+    B::AbstractBasis = DefaultOrthonormalBasis(),
+)
     return _get_vector!(M, Y, p, c, B)
 end
 
@@ -817,12 +839,17 @@ function get_vector_cached!(M::AbstractManifold, Y, p, X, B::CachedBasis)
 end
 
 """
-    get_vectors(M::AbstractManifold, p, B::AbstractBasis)
+    get_vectors(M::AbstractManifold, p, B::AbstractBasis=get_basis(M, p, DefaultOrthonormalBasis()))
 
 Get the basis vectors of basis `B` of the tangent space at point `p`.
+The function may or may not work if passed a basis other than a [`CachedBasis`](@ref).
+A `CachedBasis` can be obtained by calling [`get_basis`](@ref).
 """
 function get_vectors(M::AbstractManifold, p, B::AbstractBasis)
     return _get_vectors(M, p, B)
+end
+function get_vectors(M::AbstractManifold, p)
+    return get_vectors(M, p, get_basis(M, p, DefaultOrthonormalBasis()))
 end
 function _get_vectors(::AbstractManifold, ::Any, B::CachedBasis)
     return _get_vectors(B)
