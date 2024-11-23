@@ -72,8 +72,8 @@ end
                 copyto!(A, q, ValidationMPoint(x), p) # generate base point “on the fly”
             end
             @test isapprox(A, q, p)
-            @test ManifoldsBase.array_value(p) == x
-            @test ManifoldsBase.array_value(x) == x
+            @test ManifoldsBase._value(p) == x
+            @test ManifoldsBase._value(x) == x
             @test copy(p) == p
             q = allocate(p)
             copyto!(q, p)

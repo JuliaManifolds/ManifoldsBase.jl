@@ -1,52 +1,79 @@
 """
     ValidationManifold{𝔽,M<:AbstractManifold{𝔽}} <: AbstractDecoratorManifold{𝔽}
 
-A manifold to encapsulate manifolds working on array representations of [`AbstractManifoldPoint`](@ref)s
-and [`TVector`](@ref)s in a transparent way, such that for these manifolds it's not
-necessary to introduce explicit types for the points and tangent vectors, but they are
-encapsulated/stripped automatically when needed.
+A manifold to add tests to input and output values of functions defined in the interface.
 
-This manifold is a decorator for a manifold, i.e. it decorates a [`AbstractManifold`](@ref) `M`
-with types points, vectors, and covectors.
+Additionally the points and tangent vectors can also be encapsulated, cf.
+[`ValidationMPoint`](@ref), [`ValidationTVector`](@ref), and [`ValidationCoTVector`](@ref).
+These types can be used to see where some data is assumed to be from, when working on
+manifolds where both points and tangent vectors are represented as (plain) arrays.
 
 # Constructor
 
-    ValidationManifold(M::AbstractManifold; error::Symbol = :error)
+    ValidationManifold(M::AbstractManifold; kwargs...)
 
-Generate the Validation manifold, where `error` is used as the symbol passed to all checks.
-This `:error`s by default but could also be set to `:warn` for example
+Generate the Validation manifold
+
+## Keyword arguments
+
+* `error::Symbol=:error`: specify how errors in the validation should be reported.
+  this is passed to [`is_point`](@ref) and [`is_vector`](@ref) as the `error` keyword argument.
+  Available values are `:error`, `:warn`, `:info`, and `:none`. Every other value is treated as `:none`.
+* `store_base_point::Bool=false`: specify whether or not to store the point `p` a tangent or cotangent vector
+  is associated with. This can be useful for debugging purposes.
 """
 struct ValidationManifold{𝔽,M<:AbstractManifold{𝔽}} <: AbstractDecoratorManifold{𝔽}
     manifold::M
     mode::Symbol
+    store_base_point::Bool
 end
-function ValidationManifold(M::AbstractManifold; error::Symbol = :error)
-    return ValidationManifold(M, error)
+function ValidationManifold(M::AbstractManifold; error::Symbol = :error, store_base_point::Bool = false)
+    return ValidationManifold(M, error, store_base_point)
 end
 
 """
-    ValidationMPoint <: AbstractManifoldPoint
+    ValidationMPoint{P} <: AbstractManifoldPoint
 
-Represent a point on an [`ValidationManifold`](@ref), i.e. on a manifold where data can be
-represented by arrays. The array is stored internally and semantically. This distinguished
-the value from [`ValidationTVector`](@ref)s and [`ValidationCoTVector`](@ref)s.
+Represent a point on an [`ValidationManifold`](@ref). The point is stored internally.
+
+# Fields
+* ` value::P`: the internally stored point on a manifold
+
+# Cnstructor
+
+        ValidationMPoint(value)
+
+Create a point on the manifold with the value `value`.
 """
-struct ValidationMPoint{V} <: AbstractManifoldPoint
+struct ValidationMPoint{P} <: AbstractManifoldPoint
+    value::P
+end
+
+"""
+    ValidationFibreVector{TType<:VectorSpaceType,V,P} <: AbstractFibreVector{TType}
+
+Represent a tangent vector to a point on an [`ValidationManifold`](@ref).
+The original vector of the manifold is stored internally. The corresponding base point
+of the fibre can be stored as well.
+
+The `TType` indicates the type of fibre, for example [`TangentSpaceType`](@ref) or [`CotangentSpaceType`](@ref).
+
+# Fields
+
+* `value::V`: the internally stored vector on the fibre
+* `point::P`: the point the vector is associated with
+
+# Constructor
+
+        ValidationFibreVector{TType}(value, point=nothing)
+
+"""
+struct ValidationFibreVector{TType<:VectorSpaceType,V,P} <: AbstractFibreVector{TType}
     value::V
+    point::P
 end
-
-"""
-    ValidationFibreVector{TType<:VectorSpaceType} <: AbstractFibreVector{TType}
-
-Represent a tangent vector to a point on an [`ValidationManifold`](@ref), i.e. on a manifold
-where data can be represented by arrays. The array is stored internally and semantically.
-This distinguished the value from [`ValidationMPoint`](@ref)s vectors of other types.
-"""
-struct ValidationFibreVector{TType<:VectorSpaceType,V} <: AbstractFibreVector{TType}
-    value::V
-end
-function ValidationFibreVector{TType}(value::V) where {TType,V}
-    return ValidationFibreVector{TType,V}(value)
+function ValidationFibreVector{TType}(value::V, point::P=nothing) where {TType,V,P}
+    return ValidationFibreVector{TType,V,P}(value,point)
 end
 
 """
@@ -76,17 +103,27 @@ const ValidationCoTVector = ValidationFibreVector{CotangentSpaceType}
 end
 
 """
-    array_value(p)
+    _value(p)
 
-Return the internal array value of an [`ValidationMPoint`](@ref), [`ValidationTVector`](@ref), or
-[`ValidationCoTVector`](@ref) if the value `p` is encapsulated as such. Return `p` if it is
-already an array.
+Return the internal value of an [`ValidationMPoint`](@ref), [`ValidationTVector`](@ref), or
+[`ValidationCoTVector`](@ref) if the value `p` is encapsulated as such.
+Return `p` if it is already an a (plain) value on a manifold.
 """
-array_value(p::AbstractArray) = p
-array_value(p::ValidationMPoint) = p.value
-array_value(X::ValidationFibreVector) = X.value
+_value(p::AbstractArray) = p
+_value(p::ValidationMPoint) = p.value
+_value(X::ValidationFibreVector) = X.value
 
-decorated_manifold(M::ValidationManifold) = M.manifold
+"""
+    _msg(str,mode)
+
+issue a message `str` according to the mode `mode` (as `@error`, `@warn`, `@info`).
+"""
+function _msg(str, mode)
+    (mode === :error) && (@error str)
+    (mode === :warn) && (@warn str)
+    (mode === :info) && (@info str)
+    return nothing
+end
 
 convert(::Type{M}, m::ValidationManifold{𝔽,M}) where {𝔽,M<:AbstractManifold{𝔽}} = m.manifold
 function convert(::Type{ValidationManifold{𝔽,M}}, m::M) where {𝔽,M<:AbstractManifold{𝔽}}
@@ -130,13 +167,15 @@ end
 function distance(M::ValidationManifold, p, q; kwargs...)
     is_point(M, p; error = M.mode, kwargs...)
     is_point(M, q; error = M.mode, kwargs...)
-    return distance(M.manifold, array_value(p), array_value(q))
+    d = distance(M.manifold, _value(p), _value(q))
+    (d < 0) && _msg("Distance is negative: $d", M.mode)
+    return
 end
 
 function exp(M::ValidationManifold, p, X; kwargs...)
     is_point(M, p; error = M.mode, kwargs...)
     is_vector(M, p, X; error = M.mode, kwargs...)
-    y = exp(M.manifold, array_value(p), array_value(X))
+    y = exp(M.manifold, _value(p), _value(X))
     is_point(M, y; error = M.mode, kwargs...)
     return ValidationMPoint(y)
 end
@@ -144,14 +183,14 @@ end
 function exp!(M::ValidationManifold, q, p, X; kwargs...)
     is_point(M, p; error = M.mode, kwargs...)
     is_vector(M, p, X; error = M.mode, kwargs...)
-    exp!(M.manifold, array_value(q), array_value(p), array_value(X))
+    exp!(M.manifold, _value(q), _value(p), _value(X))
     is_point(M, q; error = M.mode, kwargs...)
     return q
 end
 
 function get_basis(M::ValidationManifold, p, B::AbstractBasis; kwargs...)
     is_point(M, p; error = M.mode, kwargs...)
-    Ξ = get_basis(M.manifold, array_value(p), B)
+    Ξ = get_basis(M.manifold, _value(p), B)
     bvectors = get_vectors(M, p, Ξ)
     N = length(bvectors)
     if N != manifold_dimension(M.manifold)
@@ -261,7 +300,7 @@ function injectivity_radius(M::ValidationManifold, method::AbstractRetractionMet
 end
 function injectivity_radius(M::ValidationManifold, p; kwargs...)
     is_point(M, p; error = M.mode, kwargs...)
-    return injectivity_radius(M.manifold, array_value(p))
+    return injectivity_radius(M.manifold, _value(p))
 end
 function injectivity_radius(
     M::ValidationManifold,
@@ -270,39 +309,39 @@ function injectivity_radius(
     kwargs...,
 )
     is_point(M, p; error = M.mode, kwargs...)
-    return injectivity_radius(M.manifold, array_value(p), method)
+    return injectivity_radius(M.manifold, _value(p), method)
 end
 
 function inner(M::ValidationManifold, p, X, Y; kwargs...)
     is_point(M, p; error = M.mode, kwargs...)
     is_vector(M, p, X; error = M.mode, kwargs...)
     is_vector(M, p, Y; error = M.mode, kwargs...)
-    return inner(M.manifold, array_value(p), array_value(X), array_value(Y))
+    return inner(M.manifold, _value(p), _value(X), _value(Y))
 end
 
 function is_point(M::ValidationManifold, p; kw...)
-    return is_point(M.manifold, array_value(p); kw...)
+    return is_point(M.manifold, _value(p); kw...)
 end
 function is_vector(M::ValidationManifold, p, X, cbp::Bool = true; kw...)
-    return is_vector(M.manifold, array_value(p), array_value(X), cbp; kw...)
+    return is_vector(M.manifold, _value(p), _value(X), cbp; kw...)
 end
 
 function isapprox(M::ValidationManifold, p, q; kwargs...)
     is_point(M, p; error = M.mode, kwargs...)
     is_point(M, q; error = M.mode, kwargs...)
-    return isapprox(M.manifold, array_value(p), array_value(q); kwargs...)
+    return isapprox(M.manifold, _value(p), _value(q); kwargs...)
 end
 function isapprox(M::ValidationManifold, p, X, Y; kwargs...)
     is_point(M, p; error = M.mode, kwargs...)
     is_vector(M, p, X; error = M.mode, kwargs...)
     is_vector(M, p, Y; error = M.mode, kwargs...)
-    return isapprox(M.manifold, array_value(p), array_value(X), array_value(Y); kwargs...)
+    return isapprox(M.manifold, _value(p), _value(X), _value(Y); kwargs...)
 end
 
 function log(M::ValidationManifold, p, q; kwargs...)
     is_point(M, p; error = M.mode, kwargs...)
     is_point(M, q; error = M.mode, kwargs...)
-    X = log(M.manifold, array_value(p), array_value(q))
+    X = log(M.manifold, _value(p), _value(q))
     is_vector(M, p, X; error = M.mode, kwargs...)
     return ValidationTVector(X)
 end
@@ -310,7 +349,7 @@ end
 function log!(M::ValidationManifold, X, p, q; kwargs...)
     is_point(M, p; error = M.mode, kwargs...)
     is_point(M, q; error = M.mode, kwargs...)
-    log!(M.manifold, array_value(X), array_value(p), array_value(q))
+    log!(M.manifold, _value(X), _value(p), _value(q))
     is_vector(M, p, X; error = M.mode, kwargs...)
     return X
 end
@@ -318,7 +357,7 @@ end
 function mid_point(M::ValidationManifold, p1, p2; kwargs...)
     is_point(M, p1; error = M.mode, kwargs...)
     is_point(M, p2; error = M.mode, kwargs...)
-    q = mid_point(M.manifold, array_value(p1), array_value(p2))
+    q = mid_point(M.manifold, _value(p1), _value(p2))
     is_point(M, q; error = M.mode, kwargs...)
     return q
 end
@@ -326,7 +365,7 @@ end
 function mid_point!(M::ValidationManifold, q, p1, p2; kwargs...)
     is_point(M, p1; error = M.mode, kwargs...)
     is_point(M, p2; error = M.mode, kwargs...)
-    mid_point!(M.manifold, array_value(q), array_value(p1), array_value(p2))
+    mid_point!(M.manifold, _value(q), _value(p1), _value(p2))
     is_point(M, q; error = M.mode, kwargs...)
     return q
 end
@@ -336,7 +375,7 @@ number_eltype(::Type{ValidationFibreVector{TType,V}}) where {TType,V} = number_e
 
 function project!(M::ValidationManifold, Y, p, X; kwargs...)
     is_point(M, p; error = M.mode, kwargs...)
-    project!(M.manifold, array_value(Y), array_value(p), array_value(X))
+    project!(M.manifold, _value(Y), _value(p), _value(X))
     is_vector(M, p, Y; error = M.mode, kwargs...)
     return Y
 end
@@ -350,7 +389,7 @@ function vector_transport_along(
     kwargs...,
 )
     is_vector(M, p, X; error = M.mode, kwargs...)
-    Y = vector_transport_along(M.manifold, array_value(p), array_value(X), c, m)
+    Y = vector_transport_along(M.manifold, _value(p), _value(X), c, m)
     is_vector(M, c[end], Y; error = M.mode, kwargs...)
     return Y
 end
@@ -367,9 +406,9 @@ function vector_transport_along!(
     is_vector(M, p, X; error = M.mode, kwargs...)
     vector_transport_along!(
         M.manifold,
-        array_value(Y),
-        array_value(p),
-        array_value(X),
+        _value(Y),
+        _value(p),
+        _value(X),
         c,
         m,
     )
@@ -387,7 +426,7 @@ function vector_transport_to(
 )
     is_point(M, q; error = M.mode, kwargs...)
     is_vector(M, p, X; error = M.mode, kwargs...)
-    Y = vector_transport_to(M.manifold, array_value(p), array_value(X), array_value(q), m)
+    Y = vector_transport_to(M.manifold, _value(p), _value(X), _value(q), m)
     is_vector(M, q, Y; error = M.mode, kwargs...)
     return Y
 end
@@ -404,10 +443,10 @@ function vector_transport_to!(
     is_vector(M, p, X; error = M.mode, kwargs...)
     vector_transport_to!(
         M.manifold,
-        array_value(Y),
-        array_value(p),
-        array_value(X),
-        array_value(q),
+        _value(Y),
+        _value(p),
+        _value(X),
+        _value(q),
         m,
     )
     is_vector(M, q, Y; error = M.mode, kwargs...)
@@ -416,14 +455,14 @@ end
 
 function zero_vector(M::ValidationManifold, p; kwargs...)
     is_point(M, p; error = M.mode, kwargs...)
-    w = zero_vector(M.manifold, array_value(p))
+    w = zero_vector(M.manifold, _value(p))
     is_vector(M, p, w; error = M.mode, kwargs...)
     return w
 end
 
 function zero_vector!(M::ValidationManifold, X, p; kwargs...)
     is_point(M, p; error = M.mode, kwargs...)
-    zero_vector!(M.manifold, array_value(X), array_value(p); kwargs...)
+    zero_vector!(M.manifold, _value(X), _value(p); kwargs...)
     is_vector(M, p, X; error = M.mode, kwargs...)
     return X
 end
