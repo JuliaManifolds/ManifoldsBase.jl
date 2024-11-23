@@ -138,16 +138,10 @@ function convert(::Type{ValidationMPoint{V}}, x::V) where {V<:AbstractArray}
     return ValidationMPoint{V}(x)
 end
 
-function convert(
-    ::Type{V},
-    X::ValidationFibreVector{TType,V,Nothing},
-) where {TType,V}
+function convert(::Type{V}, X::ValidationFibreVector{TType,V,Nothing}) where {TType,V}
     return X.value
 end
-function convert(
-    ::Type{ValidationFibreVector{TType,V,Nothing}},
-    X::V,
-) where {TType,V}
+function convert(::Type{ValidationFibreVector{TType,V,Nothing}}, X::V) where {TType,V}
     return ValidationFibreVector{TType,V,Nothing}(X)
 end
 
