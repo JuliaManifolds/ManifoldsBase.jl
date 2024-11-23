@@ -176,7 +176,7 @@ function distance(M::ValidationManifold, p, q; kwargs...)
     is_point(M, q; error = M.mode, kwargs...)
     d = distance(M.manifold, _value(p), _value(q))
     (d < 0) && _msg("Distance is negative: $d", M.mode)
-    return
+    return d
 end
 
 function exp(M::ValidationManifold, p, X; kwargs...)
