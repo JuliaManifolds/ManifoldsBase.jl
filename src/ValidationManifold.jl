@@ -137,17 +137,18 @@ convert(::Type{V}, p::ValidationMPoint{V}) where {V<:AbstractArray} = p.value
 function convert(::Type{ValidationMPoint{V}}, x::V) where {V<:AbstractArray}
     return ValidationMPoint{V}(x)
 end
+
 function convert(
     ::Type{V},
-    X::ValidationFibreVector{TType,V},
-) where {TType,V<:AbstractArray}
+    X::ValidationFibreVector{TType,V,Nothing},
+) where {TType,V}
     return X.value
 end
 function convert(
-    ::Type{ValidationFibreVector{TType,V}},
+    ::Type{ValidationFibreVector{TType,V,Nothing}},
     X::V,
-) where {TType,V<:AbstractArray}
-    return ValidationFibreVector{TType,V}(X)
+) where {TType,V}
+    return ValidationFibreVector{TType,V,Nothing}(X)
 end
 
 function copyto!(M::ValidationManifold, q::ValidationMPoint, p::ValidationMPoint; kwargs...)
