@@ -10,7 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 * a field `point` to `ValidationFibreVector` to store potentially store the point of the vector.
-* a field `point` to `ValidationFibrePoint` to store potentially store the point of the point.
+* a field `store_base_point` to `ValidationManifold` to indicate whether for new fibre vectors the base point should be stored.
+
 ### Changed
 
 * the internal function `_array_value` was renamed to `_value`,

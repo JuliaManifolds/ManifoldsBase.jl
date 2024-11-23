@@ -27,7 +27,11 @@ struct ValidationManifold{𝔽,M<:AbstractManifold{𝔽}} <: AbstractDecoratorMa
     mode::Symbol
     store_base_point::Bool
 end
-function ValidationManifold(M::AbstractManifold; error::Symbol = :error, store_base_point::Bool = false)
+function ValidationManifold(
+    M::AbstractManifold;
+    error::Symbol = :error,
+    store_base_point::Bool = false,
+)
     return ValidationManifold(M, error, store_base_point)
 end
 
@@ -72,8 +76,8 @@ struct ValidationFibreVector{TType<:VectorSpaceType,V,P} <: AbstractFibreVector{
     value::V
     point::P
 end
-function ValidationFibreVector{TType}(value::V, point::P=nothing) where {TType,V,P}
-    return ValidationFibreVector{TType,V,P}(value,point)
+function ValidationFibreVector{TType}(value::V, point::P = nothing) where {TType,V,P}
+    return ValidationFibreVector{TType,V,P}(value, point)
 end
 
 """
@@ -163,6 +167,8 @@ function copyto!(
     copyto!(M.manifold, Y.value, p.value, X.value)
     return p
 end
+
+decorated_manifold(M::ValidationManifold) = M.manifold
 
 function distance(M::ValidationManifold, p, q; kwargs...)
     is_point(M, p; error = M.mode, kwargs...)
@@ -404,14 +410,7 @@ function vector_transport_along!(
     kwargs...,
 )
     is_vector(M, p, X; error = M.mode, kwargs...)
-    vector_transport_along!(
-        M.manifold,
-        _value(Y),
-        _value(p),
-        _value(X),
-        c,
-        m,
-    )
+    vector_transport_along!(M.manifold, _value(Y), _value(p), _value(X), c, m)
     is_vector(M, c[end], Y; error = M.mode, kwargs...)
     return Y
 end
@@ -441,14 +440,7 @@ function vector_transport_to!(
 )
     is_point(M, q; error = M.mode, kwargs...)
     is_vector(M, p, X; error = M.mode, kwargs...)
-    vector_transport_to!(
-        M.manifold,
-        _value(Y),
-        _value(p),
-        _value(X),
-        _value(q),
-        m,
-    )
+    vector_transport_to!(M.manifold, _value(Y), _value(p), _value(X), _value(q), m)
     is_vector(M, q, Y; error = M.mode, kwargs...)
     return Y
 end
