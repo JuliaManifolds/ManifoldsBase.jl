@@ -18,7 +18,6 @@ using ManifoldsBase
         @test num_ambiguities == bound + 1
     end
 
-    include("test_aqua.jl")
     include("decorator_traits.jl")
     include("passthrough_decorator.jl")
     include("allocation.jl")
@@ -39,4 +38,5 @@ using ManifoldsBase
     include("metric.jl")
     include("fibers.jl")
     include("numerical_checks.jl")
+    include("test_aqua.jl")
 end

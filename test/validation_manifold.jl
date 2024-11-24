@@ -58,7 +58,11 @@ end
             @test number_eltype(p) == eltype(x)
             @test typeof(allocate(p)) == typeof(p)
             @test typeof(allocate(p, eltype(x))) == typeof(p)
-            @test typeof(allocate(p, eltype(x), (3, 1))) == T{Matrix{Float64}}
+            if T === ValidationMPoint
+                @test typeof(allocate(p, eltype(x), (3, 1))) == T{Matrix{Float64}}
+            else
+                @test typeof(allocate(p, eltype(x), (3, 1))) == T{Matrix{Float64},Nothing}
+            end
             @test allocate(p) isa T
             @test allocate(p, Float32) isa T
             @test number_eltype(allocate(p, Float32)) == Float32

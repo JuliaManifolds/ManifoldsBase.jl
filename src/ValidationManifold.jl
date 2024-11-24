@@ -133,16 +133,24 @@ convert(::Type{M}, m::ValidationManifold{𝔽,M}) where {𝔽,M<:AbstractManifol
 function convert(::Type{ValidationManifold{𝔽,M}}, m::M) where {𝔽,M<:AbstractManifold{𝔽}}
     return ValidationManifold(m)
 end
-convert(::Type{V}, p::ValidationMPoint{V}) where {V<:AbstractArray} = p.value
+function convert(
+    ::Type{V},
+    p::ValidationMPoint{V},
+) where {V<:Union{AbstractArray,AbstractManifoldPoint}}
+    return p.value
+end
 function convert(::Type{ValidationMPoint{V}}, x::V) where {V<:AbstractArray}
     return ValidationMPoint{V}(x)
 end
 
-function convert(::Type{V}, X::ValidationFibreVector{TType,V,Nothing}) where {TType,V}
+function convert(
+    ::Type{V},
+    X::ValidationFibreVector{TType,V,Nothing},
+) where {TType,V<:Union{AbstractArray,AbstractFibreVector}}
     return X.value
 end
 function convert(::Type{ValidationFibreVector{TType,V,Nothing}}, X::V) where {TType,V}
-    return ValidationFibreVector{TType,V,Nothing}(X)
+    return ValidationFibreVector{TType}(X)
 end
 
 function copyto!(M::ValidationManifold, q::ValidationMPoint, p::ValidationMPoint; kwargs...)
@@ -372,7 +380,7 @@ function mid_point!(M::ValidationManifold, q, p1, p2; kwargs...)
 end
 
 number_eltype(::Type{ValidationMPoint{V}}) where {V} = number_eltype(V)
-number_eltype(::Type{ValidationFibreVector{TType,V}}) where {TType,V} = number_eltype(V)
+number_eltype(::Type{ValidationFibreVector{TType,V,P}}) where {TType,V,P} = number_eltype(V)
 
 function project!(M::ValidationManifold, Y, p, X; kwargs...)
     is_point(M, p; error = M.mode, kwargs...)
