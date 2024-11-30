@@ -8,6 +8,36 @@ Additionally the points and tangent vectors can also be encapsulated, cf.
 These types can be used to see where some data is assumed to be from, when working on
 manifolds where both points and tangent vectors are represented as (plain) arrays.
 
+Using the `ignore` keyword (dictionary) allows to disable/ignore certain checks for this manifold.
+The `key` of the dictionary can be either a `Symbol` or a `Function`.
+For a `Function` the value is either a `Bool` to indicate that within this function no checks are performed
+or a vector of symbols to deactivate certain types of checks. Since these are semantic, they are capitalized..
+The same symbols can be used as a key in the dictionary to disable them for all functions.
+
+# Examples
+* `exp => [:Point]` excludes point checks in the `exp` function
+* `exp => [:Point, :Vector]` excludes point and vector checks in the `exp` function
+* `exp => true` excludes all checks in the `exp` function
+* `:Point => false` deactivates point checks in all functions
+
+Current Symbols are
+* `:Point`: checks for points
+* `:Vector`: checks for vectors
+* `:Output`: checks for output
+* `:Input`: checks for input variables
+
+This also means an input point can _either be left unchecked when not checking points,
+_or_ when not checking inputs.
+
+This manifold is a decorator for a manifold, i.e. it decorates a [`AbstractManifold`](@ref) `M`
+with types points, vectors, and covectors.
+
+# Fields
+
+* `manifold::M`: The manifold to be decorated
+* `mode::Symbol`: The mode to be used for error handling, either `:error` or `:warn`
+* `ignore::Dict{<:Union{Symbol, Function},Symbol}`: A dictionary of disabled checks
+
 # Constructor
 
     ValidationManifold(M::AbstractManifold; kwargs...)
@@ -21,20 +51,52 @@ Generate the Validation manifold
   Available values are `:error`, `:warn`, `:info`, and `:none`. Every other value is treated as `:none`.
 * `store_base_point::Bool=false`: specify whether or not to store the point `p` a tangent or cotangent vector
   is associated with. This can be useful for debugging purposes.
+* `ignores=Dict{Union{Function,Symbol},Union{Symbol,Bool}()` a dictionary of disabled checks
 """
-struct ValidationManifold{𝔽,M<:AbstractManifold{𝔽}} <: AbstractDecoratorManifold{𝔽}
+struct ValidationManifold{𝔽,M<:AbstractManifold{𝔽},D<:Dict{<:Union{Symbol, Function},Union{Bool, Vector{Symbol}}}} <: AbstractDecoratorManifold{𝔽}
     manifold::M
     mode::Symbol
     store_base_point::Bool
+    ignore::D
 end
 function ValidationManifold(
     M::AbstractManifold;
     error::Symbol = :error,
     store_base_point::Bool = false,
+    ignore::D=Dict{Union{Symbol, Function},Union{Bool, Vector{Sumbol}}}(),
 )
-    return ValidationManifold(M, error, store_base_point)
+    return ValidationManifold(M, error, store_base_point, ignore)
 end
 
+"""
+_vMc(f::Function, type::Symbol, dict)
+_vMc(f::Function, types::NTuple{N,Symbol}, dict) where {N}
+
+Return whether a check of `type` is active in `dict` for the function `f`.
+* if `type => false` is in `dict` return `false`
+* if `f => v` is present and the vector `v` of symbols contains `type`, return `false`
+
+In case a tuple of symbols is passed, _any_ of the present symbols in the vector
+indicating to not validate, returns false.
+
+Otherwise the test is active.
+
+!!! Note
+   This function is internal and used very often, co it has a very short name;
+    `_vMc` stands for "`ValidationManifold` check".
+"""
+function _vMc(f::Function, type::Symbol dict)
+    (haskey(dict, type) && !dict[type]) && return false
+    (haskey(dict, f)) && (type ∈ dict[f]) && return false
+    return true
+end
+function _vMc(f::Function, type::NTuple{N,Symbol}, dict) where {N}
+    for t in type
+        (haskey(dict, t) && !dict[t]) && return false
+        (haskey(dict, f)) && (t ∈ dict[f]) && return false
+    end
+    return true
+end
 """
     ValidationMPoint{P} <: AbstractManifoldPoint
 
@@ -43,7 +105,7 @@ Represent a point on an [`ValidationManifold`](@ref). The point is stored intern
 # Fields
 * ` value::P`: the internally stored point on a manifold
 
-# Cnstructor
+# Constructor
 
         ValidationMPoint(value)
 
@@ -174,10 +236,10 @@ end
 decorated_manifold(M::ValidationManifold) = M.manifold
 
 function distance(M::ValidationManifold, p, q; kwargs...)
-    is_point(M, p; error = M.mode, kwargs...)
-    is_point(M, q; error = M.mode, kwargs...)
+    _vMc(distance, (:Point, :Input), M.ignore) && is_point(M, p; error = M.mode, kwargs...)
+    _vMc(distance, (:Point, :Input), M.ignore) && is_point(M, q; error = M.mode, kwargs...)
     d = distance(M.manifold, _value(p), _value(q))
-    (d < 0) && _msg("Distance is negative: $d", M.mode)
+    (d < 0) && _vMc(distance, :Output, M.ignore) && _msg("Distance is negative: $d", M.mode)
     return d
 end
 
