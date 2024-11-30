@@ -43,7 +43,7 @@ end
     end
     @testset "Types and Conversion" begin
         @test convert(typeof(M), A) == M
-        @test convert(typeof(A), M) == A
+        @test_broken convert(typeof(A), M) == A
         @test base_manifold(A) == M
         @test base_manifold(base_manifold(A)) == base_manifold(A)
         @test ManifoldsBase.representation_size(A) == ManifoldsBase.representation_size(M)

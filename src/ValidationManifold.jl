@@ -53,7 +53,11 @@ Generate the Validation manifold
   is associated with. This can be useful for debugging purposes.
 * `ignores=Dict{Union{Function,Symbol},Union{Symbol,Bool}()` a dictionary of disabled checks
 """
-struct ValidationManifold{𝔽,M<:AbstractManifold{𝔽},D<:Dict{<:Union{Symbol, Function},Union{Bool, Vector{Symbol}}}} <: AbstractDecoratorManifold{𝔽}
+struct ValidationManifold{
+    𝔽,
+    M<:AbstractManifold{𝔽},
+    D<:Dict{<:Union{Symbol,Function},Union{Bool,Vector{Symbol}}},
+} <: AbstractDecoratorManifold{𝔽}
     manifold::M
     mode::Symbol
     store_base_point::Bool
@@ -63,8 +67,8 @@ function ValidationManifold(
     M::AbstractManifold;
     error::Symbol = :error,
     store_base_point::Bool = false,
-    ignore::D=Dict{Union{Symbol, Function},Union{Bool, Vector{Sumbol}}}(),
-)
+    ignore::D = Dict{Union{Symbol,Function},Union{Bool,Vector{Symbol}}}(),
+) where {D<:Dict{<:Union{Symbol,Function},<:Union{Bool,Vector{Symbol}}}}
     return ValidationManifold(M, error, store_base_point, ignore)
 end
 
@@ -85,7 +89,7 @@ Otherwise the test is active.
    This function is internal and used very often, co it has a very short name;
     `_vMc` stands for "`ValidationManifold` check".
 """
-function _vMc(f::Function, type::Symbol dict)
+function _vMc(f::Function, type::Symbol, dict)
     (haskey(dict, type) && !dict[type]) && return false
     (haskey(dict, f)) && (type ∈ dict[f]) && return false
     return true
