@@ -8,26 +8,26 @@ Additionally the points and tangent vectors can also be encapsulated, cf.
 These types can be used to see where some data is assumed to be from, when working on
 manifolds where both points and tangent vectors are represented as (plain) arrays.
 
-Using the `ignore` keyword (dictionary) allows to disable/ignore certain checks for this manifold.
-The `key` of the dictionary can be either a `Symbol` or a `Function`.
-For a `Function` the value is either a `Bool` to indicate that within this function no checks are performed
-or a vector of symbols to deactivate certain types of checks. Since these are semantic, they are capitalized..
-The same symbols can be used as a key in the dictionary to disable them for all functions.
+Using the `ignore_contexts` keyword allows to specify a single `Symbol` or a vector of `Symbols`
+Of which contexts to ignore.
 
-# Examples
-* `exp => [:Point]` excludes point checks in the `exp` function
-* `exp => [:Point, :Vector]` excludes point and vector checks in the `exp` function
-* `exp => true` excludes all checks in the `exp` function
-* `:Point => false` deactivates point checks in all functions
-
-Current Symbols are
+Current contexts are
+* `:All`: disable all checks
 * `:Point`: checks for points
 * `:Vector`: checks for vectors
 * `:Output`: checks for output
 * `:Input`: checks for input variables
 
-This also means an input point can _either be left unchecked when not checking points,
-_or_ when not checking inputs.
+Using the `ignore_functions` keyword (dictionary) allows to disable/ignore certain checks
+within single functions for this manifold.
+The `key` of the dictionary has to be the `Function` to exclude something in.
+The `value` is either a single symbol or a vector of symbols with the same meaning as the
+`ignore_contexts` keyword, but limited to this function
+
+# Examples
+* `exp => :All` disables _all_ checks in the [`exp`](@ref) function
+* `exp => :Point` excludes point checks in the [`exp`](@ref) function
+* `exp => [:Point, :Vector]` excludes point and vector checks in the [`exp`](@ref) function
 
 This manifold is a decorator for a manifold, i.e. it decorates a [`AbstractManifold`](@ref) `M`
 with types points, vectors, and covectors.
@@ -56,32 +56,34 @@ Generate the Validation manifold
 struct ValidationManifold{
     𝔽,
     M<:AbstractManifold{𝔽},
-    D<:Dict{<:Union{Symbol,Function},Union{Bool,Vector{Symbol}}},
+    D<:Dict{Function,Union{Symbol,Vector{Symbol}}},
+    V<:AbstractVector{Symbol},
 } <: AbstractDecoratorManifold{𝔽}
     manifold::M
     mode::Symbol
     store_base_point::Bool
-    ignore::D
+    ignore_functions::D
+    ignore_contexts::V
 end
 function ValidationManifold(
     M::AbstractManifold;
     error::Symbol = :error,
     store_base_point::Bool = false,
-    ignore::D = Dict{Union{Symbol,Function},Union{Bool,Vector{Symbol}}}(),
-) where {D<:Dict{<:Union{Symbol,Function},<:Union{Bool,Vector{Symbol}}}}
-    return ValidationManifold(M, error, store_base_point, ignore)
+    ignore_functions::D = Dict{Function,Union{Symbol,Vector{Symbol}}}(),
+    ignore_contexts::V = Vector{Symbol}(),
+) where {D<:Dict{Function,Union{Symbol,Vector{Symbol}}},V<:AbstractVector{Symbol}}
+    return ValidationManifold(M, error, store_base_point, ignore_functions, ignore_contexts)
 end
 
 """
-_vMc(f::Function, type::Symbol, dict)
-_vMc(f::Function, types::NTuple{N,Symbol}, dict) where {N}
+_vMc(M::ValidationManifold, f::Function, context::Symbol)
+_vMc(M::ValidationManifold, f::Function, context::NTuple{N,Symbol}) where {N}
 
-Return whether a check of `type` is active in `dict` for the function `f`.
-* if `type => false` is in `dict` return `false`
-* if `f => v` is present and the vector `v` of symbols contains `type`, return `false`
+Return whether a check should be performed within `f` and the `context`(`s`) provided.
 
-In case a tuple of symbols is passed, _any_ of the present symbols in the vector
-indicating to not validate, returns false.
+This function returns false and hence indicates not to check, when
+* (one of the) `context`(`s`) is in the ignore list for `f` within `ignore_functions`
+* (one of the) `context`(`s`) is in the `ignore_contexts` list
 
 Otherwise the test is active.
 
@@ -89,18 +91,42 @@ Otherwise the test is active.
    This function is internal and used very often, co it has a very short name;
     `_vMc` stands for "`ValidationManifold` check".
 """
-function _vMc(f::Function, type::Symbol, dict)
-    (haskey(dict, type) && !dict[type]) && return false
-    (haskey(dict, f)) && (type ∈ dict[f]) && return false
+function _vMc end
+
+function _vMc(M::ValidationManifold, ::Nothing, context::Symbol)
+    # Similarly for the global contexts
+    (:All ∈ M.ignore_contexts) && return false
+    (context ∈ M.ignore_contexts) && return false
+end
+function _vMc(M::ValidationManifold, f::Function, context::Symbol)
+    if haskey(M.ignore_functions, f)
+        # If :All is present -> deactivate
+        !_VMc(M.ignore_functions[f], :All) && return false
+        # If any of the provided contexts is present -> deactivate
+        !_VMc(M.ignore_functions[f], context) && return false
+    end
+    !_vMc(M, nothing, context) && return false
     return true
 end
-function _vMc(f::Function, type::NTuple{N,Symbol}, dict) where {N}
-    for t in type
-        (haskey(dict, t) && !dict[t]) && return false
-        (haskey(dict, f)) && (t ∈ dict[f]) && return false
+function _vMc(M::ValidationManifold, f, contexts::NTuple{N,Symbol}) where {N}
+    for c in contexts
+        !_vMc(M, f, c) && return false
     end
     return true
 end
+# Sub tests: is any of a in b? Then return false
+# If a is in or equal to b
+_vMc(a::Symbol, b::Symbol) = !(a === b)
+_vMc(a::Symbol, b::NTuple{N,Symbol} where {N}) = !(a ∈ b)
+# If a is multiple, then test all of them
+_vMc(a::NTuple{N,Symbol} where {N}, b::Symbol) = !(b ∈ a)
+function _vMc(a::NTuple{N,Symbol} where {N}, b::NTuple{N,Symbol} where {N})
+    for ai in a
+        (ai ∈ b) && return false
+    end
+    return true
+end
+
 """
     ValidationMPoint{P} <: AbstractManifoldPoint
 
@@ -240,10 +266,10 @@ end
 decorated_manifold(M::ValidationManifold) = M.manifold
 
 function distance(M::ValidationManifold, p, q; kwargs...)
-    _vMc(distance, (:Point, :Input), M.ignore) && is_point(M, p; error = M.mode, kwargs...)
-    _vMc(distance, (:Point, :Input), M.ignore) && is_point(M, q; error = M.mode, kwargs...)
+    is_point(M, p; error = M.mode, within = distance, context = (:Input,), kwargs...)
+    is_point(M, q; error = M.mode, within = distance, context = (:Input,), kwargs...)
     d = distance(M.manifold, _value(p), _value(q))
-    (d < 0) && _vMc(distance, :Output, M.ignore) && _msg("Distance is negative: $d", M.mode)
+    (d < 0) && _vMc(M, distance, :Output) && _msg("Distance is negative: $d", M.mode)
     return d
 end
 
@@ -394,11 +420,54 @@ function inner(M::ValidationManifold, p, X, Y; kwargs...)
     return inner(M.manifold, _value(p), _value(X), _value(Y))
 end
 
-function is_point(M::ValidationManifold, p; kw...)
-    return is_point(M.manifold, _value(p); kw...)
+"""
+    is_point(M::ValidationManifold, p; kwargs...)
+
+perform [`is_point`](@ref) on a [`ValidationManifold`](@ref),
+where two additional keywords can be used
+
+* `within=nothing` to specify a function from within which this call was issued
+* `context::NTuple{N,Symbol}=NTuple{0,Symbol}()` to specify one or more contexts, this
+  call was issued in. The context `:Point` is added before checking whether the test
+  should be performed
+
+all other keywords are passed on.
+"""
+function is_point(
+    M::ValidationManifold,
+    p;
+    within::Union{Nothing,<:Function} = nothing,
+    context::Union{NTuple{N,Symbol} where N} = NTuple{0,Symbol}(),
+    kwargs...,
+)
+    _vMc(M, within, (:Point, context...)) && return true
+    return is_point(M.manifold, _value(p); kwargs...)
 end
-function is_vector(M::ValidationManifold, p, X, cbp::Bool = true; kw...)
-    return is_vector(M.manifold, _value(p), _value(X), cbp; kw...)
+
+"""
+    is_vector(M::ValidationManifold, p, X, cbp=true; kwargs...)
+
+perform [`is_vector`](@ref) on a [`ValidationManifold`](@ref),
+where two additional keywords can be used
+
+* `within=nothing` to specify a function from within which this call was issued
+* `context::NTuple{N,Symbol}=NTuple{0,Symbol}()` to specify one or more contexts, this
+  call was issued in. The context `:Point` is added before checking whether the test
+  should be performed
+
+all other keywords are passed on.
+"""
+function is_vector(
+    M::ValidationManifold,
+    p,
+    X,
+    cbp::Bool = true;
+    within::Union{Nothing,<:Function} = nothing,
+    context::Union{NTuple{N,Symbol} where N} = NTuple{0,Symbol}(),
+    kwargs...,
+)
+    _vMc(M, within, (:Point, context...)) && return true
+    return is_vector(M.manifold, _value(p), _value(X), cbp; kwargs...)
 end
 
 function isapprox(M::ValidationManifold, p, q; kwargs...)
