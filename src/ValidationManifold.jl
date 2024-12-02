@@ -246,9 +246,9 @@ function convert(::Type{ValidationFibreVector{TType,V,Nothing}}, X::V) where {TT
 end
 
 function copyto!(M::ValidationManifold, q::ValidationMPoint, p::ValidationMPoint; kwargs...)
-    is_point(M, p; error = M.mode, within = copyto, context = (:Input,), kwargs...)
+    is_point(M, p; error = M.mode, within = copyto!, context = (:Input,), kwargs...)
     copyto!(M.manifold, q.value, p.value)
-    is_point(M, q; error = M.mode, within = copyto, context = (:Input,), kwargs...)
+    is_point(M, q; error = M.mode, within = copyto!, context = (:Input,), kwargs...)
     return q
 end
 function copyto!(
@@ -258,7 +258,7 @@ function copyto!(
     X::ValidationFibreVector{TType};
     kwargs...,
 ) where {TType}
-    is_point(M, p; error = M.mode, within = copyto, context = (:Input,), kwargs...)
+    is_point(M, p; error = M.mode, within = copyto!, context = (:Input,), kwargs...)
     copyto!(M.manifold, Y.value, p.value, X.value)
     return p
 end
