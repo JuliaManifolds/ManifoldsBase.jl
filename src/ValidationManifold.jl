@@ -135,21 +135,11 @@ function _vMc(M::ValidationManifold, f, contexts::NTuple{N,Symbol}) where {N}
     end
     return true
 end
-# Sub tests: is any of a in b? Then return false
-# If a is in or equal to b
+# Sub tests: is any of a in b? Then return false – b is from before always a symbol already
+# If a and b are symbols, equality is checked
 _vMc(a::Symbol, b::Symbol) = !(a === b)
-_vMc(a::Symbol, b::Union{<:NTuple{N,Symbol} where {N},<:AbstractVector{Symbol}}) = !(a ∈ b)
-# If a is multiple, then test all of them
+# If a is a vector multiple, then return false if b appears in a
 _vMc(a::Union{<:NTuple{N,Symbol} where {N},<:AbstractVector{Symbol}}, b::Symbol) = !(b ∈ a)
-function _vMc(
-    a::Union{<:NTuple{N,Symbol} where {N},<:AbstractVector{Symbol}},
-    b::Union{<:NTuple{N,Symbol} where {N},<:AbstractVector{Symbol}},
-)
-    for ai in a
-        (ai ∈ b) && return false
-    end
-    return true
-end
 
 """
     ValidationMPoint{P} <: AbstractManifoldPoint
