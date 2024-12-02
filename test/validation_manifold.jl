@@ -18,6 +18,10 @@ function ManifoldsBase.injectivity_radius(
     return 11.0
 end
 
+struct DummyManifold <: ManifoldsBase.AbstractManifold{ℝ} end
+ManifoldsBase.distance(::DummyManifold, p, q) = -1.0
+ManifoldsBase.norm(::DummyManifold, p, v) = -1.0
+
 @testset "Validation manifold" begin
     M = ManifoldsBase.DefaultManifold(3)
     A = ValidationManifold(M)
@@ -48,13 +52,19 @@ end
         A2b = ValidationManifold(M; ignore_contexts = [:Vector])
         @test_throws DomainError !is_point(A2b, [1, 2, 3, 4])
         @test is_vector(A2b, x, [1, 2, 3, 4])
-        A3 = ValidationManifold(M; ignore_functions = Dict(exp => :All))
-        @test is_point(A3, [1, 2, 3, 4]; within = exp)
-        @test_throws DomainError is_point(A3, [1, 2, 3, 4]; within = log)
+        A3a = ValidationManifold(M; ignore_functions = Dict(exp => :All))
+        @test is_point(A3a, [1, 2, 3, 4]; within = exp)
+        @test_throws DomainError is_point(A3a, [1, 2, 3, 4]; within = log)
+        A3b = ValidationManifold(M; ignore_functions = Dict(exp => [:Point, :Vector]))
+        @test is_point(A3b, [1, 2, 3, 4]; within = exp)
+        @test_throws DomainError is_point(A3b, [1, 2, 3, 4]; within = log)
+        @test is_vector(A3b, x, [1, 2, 3, 4]; within = exp)
+        @test_throws DomainError is_vector(A3b, x, [1, 2, 3, 4]; within = log)
     end
     @testset "Types and Conversion" begin
         @test convert(typeof(M), A) == M
-        @test_broken convert(typeof(A), M) == A
+        # equality does not work, since we have mutable fields, but the type agrees
+        @test typeof(convert(typeof(A), M)) == typeof(A)
         @test base_manifold(A) == M
         @test base_manifold(base_manifold(A)) == base_manifold(A)
         @test ManifoldsBase.representation_size(A) == ManifoldsBase.representation_size(M)
@@ -166,7 +176,6 @@ end
         @test injectivity_radius(A, CustomValidationManifoldRetraction()) == 10
         @test injectivity_radius(A, x, CustomValidationManifoldRetraction()) == 11
     end
-
     @testset "ValidationManifold basis" begin
         b = [Matrix(I, 3, 3)[:, i] for i in 1:3]
         for BT in (DefaultBasis, DefaultOrthonormalBasis, DefaultOrthogonalBasis)
@@ -214,5 +223,22 @@ end
                 end
             end
         end
+    end
+    @testset "Output distance an norm – on different message types" begin
+        Ad = ValidationManifold(DummyManifold())
+        @test_throws DomainError distance(Ad, [], [])
+        @test_throws DomainError norm(Ad, [], [])
+        AdI = ValidationManifold(DummyManifold(); error = :info)
+        @test_logs (:info,) distance(AdI, [], [])
+        @test_logs (:info,) norm(AdI, [], [])
+        AdW = ValidationManifold(DummyManifold(); error = :warn)
+        @test_logs (:warn,) distance(AdW, [], [])
+        @test_logs (:warn,) norm(AdW, [], [])
+        AdO = ValidationManifold(DummyManifold(); ignore_contexts = [:Output])
+        @test distance(AdO, [], []) == -1.0
+        @test norm(AdO, [], []) == -1.0
+        AdN = ValidationManifold(DummyManifold(); error = :None)
+        @test distance(AdN, [], []) == -1.0
+        @test norm(AdN, [], []) == -1.0
     end
 end

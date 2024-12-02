@@ -138,10 +138,13 @@ end
 # Sub tests: is any of a in b? Then return false
 # If a is in or equal to b
 _vMc(a::Symbol, b::Symbol) = !(a === b)
-_vMc(a::Symbol, b::NTuple{N,Symbol} where {N}) = !(a ∈ b)
+_vMc(a::Symbol, b::Union{<:NTuple{N,Symbol} where {N},<:AbstractVector{Symbol}}) = !(a ∈ b)
 # If a is multiple, then test all of them
-_vMc(a::NTuple{N,Symbol} where {N}, b::Symbol) = !(b ∈ a)
-function _vMc(a::NTuple{N,Symbol} where {N}, b::NTuple{N,Symbol} where {N})
+_vMc(a::Union{<:NTuple{N,Symbol} where {N},<:AbstractVector{Symbol}}, b::Symbol) = !(b ∈ a)
+function _vMc(
+    a::Union{<:NTuple{N,Symbol} where {N},<:AbstractVector{Symbol}},
+    b::Union{<:NTuple{N,Symbol} where {N},<:AbstractVector{Symbol}},
+)
     for ai in a
         (ai ∈ b) && return false
     end
