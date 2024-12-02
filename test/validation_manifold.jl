@@ -1,6 +1,4 @@
-using ManifoldsBase
-using LinearAlgebra
-using Test
+using ManifoldsBase, LinearAlgebra, Random, Test
 
 struct CustomValidationManifoldRetraction <: ManifoldsBase.AbstractRetractionMethod end
 
@@ -240,5 +238,15 @@ ManifoldsBase.norm(::DummyManifold, p, v) = -1.0
         AdN = ValidationManifold(DummyManifold(); error = :None)
         @test distance(AdN, [], []) == -1.0
         @test norm(AdN, [], []) == -1.0
+    end
+    @testset "rand" begin
+        Random.seed!(42)
+        p = rand(A)
+        @test is_point(A, p)
+        X = rand(A; vector_at = p)
+        @test is_vector(A, p, X)
+    end
+    @testset "riemannian_tensor" begin
+
     end
 end
