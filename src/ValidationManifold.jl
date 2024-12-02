@@ -63,7 +63,7 @@ Generate the Validation manifold for `M` with the default values of `V`.
 struct ValidationManifold{
     𝔽,
     M<:AbstractManifold{𝔽},
-    D<:Dict{Function,Union{Symbol,Vector{Symbol}}},
+    D<:Dict{<:Function,<:Union{Symbol,<:AbstractVector{Symbol}}},
     V<:AbstractVector{Symbol},
 } <: AbstractDecoratorManifold{𝔽}
     manifold::M
@@ -76,9 +76,12 @@ function ValidationManifold(
     M::AbstractManifold;
     error::Symbol = :error,
     store_base_point::Bool = false,
-    ignore_functions::D = Dict{Function,Union{Symbol,Vector{Symbol}}}(),
+    ignore_functions::D = Dict{Function,Union{Symbol,<:Vector{Symbol}}}(),
     ignore_contexts::V = Vector{Symbol}(),
-) where {D<:Dict{Function,Union{Symbol,Vector{Symbol}}},V<:AbstractVector{Symbol}}
+) where {
+    D<:Dict{<:Function,<:Union{Symbol,<:AbstractVector{Symbol}}},
+    V<:AbstractVector{Symbol},
+}
     return ValidationManifold(M, error, store_base_point, ignore_functions, ignore_contexts)
 end
 function ValidationManifold(M::AbstractManifold, V::ValidationManifold; kwargs...)
@@ -119,9 +122,9 @@ end
 function _vMc(M::ValidationManifold, f::Function, context::Symbol)
     if haskey(M.ignore_functions, f)
         # If :All is present -> deactivate
-        !_VMc(M.ignore_functions[f], :All) && return false
+        !_vMc(M.ignore_functions[f], :All) && return false
         # If any of the provided contexts is present -> deactivate
-        !_VMc(M.ignore_functions[f], context) && return false
+        !_vMc(M.ignore_functions[f], context) && return false
     end
     !_vMc(M, nothing, context) && return false
     return true
@@ -625,7 +628,7 @@ function is_vector(
     context::Union{NTuple{N,Symbol} where N} = NTuple{0,Symbol}(),
     kwargs...,
 )
-    !_vMc(M, within, (:Point, context...)) && return true
+    !_vMc(M, within, (:Vector, context...)) && return true
     return is_vector(M.manifold, _value(p), _value(X), cbp; error = error, kwargs...)
 end
 

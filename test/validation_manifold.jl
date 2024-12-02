@@ -21,6 +21,7 @@ end
 @testset "Validation manifold" begin
     M = ManifoldsBase.DefaultManifold(3)
     A = ValidationManifold(M)
+    @test A == ValidationManifold(M, A) # A equals the VM with same defaults
     x = [1.0, 0.0, 0.0]
     y = 1 / sqrt(2) * [1.0, 1.0, 0.0]
     z = [0.0, 1.0, 0.0]
@@ -40,6 +41,16 @@ end
         @test_throws DomainError is_point(A, [1, 2, 3, 4]; error = :error)
         @test is_vector(A, x, v; error = :error)
         @test_throws DomainError is_vector(A, x, [1, 2, 3, 4]; error = :error)
+        # Test that we can ignore point contexts
+        A2a = ValidationManifold(M; ignore_contexts = [:Point])
+        @test is_point(A2a, [1, 2, 3, 4])
+        @test_throws DomainError !is_vector(A2a, x, [1, 2, 3, 4])
+        A2b = ValidationManifold(M; ignore_contexts = [:Vector])
+        @test_throws DomainError !is_point(A2b, [1, 2, 3, 4])
+        @test is_vector(A2b, x, [1, 2, 3, 4])
+        A3 = ValidationManifold(M; ignore_functions = Dict(exp => :All))
+        @test is_point(A3, [1, 2, 3, 4]; within = exp)
+        @test_throws DomainError is_point(A3, [1, 2, 3, 4]; within = log)
     end
     @testset "Types and Conversion" begin
         @test convert(typeof(M), A) == M
