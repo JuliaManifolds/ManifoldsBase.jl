@@ -28,7 +28,7 @@ Such manifold ``M`` is described by its dimension ``n=manifold_dimension(M)`` an
 
 For each point $p \in \mathcal{M}$ there is $i\in I$ such that $p \in U_i$.
 There are also some regularity conditions that exclude certain topological spaces from being called a manifold.
-Specifically they are requirements that $\mathcal{M}$ is a second-countable Hausdorff space, see [Lee:2012, page 3](@cite) for more details.
+Specifically they are requirements that $\mathcal{M}$ is a second-countable Hausdorff space, see [Lee:2012](@cite), page 3 for more details.
 
 JuliaManifolds has a few functions for working at this level.
 First, [`manifold_dimension`](@ref) returns the number `n` for a given manifold.
