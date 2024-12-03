@@ -1,0 +1,109 @@
+---
+title: "What are manifolds?"
+---
+
+````{=commonmark}
+```@meta
+CurrentModule = ManifoldsBase
+```
+````
+
+## Introduction
+
+A precise definition of a manifold is crucial to set up appropriate expectations for types and functions.
+Unfortunately, there is no single definition that is general enough to cover all relevant cases and, at the same time, specific enough to be useful.
+Here we will cover the definitions that are most relevant in practice.
+
+The most generic relevant concept is that of a topological space.
+It describes the notion of closeness of points through families of open sets which satisfy certain properties.
+There are currently no functions in JuliaManifolds that can work at this level of generality.
+
+In this tutorial we will go from the most general concepts to the ones that provide the most structure.
+We will briefly discuss their relevance and provide references to more in-depth materials.
+
+## Topology
+
+The first concept that provides tools we can use is that of a topological manifold.
+Such manifold ``M`` is described by its dimension ``n=manifold_dimension(M)`` and an atlas $\{\phi_i\}_{i\in I}$ where $\phi_i\colon U_i \to \mathbb{R}^n$ are homeomorphisms called charts indexed by $i$ from some index set $I$ [Lee:2012](@cite) and $U_i \subseteq \mathcal{M}$. [^chart-number-system]
+
+For each point $p \in \mathcal{M}$ there is $i\in I$ such that $p \in U_i$.
+There are also some regularity conditions that exclude certain topological spaces from being called a manifold.
+Specifically they are requirements that $\mathcal{M}$ is a second-countable Hausdorff space, see [Lee:2012, page 3](@cite) for more details.
+
+JuliaManifolds has a few functions for working at this level.
+First, [`manifold_dimension`](@ref) returns the number `n` for a given manifold.
+Next, [`get_chart_index`](@extref) points to one of the charts such that $p$ is in its domain.
+The value of chart on a point can be calculated using [`get_parameters`](@extref) and its inverse using [`get_point`](@extref).
+When we have two charts $\phi_i, \phi_j$, the composition $\phi_j \circ \phi_i^{-1}$ is called the transition map from $\phi_i$ to $\phi_j$, see [`transition_map`](@extref).
+More details are discussed in [this page](https://juliamanifolds.github.io/Manifolds.jl/stable/features/atlases/) and [this tutorial](https://juliamanifolds.github.io/Manifolds.jl/stable/tutorials/working-in-charts/) demonstrates a use case.
+Often additional restrictions are imposed, for example only atlases with only [differentiable](https://en.wikipedia.org/wiki/Differentiable_manifold), smooth or [analytic](https://en.wikipedia.org/wiki/Analytic_manifold) transition maps are considered.
+
+An even stronger restriction holds for complex manifolds: the charts are complex valued ($\phi_i\colon U_i \to \mathbb{C}^n$) and transition maps are required to be holomorphic functions.
+Note that not any manifold represented using complex numbers is a complex manifold.
+In particular, no manifold of odd (real) dimension can be a complex manifold.
+Complex representation is a feature of [CR manifolds](https://en.wikipedia.org/wiki/CR_manifold).
+Instances of [`AbstractManifold`](@ref) with complex number system `𝔽` are not required to be complex manifolds, though they are expected to be CR manifolds.
+
+This definition of a manifold is both too restrictive and not restrictive enough.
+The first aspect is manifested by, for example:
+1. Manifolds with boundary which relax the definition of a chart to cases where the codomain can also be a product $\mathbb{R}^{n-1}\times[0,\infty)$.
+2. Manifolds with corners which relax it even further, that is the codomain can also be a product $\mathbb{R}^{n-k}\times[0,\infty)^k$ for any $k \in [0, 1, \dots, n]$ [Joyce:2010](@cite).
+3. Infinite-dimensional manifolds [KrieglMichor:1997](@cite). Though in practice we always need to select a finite-dimensional subspace to work with, the selection of this subspace can be data-driven and some consideration of the infinite case can be useful. For some examples see [SrivastavaKlassen:2016](@cite).
+4. [Stratified spaces](https://ncatlab.org/nlab/show/stratified+space), which allow for example for decomposing a complicated space into manifolds, and thus dimension and charts are only considered on particular strata. There are, unfortunately, many different regularity conditions that can be imposed leading to significantly different spaces. There is some recent work on using stratified spaces for practical purposes [FeragenNue:2020](@cite), and also some mixed discrete-continuous optimization algorithms can be interpreted as exploiting stratification.
+
+On the other hand, an atlas is insufficient for almost every algorithm that would like to exploit relationships between points.
+[Topological data analysis](https://en.wikipedia.org/wiki/Topological_data_analysis) tries discovering such structure, in the form of [simplicial complexes](https://en.wikipedia.org/wiki/Simplicial_complex), directly from some available data.
+JuliaManifolds focuses on the case where the structure is explicitly specified by the user through a connection.
+Roughly speaking, when a manifold has additional structure attached at each point, a connection specifies how structures attached to different points are related to each other.
+
+## Tangent space
+
+Let's start with the most commonly encountered structure that can be attached to a point on a manifold: a tangent vector.
+Let us consider an $n$-dimensional manifold $\mathcal{M}$ a point $p\in\mathcal{M}$, and a chart $\phi_i$ around $p$.
+We can take any vector $v\in\mathbb{R}^n$ and define a curve $\gamma(t) = \phi_i^{-1}(\phi_i(p) + tv)$ for sufficiently small $t$.
+The curve is, obviously, dependent on the selection of chart in a nonlinear way.
+To deal with this problem we consider any two curves $\gamma_1, \gamma_2$ such that $\frac{d}{dt}\phi_i(\gamma_1(t))\rvert_{t=0} = \frac{d}{dt}\phi_i(\gamma_2(t))\rvert_{t=0}$ to represent the same tangent vector.
+It turns out that formalizing this leads to a [tangent space](https://en.wikipedia.org/wiki/Tangent_space) that is an $n$-dimensional real vector space, and the definition in terms of $v$ provides a vector space isomorphism.
+
+A tangent vector can be interpreted as a direction in which we may go from a point up to its first order behavior.
+There is also another, equivalent [^tangent-space-equivalence] definition of a tangent vector $X$ at point $p$.
+We can consider it to be the direction in which we differentiate a scalar-valued function $f\colon \mathcal{M} \to \mathbb{R}$ at $p$.
+
+Let us consider an example: gradient descent.
+We would like to optimize a function $f\colon \mathcal{M} \to \mathbb{R}$, that is find $p^{*} = \arg\min_{p \in \mathcal{M}} f(p)$.
+We start at point $p_0 \in \mathcal{M}$ and through some computations determine that $X$ is the direction of steepest descent of $f$ at $p_0$.
+In the typical fashion, we would like to perform a step in direction $X$.
+We can follow any curve $\gamma$ that could represent $X$ for some finite time $t$.
+However, this procedure can result in vastly different results depending on the choice of $\gamma$.
+How do we choose which one to follow?
+In some cases it doesn't matter that much and we can select whichever one can be computed the fastest.
+However, often a consistent choice is required for convergence or some other desirable property of an algorithm.
+A compelling solution comes in the form of an affine connection.
+
+A curious reader may wonder why we stopped at affine functions in our definition of tangent vectors.
+Surely, we could use higher-order polynomials or other families of functions to define [jets](https://ncatlab.org/nlab/show/jet+bundle) and [germs](https://ncatlab.org/nlab/show/germ), among other things [KolarSlovakMichor:1993](@cite).
+We are not aware of any practical significance of such theories (apart from a few very specific examples) but who knows what the future holds.
+
+## Connections
+
+
+
+
+## Between Riemann and Finsler
+
+See [Chern:1996](@cite).
+
+
+
+## Lie groups
+
+
+
+
+## Fibers with more structure
+
+
+
+[^chart-number-system]: Sometimes other number systems are considered for the codomain of charts, most notably complex numbers. This discussion is restricted to the real case because it's general enough for practical purposes. Complex atlases can be represented as real atlases with real and imaginary parts separated. Quaternionic manifolds are most easily expressed though fiber bundles. [Other generalizations](https://math.stackexchange.com/a/581087) often lead to spaces that are no longer manifolds.
+
+[^tangent-space-equivalence]: These definitions are equivalent for finite-dimensional manifolds but not for all infinite-dimensional ones. You can see [kinematic tangent space](https://ncatlab.org/nlab/show/kinematic+tangent+space) for more details.
