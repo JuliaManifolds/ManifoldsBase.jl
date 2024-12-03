@@ -8,7 +8,7 @@ CurrentModule = ManifoldsBase
 ```
 ````
 
-This tutorial illustrates, how to implement your very first manifold.
+This tutorial illustrates how to implement your very first manifold.
 We start from the very beginning and cover the basic ideas of the interface provided by
 `ManifoldsBase.jl` interface.
 
@@ -188,7 +188,7 @@ is_vector(M, [1.5, 0.0, 0.0], [0.0, 1.0, 0.0], true; error=:warn) # returns true
 For the final group of functions, we want to implement the [`exp`](@ref)onential map and a [`retract`](@ref)ion. Both are ways to “move around” on the manifold, that is, given a point $p$ and a
 tangent vector indicating a “walking direction”, the two functions we define will return a new point $q$ on the manifold.
 
-For functions that compute a new point or tangent vector, `ManifoldsBase.jl` always provides two variants: One that allocates new memory, and one that allows to provide the memory the result should be returned in to spare memory allocations.
+For functions that compute a new point or tangent vector, `ManifoldsBase.jl` always provides two variants: One that allocates new memory and one, that allows to provide the memory, the result should be returned in – to spare memory allocations.
 
 Let's first take a look at what the exponential map is defined like. We follow the shortest curves, that is great arcs, on the sphere. Formally we have
 
@@ -198,9 +198,9 @@ Let's first take a look at what the exponential map is defined like. We follow t
 \sin\Bigl(\frac{1}{r}\lVert X \rVert\Bigr)\frac{X}{\lVert X \rVert}.
 ````
 
-In fact, from the two functions above, [`exp`](@ref)`(M, p, X)`, and [`exp!`](@ref)`(M, q, p, X)` that works in place of `q`, we only have to implement the second.
-The first one, `exp` by default falls back to allocating memory and calling the second. So `exp` should only be defined, if there is a special reason for.
-Furthermore, we usually do not verify/check inputs to spare time. If a user feels insecure, they could for example use the [`ValidationManifold`](@ref) wrapper which adds explicit checks of inputs and outputs.
+In fact, from the two functions above, [`exp`](@ref)`(M, p, X)` and [`exp!`](@ref)`(M, q, p, X)`, that works in place of `q`, we only have to implement the second.
+The first one, `exp` by default falls back to allocating memory and calling the second. Sp `exp` should only be defined, if there is a special reason for.
+Furthermore, we usually do not verify/check inputs to spare time. If a user feels insecure, they could for example use the [`ValidationManifold`](@ref) wrapper which adds explicitly checks of inputs and outputs.
 
 We define
 
@@ -248,7 +248,7 @@ all([is_point(M, q), is_point(M, q2)])
 
 Since the exponential map might in general be expensive, we can do a similar implementation with the [`ProjectionRetraction`](@ref).
 Here, we really have to take into account, that the interface is ``[designed with 3 levels](@ref Design)``{=commonmark} in mind:
-While the actual function we would call in the end is `retract(M, p, X, ProjectionRetraction())` (or its `!` variant), we actually have to implement `retract_project!(M, q, p, X, t)` for technical details, that are a bit beyond this introductionary tutorial. In short this split avoids ambiguity errors for decorators of the manifolds. We define
+While the actual function we would call in the end is `retract(M, p, X, ProjectionRetraction())` (or its `!` variant), we actually have to implement `retract_project!(M, q, p, X, t)` for technical details, that are a bit beyond this introductory tutorial. In short this split avoids ambiguity errors for decorators of the manifolds. We define
 
 ```{julia}
 import ManifoldsBase: retract_project!
@@ -284,7 +284,7 @@ default_retraction_method(M)
 ```
 
 and retract without a method specified would always fall back to using the projection retraction instead of the exponential map.
-Note that for compatibilty there is the [`AbstractRetractionMethod`](@ref) called [`ExponentialRetraction`](@ref) which makes [`retract`](@ref) fall back to calling [`exp`](@ref).
+Note that for compatibility there is the [`AbstractRetractionMethod`](@ref) called [`ExponentialRetraction`](@ref) which makes [`retract`](@ref) fall back to calling [`exp`](@ref).
 
 ## Technical Details
 
