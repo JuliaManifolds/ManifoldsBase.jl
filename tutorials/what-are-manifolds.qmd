@@ -94,7 +94,6 @@ We are not aware of any practical significance of such theories (apart from a fe
 See [Chern:1996](@cite).
 
 
-
 ## Lie groups
 
 
