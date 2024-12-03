@@ -198,9 +198,9 @@ Let's first take a look at what the exponential map is defined like. We follow t
 \sin\Bigl(\frac{1}{r}\lVert X \rVert\Bigr)\frac{X}{\lVert X \rVert}.
 ````
 
-In fact, from the two functions above, [`exp`](@ref)`(M, p, X)` and [`exp!`](@ref)`(M, q, p, X)`, that works in place of `q`, we only have to implement the second.
-The first one, `exp` by default falls back to allocating memory and calling the second. Sp `exp` should only be defined, if there is a special reason for.
-Furthermore, we usually do not verify/check inputs to spare time. If a user feels insecure, they could for example use the [`ValidationManifold`](@ref) wrapper which adds explicitly checks of inputs and outputs.
+In fact, from the two functions above, [`exp`](@ref)`(M, p, X)` and [`exp!`](@ref)`(M, q, p, X)` that works in place of `q`, we only have to implement the second.
+The first one, `exp` by default falls back to allocating memory and calling the second. So `exp` should only be defined, if there is a special reason for.
+Furthermore, we usually do not verify/check inputs to spare time. If a user feels insecure, they could for example use the [`ValidationManifold`](@ref) wrapper which adds explicit checks of inputs and outputs.
 
 We define
 
