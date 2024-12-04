@@ -185,6 +185,26 @@ However, many parts can still be generalized to Finsler manifolds, pseudo-Rieman
 
 ## Lie groups
 
+A manifold $\mathcal{M}$ can also be equipped with a smooth group operation $\circ\colon \mathcal{M} \times \mathcal{M} \to \mathcal{M}$ together with an identity element $I_{\mathcal{M}} \in \mathcal{M}$ and an inversion function $\cdot^{-1}\colon \mathcal{M} \to \mathcal{M}$ satisfying standard group conditions:
+
+1. Associativity: for every $p_1, p_2, p_3 \in \mathcal{M}$ we have $(p_1\circ p_2) \circ p_3 = p_1\circ (p_2 \circ p_3)$.
+2. Property of the dentity element: for every $p \in \mathcal{M}$ we have $I_{\mathcal{M}} \circ p = p \circ I_{\mathcal{M}} = p$.
+3. Inverse: for every $p \in \mathcal{M}$ it holds that $p \circ p^{-1} = p^{-1} \circ p = I_{\mathcal{M}}$.
+
+In general we don't assume commutativity, which is a major issue complicating our calculations.
+
+Before we proceed, let's take a look at what a Lie group could be.
+There is an exhaustive [classification](https://en.wikipedia.org/wiki/Lie_group#Classification) of possible Lie groups, although nearly all relevant Lie groups are so-called matrix Lie groups.
+They are defined as subgroups of the group of complex invertible $n\times n$ matrices, denoted $\operatorname{GL}(n, \mathbb{C})$, with matrix multiplication as group operation.
+We can thus represent elements of nearly every Lie group simply as matrices.
+
+If we demand invariance of the connection to the group operation, we are very restricted in our choice.
+The invariance can be understood through a new identification of tangent spaces that is available to us.
+We can establish isomorphisms between the tangent space at identity $T_{I_\mathcal{M}}\mathcal{M}$ (also called the Lie algebra of $\mathcal{M}$ and denoted $\mathfrak{g}$) and at any other point $p\in \mathcal{M}$ using differentials of either $L_p(q) = p \circ q$ or $R_p(q) = q \circ p$.
+The differential $d L_{p}$ at identity is an isomophism between $\mathfrak{g}$ and $T_p \mathcal{M}$.
+We can also devise other isomorphisms between tangent spaces such as $d R_{p}$ in a similar manner.
+
+It turns out that we can now define affine connections on $\mathcal{M}$ that are both left- and right-invariant to group operation, that is the value of the connection at any point can be determined by transporting the vectors to $I_{\mathcal{M}}$ using either $d L_{p}$ or $d R_{p}$ and evaluating the Christoffel symbol at identity.
 
 
 
