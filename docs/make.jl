@@ -56,9 +56,7 @@ using ManifoldsBase
 
 # (e) ...finally! make docs
 bib = CitationBibliography(joinpath(@__DIR__, "src", "references.bib"); style = :alpha)
-links = InterLinks(
-    "Manifolds" => ("https://juliamanifolds.github.io/Manifolds.jl/stable/"),
-)
+links = InterLinks("Manifolds" => ("https://juliamanifolds.github.io/Manifolds.jl/stable/"))
 makedocs(;
     # for development, we disable prettyurls
     format = Documenter.HTML(;
