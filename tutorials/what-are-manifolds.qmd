@@ -157,6 +157,7 @@ I(\gamma) = \int_a^b F(\gamma(t), \dot{\gamma}(t)) dt
 ```
 where $F \colon T\mathcal{M} \to [0, \infty)$ is a certain scalar function on tangent bundle called Finsler metric.[BaoChernShen:2000](@cite)
 It has the following properties:
+
 * $F$ is smooth on $TM \ \{0\}$.
 * For all $p\in \mathcal{M}$, $X \in T_p \mathcal{M}$ and $\lambda \geq 0$ the metric is homogeneous: $F(p, \lambda X) = \lambda F(p, X)$.
 * Strong convexity: at each $p\in \mathcal{M}$ the Hessian of $X \mapsto \frac{1}{2}F^2(p, X)$ is positive definite.[^no-strong-convexity]. This Hessian $g(p)$ is called the fundamental tensor.
@@ -174,6 +175,7 @@ It is a generalization of the famous [Levi-Civita connection](https://en.wikiped
 It is, however, much more technical to work with than the Riemannian case [BaoChernShen:2000](@cite).
 
 Many possible restrictions have been considered, for example:
+
 * Reversibility (or, equivalently, absolute homogeneity), that is $F(p, \lambda X) = \lvert \lambda \rvert F(p, X)$ for all $\lambda \in \mathbb{R}$.
 * Riemannian manifolds restrict the metric function $F$ to a quadratic forms in $X$ at each $p$. Such forms give rise to an inner product on each tangent space, see [`inner`](@ref).
 
