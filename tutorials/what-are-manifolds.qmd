@@ -32,9 +32,9 @@ Specifically they are requirements that $\mathcal{M}$ is a second-countable Haus
 
 JuliaManifolds has a few functions for working at this level.
 First, [`manifold_dimension`](@ref) returns the number `n` for a given manifold.
-Next, [`get_chart_index`](@extref `Manifolds.get_chart_index`) points to one of the charts such that $p$ is in its domain.
-The value of chart on a point can be calculated using [`get_parameters`](@extref `Manifolds.get_parameters`) and its inverse using [`get_point`](@extref `Manifolds.get_point`).
-When we have two charts $\phi_i, \phi_j$, the composition $\phi_j \circ \phi_i^{-1}$ is called the transition map from $\phi_i$ to $\phi_j$, see [`transition_map`](@extref `Manifolds.transition_map`).
+Next, ``[`get_chart_index`](@extref `Manifolds.get_chart_index`)``{=commonmark} points to one of the charts such that $p$ is in its domain.
+The value of chart on a point can be calculated using ``[`get_parameters`](@extref `Manifolds.get_parameters`)``{=commonmark} and its inverse using ``[`get_point`](@extref `Manifolds.get_point`)``{=commonmark}.
+When we have two charts $\phi_i, \phi_j$, the composition $\phi_j \circ \phi_i^{-1}$ is called the transition map from $\phi_i$ to $\phi_j$, see ``[`transition_map`](@extref `Manifolds.transition_map`)``{=commonmark}.
 More details are discussed in [this page](https://juliamanifolds.github.io/Manifolds.jl/stable/features/atlases/) and [this tutorial](https://juliamanifolds.github.io/Manifolds.jl/stable/tutorials/working-in-charts/) demonstrates a use case.
 Often additional restrictions are imposed, for example only atlases with only [differentiable](https://en.wikipedia.org/wiki/Differentiable_manifold), smooth or [analytic](https://en.wikipedia.org/wiki/Analytic_manifold) transition maps are considered.
 
