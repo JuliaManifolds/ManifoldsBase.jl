@@ -6,6 +6,10 @@ title: "What are manifolds?"
 ```@meta
 CurrentModule = ManifoldsBase
 ```
+```@contents
+Pages = ["what-are-manifolds.md"]
+Depth = 3
+```
 ````
 
 ## Introduction
@@ -110,29 +114,31 @@ Now we can locally write an ODE that shows us how to move a tangent vector $Y$ a
     \end{bmatrix}
 ```
 
-where $p_c\colon [0, 1] \to \mathbb{R}^n$, $X_c\colon [0, 1] \to \mathbb{R}^n$ and $\Gamma_i\colon \mathbb{R}^n \times \mathbb{R}^n \times \mathbb{R}^n \to \mathbb{R}^n$ is any differentiable function.
+where $p_c\colon [0, 1] \to \mathbb{R}^n$, $X_c\colon [0, 1] \to \mathbb{R}^n$, $Y_c\colon [0, 1] \to \mathbb{R}^n$ and $\Gamma_i\colon \mathbb{R}^n \times \mathbb{R}^n \times \mathbb{R}^n \to \mathbb{R}^n$ is any differentiable function.
 Initial conditions for the ODE are such that $p_c(0) = \phi_i(p)$, while $X_c(0)$ and $Y_c(0)$ are coefficients of, respectively, $X$ and $Y$ in the basis of $T_p \mathcal{M}$ induced by $\phi_i$.
 
 Solving the ODE defined in this way connects the tangent space at $p$ with the tangent space at $\phi_i^{-1}(p_c(1))$ by mapping $Y$ to the tangent vector represented by $Y_c(1)$ in the basis of $T_{\phi_i^{-1}(p_c(1))} \mathcal{M}$ induced by $\phi_i$.
 The function $\Gamma_i$ defines an [affine connection](https://en.wikipedia.org/wiki/Affine_connection) for the manifold $\mathcal{M}$ [^gamma-i] in chart $i$).
 The detailed investigations of differential geometry then delve into how to define affine connections in a way that makes the solution of such ODEs for different charts consistent.
 When using JuliaManifolds you don't have to worry about this because we generally deal with affine connections in a consistent way but it is highly relevant when working out a new connection.
+The relevant JuliaManifolds function is ``[`affine_connection`](@extref Manifolds :jl:method:`Manifolds.affine_connection-Tuple{AbstractManifold, Vararg{Any, 5}}`)``{=commonmark}
 
 You may be curious why the same function $\Gamma_i$ appears twice in ODE defining the connection.
 It is the result of one of the consistency conditions: we want the vector $X$ in which we move to be connected to its counterparts (defined by the second group of equations) in other tangent spaces.
-It is, however, not strictly required for more general connections. [^other-connections]
+It is, however, not strictly required for more general connections.[^other-connections]
 Such connections keep the equations for $p_c$ and $X_c$ but replace the equation for $Y_c$ with something else.
 In other words, the first two equations define how to move on a manifold, while the third one defines how to connect fibers we cross when we move.
 
 Note that, as a result of independence from selection of the chart, one usually selects a chart in which solving the affine connection ODE is the easiest.
 In some special cases (like spheres) there even exist closed-form solutions.
+To support such efficient computation, one can directly use the functions [`exp`](@ref), [`log`](@ref) and [`parallel_transport_direction`](@ref).
 
 While the conditions on the form in which fibers may be connected appear quite restrictive, in practice they turn out to still be very general.
 We thus need some additional guidelines to select a connection for our manifold.
 There are multiple available options.
 The following list discusses the most prominent ones.
 
-1. When the manifold is specified through an embedding or a pushfoward based on a space with known geometry, we can use it to define a connection.
+1. When the manifold is specified through an [embedding](https://en.wikipedia.org/wiki/Embedding), [pushforward](https://en.wikipedia.org/wiki/Pushforward_(differential)) or [quotient](https://en.wikipedia.org/wiki/Quotient_space_(topology)) based on a space with known geometry, we can use it to define a connection.
 2. Sometimes we have additional structure, for example Riemannian, Finsler or Lie (discussed in following sections) which imposes heavy restrictions.
 3. If we want to make a physical model, our constraints are dictated by physical principles and measurements. Note that the language used in this tutorial is very popular in modern physics.
 
@@ -141,9 +147,38 @@ JuliaManifolds prioritizes support for things that actually are practically rele
 
 ## Between Riemann and Finsler
 
-See [Chern:1996](@cite).
+In this section we focus on manifolds and their tangent bundles.
+There are two popular ways in which we can specify their structure in a much less flexible way than general connections: Finsler and Riemann.[^finsler-riemann-chern]
+In return we get more structure to work with, and can thus generically express more algorithms.
 
+The initial premise can be expressed by the desire to measure distance along a path $\gamma \colon [a, b] \to \mathbb{M}$ using the formula
+```math
+I(\gamma) = \int_a^b F(\gamma(t), \dot{\gamma}(t)) dt
+```
+where $F \colon T\mathcal{M} \to [0, \infty)$ is a certain scalar function on tangent bundle called Finsler metric.[BaoChernShen:2000](@cite)
+It has the following properties:
+* $F$ is smooth on $TM \ \{0\}$.
+* For all $p\in \mathcal{M}$, $X \in T_p \mathcal{M}$ and $\lambda \geq 0$ the metric is homogeneous: $F(p, \lambda X) = \lambda F(p, X)$.
+* Strong convexity: at each $p\in \mathcal{M}$ the Hessian of $X \mapsto \frac{1}{2}F^2(p, X)$ is positive definite.[^no-strong-convexity]. This Hessian $g(p)$ is called the fundamental tensor.
+For each point $p$ the function $X \mapsto F(p, X)$ is a Minkowski norm on $T_p\mathcal{M}$, that is
+* $F(p, X) > 0$ for all $X \neq 0$,
+* $F(p, X_1 + X_2) \leq F(p, X_1) + F(p, X_2)$,
+* $g(X_1, X_2) \leq F(p, X_1)F(p, X_2)$.[^fundamental-inequality]
+The Finsler metric can be calculated using [`norm`](@ref).
 
+Despite a very generic description, Finsler manifolds provide a rich structure.
+We can measure distances between points as $d(p, q) = \inf_{\gamma} L(\gamma)$, where the infimum is taken across all curves such that $\gamma(0) = p$ and $\gamma(1) = q$.
+It is handled by the [`distance`](@ref) function.
+There is also a unique connection, called Chern connection, that arises from $F$.
+It is a generalization of the famous [Levi-Civita connection](https://en.wikipedia.org/wiki/Levi-Civita_connection) for Riemannian manifolds.
+It is, however, much more technical to work with than the Riemannian case [BaoChernShen:2000](@cite).
+
+Many possible restrictions have been considered, for example:
+* Reversibility (or, equivalently, absolute homogeneity), that is $F(p, \lambda X) = \lvert \lambda \rvert F(p, X)$ for all $\lambda \in \mathbb{R}$.
+* Riemannian manifolds restrict the metric function $F$ to a quadratic forms in $X$ at each $p$. Such forms give rise to an inner product on each tangent space, see [`inner`](@ref).
+
+JuliaManifolds was designed based on Riemannian manifolds because they are much more simple to work with and more common in applications.
+However, many parts can still be generalized to Finsler manifolds, pseudo-Riemannian manifolds or even pseudo-Finsler manifolds.
 
 ## Lie groups
 
@@ -163,3 +198,9 @@ See [Chern:1996](@cite).
 [^gamma-i]: In the specific case of a metric connection it is called a [Christoffel symbol](https://en.wikipedia.org/wiki/Christoffel_symbols).
 
 [^other-connections]: See for example [Ehresmann connection](https://en.wikipedia.org/wiki/Ehresmann_connection) and its different variants.
+
+[^finsler-riemann-chern]: Historically Finsler manifolds are very close to what Riemann actually studied, and what is now known as Riemannian manifolds has a quadratic restriction that was added later. See [Chern:1996](@cite) for more details.
+
+[^no-strong-convexity]: This requirement can be slightly relaxed to nondegeneracy and many properties still hold [JavaloyesSoares:2015](@cite).
+
+[^fundamental-inequality]: This condition can be expressed in many equivalent forms. The one written here is not the most simple one but possibly the easiest to interpret, since it looks similar to the [Cauchy-Schwarz inequality](https://en.wikipedia.org/wiki/Cauchy%E2%80%93Schwarz_inequality). 
