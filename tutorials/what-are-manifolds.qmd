@@ -158,14 +158,14 @@ I(\gamma) = \int_a^b F(\gamma(t), \dot{\gamma}(t)) dt
 where $F \colon T\mathcal{M} \to [0, \infty)$ is a certain scalar function on tangent bundle called Finsler metric.[BaoChernShen:2000](@cite)
 It has the following properties:
 
-* The function $F$ is smooth on $TM \ \{0\}$.
+* The function $F$ is smooth on $TM \setminus \{0\}$.
 * For all $p\in \mathcal{M}$, $X \in T_p \mathcal{M}$ and $\lambda \geq 0$ the metric is homogeneous: $F(p, \lambda X) = \lambda F(p, X)$.
-* Strong convexity: at each $p\in \mathcal{M}$ the Hessian of $X \mapsto \frac{1}{2}F^2(p, X)$ is positive definite.[^no-strong-convexity]. This Hessian $g(p)$ is called the fundamental tensor.
+* Strong convexity: at each $p\in \mathcal{M}$ the Hessian of $X \mapsto \frac{1}{2}F^2(p, X)$ is positive definite[^no-strong-convexity]. This Hessian $g_{p}$ is called the fundamental tensor.
 For each point $p$ the function $X \mapsto F(p, X)$ is a Minkowski norm on $T_p\mathcal{M}$, that is the following properties hold:
 
 * Positivity: $F(p, X) > 0$ for all $X \neq 0$,
 * Triangle inequality: $F(p, X_1 + X_2) \leq F(p, X_1) + F(p, X_2)$,
-* Fundmental inequality: $g(X_1, X_2) \leq F(p, X_1)F(p, X_2)$.[^fundamental-inequality]
+* Fundmental inequality: $g_p(X_1, X_2) \leq F(p, X_1)F(p, X_2)$.[^fundamental-inequality]
 The Finsler metric can be calculated using [`norm`](@ref).
 
 Despite a very generic description, Finsler manifolds provide a rich structure.
