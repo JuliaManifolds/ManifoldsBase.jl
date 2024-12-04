@@ -98,7 +98,7 @@ We can find a chart $\phi_i \colon U_i \to \mathbb{R}^n$, and thus locally ident
 The neighborhood $U_i \subseteq \mathcal{M}$ can be used to locally decompose the tangent bundle as $U_i \times \mathbb{R}^n$. [^parallelizable-manifolds]
 Now we can locally write an ODE that shows us how to move a tangent vector $Y$ at $p$ to another point indicated by tangent vector $X$ at $p$:
 
-$$
+```math
 \frac{d}{dt}\begin{bmatrix}
         p_c(t)\\
         X_c(t)\\
@@ -108,7 +108,7 @@ $$
         -\Gamma_i(p(c), X_c(t), X_c(t)) \\
         -\Gamma_i(p(c), X_c(t), Y_c(t))
     \end{bmatrix}
-$$
+```
 
 where $p_c\colon [0, 1] \to \mathbb{R}^n$, $X_c\colon [0, 1] \to \mathbb{R}^n$ and $\Gamma_i\colon \mathbb{R}^n \times \mathbb{R}^n \times \mathbb{R}^n \to \mathbb{R}^n$ is any differentiable function.
 Initial conditions for the ODE are such that $p_c(0) = \phi_i(p)$, while $X_c(0)$ and $Y_c(0)$ are coefficients of, respectively, $X$ and $Y$ in the basis of $T_p \mathcal{M}$ induced by $\phi_i$.
@@ -158,7 +158,7 @@ See [Chern:1996](@cite).
 
 [^tangent-space-equivalence]: These definitions are equivalent for finite-dimensional manifolds but not for all infinite-dimensional ones. You can see [kinematic tangent space](https://ncatlab.org/nlab/show/kinematic+tangent+space) for more details.
 
-[^parallelizable-manifolds]: Manifolds whose tangent bundle is trivial (and thus we can select $U=\mathcal{M}$) are called [parallelizable](https://en.wikipedia.org/wiki/Parallelizable_manifold).
+[^parallelizable-manifolds]: Manifolds whose tangent bundle is trivial (and thus we can select $U_i=\mathcal{M}$) are called [parallelizable](https://en.wikipedia.org/wiki/Parallelizable_manifold).
 
 [^gamma-i]: In the specific case of a metric connection it is called a [Christoffel symbol](https://en.wikipedia.org/wiki/Christoffel_symbols).
 
