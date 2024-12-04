@@ -160,7 +160,9 @@ It has the following properties:
 
 * The function $F$ is smooth on $T \mathcal{M} \setminus \{0\}$.
 * For all $p\in \mathcal{M}$, $X \in T_p \mathcal{M}$ and $\lambda \geq 0$ the metric is homogeneous: $F(p, \lambda X) = \lambda F(p, X)$.
-* Strong convexity: at each $p\in \mathcal{M}$ the Hessian of $X \mapsto \frac{1}{2}F^2(p, X)$ is positive definite[^no-strong-convexity]. This Hessian $g_{p}$ is called the fundamental tensor.
+* Strong convexity: at each $p\in \mathcal{M}$ the Hessian of $X \mapsto \frac{1}{2}F^2(p, X)$ is positive definite[^no-strong-convexity].
+This Hessian $g_{p}$ is called the fundamental tensor.
+
 For each point $p$ the function $X \mapsto F(p, X)$ is a Minkowski norm on $T_p\mathcal{M}$, that is the following properties hold:
 
 * Positivity: $F(p, X) > 0$ for all $X \neq 0$,
