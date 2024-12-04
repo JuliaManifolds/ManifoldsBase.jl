@@ -188,7 +188,7 @@ is_vector(M, [1.5, 0.0, 0.0], [0.0, 1.0, 0.0], true; error=:warn) # returns true
 For the final group of functions, we want to implement the [`exp`](@ref)onential map and a [`retract`](@ref)ion. Both are ways to “move around” on the manifold, that is, given a point $p$ and a
 tangent vector indicating a “walking direction”, the two functions we define will return a new point $q$ on the manifold.
 
-For functions that compute a new point or tangent vector, `ManifoldsBase.jl` always provides two variants: One that allocates new memory and one, that allows to provide the memory, the result should be returned in – to spare memory allocations.
+For functions that compute a new point or tangent vector, `ManifoldsBase.jl` always provides two variants: One that allocates new memory, and one that allows to provide the memory, the result should be returned in to spare memory allocations.
 
 Let's first take a look at what the exponential map is defined like. We follow the shortest curves, that is great arcs, on the sphere. Formally we have
 
