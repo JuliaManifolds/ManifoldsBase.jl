@@ -7,7 +7,7 @@ if "--help" ∈ ARGS
         """
 docs/make.jl
 
-Render the `Manopt.jl` documenation with optinal arguments
+Render the `ManifoldsBase.jl` documentation with optional arguments
 
 Arguments
 * `--help`              - print this help and exit without rendering the documentation
@@ -51,11 +51,14 @@ if "--quarto" ∈ ARGS
 end
 
 using Documenter
-using DocumenterCitations
+using DocumenterCitations, DocumenterInterLinks
 using ManifoldsBase
 
 # (e) ...finally! make docs
 bib = CitationBibliography(joinpath(@__DIR__, "src", "references.bib"); style = :alpha)
+links = InterLinks(
+    "Manifolds" => ("https://juliamanifolds.github.io/Manifolds.jl/stable/"),
+)
 makedocs(;
     # for development, we disable prettyurls
     format = Documenter.HTML(;
@@ -73,7 +76,7 @@ makedocs(;
         "What are manifolds?" => "tutorials/what-are-manifolds.md",
         "Design principles" => "design.md",
         "An abstract manifold" => "types.md",
-        "Functions on maniolds" => [
+        "Functions on manifolds" => [
             "Basic functions" => "functions.md",
             "Projections" => "projections.md",
             "Retractions" => "retractions.md",
@@ -86,6 +89,6 @@ makedocs(;
         "Numerical Verification" => "numerical_verification.md",
         "References" => "references.md",
     ],
-    plugins = [bib],
+    plugins = [bib, links],
 )
 deploydocs(repo = "github.com/JuliaManifolds/ManifoldsBase.jl.git", push_preview = true)
