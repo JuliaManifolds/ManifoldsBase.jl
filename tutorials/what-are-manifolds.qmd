@@ -161,7 +161,7 @@ It has the following properties:
 * The function $F$ is smooth on $T \mathcal{M} \setminus \{0\}$.
 * For all $p\in \mathcal{M}$, $X \in T_p \mathcal{M}$ and $\lambda \geq 0$ the metric is homogeneous: $F(p, \lambda X) = \lambda F(p, X)$.
 * Strong convexity: at each $p\in \mathcal{M}$ the Hessian of $X \mapsto \frac{1}{2}F^2(p, X)$ is positive definite[^no-strong-convexity].
-This Hessian $g_{p}$ is called the fundamental tensor.
+This Hessian $g_{p}\colon T_p \mathcal \times T_p \mathcal \to \mathbb{R}$ is called the fundamental tensor.
 
 For each point $p$ the function $X \mapsto F(p, X)$ is a Minkowski norm on $T_p\mathcal{M}$, that is the following properties hold:
 
@@ -188,27 +188,47 @@ However, many parts can still be generalized to Finsler manifolds, pseudo-Rieman
 
 ## Lie groups
 
-A manifold $\mathcal{M}$ can also be equipped with a smooth group operation $\circ\colon \mathcal{M} \times \mathcal{M} \to \mathcal{M}$ together with an identity element $I_{\mathcal{M}} \in \mathcal{M}$ and an inversion function $\cdot^{-1}\colon \mathcal{M} \to \mathcal{M}$ satisfying standard group conditions:
+A manifold $\mathcal{M}$ can be equipped with a smooth group operation $\circ\colon \mathcal{M} \times \mathcal{M} \to \mathcal{M}$ together with an identity element $I_{\mathcal{M}} \in \mathcal{M}$ and an inversion function $\cdot^{-1}\colon \mathcal{M} \to \mathcal{M}$ satisfying standard group conditions:
 
 1. Associativity: for every $p_1, p_2, p_3 \in \mathcal{M}$ we have $(p_1\circ p_2) \circ p_3 = p_1\circ (p_2 \circ p_3)$.
 2. Property of the dentity element: for every $p \in \mathcal{M}$ we have $I_{\mathcal{M}} \circ p = p \circ I_{\mathcal{M}} = p$.
 3. Inverse: for every $p \in \mathcal{M}$ it holds that $p \circ p^{-1} = p^{-1} \circ p = I_{\mathcal{M}}$.
 
 In general we don't assume commutativity, which is a major issue complicating our calculations.
+Manifolds with such structure are called Lie groups and the relevant functionality is provided by [Manifolds.jl](https://juliamanifolds.github.io/Manifolds.jl/stable/manifolds/group/) and (work in progress as of December 2024) [LieGroups.jl](https://github.com/JuliaManifolds/LieGroups.jl).
 
 Before we proceed, let's take a look at what a Lie group could be.
 There is an exhaustive [classification](https://en.wikipedia.org/wiki/Lie_group#Classification) of possible Lie groups, although nearly all relevant Lie groups are so-called matrix Lie groups.
 They are defined as subgroups of the group of complex invertible $n\times n$ matrices, denoted $\operatorname{GL}(n, \mathbb{C})$, with matrix multiplication as group operation.
-We can thus represent elements of nearly every Lie group simply as matrices.
+We can thus represent elements of nearly every Lie group simply as square matrices.
+That's not necessarily always the best representation but it simplifies many derivations.
+Note that in this representation tangent vectors are also square matrices of the same size.
 
-If we demand invariance of the connection to the group operation, we are very restricted in our choice.
-The invariance can be understood through a new identification of tangent spaces that is available to us.
-We can establish isomorphisms between the tangent space at identity $T_{I_\mathcal{M}}\mathcal{M}$ (also called the Lie algebra of $\mathcal{M}$ and denoted $\mathfrak{g}$) and at any other point $p\in \mathcal{M}$ using differentials of either $L_p(q) = p \circ q$ or $R_p(q) = q \circ p$.
+The tangent space at identity, $T_{I_\mathcal{M}}\mathcal{M}$, is known as [Lie algebra](https://en.wikipedia.org/wiki/Lie_algebra) of $\mathcal{M}$ and denoted $\mathfrak{g}$.
+To actually make it an algebra it needs another operation called Lie bracket, $[\cdot, \cdot] \colon \mathfrak{g} \times \mathfrak{g} \to \mathfrak{g}$.
+This operation has a unique definition in terms of the group operation.
+On matrix Lie groups it can be computed as $[X, Y] = XY - YX$, for matrices $X, Y \in \mathfrak{G}$.[^generic-lie-bracket]
+
+It turns out that we are very restricted in the choice of a connection on Lie groups if we want to respect the group operation.
+[Exponential and logarithmic maps](https://en.wikipedia.org/wiki/Exponential_map_(Lie_theory)) turn out to be uniquely determined, see [PennecLorenzi:2020](@cite), Section 5.3.3.
+Moreover, at the identity of matrix Lie groups they coincide with, respectively, matrix exponential and matrix logarithm.
+
+There is, however, still a bit of freedom in the choice of connection that leads to different parallel transports.
+One way to understand it is through an identification of tangent spaces that is available to us.
+We can establish isomorphisms between the Lie algebra $\mathfrak{g}$ and tangent space at any other point $p\in \mathcal{M}$ using differentials of either left $L_p(q) = p \circ q$ or right $R_p(q) = q \circ p$ translations.
 The differential $d L_{p}$ at identity is an isomophism between $\mathfrak{g}$ and $T_p \mathcal{M}$.
 We can also devise other isomorphisms between tangent spaces such as $d R_{p}$ in a similar manner.
 
-It turns out that we can now define affine connections on $\mathcal{M}$ that are both left- and right-invariant to group operation, that is the value of the connection at any point can be determined by transporting the vectors to $I_{\mathcal{M}}$ using either $d L_{p}$ or $d R_{p}$ and evaluating the Christoffel symbol at identity.
+We can now define affine connections on $\mathcal{M}$ that are both left- and right-invariant to group operation.
+The value of such connection at any point can be determined by transporting the vectors to $I_{\mathcal{M}}$ using either $d L_{p}$ or $d R_{p}$ and evaluating the Christoffel symbol $\Gamma_i$ at identity.
+On each group there is a simple one-parameter family of such connections, called Cartan-Schouten connections.
+In those connections the Christoffel symbol is determined by the Lie bracket of corresponding tangent vectors multiplied by a number $\lambda \in \mathbb{R}$,
+see [PennecLorenzi:2020](@cite), Section 5.3.2.
+The choice can be narrowed down by futher requiring the connection to be torsion-free ($\lambda=\frac{1}{2}$) or flat ($\lambda \in \{0, 1\}$).
 
+We may now wonder if any of the affine connections we just constructed come from a certain Riemannian or Finsler metric.
+The answer is fairly simple: it is only true when the group $\mathcal{M}$ is compact or a direct product of a compact group and a vector space [LatifiToomanian:2013](@cite).
+The most prominent examples of groups without a biinvariant metric are special Euclidean groups.
 
 
 ## Fibers with more structure
@@ -230,3 +250,6 @@ It turns out that we can now define affine connections on $\mathcal{M}$ that are
 [^no-strong-convexity]: This requirement can be slightly relaxed to nondegeneracy and many properties still hold [JavaloyesSoares:2015](@cite).
 
 [^fundamental-inequality]: This condition can be expressed in many equivalent forms. The one written here is not the most simple one but possibly the easiest to interpret, since it looks similar to the [Cauchy-Schwarz inequality](https://en.wikipedia.org/wiki/Cauchy%E2%80%93Schwarz_inequality). 
+
+[^generic-lie-bracket]: Lie bracket is also uniquely determined for non-matrix Lie groups, though deriving formulas for its calculation is quite technical.
+See [HilgertNeeb:2012](@cite), Section 9.1.2, for more details.
