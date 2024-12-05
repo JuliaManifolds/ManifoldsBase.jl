@@ -212,7 +212,7 @@ Note that in this representation tangent vectors are also square matrices of the
 The tangent space at identity, $T_{I_\mathcal{M}}\mathcal{M}$, is known as [Lie algebra](https://en.wikipedia.org/wiki/Lie_algebra) of $\mathcal{M}$ and denoted $\mathfrak{g}$.
 To actually make it an algebra it needs another operation called Lie bracket, $[\cdot, \cdot] \colon \mathfrak{g} \times \mathfrak{g} \to \mathfrak{g}$.
 This operation has a unique definition in terms of the group operation.
-On matrix Lie groups it can be computed as $[X, Y] = XY - YX$, for matrices $X, Y \in \mathfrak{G}$.[^generic-lie-bracket]
+On matrix Lie groups it can be computed as $[X, Y] = XY - YX$, for matrices $X, Y \in \mathfrak{g}$.[^generic-lie-bracket]
 
 It turns out that we are very restricted in the choice of a connection on Lie groups if we want to respect the group operation.
 [Exponential and logarithmic maps](https://en.wikipedia.org/wiki/Exponential_map_(Lie_theory)) turn out to be uniquely determined, see [PennecLorenzi:2020](@cite), Section 5.3.3.
@@ -220,7 +220,7 @@ Moreover, at the identity of matrix Lie groups they coincide with, respectively,
 
 There is, however, still a bit of freedom in the choice of connection that leads to different parallel transports.
 One way to understand it is through an identification of tangent spaces that is available to us.
-We can establish isomorphisms between the Lie algebra $\mathfrak{g}$ and tangent space at any other point $p\in \mathcal{M}$ using differentials of either left $L_p(q) = p \circ q$ or right $R_p(q) = q \circ p$ translations.
+We can establish isomorphisms between the Lie algebra $\mathfrak{g}$ and tangent space at any other point $p\in \mathcal{M}$ using [differentials](https://en.wikipedia.org/wiki/Pushforward_(differential)) of either left $L_p(q) = p \circ q$ or right $R_p(q) = q \circ p$ translations.
 The differential $d L_{p}$ at identity is an isomophism between $\mathfrak{g}$ and $T_p \mathcal{M}$.
 We can also devise other isomorphisms between tangent spaces such as $d R_{p}$ in a similar manner.
 
