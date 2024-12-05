@@ -27,6 +27,11 @@ We will briefly discuss their relevance and provide references to more in-depth 
 Basic knowledge of multivariate calculus, linear algebra and ordinary differential equations is required to understand this tutorial.
 More advanced topics are helpful but not necessary to learn something from this text.
 
+If at any point you feel overwhelmed by the introduced concepts, feel free to skip a paragraph or even a section.
+Also, let us know if you think any part could be improved.
+When reading referenced material remember that advanced mathematical texts are primarily written to help people prove theorems.
+Most of that knowledge is not required for working with applications.
+
 ## Topology
 
 The first concept that provides tools we can use is that of a topological manifold.
@@ -227,13 +232,31 @@ see [PennecLorenzi:2020](@cite), Section 5.3.2.
 The choice can be narrowed down by futher requiring the connection to be torsion-free ($\lambda=\frac{1}{2}$) or flat ($\lambda \in \{0, 1\}$).
 
 We may now wonder if any of the affine connections we just constructed come from a certain Riemannian or Finsler metric.
-The answer is fairly simple: it is only true when the group $\mathcal{M}$ is compact or a direct product of a compact group and a vector space [LatifiToomanian:2013](@cite).
+The answer is fairly simple: it is only true when the group $\mathcal{M}$ is compact or a [direct product](https://en.wikipedia.org/wiki/Direct_product_of_groups) of a compact group and a vector space [LatifiToomanian:2013](@cite).
 The most prominent examples of groups without a biinvariant metric are special Euclidean groups.
 
 
-## Fibers with more structure
+## Fibers and fiber bundles
 
+As seen in the section about the tangent space, fiber bundles can be considered as a way of attaching additional information to each point of a manifold.
+A connection can be introduced to connect different fibers in a way that is decoupled from the way we move on the manifold as defined using an affine connection.
+Standard formalization of this concept is known as [Ehresmann connection](https://en.wikipedia.org/wiki/Ehresmann_connection).
 
+One common example of a fiber bundle is the frame bundle of a manifold.
+Instead of considering just a single tangent vector at each point like in the tangent bundle, we now attach an entire basis of the tangent space.
+On an $n$-dimensional manifold we can identify such frames with elements of the general linear group $\operatorname{GL}(n, \mathbb{R})$.
+The existence of sections of subgroups is tied to important properties about a manifold, see [G-structures on a manifold](https://en.wikipedia.org/wiki/G-structure_on_a_manifold).
+
+As of December 2024 JuliaManifolds offers little support for general fiber bundles, with the exception of tangent bundle.
+Simply using a product manifold of $\mathcal{M}$ and a single fiber seems to be good enough in practice.
+Due to major importance of fiber bundles in theory they are, however, expected to be more relevant in the future.
+
+## Concluding remarks
+
+As demonstrated, there is no single definition of a manifold that fits every use case.
+There are various operations that we may need for our computations.
+This tutorial provides a high-level overview of those operations and describes ways in which they are interconnected.
+It additionally serves as an introduction to concepts relevant to practical computations using JuliaManifolds.
 
 [^chart-number-system]: Sometimes other number systems are considered for the codomain of charts, most notably complex numbers. This discussion is restricted to the real case because it's general enough for practical purposes. Complex atlases can be represented as real atlases with real and imaginary parts separated. Quaternionic manifolds are most easily expressed though fiber bundles. [Other generalizations](https://math.stackexchange.com/a/581087) often lead to spaces that are no longer manifolds.
 
