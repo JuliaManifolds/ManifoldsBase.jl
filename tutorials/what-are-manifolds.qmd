@@ -21,6 +21,8 @@ Here we will cover the definitions that are most relevant in practice.
 The most generic relevant concept is that of a topological space.
 It describes the notion of closeness of points through families of open sets which satisfy certain properties.
 There are currently no functions in JuliaManifolds that can work at this level of generality.
+Topology is only relevant when one wants to push boundaries of what kinds of spaces can be worked on.
+It is not useful for working with existing types.
 
 In this tutorial we will go from the most general concepts to the ones that provide the most structure.
 We will briefly discuss their relevance and provide references to more in-depth materials.
@@ -35,11 +37,10 @@ Most of that knowledge is not required for working with applications.
 ## Topology
 
 The first concept that provides tools we can use is that of a topological manifold.
-Such manifold ``M`` is described by its dimension ``n=manifold_dimension(M)`` and an atlas $\{\phi_i\}_{i\in I}$ where $\phi_i\colon U_i \to \mathbb{R}^n$ are homeomorphisms called charts indexed by $i$ from some index set $I$ [Lee:2012](@cite) and $U_i \subseteq \mathcal{M}$. [^chart-number-system]
+Such manifold ``M`` is described by its dimension ``n=manifold_dimension(M)`` and a set of functions called an atlas $\{\phi_i\}_{i\in I}$ where $\phi_i\colon U_i \to \mathbb{R}^n$ are charts indexed by $i$ from some index set $I$ [Lee:2012](@cite) and $U_i \subseteq \mathcal{M}$. [^more-about-charts] [^chart-number-system]
 
 For each point $p \in \mathcal{M}$ there is $i\in I$ such that $p \in U_i$.
-There are also some regularity conditions that exclude certain topological spaces from being called a manifold.
-Specifically they are requirements that $\mathcal{M}$ is a second-countable Hausdorff space, see [Lee:2012](@cite), page 3 for more details.
+There are also some regularity conditions which we skip here because they are rarely relevant. [^topological-conditions]
 
 JuliaManifolds has a few functions for working at this level.
 First, [`manifold_dimension`](@ref) returns the number `n` for a given manifold.
@@ -258,7 +259,11 @@ There are various operations that we may need for our computations.
 This tutorial provides a high-level overview of those operations and describes ways in which they are interconnected.
 It additionally serves as an introduction to concepts relevant to practical computations using JuliaManifolds.
 
+[^more-about-charts]: In JuliaManifolds we either have a finite number of charts (for example, spheres require only two) or one chart for each point on the manifold.
+
 [^chart-number-system]: Sometimes other number systems are considered for the codomain of charts, most notably complex numbers. This discussion is restricted to the real case because it's general enough for practical purposes. Complex atlases can be represented as real atlases with real and imaginary parts separated. Quaternionic manifolds are most easily expressed though fiber bundles. [Other generalizations](https://math.stackexchange.com/a/581087) often lead to spaces that are no longer manifolds.
+
+[^topological-conditions]: Specifically manifolds are required to be second-countable Hausdorff spaces, see [Lee:2012](@cite), page 3 for more details.
 
 [^tangent-space-equivalence]: These definitions are equivalent for finite-dimensional manifolds but not for all infinite-dimensional ones. You can see [kinematic tangent space](https://ncatlab.org/nlab/show/kinematic+tangent+space) for more details.
 
