@@ -3,5 +3,5 @@ using ManifoldsBase
 @testset "deprecated functions still working" begin
     x = [1.0, 2.0, 3.0]
     y = ValidationMPoint(x)
-    @test ManifoldsBase._array_value(y) == internal_value(y)
+    @test_logs (:warn,) ManifoldsBase._array_value(y) == internal_value(y)
 end
