@@ -11,11 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * a field `point` to `ValidationFibreVector` to store potentially store the point of the vector.
 * a field `store_base_point` to `ValidationManifold` to indicate whether for new fibre vectors the base point should be stored.
+* a keyword `ignore_contexts` to `ValidationManifold` to ignore certain contexts from validation, e.g. `:Input`, `:Output`, `:Point`, or `:Vector`.
+* a keyword `ignore_functions` to `ValidationFibreVector` to ignore certain contexts within a single function. This is provided as a dictionary with the key being the (allocating) function and the value is a context or vector of contexts.
 
 ### Changed
 
-* the internal function `_array_value` was renamed to `_value`,
-  since the cases where it is used also work for non-array poins/vectors
+* the internal function `_array_value` was renamed to `internal_value` and is now exported, since it can be also used on elements that store values different from arrays,
+e.g. an `ValidationMPoint` storing a subtype of an `ManifoldPoint`. ``_array_value` is hence deprecated.
 
 ## [0.15.22] 15/11/2024
 

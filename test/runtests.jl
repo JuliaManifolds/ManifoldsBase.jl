@@ -38,5 +38,6 @@ using ManifoldsBase
     include("metric.jl")
     include("fibers.jl")
     include("numerical_checks.jl")
+    include("deprecated.jl")
     include("test_aqua.jl")
 end

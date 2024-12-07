@@ -36,7 +36,9 @@ with types points, vectors, and covectors.
 
 * `manifold::M`: The manifold to be decorated
 * `mode::Symbol`: The mode to be used for error handling, either `:error` or `:warn`
-* `ignore::Dict{<:Union{Symbol, Function},Symbol}`: A dictionary of disabled checks
+* `ignore_contexts::AbstractVector{Symbol}`: store contexts to be ignored of validation.
+* `ignore_functions::Dict{<:Function,<:Union{Symbol,<:AbstractVector{Symbol}}`:
+  store contexts to be ignored with in a function or its mutating variant.
 
 # Constructors
 
@@ -213,15 +215,15 @@ const ValidationCoTVector = ValidationFibreVector{CotangentSpaceType}
 end
 
 """
-    _value(p)
+    internal_value(p)
 
 Return the internal value of an [`ValidationMPoint`](@ref), [`ValidationTVector`](@ref), or
 [`ValidationCoTVector`](@ref) if the value `p` is encapsulated as such.
 Return `p` if it is already an a (plain) value on a manifold.
 """
-_value(p::AbstractArray) = p
-_value(p::ValidationMPoint) = p.value
-_value(X::ValidationFibreVector) = X.value
+internal_value(p) = p
+internal_value(p::ValidationMPoint) = p.value
+internal_value(X::ValidationFibreVector) = X.value
 
 """
     _msg(str; error=:None, within::Union{Nothing,<:Function} = nothing,
@@ -303,7 +305,7 @@ decorated_manifold(M::ValidationManifold) = M.manifold
 function distance(M::ValidationManifold, p, q; kwargs...)
     is_point(M, p; within = distance, context = (:Input,), kwargs...)
     is_point(M, q; within = distance, context = (:Input,), kwargs...)
-    d = distance(M.manifold, _value(p), _value(q))
+    d = distance(M.manifold, internal_value(p), internal_value(q))
     (d < 0) && _msg(
         M,
         DomainError(d, "Distance is negative.");
@@ -315,7 +317,7 @@ end
 
 function embed(M::ValidationManifold, p; kwargs...)
     is_point(M, p; within = embed, context = (:Input,), kwargs...)
-    q = embed(M.manifold, _value(p), _value(X))
+    q = embed(M.manifold, internal_value(p))
     MEV = ValidationManifold(get_embedding(M.manifold), M)
     is_point(MEV, q; error = MEV.mode, within = embed, context = (:Output,), kwargs...)
     return ValidationMPoint(q)
@@ -323,22 +325,22 @@ end
 function embed(M::ValidationManifold, p, X; kwargs...)
     is_point(M, p; within = embed, context = (:Input,), kwargs...)
     is_vector(M, p, X; within = embed, context = (:Input,), kwargs...)
-    Y = embed(M.manifold, _value(p), _value(X))
+    Y = embed(M.manifold, internal_value(p), internal_value(X))
     MEV = ValidationManifold(get_embedding(M.manifold), M)
     is_vector(
         MEV,
-        embed(M.manifold, _value(p)),
+        embed(M.manifold, internal_value(p)),
         Y;
         within = embed,
         context = (:Output,),
         kwargs...,
     )
-    return ValidationMPoint(Y)
+    return ValidationTVector(Y)
 end
 
 function embed!(M::ValidationManifold, q, p; kwargs...)
     is_point(M, p; within = embed, context = (:Input,), kwargs...)
-    embed!(M.manifold, _value(p), _value(X))
+    embed!(M.manifold, internal_value(q), internal_value(p))
     MEV = ValidationManifold(get_embedding(M.manifold), M)
     is_point(MEV, q; error = MEV.mode, within = embed, context = (:Output,), kwargs...)
     return q
@@ -346,11 +348,11 @@ end
 function embed!(M::ValidationManifold, Y, p, X; kwargs...)
     is_point(M, p; within = embed, context = (:Input,), kwargs...)
     is_vector(M, p, X; within = embed, context = (:Input,), kwargs...)
-    embed!(M.manifold, _value(Y), _value(p), _value(X))
+    embed!(M.manifold, internal_value(Y), internal_value(p), internal_value(X))
     MEV = ValidationManifold(get_embedding(M.manifold), M)
     is_vector(
         MEV,
-        embed(M.manifold, _value(p)),
+        embed(M.manifold, internal_value(p)),
         Y;
         within = embed,
         context = (:Output,),
@@ -361,28 +363,28 @@ end
 
 function embed_project(M::ValidationManifold, p; kwargs...)
     is_point(M, p; within = embed, context = (:Input,), kwargs...)
-    q = embed_project(M.manifold, _value(p), _value(X))
+    q = embed_project(M.manifold, internal_value(p))
     is_point(M, q; within = embed, context = (:Output,), kwargs...)
     return ValidationMPoint(q)
 end
 function embed_project(M::ValidationManifold, p, X; kwargs...)
     is_point(M, p; within = embed, context = (:Input,), kwargs...)
     is_vector(M, p, X; within = embed, context = (:Input,), kwargs...)
-    Y = embed_project(M.manifold, _value(p), _value(X))
+    Y = embed_project(M.manifold, internal_value(p), internal_value(X))
     is_vector(M, p, Y; within = embed, context = (:Output,), kwargs...)
     return ValidationTVector(Y)
 end
 
 function embed_project!(M::ValidationManifold, q, p; kwargs...)
     is_point(M, p; within = embed, context = (:Input,), kwargs...)
-    embed_project!(M.manifold, _value(p), _value(X))
+    embed_project!(M.manifold, internal_value(q), internal_value(p))
     is_point(M, q; within = embed, context = (:Output,), kwargs...)
     return q
 end
 function embed_project!(M::ValidationManifold, Y, p, X; kwargs...)
     is_point(M, p; within = embed, context = (:Input,), kwargs...)
     is_vector(M, p, X; within = embed, context = (:Input,), kwargs...)
-    embed_project!(M.manifold, _value(Y), _value(p), _value(X))
+    embed_project!(M.manifold, internal_value(Y), internal_value(p), internal_value(X))
     is_vector(M, p, Y; within = embed, context = (:Output,), kwargs...)
     return Y
 end
@@ -390,7 +392,7 @@ end
 function exp(M::ValidationManifold, p, X; kwargs...)
     is_point(M, p; within = exp, context = (:Input,), kwargs...)
     is_vector(M, p, X; within = exp, context = (:Input,), kwargs...)
-    y = exp(M.manifold, _value(p), _value(X))
+    y = exp(M.manifold, internal_value(p), internal_value(X))
     is_point(M, y; within = exp, context = (:Output,), kwargs...)
     return ValidationMPoint(y)
 end
@@ -398,14 +400,14 @@ end
 function exp!(M::ValidationManifold, q, p, X; kwargs...)
     is_point(M, p; within = exp, context = (:Input,), kwargs...)
     is_vector(M, p, X; within = exp, context = (:Input,), kwargs...)
-    exp!(M.manifold, _value(q), _value(p), _value(X))
+    exp!(M.manifold, internal_value(q), internal_value(p), internal_value(X))
     is_point(M, q; within = exp, context = (:Output,), kwargs...)
     return q
 end
 
 function get_basis(M::ValidationManifold, p, B::AbstractBasis; kwargs...)
     is_point(M, p; within = get_basis, context = (:Input,), kwargs...)
-    Ξ = get_basis(M.manifold, _value(p), B)
+    Ξ = get_basis(M.manifold, internal_value(p), B)
     bvectors = get_vectors(M, p, Ξ)
     N = length(bvectors)
     if N != manifold_dimension(M.manifold)
@@ -510,7 +512,7 @@ end
 
 function get_coordinates!(M::ValidationManifold, c, p, X, B::AbstractBasis; kwargs...)
     is_vector(M, p, X; within = get_coordinates, context = (:Input,), kwargs...)
-    get_coordinates!(M.manifold, c, _value(p), _value(X), B)
+    get_coordinates!(M.manifold, c, internal_value(p), internal_value(X), B)
     return c
 end
 
@@ -526,7 +528,7 @@ function get_vector(M::ValidationManifold, p, c, B::AbstractBasis; kwargs...)
             context = (:Input,),
         )
     end
-    Y = get_vector(M.manifold, _value(p), _value(c), B)
+    Y = get_vector(M.manifold, internal_value(p), internal_value(c), B)
     is_vector(M, p, Y; within = get_vector, context = (:Output,), kwargs...)
     return Y
 end
@@ -543,7 +545,7 @@ function get_vector!(M::ValidationManifold, Y, p, c, B::AbstractBasis; kwargs...
             context = (:Input,),
         )
     end
-    get_vector!(M.manifold, _value(Y), _value(p), _value(c), B)
+    get_vector!(M.manifold, internal_value(Y), internal_value(p), internal_value(c), B)
     is_vector(M, p, Y; within = get_vector, context = (:Output,), kwargs...)
     return Y
 end
@@ -554,7 +556,7 @@ function injectivity_radius(M::ValidationManifold, method::AbstractRetractionMet
 end
 function injectivity_radius(M::ValidationManifold, p; kwargs...)
     is_point(M, p; within = injectivity_radius, context = (:Input,), kwargs...)
-    return injectivity_radius(M.manifold, _value(p))
+    return injectivity_radius(M.manifold, internal_value(p))
 end
 function injectivity_radius(
     M::ValidationManifold,
@@ -563,14 +565,14 @@ function injectivity_radius(
     kwargs...,
 )
     is_point(M, p; within = injectivity_radius, context = (:Input,), kwargs...)
-    return injectivity_radius(M.manifold, _value(p), method)
+    return injectivity_radius(M.manifold, internal_value(p), method)
 end
 
 function inner(M::ValidationManifold, p, X, Y; kwargs...)
     is_point(M, p; within = inner, context = (:Input,), kwargs...)
     is_vector(M, p, X; within = inner, context = (:Input,), kwargs...)
     is_vector(M, p, Y; within = inner, context = (:Input,), kwargs...)
-    return inner(M.manifold, _value(p), _value(X), _value(Y))
+    return inner(M.manifold, internal_value(p), internal_value(X), internal_value(Y))
 end
 
 """
@@ -595,7 +597,7 @@ function is_point(
     kwargs...,
 )
     !_vMc(M, within, (:Point, context...)) && return true
-    return is_point(M.manifold, _value(p); error = error, kwargs...)
+    return is_point(M.manifold, internal_value(p); error = error, kwargs...)
 end
 
 """
@@ -622,25 +624,38 @@ function is_vector(
     kwargs...,
 )
     !_vMc(M, within, (:Vector, context...)) && return true
-    return is_vector(M.manifold, _value(p), _value(X), cbp; error = error, kwargs...)
+    return is_vector(
+        M.manifold,
+        internal_value(p),
+        internal_value(X),
+        cbp;
+        error = error,
+        kwargs...,
+    )
 end
 
 function isapprox(M::ValidationManifold, p, q; kwargs...)
     is_point(M, p; within = isapprox, context = (:Input,), kwargs...)
     is_point(M, q; within = isapprox, context = (:Input,), kwargs...)
-    return isapprox(M.manifold, _value(p), _value(q); kwargs...)
+    return isapprox(M.manifold, internal_value(p), internal_value(q); kwargs...)
 end
 function isapprox(M::ValidationManifold, p, X, Y; kwargs...)
     is_point(M, p; within = isapprox, context = (:Input,), kwargs...)
     is_vector(M, p, X; within = isapprox, context = (:Input,), kwargs...)
     is_vector(M, p, Y; within = isapprox, context = (:Input,), kwargs...)
-    return isapprox(M.manifold, _value(p), _value(X), _value(Y); kwargs...)
+    return isapprox(
+        M.manifold,
+        internal_value(p),
+        internal_value(X),
+        internal_value(Y);
+        kwargs...,
+    )
 end
 
 function log(M::ValidationManifold, p, q; kwargs...)
     is_point(M, p; within = log, context = (:Input,), kwargs...)
     is_point(M, q; within = log, context = (:Input,), kwargs...)
-    X = log(M.manifold, _value(p), _value(q))
+    X = log(M.manifold, internal_value(p), internal_value(q))
     is_vector(M, p, X; within = log, context = (:Output,), kwargs...)
     return ValidationTVector(X)
 end
@@ -648,7 +663,7 @@ end
 function log!(M::ValidationManifold, X, p, q; kwargs...)
     is_point(M, p; within = log, context = (:Input,), kwargs...)
     is_point(M, q; within = log, context = (:Input,), kwargs...)
-    log!(M.manifold, _value(X), _value(p), _value(q))
+    log!(M.manifold, internal_value(X), internal_value(p), internal_value(q))
     is_vector(M, p, X; within = log, context = (:Output,), kwargs...)
     return X
 end
@@ -656,7 +671,7 @@ end
 function mid_point(M::ValidationManifold, p1, p2; kwargs...)
     is_point(M, p1; within = mid_point, context = (:Input,), kwargs...)
     is_point(M, p2; within = mid_point, context = (:Input,), kwargs...)
-    q = mid_point(M.manifold, _value(p1), _value(p2))
+    q = mid_point(M.manifold, internal_value(p1), internal_value(p2))
     is_point(M, q; within = mid_point, context = (:Output,), kwargs...)
     return q
 end
@@ -664,7 +679,7 @@ end
 function mid_point!(M::ValidationManifold, q, p1, p2; kwargs...)
     is_point(M, p1; within = mid_point, context = (:Input,), kwargs...)
     is_point(M, p2; within = mid_point, context = (:Input,), kwargs...)
-    mid_point!(M.manifold, _value(q), _value(p1), _value(p2))
+    mid_point!(M.manifold, internal_value(q), internal_value(p1), internal_value(p2))
     is_point(M, q; within = mid_point, context = (:Output,), kwargs...)
     return q
 end
@@ -672,7 +687,7 @@ end
 function norm(M::ValidationManifold, p, X; kwargs...)
     is_point(M, p; within = norm, context = (:Input,), kwargs...)
     is_vector(M, p, X; within = norm, context = (:Input,), kwargs...)
-    n = norm(M.manifold, _value(p), _value(X))
+    n = norm(M.manifold, internal_value(p), internal_value(X))
     (n < 0) &&
         _msg(M, DomainError(n, "Norm is negative."); within = norm, context = (:Output,))
     return n
@@ -683,7 +698,7 @@ number_eltype(::Type{ValidationFibreVector{TType,V,P}}) where {TType,V,P} = numb
 
 function project!(M::ValidationManifold, Y, p, X; kwargs...)
     is_point(M, p; within = project, context = (:Input,), kwargs...)
-    project!(M.manifold, _value(Y), _value(p), _value(X))
+    project!(M.manifold, internal_value(Y), internal_value(p), internal_value(X))
     is_vector(M, p, Y; within = project, context = (:Output,), kwargs...)
     return Y
 end
@@ -706,22 +721,45 @@ function riemann_tensor(M::ValidationManifold, p, X, Y, Z; kwargs...)
     for W in (X, Y, Z)
         is_vector(M, p, W; within = riemann_tensor, context = (:Input,), kwargs...)
     end
-    return riemann_tensor(M.manifold, _value(p), _value(X), _value(Y), _value(Z))
+    W = riemann_tensor(
+        M.manifold,
+        internal_value(p),
+        internal_value(X),
+        internal_value(Y),
+        internal_value(Z),
+    )
+    return ValidationTVector(W)
 end
 
-function riemann_tensor!(M::ValidationManifold, Xresult, p, X, Y, Z; kwargs...)
+function riemann_tensor!(M::ValidationManifold, W, p, X, Y, Z; kwargs...)
     is_point(M, p; within = riemann_tensor, context = (:Input,), kwargs...)
     for W in (X, Y, Z)
         is_vector(M, p, W; within = riemann_tensor, context = (:Input,), kwargs...)
     end
-    return riemann_tensor(
+    riemann_tensor!(
         M.manifold,
-        _value(Xresult),
-        _value(p),
-        _value(X),
-        _value(Y),
-        _value(Z),
+        internal_value(W),
+        internal_value(p),
+        internal_value(X),
+        internal_value(Y),
+        internal_value(Z),
     )
+    return W
+end
+
+function show(io::IO, M::ValidationManifold)
+    s = """
+    ValidationManifold of $(M.manifold)
+        * mode = :$(M.mode)
+        * store_base_point = $(M.store_base_point)
+    """
+    if length(M.ignore_contexts) > 0
+        s *= "    * ignore_context = $(M.ignore_contexts)\n"
+    end
+    if length(M.ignore_functions) > 0
+        s *= "    * ignore_functions = $(M.ignore_functions)"
+    end
+    return print(io, s)
 end
 
 function vector_transport_along(
@@ -733,7 +771,7 @@ function vector_transport_along(
     kwargs...,
 )
     is_vector(M, p, X; within = vector_transport_along, context = (:Input,), kwargs...)
-    Y = vector_transport_along(M.manifold, _value(p), _value(X), c, m)
+    Y = vector_transport_along(M.manifold, internal_value(p), internal_value(X), c, m)
     is_vector(
         M,
         c[end],
@@ -755,7 +793,14 @@ function vector_transport_along!(
     kwargs...,
 )
     is_vector(M, p, X; within = vector_transport_along, context = (:Input,), kwargs...)
-    vector_transport_along!(M.manifold, _value(Y), _value(p), _value(X), c, m)
+    vector_transport_along!(
+        M.manifold,
+        internal_value(Y),
+        internal_value(p),
+        internal_value(X),
+        c,
+        m,
+    )
     is_vector(
         M,
         c[end],
@@ -777,7 +822,13 @@ function vector_transport_to(
 )
     is_point(M, q; within = vector_transport_to, context = (:Input,), kwargs...)
     is_vector(M, p, X; within = vector_transport_to, context = (:Input,), kwargs...)
-    Y = vector_transport_to(M.manifold, _value(p), _value(X), _value(q), m)
+    Y = vector_transport_to(
+        M.manifold,
+        internal_value(p),
+        internal_value(X),
+        internal_value(q),
+        m,
+    )
     is_vector(M, q, Y; within = vector_transport_to, context = (:Output,), kwargs...)
     return Y
 end
@@ -792,21 +843,28 @@ function vector_transport_to!(
 )
     is_point(M, q; within = vector_transport_to, context = (:Input,), kwargs...)
     is_vector(M, p, X; within = vector_transport_to, context = (:Input,), kwargs...)
-    vector_transport_to!(M.manifold, _value(Y), _value(p), _value(X), _value(q), m)
+    vector_transport_to!(
+        M.manifold,
+        internal_value(Y),
+        internal_value(p),
+        internal_value(X),
+        internal_value(q),
+        m,
+    )
     is_vector(M, q, Y; within = vector_transport_to, context = (:Output,), kwargs...)
     return Y
 end
 
 function zero_vector(M::ValidationManifold, p; kwargs...)
     is_point(M, p; within = zero_vector, context = (:Input,), kwargs...)
-    w = zero_vector(M.manifold, _value(p))
+    w = zero_vector(M.manifold, internal_value(p))
     is_vector(M, p, w; within = zero_vector, context = (:Output,), kwargs...)
     return w
 end
 
 function zero_vector!(M::ValidationManifold, X, p; kwargs...)
     is_point(M, p; within = zero_vector, context = (:Input,), kwargs...)
-    zero_vector!(M.manifold, _value(X), _value(p); kwargs...)
+    zero_vector!(M.manifold, internal_value(X), internal_value(p); kwargs...)
     is_vector(M, p, X; within = zero_vector, context = (:Output,), kwargs...)
     return X
 end

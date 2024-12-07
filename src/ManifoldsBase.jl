@@ -1171,6 +1171,7 @@ include("DefaultManifold.jl")
 include("ProductManifold.jl")
 include("PowerManifold.jl")
 
+include("deprecated.jl")
 #
 #
 # Init
@@ -1368,6 +1369,7 @@ export ×,
     hat!,
     injectivity_radius,
     inner,
+    internal_value,
     inverse_retract,
     inverse_retract!,
     isapprox,

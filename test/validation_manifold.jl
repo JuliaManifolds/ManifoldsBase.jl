@@ -1,24 +1,8 @@
 using ManifoldsBase, LinearAlgebra, Random, Test
 
-struct CustomValidationManifoldRetraction <: ManifoldsBase.AbstractRetractionMethod end
-
-function ManifoldsBase.injectivity_radius(
-    ::ManifoldsBase.DefaultManifold,
-    ::CustomValidationManifoldRetraction,
-)
-    return 10.0
-end
-function ManifoldsBase.injectivity_radius(
-    ::ManifoldsBase.DefaultManifold,
-    p,
-    ::CustomValidationManifoldRetraction,
-)
-    return 11.0
-end
-
-struct DummyManifold <: ManifoldsBase.AbstractManifold{ℝ} end
-ManifoldsBase.distance(::DummyManifold, p, q) = -1.0
-ManifoldsBase.norm(::DummyManifold, p, v) = -1.0
+s = joinpath(@__DIR__, "ManifoldsBaseTestSuite.jl")
+!(s in LOAD_PATH) && (push!(LOAD_PATH, s))
+using ManifoldsBaseTestSuite
 
 @testset "Validation manifold" begin
     M = ManifoldsBase.DefaultManifold(3)
@@ -95,8 +79,8 @@ ManifoldsBase.norm(::DummyManifold, p, v) = -1.0
                 copyto!(A, q, ValidationMPoint(x), p) # generate base point “on the fly”
             end
             @test isapprox(A, q, p)
-            @test ManifoldsBase._value(p) == x
-            @test ManifoldsBase._value(x) == x
+            @test ManifoldsBase.internal_value(p) == x
+            @test ManifoldsBase.internal_value(x) == x
             @test copy(p) == p
             q = allocate(p)
             copyto!(q, p)
@@ -171,8 +155,15 @@ ManifoldsBase.norm(::DummyManifold, p, v) = -1.0
         @test injectivity_radius(A, x) == Inf
         @test injectivity_radius(A, ManifoldsBase.ExponentialRetraction()) == Inf
         @test injectivity_radius(A, x, ManifoldsBase.ExponentialRetraction()) == Inf
-        @test injectivity_radius(A, CustomValidationManifoldRetraction()) == 10
-        @test injectivity_radius(A, x, CustomValidationManifoldRetraction()) == 11
+        @test injectivity_radius(
+            A,
+            ManifoldsBaseTestSuite.CustomValidationManifoldRetraction(),
+        ) == 10
+        @test injectivity_radius(
+            A,
+            x,
+            ManifoldsBaseTestSuite.CustomValidationManifoldRetraction(),
+        ) == 11
     end
     @testset "ValidationManifold basis" begin
         b = [Matrix(I, 3, 3)[:, i] for i in 1:3]
@@ -223,19 +214,20 @@ ManifoldsBase.norm(::DummyManifold, p, v) = -1.0
         end
     end
     @testset "Output distance an norm – on different message types" begin
-        Ad = ValidationManifold(DummyManifold())
+        Dm = ManifoldsBaseTestSuite.ValidationDummyManifold()
+        Ad = ValidationManifold(Dm)
         @test_throws DomainError distance(Ad, [], [])
         @test_throws DomainError norm(Ad, [], [])
-        AdI = ValidationManifold(DummyManifold(); error = :info)
+        AdI = ValidationManifold(Dm; error = :info)
         @test_logs (:info,) distance(AdI, [], [])
         @test_logs (:info,) norm(AdI, [], [])
-        AdW = ValidationManifold(DummyManifold(); error = :warn)
+        AdW = ValidationManifold(Dm; error = :warn)
         @test_logs (:warn,) distance(AdW, [], [])
         @test_logs (:warn,) norm(AdW, [], [])
-        AdO = ValidationManifold(DummyManifold(); ignore_contexts = [:Output])
+        AdO = ValidationManifold(Dm; ignore_contexts = [:Output])
         @test distance(AdO, [], []) == -1.0
         @test norm(AdO, [], []) == -1.0
-        AdN = ValidationManifold(DummyManifold(); error = :None)
+        AdN = ValidationManifold(Dm; error = :None)
         @test distance(AdN, [], []) == -1.0
         @test norm(AdN, [], []) == -1.0
     end
@@ -246,7 +238,54 @@ ManifoldsBase.norm(::DummyManifold, p, v) = -1.0
         X = rand(A; vector_at = p)
         @test is_vector(A, p, X)
     end
+    @testset "embed and project" begin
+        Dm = ManifoldsBaseTestSuite.ValidationDummyManifold()
+        Ad = ValidationManifold(Dm)
+        p = [0.0, 0.0, 1.0]
+        X = [1.0, 0.0, 0.0]
+        q = embed(Ad, p)
+        @test q isa ValidationMPoint
+        q2 = copy(Ad, q)
+        embed!(Ad, q2, p)
+        @test q2 == q
+        Y = embed(Ad, p, X)
+        @test Y isa ValidationTVector
+        Y2 = copy(Ad, q, Y)
+        embed!(Ad, Y2, p, X)
+        @test Y2 == Y
+        #
+        q3 = embed_project(Ad, p)
+        @test q3 isa ValidationMPoint
+        q4 = copy(Ad, q3)
+        embed_project!(Ad, q4, p)
+        @test q3 == q4
+        Y3 = embed_project(Ad, p, X)
+        @test Y3 isa ValidationTVector
+        Y4 = copy(Ad, p, Y3)
+        embed_project!(Ad, Y4, p, X)
+        @test Y3 == Y4
+    end
     @testset "riemannian_tensor" begin
-
+        r = riemann_tensor(M, x, x, y, z)
+        r2 = riemann_tensor(A, x, x, y, z)
+        @test r2 isa ValidationTVector
+        r3 = copy(A, r2)
+        r3 = riemann_tensor!(A, r3, x, x, y, z)
+        @test r2 == r3
+    end
+    @testset "_msg defaults w/strings" begin
+        @test_logs (:warn, "msg") ManifoldsBase._msg(A, "msg"; error = :warn)
+        @test_logs (:info, "msg") ManifoldsBase._msg(A, "msg"; error = :info)
+    end
+    @testset "show" begin
+        As = ValidationManifold(
+            M;
+            ignore_contexts = [:Point],
+            ignore_functions = Dict(exp => :All),
+        )
+        sAs = repr(As)
+        @test contains(sAs, "ValidationManifold")
+        @test contains(sAs, repr(Dict(exp => :All)))
+        @test contains(sAs, ":Point")
     end
 end
