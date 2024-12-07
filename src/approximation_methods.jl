@@ -8,21 +8,21 @@ abstract type AbstractApproximationMethod end
 @doc raw"""
     GradientDescentEstimation <: AbstractApproximationMethod
 
-Method for estimation using [📖 gradient descent](https://en.wikipedia.org/wiki/Gradient_descent).
+Method for estimation using [gradient descent](https://en.wikipedia.org/wiki/Gradient_descent).
 """
 struct GradientDescentEstimation <: AbstractApproximationMethod end
 
 @doc raw"""
     CyclicProximalPointEstimation <: AbstractApproximationMethod
 
-Method for estimation using the cyclic proximal point technique, which is based on [📖 proximal maps](https://en.wikipedia.org/wiki/Proximal_operator).
+Method for estimation using the cyclic proximal point technique, which is based on [proximal maps](https://en.wikipedia.org/wiki/Proximal_operator).
 """
 struct CyclicProximalPointEstimation <: AbstractApproximationMethod end
 
 @doc raw"""
     EfficientEstimator <: AbstractApproximationMethod
 
-Method for estimation in the best possible sense, see [📖 Efficiency (Statictsics)](https://en.wikipedia.org/wiki/Efficiency_(statistics)) for more details.
+Method for estimation in the best possible sense, see [Efficiency (Statictsics)](https://en.wikipedia.org/wiki/Efficiency_(statistics)) for more details.
 This can for example be used when computing the usual mean on an Euclidean space, which is the best estimator.
 """
 struct EfficientEstimator <: AbstractApproximationMethod end
@@ -42,7 +42,7 @@ end
     WeiszfeldEstimation <: AbstractApproximationMethod
 
 Method for estimation using the Weiszfeld algorithm, compare for example the computation of the
-[📖 Geometric median](https://en.wikipedia.org/wiki/Geometric_median).
+[Geometric median](https://en.wikipedia.org/wiki/Geometric_median).
 """
 struct WeiszfeldEstimation <: AbstractApproximationMethod end
 

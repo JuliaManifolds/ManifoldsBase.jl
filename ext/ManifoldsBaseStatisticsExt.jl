@@ -1,16 +1,8 @@
 module ManifoldsBaseStatisticsExt
 
-if isdefined(Base, :get_extension)
-    using Statistics
-    using ManifoldsBase
-    import ManifoldsBase: find_best_slope_window
-else
-    # imports need to be relative for Requires.jl-based workflows:
-    # https://github.com/JuliaArrays/ArrayInterface.jl/pull/387
-    using ..Statistics
-    using ..ManifoldsBase
-    import ..ManifoldsBase: find_best_slope_window
-end
+using Statistics
+using ManifoldsBase
+import ManifoldsBase: find_best_slope_window
 
 function ManifoldsBase.find_best_slope_window(
     X,
