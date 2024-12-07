@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * the internal function `_array_value` was renamed to `internal_value` and is now exported, since it can be also used on elements that store values different from arrays,
 e.g. an `ValidationMPoint` storing a subtype of an `ManifoldPoint`. ``_array_value` is hence deprecated.
+* Minimum Julia version is now 1.10 (the LTS which replaced 1.6)
 
 ## [0.15.22] 15/11/2024
 
