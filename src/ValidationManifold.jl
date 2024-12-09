@@ -522,7 +522,7 @@ function get_vector(M::ValidationManifold, p, c, B::AbstractBasis; kwargs...)
             ArgumentError(
                 "Incorrect size of coefficient vector X ($(size(c))), expected $(manifold_dimension(M)).",
             );
-            within = get_basis,
+            within = get_vector,
             context = (:Input,),
         )
     end
@@ -539,7 +539,7 @@ function get_vector!(M::ValidationManifold, Y, p, c, B::AbstractBasis; kwargs...
             ArgumentError(
                 "Incorrect size of coefficient vector X ($(size(c))), expected $(manifold_dimension(M)).",
             );
-            within = get_basis,
+            within = get_vector,
             context = (:Input,),
         )
     end
