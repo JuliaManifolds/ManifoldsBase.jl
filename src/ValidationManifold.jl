@@ -327,15 +327,9 @@ function embed(M::ValidationManifold, p, X; kwargs...)
     is_vector(M, p, X; within = embed, context = (:Input,), kwargs...)
     Y = embed(M.manifold, internal_value(p), internal_value(X))
     MEV = ValidationManifold(get_embedding(M.manifold), M)
-    is_vector(
-        MEV,
-        embed(M.manifold, internal_value(p)),
-        Y;
-        within = embed,
-        context = (:Output,),
-        kwargs...,
-    )
-    return ValidationTVector(Y)
+    q = embed(M.manifold, internal_value(p))
+    is_vector(MEV, q, Y; within = embed, context = (:Output,), kwargs...)
+    return ValidationTVector(Y, M.store_base_point ? q : nothing)
 end
 
 function embed!(M::ValidationManifold, q, p; kwargs...)
@@ -372,7 +366,7 @@ function embed_project(M::ValidationManifold, p, X; kwargs...)
     is_vector(M, p, X; within = embed, context = (:Input,), kwargs...)
     Y = embed_project(M.manifold, internal_value(p), internal_value(X))
     is_vector(M, p, Y; within = embed, context = (:Output,), kwargs...)
-    return ValidationTVector(Y)
+    return ValidationTVector(Y,  M.store_base_point ? copy(M, p) : nothing)
 end
 
 function embed_project!(M::ValidationManifold, q, p; kwargs...)
@@ -657,7 +651,7 @@ function log(M::ValidationManifold, p, q; kwargs...)
     is_point(M, q; within = log, context = (:Input,), kwargs...)
     X = log(M.manifold, internal_value(p), internal_value(q))
     is_vector(M, p, X; within = log, context = (:Output,), kwargs...)
-    return ValidationTVector(X)
+    return ValidationTVector(X, M.store_base_point ? copy(M, p) : nothing)
 end
 
 function log!(M::ValidationManifold, X, p, q; kwargs...)
@@ -729,7 +723,7 @@ function riemann_tensor(M::ValidationManifold, p, X, Y, Z; kwargs...)
         internal_value(Z),
     )
     is_vector(M, p, W; within = riemann_tensor, context = (:Output,), kwargs...)
-    return ValidationTVector(W)
+    return ValidationTVector(W, M.store_base_point ? copy(M, p) : nothing)
 end
 
 function riemann_tensor!(M::ValidationManifold, W, p, X, Y, Z; kwargs...)
