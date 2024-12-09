@@ -225,6 +225,14 @@ internal_value(p) = p
 internal_value(p::ValidationMPoint) = p.value
 internal_value(X::ValidationFibreVector) = X.value
 
+_update_basepoint!(::ValidationManifold, X, p) = X
+_update_basepoint!(::ValidationManifold, X::ValidationTVector{P,Nothing}, p) where {P} = X
+function _update_basepoint!(M::ValidationManifold, X::ValidationTVector{P,V}, p) where {P,V}
+    copyto!(M.manifold, X.base_point, p)
+    return X
+end
+
+
 """
     _msg(str; error=:None, within::Union{Nothing,<:Function} = nothing,
     context::Union{NTuple{N,Symbol} where N} = NTuple{0,Symbol}())
@@ -344,14 +352,9 @@ function embed!(M::ValidationManifold, Y, p, X; kwargs...)
     is_vector(M, p, X; within = embed, context = (:Input,), kwargs...)
     embed!(M.manifold, internal_value(Y), internal_value(p), internal_value(X))
     MEV = ValidationManifold(get_embedding(M.manifold), M)
-    is_vector(
-        MEV,
-        embed(M.manifold, internal_value(p)),
-        Y;
-        within = embed,
-        context = (:Output,),
-        kwargs...,
-    )
+    q = embed(M.manifold, internal_value(p))
+    _update_basepoint!(M, Y, q)
+    is_vector(MEV, q, Y; within = embed, context = (:Output,), kwargs...)
     return Y
 end
 
@@ -366,7 +369,7 @@ function embed_project(M::ValidationManifold, p, X; kwargs...)
     is_vector(M, p, X; within = embed, context = (:Input,), kwargs...)
     Y = embed_project(M.manifold, internal_value(p), internal_value(X))
     is_vector(M, p, Y; within = embed, context = (:Output,), kwargs...)
-    return ValidationTVector(Y,  M.store_base_point ? copy(M, p) : nothing)
+    return ValidationTVector(Y, M.store_base_point ? copy(M, p) : nothing)
 end
 
 function embed_project!(M::ValidationManifold, q, p; kwargs...)
@@ -379,6 +382,7 @@ function embed_project!(M::ValidationManifold, Y, p, X; kwargs...)
     is_point(M, p; within = embed, context = (:Input,), kwargs...)
     is_vector(M, p, X; within = embed, context = (:Input,), kwargs...)
     embed_project!(M.manifold, internal_value(Y), internal_value(p), internal_value(X))
+    _update_basepoint!(M, Y, p)
     is_vector(M, p, Y; within = embed, context = (:Output,), kwargs...)
     return Y
 end
@@ -540,6 +544,7 @@ function get_vector!(M::ValidationManifold, Y, p, c, B::AbstractBasis; kwargs...
         )
     end
     get_vector!(M.manifold, internal_value(Y), internal_value(p), internal_value(c), B)
+    _update_basepoint!(M, Y, p)
     is_vector(M, p, Y; within = get_vector, context = (:Output,), kwargs...)
     return Y
 end
@@ -658,6 +663,7 @@ function log!(M::ValidationManifold, X, p, q; kwargs...)
     is_point(M, p; within = log, context = (:Input,), kwargs...)
     is_point(M, q; within = log, context = (:Input,), kwargs...)
     log!(M.manifold, internal_value(X), internal_value(p), internal_value(q))
+    _update_basepoint!(M, X, p)
     is_vector(M, p, X; within = log, context = (:Output,), kwargs...)
     return X
 end
@@ -693,6 +699,7 @@ number_eltype(::Type{ValidationFibreVector{TType,V,P}}) where {TType,V,P} = numb
 function project!(M::ValidationManifold, Y, p, X; kwargs...)
     is_point(M, p; within = project, context = (:Input,), kwargs...)
     project!(M.manifold, internal_value(Y), internal_value(p), internal_value(X))
+    _update_basepoint!(M, Y, p)
     is_vector(M, p, Y; within = project, context = (:Output,), kwargs...)
     return Y
 end
@@ -739,6 +746,7 @@ function riemann_tensor!(M::ValidationManifold, W, p, X, Y, Z; kwargs...)
         internal_value(Y),
         internal_value(Z),
     )
+    _update_basepoint!(M, W, p)
     is_vector(M, p, W; within = riemann_tensor, context = (:Output,), kwargs...)
     return W
 end
@@ -797,6 +805,7 @@ function vector_transport_along!(
         c,
         m,
     )
+    _update_basepoint!(M, Y, c[end])
     is_vector(
         M,
         c[end],
@@ -847,6 +856,7 @@ function vector_transport_to!(
         internal_value(q),
         m,
     )
+    _update_basepoint!(M, Y, q)
     is_vector(M, q, Y; within = vector_transport_to, context = (:Output,), kwargs...)
     return Y
 end
@@ -861,6 +871,7 @@ end
 function zero_vector!(M::ValidationManifold, X, p; kwargs...)
     is_point(M, p; within = zero_vector, context = (:Input,), kwargs...)
     zero_vector!(M.manifold, internal_value(X), internal_value(p); kwargs...)
+    _update_basepoint!(M, X, p)
     is_vector(M, p, X; within = zero_vector, context = (:Output,), kwargs...)
     return X
 end
