@@ -728,6 +728,7 @@ function riemann_tensor(M::ValidationManifold, p, X, Y, Z; kwargs...)
         internal_value(Y),
         internal_value(Z),
     )
+    is_vector(M, p, W; within = riemann_tensor, context = (:Output,), kwargs...)
     return ValidationTVector(W)
 end
 
@@ -744,6 +745,7 @@ function riemann_tensor!(M::ValidationManifold, W, p, X, Y, Z; kwargs...)
         internal_value(Y),
         internal_value(Z),
     )
+    is_vector(M, p, W; within = riemann_tensor, context = (:Output,), kwargs...)
     return W
 end
 
