@@ -228,7 +228,7 @@ internal_value(X::ValidationFibreVector) = X.value
 _update_basepoint!(::ValidationManifold, X, p) = X
 _update_basepoint!(::ValidationManifold, X::ValidationTVector{P,Nothing}, p) where {P} = X
 function _update_basepoint!(M::ValidationManifold, X::ValidationTVector{P,V}, p) where {P,V}
-    copyto!(M.manifold, X.base_point, p)
+    copyto!(M.manifold, X.point, p)
     return X
 end
 

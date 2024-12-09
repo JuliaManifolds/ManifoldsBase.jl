@@ -277,6 +277,11 @@ using ManifoldsBaseTestSuite
         @test_logs (:warn, "msg") ManifoldsBase._msg(A, "msg"; error = :warn)
         @test_logs (:info, "msg") ManifoldsBase._msg(A, "msg"; error = :info)
     end
+    @testset "_update_basepoint" begin
+        v = ValidationTVector([1.0, 0.0, 0.0], [1.0, 0.0, 0.0])
+        ManifoldsBase._update_basepoint!(A, v, [0.0, 0.0, 1.0])
+        @test v.point == [0.0, 0.0, 1.0]
+    end
     @testset "show" begin
         As = ValidationManifold(
             M;
