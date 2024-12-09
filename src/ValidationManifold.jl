@@ -98,8 +98,8 @@ function ValidationManifold(M::AbstractManifold, V::ValidationManifold; kwargs..
 end
 
 """
-_vMc(M::ValidationManifold, f::Function, context::Symbol)
-_vMc(M::ValidationManifold, f::Function, context::NTuple{N,Symbol}) where {N}
+    _vMc(M::ValidationManifold, f::Function, context::Symbol)
+    _vMc(M::ValidationManifold, f::Function, context::NTuple{N,Symbol}) where {N}
 
 Return whether a check should be performed within `f` and the `context`(`s`) provided.
 
@@ -578,11 +578,11 @@ end
 """
     is_point(M::ValidationManifold, p; kwargs...)
 
-perform [`is_point`](@ref) on a [`ValidationManifold`](@ref),
+Perform [`is_point`](@ref) on a [`ValidationManifold`](@ref),
 where two additional keywords can be used
 
 * `within=nothing` to specify a function from within which this call was issued
-* `context::NTuple{N,Symbol}=NTuple{0,Symbol}()` to specify one or more contexts, this
+* `context::NTuple{N,Symbol} where N=()` to specify one or more contexts, this
   call was issued in. The context `:Point` is added before checking whether the test
   should be performed
 
@@ -591,9 +591,9 @@ all other keywords are passed on.
 function is_point(
     M::ValidationManifold,
     p;
-    error = M.mode,
-    within::Union{Nothing,<:Function} = nothing,
-    context::Union{NTuple{N,Symbol} where N} = NTuple{0,Symbol}(),
+    error::Symbol = M.mode,
+    within::Union{Nothing,Function} = nothing,
+    context::NTuple{N,Symbol} where {N} = (),
     kwargs...,
 )
     !_vMc(M, within, (:Point, context...)) && return true
@@ -607,7 +607,7 @@ perform [`is_vector`](@ref) on a [`ValidationManifold`](@ref),
 where two additional keywords can be used
 
 * `within=nothing` to specify a function from within which this call was issued
-* `context::NTuple{N,Symbol}=NTuple{0,Symbol}()` to specify one or more contexts, this
+* `context::NTuple{N,Symbol} where N=()` to specify one or more contexts, this
   call was issued in. The context `:Point` is added before checking whether the test
   should be performed
 
@@ -618,9 +618,9 @@ function is_vector(
     p,
     X,
     cbp::Bool = true;
-    error = M.mode,
-    within::Union{Nothing,<:Function} = nothing,
-    context::Union{NTuple{N,Symbol} where N} = NTuple{0,Symbol}(),
+    error::Symbol = M.mode,
+    within::Union{Nothing,Function} = nothing,
+    context::NTuple{N,Symbol} where {N} = (),
     kwargs...,
 )
     !_vMc(M, within, (:Vector, context...)) && return true

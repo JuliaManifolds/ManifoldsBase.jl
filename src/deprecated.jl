@@ -1,1 +1,1 @@
-@deprecate _array_value(x) internal_value(x);
+@deprecate array_value(x) internal_value(x);
