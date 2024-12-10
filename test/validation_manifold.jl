@@ -1,26 +1,13 @@
-using ManifoldsBase
-using LinearAlgebra
-using Test
+using ManifoldsBase, LinearAlgebra, Random, Test
 
-struct CustomValidationManifoldRetraction <: ManifoldsBase.AbstractRetractionMethod end
-
-function ManifoldsBase.injectivity_radius(
-    ::ManifoldsBase.DefaultManifold,
-    ::CustomValidationManifoldRetraction,
-)
-    return 10.0
-end
-function ManifoldsBase.injectivity_radius(
-    ::ManifoldsBase.DefaultManifold,
-    p,
-    ::CustomValidationManifoldRetraction,
-)
-    return 11.0
-end
+s = joinpath(@__DIR__, "ManifoldsBaseTestSuite.jl")
+!(s in LOAD_PATH) && (push!(LOAD_PATH, s))
+using ManifoldsBaseTestSuite
 
 @testset "Validation manifold" begin
     M = ManifoldsBase.DefaultManifold(3)
     A = ValidationManifold(M)
+    @test A == ValidationManifold(M, A) # A equals the VM with same defaults
     x = [1.0, 0.0, 0.0]
     y = 1 / sqrt(2) * [1.0, 1.0, 0.0]
     z = [0.0, 1.0, 0.0]
@@ -40,10 +27,26 @@ end
         @test_throws DomainError is_point(A, [1, 2, 3, 4]; error = :error)
         @test is_vector(A, x, v; error = :error)
         @test_throws DomainError is_vector(A, x, [1, 2, 3, 4]; error = :error)
+        # Test that we can ignore point contexts
+        A2a = ValidationManifold(M; ignore_contexts = [:Point])
+        @test is_point(A2a, [1, 2, 3, 4])
+        @test_throws DomainError !is_vector(A2a, x, [1, 2, 3, 4])
+        A2b = ValidationManifold(M; ignore_contexts = [:Vector])
+        @test_throws DomainError !is_point(A2b, [1, 2, 3, 4])
+        @test is_vector(A2b, x, [1, 2, 3, 4])
+        A3a = ValidationManifold(M; ignore_functions = Dict(exp => :All))
+        @test is_point(A3a, [1, 2, 3, 4]; within = exp)
+        @test_throws DomainError is_point(A3a, [1, 2, 3, 4]; within = log)
+        A3b = ValidationManifold(M; ignore_functions = Dict(exp => [:Point, :Vector]))
+        @test is_point(A3b, [1, 2, 3, 4]; within = exp)
+        @test_throws DomainError is_point(A3b, [1, 2, 3, 4]; within = log)
+        @test is_vector(A3b, x, [1, 2, 3, 4]; within = exp)
+        @test_throws DomainError is_vector(A3b, x, [1, 2, 3, 4]; within = log)
     end
     @testset "Types and Conversion" begin
         @test convert(typeof(M), A) == M
-        @test convert(typeof(A), M) == A
+        # equality does not work, since we have mutable fields, but the type agrees
+        @test typeof(convert(typeof(A), M)) == typeof(A)
         @test base_manifold(A) == M
         @test base_manifold(base_manifold(A)) == base_manifold(A)
         @test ManifoldsBase.representation_size(A) == ManifoldsBase.representation_size(M)
@@ -58,7 +61,11 @@ end
             @test number_eltype(p) == eltype(x)
             @test typeof(allocate(p)) == typeof(p)
             @test typeof(allocate(p, eltype(x))) == typeof(p)
-            @test typeof(allocate(p, eltype(x), (3, 1))) == T{Matrix{Float64}}
+            if T === ValidationMPoint
+                @test typeof(allocate(p, eltype(x), (3, 1))) == T{Matrix{Float64}}
+            else
+                @test typeof(allocate(p, eltype(x), (3, 1))) == T{Matrix{Float64},Nothing}
+            end
             @test allocate(p) isa T
             @test allocate(p, Float32) isa T
             @test number_eltype(allocate(p, Float32)) == Float32
@@ -72,8 +79,8 @@ end
                 copyto!(A, q, ValidationMPoint(x), p) # generate base point “on the fly”
             end
             @test isapprox(A, q, p)
-            @test ManifoldsBase.array_value(p) == x
-            @test ManifoldsBase.array_value(x) == x
+            @test ManifoldsBase.internal_value(p) == x
+            @test ManifoldsBase.internal_value(x) == x
             @test copy(p) == p
             q = allocate(p)
             copyto!(q, p)
@@ -148,10 +155,16 @@ end
         @test injectivity_radius(A, x) == Inf
         @test injectivity_radius(A, ManifoldsBase.ExponentialRetraction()) == Inf
         @test injectivity_radius(A, x, ManifoldsBase.ExponentialRetraction()) == Inf
-        @test injectivity_radius(A, CustomValidationManifoldRetraction()) == 10
-        @test injectivity_radius(A, x, CustomValidationManifoldRetraction()) == 11
+        @test injectivity_radius(
+            A,
+            ManifoldsBaseTestSuite.CustomValidationManifoldRetraction(),
+        ) == 10
+        @test injectivity_radius(
+            A,
+            x,
+            ManifoldsBaseTestSuite.CustomValidationManifoldRetraction(),
+        ) == 11
     end
-
     @testset "ValidationManifold basis" begin
         b = [Matrix(I, 3, 3)[:, i] for i in 1:3]
         for BT in (DefaultBasis, DefaultOrthonormalBasis, DefaultOrthogonalBasis)
@@ -160,9 +173,9 @@ end
                 @test b == get_vectors(M, x, get_basis(A, x, cb))
                 v = similar(x)
                 v2 = similar(x)
-                @test_throws ErrorException get_vector(A, x, [1.0], cb)
+                @test_throws ArgumentError get_vector(A, x, [1.0], cb)
                 @test_throws DomainError get_vector(A, [1.0], [1.0, 0.0, 0.0], cb)
-                @test_throws ErrorException get_vector!(A, v, x, [], cb)
+                @test_throws ArgumentError get_vector!(A, v, x, [], cb)
                 @test_throws DomainError get_vector!(A, v, [1.0], [1.0, 0.0, 0.0], cb)
                 @test_throws DomainError get_coordinates(A, x, [1.0], cb)
                 @test_throws DomainError get_coordinates!(A, v, x, [], cb)
@@ -199,5 +212,85 @@ end
                 end
             end
         end
+    end
+    @testset "Output distance an norm – on different message types" begin
+        Dm = ManifoldsBaseTestSuite.ValidationDummyManifold()
+        Ad = ValidationManifold(Dm)
+        @test_throws DomainError distance(Ad, [], [])
+        @test_throws DomainError norm(Ad, [], [])
+        AdI = ValidationManifold(Dm; error = :info)
+        @test_logs (:info,) distance(AdI, [], [])
+        @test_logs (:info,) norm(AdI, [], [])
+        AdW = ValidationManifold(Dm; error = :warn)
+        @test_logs (:warn,) distance(AdW, [], [])
+        @test_logs (:warn,) norm(AdW, [], [])
+        AdO = ValidationManifold(Dm; ignore_contexts = [:Output])
+        @test distance(AdO, [], []) == -1.0
+        @test norm(AdO, [], []) == -1.0
+        AdN = ValidationManifold(Dm; error = :None)
+        @test distance(AdN, [], []) == -1.0
+        @test norm(AdN, [], []) == -1.0
+    end
+    @testset "rand" begin
+        Random.seed!(42)
+        p = rand(A)
+        @test is_point(A, p)
+        X = rand(A; vector_at = p)
+        @test is_vector(A, p, X)
+    end
+    @testset "embed and project" begin
+        Dm = ManifoldsBaseTestSuite.ValidationDummyManifold()
+        Ad = ValidationManifold(Dm)
+        p = [0.0, 0.0, 1.0]
+        X = [1.0, 0.0, 0.0]
+        q = embed(Ad, p)
+        @test q isa ValidationMPoint
+        q2 = copy(Ad, q)
+        embed!(Ad, q2, p)
+        @test q2 == q
+        Y = embed(Ad, p, X)
+        @test Y isa ValidationTVector
+        Y2 = copy(Ad, q, Y)
+        embed!(Ad, Y2, p, X)
+        @test Y2 == Y
+        #
+        q3 = embed_project(Ad, p)
+        @test q3 isa ValidationMPoint
+        q4 = copy(Ad, q3)
+        embed_project!(Ad, q4, p)
+        @test q3 == q4
+        Y3 = embed_project(Ad, p, X)
+        @test Y3 isa ValidationTVector
+        Y4 = copy(Ad, p, Y3)
+        embed_project!(Ad, Y4, p, X)
+        @test Y3 == Y4
+    end
+    @testset "riemannian_tensor" begin
+        r = riemann_tensor(M, x, x, y, z)
+        r2 = riemann_tensor(A, x, x, y, z)
+        @test r2 isa ValidationTVector
+        r3 = copy(A, r2)
+        r3 = riemann_tensor!(A, r3, x, x, y, z)
+        @test r2 == r3
+    end
+    @testset "_msg defaults w/strings" begin
+        @test_logs (:warn, "msg") ManifoldsBase._msg(A, "msg"; error = :warn)
+        @test_logs (:info, "msg") ManifoldsBase._msg(A, "msg"; error = :info)
+    end
+    @testset "_update_basepoint" begin
+        v = ValidationTVector([1.0, 0.0, 0.0], [1.0, 0.0, 0.0])
+        ManifoldsBase._update_basepoint!(A, v, [0.0, 0.0, 1.0])
+        @test v.point == [0.0, 0.0, 1.0]
+    end
+    @testset "show" begin
+        As = ValidationManifold(
+            M;
+            ignore_contexts = [:Point],
+            ignore_functions = Dict(exp => :All),
+        )
+        sAs = repr(As)
+        @test contains(sAs, "ValidationManifold")
+        @test contains(sAs, repr(Dict(exp => :All)))
+        @test contains(sAs, ":Point")
     end
 end
