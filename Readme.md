@@ -8,7 +8,7 @@
 [![](https://img.shields.io/badge/docs-stable-blue.svg)](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/)
 [![](https://img.shields.io/badge/docs-dev-blue.svg)](https://juliamanifolds.github.io/ManifoldsBase.jl/dev/)
 [![CI](https://github.com/JuliaManifolds/ManifoldsBase.jl/workflows/CI/badge.svg)](https://github.com/JuliaManifolds/ManifoldsBase.jl/actions?query=workflow%3ACI+branch%3Amaster)
-[![codecov.io](http://codecov.io/github/JuliaManifolds/ManifoldsBase.jl/coverage.svg?branch=master)](https://codecov.io/gh/JuliaManifolds/ManifoldsBase.jl/)
+[![codecov](https://codecov.io/gh/JuliaManifolds/ManifoldsBase.jl/graph/badge.svg?token=bQsBUU9knE)](https://codecov.io/gh/JuliaManifolds/ManifoldsBase.jl)
 [![Aqua QA](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
 
 [![ACM TOMS](https://img.shields.io/badge/ACM%20TOMS-10.1145%2F3618296-blue.svg)](http://doi.org/10.1145/3618296)
