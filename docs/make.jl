@@ -71,7 +71,7 @@ makedocs(;
     pages = [
         "Home" => "index.md",
         "How to define a manifold" => "tutorials/implement-a-manifold.md",
-        "What are manifolds?" => "tutorials/what-are-manifolds.md",
+        "What are manifolds?" => "tutorials/what-are-manifolds2.md",
         "Design principles" => "design.md",
         "An abstract manifold" => "types.md",
         "Functions on manifolds" => [
