@@ -149,6 +149,9 @@ using RecursiveArrayTools
         p1 = allocate_on(M, ArrayPartition{Float32,Tuple{Vector{Float32},Matrix{Float32}}})
         @test p1 isa ArrayPartition{Float32,Tuple{Vector{Float32},Matrix{Float32}}}
 
+        p1 = allocate_on(M, ArrayPartition)
+        @test p1 isa ArrayPartition{Float64,Tuple{Vector{Float64},Matrix{Float64}}}
+
         X1 = allocate_on(M, TangentSpaceType())
         @test X1 isa ArrayPartition{Float64,Tuple{Vector{Float64},Matrix{Float64}}}
 
@@ -158,6 +161,9 @@ using RecursiveArrayTools
             ArrayPartition{Float32,Tuple{Vector{Float32},Matrix{Float32}}},
         )
         @test X1 isa ArrayPartition{Float32,Tuple{Vector{Float32},Matrix{Float32}}}
+
+        X1 = allocate_on(M, TangentSpaceType(), ArrayPartition)
+        @test X1 isa ArrayPartition{Float64,Tuple{Vector{Float64},Matrix{Float64}}}
     end
 
     p1 = ArrayPartition([1.0, 0.0, 0.0], [4.0 5.0; 6.0 7.0])
