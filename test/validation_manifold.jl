@@ -53,7 +53,7 @@ using ManifoldsBaseTestSuite
         @test ManifoldsBase.representation_size(A) == (3,)
         @test manifold_dimension(A) == manifold_dimension(M)
         @test manifold_dimension(A) == 3
-        for T in [ValidationMPoint, ValidationTVector, ValidationCoTVector]
+        for T in [ValidationMPoint, ValidationTangentVector, ValidationCotangentVector]
             p = T(x)
             @test convert(typeof(x), p) == x
             @test convert(typeof(p), y) == T(y)
@@ -89,7 +89,7 @@ using ManifoldsBaseTestSuite
         end
     end
     @testset "Vector functions" begin
-        for T in [ValidationTVector, ValidationCoTVector]
+        for T in [ValidationTangentVector, ValidationCotangentVector]
             a = T(v)
             b = T(w)
             @test isapprox(A, a + b, T(v + w))
@@ -249,7 +249,7 @@ using ManifoldsBaseTestSuite
         embed!(Ad, q2, p)
         @test q2 == q
         Y = embed(Ad, p, X)
-        @test Y isa ValidationTVector
+        @test Y isa ValidationTangentVector
         Y2 = copy(Ad, q, Y)
         embed!(Ad, Y2, p, X)
         @test Y2 == Y
@@ -260,7 +260,7 @@ using ManifoldsBaseTestSuite
         embed_project!(Ad, q4, p)
         @test q3 == q4
         Y3 = embed_project(Ad, p, X)
-        @test Y3 isa ValidationTVector
+        @test Y3 isa ValidationTangentVector
         Y4 = copy(Ad, p, Y3)
         embed_project!(Ad, Y4, p, X)
         @test Y3 == Y4
@@ -268,7 +268,7 @@ using ManifoldsBaseTestSuite
     @testset "riemannian_tensor" begin
         r = riemann_tensor(M, x, x, y, z)
         r2 = riemann_tensor(A, x, x, y, z)
-        @test r2 isa ValidationTVector
+        @test r2 isa ValidationTangentVector
         r3 = copy(A, r2)
         r3 = riemann_tensor!(A, r3, x, x, y, z)
         @test r2 == r3
@@ -278,7 +278,7 @@ using ManifoldsBaseTestSuite
         @test_logs (:info, "msg") ManifoldsBase._msg(A, "msg"; error = :info)
     end
     @testset "_update_basepoint" begin
-        v = ValidationTVector([1.0, 0.0, 0.0], [1.0, 0.0, 0.0])
+        v = ValidationTangentVector([1.0, 0.0, 0.0], [1.0, 0.0, 0.0])
         ManifoldsBase._update_basepoint!(A, v, [0.0, 0.0, 1.0])
         @test v.point == [0.0, 0.0, 1.0]
     end

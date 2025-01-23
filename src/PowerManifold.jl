@@ -660,9 +660,9 @@ end
     exp(M::AbstractPowerManifold, p, X)
 
 Compute the exponential map from `p` in direction `X` on the [`AbstractPowerManifold`](@ref) `M`,
-which can be computed using the base manifolds exponential map elementwise.
+which can be computed using the base manifolds exponential map element-wise.
 """
-exp(::AbstractPowerManifold, ::Any...)
+exp(::AbstractPowerManifold, ::Any, ::Any)
 
 function exp!(M::AbstractPowerManifold, q, p, X)
     rep_size = representation_size(M.manifold)

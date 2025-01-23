@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.16.0] 25/01/2025
+
+## Changed
+* to avoid logical ambiguities to the forthcoming [`LieGroups.jl`](https://github.com/JuliaManifolds/LieGroups.jl),
+  the “fusing” variant `exp(M, p, X, t)` has been moved to its own name `expt(M, p, X, t)`
+  and similarly `exp!(M, q, p, X, t)` has moved to its own name `expt!(M, q, p, X, t)`.
+  Since both provide a technical detail for speedup, this new function is currently not exported and considered internal.
+* the `TVector` type has been renamed to `AbstractTangentVector`
+* the `CoTVector` type has been renamed to `AbstractCotangentVector`
+
 ## [0.15.24] 17/01/2025
 
 ### Added

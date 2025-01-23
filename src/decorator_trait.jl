@@ -231,29 +231,29 @@ end
 
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function exp(M::AbstractDecoratorManifold, p, X)
-@trait_function exp(M::AbstractDecoratorManifold, p, X, t::Number)
+@trait_function expt(M::AbstractDecoratorManifold, p, X, t::Number)
 # EmbeddedSubManifold
 function exp(::TraitList{IsEmbeddedSubmanifold}, M::AbstractDecoratorManifold, p, X)
     return exp(get_embedding(M, p), p, X)
 end
-function exp(
+function expt(
     ::TraitList{IsEmbeddedSubmanifold},
     M::AbstractDecoratorManifold,
     p,
     X,
     t::Number,
 )
-    return exp(get_embedding(M, p), p, X, t)
+    return expt(get_embedding(M, p), p, X, t)
 end
 
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function exp!(M::AbstractDecoratorManifold, q, p, X)
-@trait_function exp!(M::AbstractDecoratorManifold, q, p, X, t::Number)
+@trait_function expt!(M::AbstractDecoratorManifold, q, p, X, t::Number)
 # EmbeddedSubManifold
 function exp!(::TraitList{IsEmbeddedSubmanifold}, M::AbstractDecoratorManifold, q, p, X)
     return exp!(get_embedding(M, p), q, p, X)
 end
-function exp!(
+function expt!(
     ::TraitList{IsEmbeddedSubmanifold},
     M::AbstractDecoratorManifold,
     q,
@@ -261,7 +261,7 @@ function exp!(
     X,
     t::Number,
 )
-    return exp!(get_embedding(M, p), q, p, X, t)
+    return expt!(get_embedding(M, p), q, p, X, t)
 end
 
 # Introduce Deco Trait | automatic foward | fallback

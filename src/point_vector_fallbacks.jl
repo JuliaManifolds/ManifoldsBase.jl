@@ -150,6 +150,11 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
             return q
         end
 
+        function ManifoldsBase.expt!(M::$TM, q::$TP, p::$TP, X::$TV, t::Number)
+            ManifoldsBase.expt!(M, q.$pfield, p.$pfield, X.$vfield, t)
+            return q
+        end
+
         function ManifoldsBase.inner(M::$TM, p::$TP, X::$TV, Y::$TV)
             return ManifoldsBase.inner(M, p.$pfield, X.$vfield, Y.$vfield)
         end

@@ -310,7 +310,7 @@ Check whether `X` is a valid tangent vector in the tangent space of `p` on the
 If it is not a tangent vector, an error string should be returned.
 
 By default, `check_vector` returns `nothing`, i.e. if no checks are implemented, the
-assumption is to be optimistic for tangent vectors not deriving from the [`TVector`](@ref)
+assumption is to be optimistic for tangent vectors not deriving from the [`AbstractTangentVector`](@ref)
 type.
 """
 check_vector(M::AbstractManifold, p, X; kwargs...) = nothing
@@ -1214,14 +1214,20 @@ end
 # ------
 #
 # (a) Manifolds and general types
-export AbstractManifold, AbstractManifoldPoint, TVector, CoTVector, TFVector, CoTFVector
+export AbstractManifold,
+    AbstractManifoldPoint,
+    AbstractTangentVector,
+    AbstractCotangentVector,
+    TFVector,
+    CoTFVector
 export VectorSpaceFiber
 export TangentSpace, TangentSpaceType
 export CotangentSpace, CotangentSpaceType
 export AbstractDecoratorManifold
 export AbstractTrait, IsEmbeddedManifold, IsEmbeddedSubmanifold, IsIsometricEmbeddedManifold
 export IsExplicitDecorator
-export ValidationManifold, ValidationMPoint, ValidationTVector, ValidationCoTVector
+export ValidationManifold,
+    ValidationMPoint, ValidationTangentVector, ValidationCotangentVector
 export EmbeddedManifold
 export AbstractPowerManifold, PowerManifold
 export AbstractPowerRepresentation,
