@@ -58,7 +58,7 @@ function ManifoldsBase.check_vector(M::TestSphere, p, X; kwargs...)
     return nothing
 end
 function ManifoldsBase.exp!(M::TestSphere, q, p, X)
-    return expt!(M, q, p, X, one(number_eltype(X)))
+    return ManifoldsBase.expt!(M, q, p, X, one(number_eltype(X)))
 end
 function ManifoldsBase.expt!(::TestSphere, q, p, X, t::Number)
     θ = abs(t) * norm(X)
@@ -253,7 +253,7 @@ ManifoldsBase.manifold_dimension(::ProjectionTestManifold) = 100
 struct NonManifold <: AbstractManifold{ℝ} end
 struct NonBasis <: ManifoldsBase.AbstractBasis{ℝ,TangentSpaceType} end
 struct NonMPoint <: AbstractManifoldPoint end
-struct NonTangentVector <: TVector end
+struct NonTangentVector <: AbstractTangentVector end
 struct NonCotangentVector <: AbstractCotangentVector end
 struct NotImplementedRetraction <: AbstractRetractionMethod end
 struct NotImplementedInverseRetraction <: AbstractInverseRetractionMethod end

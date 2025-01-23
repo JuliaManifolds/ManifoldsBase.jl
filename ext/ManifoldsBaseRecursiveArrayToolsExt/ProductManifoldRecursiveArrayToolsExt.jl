@@ -95,7 +95,7 @@ function ManifoldsBase.expt(
 )
     return ArrayPartition(
         map(
-            (N, pc, Xc) -> expt(N, pc, Xc, t),
+            (N, pc, Xc) -> ManifoldsBase.expt(N, pc, Xc, t),
             M.manifolds,
             submanifold_components(M, p),
             submanifold_components(M, X),
