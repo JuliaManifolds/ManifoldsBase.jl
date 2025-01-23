@@ -737,7 +737,7 @@ function retract(
 end
 
 function _retract(M::AbstractManifold, p, X, t::Number, ::ExponentialRetraction)
-    return exp(M, p, X, t)
+    return expt(M, p, X, t)
 end
 function _retract(M::AbstractManifold, p, X, t, m::AbstractRetractionMethod)
     q = allocate_result(M, retract, p, X)
@@ -787,7 +787,7 @@ function _retract!(M::AbstractManifold, q, p, X, t, m::EmbeddedRetraction; kwarg
     return retract_embedded!(M, q, p, X, t, m.retraction; kwargs...)
 end
 function _retract!(M::AbstractManifold, q, p, X, t, ::ExponentialRetraction; kwargs...)
-    return exp!(M, q, p, X, t; kwargs...)
+    return expt!(M, q, p, X, t; kwargs...)
 end
 function _retract!(M::AbstractManifold, q, p, X, t, m::ODEExponentialRetraction; kwargs...)
     return retract_exp_ode!(M, q, p, X, t, m.retraction, m.basis; kwargs...)

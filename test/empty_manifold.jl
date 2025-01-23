@@ -7,7 +7,7 @@ using Test
 @testset "AbstractManifold with empty implementation" begin
     M = NonManifold()
     p = NonMPoint()
-    v = NonTVector()
+    v = NonTangentVector()
     @test base_manifold(M) === M
     @test number_system(M) === ℝ
     @test representation_size(M) === nothing
@@ -81,13 +81,13 @@ using Test
     @test_throws MethodError distance(M, [0.0], [0.0])
 
     @test_throws MethodError exp!(M, p, p, v)
-    @test_throws MethodError exp!(M, p, p, v, 0.0)
+    @test_throws MethodError ManifoldsBase.expt!(M, p, p, v, 0.0)
     @test_throws MethodError exp!(M, [0], [0], [0])
-    @test_throws MethodError exp!(M, [0], [0], [0], 0.0)
+    @test_throws MethodError ManifoldsBase.expt!(M, [0], [0], [0], 0.0)
     @test_throws MethodError exp(M, [0], [0])
-    @test_throws MethodError exp(M, [0], [0], 0.0)
+    @test_throws MethodError ManifoldsBase.expt(M, [0], [0], 0.0)
     @test_throws MethodError exp(M, [0.0], [0.0])
-    @test_throws MethodError exp(M, [0.0], [0.0], 0.0)
+    @test_throws MethodError ManifoldsBase.expt(M, [0.0], [0.0], 0.0)
 
     @test_throws MethodError embed!(M, p, [0]) # no copy for NoPoint p
     @test embed!(M, [0], [0]) == [0]

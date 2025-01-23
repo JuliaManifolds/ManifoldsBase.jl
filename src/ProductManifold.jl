@@ -429,7 +429,7 @@ end
 compute the exponential map from `p` in the direction of `X` on the [`ProductManifold`](@ref) `M`,
 which is the elementwise exponential map on the internal manifolds that build `M`.
 """
-exp(::ProductManifold, ::Any...)
+exp(::ProductManifold, ::Any, ::Any)
 
 function exp!(M::ProductManifold, q, p, X)
     map(
@@ -441,9 +441,9 @@ function exp!(M::ProductManifold, q, p, X)
     )
     return q
 end
-function exp!(M::ProductManifold, q, p, X, t::Number)
+function expt!(M::ProductManifold, q, p, X, t::Number)
     map(
-        (N, qc, pc, Xc) -> exp!(N, qc, pc, Xc, t),
+        (N, qc, pc, Xc) -> expt!(N, qc, pc, Xc, t),
         M.manifolds,
         submanifold_components(M, q),
         submanifold_components(M, p),

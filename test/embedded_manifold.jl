@@ -277,11 +277,11 @@ ManifoldsBase.decorated_manifold(::FallbackManifold) = DefaultManifold(3)
         log!(M, Y, p, q)
         @test Y == q - p
         @test exp(M, p, X) == q
-        @test exp(M, p, X, 1.0) == q
+        @test ManifoldsBase.expt(M, p, X, 1.0) == q
         r = similar(p)
         exp!(M, r, p, X)
         @test r == q
-        exp!(M, r, p, X, 1.0)
+        ManifoldsBase.expt!(M, r, p, X, 1.0)
         @test r == q
         @test distance(M, p, r) == norm(r - p)
 
@@ -371,9 +371,9 @@ ManifoldsBase.decorated_manifold(::FallbackManifold) = DefaultManifold(3)
             A = zeros(2)
             # Check that all of these report not to be implemented, i.e.
             @test_throws MethodError exp(M2, [1, 2], [2, 3])
-            @test_throws MethodError exp(M2, [1, 2], [2, 3], 1.0)
+            @test_throws MethodError ManifoldsBase.expt(M2, [1, 2], [2, 3], 1.0)
             @test_throws MethodError exp!(M2, A, [1, 2], [2, 3])
-            @test_throws MethodError exp!(M2, A, [1, 2], [2, 3], 1.0)
+            @test_throws MethodError ManifoldsBase.expt!(M2, A, [1, 2], [2, 3], 1.0)
             @test_throws MethodError retract(M2, [1, 2], [2, 3])
             @test_throws MethodError retract(M2, [1, 2], [2, 3], 1.0)
             @test_throws MethodError retract!(M2, A, [1, 2], [2, 3])
