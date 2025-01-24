@@ -131,7 +131,7 @@ injectivity_radius(::DefaultManifold) = Inf
 
 is_flat(::DefaultManifold) = true
 
-log!(::DefaultManifold, Y, p, q) = (Y .= q .- p)
+ManifoldsBase.log!(::DefaultManifold, Y, p, q) = (Y .= q .- p)
 
 function manifold_dimension(M::DefaultManifold{𝔽}) where {𝔽}
     size = get_parameter(M.size)
