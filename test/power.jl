@@ -192,10 +192,10 @@ end
                     @test retract(N, p, q, ExponentialRetraction()) == p .+ q
                     r = allocate(p)
                     @test retract!(N, r, p, q, ExponentialRetraction()) == p .+ q
-                    @test retract(N, p, q, 1.0) == p .+ q
-                    @test retract(N, p, q, 1.0, ExponentialRetraction()) == p .+ q
+                    @test retract_t(N, p, q, 1.0) == p .+ q
+                    @test retract_t(N, p, q, 1.0, ExponentialRetraction()) == p .+ q
                     r = allocate(p)
-                    @test retract!(N, r, p, q, 1.0, ExponentialRetraction()) == p .+ q
+                    @test retract_t!(N, r, p, q, 1.0, ExponentialRetraction()) == p .+ q
                     @test r == p .+ q
                     @test inverse_retract(N, p, r) == q
                     @test inverse_retract(N, p, r, LogarithmicInverseRetraction()) == q

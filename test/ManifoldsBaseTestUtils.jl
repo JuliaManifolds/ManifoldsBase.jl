@@ -167,7 +167,7 @@ function Random.rand!(
     return pX
 end
 ManifoldsBase.representation_size(::TestSphere{N}) where {N} = (N + 1,)
-function ManifoldsBase.retract_project!(M::TestSphere, q, p, X, t::Number)
+function ManifoldsBase.retract_project_t!(M::TestSphere, q, p, X, t::Number)
     q .= p .+ t .* X
     project!(M, q, q)
     return q
@@ -445,7 +445,7 @@ ManifoldsBase.@default_manifold_fallbacks ManifoldsBase.DefaultManifold DefaultP
 function ManifoldsBase._injectivity_radius(::DefaultManifold, ::CustomDefinedRetraction)
     return 10.0
 end
-function ManifoldsBase._retract!(
+function ManifoldsBase._retract_t!(
     M::DefaultManifold,
     q,
     p,
@@ -454,9 +454,9 @@ function ManifoldsBase._retract!(
     ::CustomDefinedKeywordRetraction;
     kwargs...,
 )
-    return retract_custom_kw!(M, q, p, X, t; kwargs...)
+    return retract_custom_kw_t!(M, q, p, X, t; kwargs...)
 end
-function retract_custom_kw!(
+function retract_custom_kw_t!(
     ::DefaultManifold,
     q::DefaultPoint,
     p::DefaultPoint,
@@ -488,7 +488,7 @@ function inverse_retract_custom_kw!(
     return X
 end
 
-function ManifoldsBase.retract!(
+function ManifoldsBase.retract_t!(
     ::DefaultManifold,
     q::DefaultPoint,
     p::DefaultPoint,
@@ -515,10 +515,10 @@ struct MatrixVectorTransport{T} <: AbstractVector{T}
     m::Matrix{T}
 end
 # dummy retractions, inverse retracions for fallback tests - mutating should be enough
-ManifoldsBase.retract_polar!(::DefaultManifold, q, p, X, t::Number) = (q .= p .+ t .* X)
-ManifoldsBase.retract_project!(::DefaultManifold, q, p, X, t::Number) = (q .= p .+ t .* X)
-ManifoldsBase.retract_qr!(::DefaultManifold, q, p, X, t::Number) = (q .= p .+ t .* X)
-function ManifoldsBase.retract_exp_ode!(
+ManifoldsBase.retract_polar_t!(::DefaultManifold, q, p, X, t::Number) = (q .= p .+ t .* X)
+ManifoldsBase.retract_project_t!(::DefaultManifold, q, p, X, t::Number) = (q .= p .+ t .* X)
+ManifoldsBase.retract_qr_t!(::DefaultManifold, q, p, X, t::Number) = (q .= p .+ t .* X)
+function ManifoldsBase.retract_exp_ode_t!(
     ::DefaultManifold,
     q,
     p,
@@ -530,7 +530,7 @@ function ManifoldsBase.retract_exp_ode!(
     return (q .= p .+ t .* X)
 end
 
-function ManifoldsBase.retract_pade!(
+function ManifoldsBase.retract_pade_t!(
     ::DefaultManifold,
     q,
     p,
@@ -540,7 +540,7 @@ function ManifoldsBase.retract_pade!(
 )
     return (q .= p .+ t .* X)
 end
-function ManifoldsBase.retract_sasaki!(
+function ManifoldsBase.retract_sasaki_t!(
     ::DefaultManifold,
     q,
     p,
@@ -550,7 +550,7 @@ function ManifoldsBase.retract_sasaki!(
 )
     return (q .= p .+ t .* X)
 end
-ManifoldsBase.retract_softmax!(::DefaultManifold, q, p, X, t::Number) = (q .= p .+ t .* X)
+ManifoldsBase.retract_softmax_t!(::DefaultManifold, q, p, X, t::Number) = (q .= p .+ t .* X)
 ManifoldsBase.get_embedding(M::DefaultManifold) = M # dummy embedding
 ManifoldsBase.inverse_retract_polar!(::DefaultManifold, Y, p, q) = (Y .= q .- p)
 ManifoldsBase.inverse_retract_project!(::DefaultManifold, Y, p, q) = (Y .= q .- p)
