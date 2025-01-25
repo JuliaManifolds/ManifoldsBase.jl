@@ -641,7 +641,7 @@ end
     X,
     m::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
 )
-@trait_function retract(
+@trait_function retract_t(
     M::AbstractDecoratorManifold,
     p,
     X,
@@ -657,7 +657,7 @@ function retract(
 )
     return retract(get_embedding(M, p), p, X, m)
 end
-function retract(
+function retract_t(
     ::TraitList{IsEmbeddedSubmanifold},
     M::AbstractDecoratorManifold,
     p,
@@ -665,7 +665,7 @@ function retract(
     t::Number,
     m::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
 )
-    return retract(get_embedding(M, p), p, X, t, m)
+    return retract_t(get_embedding(M, p), p, X, t, m)
 end
 
 @trait_function retract!(
@@ -675,7 +675,7 @@ end
     X,
     m::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
 )
-@trait_function retract!(
+@trait_function retract_t!(
     M::AbstractDecoratorManifold,
     q,
     p,
@@ -693,7 +693,7 @@ function retract!(
 )
     return retract!(get_embedding(M, p), q, p, X, m)
 end
-function retract!(
+function retract_t!(
     ::TraitList{IsEmbeddedSubmanifold},
     M::AbstractDecoratorManifold,
     q,
@@ -702,7 +702,7 @@ function retract!(
     t::Number,
     m::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
 )
-    return retract!(get_embedding(M, p), q, p, X, t, m)
+    return retract_t!(get_embedding(M, p), q, p, X, t, m)
 end
 
 @trait_function vector_transport_along(

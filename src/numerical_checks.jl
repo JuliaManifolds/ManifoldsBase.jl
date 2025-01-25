@@ -155,7 +155,7 @@ function check_retraction(
     T = exp10.(log_range)
     # points `p_i` to evaluate the error function at
     points = [expt(M, p, Xn, t) for t in T]
-    approx_points = [retract(M, p, Xn, t, retraction_method) for t in T]
+    approx_points = [retract_t(M, p, Xn, t, retraction_method) for t in T]
     errors = [distance(M, p, q) for (p, q) in zip(points, approx_points)]
     return prepare_check_result(
         log_range,

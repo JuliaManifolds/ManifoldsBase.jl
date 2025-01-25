@@ -101,10 +101,10 @@ using ManifoldsBaseTestUtils
             @test ManifoldsBase.check_approx(M, pts[1], pts[1]) === nothing
             @test ManifoldsBase.check_approx(M, pts[2], tv2, tv2) === nothing
             @test is_point(M, retract(M, pts[1], tv1))
-            @test isapprox(M, pts[1], retract(M, pts[1], tv1, 0))
+            @test isapprox(M, pts[1], retract_t(M, pts[1], tv1, 0))
 
             @test is_point(M, retract(M, pts[1], tv1, rm))
-            @test isapprox(M, pts[1], retract(M, pts[1], tv1, 0, rm))
+            @test isapprox(M, pts[1], retract_t(M, pts[1], tv1, 0, rm))
 
             new_pt = exp(M, pts[1], tv1)
             retract!(M, new_pt, pts[1], tv1)
@@ -514,9 +514,9 @@ using ManifoldsBaseTestUtils
         @test angle(M, p, X, Y) ≈ π / 2
         @test inverse_retract(M, p, q, LogarithmicInverseRetraction()) == -Y
         @test retract(M, q, Y, CustomDefinedRetraction()) == p
-        @test retract(M, q, Y, 1.0, CustomDefinedRetraction()) == p
+        @test retract_t(M, q, Y, 1.0, CustomDefinedRetraction()) == p
         @test retract(M, q, Y, ExponentialRetraction()) == p
-        @test retract(M, q, Y, 1.0, ExponentialRetraction()) == p
+        @test retract_t(M, q, Y, 1.0, ExponentialRetraction()) == p
         # rest not implemented - so they also fall back even onto mutating
         Z = similar(Y)
         r = similar(p)
@@ -532,17 +532,18 @@ using ManifoldsBaseTestUtils
             SasakiRetraction(5),
         ]
             @test retract(M, q, Y, retr) == DefaultPoint(q.value + Y.value)
-            @test retract(M, q, Y, 0.5, retr) == DefaultPoint(q.value + 0.5 * Y.value)
+            @test retract_t(M, q, Y, 0.5, retr) == DefaultPoint(q.value + 0.5 * Y.value)
             @test retract!(M, r, q, Y, retr) == DefaultPoint(q.value + Y.value)
-            @test retract!(M, r, q, Y, 0.5, retr) == DefaultPoint(q.value + 0.5 * Y.value)
+            @test retract_t!(M, r, q, Y, 0.5, retr) == DefaultPoint(q.value + 0.5 * Y.value)
         end
 
         mRK = RetractionWithKeywords(CustomDefinedKeywordRetraction(); scale = 3.0)
         pRK = allocate(p, eltype(p.value), size(p.value))
         @test retract(M, p, X, mRK) == DefaultPoint(3 * p.value + X.value)
-        @test retract(M, p, X, 0.5, mRK) == DefaultPoint(3 * p.value + 0.5 * X.value)
+        @test retract_t(M, p, X, 0.5, mRK) == DefaultPoint(3 * p.value + 0.5 * X.value)
         @test retract!(M, pRK, p, X, mRK) == DefaultPoint(3 * p.value + X.value)
-        @test retract!(M, pRK, p, X, 0.5, mRK) == DefaultPoint(3 * p.value + 0.5 * X.value)
+        @test retract_t!(M, pRK, p, X, 0.5, mRK) ==
+              DefaultPoint(3 * p.value + 0.5 * X.value)
         mIRK = InverseRetractionWithKeywords(
             CustomDefinedKeywordInverseRetraction();
             scale = 3.0,

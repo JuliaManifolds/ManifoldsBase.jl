@@ -286,10 +286,10 @@ ManifoldsBase.decorated_manifold(::FallbackManifold) = DefaultManifold(3)
         @test distance(M, p, r) == norm(r - p)
 
         @test retract(M, p, X) == q
-        @test retract(M, p, X, 1.0) == q
+        @test retract_t(M, p, X, 1.0) == q
         q2 = similar(q)
         @test retract!(M, q2, p, X) == q
-        @test retract!(M, q2, p, X, 1.0) == q
+        @test retract_t!(M, q2, p, X, 1.0) == q
         @test q2 == q
         @test inverse_retract(M, p, q) == X
         Y = similar(X)
@@ -375,9 +375,9 @@ ManifoldsBase.decorated_manifold(::FallbackManifold) = DefaultManifold(3)
             @test_throws MethodError exp!(M2, A, [1, 2], [2, 3])
             @test_throws MethodError ManifoldsBase.expt!(M2, A, [1, 2], [2, 3], 1.0)
             @test_throws MethodError retract(M2, [1, 2], [2, 3])
-            @test_throws MethodError retract(M2, [1, 2], [2, 3], 1.0)
+            @test_throws MethodError retract_t(M2, [1, 2], [2, 3], 1.0)
             @test_throws MethodError retract!(M2, A, [1, 2], [2, 3])
-            @test_throws MethodError retract!(M2, A, [1, 2], [2, 3], 1.0)
+            @test_throws MethodError retract_t!(M2, A, [1, 2], [2, 3], 1.0)
             @test_throws MethodError log(M2, [1, 2], [2, 3])
             @test_throws MethodError log!(M2, A, [1, 2], [2, 3])
             @test_throws MethodError inverse_retract(M2, [1, 2], [2, 3])

@@ -255,7 +255,7 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
         end
     end
     for f_postfix in [:polar, :project, :qr, :softmax]
-        rm = Symbol("retract_$(f_postfix)!")
+        rm = Symbol("retract_$(f_postfix)_t!")
         push!(
             block.args,
             quote
@@ -269,7 +269,7 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
     push!(
         block.args,
         quote
-            function ManifoldsBase.retract_exp_ode!(
+            function ManifoldsBase.retract_exp_ode_t!(
                 M::$TM,
                 q::$TP,
                 p::$TP,
@@ -278,10 +278,18 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
                 m::AbstractRetractionMethod,
                 B::ManifoldsBase.AbstractBasis,
             )
-                ManifoldsBase.retract_exp_ode!(M, q.$pfield, p.$pfield, X.$vfield, t, m, B)
+                ManifoldsBase.retract_exp_ode_t!(
+                    M,
+                    q.$pfield,
+                    p.$pfield,
+                    X.$vfield,
+                    t,
+                    m,
+                    B,
+                )
                 return q
             end
-            function ManifoldsBase.retract_pade!(
+            function ManifoldsBase.retract_pade_t!(
                 M::$TM,
                 q::$TP,
                 p::$TP,
@@ -289,10 +297,10 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
                 t::Number,
                 m::PadeRetraction,
             )
-                ManifoldsBase.retract_pade!(M, q.$pfield, p.$pfield, X.$vfield, t, m)
+                ManifoldsBase.retract_pade_t!(M, q.$pfield, p.$pfield, X.$vfield, t, m)
                 return q
             end
-            function ManifoldsBase.retract_embedded!(
+            function ManifoldsBase.retract_embedded_t!(
                 M::$TM,
                 q::$TP,
                 p::$TP,
@@ -300,10 +308,10 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
                 t::Number,
                 m::AbstractRetractionMethod,
             )
-                ManifoldsBase.retract_embedded!(M, q.$pfield, p.$pfield, X.$vfield, t, m)
+                ManifoldsBase.retract_embedded_t!(M, q.$pfield, p.$pfield, X.$vfield, t, m)
                 return q
             end
-            function ManifoldsBase.retract_sasaki!(
+            function ManifoldsBase.retract_sasaki_t!(
                 M::$TM,
                 q::$TP,
                 p::$TP,
@@ -311,7 +319,7 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
                 t::Number,
                 m::SasakiRetraction,
             )
-                ManifoldsBase.retract_sasaki!(M, q.$pfield, p.$pfield, X.$vfield, t, m)
+                ManifoldsBase.retract_sasaki_t!(M, q.$pfield, p.$pfield, X.$vfield, t, m)
                 return q
             end
         end,
