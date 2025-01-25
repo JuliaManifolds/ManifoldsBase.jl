@@ -46,7 +46,7 @@ See also [`exp`](@ref).
 exp!(M::AbstractManifold, q, p, X)
 
 """
-    expt!(M::AbstractManifold, q, p, X, t::Number = 1)
+    expt!(M::AbstractManifold, q, p, X, t::Number)
 
 Compute the exponential map of tangent vector `X` scaled by `t` at point `p` in-place of `q`.
 Compared to [`exp!`](@ref), this method provides the opportunity to avoid the allocation
