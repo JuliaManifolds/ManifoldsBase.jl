@@ -198,6 +198,18 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
             return q
         end
 
+        function ManifoldsBase.retract_t!(
+            M::$TM,
+            q::$TP,
+            p::$TP,
+            X::$TV,
+            t::Number,
+            m::ExponentialRetraction,
+        )
+            ManifoldsBase.retract_t!(M, q.$pfield, p.$pfield, X.$vfield, t, m)
+            return q
+        end
+
         function ManifoldsBase.vector_transport_along!(
             M::$TM,
             Y::$TV,
