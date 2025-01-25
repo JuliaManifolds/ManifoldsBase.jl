@@ -26,7 +26,7 @@ avoid the allocation when computing `t*X`.
 By default, this method allocates the resulting point `q` and passes to [`expt!`](@ref).
 """
 function expt(M::AbstractManifold, p, X, t::Number)
-    q = allocate_result(M, exp, p, X, t)
+    q = allocate_result(M, exp, p, X)
     expt!(M, q, p, X, t)
     return q
 end
@@ -179,7 +179,7 @@ Note that the logarithmic map might not be globally defined.
 
 see also [`log`](@ref) and [`inverse_retract!`](@ref),
 """
-log!(M::AbstractManifold, X, p, q)
+ManifoldsBase.log!(M::AbstractManifold, X, p, q)
 
 @doc raw"""
     shortest_geodesic(M::AbstractManifold, p, q) -> Function
