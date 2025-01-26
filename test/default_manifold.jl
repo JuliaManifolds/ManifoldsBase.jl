@@ -331,32 +331,7 @@ using ManifoldsBaseTestUtils
                 @test ManifoldsBase.is_vector(M, pts[3], X1t1)
                 @test ManifoldsBase.is_vector(M, pts[3], X1t3)
                 @test isapprox(M, pts[3], X1t1, X1t3)
-                # along a `Vector` of points
-                c = [pts[1], pts[1]]
-                X1t4 = vector_transport_along(M, pts[1], X1, c)
-                @test isapprox(M, pts[1], X1, X1t4)
-                X1t5 = allocate(X1)
-                vector_transport_along!(M, X1t5, pts[1], X1, c)
-                @test isapprox(M, pts[1], X1, X1t5)
-                # transport along more than one interims point
-                @test vector_transport_along(M, pts[1], X1, pts[2:3]) == X1
-                X1t6 = allocate(X1)
-                vector_transport_along!(M, X1t6, pts[1], X1, pts[2:3])
-                @test isapprox(M, pts[1], X1, X1t6)
-                # along a custom type of points
-                if T <: DefaultPoint
-                    S = eltype(pts[1].value)
-                    mat = reshape(pts[1].value, length(pts[1].value), 1)
-                else
-                    S = eltype(pts[1])
-                    mat = reshape(pts[1], length(pts[1]), 1)
-                end
-                c2 = MatrixVectorTransport{S}(mat)
-                X1t4c2 = vector_transport_along(M, pts[1], X1, c2)
-                @test isapprox(M, pts[1], X1, X1t4c2)
-                X1t5c2 = allocate(X1)
-                vector_transport_along!(M, X1t5c2, pts[1], X1, c2)
-                @test isapprox(M, pts[1], X1, X1t5c2)
+
                 # On Euclidean Space Schild & Pole are identity
                 @test vector_transport_to(
                     M,
@@ -382,52 +357,6 @@ using ManifoldsBaseTestUtils
                     mid_point(M, pts[2], pts[3]),
                     pts[3],
                 ]
-                Xtmp = allocate(X2)
-                @test vector_transport_along(M, pts[1], X2, c, SchildsLadderTransport()) ==
-                      X2
-                @test vector_transport_along!(
-                    M,
-                    Xtmp,
-                    pts[1],
-                    X2,
-                    c,
-                    SchildsLadderTransport(),
-                ) == X2
-                @test vector_transport_along(M, pts[1], X2, c, PoleLadderTransport()) == X2
-                @test vector_transport_along!(
-                    M,
-                    Xtmp,
-                    pts[1],
-                    X2,
-                    c,
-                    PoleLadderTransport(),
-                ) == X2
-                @test vector_transport_along(M, pts[1], X2, c, ParallelTransport()) == X2
-                @test vector_transport_along!(
-                    M,
-                    Xtmp,
-                    pts[1],
-                    X2,
-                    c,
-                    ParallelTransport(),
-                ) == X2
-                @test ManifoldsBase._vector_transport_along!(
-                    M,
-                    Xtmp,
-                    pts[1],
-                    X2,
-                    c,
-                    ParallelTransport(),
-                ) == X2
-                @test vector_transport_along(M, pts[1], X2, c, ProjectionTransport()) == X2
-                @test vector_transport_along!(
-                    M,
-                    Xtmp,
-                    pts[1],
-                    X2,
-                    c,
-                    ProjectionTransport(),
-                ) == X2
                 # check mutating ones with defaults
                 p = allocate(pts[1])
                 ManifoldsBase.pole_ladder!(M, p, pts[1], pts[2], pts[3])
@@ -612,15 +541,11 @@ using ManifoldsBaseTestUtils
         @test vector_transport_direction(M, p, X, X, ProjectionTransport()) == X
         @test vector_transport_to!(M, Y, p, X, q, ProjectionTransport()) == X
         @test vector_transport_direction!(M, Y, p, X, X, ProjectionTransport()) == X
-        @test vector_transport_along(M, p, X, [p], ProjectionTransport()) == X
-        @test vector_transport_along!(M, Z, p, X, [p], ProjectionTransport()) == X
         @test vector_transport_to(M, p, X, :q, ProjectionTransport()) == X
         @test parallel_transport_to(M, p, X, q) == X
         @test parallel_transport_direction(M, p, X, X) == X
-        @test parallel_transport_along(M, p, X, []) == X
         @test parallel_transport_to!(M, Y, p, X, q) == X
         @test parallel_transport_direction!(M, Y, p, X, X) == X
-        @test parallel_transport_along!(M, Y, p, X, []) == X
 
         # convert with manifold
         @test convert(typeof(p), M, p.value) == p
@@ -726,15 +651,6 @@ using ManifoldsBaseTestUtils
         @test default_approximation_method(M, vector_transport_to) ==
               default_vector_transport_method(M)
         @test default_approximation_method(M, vector_transport_to, DefaultPoint) ==
-              default_vector_transport_method(M)
-        # along
-        @test default_approximation_method(M, vector_transport_along) ==
-              default_vector_transport_method(M)
-        @test default_approximation_method(M, vector_transport_along, DefaultPoint) ==
-              default_vector_transport_method(M)
-        @test default_approximation_method(M, vector_transport_direction) ==
-              default_vector_transport_method(M)
-        @test default_approximation_method(M, vector_transport_direction, DefaultPoint) ==
               default_vector_transport_method(M)
     end
 end

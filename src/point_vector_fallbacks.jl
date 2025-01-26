@@ -210,17 +210,6 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
             return q
         end
 
-        function ManifoldsBase.vector_transport_along!(
-            M::$TM,
-            Y::$TV,
-            p::$TP,
-            X::$TV,
-            c::AbstractVector,
-        )
-            ManifoldsBase.vector_transport_along!(M, Y.$vfield, p.$pfield, X.$vfield, c)
-            return Y
-        end
-
         function ManifoldsBase.zero_vector(M::$TM, p::$TP)
             return $TV(zero_vector(M, p.$pfield))
         end
@@ -387,21 +376,10 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
 
     for sub in [:project, :diff, :embedded]
         # project & diff
-        vtam = Symbol("vector_transport_along_$(sub)!")
         vttm = Symbol("vector_transport_to_$(sub)!")
         push!(
             block.args,
             quote
-                function ManifoldsBase.$vtam(
-                    M::$TM,
-                    Y::$TV,
-                    p::$TP,
-                    X::$TV,
-                    c::AbstractVector,
-                )
-                    ManifoldsBase.$vtam(M, Y.$vfield, p.$pfield, X.$vfield, c)
-                    return Y
-                end
                 function ManifoldsBase.$vttm(M::$TM, Y::$TV, p::$TP, X::$TV, q::$TP)
                     ManifoldsBase.$vttm(M, Y.$vfield, p.$pfield, X.$vfield, q.$pfield)
                     return Y
@@ -413,32 +391,6 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
     push!(
         block.args,
         quote
-            function ManifoldsBase.parallel_transport_along(
-                M::$TM,
-                p::$TP,
-                X::$TV,
-                c::AbstractVector,
-            )
-                return $TV(
-                    ManifoldsBase.parallel_transport_along(M, p.$pfield, X.$vfield, c),
-                )
-            end
-            function ManifoldsBase.parallel_transport_along!(
-                M::$TM,
-                Y::$TV,
-                p::$TP,
-                X::$TV,
-                c::AbstractVector,
-            )
-                ManifoldsBase.parallel_transport_along!(
-                    M,
-                    Y.$vfield,
-                    p.$pfield,
-                    X.$vfield,
-                    c,
-                )
-                return Y
-            end
             function ManifoldsBase.parallel_transport_direction(
                 M::$TM,
                 p::$TP,

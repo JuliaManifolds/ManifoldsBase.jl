@@ -776,57 +776,6 @@ function show(io::IO, M::ValidationManifold)
     return print(io, s)
 end
 
-function vector_transport_along(
-    M::ValidationManifold,
-    p,
-    X,
-    c::AbstractVector,
-    m::AbstractVectorTransportMethod;
-    kwargs...,
-)
-    is_vector(M, p, X; within = vector_transport_along, context = (:Input,), kwargs...)
-    Y = vector_transport_along(M.manifold, internal_value(p), internal_value(X), c, m)
-    is_vector(
-        M,
-        c[end],
-        Y;
-        within = vector_transport_along,
-        context = (:Output,),
-        kwargs...,
-    )
-    return Y
-end
-
-function vector_transport_along!(
-    M::ValidationManifold,
-    Y,
-    p,
-    X,
-    c::AbstractVector,
-    m::AbstractVectorTransportMethod;
-    kwargs...,
-)
-    is_vector(M, p, X; within = vector_transport_along, context = (:Input,), kwargs...)
-    vector_transport_along!(
-        M.manifold,
-        internal_value(Y),
-        internal_value(p),
-        internal_value(X),
-        c,
-        m,
-    )
-    _update_basepoint!(M, Y, c[end])
-    is_vector(
-        M,
-        c[end],
-        Y;
-        within = vector_transport_along,
-        context = (:Output,),
-        kwargs...,
-    )
-    return Y
-end
-
 function vector_transport_to(
     M::ValidationManifold,
     p,

@@ -149,8 +149,6 @@ using ManifoldsBaseTestSuite
         @test isapprox(A, x, v2s, zero_vector(M, x))
         c2 = [x2]
         v3 = similar(v2)
-        @test isapprox(A, x2, v2, vector_transport_along!(A, v3, x2, v2, c2))
-        @test isapprox(A, x2, v2, vector_transport_along(A, x2, v2, c2))
         @test injectivity_radius(A) == Inf
         @test injectivity_radius(A, x) == Inf
         @test injectivity_radius(A, ManifoldsBase.ExponentialRetraction()) == Inf

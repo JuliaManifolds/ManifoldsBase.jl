@@ -94,16 +94,6 @@ end
 function ManifoldsBase.exp!(::AnotherHalfPlanemanifold, q, p, X)
     return q .= p .+ X
 end
-function ManifoldsBase.vector_transport_along_embedded!(
-    ::AnotherHalfPlanemanifold,
-    Y,
-    p,
-    X,
-    c,
-    ::ParallelTransport,
-)
-    return Y .= X .+ 1 # +1 for check
-end
 #
 # Third example - explicitly mention an embedding.
 #
@@ -296,10 +286,6 @@ ManifoldsBase.decorated_manifold(::FallbackManifold) = DefaultManifold(3)
         @test inverse_retract!(M, Y, p, q) == X
         @test Y == X
 
-        @test vector_transport_along(M, p, X, []) == X
-        @test vector_transport_along!(M, Y, p, X, []) == X
-        @test parallel_transport_along(M, p, X, []) == X
-        @test parallel_transport_along!(M, Y, p, X, []) == X
         @test parallel_transport_direction(M, p, X, X) == X
         @test parallel_transport_direction!(M, Y, p, X, X) == X
         @test parallel_transport_to(M, p, X, q) == X
@@ -339,7 +325,6 @@ ManifoldsBase.decorated_manifold(::FallbackManifold) = DefaultManifold(3)
         q = [2.0, 2.0]
         @test vector_transport_to(M, p, X, q, m) == X #since its PT on R^3
         @test vector_transport_direction(M, p, X, q, m) == X
-        @test vector_transport_along(M, p, X, [], m) == X .+ 1 #as specified in definition above
     end
 
     @testset "Test nonimplemented fallbacks" begin
@@ -388,16 +373,6 @@ ManifoldsBase.decorated_manifold(::FallbackManifold) = DefaultManifold(3)
             @test_throws MethodError project!(M2, A, [1, 2])
             @test_throws MethodError project(M2, [1, 2], [2, 3])
             @test_throws MethodError project!(M2, A, [1, 2], [2, 3])
-            @test_throws MethodError vector_transport_along(M2, [1, 2], [2, 3], [[1, 2]])
-            @test_throws MethodError vector_transport_along(
-                M2,
-                [1, 2],
-                [2, 3],
-                [[1, 2]],
-                ParallelTransport(),
-            )
-            @test vector_transport_along!(M2, A, [1, 2], [2, 3], []) == [2, 3]
-            @test A == [2, 3]
             @test_throws MethodError vector_transport_direction(M2, [1, 2], [2, 3], [3, 4])
             @test_throws MethodError vector_transport_direction!(
                 M2,

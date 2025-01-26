@@ -512,44 +512,6 @@ function log!(::TraitList{IsEmbeddedSubmanifold}, M::AbstractDecoratorManifold, 
 end
 
 # Introduce Deco Trait | automatic foward | fallback
-@trait_function parallel_transport_along(
-    M::AbstractDecoratorManifold,
-    p,
-    X,
-    c::AbstractVector,
-)
-# EmbeddedSubManifold
-function parallel_transport_along(
-    ::TraitList{IsEmbeddedSubmanifold},
-    M::AbstractDecoratorManifold,
-    p,
-    X,
-    c::AbstractVector,
-)
-    return parallel_transport_along(get_embedding(M, p), p, X, c)
-end
-
-# Introduce Deco Trait | automatic foward | fallback
-@trait_function parallel_transport_along!(
-    M::AbstractDecoratorManifold,
-    Y,
-    p,
-    X,
-    c::AbstractVector,
-)
-# EmbeddedSubManifold
-function parallel_transport_along!(
-    ::TraitList{IsEmbeddedSubmanifold},
-    M::AbstractDecoratorManifold,
-    Y,
-    p,
-    X,
-    c::AbstractVector,
-)
-    return parallel_transport_along!(get_embedding(M, p), Y, p, X, c)
-end
-
-# Introduce Deco Trait | automatic foward | fallback
 @trait_function parallel_transport_direction(M::AbstractDecoratorManifold, p, X, q)
 # EmbeddedSubManifold
 function parallel_transport_direction(
@@ -703,44 +665,6 @@ function retract_t!(
     m::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
 )
     return retract_t!(get_embedding(M, p), q, p, X, t, m)
-end
-
-@trait_function vector_transport_along(
-    M::AbstractDecoratorManifold,
-    q,
-    p,
-    X,
-    m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
-)
-function vector_transport_along(
-    ::TraitList{IsEmbeddedSubmanifold},
-    M::AbstractDecoratorManifold,
-    p,
-    X,
-    c,
-    m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
-)
-    return vector_transport_along(get_embedding(M, p), p, X, c, m)
-end
-
-@trait_function vector_transport_along!(
-    M::AbstractDecoratorManifold,
-    Y,
-    p,
-    X,
-    c::AbstractVector,
-    m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
-)
-function vector_transport_along!(
-    ::TraitList{IsEmbeddedSubmanifold},
-    M::AbstractDecoratorManifold,
-    Y,
-    p,
-    X,
-    c::AbstractVector,
-    m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
-)
-    return vector_transport_along!(get_embedding(M, p), Y, p, X, c, m)
 end
 
 @trait_function vector_transport_direction(

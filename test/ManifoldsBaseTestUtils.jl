@@ -565,15 +565,6 @@ function ManifoldsBase.inverse_retract_nlsolve!(
 )
     return (Y .= q .- p)
 end
-function ManifoldsBase.vector_transport_along_project!(
-    ::DefaultManifold,
-    Y,
-    p,
-    X,
-    c::AbstractVector,
-)
-    return (Y .= X)
-end
 Base.getindex(x::MatrixVectorTransport, i) = x.m[:, i]
 Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
 
