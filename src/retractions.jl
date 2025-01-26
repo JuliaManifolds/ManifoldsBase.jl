@@ -1052,13 +1052,11 @@ function retract_sasaki! end
 
 Compute the in-place variant of the [`SasakiRetraction`](@ref) `m`.
 """
-retract_sasaki!(M::AbstractManifold, q, p, X, m::SasakiRetraction)
-
-function retract_sasaki! end
-
-function retract_sasaki_t!(M::AbstractManifold, q, p, X, t::Number)
-    return retract_sasaki!(M, q, p, t * X)
+function retract_sasaki!(M::AbstractManifold, q, p, X, m::SasakiRetraction)
+    return retract_sasaki_t!(M, q, p, X, one(number_eltype(X)), m)
 end
+
+function retract_sasaki_t! end
 
 Base.show(io::IO, ::CayleyRetraction) = print(io, "CayleyRetraction()")
 Base.show(io::IO, ::PadeRetraction{m}) where {m} = print(io, "PadeRetraction($m)")

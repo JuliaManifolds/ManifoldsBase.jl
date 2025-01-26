@@ -951,7 +951,7 @@ norm(M::AbstractManifold, p, X) = sqrt(max(real(inner(M, p, X, X)), 0))
     number_eltype(x)
 
 Numeric element type of the a nested representation of a point or a vector.
-To be used in conjuntion with [`allocate`](@ref) or [`allocate_result`](@ref).
+To be used in conjunction with [`allocate`](@ref) or [`allocate_result`](@ref).
 """
 number_eltype(x) = eltype(x)
 @inline function number_eltype(x::AbstractArray)
