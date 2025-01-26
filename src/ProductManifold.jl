@@ -429,7 +429,7 @@ end
 compute the exponential map from `p` in the direction of `X` on the [`ProductManifold`](@ref) `M`,
 which is the elementwise exponential map on the internal manifolds that build `M`.
 """
-exp(::ProductManifold, ::Any...)
+exp(::ProductManifold, ::Any, ::Any)
 
 function exp!(M::ProductManifold, q, p, X)
     map(
@@ -441,9 +441,9 @@ function exp!(M::ProductManifold, q, p, X)
     )
     return q
 end
-function exp!(M::ProductManifold, q, p, X, t::Number)
+function expt!(M::ProductManifold, q, p, X, t::Number)
     map(
-        (N, qc, pc, Xc) -> exp!(N, qc, pc, Xc, t),
+        (N, qc, pc, Xc) -> expt!(N, qc, pc, Xc, t),
         M.manifolds,
         submanifold_components(M, q),
         submanifold_components(M, p),
@@ -880,9 +880,9 @@ using the [`AbstractRetractionMethod`](@ref) `m` on every manifold.
 """
 retract(::ProductManifold, ::Any, ::Any, ::AbstractRetractionMethod)
 
-function retract!(M::ProductManifold, q, p, X, t::Number, method::ProductRetraction)
+function retract_t!(M::ProductManifold, q, p, X, t::Number, method::ProductRetraction)
     map(
-        (N, qc, pc, Xc, rm) -> retract!(N, qc, pc, Xc, t, rm),
+        (N, qc, pc, Xc, rm) -> retract_t!(N, qc, pc, Xc, t, rm),
         M.manifolds,
         submanifold_components(M, q),
         submanifold_components(M, p),
@@ -891,7 +891,7 @@ function retract!(M::ProductManifold, q, p, X, t::Number, method::ProductRetract
     )
     return q
 end
-function retract!(
+function retract_t!(
     M::ProductManifold,
     q,
     p,
@@ -900,7 +900,7 @@ function retract!(
     method::RTM,
 ) where {RTM<:AbstractRetractionMethod}
     map(
-        (N, qc, pc, Xc) -> retract!(N, qc, pc, Xc, t, method),
+        (N, qc, pc, Xc) -> retract_t!(N, qc, pc, Xc, t, method),
         M.manifolds,
         submanifold_components(M, q),
         submanifold_components(M, p),

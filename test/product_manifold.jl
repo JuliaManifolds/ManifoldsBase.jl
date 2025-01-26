@@ -196,8 +196,8 @@ using RecursiveArrayTools
         @test exp(M, p1, X1) ≈
               ArrayPartition(exp(M1, p1[M, 1], X1[M, 1]), exp(M2, p1[M, 2], X1[M, 2]))
         @test exp(M, p1, X1) ≈ qr
-        @test exp(M, p1, X1, 2.0) ≈ exp(M, p1, 2 * X1)
-        exp!(M, qr, p1, X1, 2.0)
+        @test ManifoldsBase.expt(M, p1, X1, 2.0) ≈ exp(M, p1, 2 * X1)
+        ManifoldsBase.expt!(M, qr, p1, X1, 2.0)
         @test qr ≈ exp(M, p1, 2 * X1)
         @test qr ≈ retract(
             M,

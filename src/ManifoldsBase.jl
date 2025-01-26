@@ -310,7 +310,7 @@ Check whether `X` is a valid tangent vector in the tangent space of `p` on the
 If it is not a tangent vector, an error string should be returned.
 
 By default, `check_vector` returns `nothing`, i.e. if no checks are implemented, the
-assumption is to be optimistic for tangent vectors not deriving from the [`TVector`](@ref)
+assumption is to be optimistic for tangent vectors not deriving from the [`AbstractTangentVector`](@ref)
 type.
 """
 check_vector(M::AbstractManifold, p, X; kwargs...) = nothing
@@ -951,7 +951,7 @@ norm(M::AbstractManifold, p, X) = sqrt(max(real(inner(M, p, X, X)), 0))
     number_eltype(x)
 
 Numeric element type of the a nested representation of a point or a vector.
-To be used in conjuntion with [`allocate`](@ref) or [`allocate_result`](@ref).
+To be used in conjunction with [`allocate`](@ref) or [`allocate_result`](@ref).
 """
 number_eltype(x) = eltype(x)
 @inline function number_eltype(x::AbstractArray)
@@ -1214,14 +1214,20 @@ end
 # ------
 #
 # (a) Manifolds and general types
-export AbstractManifold, AbstractManifoldPoint, TVector, CoTVector, TFVector, CoTFVector
+export AbstractManifold,
+    AbstractManifoldPoint,
+    AbstractTangentVector,
+    AbstractCotangentVector,
+    TFVector,
+    CoTFVector
 export VectorSpaceFiber
 export TangentSpace, TangentSpaceType
 export CotangentSpace, CotangentSpaceType
 export AbstractDecoratorManifold
 export AbstractTrait, IsEmbeddedManifold, IsEmbeddedSubmanifold, IsIsometricEmbeddedManifold
 export IsExplicitDecorator
-export ValidationManifold, ValidationMPoint, ValidationTVector, ValidationCoTVector
+export ValidationManifold,
+    ValidationMPoint, ValidationTangentVector, ValidationCotangentVector
 export EmbeddedManifold
 export AbstractPowerManifold, PowerManifold
 export AbstractPowerRepresentation,
@@ -1370,8 +1376,6 @@ export ×,
     number_of_coordinates,
     number_system,
     power_dimensions,
-    parallel_transport_along,
-    parallel_transport_along!,
     parallel_transport_direction,
     parallel_transport_direction!,
     parallel_transport_to,
@@ -1388,14 +1392,14 @@ export ×,
     rand!,
     retract,
     retract!,
+    retract_t,
+    retract_t!,
     riemann_tensor,
     riemann_tensor!,
     sectional_curvature,
     sectional_curvature_max,
     sectional_curvature_min,
     vector_space_dimension,
-    vector_transport_along,
-    vector_transport_along!,
     vector_transport_direction,
     vector_transport_direction!,
     vector_transport_to,

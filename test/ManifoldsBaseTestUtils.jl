@@ -58,9 +58,9 @@ function ManifoldsBase.check_vector(M::TestSphere, p, X; kwargs...)
     return nothing
 end
 function ManifoldsBase.exp!(M::TestSphere, q, p, X)
-    return exp!(M, q, p, X, one(number_eltype(X)))
+    return ManifoldsBase.expt!(M, q, p, X, one(number_eltype(X)))
 end
-function ManifoldsBase.exp!(::TestSphere, q, p, X, t::Number)
+function ManifoldsBase.expt!(::TestSphere, q, p, X, t::Number)
     θ = abs(t) * norm(X)
     if θ == 0
         copyto!(q, p)
@@ -167,7 +167,7 @@ function Random.rand!(
     return pX
 end
 ManifoldsBase.representation_size(::TestSphere{N}) where {N} = (N + 1,)
-function ManifoldsBase.retract_project!(M::TestSphere, q, p, X, t::Number)
+function ManifoldsBase.retract_project_t!(M::TestSphere, q, p, X, t::Number)
     q .= p .+ t .* X
     project!(M, q, q)
     return q
@@ -253,11 +253,11 @@ ManifoldsBase.manifold_dimension(::ProjectionTestManifold) = 100
 struct NonManifold <: AbstractManifold{ℝ} end
 struct NonBasis <: ManifoldsBase.AbstractBasis{ℝ,TangentSpaceType} end
 struct NonMPoint <: AbstractManifoldPoint end
-struct NonTVector <: TVector end
-struct NonCoTVector <: CoTVector end
+struct NonTangentVector <: AbstractTangentVector end
+struct NonCotangentVector <: AbstractCotangentVector end
 struct NotImplementedRetraction <: AbstractRetractionMethod end
 struct NotImplementedInverseRetraction <: AbstractInverseRetractionMethod end
-*(t::Float64, X::NonTVector) = X
+*(t::Float64, X::NonTangentVector) = X
 
 struct NonBroadcastBasisThing{T}
     v::T
@@ -412,12 +412,14 @@ end
 Base.convert(::Type{DefaultPoint{T}}, v::T) where {T} = DefaultPoint(v)
 Base.eltype(p::DefaultPoint) = eltype(p.value)
 Base.length(p::DefaultPoint) = length(p.value)
-struct DefaultTVector{T} <: TVector
+struct DefaultTangentVector{T} <: AbstractTangentVector
     value::T
 end
-Base.convert(::Type{DefaultTVector{T}}, ::DefaultPoint, v::T) where {T} = DefaultTVector(v)
-Base.eltype(X::DefaultTVector) = eltype(X.value)
-function Base.fill!(X::DefaultTVector, x)
+function Base.convert(::Type{DefaultTangentVector{T}}, ::DefaultPoint, v::T) where {T}
+    return DefaultTangentVector(v)
+end
+Base.eltype(X::DefaultTangentVector) = eltype(X.value)
+function Base.fill!(X::DefaultTangentVector, x)
     fill!(X.value, x)
     return X
 end
@@ -426,24 +428,24 @@ function ManifoldsBase.allocate_result_type(
     ::typeof(log),
     ::Tuple{DefaultPoint,DefaultPoint},
 )
-    return DefaultTVector
+    return DefaultTangentVector
 end
 function ManifoldsBase.allocate_result_type(
     ::DefaultManifold,
     ::typeof(inverse_retract),
     ::Tuple{DefaultPoint,DefaultPoint},
 )
-    return DefaultTVector
+    return DefaultTangentVector
 end
 
 ManifoldsBase.@manifold_element_forwards DefaultPoint value
-ManifoldsBase.@manifold_vector_forwards DefaultTVector value
-ManifoldsBase.@default_manifold_fallbacks ManifoldsBase.DefaultManifold DefaultPoint DefaultTVector value value
+ManifoldsBase.@manifold_vector_forwards DefaultTangentVector value
+ManifoldsBase.@default_manifold_fallbacks ManifoldsBase.DefaultManifold DefaultPoint DefaultTangentVector value value
 
 function ManifoldsBase._injectivity_radius(::DefaultManifold, ::CustomDefinedRetraction)
     return 10.0
 end
-function ManifoldsBase._retract!(
+function ManifoldsBase._retract_t!(
     M::DefaultManifold,
     q,
     p,
@@ -452,13 +454,13 @@ function ManifoldsBase._retract!(
     ::CustomDefinedKeywordRetraction;
     kwargs...,
 )
-    return retract_custom_kw!(M, q, p, X, t; kwargs...)
+    return retract_custom_kw_t!(M, q, p, X, t; kwargs...)
 end
-function retract_custom_kw!(
+function retract_custom_kw_t!(
     ::DefaultManifold,
     q::DefaultPoint,
     p::DefaultPoint,
-    X::DefaultTVector,
+    X::DefaultTangentVector,
     t::Number;
     scale = 2.0,
 )
@@ -477,7 +479,7 @@ function ManifoldsBase._inverse_retract!(
 end
 function inverse_retract_custom_kw!(
     ::DefaultManifold,
-    X::DefaultTVector,
+    X::DefaultTangentVector,
     p::DefaultPoint,
     q::DefaultPoint;
     scale = 2.0,
@@ -486,11 +488,11 @@ function inverse_retract_custom_kw!(
     return X
 end
 
-function ManifoldsBase.retract!(
+function ManifoldsBase.retract_t!(
     ::DefaultManifold,
     q::DefaultPoint,
     p::DefaultPoint,
-    X::DefaultTVector,
+    X::DefaultTangentVector,
     t::Number,
     ::CustomDefinedRetraction,
 )
@@ -500,7 +502,7 @@ end
 
 function ManifoldsBase.inverse_retract!(
     ::DefaultManifold,
-    X::DefaultTVector,
+    X::DefaultTangentVector,
     p::DefaultPoint,
     q::DefaultPoint,
     ::CustomDefinedInverseRetraction,
@@ -513,10 +515,10 @@ struct MatrixVectorTransport{T} <: AbstractVector{T}
     m::Matrix{T}
 end
 # dummy retractions, inverse retracions for fallback tests - mutating should be enough
-ManifoldsBase.retract_polar!(::DefaultManifold, q, p, X, t::Number) = (q .= p .+ t .* X)
-ManifoldsBase.retract_project!(::DefaultManifold, q, p, X, t::Number) = (q .= p .+ t .* X)
-ManifoldsBase.retract_qr!(::DefaultManifold, q, p, X, t::Number) = (q .= p .+ t .* X)
-function ManifoldsBase.retract_exp_ode!(
+ManifoldsBase.retract_polar_t!(::DefaultManifold, q, p, X, t::Number) = (q .= p .+ t .* X)
+ManifoldsBase.retract_project_t!(::DefaultManifold, q, p, X, t::Number) = (q .= p .+ t .* X)
+ManifoldsBase.retract_qr_t!(::DefaultManifold, q, p, X, t::Number) = (q .= p .+ t .* X)
+function ManifoldsBase.retract_exp_ode_t!(
     ::DefaultManifold,
     q,
     p,
@@ -528,7 +530,7 @@ function ManifoldsBase.retract_exp_ode!(
     return (q .= p .+ t .* X)
 end
 
-function ManifoldsBase.retract_pade!(
+function ManifoldsBase.retract_pade_t!(
     ::DefaultManifold,
     q,
     p,
@@ -538,7 +540,7 @@ function ManifoldsBase.retract_pade!(
 )
     return (q .= p .+ t .* X)
 end
-function ManifoldsBase.retract_sasaki!(
+function ManifoldsBase.retract_sasaki_t!(
     ::DefaultManifold,
     q,
     p,
@@ -548,7 +550,7 @@ function ManifoldsBase.retract_sasaki!(
 )
     return (q .= p .+ t .* X)
 end
-ManifoldsBase.retract_softmax!(::DefaultManifold, q, p, X, t::Number) = (q .= p .+ t .* X)
+ManifoldsBase.retract_softmax_t!(::DefaultManifold, q, p, X, t::Number) = (q .= p .+ t .* X)
 ManifoldsBase.get_embedding(M::DefaultManifold) = M # dummy embedding
 ManifoldsBase.inverse_retract_polar!(::DefaultManifold, Y, p, q) = (Y .= q .- p)
 ManifoldsBase.inverse_retract_project!(::DefaultManifold, Y, p, q) = (Y .= q .- p)
@@ -563,15 +565,6 @@ function ManifoldsBase.inverse_retract_nlsolve!(
 )
     return (Y .= q .- p)
 end
-function ManifoldsBase.vector_transport_along_project!(
-    ::DefaultManifold,
-    Y,
-    p,
-    X,
-    c::AbstractVector,
-)
-    return (Y .= X)
-end
 Base.getindex(x::MatrixVectorTransport, i) = x.m[:, i]
 Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
 
@@ -582,11 +575,11 @@ const TestPowerManifoldMultidimensional =
 
 export CustomDefinedInverseRetraction, CustomDefinedKeywordInverseRetraction
 export CustomDefinedKeywordRetraction, CustomDefinedRetraction, CustomUndefinedRetraction
-export DefaultPoint, DefaultTVector
+export DefaultPoint, DefaultTangentVector
 export DiagonalizingBasisProxy
 export MatrixVectorTransport
 export NonManifold, NonBasis, NonBroadcastBasisThing
-export NonMPoint, NonTVector, NonCoTVector
+export NonMPoint, NonTangentVector, NonCotangentVector
 export NotImplementedRetraction, NotImplementedInverseRetraction
 export ProjManifold, ProjectionTestManifold
 export TestSphere, TestSPD

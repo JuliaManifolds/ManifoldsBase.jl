@@ -72,11 +72,6 @@ They should only be called as the final step in the previous layer.
 
 If the default parameters are not dispatched per type, using `_` might be skipped.
 The same holds for functions that do not have these parameters.
-The following resolution might even be seen as a last step in layer I or the resolution here in layer II.
-
-```julia
-exp(M::AbstractManifold, p, X, t::Real) = exp(M, p, t * X)
-```
 
 When there is no dispatch for different types of the optional parameter (here `t`), the `_` might be skipped.
 One could hence see the last code line as a definition on Layer I that passes directly to Layer III, since there are not parameter to dispatch on.
@@ -117,7 +112,7 @@ This means
 
 * the function name should be similar to its high level parent (for example [`retract!`](@ref) and [`retract_polar!`](@ref ManifoldsBase.retract_polar!)  above)
 * The manifold type in method signature should always be as narrow as possible.
-* The points/vectors should either be untyped (for the default representation or if there is only one implementation) or provide all type bounds (for second representations or when using [`AbstractManifoldPoint`](@ref) and [`TVector`](@ref TVector), respectively).
+* The points/vectors should either be untyped (for the default representation or if there is only one implementation) or provide all type bounds (for second representations or when using [`AbstractManifoldPoint`](@ref) and [`AbstractTangentVector`](@ref AbstractTangentVector), respectively).
 
 The first step that often happens on this level is memory allocation and calling the in-place function. If faster, it might also implement the function at hand itself.
 
@@ -129,9 +124,9 @@ To summarize, with respect to the [dispatch on one argument at a time](https://d
 ## [Mutating and allocating functions](@id inplace-and-noninplace)
 
 Every function, where this is applicable, should provide an in-place and an allocating variant.
-For example for the exponential map `exp(M, p, X, t)` returns a _new_ point `q` where the result is computed in.
-On the other hand `exp!(M, q, p, X, t)` computes the result in place of `q`, where the design of the implementation
-should keep in mind that also `exp!(M, p, p, X, t)` should correctly overwrite `p`.
+For example for the exponential map `exp(M, p, X)` returns a _new_ point `q` where the result is computed in.
+On the other hand `exp!(M, q, p, X)` computes the result in place of `q`, where the design of the implementation
+should keep in mind that also `exp!(M, p, p, X)` should correctly overwrite `p`.
 
 The interface provides a way to determine the allocation type and a result to compute/allocate
 the resulting memory, such that the default implementation allocating functions, like [`exp`](@ref) is to allocate the resulting memory and call [`exp!`](@ref).
