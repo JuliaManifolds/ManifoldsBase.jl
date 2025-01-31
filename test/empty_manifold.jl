@@ -81,13 +81,13 @@ using Test
     @test_throws MethodError distance(M, [0.0], [0.0])
 
     @test_throws MethodError exp!(M, p, p, v)
-    @test_throws MethodError ManifoldsBase.exp_fused!(M, p, p, v, 0.0)
+    @test_throws MethodError exp_fused!(M, p, p, v, 0.0)
     @test_throws MethodError exp!(M, [0], [0], [0])
-    @test_throws MethodError ManifoldsBase.exp_fused!(M, [0], [0], [0], 0.0)
+    @test_throws MethodError exp_fused!(M, [0], [0], [0], 0.0)
     @test_throws MethodError exp(M, [0], [0])
-    @test_throws MethodError ManifoldsBase.exp_fused(M, [0], [0], 0.0)
+    @test_throws MethodError exp_fused(M, [0], [0], 0.0)
     @test_throws MethodError exp(M, [0.0], [0.0])
-    @test_throws MethodError ManifoldsBase.exp_fused(M, [0.0], [0.0], 0.0)
+    @test_throws MethodError exp_fused(M, [0.0], [0.0], 0.0)
 
     @test_throws MethodError embed!(M, p, [0]) # no copy for NoPoint p
     @test embed!(M, [0], [0]) == [0]

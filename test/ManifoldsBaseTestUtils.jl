@@ -58,7 +58,7 @@ function ManifoldsBase.check_vector(M::TestSphere, p, X; kwargs...)
     return nothing
 end
 function ManifoldsBase.exp!(M::TestSphere, q, p, X)
-    return ManifoldsBase.exp_fused!(M, q, p, X, one(number_eltype(X)))
+    return exp_fused!(M, q, p, X, one(number_eltype(X)))
 end
 function ManifoldsBase.exp_fused!(::TestSphere, q, p, X, t::Number)
     θ = abs(t) * norm(X)
@@ -274,6 +274,21 @@ function ManifoldsBase.number_eltype(a::NonBroadcastBasisThing)
     return typeof(reduce(+, one(number_eltype(eti)) for eti in a.v))
 end
 
+function ManifoldsBase._tangent_vector_type_for_point(
+    ::AbstractManifold,
+    p::NonBroadcastBasisThing,
+    T_number_eltype,
+)
+    return typeof(p)
+end
+function ManifoldsBase.allocate_on(
+    M::AbstractManifold,
+    ::TangentSpaceType,
+    T::Type{<:NonBroadcastBasisThing},
+)
+    return NonBroadcastBasisThing(similar(T.parameters[1], representation_size(M)))
+end
+
 ManifoldsBase.allocate(a::NonBroadcastBasisThing) = NonBroadcastBasisThing(allocate(a.v))
 function ManifoldsBase.allocate(a::NonBroadcastBasisThing, ::Type{T}) where {T}
     return NonBroadcastBasisThing(allocate(a.v, T))
@@ -287,22 +302,23 @@ function Base.copyto!(a::NonBroadcastBasisThing, b::NonBroadcastBasisThing)
     return a
 end
 
+
 function ManifoldsBase.log!(
     ::DefaultManifold,
-    v::NonBroadcastBasisThing,
-    x::NonBroadcastBasisThing,
-    y::NonBroadcastBasisThing,
+    X::NonBroadcastBasisThing,
+    p::NonBroadcastBasisThing,
+    q::NonBroadcastBasisThing,
 )
-    return copyto!(v, y - x)
+    return copyto!(X, q - p)
 end
 
 function ManifoldsBase.exp!(
     ::DefaultManifold,
-    y::NonBroadcastBasisThing,
-    x::NonBroadcastBasisThing,
-    v::NonBroadcastBasisThing,
+    q::NonBroadcastBasisThing,
+    p::NonBroadcastBasisThing,
+    X::NonBroadcastBasisThing,
 )
-    return copyto!(y, x + v)
+    return copyto!(q, p + X)
 end
 
 function ManifoldsBase.get_basis_orthonormal(

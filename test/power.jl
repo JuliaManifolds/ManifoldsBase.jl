@@ -186,7 +186,7 @@ end
                     @test distance(N, p, q, Inf) == Infn
                     @test distance(N, p, q, LogarithmicInverseRetraction(), Inf) == Infn
                     @test exp(N, p, q) == p .+ q
-                    @test ManifoldsBase.exp_fused(N, p, q, 2) == p .+ 2 .* q
+                    @test exp_fused(N, p, q, 2) == p .+ 2 .* q
 
                     @test retract(N, p, q) == p .+ q
                     @test retract(N, p, q, ExponentialRetraction()) == p .+ q

@@ -103,6 +103,12 @@ end
     X,
     B::AbstractBasis,
 )
+@invoke_maker 1 AbstractManifold allocate_result(
+    M::AbstractDecoratorManifold,
+    f::typeof(get_vector),
+    p,
+    c,
+)
 
 # Introduce fallback
 @inline function allocate_result(

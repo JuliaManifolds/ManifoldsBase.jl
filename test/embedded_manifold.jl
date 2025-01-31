@@ -10,7 +10,7 @@ struct PosQuadrantManifold <: AbstractDecoratorManifold{ℝ} end
 
 ManifoldsBase.get_embedding(::HalfPlaneManifold) = ManifoldsBase.DefaultManifold(1, 3)
 ManifoldsBase.decorated_manifold(::HalfPlaneManifold) = ManifoldsBase.DefaultManifold(2)
-ManifoldsBase.representation_size(::HalfPlaneManifold) = (3,)
+ManifoldsBase.representation_size(::HalfPlaneManifold) = (1, 3)
 
 ManifoldsBase.get_embedding(::PosQuadrantManifold) = HalfPlaneManifold()
 ManifoldsBase.representation_size(::PosQuadrantManifold) = (3,)
@@ -63,35 +63,35 @@ end
 #
 # A second manifold that is modelled as just isometrically embedded but not a submanifold
 #
-struct AnotherHalfPlanemanifold <: AbstractDecoratorManifold{ℝ} end
+struct AnotherHalfPlaneManifold <: AbstractDecoratorManifold{ℝ} end
 
-ManifoldsBase.get_embedding(::AnotherHalfPlanemanifold) = ManifoldsBase.DefaultManifold(3)
-function ManifoldsBase.decorated_manifold(::AnotherHalfPlanemanifold)
+ManifoldsBase.get_embedding(::AnotherHalfPlaneManifold) = ManifoldsBase.DefaultManifold(3)
+function ManifoldsBase.decorated_manifold(::AnotherHalfPlaneManifold)
     return ManifoldsBase.DefaultManifold(2)
 end
-ManifoldsBase.representation_size(::AnotherHalfPlanemanifold) = (2,)
+ManifoldsBase.representation_size(::AnotherHalfPlaneManifold) = (2,)
 
-function ManifoldsBase.active_traits(f, ::AnotherHalfPlanemanifold, args...)
+function ManifoldsBase.active_traits(f, ::AnotherHalfPlaneManifold, args...)
     return ManifoldsBase.merge_traits(ManifoldsBase.IsIsometricEmbeddedManifold())
 end
 
-function ManifoldsBase.embed!(::AnotherHalfPlanemanifold, q, p)
+function ManifoldsBase.embed!(::AnotherHalfPlaneManifold, q, p)
     q[1:2] .= p
     q[3] = 0
     return q
 end
-function ManifoldsBase.embed!(::AnotherHalfPlanemanifold, Y, p, X)
+function ManifoldsBase.embed!(::AnotherHalfPlaneManifold, Y, p, X)
     Y[1:2] .= X
     Y[3] = 0
     return Y
 end
-function ManifoldsBase.project!(::AnotherHalfPlanemanifold, q, p)
+function ManifoldsBase.project!(::AnotherHalfPlaneManifold, q, p)
     return q .= [p[1], p[2]]
 end
-function ManifoldsBase.project!(::AnotherHalfPlanemanifold, Y, p, X)
+function ManifoldsBase.project!(::AnotherHalfPlaneManifold, Y, p, X)
     return Y .= [X[1], X[2]]
 end
-function ManifoldsBase.exp!(::AnotherHalfPlanemanifold, q, p, X)
+function ManifoldsBase.exp!(::AnotherHalfPlaneManifold, q, p, X)
     return q .= p .+ X
 end
 #
@@ -200,12 +200,12 @@ ManifoldsBase.decorated_manifold(::FallbackManifold) = DefaultManifold(3)
         @test get_embedding(M, [1, 2, 3]) == ManifoldsBase.DefaultManifold(3)
     end
 
-    @testset "HalfPlanemanifold" begin
+    @testset "HalfPlaneManifold" begin
         M = HalfPlaneManifold()
         N = PosQuadrantManifold()
         @test repr(M) == "HalfPlaneManifold()"
         @test get_embedding(M) == ManifoldsBase.DefaultManifold(1, 3)
-        @test representation_size(M) == (3,)
+        @test representation_size(M) == (1, 3)
         # Check point checks using embedding
         @test is_point(M, [1 0.1 0.1], true)
         @test !is_point(M, [-1, 0, 0]) #wrong dim (3,1)
@@ -267,11 +267,11 @@ ManifoldsBase.decorated_manifold(::FallbackManifold) = DefaultManifold(3)
         log!(M, Y, p, q)
         @test Y == q - p
         @test exp(M, p, X) == q
-        @test ManifoldsBase.exp_fused(M, p, X, 1.0) == q
+        @test exp_fused(M, p, X, 1.0) == q
         r = similar(p)
         exp!(M, r, p, X)
         @test r == q
-        ManifoldsBase.exp_fused!(M, r, p, X, 1.0)
+        exp_fused!(M, r, p, X, 1.0)
         @test r == q
         @test distance(M, p, r) == norm(r - p)
 
@@ -300,8 +300,8 @@ ManifoldsBase.decorated_manifold(::FallbackManifold) = DefaultManifold(3)
         @test get_vector!(M, Y, p, Xc, DefaultOrthonormalBasis()) == X
     end
 
-    @testset "AnotherHalfPlanemanifold" begin
-        M = AnotherHalfPlanemanifold()
+    @testset "AnotherHalfPlaneManifold" begin
+        M = AnotherHalfPlaneManifold()
         p = [1.0, 2.0]
         pe = embed(M, p)
         @test pe == [1.0, 2.0, 0.0]
@@ -314,7 +314,7 @@ ManifoldsBase.decorated_manifold(::FallbackManifold) = DefaultManifold(3)
         Xs = similar(X)
         @test embed_project!(M, Xs, p, X) == X
         @test project(M, pe, Xe) == X
-        # isometric passtthrough
+        # isometric passthrough
         @test injectivity_radius(M) == Inf
         @test injectivity_radius(M, p) == Inf
         @test injectivity_radius(M, p, ExponentialRetraction()) == Inf
@@ -356,9 +356,9 @@ ManifoldsBase.decorated_manifold(::FallbackManifold) = DefaultManifold(3)
             A = zeros(2)
             # Check that all of these report not to be implemented, i.e.
             @test_throws MethodError exp(M2, [1, 2], [2, 3])
-            @test_throws MethodError ManifoldsBase.exp_fused(M2, [1, 2], [2, 3], 1.0)
+            @test_throws MethodError exp_fused(M2, [1, 2], [2, 3], 1.0)
             @test_throws MethodError exp!(M2, A, [1, 2], [2, 3])
-            @test_throws MethodError ManifoldsBase.exp_fused!(M2, A, [1, 2], [2, 3], 1.0)
+            @test_throws MethodError exp_fused!(M2, A, [1, 2], [2, 3], 1.0)
             @test_throws MethodError retract(M2, [1, 2], [2, 3])
             @test_throws MethodError retract_fused(M2, [1, 2], [2, 3], 1.0)
             @test_throws MethodError retract!(M2, A, [1, 2], [2, 3])
