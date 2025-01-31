@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0] 01/02/2025
+
+## Changed
+
+* to avoid logical ambiguities to the forthcoming [`LieGroups.jl`](https://github.com/JuliaManifolds/LieGroups.jl),
+  the “fusing” variant `exp(M, p, X, t)` has been moved to its own name `exp_fused(M, p, X, t)`
+  and similarly `exp!(M, q, p, X, t)` has moved to its own name `exp_fused!(M, q, p, X, t)`.
+  Using `exp_fused!` instead of multiplying `X` by `t` and calling `exp!` is faster on certain manifolds. `retract` was reworked in a similar way.
+* the `TVector` type has been renamed to `AbstractTangentVector`
+* the `CoTVector` type has been renamed to `AbstractCotangentVector`
+
+## Removed
+
+* `parallel_transport_along(M, p, X, c)`, `vector_transport_along(M, p, X, c, m)` as well as
+  their mutating variants are removed from the API for now.
+  It was never specified how to actually specify a curve `c` and the method was only
+  implemented for `Euclidean` in `Manifolds.jl` anyways.
+
 ## [0.15.24] 17/01/2025
 
 ### Added

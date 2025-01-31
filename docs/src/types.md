@@ -37,7 +37,7 @@ Converting tangent vectors between different representations can be performed us
 ## Macros for automatic forwards for simple points/tangent vectors
 
 When distinguishing different representations of points or tangent vectors on one manifold,
-it might happen that both a subtype of [`AbstractManifoldPoint`](@ref) and a subtype of [`TVector`](@ref)
+it might happen that both a subtype of [`AbstractManifoldPoint`](@ref) and a subtype of [`AbstractTangentVector`](@ref)
 are just encapsulating a value
 
 This is taken into account by the following macros, that forward several actions just to this field. Most prominently vector operations for the tangent vectors.
