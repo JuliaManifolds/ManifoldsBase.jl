@@ -10,9 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Changed
 
 * to avoid logical ambiguities to the forthcoming [`LieGroups.jl`](https://github.com/JuliaManifolds/LieGroups.jl),
-  the “fusing” variant `exp(M, p, X, t)` has been moved to its own name `expt(M, p, X, t)`
-  and similarly `exp!(M, q, p, X, t)` has moved to its own name `expt!(M, q, p, X, t)`.
-  Since both provide a technical detail for speedup, this new function is currently not exported and considered internal.
+  the “fusing” variant `exp(M, p, X, t)` has been moved to its own name `exp_fused(M, p, X, t)`
+  and similarly `exp!(M, q, p, X, t)` has moved to its own name `exp_fused!(M, q, p, X, t)`.
+  Using `exp_fused!` instead of multiplying `X` by `t` and calling `exp!` is faster on certain manifolds. `retract` was reworked in a similar way.
 * the `TVector` type has been renamed to `AbstractTangentVector`
 * the `CoTVector` type has been renamed to `AbstractCotangentVector`
 

@@ -231,29 +231,29 @@ end
 
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function exp(M::AbstractDecoratorManifold, p, X)
-@trait_function expt(M::AbstractDecoratorManifold, p, X, t::Number)
+@trait_function exp_fused(M::AbstractDecoratorManifold, p, X, t::Number)
 # EmbeddedSubManifold
 function exp(::TraitList{IsEmbeddedSubmanifold}, M::AbstractDecoratorManifold, p, X)
     return exp(get_embedding(M, p), p, X)
 end
-function expt(
+function exp_fused(
     ::TraitList{IsEmbeddedSubmanifold},
     M::AbstractDecoratorManifold,
     p,
     X,
     t::Number,
 )
-    return expt(get_embedding(M, p), p, X, t)
+    return exp_fused(get_embedding(M, p), p, X, t)
 end
 
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function exp!(M::AbstractDecoratorManifold, q, p, X)
-@trait_function expt!(M::AbstractDecoratorManifold, q, p, X, t::Number)
+@trait_function exp_fused!(M::AbstractDecoratorManifold, q, p, X, t::Number)
 # EmbeddedSubManifold
 function exp!(::TraitList{IsEmbeddedSubmanifold}, M::AbstractDecoratorManifold, q, p, X)
     return exp!(get_embedding(M, p), q, p, X)
 end
-function expt!(
+function exp_fused!(
     ::TraitList{IsEmbeddedSubmanifold},
     M::AbstractDecoratorManifold,
     q,
@@ -261,7 +261,7 @@ function expt!(
     X,
     t::Number,
 )
-    return expt!(get_embedding(M, p), q, p, X, t)
+    return exp_fused!(get_embedding(M, p), q, p, X, t)
 end
 
 # Introduce Deco Trait | automatic foward | fallback
@@ -603,7 +603,7 @@ end
     X,
     m::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
 )
-@trait_function retract_t(
+@trait_function retract_fused(
     M::AbstractDecoratorManifold,
     p,
     X,
@@ -619,7 +619,7 @@ function retract(
 )
     return retract(get_embedding(M, p), p, X, m)
 end
-function retract_t(
+function retract_fused(
     ::TraitList{IsEmbeddedSubmanifold},
     M::AbstractDecoratorManifold,
     p,
@@ -627,7 +627,7 @@ function retract_t(
     t::Number,
     m::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
 )
-    return retract_t(get_embedding(M, p), p, X, t, m)
+    return retract_fused(get_embedding(M, p), p, X, t, m)
 end
 
 @trait_function retract!(
@@ -637,7 +637,7 @@ end
     X,
     m::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
 )
-@trait_function retract_t!(
+@trait_function retract_fused!(
     M::AbstractDecoratorManifold,
     q,
     p,
@@ -655,7 +655,7 @@ function retract!(
 )
     return retract!(get_embedding(M, p), q, p, X, m)
 end
-function retract_t!(
+function retract_fused!(
     ::TraitList{IsEmbeddedSubmanifold},
     M::AbstractDecoratorManifold,
     q,
@@ -664,7 +664,7 @@ function retract_t!(
     t::Number,
     m::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
 )
-    return retract_t!(get_embedding(M, p), q, p, X, t, m)
+    return retract_fused!(get_embedding(M, p), q, p, X, t, m)
 end
 
 @trait_function vector_transport_direction(

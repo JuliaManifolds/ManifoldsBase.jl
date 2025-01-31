@@ -150,8 +150,8 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
             return q
         end
 
-        function ManifoldsBase.expt!(M::$TM, q::$TP, p::$TP, X::$TV, t::Number)
-            ManifoldsBase.expt!(M, q.$pfield, p.$pfield, X.$vfield, t)
+        function ManifoldsBase.exp_fused!(M::$TM, q::$TP, p::$TP, X::$TV, t::Number)
+            ManifoldsBase.exp_fused!(M, q.$pfield, p.$pfield, X.$vfield, t)
             return q
         end
 
@@ -198,7 +198,7 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
             return q
         end
 
-        function ManifoldsBase.retract_t!(
+        function ManifoldsBase.retract_fused!(
             M::$TM,
             q::$TP,
             p::$TP,
@@ -206,7 +206,7 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
             t::Number,
             m::ExponentialRetraction,
         )
-            ManifoldsBase.retract_t!(M, q.$pfield, p.$pfield, X.$vfield, t, m)
+            ManifoldsBase.retract_fused!(M, q.$pfield, p.$pfield, X.$vfield, t, m)
             return q
         end
 
@@ -256,7 +256,7 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
         end
     end
     for f_postfix in [:polar, :project, :qr, :softmax]
-        rm = Symbol("retract_$(f_postfix)_t!")
+        rm = Symbol("retract_$(f_postfix)_fused!")
         push!(
             block.args,
             quote
@@ -270,7 +270,7 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
     push!(
         block.args,
         quote
-            function ManifoldsBase.retract_exp_ode_t!(
+            function ManifoldsBase.retract_exp_ode_fused!(
                 M::$TM,
                 q::$TP,
                 p::$TP,
@@ -279,7 +279,7 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
                 m::AbstractRetractionMethod,
                 B::ManifoldsBase.AbstractBasis,
             )
-                ManifoldsBase.retract_exp_ode_t!(
+                ManifoldsBase.retract_exp_ode_fused!(
                     M,
                     q.$pfield,
                     p.$pfield,
@@ -290,7 +290,7 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
                 )
                 return q
             end
-            function ManifoldsBase.retract_pade_t!(
+            function ManifoldsBase.retract_pade_fused!(
                 M::$TM,
                 q::$TP,
                 p::$TP,
@@ -298,10 +298,10 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
                 t::Number,
                 m::PadeRetraction,
             )
-                ManifoldsBase.retract_pade_t!(M, q.$pfield, p.$pfield, X.$vfield, t, m)
+                ManifoldsBase.retract_pade_fused!(M, q.$pfield, p.$pfield, X.$vfield, t, m)
                 return q
             end
-            function ManifoldsBase.retract_embedded_t!(
+            function ManifoldsBase.retract_embedded_fused!(
                 M::$TM,
                 q::$TP,
                 p::$TP,
@@ -309,10 +309,17 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
                 t::Number,
                 m::AbstractRetractionMethod,
             )
-                ManifoldsBase.retract_embedded_t!(M, q.$pfield, p.$pfield, X.$vfield, t, m)
+                ManifoldsBase.retract_embedded_fused!(
+                    M,
+                    q.$pfield,
+                    p.$pfield,
+                    X.$vfield,
+                    t,
+                    m,
+                )
                 return q
             end
-            function ManifoldsBase.retract_sasaki_t!(
+            function ManifoldsBase.retract_sasaki_fused!(
                 M::$TM,
                 q::$TP,
                 p::$TP,
@@ -320,7 +327,14 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
                 t::Number,
                 m::SasakiRetraction,
             )
-                ManifoldsBase.retract_sasaki_t!(M, q.$pfield, p.$pfield, X.$vfield, t, m)
+                ManifoldsBase.retract_sasaki_fused!(
+                    M,
+                    q.$pfield,
+                    p.$pfield,
+                    X.$vfield,
+                    t,
+                    m,
+                )
                 return q
             end
         end,
