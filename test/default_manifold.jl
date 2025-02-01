@@ -443,9 +443,9 @@ using ManifoldsBaseTestUtils
         @test angle(M, p, X, Y) ≈ π / 2
         @test inverse_retract(M, p, q, LogarithmicInverseRetraction()) == -Y
         @test retract(M, q, Y, CustomDefinedRetraction()) == p
-        @test retract_fused(M, q, Y, 1.0, CustomDefinedRetraction()) == p
+        @test ManifoldsBase.retract_fused(M, q, Y, 1.0, CustomDefinedRetraction()) == p
         @test retract(M, q, Y, ExponentialRetraction()) == p
-        @test retract_fused(M, q, Y, 1.0, ExponentialRetraction()) == p
+        @test ManifoldsBase.retract_fused(M, q, Y, 1.0, ExponentialRetraction()) == p
         # rest not implemented - so they also fall back even onto mutating
         Z = similar(Y)
         r = similar(p)
@@ -461,9 +461,10 @@ using ManifoldsBaseTestUtils
             SasakiRetraction(5),
         ]
             @test retract(M, q, Y, retr) == DefaultPoint(q.value + Y.value)
-            @test retract_fused(M, q, Y, 0.5, retr) == DefaultPoint(q.value + 0.5 * Y.value)
+            @test ManifoldsBase.retract_fused(M, q, Y, 0.5, retr) ==
+                  DefaultPoint(q.value + 0.5 * Y.value)
             @test retract!(M, r, q, Y, retr) == DefaultPoint(q.value + Y.value)
-            @test retract_fused!(M, r, q, Y, 0.5, retr) ==
+            @test ManifoldsBase.retract_fused!(M, r, q, Y, 0.5, retr) ==
                   DefaultPoint(q.value + 0.5 * Y.value)
         end
 

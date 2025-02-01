@@ -461,6 +461,16 @@ ManifoldsBase.@default_manifold_fallbacks ManifoldsBase.DefaultManifold DefaultP
 function ManifoldsBase._injectivity_radius(::DefaultManifold, ::CustomDefinedRetraction)
     return 10.0
 end
+function ManifoldsBase._retract!(
+    M::DefaultManifold,
+    q,
+    p,
+    X,
+    ::CustomDefinedKeywordRetraction;
+    kwargs...,
+)
+    return retract_custom_kw!(M, q, p, X; kwargs...)
+end
 function ManifoldsBase._retract_fused!(
     M::DefaultManifold,
     q,
@@ -481,6 +491,16 @@ function retract_custom_kw_fused!(
     scale = 2.0,
 )
     q.value .= scale .* p.value .+ t .* X.value
+    return q
+end
+function retract_custom_kw!(
+    ::DefaultManifold,
+    q::DefaultPoint,
+    p::DefaultPoint,
+    X::DefaultTangentVector;
+    scale = 2.0,
+)
+    q.value .= scale .* p.value .+ X.value
     return q
 end
 function ManifoldsBase._inverse_retract!(
@@ -504,7 +524,19 @@ function inverse_retract_custom_kw!(
     return X
 end
 
-function ManifoldsBase.retract_fused!(
+#
+# Test on layer 2 (omiting a layer 3, since we fully qualify all types here already)
+function ManifoldsBase._retract!(
+    ::DefaultManifold,
+    q::DefaultPoint,
+    p::DefaultPoint,
+    X::DefaultTangentVector,
+    ::CustomDefinedRetraction,
+)
+    q.value .= 2 .* p.value .+ X.value
+    return q
+end
+function ManifoldsBase._retract_fused!(
     ::DefaultManifold,
     q::DefaultPoint,
     p::DefaultPoint,
@@ -516,7 +548,7 @@ function ManifoldsBase.retract_fused!(
     return q
 end
 
-function ManifoldsBase.inverse_retract!(
+function ManifoldsBase._inverse_retract!(
     ::DefaultManifold,
     X::DefaultTangentVector,
     p::DefaultPoint,
@@ -531,13 +563,30 @@ struct MatrixVectorTransport{T} <: AbstractVector{T}
     m::Matrix{T}
 end
 # dummy retractions, inverse retracions for fallback tests - mutating should be enough
+function ManifoldsBase.retract_polar!(::DefaultManifold, q, p, X)
+    return (q .= p .+ X)
+end
 function ManifoldsBase.retract_polar_fused!(::DefaultManifold, q, p, X, t::Number)
     return (q .= p .+ t .* X)
+end
+function ManifoldsBase.retract_project!(::DefaultManifold, q, p, X)
+    return (q .= p .+ X)
 end
 function ManifoldsBase.retract_project_fused!(::DefaultManifold, q, p, X, t::Number)
     return (q .= p .+ t .* X)
 end
+ManifoldsBase.retract_qr!(::DefaultManifold, q, p, X) = (q .= p .+ X)
 ManifoldsBase.retract_qr_fused!(::DefaultManifold, q, p, X, t::Number) = (q .= p .+ t .* X)
+function ManifoldsBase.retract_exp_ode!(
+    ::DefaultManifold,
+    q,
+    p,
+    X,
+    m::AbstractRetractionMethod,
+    B::ManifoldsBase.AbstractBasis,
+)
+    return (q .= p .+ X)
+end
 function ManifoldsBase.retract_exp_ode_fused!(
     ::DefaultManifold,
     q,
@@ -550,6 +599,9 @@ function ManifoldsBase.retract_exp_ode_fused!(
     return (q .= p .+ t .* X)
 end
 
+function ManifoldsBase.retract_pade!(::DefaultManifold, q, p, X, m::PadeRetraction)
+    return (q .= p .+ X)
+end
 function ManifoldsBase.retract_pade_fused!(
     ::DefaultManifold,
     q,
@@ -560,6 +612,9 @@ function ManifoldsBase.retract_pade_fused!(
 )
     return (q .= p .+ t .* X)
 end
+function ManifoldsBase.retract_sasaki!(::DefaultManifold, q, p, X, ::SasakiRetraction)
+    return (q .= p .+ X)
+end
 function ManifoldsBase.retract_sasaki_fused!(
     ::DefaultManifold,
     q,
@@ -569,6 +624,9 @@ function ManifoldsBase.retract_sasaki_fused!(
     ::SasakiRetraction,
 )
     return (q .= p .+ t .* X)
+end
+function ManifoldsBase.retract_softmax!(::DefaultManifold, q, p, X)
+    return (q .= p .+ X)
 end
 function ManifoldsBase.retract_softmax_fused!(::DefaultManifold, q, p, X, t::Number)
     return (q .= p .+ t .* X)
