@@ -185,10 +185,6 @@ isomorphisms.
     picked = _pick_basic_allocation_argument(M, f, x...)
     return allocate(M, picked, T)
 end
-@inline function allocate_result(M::AbstractManifold, f::typeof(get_vector), p, c)
-    T = allocate_result_type(M, f, (p, c))
-    return allocate_on(M, TangentSpaceType(), _tangent_vector_type_for_point(M, p, T))
-end
 @inline function allocate_result(M::AbstractManifold, f)
     T = allocate_result_type(M, f, ())
     rs = representation_size(M)
@@ -1349,8 +1345,6 @@ export ×,
     distance,
     exp,
     exp!,
-    exp_fused,
-    exp_fused!,
     embed,
     embed!,
     embed_project,
@@ -1407,8 +1401,6 @@ export ×,
     rand!,
     retract,
     retract!,
-    retract_fused,
-    retract_fused!,
     riemann_tensor,
     riemann_tensor!,
     sectional_curvature,
