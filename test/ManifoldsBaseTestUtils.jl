@@ -58,7 +58,7 @@ function ManifoldsBase.check_vector(M::TestSphere, p, X; kwargs...)
     return nothing
 end
 function ManifoldsBase.exp!(M::TestSphere, q, p, X)
-    return exp_fused!(M, q, p, X, one(number_eltype(X)))
+    return ManifoldsBase.exp_fused!(M, q, p, X, one(number_eltype(X)))
 end
 function ManifoldsBase.exp_fused!(::TestSphere, q, p, X, t::Number)
     θ = abs(t) * norm(X)

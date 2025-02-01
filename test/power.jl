@@ -186,16 +186,29 @@ end
                     @test distance(N, p, q, Inf) == Infn
                     @test distance(N, p, q, LogarithmicInverseRetraction(), Inf) == Infn
                     @test exp(N, p, q) == p .+ q
-                    @test exp_fused(N, p, q, 2) == p .+ 2 .* q
+                    @test ManifoldsBase.exp_fused(N, p, q, 2) == p .+ 2 .* q
 
                     @test retract(N, p, q) == p .+ q
                     @test retract(N, p, q, ExponentialRetraction()) == p .+ q
                     r = allocate(p)
                     @test retract!(N, r, p, q, ExponentialRetraction()) == p .+ q
-                    @test retract_fused(N, p, q, 1.0) == p .+ q
-                    @test retract_fused(N, p, q, 1.0, ExponentialRetraction()) == p .+ q
+                    @test ManifoldsBase.retract_fused(N, p, q, 1.0) == p .+ q
+                    @test ManifoldsBase.retract_fused(
+                        N,
+                        p,
+                        q,
+                        1.0,
+                        ExponentialRetraction(),
+                    ) == p .+ q
                     r = allocate(p)
-                    @test retract_fused!(N, r, p, q, 1.0, ExponentialRetraction()) == p .+ q
+                    @test ManifoldsBase.retract_fused!(
+                        N,
+                        r,
+                        p,
+                        q,
+                        1.0,
+                        ExponentialRetraction(),
+                    ) == p .+ q
                     @test r == p .+ q
                     @test inverse_retract(N, p, r) == q
                     @test inverse_retract(N, p, r, LogarithmicInverseRetraction()) == q

@@ -101,10 +101,10 @@ using ManifoldsBaseTestUtils
             @test ManifoldsBase.check_approx(M, pts[1], pts[1]) === nothing
             @test ManifoldsBase.check_approx(M, pts[2], tv2, tv2) === nothing
             @test is_point(M, retract(M, pts[1], tv1))
-            @test isapprox(M, pts[1], retract_fused(M, pts[1], tv1, 0))
+            @test isapprox(M, pts[1], ManifoldsBase.retract_fused(M, pts[1], tv1, 0))
 
             @test is_point(M, retract(M, pts[1], tv1, rm))
-            @test isapprox(M, pts[1], retract_fused(M, pts[1], tv1, 0, rm))
+            @test isapprox(M, pts[1], ManifoldsBase.retract_fused(M, pts[1], tv1, 0, rm))
 
             new_pt = exp(M, pts[1], tv1)
             retract!(M, new_pt, pts[1], tv1)
@@ -471,9 +471,10 @@ using ManifoldsBaseTestUtils
         mRK = RetractionWithKeywords(CustomDefinedKeywordRetraction(); scale = 3.0)
         pRK = allocate(p, eltype(p.value), size(p.value))
         @test retract(M, p, X, mRK) == DefaultPoint(3 * p.value + X.value)
-        @test retract_fused(M, p, X, 0.5, mRK) == DefaultPoint(3 * p.value + 0.5 * X.value)
+        @test ManifoldsBase.retract_fused(M, p, X, 0.5, mRK) ==
+              DefaultPoint(3 * p.value + 0.5 * X.value)
         @test retract!(M, pRK, p, X, mRK) == DefaultPoint(3 * p.value + X.value)
-        @test retract_fused!(M, pRK, p, X, 0.5, mRK) ==
+        @test ManifoldsBase.retract_fused!(M, pRK, p, X, 0.5, mRK) ==
               DefaultPoint(3 * p.value + 0.5 * X.value)
         mIRK = InverseRetractionWithKeywords(
             CustomDefinedKeywordInverseRetraction();
