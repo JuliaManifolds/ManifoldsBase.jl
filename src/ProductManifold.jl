@@ -880,6 +880,34 @@ using the [`AbstractRetractionMethod`](@ref) `m` on every manifold.
 """
 retract(::ProductManifold, ::Any, ::Any, ::AbstractRetractionMethod)
 
+function retract!(M::ProductManifold, q, p, X, method::ProductRetraction)
+    map(
+        (N, qc, pc, Xc, rm) -> retract!(N, qc, pc, Xc, rm),
+        M.manifolds,
+        submanifold_components(M, q),
+        submanifold_components(M, p),
+        submanifold_components(M, X),
+        method.retractions,
+    )
+    return q
+end
+function retract!(
+    M::ProductManifold,
+    q,
+    p,
+    X,
+    method::RTM,
+) where {RTM<:AbstractRetractionMethod}
+    map(
+        (N, qc, pc, Xc) -> retract!(N, qc, pc, Xc, method),
+        M.manifolds,
+        submanifold_components(M, q),
+        submanifold_components(M, p),
+        submanifold_components(M, X),
+    )
+    return q
+end
+
 function retract_fused!(M::ProductManifold, q, p, X, t::Number, method::ProductRetraction)
     map(
         (N, qc, pc, Xc, rm) -> retract_fused!(N, qc, pc, Xc, t, rm),

@@ -735,7 +735,7 @@ function _retract(M::AbstractManifold, p, X, ::ExponentialRetraction)
 end
 function _retract(M::AbstractManifold, p, X, m::AbstractRetractionMethod)
     q = allocate_result(M, retract, p, X)
-    return _retract!(M, q, p, X, m)
+    return retract!(M, q, p, X, m)
 end
 
 @doc "$(_doc_retract)"
