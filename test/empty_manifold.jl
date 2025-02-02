@@ -1,6 +1,8 @@
 using ManifoldsBase, Test
 
-
+s = @__DIR__
+!(s in LOAD_PATH) && (push!(LOAD_PATH, s))
+using ManifoldsBaseTestUtils
 
 using Test
 
@@ -44,6 +46,9 @@ using Test
     @test_throws MethodError ManifoldsBase.retract_fused(M, [0.0], [0.0], 0.0)
     @test_throws MethodError ManifoldsBase.retract_fused(M, [0.0], [0.0], 0.0, exp_retr)
     @test_throws MethodError retract(M, [0.0], [0.0], NotImplementedRetraction())
+    sr = SasakiRetraction(2)
+    @test_throws MethodError ManifoldsBase.retract_fused(M, [0.0], [0.0], 0.0, sr)
+    @test_throws MethodError retract(M, [0.0], [0.0], sr)
 
     log_invretr = ManifoldsBase.LogarithmicInverseRetraction()
 

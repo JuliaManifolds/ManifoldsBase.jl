@@ -655,5 +655,9 @@ using ManifoldsBaseTestUtils
               default_vector_transport_method(M)
         @test default_approximation_method(M, vector_transport_to, DefaultPoint) ==
               default_vector_transport_method(M)
+        @test default_approximation_method(M, vector_transport_direction) ==
+              default_vector_transport_method(M)
+        @test default_approximation_method(M, vector_transport_direction, DefaultPoint) ==
+              default_vector_transport_method(M)
     end
 end

@@ -216,9 +216,22 @@ using RecursiveArrayTools
             ProductRetraction(ExponentialRetraction(), ExponentialRetraction()),
         )
         @test qr2 ≈ qr
-        qr3 = similar(p1)
-        retract!(M, qr3, p1, 2 * X1, ExponentialRetraction())
-        @test qr3 ≈ qr
+        qr3a = similar(p1)
+        ManifoldsBase.retract_fused!(
+            M,
+            qr3a,
+            p1,
+            2 * X1,
+            1.0,
+            ProductRetraction(ExponentialRetraction(), ExponentialRetraction()),
+        )
+        @test qr3a ≈ qr
+        qr3b = similar(p1)
+        ManifoldsBase.retract_fused!(M, qr3b, p1, 2 * X1, 1.0, ExponentialRetraction())
+        @test qr3b ≈ qr
+        qr4 = similar(p1)
+        retract!(M, qr4, p1, 2 * X1, ExponentialRetraction())
+        @test qr4 ≈ qr
         Xr = similar(X1)
         log!(M, Xr, p1, p2)
         @test log(M, p1, p2) ≈ ArrayPartition([0.0, π / 4, 0.0], [0.0 3.0; -3.0 0.5])
