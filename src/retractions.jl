@@ -177,10 +177,10 @@ end
 
 Exponential map on [`TangentBundle`](https://juliamanifolds.github.io/Manifolds.jl/stable/manifolds/vector_bundle.html#Manifolds.TangentBundle) computed via Euler integration as described
 in [MuralidharanFletcher:2012](@cite). The system of equations for ``\gamma : ℝ \to T\mathcal M`` such that
-``\gamma(1) = \exp_{p,X}(X_M, X_F)`` and ``\gamma(0)=(p, X)`` reads
+``γ(1) = \exp_{p,X}(X_M, X_F)`` and ``γ(0)=(p, X)`` reads
 
 ```math
-\dot{\gamma}(t) = (\dot{p}(t), \dot{X}(t)) = (R(X(t), \dot{X}(t))\dot{p}(t), 0)
+\dot{γ}(t) = (\dot{p}(t), \dot{X}(t)) = (R(X(t), \dot{X}(t))\dot{p}(t), 0)
 ```
 
 where ``R`` is the Riemann curvature tensor (see [`riemann_tensor`](@ref)).
@@ -695,18 +695,19 @@ inverse_retract_softmax!(M::AbstractManifold, X, p, q)
 
 function inverse_retract_softmax! end
 
-@doc raw"""
+_doc_retract = raw"""
     retract(M::AbstractManifold, p, X, method::AbstractRetractionMethod=default_retraction_method(M, typeof(p)))
-    retract(M::AbstractManifold, p, X, t::Number=1, method::AbstractRetractionMethod=default_retraction_method(M, typeof(p)))
+    retract!(M::AbstractManifold, q, p, X, method::AbstractRetractionMethod=default_retraction_method(M, typeof(p)))
 
-Compute a retraction, a cheaper, approximate version of the [`exp`](@ref)onential map,
+Compute a retraction, an approximate version of the [`exp`](@ref)onential map,
 from `p` into direction `X`, scaled by `t`, on the [`AbstractManifold`](@ref) `M`.
+This can be computed in-place of `q`.
 
 A retraction ``\operatorname{retr}_p: T_p\mathcal M → \mathcal M`` is a smooth map that fulfils
 
 1. ``\operatorname{retr}_p(0) = p``
-2. ``D\operatorname{retr}_p(0): T_p\mathcal M \to T_p\mathcal M`` is the identity map,
-i.e. ``D\operatorname{retr}_p(0)[X]=X`` holds for all ``X\in T_p\mathcal M``,
+2. ``D\operatorname{retr}_p(0): T_p\mathcal M → T_p\mathcal M`` is the identity map,
+i.e. ``D\operatorname{retr}_p(0)[X]=X`` holds for all ``X∈ T_p\mathcal M``,
 
 where ``D\operatorname{retr}_p`` denotes the differential of the retraction
 
@@ -718,58 +719,26 @@ Retraction method can be specified by the last argument, defaulting to
 
 Locally, the retraction is invertible. For the inverse operation, see [`inverse_retract`](@ref).
 """
-function retract(
-    M::AbstractManifold,
-    p,
-    X,
-    m::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
-)
-    return _retract(M, p, X, one(number_eltype(X)), m)
-end
-function retract(
-    M::AbstractManifold,
-    p,
-    X,
-    t::Number,
-    m::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
-)
-    return _retract(M, p, X, t, m)
-end
 
-function _retract(M::AbstractManifold, p, X, t::Number, ::ExponentialRetraction)
-    return exp(M, p, X, t)
+@doc "$(_doc_retract)"
+function retract(
+    M::AbstractManifold,
+    p,
+    X,
+    m::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
+)
+    return _retract(M, p, X, m)
 end
-function _retract(M::AbstractManifold, p, X, t, m::AbstractRetractionMethod)
+# Layer 2 – dispatch on the method
+function _retract(M::AbstractManifold, p, X, ::ExponentialRetraction)
+    return exp(M, p, X)
+end
+function _retract(M::AbstractManifold, p, X, m::AbstractRetractionMethod)
     q = allocate_result(M, retract, p, X)
-    return retract!(M, q, p, X, t, m)
+    return retract!(M, q, p, X, m)
 end
 
-"""
-    retract!(M::AbstractManifold, q, p, X)
-    retract!(M::AbstractManifold, q, p, X, t::Real=1)
-    retract!(M::AbstractManifold, q, p, X, method::AbstractRetractionMethod)
-    retract!(M::AbstractManifold, q, p, X, t::Real=1, method::AbstractRetractionMethod)
-
-Compute a retraction, a cheaper, approximate version of the [`exp`](@ref)onential map,
-from `p` into direction `X`, scaled by `t`, on the [`AbstractManifold`](@ref) manifold `M`.
-Result is saved to `q`.
-
-Retraction method can be specified by the last argument, defaulting to
-[`default_retraction_method`](@ref)`(M)`. See the documentation of respective manifolds for available
-methods.
-
-See [`retract`](@ref) for more details.
-"""
-function retract!(
-    M::AbstractManifold,
-    q,
-    p,
-    X,
-    t::Number,
-    m::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
-)
-    return _retract!(M, q, p, X, t, m)
-end
+@doc "$(_doc_retract)"
 function retract!(
     M::AbstractManifold,
     q,
@@ -777,45 +746,210 @@ function retract!(
     X,
     method::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
 )
-    return retract!(M, q, p, X, one(number_eltype(X)), method)
-end
-# dispatch to lower level
-function _retract!(M::AbstractManifold, q, p, X, t, ::CayleyRetraction; kwargs...)
-    return retract_cayley!(M, q, p, X, t; kwargs...)
-end
-function _retract!(M::AbstractManifold, q, p, X, t, m::EmbeddedRetraction; kwargs...)
-    return retract_embedded!(M, q, p, X, t, m.retraction; kwargs...)
-end
-function _retract!(M::AbstractManifold, q, p, X, t, ::ExponentialRetraction; kwargs...)
-    return exp!(M, q, p, X, t; kwargs...)
-end
-function _retract!(M::AbstractManifold, q, p, X, t, m::ODEExponentialRetraction; kwargs...)
-    return retract_exp_ode!(M, q, p, X, t, m.retraction, m.basis; kwargs...)
-end
-function _retract!(M::AbstractManifold, q, p, X, t, ::PolarRetraction; kwargs...)
-    return retract_polar!(M, q, p, X, t; kwargs...)
-end
-function _retract!(M::AbstractManifold, q, p, X, t, ::ProjectionRetraction; kwargs...)
-    return retract_project!(M, q, p, X, t; kwargs...)
-end
-function _retract!(M::AbstractManifold, q, p, X, t, ::QRRetraction; kwargs...)
-    return retract_qr!(M, q, p, X, t; kwargs...)
-end
-function _retract!(M::AbstractManifold, q, p, X, t::Number, m::SasakiRetraction)
-    return retract_sasaki!(M, q, p, X, t, m)
-end
-function _retract!(M::AbstractManifold, q, p, X, t::Number, ::SoftmaxRetraction; kwargs...)
-    return retract_softmax!(M, q, p, X, t; kwargs...)
-end
-function _retract!(M::AbstractManifold, q, p, X, t, m::PadeRetraction; kwargs...)
-    return retract_pade!(M, q, p, X, t, m; kwargs...)
-end
-function _retract!(M::AbstractManifold, q, p, X, t, m::RetractionWithKeywords; kwargs...)
-    return _retract!(M, q, p, X, t, m.retraction; kwargs..., m.kwargs...)
+    return _retract!(M, q, p, X, method)
 end
 
+# Retract Layer 2 – dispatch on the method
+function _retract!(M::AbstractManifold, q, p, X, ::CayleyRetraction; kwargs...)
+    return retract_cayley!(M, q, p, X; kwargs...)
+end
+function _retract!(M::AbstractManifold, q, p, X, m::EmbeddedRetraction; kwargs...)
+    return retract_embedded!(M, q, p, X, m.retraction; kwargs...)
+end
+function _retract!(M::AbstractManifold, q, p, X, ::ExponentialRetraction; kwargs...)
+    return exp!(M, q, p, X; kwargs...)
+end
+function _retract!(M::AbstractManifold, q, p, X, m::ODEExponentialRetraction; kwargs...)
+    return retract_exp_ode!(M, q, p, X, m.retraction, m.basis; kwargs...)
+end
+function _retract!(M::AbstractManifold, q, p, X, ::PolarRetraction; kwargs...)
+    return retract_polar!(M, q, p, X; kwargs...)
+end
+function _retract!(M::AbstractManifold, q, p, X, ::ProjectionRetraction; kwargs...)
+    return retract_project!(M, q, p, X; kwargs...)
+end
+function _retract!(M::AbstractManifold, q, p, X, ::QRRetraction; kwargs...)
+    return retract_qr!(M, q, p, X; kwargs...)
+end
+function _retract!(M::AbstractManifold, q, p, X, m::SasakiRetraction)
+    return retract_sasaki!(M, q, p, X, m)
+end
+function _retract!(M::AbstractManifold, q, p, X, ::SoftmaxRetraction; kwargs...)
+    return retract_softmax!(M, q, p, X; kwargs...)
+end
+function _retract!(M::AbstractManifold, q, p, X, m::PadeRetraction; kwargs...)
+    return retract_pade!(M, q, p, X, m; kwargs...)
+end
+function _retract!(M::AbstractManifold, q, p, X, m::RetractionWithKeywords; kwargs...)
+    return _retract!(M, q, p, X, m.retraction; kwargs..., m.kwargs...)
+end
+
+_doc_retract_fused = """
+    retract_fused(M::AbstractManifold, p, X, t::Number, method::AbstractRetractionMethod=default_retraction_method(M, typeof(p)))
+    retract_fused!(M::AbstractManifold, q, p, X, t::Number, method::AbstractRetractionMethod=default_retraction_method(M, typeof(p)))
+
+A variant of [`retract`](@ref) that performs retraction on the vector `X` scaled by `t`.
+This can be faster in some cases compared to multiplying `X` by `t`, especially when
+performing this for multiple values of `t`.
+This can be computed in-place of `q`.
+
+By default, this falls back to calling [`retract`](@ref) with `t*X`.
+
+!!! note "Technical Note"
+    This fallback is happening on the in-place variant in [Layer 3](@ref design-layer3).
+    Hence implementing this performant variant requires to implement the corresponding
+    third layer fused function, like for example `retract_polar_fused!`.
+    The “non-fused” variant always also has to be implemented, but can then be just spefied
+    to fallback to the fused variant. for example
+    ```
+    retract_polar!(M, q, p, X) = retract_polar_fused!(M, q, p, X, one(eltype(p)))
+    ```
 """
-    retract_embedded!(M::AbstractManifold, q, p, X, t, m::AbstractRetractionMethod)
+
+@doc "$(_doc_retract_fused)"
+function retract_fused(
+    M::AbstractManifold,
+    p,
+    X,
+    t::Number,
+    m::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
+)
+    return _retract_fused(M, p, X, t, m)
+end
+
+function _retract_fused(M::AbstractManifold, p, X, t::Number, ::ExponentialRetraction)
+    return exp_fused(M, p, X, t)
+end
+function _retract_fused(M::AbstractManifold, p, X, t::Number, m::AbstractRetractionMethod)
+    q = allocate_result(M, retract, p, X)
+    return retract_fused!(M, q, p, X, t, m)
+end
+
+@doc "$(_doc_retract_fused)"
+function retract_fused!(
+    M::AbstractManifold,
+    q,
+    p,
+    X,
+    t::Number,
+    m::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
+)
+    return _retract_fused!(M, q, p, X, t, m)
+end
+# Retract fused Layer 2
+# Retract Layer 2 – dispatch on the method
+function _retract_fused!(
+    M::AbstractManifold,
+    q,
+    p,
+    X,
+    t::Number,
+    ::CayleyRetraction;
+    kwargs...,
+)
+    return retract_cayley_fused!(M, q, p, X, t; kwargs...)
+end
+function _retract_fused!(
+    M::AbstractManifold,
+    q,
+    p,
+    X,
+    t::Number,
+    m::EmbeddedRetraction;
+    kwargs...,
+)
+    return retract_embedded_fused!(M, q, p, X, t, m.retraction; kwargs...)
+end
+function _retract_fused!(
+    M::AbstractManifold,
+    q,
+    p,
+    X,
+    t::Number,
+    ::ExponentialRetraction;
+    kwargs...,
+)
+    return exp_fused!(M, q, p, X, t; kwargs...)
+end
+function _retract_fused!(
+    M::AbstractManifold,
+    q,
+    p,
+    X,
+    t::Number,
+    m::ODEExponentialRetraction;
+    kwargs...,
+)
+    return retract_exp_ode_fused!(M, q, p, X, t, m.retraction, m.basis; kwargs...)
+end
+function _retract_fused!(
+    M::AbstractManifold,
+    q,
+    p,
+    X,
+    t::Number,
+    ::PolarRetraction;
+    kwargs...,
+)
+    return retract_polar_fused!(M, q, p, X, t; kwargs...)
+end
+function _retract_fused!(
+    M::AbstractManifold,
+    q,
+    p,
+    X,
+    t::Number,
+    ::ProjectionRetraction;
+    kwargs...,
+)
+    return retract_project_fused!(M, q, p, X, t; kwargs...)
+end
+function _retract_fused!(M::AbstractManifold, q, p, X, t::Number, ::QRRetraction; kwargs...)
+    return retract_qr_fused!(M, q, p, X, t; kwargs...)
+end
+function _retract_fused!(M::AbstractManifold, q, p, X, t::Number, m::SasakiRetraction)
+    return retract_sasaki_fused!(M, q, p, X, t, m)
+end
+function _retract_fused!(
+    M::AbstractManifold,
+    q,
+    p,
+    X,
+    t::Number,
+    ::SoftmaxRetraction;
+    kwargs...,
+)
+    return retract_softmax_fused!(M, q, p, X, t; kwargs...)
+end
+function _retract_fused!(
+    M::AbstractManifold,
+    q,
+    p,
+    X,
+    t::Number,
+    m::PadeRetraction;
+    kwargs...,
+)
+    return retract_pade_fused!(M, q, p, X, t, m; kwargs...)
+end
+function _retract_fused!(
+    M::AbstractManifold,
+    q,
+    p,
+    X,
+    t::Number,
+    m::RetractionWithKeywords;
+    kwargs...,
+)
+    return _retract_fused!(M, q, p, X, t, m.retraction; kwargs..., m.kwargs...)
+end
+
+#
+#
+# retract and retract_fused layer 3
+
+"""
+    retract_embedded!(M::AbstractManifold, q, p, X, m::AbstractRetractionMethod)
 
 Compute the in-place variant of the [`EmbeddedRetraction`](@ref) using
 the [`AbstractRetractionMethod`](@ref) `m` in the embedding (see [`get_embedding`](@ref))
@@ -826,7 +960,6 @@ function retract_embedded!(
     q,
     p,
     X,
-    t,
     m::AbstractRetractionMethod;
     kwargs...,
 )
@@ -834,6 +967,33 @@ function retract_embedded!(
         M,
         q,
         retract(
+            get_embedding(M),
+            embed(get_embedding(M), p),
+            embed(get_embedding(M), p, X),
+            m;
+            kwargs...,
+        ),
+    )
+end
+
+"""
+    retract_embedded_fused!(M::AbstractManifold, q, p, X, t::Number, m::AbstractRetractionMethod)
+
+Compute the scaled variant of `retract_embedded!`.
+"""
+function retract_embedded_fused!(
+    M::AbstractManifold,
+    q,
+    p,
+    X,
+    t::Number,
+    m::AbstractRetractionMethod;
+    kwargs...,
+)
+    return project!(
+        M,
+        q,
+        retract_fused(
             get_embedding(M),
             embed(get_embedding(M), p),
             embed(get_embedding(M), p, X),
@@ -845,92 +1005,116 @@ function retract_embedded!(
 end
 
 """
-    retract_cayley!(M::AbstractManifold, q, p, X, t)
+    retract_cayley!(M::AbstractManifold, q, p, X)
 
 Compute the in-place variant of the [`CayleyRetraction`](@ref),
 which by default falls back to calling the first order [`PadeRetraction`](@ref).
 """
-function retract_cayley!(M::AbstractManifold, q, p, X, t; kwargs...)
-    return retract_pade!(M, q, p, X, t, PadeRetraction(1); kwargs...)
+function retract_cayley!(M::AbstractManifold, q, p, X; kwargs...)
+    return retract_pade!(M, q, p, X, PadeRetraction(1); kwargs...)
 end
 
+function retract_cayley_fused!(M::AbstractManifold, q, p, X, t::Number; kwargs...)
+    return retract_cayley!(M, q, p, t * X; kwargs...)
+end
+
+function retract_exp_ode! end
 """
-    retract_exp_ode!(M::AbstractManifold, q, p, X, t, m::AbstractRetractionMethod, B::AbstractBasis)
+    retract_exp_ode!(M::AbstractManifold, q, p, X, m::AbstractRetractionMethod, B::AbstractBasis)
 
 Compute the in-place variant of the [`ODEExponentialRetraction`](@ref)`(m, B)`.
 """
-function retract_exp_ode!(
+retract_exp_ode!(
     M::AbstractManifold,
     q,
     p,
     X,
-    t,
     m::AbstractRetractionMethod,
     B::AbstractBasis,
 )
-    return retract_exp_ode!(
-        M::AbstractManifold,
-        q,
-        p,
-        t * X,
-        m::AbstractRetractionMethod,
-        B::AbstractBasis,
-    )
+
+function retract_exp_ode_fused!(M::AbstractManifold, q, p, X, t::Number, m, B)
+    return retract_exp_ode!(M, q, p, t * X, m, B)
 end
 
+function retract_pade! end
 """
-    retract_pade!(M::AbstractManifold, q, p, X, t, m::PadeRetraction)
+    retract_pade!(M::AbstractManifold, q, p, X, m::PadeRetraction)
 
 Compute the in-place variant of the [`PadeRetraction`](@ref) `m`.
 """
-function retract_pade!(M::AbstractManifold, q, p, X, t, m::PadeRetraction)
-    return retract_pade!(M, q, p, t * X)
+retract_pade!(M::AbstractManifold, q, p, X, m::PadeRetraction)
+
+function retract_pade_fused!(M::AbstractManifold, q, p, X, t::Number, m::PadeRetraction)
+    return retract_pade!(M, q, p, t * X, m)
 end
 
+
+function retract_project! end
 """
-    retract_project!(M::AbstractManifold, q, p, X, t)
+    retract_project!(M::AbstractManifold, q, p, X)
 
 Compute the in-place variant of the [`ProjectionRetraction`](@ref).
 """
-function retract_project!(M::AbstractManifold, q, p, X, t)
+retract_project!(M::AbstractManifold, q, p, X)
+
+"""
+    retract_project_fused!(M::AbstractManifold, q, p, X, t::Number)
+
+Compute the in-place variant of the [`ProjectionRetraction`](@ref).
+"""
+function retract_project_fused!(M::AbstractManifold, q, p, X, t::Number)
     return retract_project!(M, q, p, t * X)
 end
 
+
+function retract_polar! end
 """
-    retract_polar!(M::AbstractManifold, q, p, X, t)
+    retract_polar!(M::AbstractManifold, q, p, X)
 
 Compute the in-place variant of the [`PolarRetraction`](@ref).
 """
-function retract_polar!(M::AbstractManifold, q, p, X, t)
+retract_polar!(M::AbstractManifold, q, p, X)
+
+function retract_polar_fused!(M::AbstractManifold, q, p, X, t::Number)
     return retract_polar!(M, q, p, t * X)
 end
 
+function retract_qr! end
 """
-    retract_qr!(M::AbstractManifold, q, p, X, t)
+    retract_qr!(M::AbstractManifold, q, p, X)
 
 Compute the in-place variant of the [`QRRetraction`](@ref).
 """
-function retract_qr!(M::AbstractManifold, q, p, X, t)
+retract_qr!(M::AbstractManifold, q, p, X)
+
+function retract_qr_fused!(M::AbstractManifold, q, p, X, t::Number)
     return retract_qr!(M, q, p, t * X)
 end
 
+function retract_softmax! end
 """
-    retract_softmax!(M::AbstractManifold, q, p, X, t)
+    retract_softmax!(M::AbstractManifold, q, p, X)
 
 Compute the in-place variant of the [`SoftmaxRetraction`](@ref).
 """
-function retract_softmax!(M::AbstractManifold, q, p, X, t::Number)
+retract_softmax!(M::AbstractManifold, q, p, X)
+
+function retract_softmax_fused!(M::AbstractManifold, q, p, X, t::Number)
     return retract_softmax!(M, q, p, t * X)
 end
 
+function retract_sasaki! end
 """
-    retract_sasaki!(M::AbstractManifold, q, p, X, t::Number, m::SasakiRetraction)
+    retract_sasaki!(M::AbstractManifold, q, p, X, m::SasakiRetraction)
 
 Compute the in-place variant of the [`SasakiRetraction`](@ref) `m`.
 """
-retract_sasaki!(M::AbstractManifold, q, p, X, t::Number, m::SasakiRetraction)
+retract_sasaki!(M::AbstractManifold, q, p, X, m::SasakiRetraction)
 
-function retract_sasaki! end
+function retract_sasaki_fused!(M::AbstractManifold, q, p, X, t::Number, m::SasakiRetraction)
+    return retract_sasaki!(M, q, p, t * X, m)
+end
 
 Base.show(io::IO, ::CayleyRetraction) = print(io, "CayleyRetraction()")
 Base.show(io::IO, ::PadeRetraction{m}) where {m} = print(io, "PadeRetraction($m)")

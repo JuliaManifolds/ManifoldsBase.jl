@@ -92,25 +92,36 @@ ManifoldsBase.representation_size(::NonDecoratorManifold) = (2,)
     @test embed!(M, Y, p, X) == X
     # the following is implemented but passes to the second and hence fails
     @test_throws MethodError exp(M, p, X)
-    @test_throws MethodError exp(M, p, X, 2.0)
+    @test_throws MethodError ManifoldsBase.exp_fused(M, p, X, 2.0)
     @test_throws MethodError exp!(M, q, p, X)
-    @test_throws MethodError exp!(M, q, p, X, 2.0)
+    @test_throws MethodError ManifoldsBase.exp_fused!(M, q, p, X, 2.0)
     @test_throws MethodError retract(M, p, X)
-    @test_throws MethodError retract(M, p, X, 2.0)
+    @test_throws MethodError ManifoldsBase.retract_fused(M, p, X, 2.0)
+    @test_throws MethodError ManifoldsBase.retract_fused(
+        M,
+        p,
+        X,
+        2.0,
+        ExponentialRetraction(),
+    )
     @test_throws MethodError retract!(M, q, p, X)
-    @test_throws MethodError retract!(M, q, p, X, 2.0)
+    @test_throws MethodError ManifoldsBase.retract_fused!(M, q, p, X, 2.0)
+    @test_throws MethodError ManifoldsBase.retract_fused!(
+        M,
+        q,
+        p,
+        X,
+        2.0,
+        ExponentialRetraction(),
+    )
     @test_throws MethodError log(M, p, q)
     @test_throws MethodError log!(M, Y, p, q)
     @test_throws MethodError inverse_retract(M, p, q)
     @test_throws MethodError inverse_retract!(M, Y, p, q)
-    @test_throws MethodError parallel_transport_along(M, p, X, :curve)
-    @test_throws MethodError parallel_transport_along!(M, Y, p, X, :curve)
     @test_throws MethodError parallel_transport_direction(M, p, X, X)
     @test_throws MethodError parallel_transport_direction!(M, Y, p, X, X)
     @test_throws MethodError parallel_transport_to(M, p, X, q)
     @test_throws MethodError parallel_transport_to!(M, Y, p, X, q)
-    @test_throws MethodError vector_transport_along(M, p, X, :curve)
-    @test_throws MethodError vector_transport_along!(M, Y, p, X, :curve)
 end
 
 # With even less, check that representation size stack overflows

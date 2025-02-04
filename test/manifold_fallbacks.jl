@@ -66,18 +66,15 @@ using ManifoldsBaseTestUtils
         PadeRetraction(2),
     ]
         @test_throws MethodError retract(M, p, X, R)
-        @test_throws MethodError retract(M, p, X, 1.0, R)
+        @test_throws MethodError ManifoldsBase.retract_fused(M, p, X, 1.0, R)
         @test_throws MethodError retract!(M, q, p, X, R)
-        @test_throws MethodError retract!(M, q, p, X, 1.0, R)
+        @test_throws MethodError ManifoldsBase.retract_fused!(M, q, p, X, 1.0, R)
     end
     for VT in [
         DifferentiatedRetractionVectorTransport(ExponentialRetraction()),
         ProjectionTransport(),
         ParallelTransport(),
     ]
-        @test_throws MethodError vector_transport_along(M, p, X, :curve, VT)
-        @test_throws MethodError vector_transport_along!(M, Y, p, X, :curve, VT)
-        @test_throws MethodError vector_transport_along!(M, Y, p, X, [p], VT)
         @test_throws MethodError vector_transport_direction(M, p, X, X, VT)
         @test_throws MethodError vector_transport_direction!(M, Y, p, X, X, VT)
         @test_throws MethodError vector_transport_to(M, p, X, q, VT)

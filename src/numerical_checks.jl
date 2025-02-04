@@ -65,7 +65,7 @@ function check_inverse_retraction(
     #
     T = exp10.(log_range)
     # points `p_i` to evaluate the error function at
-    points = [exp(M, p, Xn, t) for t in T]
+    points = [exp_fused(M, p, Xn, t) for t in T]
     Xs = [t * Xn for t in T]
     approx_Xs = [inverse_retract(M, p, q, inverse_retraction_method) for q in points]
     errors = [norm(M, p, X - Y) for (X, Y) in zip(Xs, approx_Xs)]
@@ -154,8 +154,8 @@ function check_retraction(
     #
     T = exp10.(log_range)
     # points `p_i` to evaluate the error function at
-    points = [exp(M, p, Xn, t) for t in T]
-    approx_points = [retract(M, p, Xn, t, retraction_method) for t in T]
+    points = [exp_fused(M, p, Xn, t) for t in T]
+    approx_points = [retract_fused(M, p, Xn, t, retraction_method) for t in T]
     errors = [distance(M, p, q) for (p, q) in zip(points, approx_points)]
     return prepare_check_result(
         log_range,
@@ -244,7 +244,7 @@ function check_vector_transport(
     #
     T = exp10.(log_range)
     # points `p_i` to evaluate the error function at
-    points = [exp(M, p, Xn, t) for t in T]
+    points = [exp_fused(M, p, Xn, t) for t in T]
     Yv = [vector_transport_to(M, p, Y, q, vector_transport_method) for q in points]
     Yp = [parallel_transport_to(M, p, Y, q) for q in points]
     errors = [norm(M, q, X - Y) for (q, X, Y) in zip(points, Yv, Yp)]

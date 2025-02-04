@@ -1,8 +1,7 @@
 @doc raw"""
     exp(M::AbstractManifold, p, X)
-    exp(M::AbstractManifold, p, X, t::Number = 1)
 
-Compute the exponential map of tangent vector `X`, optionally scaled by `t`,  at point `p`
+Compute the exponential map of tangent vector `X` at point `p`
 from the manifold [`AbstractManifold`](@ref) `M`, i.e.
 
 ```math
@@ -17,27 +16,44 @@ function exp(M::AbstractManifold, p, X)
     exp!(M, q, p, X)
     return q
 end
-function exp(M::AbstractManifold, p, X, t::Number)
-    q = allocate_result(M, exp, p, X, t)
-    exp!(M, q, p, X, t)
+
+@doc raw"""
+    exp_fused(M::AbstractManifold, p, X, t::Number = 1)
+
+Compute the exponential map of tangent vector `X` scaled by `t` at point `p`.
+Compared to [`exp`](@ref), this method provides the opportunity to
+avoid the allocation when computing `t*X`.
+By default, this method allocates the resulting point `q` and passes to [`exp_fused!`](@ref).
+"""
+function exp_fused(M::AbstractManifold, p, X, t::Number)
+    q = allocate_result(M, exp, p, X)
+    exp_fused!(M, q, p, X, t)
     return q
 end
 
 """
     exp!(M::AbstractManifold, q, p, X)
-    exp!(M::AbstractManifold, q, p, X, t::Number = 1)
 
 Compute the exponential map of tangent vector `X`, optionally scaled by `t`,  at point `p`
 from the manifold [`AbstractManifold`](@ref) `M`.
 The result is saved to `q`.
 
-If you want to implement exponential map for your manifold, you should implement the
-method with `t`, that is `exp!(M::MyManifold, q, p, X, t::Number)`.
+If you want to implement exponential map for your manifold, you should implement the in-place
+method with, that is `exp_fused!(M::MyManifold, q, p, X)`.
 
 See also [`exp`](@ref).
 """
 exp!(M::AbstractManifold, q, p, X)
-exp!(M::AbstractManifold, q, p, X, t::Number) = exp!(M, q, p, t * X)
+
+"""
+    exp_fused!(M::AbstractManifold, q, p, X, t::Number)
+
+Compute the exponential map of tangent vector `X` scaled by `t` at point `p` in-place of `q`.
+Compared to [`exp!`](@ref), this method provides the opportunity to avoid the allocation
+when computing `t*X`.
+By default, this method performs this operation and passes to [`exp!`](@ref).
+"""
+exp_fused!(M::AbstractManifold, q, p, X, t::Number) = exp!(M, q, p, t * X)
 
 @doc raw"""
     geodesic(M::AbstractManifold, p, X) -> Function
@@ -55,7 +71,8 @@ This yields, that the curve has constant velocity that is locally distance-minim
 
 This function returns a function of (time) `t`.
 """
-geodesic(M::AbstractManifold, p, X) = t -> exp(M, p, X, t)
+geodesic(M::AbstractManifold, p, X) = t -> exp_fused(M, p, X, t)
+
 @doc raw"""
     geodesic(M::AbstractManifold, p, X, t::Real)
 
@@ -68,7 +85,8 @@ with ``γ_{p,X}(0) = p`` and ``\dot γ_{p,X}(0) = X`` a geodesic further fulfill
 
 at time `t`.
 """
-geodesic(M::AbstractManifold, p, X, t::Real) = exp(M, p, X, t)
+geodesic(M::AbstractManifold, p, X, t::Real) = exp_fused(M, p, X, t)
+
 @doc raw"""
     geodesic(M::AbstractManifold, p, X, T::AbstractVector) -> AbstractVector
 
@@ -81,7 +99,7 @@ with ``γ_{p,X}(0) = p`` and ``\dot γ_{p,X}(0) = X`` a geodesic further fulfill
 
 at time points `t` from `T`.
 """
-geodesic(M::AbstractManifold, p, X, T::AbstractVector) = map(t -> exp(M, p, X, t), T)
+geodesic(M::AbstractManifold, p, X, T::AbstractVector) = map(t -> exp_fused(M, p, X, t), T)
 
 @doc raw"""
     geodesic!(M::AbstractManifold, p, X) -> Function
@@ -99,7 +117,7 @@ This yields that the curve has constant velocity and is locally distance-minimiz
 
 This function returns a function `(q,t)` of (time) `t` that mutates `q``.
 """
-geodesic!(M::AbstractManifold, p, X) = (q, t) -> exp!(M, q, p, X, t)
+geodesic!(M::AbstractManifold, p, X) = (q, t) -> exp_fused!(M, q, p, X, t)
 @doc raw"""
     geodesic!(M::AbstractManifold, q, p, X, t::Real)
 
@@ -114,7 +132,7 @@ with ``γ_{p,X}(0) = p`` and ``\dot γ_{p,X}(0) = X`` a geodesic further fulfill
 i.e. the curve is acceleration free with respect to the Riemannian metric.
 This function evaluates the geodeic at `t` in place of `q`.
 """
-geodesic!(M::AbstractManifold, q, p, X, t::Real) = exp!(M, q, p, X, t)
+geodesic!(M::AbstractManifold, q, p, X, t::Real) = exp_fused!(M, q, p, X, t)
 @doc raw"""
     geodesic!(M::AbstractManifold, Q, p, X, T::AbstractVector) -> AbstractVector
 
@@ -131,7 +149,7 @@ This function evaluates the geodeic at time points `t` fom `T` in place of `Q`.
 """
 function geodesic!(M::AbstractManifold, Q, p, X, T::AbstractVector)
     for (q, t) in zip(Q, T)
-        exp!(M, q, p, X, t)
+        exp_fused!(M, q, p, X, t)
     end
     return Q
 end
@@ -161,7 +179,7 @@ Note that the logarithmic map might not be globally defined.
 
 see also [`log`](@ref) and [`inverse_retract!`](@ref),
 """
-log!(M::AbstractManifold, X, p, q)
+ManifoldsBase.log!(M::AbstractManifold, X, p, q)
 
 @doc raw"""
     shortest_geodesic(M::AbstractManifold, p, q) -> Function

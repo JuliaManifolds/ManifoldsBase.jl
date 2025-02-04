@@ -10,7 +10,7 @@ struct PosQuadrantManifold <: AbstractDecoratorManifold{ℝ} end
 
 ManifoldsBase.get_embedding(::HalfPlaneManifold) = ManifoldsBase.DefaultManifold(1, 3)
 ManifoldsBase.decorated_manifold(::HalfPlaneManifold) = ManifoldsBase.DefaultManifold(2)
-ManifoldsBase.representation_size(::HalfPlaneManifold) = (3,)
+ManifoldsBase.representation_size(::HalfPlaneManifold) = (1, 3)
 
 ManifoldsBase.get_embedding(::PosQuadrantManifold) = HalfPlaneManifold()
 ManifoldsBase.representation_size(::PosQuadrantManifold) = (3,)
@@ -63,46 +63,36 @@ end
 #
 # A second manifold that is modelled as just isometrically embedded but not a submanifold
 #
-struct AnotherHalfPlanemanifold <: AbstractDecoratorManifold{ℝ} end
+struct AnotherHalfPlaneManifold <: AbstractDecoratorManifold{ℝ} end
 
-ManifoldsBase.get_embedding(::AnotherHalfPlanemanifold) = ManifoldsBase.DefaultManifold(3)
-function ManifoldsBase.decorated_manifold(::AnotherHalfPlanemanifold)
+ManifoldsBase.get_embedding(::AnotherHalfPlaneManifold) = ManifoldsBase.DefaultManifold(3)
+function ManifoldsBase.decorated_manifold(::AnotherHalfPlaneManifold)
     return ManifoldsBase.DefaultManifold(2)
 end
-ManifoldsBase.representation_size(::AnotherHalfPlanemanifold) = (2,)
+ManifoldsBase.representation_size(::AnotherHalfPlaneManifold) = (2,)
 
-function ManifoldsBase.active_traits(f, ::AnotherHalfPlanemanifold, args...)
+function ManifoldsBase.active_traits(f, ::AnotherHalfPlaneManifold, args...)
     return ManifoldsBase.merge_traits(ManifoldsBase.IsIsometricEmbeddedManifold())
 end
 
-function ManifoldsBase.embed!(::AnotherHalfPlanemanifold, q, p)
+function ManifoldsBase.embed!(::AnotherHalfPlaneManifold, q, p)
     q[1:2] .= p
     q[3] = 0
     return q
 end
-function ManifoldsBase.embed!(::AnotherHalfPlanemanifold, Y, p, X)
+function ManifoldsBase.embed!(::AnotherHalfPlaneManifold, Y, p, X)
     Y[1:2] .= X
     Y[3] = 0
     return Y
 end
-function ManifoldsBase.project!(::AnotherHalfPlanemanifold, q, p)
+function ManifoldsBase.project!(::AnotherHalfPlaneManifold, q, p)
     return q .= [p[1], p[2]]
 end
-function ManifoldsBase.project!(::AnotherHalfPlanemanifold, Y, p, X)
+function ManifoldsBase.project!(::AnotherHalfPlaneManifold, Y, p, X)
     return Y .= [X[1], X[2]]
 end
-function ManifoldsBase.exp!(::AnotherHalfPlanemanifold, q, p, X)
+function ManifoldsBase.exp!(::AnotherHalfPlaneManifold, q, p, X)
     return q .= p .+ X
-end
-function ManifoldsBase.vector_transport_along_embedded!(
-    ::AnotherHalfPlanemanifold,
-    Y,
-    p,
-    X,
-    c,
-    ::ParallelTransport,
-)
-    return Y .= X .+ 1 # +1 for check
 end
 #
 # Third example - explicitly mention an embedding.
@@ -210,12 +200,12 @@ ManifoldsBase.decorated_manifold(::FallbackManifold) = DefaultManifold(3)
         @test get_embedding(M, [1, 2, 3]) == ManifoldsBase.DefaultManifold(3)
     end
 
-    @testset "HalfPlanemanifold" begin
+    @testset "HalfPlaneManifold" begin
         M = HalfPlaneManifold()
         N = PosQuadrantManifold()
         @test repr(M) == "HalfPlaneManifold()"
         @test get_embedding(M) == ManifoldsBase.DefaultManifold(1, 3)
-        @test representation_size(M) == (3,)
+        @test representation_size(M) == (1, 3)
         # Check point checks using embedding
         @test is_point(M, [1 0.1 0.1], true)
         @test !is_point(M, [-1, 0, 0]) #wrong dim (3,1)
@@ -277,29 +267,25 @@ ManifoldsBase.decorated_manifold(::FallbackManifold) = DefaultManifold(3)
         log!(M, Y, p, q)
         @test Y == q - p
         @test exp(M, p, X) == q
-        @test exp(M, p, X, 1.0) == q
+        @test ManifoldsBase.exp_fused(M, p, X, 1.0) == q
         r = similar(p)
         exp!(M, r, p, X)
         @test r == q
-        exp!(M, r, p, X, 1.0)
+        ManifoldsBase.exp_fused!(M, r, p, X, 1.0)
         @test r == q
         @test distance(M, p, r) == norm(r - p)
 
         @test retract(M, p, X) == q
-        @test retract(M, p, X, 1.0) == q
+        @test ManifoldsBase.retract_fused(M, p, X, 1.0) == q
         q2 = similar(q)
         @test retract!(M, q2, p, X) == q
-        @test retract!(M, q2, p, X, 1.0) == q
+        @test ManifoldsBase.retract_fused!(M, q2, p, X, 1.0) == q
         @test q2 == q
         @test inverse_retract(M, p, q) == X
         Y = similar(X)
         @test inverse_retract!(M, Y, p, q) == X
         @test Y == X
 
-        @test vector_transport_along(M, p, X, []) == X
-        @test vector_transport_along!(M, Y, p, X, []) == X
-        @test parallel_transport_along(M, p, X, []) == X
-        @test parallel_transport_along!(M, Y, p, X, []) == X
         @test parallel_transport_direction(M, p, X, X) == X
         @test parallel_transport_direction!(M, Y, p, X, X) == X
         @test parallel_transport_to(M, p, X, q) == X
@@ -314,8 +300,8 @@ ManifoldsBase.decorated_manifold(::FallbackManifold) = DefaultManifold(3)
         @test get_vector!(M, Y, p, Xc, DefaultOrthonormalBasis()) == X
     end
 
-    @testset "AnotherHalfPlanemanifold" begin
-        M = AnotherHalfPlanemanifold()
+    @testset "AnotherHalfPlaneManifold" begin
+        M = AnotherHalfPlaneManifold()
         p = [1.0, 2.0]
         pe = embed(M, p)
         @test pe == [1.0, 2.0, 0.0]
@@ -328,7 +314,7 @@ ManifoldsBase.decorated_manifold(::FallbackManifold) = DefaultManifold(3)
         Xs = similar(X)
         @test embed_project!(M, Xs, p, X) == X
         @test project(M, pe, Xe) == X
-        # isometric passtthrough
+        # isometric passthrough
         @test injectivity_radius(M) == Inf
         @test injectivity_radius(M, p) == Inf
         @test injectivity_radius(M, p, ExponentialRetraction()) == Inf
@@ -339,7 +325,6 @@ ManifoldsBase.decorated_manifold(::FallbackManifold) = DefaultManifold(3)
         q = [2.0, 2.0]
         @test vector_transport_to(M, p, X, q, m) == X #since its PT on R^3
         @test vector_transport_direction(M, p, X, q, m) == X
-        @test vector_transport_along(M, p, X, [], m) == X .+ 1 #as specified in definition above
     end
 
     @testset "Test nonimplemented fallbacks" begin
@@ -371,13 +356,19 @@ ManifoldsBase.decorated_manifold(::FallbackManifold) = DefaultManifold(3)
             A = zeros(2)
             # Check that all of these report not to be implemented, i.e.
             @test_throws MethodError exp(M2, [1, 2], [2, 3])
-            @test_throws MethodError exp(M2, [1, 2], [2, 3], 1.0)
+            @test_throws MethodError ManifoldsBase.exp_fused(M2, [1, 2], [2, 3], 1.0)
             @test_throws MethodError exp!(M2, A, [1, 2], [2, 3])
-            @test_throws MethodError exp!(M2, A, [1, 2], [2, 3], 1.0)
+            @test_throws MethodError ManifoldsBase.exp_fused!(M2, A, [1, 2], [2, 3], 1.0)
             @test_throws MethodError retract(M2, [1, 2], [2, 3])
-            @test_throws MethodError retract(M2, [1, 2], [2, 3], 1.0)
+            @test_throws MethodError ManifoldsBase.retract_fused(M2, [1, 2], [2, 3], 1.0)
             @test_throws MethodError retract!(M2, A, [1, 2], [2, 3])
-            @test_throws MethodError retract!(M2, A, [1, 2], [2, 3], 1.0)
+            @test_throws MethodError ManifoldsBase.retract_fused!(
+                M2,
+                A,
+                [1, 2],
+                [2, 3],
+                1.0,
+            )
             @test_throws MethodError log(M2, [1, 2], [2, 3])
             @test_throws MethodError log!(M2, A, [1, 2], [2, 3])
             @test_throws MethodError inverse_retract(M2, [1, 2], [2, 3])
@@ -388,16 +379,6 @@ ManifoldsBase.decorated_manifold(::FallbackManifold) = DefaultManifold(3)
             @test_throws MethodError project!(M2, A, [1, 2])
             @test_throws MethodError project(M2, [1, 2], [2, 3])
             @test_throws MethodError project!(M2, A, [1, 2], [2, 3])
-            @test_throws MethodError vector_transport_along(M2, [1, 2], [2, 3], [[1, 2]])
-            @test_throws MethodError vector_transport_along(
-                M2,
-                [1, 2],
-                [2, 3],
-                [[1, 2]],
-                ParallelTransport(),
-            )
-            @test vector_transport_along!(M2, A, [1, 2], [2, 3], []) == [2, 3]
-            @test A == [2, 3]
             @test_throws MethodError vector_transport_direction(M2, [1, 2], [2, 3], [3, 4])
             @test_throws MethodError vector_transport_direction!(
                 M2,

@@ -85,8 +85,8 @@ struct ParallelTransport <: AbstractLinearVectorTransportMethod end
     ProjectionTransport <: AbstractVectorTransportMethod
 
 Specify to use projection onto tangent space as vector transport method within
-[`vector_transport_to`](@ref), [`vector_transport_direction`](@ref), or
-[`vector_transport_along`](@ref). See [`project`](@ref) for details.
+[`vector_transport_to`](@ref) or [`vector_transport_direction`](@ref).
+See [`project`](@ref) for details.
 """
 struct ProjectionTransport <: AbstractLinearVectorTransportMethod end
 
@@ -95,8 +95,7 @@ struct ProjectionTransport <: AbstractLinearVectorTransportMethod end
     PoleLadderTransport <: AbstractVectorTransportMethod
 
 Specify to use [`pole_ladder`](@ref) as vector transport method within
-[`vector_transport_to`](@ref), [`vector_transport_direction`](@ref), or
-[`vector_transport_along`](@ref), i.e.
+[`vector_transport_to`](@ref) or [`vector_transport_direction`](@ref), i.e.
 
 Let $X∈ T_p\mathcal M$ be a tangent vector at $p∈\mathcal M$ and $q∈\mathcal M$ the
 point to transport to. Then $x = \exp_pX$ is used to call
@@ -169,8 +168,7 @@ end
     SchildsLadderTransport <: AbstractVectorTransportMethod
 
 Specify to use [`schilds_ladder`](@ref) as vector transport method within
-[`vector_transport_to`](@ref), [`vector_transport_direction`](@ref), or
-[`vector_transport_along`](@ref), i.e.
+[`vector_transport_to`](@ref) or [`vector_transport_direction`](@ref), i.e.
 
 Let $X∈ T_p\mathcal M$ be a tangent vector at $p∈\mathcal M$ and $q∈\mathcal M$ the
 point to transport to. Then
@@ -310,9 +308,8 @@ end
     default_vector_transport_method(M::AbstractManifold)
     default_vector_transport_method(M::AbstractManifold, ::Type{T}) where {T}
 
-The [`AbstractVectorTransportMethod`](@ref) that is used when calling
-[`vector_transport_along`](@ref), [`vector_transport_to`](@ref), or
-[`vector_transport_direction`](@ref) without specifying the vector transport method.
+The [`AbstractVectorTransportMethod`](@ref) that is used when calling [`vector_transport_to`](@ref)
+or [`vector_transport_direction`](@ref) without specifying the vector transport method.
 By default, this is [`ParallelTransport`](@ref).
 
 This method can also be specified more precisely with a point type `T`, for the case
@@ -487,345 +484,6 @@ function show(io::IO, ::ParallelTransport)
 end
 function show(io::IO, m::ScaledVectorTransport)
     return print(io, "ScaledVectorTransport($(m.method))")
-end
-
-"""
-    vector_transport_along(M::AbstractManifold, p, X, c)
-    vector_transport_along(M::AbstractManifold, p, X, c, m::AbstractVectorTransportMethod)
-
-Transport a vector `X` from the tangent space at a point `p` on the [`AbstractManifold`](@ref) `M`
-along the curve represented by `c` using the `method`, which defaults to
-[`default_vector_transport_method`](@ref)`(M)`.
-"""
-function vector_transport_along(
-    M::AbstractManifold,
-    p,
-    X,
-    c,
-    m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
-)
-    return _vector_transport_along(M, p, X, c, m)
-end
-function _vector_transport_along(
-    M::AbstractManifold,
-    p,
-    X,
-    c,
-    ::ParallelTransport;
-    kwargs...,
-)
-    return parallel_transport_along(M, p, X, c; kwargs...)
-end
-function _vector_transport_along(
-    M::AbstractManifold,
-    p,
-    X,
-    c,
-    m::VectorTransportWithKeywords;
-    kwargs...,
-)
-    return _vector_transport_along(M, p, X, c, m.vector_transport; kwargs..., m.kwargs...)
-end
-function _vector_transport_along(
-    M::AbstractManifold,
-    p,
-    X,
-    c,
-    m::AbstractVectorTransportMethod;
-    kwargs...,
-)
-    Y = allocate_result(M, vector_transport_along, X, p)
-    return vector_transport_along!(M, Y, p, X, c, m; kwargs...)
-end
-
-
-@doc raw"""
-    vector_transport_along_diff!(M::AbstractManifold, Y, p, X, c, m::AbstractRetractionMethod)
-
-Compute the vector transport of `X` from ``T_p\mathcal M`` along the curve `c`
-using the differential of the [`AbstractRetractionMethod`](@ref) `m` in place of `Y`.
-"""
-vector_transport_along_diff!(M::AbstractManifold, Y, p, X, c, m)
-
-function vector_transport_along_diff! end
-
-@doc raw"""
-    vector_transport_along_project!(M::AbstractManifold, Y, p, X, c::AbstractVector)
-
-Compute the vector transport of `X` from ``T_p\mathcal M`` along the curve `c`
-using a projection. The result is computed in place of `Y`.
-"""
-vector_transport_along_project!(M::AbstractManifold, Y, p, X, c::AbstractVector)
-
-function vector_transport_along_project! end
-
-"""
-    vector_transport_along!(M::AbstractManifold, Y, p, X, c::AbstractVector)
-    vector_transport_along!(M::AbstractManifold, Y, p, X, c::AbstractVector, m::AbstractVectorTransportMethod)
-
-Transport a vector `X` from the tangent space at a point `p` on the [`AbstractManifold`](@ref) `M`
-along the curve represented by `c` using the `method`, which defaults to
-[`default_vector_transport_method`](@ref)`(M)`. The result is saved to `Y`.
-"""
-function vector_transport_along!(
-    M::AbstractManifold,
-    Y,
-    p,
-    X,
-    c::AbstractVector,
-    m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
-)
-    return _vector_transport_along!(M, Y, p, X, c, m)
-end
-
-function parallel_transport_along!(
-    M::AbstractManifold,
-    Y,
-    p,
-    X,
-    c::AbstractVector;
-    kwargs...,
-)
-    n = length(c)
-    if n == 0
-        copyto!(Y, X)
-    else
-        parallel_transport_to!(M, Y, p, X, c[1]; kwargs...)
-        for i in 1:(length(c) - 1)
-            parallel_transport_to!(M, Y, c[i], Y, c[i + 1]; kwargs...)
-        end
-    end
-    return Y
-end
-
-function _vector_transport_along!(
-    M::AbstractManifold,
-    Y,
-    p,
-    X,
-    c::AbstractVector,
-    ::ParallelTransport;
-    kwargs...,
-)
-    return parallel_transport_along!(M, Y, p, X, c; kwargs...)
-end
-function _vector_transport_along!(
-    M::AbstractManifold,
-    Y,
-    p,
-    X,
-    c::AbstractVector,
-    m::DifferentiatedRetractionVectorTransport;
-    kwargs...,
-)
-    return vector_transport_along_diff!(M, Y, p, X, c, m.retraction; kwargs...)
-end
-function _vector_transport_along!(
-    M::AbstractManifold,
-    Y,
-    p,
-    X,
-    c::AbstractVector,
-    ::ProjectionTransport;
-    kwargs...,
-)
-    return vector_transport_along_project!(M, Y, p, X, c; kwargs...)
-end
-function _vector_transport_along!(
-    M::AbstractManifold,
-    Y,
-    p,
-    X,
-    c,
-    m::VectorTransportWithKeywords;
-    kwargs...,
-)
-    return _vector_transport_along!(
-        M,
-        Y,
-        p,
-        X,
-        c,
-        m.vector_transport;
-        kwargs...,
-        m.kwargs...,
-    )
-end
-function _vector_transport_along!(
-    M::AbstractManifold,
-    Y,
-    p,
-    X,
-    c::AbstractVector,
-    m::EmbeddedVectorTransport;
-    kwargs...,
-)
-    return vector_transport_along_embedded!(M, Y, p, X, c, m.vector_transport; kwargs...)
-end
-
-@doc raw"""
-    vector_transport_along_embedded!(M::AbstractManifold, Y, p, X, c, m::AbstractVectorTransportMethod; kwargs...)
-
-Compute the vector transport of `X` from ``T_p\mathcal M`` along the curve `c`
-using the vector transport method `m` in the embedding and projecting the result back on
-the corresponding tangent space. The result is computed in place of `Y`.
-"""
-vector_transport_along_embedded!(
-    M::AbstractManifold,
-    Y,
-    p,
-    X,
-    c,
-    ::AbstractVectorTransportMethod,
-)
-
-function vector_transport_along_embedded! end
-
-@doc raw"""
-    function vector_transport_along(
-        M::AbstractManifold,
-        p,
-        X,
-        c::AbstractVector,
-        m::PoleLadderTransport
-    )
-
-Compute the vector transport along a discretized curve using
-[`PoleLadderTransport`](@ref) succesively along the sampled curve.
-This method is avoiding additional allocations as well as inner exp/log by performing all
-ladder steps on the manifold and only computing one tangent vector in the end.
-"""
-vector_transport_along(
-    M::AbstractManifold,
-    Y,
-    p,
-    X,
-    c::AbstractVector,
-    m::PoleLadderTransport,
-)
-
-function _vector_transport_along!(
-    M::AbstractManifold,
-    Y,
-    p,
-    X,
-    c::AbstractVector,
-    m::PoleLadderTransport;
-    kwargs...,
-)
-    clen = length(c)
-    if clen == 0
-        copyto!(Y, X)
-    else
-        d = retract(M, p, X, m.retraction)
-        mp = mid_point(M, p, c[1])
-        pole_ladder!(
-            M,
-            d,
-            p,
-            d,
-            c[1],
-            mp,
-            Y;
-            retraction = m.retraction,
-            inverse_retraction = m.inverse_retraction,
-            kwargs...,
-        )
-        for i in 1:(clen - 1)
-            # precompute mid point inplace
-            ci = c[i]
-            cip1 = c[i + 1]
-            mid_point!(M, mp, ci, cip1)
-            # compute new ladder point
-            pole_ladder!(
-                M,
-                d,
-                ci,
-                d,
-                cip1,
-                mp,
-                Y;
-                retraction = m.retraction,
-                inverse_retraction = m.inverse_retraction,
-                kwargs...,
-            )
-        end
-        inverse_retract!(M, Y, c[clen], d, m.inverse_retraction)
-        Y *= (-1)^clen
-    end
-    return Y
-end
-
-@doc raw"""
-    vector_transport_along(
-        M::AbstractManifold,
-        p,
-        X,
-        c::AbstractVector,
-        m::SchildsLadderTransport
-    )
-
-Compute the vector transport along a discretized curve using
-[`SchildsLadderTransport`](@ref) succesively along the sampled curve.
-This method is avoiding additional allocations as well as inner exp/log by performing all
-ladder steps on the manifold and only computing one tangent vector in the end.
-"""
-vector_transport_along(
-    M::AbstractManifold,
-    p,
-    X,
-    c::AbstractVector,
-    m::SchildsLadderTransport,
-)
-function _vector_transport_along!(
-    M::AbstractManifold,
-    Y,
-    p,
-    X,
-    c::AbstractVector,
-    m::SchildsLadderTransport;
-    kwargs...,
-)
-    clen = length(c)
-    if clen == 0
-        copyto!(Y, X)
-    else
-        d = retract(M, p, X, m.retraction)
-        mp = mid_point(M, c[1], d)
-        schilds_ladder!(
-            M,
-            d,
-            p,
-            d,
-            c[1],
-            mp,
-            Y;
-            retraction = m.retraction,
-            inverse_retraction = m.inverse_retraction,
-            kwargs...,
-        )
-        for i in 1:(clen - 1)
-            ci = c[i]
-            cip1 = c[i + 1]
-            # precompute mid point inplace
-            mid_point!(M, mp, cip1, d)
-            # compute new ladder point
-            schilds_ladder!(
-                M,
-                d,
-                ci,
-                d,
-                cip1,
-                mp,
-                Y;
-                retraction = m.retraction,
-                inverse_retraction = m.inverse_retraction,
-                kwargs...,
-            )
-        end
-        inverse_retract!(M, Y, c[clen], d, m.inverse_retraction)
-    end
-    return Y
 end
 
 @doc raw"""
@@ -1321,22 +979,12 @@ function default_approximation_method(
 )
     return default_vector_transport_method(M)
 end
-function default_approximation_method(M::AbstractManifold, ::typeof(vector_transport_along))
-    return default_vector_transport_method(M)
-end
 function default_approximation_method(M::AbstractManifold, ::typeof(vector_transport_to))
     return default_vector_transport_method(M)
 end
 function default_approximation_method(
     M::AbstractManifold,
     ::typeof(vector_transport_direction),
-    T,
-)
-    return default_vector_transport_method(M, T)
-end
-function default_approximation_method(
-    M::AbstractManifold,
-    ::typeof(vector_transport_along),
     T,
 )
     return default_vector_transport_method(M, T)

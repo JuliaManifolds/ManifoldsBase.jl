@@ -87,10 +87,15 @@ function Base.exp(M::ProductManifold, p::ArrayPartition, X::ArrayPartition)
         )...,
     )
 end
-function Base.exp(M::ProductManifold, p::ArrayPartition, X::ArrayPartition, t::Number)
+function ManifoldsBase.exp_fused(
+    M::ProductManifold,
+    p::ArrayPartition,
+    X::ArrayPartition,
+    t::Number,
+)
     return ArrayPartition(
         map(
-            (N, pc, Xc) -> exp(N, pc, Xc, t),
+            (N, pc, Xc) -> ManifoldsBase.exp_fused(N, pc, Xc, t),
             M.manifolds,
             submanifold_components(M, p),
             submanifold_components(M, X),

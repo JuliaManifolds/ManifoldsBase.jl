@@ -5,6 +5,39 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0] 01/02/2025
+
+## Changed
+
+* to avoid logical ambiguities to the forthcoming [`LieGroups.jl`](https://github.com/JuliaManifolds/LieGroups.jl),
+  the “fusing” variant `exp(M, p, X, t)` has been moved to its own name `exp_fused(M, p, X, t)`
+  and similarly `exp!(M, q, p, X, t)` has been moved to its own name `exp_fused!(M, q, p, X, t)`.
+  Note that the new `exp_fused!` method is not exported and by default falls back to calling `exp!` with `t*X`.
+  Actions to take
+  * if you just implemented an own `exp(M, p, X)` or `exp!(M, q, p, X)` everything works as before.
+  * if you implemented a fused variant `exp!(M, q, p, X, t)` you have to adapt two things
+    1. move that implementation to `ManifoldsBase.exp_fused!(M, q, p, X, t)`
+    2. Implement the default `exp!(M, q, p, X) = ManifoldBase.exp_fused!(M, q, p, one(eltype(p)), X)`,
+    or an own specific implementation for the non-fused variant.
+* Similar to `exp`, the “fusing” variant `retract(M, p, X, t, m)` has been moved to
+  its own name `retract_fused(M, p, X, t, m)`  and similarly `retract!(M, q, p, X, t, m)`
+  has been moved to its own name `retract_fused!(M, q, p, X, t, m)`.
+  Note that the new `retract_fused!` method is not exported and by default falls back to calling `retract!` with `t*X`.
+  Actions to take
+  * if you just implemented an own `retract(M, p, X, m)` or `retract!(M, q, p, X, m)` everything works as before.
+  * if you implemented a fused variant `retract!(M, q, p, X, t)` you have to adapt two things
+    1. move that implementation to `ManifoldsBase.retract_fused!(M, q, p, X, t, m)`
+    2. Implement the default `retract!(M, q, p, X, m) = ManifoldBase.retract_fused!(M, q, p, one(eltype(p)), X)`, or an own specific implementation for the non-fused variant.
+* the `TVector` type has been renamed to `AbstractTangentVector`
+* the `CoTVector` type has been renamed to `AbstractCotangentVector`
+
+## Removed
+
+* `parallel_transport_along(M, p, X, c)`, `vector_transport_along(M, p, X, c, m)` as well as
+  their mutating variants are removed from the API for now.
+  It was never specified how to actually specify a curve `c` and the method was only
+  implemented for `Euclidean` in `Manifolds.jl` anyways.
+
 ## [0.15.24] 17/01/2025
 
 ### Added

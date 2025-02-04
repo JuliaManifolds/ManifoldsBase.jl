@@ -64,6 +64,9 @@ using ManifoldsBaseTestUtils
             @test injectivity_radius(M, rm) == Inf
             @test injectivity_radius(M, rm2) == 10
             @test injectivity_radius(M, pts[1], rm2) == 10
+            # ManifoldsBase._injectivity_radius always requires the method to be passed
+            # to reduce the number of ambiguities
+            @test_throws MethodError ManifoldsBase._injectivity_radius(M, pts[1])
 
             tv1 = log(M, pts[1], pts[2])
 
@@ -83,8 +86,8 @@ using ManifoldsBaseTestUtils
                 convert(T, [NaN, NaN, NaN]);
                 error = :info,
             )
-            @test isapprox(M, pts[1], exp(M, pts[1], tv1, 0))
-            @test isapprox(M, pts[2], exp(M, pts[1], tv1, 1))
+            @test isapprox(M, pts[1], ManifoldsBase.exp_fused(M, pts[1], tv1, 0))
+            @test isapprox(M, pts[2], ManifoldsBase.exp_fused(M, pts[1], tv1, 1))
             @test isapprox(M, pts[1], exp(M, pts[2], tv2))
             if T <: Array
                 @test_throws ApproximatelyError isapprox(M, pts[1], pts[2]; error = :error)
@@ -101,15 +104,28 @@ using ManifoldsBaseTestUtils
             @test ManifoldsBase.check_approx(M, pts[1], pts[1]) === nothing
             @test ManifoldsBase.check_approx(M, pts[2], tv2, tv2) === nothing
             @test is_point(M, retract(M, pts[1], tv1))
-            @test isapprox(M, pts[1], retract(M, pts[1], tv1, 0))
+            @test isapprox(M, pts[1], ManifoldsBase.retract_fused(M, pts[1], tv1, 0))
 
             @test is_point(M, retract(M, pts[1], tv1, rm))
-            @test isapprox(M, pts[1], retract(M, pts[1], tv1, 0, rm))
+            @test isapprox(M, pts[1], ManifoldsBase.retract_fused(M, pts[1], tv1, 0, rm))
 
             new_pt = exp(M, pts[1], tv1)
             retract!(M, new_pt, pts[1], tv1)
             @test is_point(M, new_pt)
             @test !isapprox(M, pts[1], [1, 2, 3], [3, 2, 4]; error = :other)
+
+            @test isapprox(
+                M,
+                pts[1],
+                ManifoldsBase.retract_fused!(
+                    M,
+                    new_pt,
+                    pts[1],
+                    tv1,
+                    0,
+                    ExponentialRetraction(),
+                ),
+            )
             for p in pts
                 X_p_zero = zero_vector(M, p)
                 X_p_nan = NaN * X_p_zero
@@ -152,8 +168,8 @@ using ManifoldsBaseTestUtils
             log!(M, tv1, pts[1], pts[2])
             @test norm(M, pts[1], tv1) ≈ sqrt(inner(M, pts[1], tv1, tv1))
 
-            @test isapprox(M, exp(M, pts[1], tv1, 1), pts[2])
-            @test isapprox(M, exp(M, pts[1], tv1, 0), pts[1])
+            @test isapprox(M, ManifoldsBase.exp_fused(M, pts[1], tv1, 1), pts[2])
+            @test isapprox(M, ManifoldsBase.exp_fused(M, pts[1], tv1, 0), pts[1])
 
             @test distance(M, pts[1], pts[2]) ≈ norm(M, pts[1], tv1)
             @test distance(M, pts[1], pts[2], LogarithmicInverseRetraction()) ≈
@@ -331,32 +347,7 @@ using ManifoldsBaseTestUtils
                 @test ManifoldsBase.is_vector(M, pts[3], X1t1)
                 @test ManifoldsBase.is_vector(M, pts[3], X1t3)
                 @test isapprox(M, pts[3], X1t1, X1t3)
-                # along a `Vector` of points
-                c = [pts[1], pts[1]]
-                X1t4 = vector_transport_along(M, pts[1], X1, c)
-                @test isapprox(M, pts[1], X1, X1t4)
-                X1t5 = allocate(X1)
-                vector_transport_along!(M, X1t5, pts[1], X1, c)
-                @test isapprox(M, pts[1], X1, X1t5)
-                # transport along more than one interims point
-                @test vector_transport_along(M, pts[1], X1, pts[2:3]) == X1
-                X1t6 = allocate(X1)
-                vector_transport_along!(M, X1t6, pts[1], X1, pts[2:3])
-                @test isapprox(M, pts[1], X1, X1t6)
-                # along a custom type of points
-                if T <: DefaultPoint
-                    S = eltype(pts[1].value)
-                    mat = reshape(pts[1].value, length(pts[1].value), 1)
-                else
-                    S = eltype(pts[1])
-                    mat = reshape(pts[1], length(pts[1]), 1)
-                end
-                c2 = MatrixVectorTransport{S}(mat)
-                X1t4c2 = vector_transport_along(M, pts[1], X1, c2)
-                @test isapprox(M, pts[1], X1, X1t4c2)
-                X1t5c2 = allocate(X1)
-                vector_transport_along!(M, X1t5c2, pts[1], X1, c2)
-                @test isapprox(M, pts[1], X1, X1t5c2)
+
                 # On Euclidean Space Schild & Pole are identity
                 @test vector_transport_to(
                     M,
@@ -382,52 +373,6 @@ using ManifoldsBaseTestUtils
                     mid_point(M, pts[2], pts[3]),
                     pts[3],
                 ]
-                Xtmp = allocate(X2)
-                @test vector_transport_along(M, pts[1], X2, c, SchildsLadderTransport()) ==
-                      X2
-                @test vector_transport_along!(
-                    M,
-                    Xtmp,
-                    pts[1],
-                    X2,
-                    c,
-                    SchildsLadderTransport(),
-                ) == X2
-                @test vector_transport_along(M, pts[1], X2, c, PoleLadderTransport()) == X2
-                @test vector_transport_along!(
-                    M,
-                    Xtmp,
-                    pts[1],
-                    X2,
-                    c,
-                    PoleLadderTransport(),
-                ) == X2
-                @test vector_transport_along(M, pts[1], X2, c, ParallelTransport()) == X2
-                @test vector_transport_along!(
-                    M,
-                    Xtmp,
-                    pts[1],
-                    X2,
-                    c,
-                    ParallelTransport(),
-                ) == X2
-                @test ManifoldsBase._vector_transport_along!(
-                    M,
-                    Xtmp,
-                    pts[1],
-                    X2,
-                    c,
-                    ParallelTransport(),
-                ) == X2
-                @test vector_transport_along(M, pts[1], X2, c, ProjectionTransport()) == X2
-                @test vector_transport_along!(
-                    M,
-                    Xtmp,
-                    pts[1],
-                    X2,
-                    c,
-                    ProjectionTransport(),
-                ) == X2
                 # check mutating ones with defaults
                 p = allocate(pts[1])
                 ManifoldsBase.pole_ladder!(M, p, pts[1], pts[2], pts[3])
@@ -486,7 +431,7 @@ using ManifoldsBaseTestUtils
         M = ManifoldsBase.DefaultManifold(2)
         for (p, X) in (
             ([2.0, 3.0], [4.0, 5.0]),
-            (DefaultPoint([2.0, 3.0]), DefaultTVector([4.0, 5.0])),
+            (DefaultPoint([2.0, 3.0]), DefaultTangentVector([4.0, 5.0])),
         )
             q = similar(p)
             copyto!(M, q, p)
@@ -509,14 +454,14 @@ using ManifoldsBaseTestUtils
         M = ManifoldsBase.DefaultManifold(3)
         p = DefaultPoint([1.0, 0.0, 0.0])
         q = DefaultPoint([0.0, 0.0, 0.0])
-        X = DefaultTVector([0.0, 1.0, 0.0])
-        Y = DefaultTVector([1.0, 0.0, 0.0])
+        X = DefaultTangentVector([0.0, 1.0, 0.0])
+        Y = DefaultTangentVector([1.0, 0.0, 0.0])
         @test angle(M, p, X, Y) ≈ π / 2
         @test inverse_retract(M, p, q, LogarithmicInverseRetraction()) == -Y
         @test retract(M, q, Y, CustomDefinedRetraction()) == p
-        @test retract(M, q, Y, 1.0, CustomDefinedRetraction()) == p
+        @test ManifoldsBase.retract_fused(M, q, Y, 1.0, CustomDefinedRetraction()) == p
         @test retract(M, q, Y, ExponentialRetraction()) == p
-        @test retract(M, q, Y, 1.0, ExponentialRetraction()) == p
+        @test ManifoldsBase.retract_fused(M, q, Y, 1.0, ExponentialRetraction()) == p
         # rest not implemented - so they also fall back even onto mutating
         Z = similar(Y)
         r = similar(p)
@@ -532,25 +477,30 @@ using ManifoldsBaseTestUtils
             SasakiRetraction(5),
         ]
             @test retract(M, q, Y, retr) == DefaultPoint(q.value + Y.value)
-            @test retract(M, q, Y, 0.5, retr) == DefaultPoint(q.value + 0.5 * Y.value)
+            @test ManifoldsBase.retract_fused(M, q, Y, 0.5, retr) ==
+                  DefaultPoint(q.value + 0.5 * Y.value)
             @test retract!(M, r, q, Y, retr) == DefaultPoint(q.value + Y.value)
-            @test retract!(M, r, q, Y, 0.5, retr) == DefaultPoint(q.value + 0.5 * Y.value)
+            @test ManifoldsBase.retract_fused!(M, r, q, Y, 0.5, retr) ==
+                  DefaultPoint(q.value + 0.5 * Y.value)
         end
 
         mRK = RetractionWithKeywords(CustomDefinedKeywordRetraction(); scale = 3.0)
         pRK = allocate(p, eltype(p.value), size(p.value))
         @test retract(M, p, X, mRK) == DefaultPoint(3 * p.value + X.value)
-        @test retract(M, p, X, 0.5, mRK) == DefaultPoint(3 * p.value + 0.5 * X.value)
+        @test ManifoldsBase.retract_fused(M, p, X, 0.5, mRK) ==
+              DefaultPoint(3 * p.value + 0.5 * X.value)
         @test retract!(M, pRK, p, X, mRK) == DefaultPoint(3 * p.value + X.value)
-        @test retract!(M, pRK, p, X, 0.5, mRK) == DefaultPoint(3 * p.value + 0.5 * X.value)
+        @test ManifoldsBase.retract_fused!(M, pRK, p, X, 0.5, mRK) ==
+              DefaultPoint(3 * p.value + 0.5 * X.value)
         mIRK = InverseRetractionWithKeywords(
             CustomDefinedKeywordInverseRetraction();
             scale = 3.0,
         )
         XIRK = allocate(X, eltype(X.value), size(X.value))
-        @test inverse_retract(M, p, pRK, mIRK) == DefaultTVector(pRK.value - 3 * p.value)
+        @test inverse_retract(M, p, pRK, mIRK) ==
+              DefaultTangentVector(pRK.value - 3 * p.value)
         @test inverse_retract!(M, XIRK, p, pRK, mIRK) ==
-              DefaultTVector(pRK.value - 3 * p.value)
+              DefaultTangentVector(pRK.value - 3 * p.value)
         p2 = allocate(p, eltype(p.value), size(p.value))
         @test size(p2.value) == size(p.value)
         X2 = allocate(X, eltype(X.value), size(X.value))
@@ -572,36 +522,37 @@ using ManifoldsBaseTestUtils
             QRInverseRetraction,
             SoftmaxInverseRetraction,
         ]
-            @test inverse_retract(M, q, p, r()) == DefaultTVector(p.value - q.value)
-            @test inverse_retract!(M, Z, q, p, r()) == DefaultTVector(p.value - q.value)
+            @test inverse_retract(M, q, p, r()) == DefaultTangentVector(p.value - q.value)
+            @test inverse_retract!(M, Z, q, p, r()) ==
+                  DefaultTangentVector(p.value - q.value)
         end
         @test inverse_retract(
             M,
             q,
             p,
             EmbeddedInverseRetraction(LogarithmicInverseRetraction()),
-        ) == DefaultTVector(p.value - q.value)
+        ) == DefaultTangentVector(p.value - q.value)
         @test inverse_retract(M, q, p, NLSolveInverseRetraction(ExponentialRetraction())) ==
-              DefaultTVector(p.value - q.value)
+              DefaultTangentVector(p.value - q.value)
         @test inverse_retract!(
             M,
             Z,
             q,
             p,
             EmbeddedInverseRetraction(LogarithmicInverseRetraction()),
-        ) == DefaultTVector(p.value - q.value)
+        ) == DefaultTangentVector(p.value - q.value)
         @test inverse_retract!(
             M,
             Z,
             q,
             p,
             NLSolveInverseRetraction(ExponentialRetraction()),
-        ) == DefaultTVector(p.value - q.value)
+        ) == DefaultTangentVector(p.value - q.value)
         c = ManifoldsBase.allocate_coordinates(M, p, Float64, manifold_dimension(M))
         @test c isa Vector
         @test length(c) == 3
-        @test 2.0 \ X == DefaultTVector(2.0 \ X.value)
-        @test X + Y == DefaultTVector(X.value + Y.value)
+        @test 2.0 \ X == DefaultTangentVector(2.0 \ X.value)
+        @test X + Y == DefaultTangentVector(X.value + Y.value)
         @test +X == X
         @test (Y .= X) === Y
         # vector transport pass through
@@ -609,15 +560,11 @@ using ManifoldsBaseTestUtils
         @test vector_transport_direction(M, p, X, X, ProjectionTransport()) == X
         @test vector_transport_to!(M, Y, p, X, q, ProjectionTransport()) == X
         @test vector_transport_direction!(M, Y, p, X, X, ProjectionTransport()) == X
-        @test vector_transport_along(M, p, X, [p], ProjectionTransport()) == X
-        @test vector_transport_along!(M, Z, p, X, [p], ProjectionTransport()) == X
         @test vector_transport_to(M, p, X, :q, ProjectionTransport()) == X
         @test parallel_transport_to(M, p, X, q) == X
         @test parallel_transport_direction(M, p, X, X) == X
-        @test parallel_transport_along(M, p, X, []) == X
         @test parallel_transport_to!(M, Y, p, X, q) == X
         @test parallel_transport_direction!(M, Y, p, X, X) == X
-        @test parallel_transport_along!(M, Y, p, X, []) == X
 
         # convert with manifold
         @test convert(typeof(p), M, p.value) == p
@@ -723,11 +670,6 @@ using ManifoldsBaseTestUtils
         @test default_approximation_method(M, vector_transport_to) ==
               default_vector_transport_method(M)
         @test default_approximation_method(M, vector_transport_to, DefaultPoint) ==
-              default_vector_transport_method(M)
-        # along
-        @test default_approximation_method(M, vector_transport_along) ==
-              default_vector_transport_method(M)
-        @test default_approximation_method(M, vector_transport_along, DefaultPoint) ==
               default_vector_transport_method(M)
         @test default_approximation_method(M, vector_transport_direction) ==
               default_vector_transport_method(M)

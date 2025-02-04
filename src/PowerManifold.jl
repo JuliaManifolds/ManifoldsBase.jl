@@ -660,9 +660,9 @@ end
     exp(M::AbstractPowerManifold, p, X)
 
 Compute the exponential map from `p` in direction `X` on the [`AbstractPowerManifold`](@ref) `M`,
-which can be computed using the base manifolds exponential map elementwise.
+which can be computed using the base manifolds exponential map element-wise.
 """
-exp(::AbstractPowerManifold, ::Any...)
+exp(::AbstractPowerManifold, ::Any, ::Any)
 
 function exp!(M::AbstractPowerManifold, q, p, X)
     rep_size = representation_size(M.manifold)
@@ -1542,7 +1542,7 @@ function retract!(
     return q
 end
 
-function retract!(
+function retract_fused!(
     M::AbstractPowerManifold,
     q,
     p,
@@ -1552,7 +1552,7 @@ function retract!(
 )
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
-        retract!(
+        retract_fused!(
             M.manifold,
             _write(M, rep_size, q, i),
             _read(M, rep_size, p, i),
@@ -1563,7 +1563,7 @@ function retract!(
     end
     return q
 end
-function retract!(
+function retract_fused!(
     M::PowerManifoldNestedReplacing,
     q,
     p,
@@ -1573,8 +1573,13 @@ function retract!(
 )
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
-        q[i...] =
-            retract(M.manifold, _read(M, rep_size, p, i), _read(M, rep_size, X, i), t, m)
+        q[i...] = retract_fused(
+            M.manifold,
+            _read(M, rep_size, p, i),
+            _read(M, rep_size, X, i),
+            t,
+            m,
+        )
     end
     return q
 end

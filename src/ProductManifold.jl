@@ -429,7 +429,7 @@ end
 compute the exponential map from `p` in the direction of `X` on the [`ProductManifold`](@ref) `M`,
 which is the elementwise exponential map on the internal manifolds that build `M`.
 """
-exp(::ProductManifold, ::Any...)
+exp(::ProductManifold, ::Any, ::Any)
 
 function exp!(M::ProductManifold, q, p, X)
     map(
@@ -441,9 +441,9 @@ function exp!(M::ProductManifold, q, p, X)
     )
     return q
 end
-function exp!(M::ProductManifold, q, p, X, t::Number)
+function exp_fused!(M::ProductManifold, q, p, X, t::Number)
     map(
-        (N, qc, pc, Xc) -> exp!(N, qc, pc, Xc, t),
+        (N, qc, pc, Xc) -> exp_fused!(N, qc, pc, Xc, t),
         M.manifolds,
         submanifold_components(M, q),
         submanifold_components(M, p),
@@ -880,9 +880,9 @@ using the [`AbstractRetractionMethod`](@ref) `m` on every manifold.
 """
 retract(::ProductManifold, ::Any, ::Any, ::AbstractRetractionMethod)
 
-function retract!(M::ProductManifold, q, p, X, t::Number, method::ProductRetraction)
+function retract!(M::ProductManifold, q, p, X, method::ProductRetraction)
     map(
-        (N, qc, pc, Xc, rm) -> retract!(N, qc, pc, Xc, t, rm),
+        (N, qc, pc, Xc, rm) -> retract!(N, qc, pc, Xc, rm),
         M.manifolds,
         submanifold_components(M, q),
         submanifold_components(M, p),
@@ -896,11 +896,39 @@ function retract!(
     q,
     p,
     X,
+    method::RTM,
+) where {RTM<:AbstractRetractionMethod}
+    map(
+        (N, qc, pc, Xc) -> retract!(N, qc, pc, Xc, method),
+        M.manifolds,
+        submanifold_components(M, q),
+        submanifold_components(M, p),
+        submanifold_components(M, X),
+    )
+    return q
+end
+
+function retract_fused!(M::ProductManifold, q, p, X, t::Number, method::ProductRetraction)
+    map(
+        (N, qc, pc, Xc, rm) -> retract_fused!(N, qc, pc, Xc, t, rm),
+        M.manifolds,
+        submanifold_components(M, q),
+        submanifold_components(M, p),
+        submanifold_components(M, X),
+        method.retractions,
+    )
+    return q
+end
+function retract_fused!(
+    M::ProductManifold,
+    q,
+    p,
+    X,
     t::Number,
     method::RTM,
 ) where {RTM<:AbstractRetractionMethod}
     map(
-        (N, qc, pc, Xc) -> retract!(N, qc, pc, Xc, t, method),
+        (N, qc, pc, Xc) -> retract_fused!(N, qc, pc, Xc, t, method),
         M.manifolds,
         submanifold_components(M, q),
         submanifold_components(M, p),

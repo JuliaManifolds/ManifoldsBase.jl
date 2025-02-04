@@ -4,7 +4,7 @@
 A manifold to add tests to input and output values of functions defined in the interface.
 
 Additionally the points and tangent vectors can also be encapsulated, cf.
-[`ValidationMPoint`](@ref), [`ValidationTVector`](@ref), and [`ValidationCoTVector`](@ref).
+[`ValidationMPoint`](@ref), [`ValidationTangentVector`](@ref), and [`ValidationCotangentVector`](@ref).
 These types can be used to see where some data is assumed to be from, when working on
 manifolds where both points and tangent vectors are represented as (plain) arrays.
 
@@ -189,22 +189,22 @@ function ValidationFibreVector{TType}(value::V, point::P = nothing) where {TType
 end
 
 """
-    ValidationTVector = ValidationFibreVector{TangentSpaceType}
+    ValidationTangentVector = ValidationFibreVector{TangentSpaceType}
 
 Represent a tangent vector to a point on an [`ValidationManifold`](@ref), i.e. on a manifold
 where data can be represented by arrays. The array is stored internally and semantically.
 This distinguished the value from [`ValidationMPoint`](@ref)s vectors of other types.
 """
-const ValidationTVector = ValidationFibreVector{TangentSpaceType}
+const ValidationTangentVector = ValidationFibreVector{TangentSpaceType}
 
 """
-    ValidationCoTVector = ValidationFibreVector{CotangentSpaceType}
+    ValidationCotangentVector = ValidationFibreVector{CotangentSpaceType}
 
 Represent a cotangent vector to a point on an [`ValidationManifold`](@ref), i.e. on a manifold
 where data can be represented by arrays. The array is stored internally and semantically.
 This distinguished the value from [`ValidationMPoint`](@ref)s vectors of other types.
 """
-const ValidationCoTVector = ValidationFibreVector{CotangentSpaceType}
+const ValidationCotangentVector = ValidationFibreVector{CotangentSpaceType}
 
 @eval @manifold_vector_forwards ValidationFibreVector{TType} TType value
 
@@ -217,8 +217,8 @@ end
 """
     internal_value(p)
 
-Return the internal value of an [`ValidationMPoint`](@ref), [`ValidationTVector`](@ref), or
-[`ValidationCoTVector`](@ref) if the value `p` is encapsulated as such.
+Return the internal value of an [`ValidationMPoint`](@ref), [`ValidationTangentVector`](@ref), or
+[`ValidationCotangentVector`](@ref) if the value `p` is encapsulated as such.
 Return `p` if it is already an a (plain) value on a manifold.
 """
 internal_value(p) = p
@@ -226,8 +226,18 @@ internal_value(p::ValidationMPoint) = p.value
 internal_value(X::ValidationFibreVector) = X.value
 
 _update_basepoint!(::ValidationManifold, X, p) = X
-_update_basepoint!(::ValidationManifold, X::ValidationTVector{P,Nothing}, p) where {P} = X
-function _update_basepoint!(M::ValidationManifold, X::ValidationTVector{P,V}, p) where {P,V}
+function _update_basepoint!(
+    ::ValidationManifold,
+    X::ValidationTangentVector{P,Nothing},
+    p,
+) where {P}
+    return X
+end
+function _update_basepoint!(
+    M::ValidationManifold,
+    X::ValidationTangentVector{P,V},
+    p,
+) where {P,V}
     copyto!(M.manifold, X.point, p)
     return X
 end
@@ -337,7 +347,7 @@ function embed(M::ValidationManifold, p, X; kwargs...)
     MEV = ValidationManifold(get_embedding(M.manifold), M)
     q = embed(M.manifold, internal_value(p))
     is_vector(MEV, q, Y; within = embed, context = (:Output,), kwargs...)
-    return ValidationTVector(Y, M.store_base_point ? q : nothing)
+    return ValidationTangentVector(Y, M.store_base_point ? q : nothing)
 end
 
 function embed!(M::ValidationManifold, q, p; kwargs...)
@@ -369,7 +379,7 @@ function embed_project(M::ValidationManifold, p, X; kwargs...)
     is_vector(M, p, X; within = embed, context = (:Input,), kwargs...)
     Y = embed_project(M.manifold, internal_value(p), internal_value(X))
     is_vector(M, p, Y; within = embed, context = (:Output,), kwargs...)
-    return ValidationTVector(Y, M.store_base_point ? copy(M, p) : nothing)
+    return ValidationTangentVector(Y, M.store_base_point ? copy(M, p) : nothing)
 end
 
 function embed_project!(M::ValidationManifold, q, p; kwargs...)
@@ -656,7 +666,7 @@ function log(M::ValidationManifold, p, q; kwargs...)
     is_point(M, q; within = log, context = (:Input,), kwargs...)
     X = log(M.manifold, internal_value(p), internal_value(q))
     is_vector(M, p, X; within = log, context = (:Output,), kwargs...)
-    return ValidationTVector(X, M.store_base_point ? copy(M, p) : nothing)
+    return ValidationTangentVector(X, M.store_base_point ? copy(M, p) : nothing)
 end
 
 function log!(M::ValidationManifold, X, p, q; kwargs...)
@@ -730,7 +740,7 @@ function riemann_tensor(M::ValidationManifold, p, X, Y, Z; kwargs...)
         internal_value(Z),
     )
     is_vector(M, p, W; within = riemann_tensor, context = (:Output,), kwargs...)
-    return ValidationTVector(W, M.store_base_point ? copy(M, p) : nothing)
+    return ValidationTangentVector(W, M.store_base_point ? copy(M, p) : nothing)
 end
 
 function riemann_tensor!(M::ValidationManifold, W, p, X, Y, Z; kwargs...)
@@ -764,57 +774,6 @@ function show(io::IO, M::ValidationManifold)
         s *= "    * ignore_functions = $(M.ignore_functions)"
     end
     return print(io, s)
-end
-
-function vector_transport_along(
-    M::ValidationManifold,
-    p,
-    X,
-    c::AbstractVector,
-    m::AbstractVectorTransportMethod;
-    kwargs...,
-)
-    is_vector(M, p, X; within = vector_transport_along, context = (:Input,), kwargs...)
-    Y = vector_transport_along(M.manifold, internal_value(p), internal_value(X), c, m)
-    is_vector(
-        M,
-        c[end],
-        Y;
-        within = vector_transport_along,
-        context = (:Output,),
-        kwargs...,
-    )
-    return Y
-end
-
-function vector_transport_along!(
-    M::ValidationManifold,
-    Y,
-    p,
-    X,
-    c::AbstractVector,
-    m::AbstractVectorTransportMethod;
-    kwargs...,
-)
-    is_vector(M, p, X; within = vector_transport_along, context = (:Input,), kwargs...)
-    vector_transport_along!(
-        M.manifold,
-        internal_value(Y),
-        internal_value(p),
-        internal_value(X),
-        c,
-        m,
-    )
-    _update_basepoint!(M, Y, c[end])
-    is_vector(
-        M,
-        c[end],
-        Y;
-        within = vector_transport_along,
-        context = (:Output,),
-        kwargs...,
-    )
-    return Y
 end
 
 function vector_transport_to(
