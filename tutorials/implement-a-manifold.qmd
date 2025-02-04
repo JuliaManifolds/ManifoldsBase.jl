@@ -251,9 +251,8 @@ Here, we really have to take into account, that the interface is ``[designed wit
 While the actual function we would call in the end is `retract(M, p, X, ProjectionRetraction())` (or its `!` variant), we actually have to implement `retract_project!(M, q, p, X, t)` for technical details, that are a bit beyond this introductory tutorial. In short this split avoids ambiguity errors for decorators of the manifolds. We define
 
 ```{julia}
-import ManifoldsBase: retract_project_fused!
-function retract_project_fused!(M::ScaledSphere, q, p, X, t::Number)
-    q .= (p + t*X) .* (M.radius/norm(p + t*X))
+function ManifoldsBase.retract_project!(M::ScaledSphere, q, p, X)
+    q .= (p + X) .* (M.radius/norm(p + X))
     return q
 end
 ```
