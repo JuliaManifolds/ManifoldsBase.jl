@@ -113,6 +113,19 @@ using ManifoldsBaseTestUtils
             retract!(M, new_pt, pts[1], tv1)
             @test is_point(M, new_pt)
             @test !isapprox(M, pts[1], [1, 2, 3], [3, 2, 4]; error = :other)
+
+            @test isapprox(
+                M,
+                pts[1],
+                ManifoldsBase.retract_fused!(
+                    M,
+                    new_pt,
+                    pts[1],
+                    tv1,
+                    0,
+                    ExponentialRetraction(),
+                ),
+            )
             for p in pts
                 X_p_zero = zero_vector(M, p)
                 X_p_nan = NaN * X_p_zero
