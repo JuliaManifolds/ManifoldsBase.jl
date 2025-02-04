@@ -36,7 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `parallel_transport_along(M, p, X, c)`, `vector_transport_along(M, p, X, c, m)` as well as
   their mutating variants are removed from the API for now.
   It was never specified how to actually specify a curve `c` and the method was only
-  implemented for `Euclidean` in `Manifolds.jl` anyways.
+  implemented for `Euclidean` in `Manifolds.jl`, where it is the identity.
 
 ## [0.15.24] 17/01/2025
 
