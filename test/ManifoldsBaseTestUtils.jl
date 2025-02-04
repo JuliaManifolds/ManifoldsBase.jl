@@ -274,13 +274,6 @@ function ManifoldsBase.number_eltype(a::NonBroadcastBasisThing)
     return typeof(reduce(+, one(number_eltype(eti)) for eti in a.v))
 end
 
-function ManifoldsBase._tangent_vector_type_for_point(
-    ::AbstractManifold,
-    p::NonBroadcastBasisThing,
-    T_number_eltype,
-)
-    return typeof(p)
-end
 function ManifoldsBase.allocate_on(
     M::AbstractManifold,
     ::TangentSpaceType,

@@ -163,15 +163,6 @@ function _pick_basic_allocation_argument(::AbstractManifold, f, x...)
 end
 
 """
-    _tangent_vector_type_for_point(::AbstractManifold, p, T_number_eltype)
-
-Get the type of tangent vector at point `p` with element type `T_number_eltype`.
-"""
-function _tangent_vector_type_for_point(::AbstractManifold, p, T_number_eltype)
-    return Array{T_number_eltype}
-end
-
-"""
     allocate_result(M::AbstractManifold, f, x...)
 
 Allocate an array for the result of function `f` on [`AbstractManifold`](@ref) `M` and arguments
@@ -644,11 +635,8 @@ end
 function _injectivity_radius(M::AbstractManifold, p, m::AbstractRetractionMethod)
     return _injectivity_radius(M, m)
 end
-function _injectivity_radius(M::AbstractManifold, m::AbstractRetractionMethod)
-    return _injectivity_radius(M)
-end
-function _injectivity_radius(M::AbstractManifold)
-    return injectivity_radius(M)
+function _injectivity_radius(M::AbstractManifold, ::AbstractRetractionMethod)
+    return _injectivity_radius(M, ExponentialRetraction())
 end
 function _injectivity_radius(M::AbstractManifold, p, ::ExponentialRetraction)
     return injectivity_radius_exp(M, p)
@@ -656,8 +644,8 @@ end
 function _injectivity_radius(M::AbstractManifold, ::ExponentialRetraction)
     return injectivity_radius_exp(M)
 end
-injectivity_radius_exp(M, p) = injectivity_radius_exp(M)
-injectivity_radius_exp(M) = injectivity_radius(M)
+injectivity_radius_exp(M::AbstractManifold, p) = injectivity_radius_exp(M)
+injectivity_radius_exp(M::AbstractManifold) = injectivity_radius(M)
 
 """
     inner(M::AbstractManifold, p, X, Y)

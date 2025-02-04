@@ -64,6 +64,9 @@ using ManifoldsBaseTestUtils
             @test injectivity_radius(M, rm) == Inf
             @test injectivity_radius(M, rm2) == 10
             @test injectivity_radius(M, pts[1], rm2) == 10
+            # ManifoldsBase._injectivity_radius always requires the method to be passed
+            # to reduce the number of ambiguities
+            @test_throws MethodError ManifoldsBase._injectivity_radius(M, pts[1])
 
             tv1 = log(M, pts[1], pts[2])
 
