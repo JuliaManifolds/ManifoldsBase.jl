@@ -97,8 +97,23 @@ ManifoldsBase.representation_size(::NonDecoratorManifold) = (2,)
     @test_throws MethodError ManifoldsBase.exp_fused!(M, q, p, X, 2.0)
     @test_throws MethodError retract(M, p, X)
     @test_throws MethodError ManifoldsBase.retract_fused(M, p, X, 2.0)
+    @test_throws MethodError ManifoldsBase.retract_fused(
+        M,
+        p,
+        X,
+        2.0,
+        ExponentialRetraction(),
+    )
     @test_throws MethodError retract!(M, q, p, X)
     @test_throws MethodError ManifoldsBase.retract_fused!(M, q, p, X, 2.0)
+    @test_throws MethodError ManifoldsBase.retract_fused!(
+        M,
+        q,
+        p,
+        X,
+        2.0,
+        ExponentialRetraction(),
+    )
     @test_throws MethodError log(M, p, q)
     @test_throws MethodError log!(M, Y, p, q)
     @test_throws MethodError inverse_retract(M, p, q)
