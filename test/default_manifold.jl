@@ -666,7 +666,7 @@ using ManifoldsBaseTestUtils
               default_inverse_retraction_method(M)
         @test default_approximation_method(M, inverse_retract, DefaultPoint) ==
               default_inverse_retraction_method(M)
-        # Vector Transsports – all 3: to
+        # Vector Transports – all 3: to
         @test default_approximation_method(M, vector_transport_to) ==
               default_vector_transport_method(M)
         @test default_approximation_method(M, vector_transport_to, DefaultPoint) ==
@@ -675,5 +675,9 @@ using ManifoldsBaseTestUtils
               default_vector_transport_method(M)
         @test default_approximation_method(M, vector_transport_direction, DefaultPoint) ==
               default_vector_transport_method(M)
+    end
+
+    @testset "Type promotion in allocation" begin
+        @test ManifoldsBase.exp_fused(M, [1, 2], [2, 3], 1.0) isa Vector{Float64}
     end
 end

@@ -26,7 +26,7 @@ avoid the allocation when computing `t*X`.
 By default, this method allocates the resulting point `q` and passes to [`exp_fused!`](@ref).
 """
 function exp_fused(M::AbstractManifold, p, X, t::Number)
-    q = allocate_result(M, exp, p, X)
+    q = allocate_result(M, exp, p, X, t)
     exp_fused!(M, q, p, X, t)
     return q
 end
