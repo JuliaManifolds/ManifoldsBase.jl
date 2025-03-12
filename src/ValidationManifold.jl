@@ -244,7 +244,7 @@ end
 
 
 """
-    _msg(str; error=:None, within::Union{Nothing,<:Function} = nothing,
+    _msg(M::ValidationManifold, str; error=:None, within::Union{Nothing,<:Function} = nothing,
     context::Union{NTuple{N,Symbol} where N} = NTuple{0,Symbol}())
 
 issue a message `str` according to the mode `mode` (as `@error`, `@warn`, `@info`).

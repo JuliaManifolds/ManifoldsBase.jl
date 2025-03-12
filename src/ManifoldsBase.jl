@@ -163,10 +163,19 @@ function _pick_basic_allocation_argument(::AbstractManifold, f, x...)
 end
 
 """
+    allocate_result(M::AbstractManifold, f)
     allocate_result(M::AbstractManifold, f, x...)
+    allocate_result(M::AbstractManifold, f, T::Type)
 
 Allocate an array for the result of function `f` on [`AbstractManifold`](@ref) `M` and arguments
 `x...` for implementing the non-modifying operation using the modifying operation.
+
+Internally one of the arguments of `x...` is used to determine the dimensions of the result.
+
+If no arguments are present, for example for a function that has no (point/vector) arguments,
+a default type is determined with [`allocate_result_type`](@ref) `T`.
+If either that type or another type (maybe a non-default representation) is provided,
+an array of size [`representation_size`](@ref) is allocated using [`allocate_result_array`](@ref)
 
 Usefulness of passing a function is demonstrated by methods that allocate results of musical
 isomorphisms.
@@ -178,6 +187,9 @@ isomorphisms.
 end
 @inline function allocate_result(M::AbstractManifold, f)
     T = allocate_result_type(M, f, ())
+    return allocate_result(M::AbstractManifold, f, T)
+end
+@inline function allocate_result(M::AbstractManifold, f, T::Type)
     rs = representation_size(M)
     return allocate_result_array(M, f, T, rs)
 end
