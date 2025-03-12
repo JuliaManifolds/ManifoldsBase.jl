@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.2] 12/03/2025
+
+## Added
+
+* add `allocate_result(M, f, T)` to allocate a resulting memory of type `T` as an interims
+  additional method in case a function does not have a concrete `x` to allocate but its type.
+
 ## [1.0.1] 05/02/2025
 
 ## Fixed
