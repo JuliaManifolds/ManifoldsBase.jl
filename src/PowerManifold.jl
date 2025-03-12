@@ -240,6 +240,9 @@ function allocate_result(M::PowerManifoldNested, f, x...)
         ]
     end
 end
+function allocate_result(M::PowerManifoldNested, f, T::Type)
+    return [allocate_result(M.manifold, f, eltype(T)) for i in get_iterator(M)]
+end
 # avoid ambiguities - though usually not used
 function allocate_result(
     M::PowerManifoldNested,
@@ -264,6 +267,9 @@ function allocate_result(M::PowerManifoldNestedReplacing, f, x...)
     else
         return copy(x[1])
     end
+end
+function allocate_result(M::PowerManifoldNestedReplacing, f, T::Type)
+    return [allocate_result(M.manifold, f, T) for _ in get_iterator(M)]
 end
 # the following is not used but necessary to avoid ambiguities
 function allocate_result(

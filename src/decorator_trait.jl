@@ -95,11 +95,7 @@ get_embedding(M::AbstractDecoratorManifold, p) = get_embedding(M)
 ) where {TF,N}
     return allocate_result(trait(allocate_result, M, f, x...), M, f, x...)
 end
-@inline function allocate_result(
-    M::AbstractDecoratorManifold,
-    f::TF,
-    T::Type,
-) where {TF}
+@inline function allocate_result(M::AbstractDecoratorManifold, f::TF, T::Type) where {TF}
     return allocate_result(trait(allocate_result, M, f, T), M, f, T)
 end
 # disambiguation

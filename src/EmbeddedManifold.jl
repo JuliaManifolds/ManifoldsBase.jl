@@ -39,6 +39,9 @@ function allocate_result(M::EmbeddedManifold, f::typeof(project), x...)
     T = allocate_result_type(M, f, x)
     return allocate(M, x[1], T, representation_size(base_manifold(M)))
 end
+function allocate_result(M::EmbeddedManifold, f::typeof(project), T::Type)
+    return allocate(M, T, representation_size(base_manifold(M)))
+end
 
 """
     decorated_manifold(M::EmbeddedManifold, d::Val{N} = Val(-1))
