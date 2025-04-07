@@ -33,6 +33,15 @@ struct Fiber{𝔽,TFiber<:FiberType,TM<:AbstractManifold,TX} <: AbstractManifold
     fiber_type::TFiber
 end
 
+function Fiber(
+    manifold::TM,
+    point::TX,
+    fiber_type::TFiber;
+    field::AbstractNumbers = ℝ,
+) where {TM<:AbstractManifold,TX,TFiber<:FiberType}
+    return Fiber{field,TFiber,TM,TX}(manifold, point, fiber_type)
+end
+
 base_manifold(B::Fiber) = B.manifold
 
 function Base.show(io::IO, ::MIME"text/plain", vs::Fiber)
