@@ -5,15 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.2] 07/04/2025
+
+### Changed
+
+* `Fiber` no longer requires the number system to be consistent with the wrapped manifold.
+
+### Added
+
+* `allocate` method that works with numeric scalars.
+
 ## [1.0.1] 05/02/2025
 
-## Fixed
+### Fixed
 
 * An issue with allocation type promotion in `exp_fused`.
 
 ## [1.0] 05/02/2025
 
-## Changed
+### Changed
 
 * to avoid logical ambiguities to the forthcoming [`LieGroups.jl`](https://github.com/JuliaManifolds/LieGroups.jl),
   the “fusing” variant `exp(M, p, X, t)` has been moved to its own name `exp_fused(M, p, X, t)`
@@ -37,7 +47,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * the `TVector` type has been renamed to `AbstractTangentVector`
 * the `CoTVector` type has been renamed to `AbstractCotangentVector`
 
-## Removed
+### Removed
 
 * `parallel_transport_along(M, p, X, c)`, `vector_transport_along(M, p, X, c, m)` as well as
   their mutating variants are removed from the API for now.

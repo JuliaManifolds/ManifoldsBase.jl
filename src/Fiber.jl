@@ -7,7 +7,7 @@ An abstract type for fiber types that can be used within [`Fiber`](@ref).
 abstract type FiberType end
 
 @doc raw"""
-    Fiber{𝔽,TFiber<:FiberType,TM<:AbstractManifold{𝔽},TX} <: AbstractManifold{𝔽}
+    Fiber{𝔽,TFiber<:FiberType,TM<:AbstractManifold,TX} <: AbstractManifold{𝔽}
 
 A fiber of a fiber bundle at a point `p` on the manifold.
 
