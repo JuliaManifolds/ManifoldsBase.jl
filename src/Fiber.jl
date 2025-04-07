@@ -27,7 +27,7 @@ isometric to the [`Euclidean`](https://juliamanifolds.github.io/Manifolds.jl/lat
 
 A fiber of type `fiber_type` at point `p` from the manifold `manifold`.
 """
-struct Fiber{𝔽,TFiber<:FiberType,TM<:AbstractManifold{𝔽},TX} <: AbstractManifold{𝔽}
+struct Fiber{𝔽,TFiber<:FiberType,TM<:AbstractManifold,TX} <: AbstractManifold{𝔽}
     manifold::TM
     point::TX
     fiber_type::TFiber
