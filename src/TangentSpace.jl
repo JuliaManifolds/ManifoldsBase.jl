@@ -1,6 +1,6 @@
 
 @doc raw"""
-    TangentSpace{𝔽,M} = Fiber{𝔽,TangentSpaceType,M} where {𝔽,M<:AbstractManifold{𝔽}}
+    TangentSpace{𝔽,M} = Fiber{𝔽,TangentSpaceType,M} where {𝔽,M<:AbstractManifold}
 
 A manifold for the tangent space ``T_p\mathcal M`` at a point ``p\in\mathcal M``.
 This is modelled as an alias for [`VectorSpaceFiber`](@ref) corresponding to
@@ -13,12 +13,12 @@ This is modelled as an alias for [`VectorSpaceFiber`](@ref) corresponding to
 Return the manifold (vector space) representing the tangent space ``T_p\mathcal M``
 at point `p`, ``p\in\mathcal M``.
 """
-const TangentSpace{𝔽,M} = Fiber{𝔽,TangentSpaceType,M} where {𝔽,M<:AbstractManifold{𝔽}}
+const TangentSpace{𝔽,M} = Fiber{𝔽,TangentSpaceType,M} where {𝔽,M<:AbstractManifold}
 
 TangentSpace(M::AbstractManifold, p) = Fiber(M, p, TangentSpaceType())
 
 @doc raw"""
-    CotangentSpace{𝔽,M} = Fiber{𝔽,CotangentSpaceType,M} where {𝔽,M<:AbstractManifold{𝔽}}
+    CotangentSpace{𝔽,M} = Fiber{𝔽,CotangentSpaceType,M} where {𝔽,M<:AbstractManifold}
 
 A manifold for the Cotangent space ``T^*_p\mathcal M`` at a point ``p\in\mathcal M``.
 This is modelled as an alias for [`VectorSpaceFiber`](@ref) corresponding to
@@ -31,7 +31,7 @@ This is modelled as an alias for [`VectorSpaceFiber`](@ref) corresponding to
 Return the manifold (vector space) representing the cotangent space ``T^*_p\mathcal M``
 at point `p`, ``p\in\mathcal M``.
 """
-const CotangentSpace{𝔽,M} = Fiber{𝔽,CotangentSpaceType,M} where {𝔽,M<:AbstractManifold{𝔽}}
+const CotangentSpace{𝔽,M} = Fiber{𝔽,CotangentSpaceType,M} where {𝔽,M<:AbstractManifold}
 
 CotangentSpace(M::AbstractManifold, p) = Fiber(M, p, CotangentSpaceType())
 

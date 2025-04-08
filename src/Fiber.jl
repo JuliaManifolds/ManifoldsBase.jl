@@ -7,7 +7,7 @@ An abstract type for fiber types that can be used within [`Fiber`](@ref).
 abstract type FiberType end
 
 @doc raw"""
-    Fiber{𝔽,TFiber<:FiberType,TM<:AbstractManifold{𝔽},TX} <: AbstractManifold{𝔽}
+    Fiber{𝔽,TFiber<:FiberType,TM<:AbstractManifold,TX} <: AbstractManifold{𝔽}
 
 A fiber of a fiber bundle at a point `p` on the manifold.
 
@@ -27,10 +27,19 @@ isometric to the [`Euclidean`](https://juliamanifolds.github.io/Manifolds.jl/lat
 
 A fiber of type `fiber_type` at point `p` from the manifold `manifold`.
 """
-struct Fiber{𝔽,TFiber<:FiberType,TM<:AbstractManifold{𝔽},TX} <: AbstractManifold{𝔽}
+struct Fiber{𝔽,TFiber<:FiberType,TM<:AbstractManifold,TX} <: AbstractManifold{𝔽}
     manifold::TM
     point::TX
     fiber_type::TFiber
+end
+
+function Fiber(
+    manifold::TM,
+    point::TX,
+    fiber_type::TFiber;
+    field::AbstractNumbers = ℝ,
+) where {TM<:AbstractManifold,TX,TFiber<:FiberType}
+    return Fiber{field,TFiber,TM,TX}(manifold, point, fiber_type)
 end
 
 base_manifold(B::Fiber) = B.manifold
