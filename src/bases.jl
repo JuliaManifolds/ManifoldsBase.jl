@@ -328,32 +328,40 @@ the right type. This is needed for [`get_vector`](@ref) when a point on a comple
 is represented by a real-valued vectors with a real-coefficient basis, so that
 a complex-valued vector representation is allocated.
 """
-allocation_promotion_function(M::AbstractManifold, f, args::Tuple) = identity
+allocation_promotion_function(::AbstractManifold, f, ::Tuple) = identity
 
 
 _doc_default_basis = """
-    default_basis(M::AbstractManifold, ::typeof(p), 𝔽::AbstractNumbers)
-    default_basis(M::AbstractManifold, ::typeof(p))
-    default_basis(M::AbstractManifold)
+    default_basis(M::AbstractManifold, ::typeof(p); kwargs...)
+    default_basis(M::AbstractManifold; kwargs...)
 
 Provide a default basis for a manifold's tangent space. This can be specific for different
-points `p` on `M` as well as different coefficient number types `𝔽`.
-The global default for both is the [`DefaultOrthonormalBasis`](@ref).
+points `p` on `M`
+The global default for both is the [`DefaultOrthonormalBasis`](@ref) with
+the same number type as `M`.
 
 This method can also be specified more precisely with a point type `T`, for the case
 that on a `M` there are two different representations of points, which provide
 different inverse retraction methods.
+
+## Keyword arguments
+
+* `field::`[`AbstractNumbers`](@ref) field for the coefficients of the basis
 """
 
 @doc "$(_doc_default_basis)"
-default_basis(M::AbstractManifold, P::Type{T}, ::AbstractNumbers) where {T} =
-    default_basis(M, P)
+function default_basis(
+    M::AbstractManifold{𝔽},
+    ::Type{T};
+    field::AbstractNumbers = 𝔽,
+) where {𝔽,T}
+    return default_basis(M; field = field)
+end
 
 @doc "$(_doc_default_basis)"
-default_basis(M::AbstractManifold, ::Type{T}) where {T} = default_basis(M)
-
-@doc "$(_doc_default_basis)"
-default_basis(::AbstractManifold) = DefaultOrthonormalBasis()
+function default_basis(::AbstractManifold{𝔽}; field::AbstractNumbers = 𝔽) where {𝔽}
+    return DefaultOrthonormalBasis(field)
+end
 
 """
     change_basis(M::AbstractManifold, p, c, B_in::AbstractBasis, B_out::AbstractBasis)
