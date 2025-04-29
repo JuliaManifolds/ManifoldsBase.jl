@@ -186,6 +186,8 @@ using ManifoldsBaseTestUtils
         ]
         p2 = copy(p1)
         p3 = copy(p1)
+        p4 = copy(p1)
+        p5 = copy(p1)
         X1 = [
             -1.3114742420546033,
             0.2735101165024386,
@@ -201,27 +203,46 @@ using ManifoldsBaseTestUtils
         ]
         X2 = copy(X1)
         X3 = copy(X1)
+        X4 = copy(X1)
+        X5 = copy(X1)
         q = similar(p1)
         SR = StabilizedRetraction()
         err_eps = 1e-5
         for _ in 1:1000
+
             X1 .+= err_eps
-            retract!(M, q, p1, X1, SR)
+            exp!(M, q, p1, X1)
             parallel_transport_to!(M, X1, p1, X1, q)
             p1 .= q
 
+            # mutating non-fused
             X2 .+= err_eps
-            exp!(M, q, p2, X2)
+            retract!(M, q, p2, X2, SR)
             parallel_transport_to!(M, X2, p2, X2, q)
             p2 .= q
 
+            # mutating fused
             X3 .+= err_eps
             ManifoldsBase.retract_fused!(M, q, p3, X3, 1.0, SR)
             parallel_transport_to!(M, X3, p3, X3, q)
             p3 .= q
+
+            # non-mutating non-fused
+            X4 .+= err_eps
+            q4 = retract(M, p4, X4, SR)
+            parallel_transport_to!(M, X4, p4, X4, q4)
+            p4 .= q4
+
+            # non-mutating fused
+            X5 .+= err_eps
+            q5 = ManifoldsBase.retract_fused(M, p5, X5, 1.0, SR)
+            parallel_transport_to!(M, X5, p5, X5, q5)
+            p5 .= q5
         end
-        @test is_point(M, p1)
-        @test !is_point(M, p2)
+        @test !is_point(M, p1)
+        @test is_point(M, p2)
         @test is_point(M, p3)
+        @test is_point(M, p4)
+        @test is_point(M, p5)
     end
 end
