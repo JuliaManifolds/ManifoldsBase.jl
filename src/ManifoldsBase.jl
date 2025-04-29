@@ -1259,7 +1259,8 @@ export AbstractRetractionMethod,
     RetractionWithKeywords,
     SasakiRetraction,
     ShootingInverseRetraction,
-    SoftmaxRetraction
+    SoftmaxRetraction,
+    StabilizedRetraction
 
 # (c) Inverse Retraction Types
 export AbstractInverseRetractionMethod,
