@@ -207,6 +207,21 @@ Describes a retraction that is based on the softmax function.
 struct SoftmaxRetraction <: AbstractRetractionMethod end
 
 
+"""
+    StabilizedRetraction <: AbstractRetractionMethod
+
+A retraction wraps another retraction and projects the resulting point onto the manifold
+for numerical stability.
+
+# Constructor
+
+    StabilizedRetraction(::AbstractRetractionMethod=ExponentialRetraction())
+"""
+struct StabilizedRetraction{TRM<:AbstractRetractionMethod} <: AbstractRetractionMethod
+    retraction::TRM
+end
+StabilizedRetraction() = StabilizedRetraction(ExponentialRetraction())
+
 @doc raw"""
     PadeRetraction{m} <: AbstractRetractionMethod
 
@@ -777,6 +792,9 @@ end
 function _retract!(M::AbstractManifold, q, p, X, ::SoftmaxRetraction; kwargs...)
     return retract_softmax!(M, q, p, X; kwargs...)
 end
+function _retract!(M::AbstractManifold, q, p, X, m::StabilizedRetraction; kwargs...)
+    return retract_stabilized!(M, q, p, X, m; kwargs...)
+end
 function _retract!(M::AbstractManifold, q, p, X, m::PadeRetraction; kwargs...)
     return retract_pade!(M, q, p, X, m; kwargs...)
 end
@@ -920,6 +938,9 @@ function _retract_fused!(
     kwargs...,
 )
     return retract_softmax_fused!(M, q, p, X, t; kwargs...)
+end
+function _retract_fused!(M::AbstractManifold, q, p, X, t::Number, m::StabilizedRetraction)
+    return retract_stabilized_fused!(M, q, p, X, t, m)
 end
 function _retract_fused!(
     M::AbstractManifold,
@@ -1114,6 +1135,23 @@ retract_sasaki!(M::AbstractManifold, q, p, X, m::SasakiRetraction)
 
 function retract_sasaki_fused!(M::AbstractManifold, q, p, X, t::Number, m::SasakiRetraction)
     return retract_sasaki!(M, q, p, t * X, m)
+end
+
+function retract_stabilized!(M::AbstractManifold, q, p, X, m::StabilizedRetraction)
+    retract!(M, q, p, X, m.retraction)
+    return embed_project!(M, q, q)
+end
+
+function retract_stabilized_fused!(
+    M::AbstractManifold,
+    q,
+    p,
+    X,
+    t::Number,
+    m::StabilizedRetraction,
+)
+    retract_fused!(M, q, p, X, t, m.retraction)
+    return embed_project!(M, q, q)
 end
 
 Base.show(io::IO, ::CayleyRetraction) = print(io, "CayleyRetraction()")
