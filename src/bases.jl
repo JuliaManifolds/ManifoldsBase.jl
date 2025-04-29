@@ -359,7 +359,7 @@ function default_basis(
 end
 
 @doc "$(_doc_default_basis)"
-function default_basis(::AbstractManifold{𝔽}; field::AbstractNumbers = 𝔽) where {𝔽}
+function default_basis(::AbstractManifold; field::AbstractNumbers = ℝ)
     return DefaultOrthonormalBasis(field)
 end
 
