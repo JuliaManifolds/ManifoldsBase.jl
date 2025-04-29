@@ -332,17 +332,21 @@ allocation_promotion_function(M::AbstractManifold, f, args::Tuple) = identity
 
 
 _doc_default_basis = """
+    default_basis(M::AbstractManifold, ::typeof(p), 𝔽::AbstractNumbers)
     default_basis(M::AbstractManifold, ::typeof(p))
     default_basis(M::AbstractManifold)
 
 Provide a default basis for a manifold's tangent space. This can be specific for different
-points `p` on `M`.
+points `p` on `M` as well as different coefficient number types `𝔽`.
 The global default for both is the [`DefaultOrthonormalBasis`](@ref).
 
 This method can also be specified more precisely with a point type `T`, for the case
 that on a `M` there are two different representations of points, which provide
 different inverse retraction methods.
 """
+
+@doc "$(_doc_default_basis)"
+default_basis(M::AbstractManifold, P::Type{T}, ::AbstractNumbers) where {T} = default_basis(M, P)
 
 @doc "$(_doc_default_basis)"
 default_basis(M::AbstractManifold, ::Type{T}) where {T} = default_basis(M)
