@@ -332,7 +332,7 @@ allocation_promotion_function(M::AbstractManifold, f, args::Tuple) = identity
 
 
 _doc_default_basis = """
-    default_basis(M::AbstractManifold, p)
+    default_basis(M::AbstractManifold, ::typeof(p))
     default_basis(M::AbstractManifold)
 
 Provide a default basis for a manifold's tangent space. This can be specific for different
