@@ -328,7 +328,36 @@ the right type. This is needed for [`get_vector`](@ref) when a point on a comple
 is represented by a real-valued vectors with a real-coefficient basis, so that
 a complex-valued vector representation is allocated.
 """
-allocation_promotion_function(M::AbstractManifold, f, args::Tuple) = identity
+allocation_promotion_function(::AbstractManifold, f, ::Tuple) = identity
+
+
+_doc_default_basis = """
+    default_basis(M::AbstractManifold, ::typeof(p); kwargs...)
+    default_basis(M::AbstractManifold; kwargs...)
+
+Provide a default basis for a manifold's tangent space. This can be specific for different
+points `p` on `M`
+The global default for both is the [`DefaultOrthonormalBasis`](@ref) with
+the same number type as `M`.
+
+This method can also be specified more precisely with a point type `T`, for the case
+that on a `M` there are two different representations of points, which provide
+different inverse retraction methods.
+
+## Keyword arguments
+
+* `field::`[`AbstractNumbers`](@ref) field for the coefficients of the basis
+"""
+
+@doc "$(_doc_default_basis)"
+function default_basis(M::AbstractManifold, ::Type{T}; field::AbstractNumbers = ℝ) where {T}
+    return default_basis(M; field = field)
+end
+
+@doc "$(_doc_default_basis)"
+function default_basis(::AbstractManifold; field::AbstractNumbers = ℝ)
+    return DefaultOrthonormalBasis(field)
+end
 
 """
     change_basis(M::AbstractManifold, p, c, B_in::AbstractBasis, B_out::AbstractBasis)
@@ -516,7 +545,7 @@ function get_basis_orthonormal(M::AbstractManifold, p, N::AbstractNumbers; kwarg
 end
 
 @doc raw"""
-    get_coordinates(M::AbstractManifold, p, X, B::AbstractBasis=DefaultOrthonormalBasis())
+    get_coordinates(M::AbstractManifold, p, X, B::AbstractBasis=default_basis(M, typeof(p)))
     get_coordinates(M::AbstractManifold, p, X, B::CachedBasis)
 
 Compute a one-dimensional vector of coefficients of the tangent vector `X`
@@ -536,7 +565,7 @@ function get_coordinates(
     M::AbstractManifold,
     p,
     X,
-    B::AbstractBasis = DefaultOrthonormalBasis(),
+    B::AbstractBasis = default_basis(M, typeof(p)),
 )
     return _get_coordinates(M, p, X, B)
 end
@@ -678,7 +707,7 @@ function get_coordinates_cached!(
 end
 
 """
-    X = get_vector(M::AbstractManifold, p, c, B::AbstractBasis=DefaultOrthonormalBasis())
+    X = get_vector(M::AbstractManifold, p, c, B::AbstractBasis=default_basis(M, typeof(p)))
 
 Convert a one-dimensional vector of coefficients in a basis `B` of
 the tangent space at `p` on manifold `M` to a tangent vector `X` at `p`.
@@ -690,13 +719,13 @@ along the curve.
 For the [`CachedBasis`](@ref) keep in mind that the reconstruction from [`get_coordinates`](@ref)
 requires either a dual basis or the cached basis to be selfdual, for example orthonormal
 
-See also: [`get_coordinates`](@ref), [`get_basis`](@ref)
+See also: [`get_coordinates`](@ref), [`get_basis`](@ref), [`default_basis`](@ref)
 """
 @inline function get_vector(
     M::AbstractManifold,
     p,
     c,
-    B::AbstractBasis = DefaultOrthonormalBasis(),
+    B::AbstractBasis = default_basis(M, typeof(p)),
 )
     return _get_vector(M, p, c, B)
 end

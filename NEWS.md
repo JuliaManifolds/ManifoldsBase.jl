@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+* `default_basis(M)` to be more flexible than a fixed `DefaultOrthonormalBasis` default.
 * `StabilizedRetraction`, a retraction that improves numerical stability of another retraction by projecting the resulting point.
 
 ## [1.0.3] 08/04/2025
