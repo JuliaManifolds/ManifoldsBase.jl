@@ -350,11 +350,7 @@ different inverse retraction methods.
 """
 
 @doc "$(_doc_default_basis)"
-function default_basis(
-    M::AbstractManifold,
-    ::Type{T};
-    field::AbstractNumbers = ℝ,
-) where {T}
+function default_basis(M::AbstractManifold, ::Type{T}; field::AbstractNumbers = ℝ) where {T}
     return default_basis(M; field = field)
 end
 
