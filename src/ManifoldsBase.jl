@@ -1096,6 +1096,14 @@ Converts a size given by `Tuple{N, M, ...}` into a tuple `(N, M, ...)`.
 """
 Base.@pure size_to_tuple(::Type{S}) where {S<:Tuple} = tuple(S.parameters...)
 
+"""
+    tangent_vector_type(::AbstractManifold, point_type::Type)
+
+Change `point_type` that is a type of points on manifold `M` to matching type for
+representing tangent vectors.
+"""
+tangent_vector_type(::AbstractManifold, point_type::Type) = point_type
+
 @doc raw"""
     Weingarten!(M, Y, p, X, V)
 
