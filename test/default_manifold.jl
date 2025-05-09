@@ -677,6 +677,9 @@ using ManifoldsBaseTestUtils
               default_vector_transport_method(M)
     end
 
+    @test ManifoldsBase.tangent_vector_type(M, DefaultPoint) === DefaultTangentVector
+    @test ManifoldsBase.tangent_vector_type(M, Array) === Array
+
     @testset "Type promotion in allocation" begin
         @test ManifoldsBase.exp_fused(M, [1, 2], [2, 3], 1.0) isa Vector{Float64}
     end

@@ -447,6 +447,10 @@ function ManifoldsBase.allocate_result_type(
     return DefaultTangentVector
 end
 
+function ManifoldsBase.tangent_vector_type(::DefaultManifold, ::Type{DefaultPoint})
+    return DefaultTangentVector
+end
+
 ManifoldsBase.@manifold_element_forwards DefaultPoint value
 ManifoldsBase.@manifold_vector_forwards DefaultTangentVector value
 ManifoldsBase.@default_manifold_fallbacks ManifoldsBase.DefaultManifold DefaultPoint DefaultTangentVector value value
