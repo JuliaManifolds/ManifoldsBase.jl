@@ -124,8 +124,7 @@ changed to an [`AbstractRetractionMethod`](@ref) `retraction` and an
 [`AbstractInverseRetractionMethod`](@ref) `inverse_retraction`, respectively.
 """
 struct PoleLadderTransport{
-        RT <: AbstractRetractionMethod,
-        IRT <: AbstractInverseRetractionMethod,
+        RT <: AbstractRetractionMethod, IRT <: AbstractInverseRetractionMethod,
     } <: AbstractLinearVectorTransportMethod
     retraction::RT
     inverse_retraction::IRT
@@ -198,8 +197,7 @@ changed to an [`AbstractRetractionMethod`](@ref) `retraction` and an
 [`AbstractInverseRetractionMethod`](@ref) `inverse_retraction`, respectively.
 """
 struct SchildsLadderTransport{
-        RT <: AbstractRetractionMethod,
-        IRT <: AbstractInverseRetractionMethod,
+        RT <: AbstractRetractionMethod, IRT <: AbstractInverseRetractionMethod,
     } <: AbstractLinearVectorTransportMethod
     retraction::RT
     inverse_retraction::IRT
@@ -226,8 +224,7 @@ associated to a vector transport, i.e. when a first implementation assumed
 an implicit associated retraction.
 """
 struct VectorTransportDirection{
-        VM <: AbstractVectorTransportMethod,
-        RM <: AbstractRetractionMethod,
+        VM <: AbstractVectorTransportMethod, RM <: AbstractRetractionMethod,
     } <: AbstractVectorTransportMethod
     retraction::RM
     vector_transport::VM
@@ -254,8 +251,7 @@ associated to a vector transport, i.e. when a first implementation assumed
 an implicit associated retraction.
 """
 struct VectorTransportTo{
-        VM <: AbstractVectorTransportMethod,
-        IM <: AbstractInverseRetractionMethod,
+        VM <: AbstractVectorTransportMethod, IM <: AbstractInverseRetractionMethod,
     } <: AbstractVectorTransportMethod
     inverse_retraction::IM
     vector_transport::VM
@@ -325,11 +321,7 @@ end
 
 @doc raw"""
     pole_ladder(
-        M,
-        p,
-        d,
-        q,
-        c = mid_point(M, p, q);
+        M, p, d, q, c = mid_point(M, p, q);
         retraction=default_retraction_method(M, typeof(p)),
         inverse_retraction=default_inverse_retraction_method(M, typeof(p))
     )
@@ -356,11 +348,7 @@ ladder steps between `p` and `q`, but with different `d`, there is just one eval
 each., since the center `c` can be reused.
 """
 function pole_ladder(
-        M,
-        p,
-        d,
-        q,
-        c = mid_point(M, p, q);
+        M, p, d, q, c = mid_point(M, p, q);
         retraction = default_retraction_method(M, typeof(p)),
         inverse_retraction = default_inverse_retraction_method(M, typeof(p)),
     )
@@ -368,13 +356,7 @@ function pole_ladder(
 end
 @doc raw"""
     pole_ladder(
-        M,
-        pl,
-        p,
-        d,
-        q,
-        c = mid_point(M, p, q),
-        X = allocate_result_type(M, log, d, c);
+        M, pl, p, d, q, c = mid_point(M, p, q), X = allocate_result_type(M, log, d, c);
         retraction = default_retraction_method(M, typeof(p)),
         inverse_retraction = default_inverse_retraction_method(M, typeof(p)),
     )
@@ -383,13 +365,7 @@ Compute the [`pole_ladder`](@ref), i.e. the result is saved in `pl`.
 `X` is used for storing intermediate inverse retraction.
 """
 function pole_ladder!(
-        M,
-        pl,
-        p,
-        d,
-        q,
-        c = mid_point(M, p, q),
-        X = allocate_result(M, log, d, c);
+        M, pl, p, d, q, c = mid_point(M, p, q), X = allocate_result(M, log, d, c);
         retraction = default_retraction_method(M, typeof(p)),
         inverse_retraction = default_inverse_retraction_method(M, typeof(p)),
     )
@@ -400,11 +376,7 @@ end
 
 @doc raw"""
     schilds_ladder(
-        M,
-        p,
-        d,
-        q,
-        c = mid_point(M, q, d);
+        M, p, d, q, c = mid_point(M, q, d);
         retraction = default_retraction_method(M, typeof(p)),
         inverse_retraction = default_inverse_retraction_method(M, typeof(p)),
     )
@@ -434,24 +406,14 @@ Hence after $n$ successive steps the tangent vector reads
 $Y_n = \log_q \operatorname{Pl}(p_{n-1},d_{n-1},p_n)$.
 """
 function schilds_ladder(
-        M,
-        p,
-        d,
-        q,
-        c = mid_point(M, q, d);
+        M, p, d, q, c = mid_point(M, q, d);
         retraction = default_retraction_method(M, typeof(p)),
         inverse_retraction = default_inverse_retraction_method(M, typeof(p)),
     )
     return retract(M, p, 2 * inverse_retract(M, p, c, inverse_retraction), retraction)
 end
 @doc raw"""
-    schilds_ladder!(
-        M,
-        sl
-        p,
-        d,
-        q,
-        c = mid_point(M, q, d),
+    schilds_ladder!(M, sl, p, d, q, c = mid_point(M, q, d),
         X = allocate_result_type(M, log, d, c);
         retraction = default_retraction_method(M, typeof(p)),
         inverse_retraction = default_inverse_retraction_method(M, typeof(p)),
@@ -463,13 +425,7 @@ and the allocation of new memory can be avoided providing a tangent vector `X`
 for the interims result.
 """
 function schilds_ladder!(
-        M,
-        sl,
-        p,
-        d,
-        q,
-        c = mid_point(M, q, d),
-        X = allocate_result(M, log, d, c);
+        M, sl, p, d, q, c = mid_point(M, q, d), X = allocate_result(M, log, d, c);
         retraction = default_retraction_method(M, typeof(p)),
         inverse_retraction = default_inverse_retraction_method(M, typeof(p)),
     )
@@ -522,19 +478,13 @@ By default [`vector_transport_direction`](@ref) falls back to using [`vector_tra
 using the [`default_retraction_method`](@ref) on `M`.
 """
 function vector_transport_direction(
-        M::AbstractManifold,
-        p,
-        X,
-        d,
+        M::AbstractManifold, p, X, d,
         m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
     )
     return _vector_transport_direction(M, p, X, d, m)
 end
 function _vector_transport_direction(
-        M::AbstractManifold,
-        p,
-        X,
-        d,
+        M::AbstractManifold, p, X, d,
         m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p));
         kwargs...,
     )
@@ -898,34 +848,18 @@ function _vector_transport_to!(
     return Y
 end
 function _vector_transport_to!(
-        M::AbstractManifold,
-        Y,
-        p,
-        X,
-        q,
-        m::VectorTransportWithKeywords;
-        kwargs...,
+        M::AbstractManifold, Y, p, X, q, m::VectorTransportWithKeywords; kwargs...,
     )
     return _vector_transport_to!(M, Y, p, X, q, m.vector_transport; kwargs..., m.kwargs...)
 end
 function _vector_transport_to!(
-        M::AbstractManifold,
-        Y,
-        p,
-        X,
-        q,
-        m::SchildsLadderTransport;
+        M::AbstractManifold, Y, p, X, q, m::SchildsLadderTransport;
         kwargs...,
     )
     return inverse_retract!(
-        M,
-        Y,
-        q,
+        M, Y, q,
         schilds_ladder(
-            M,
-            p,
-            retract(M, p, X, m.retraction),
-            q;
+            M, p, retract(M, p, X, m.retraction), q;
             retraction = m.retraction,
             inverse_retraction = m.inverse_retraction,
             kwargs...,

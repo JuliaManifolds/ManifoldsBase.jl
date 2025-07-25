@@ -387,7 +387,7 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
                     M::$TM, Y::$TV, p::$TP, X::$TV, d::$TV,
                 )
                 ManifoldsBase.parallel_transport_direction!(
-                    M, Y.$vfield, p.$pfield, $vfield, d.$vfield,
+                    M, Y.$vfield, p.$pfield, X.$vfield, d.$vfield,
                 )
                 return Y
             end
