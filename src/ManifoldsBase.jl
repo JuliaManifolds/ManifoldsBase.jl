@@ -201,9 +201,7 @@ Return type of element of the array that will represent the result of function `
 [`AbstractManifold`](@ref) `M` on given arguments `args` (passed as a tuple).
 """
 @inline function allocate_result_type(
-        ::AbstractManifold,
-        f::TF,
-        args::NTuple{N, Any},
+        ::AbstractManifold, f::TF, args::NTuple{N, Any},
     ) where {N, TF}
     @inline eti_to_one(eti) = one(number_eltype(eti))
     return typeof(sum(map(eti_to_one, args)))
@@ -228,11 +226,7 @@ end
 Check is vectors `X`, `Y` tangent at `p` to `M` are linearly independent.
 """
 function are_linearly_independent(
-        M::AbstractManifold,
-        p,
-        X,
-        Y;
-        atol::Real = sqrt(eps(number_eltype(X))),
+        M::AbstractManifold, p, X, Y; atol::Real = sqrt(eps(number_eltype(X))),
     )
     norm_X = norm(M, p, X)
     norm_Y = norm(M, p, Y)
@@ -848,30 +842,17 @@ The second signature is a shorthand, where `throw_error` is used for `error=:err
 and `error=:none` (default, `false`). This case ignores the `error=` keyword.
 """
 function is_vector(
-        M::AbstractManifold,
-        p,
-        X,
-        check_base_point::Bool,
-        throw_error::Bool;
-        error::Symbol = :none,
-        kwargs...,
+        M::AbstractManifold, p, X, check_base_point::Bool, throw_error::Bool;
+        error::Symbol = :none, kwargs...,
     )
     return is_vector(
-        M,
-        p,
-        X,
-        check_base_point;
-        error = throw_error ? :error : :none,
-        kwargs...,
+        M, p, X, check_base_point;
+        error = throw_error ? :error : :none, kwargs...,
     )
 end
 function is_vector(
-        M::AbstractManifold,
-        p,
-        X,
-        check_base_point::Bool = true;
-        error::Symbol = :none,
-        kwargs...,
+        M::AbstractManifold, p, X, check_base_point::Bool = true;
+        error::Symbol = :none, kwargs...,
     )
     if check_base_point
         # if error, is_point throws, otherwise if not a point return false

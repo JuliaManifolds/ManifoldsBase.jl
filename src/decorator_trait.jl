@@ -143,11 +143,7 @@ end
 
 @trait_function change_representer(M::AbstractDecoratorManifold, G::AbstractMetric, X, p)
 @trait_function change_representer!(
-    M::AbstractDecoratorManifold,
-    Y,
-    G::AbstractMetric,
-    X,
-    p,
+    M::AbstractDecoratorManifold, Y, G::AbstractMetric, X, p,
 )
 
 # Introduce Deco Trait | automatic foward | fallback
