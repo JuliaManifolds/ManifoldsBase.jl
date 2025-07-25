@@ -5,19 +5,19 @@
 if "--help" ∈ ARGS
     println(
         """
-docs/make.jl
+        docs/make.jl
 
-Render the `Manopt.jl` documenation with optinal arguments
+        Render the `Manopt.jl` documenation with optinal arguments
 
-Arguments
-* `--help`              - print this help and exit without rendering the documentation
-* `--prettyurls`        – toggle the prettyurls part to true (which is otherwise only true on CI)
-* `--quarto`            – run the Quarto notebooks from the `tutorials/` folder before generating the documentation
-  this has to be run locally at least once for the `tutorials/*.md` files to exist that are included in
-  the documentation (see `--exclude-tutorials`) for the alternative.
-  If they are generated ones they are cached accordingly.
-  Then you can spare time in the rendering by not passing this argument.
-""",
+        Arguments
+        * `--help`              - print this help and exit without rendering the documentation
+        * `--prettyurls`        – toggle the prettyurls part to true (which is otherwise only true on CI)
+        * `--quarto`            – run the Quarto notebooks from the `tutorials/` folder before generating the documentation
+          this has to be run locally at least once for the `tutorials/*.md` files to exist that are included in
+          the documentation (see `--exclude-tutorials`) for the alternative.
+          If they are generated ones they are cached accordingly.
+          Then you can spare time in the rendering by not passing this argument.
+        """,
     )
     exit(0)
 end

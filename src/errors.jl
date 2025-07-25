@@ -27,11 +27,11 @@ Generate an Error with value `val` and message `msg`.
 Generate a message without a value (using `val=NaN` internally) and message `msg`.
 
 """
-struct ApproximatelyError{V,S} <: Exception
+struct ApproximatelyError{V, S} <: Exception
     val::V
     msg::S
 end
-ApproximatelyError(msg::S) where {S} = ApproximatelyError{Float64,S}(NaN, msg)
+ApproximatelyError(msg::S) where {S} = ApproximatelyError{Float64, S}(NaN, msg)
 
 function Base.show(io::IO, ex::ApproximatelyError)
     isnan(ex.val) && return print(io, "ApproximatelyError(\"$(ex.msg)\")")
@@ -52,12 +52,12 @@ Store an error that occured in a component, where the additional `index` is stor
 * `index::I` index where the error occured`
 * `error::E` error that occured.
 """
-struct ComponentManifoldError{I,E} <: AbstractManifoldDomainError where {I,E<:Exception}
+struct ComponentManifoldError{I, E} <: AbstractManifoldDomainError where {I, E <: Exception}
     index::I
     error::E
 end
-function ComponentManifoldError(i::I, e::E) where {I,E<:Exception}
-    return ComponentManifoldError{I,E}(i, e)
+function ComponentManifoldError(i::I, e::E) where {I, E <: Exception}
+    return ComponentManifoldError{I, E}(i, e)
 end
 
 @doc """
@@ -69,11 +69,11 @@ with [`ComponentManifoldError`](@ref) to store a set of errors that occured.
 # Fields
 * `errors` a `Vector` of `<:Exceptions`.
 """
-struct CompositeManifoldError{T} <: AbstractManifoldDomainError where {T<:Exception}
+struct CompositeManifoldError{T} <: AbstractManifoldDomainError where {T <: Exception}
     errors::Vector{T}
 end
 CompositeManifoldError() = CompositeManifoldError{Exception}(Exception[])
-function CompositeManifoldError(errors::Vector{T}) where {T<:Exception}
+function CompositeManifoldError(errors::Vector{T}) where {T <: Exception}
     return CompositeManifoldError{T}(errors)
 end
 
@@ -130,7 +130,7 @@ An error to represent a nested (Domain) error on a manifold, for example
 if a point or tangent vector is invalid because its representation in some
 embedding is already invalid.
 """
-struct ManifoldDomainError{E} <: AbstractManifoldDomainError where {E<:Exception}
+struct ManifoldDomainError{E} <: AbstractManifoldDomainError where {E <: Exception}
     outer_text::String
     error::E
 end

@@ -1,4 +1,3 @@
-
 """
     manifold_element_forwards(T, field::Symbol)
     manifold_element_forwards(T, Twhere, field::Symbol)
@@ -17,9 +16,11 @@ List of forwarded functions:
 * `==`.
 """
 macro manifold_element_forwards(T, field::Symbol)
-    return esc(quote
-        ManifoldsBase.@manifold_element_forwards ($T) _unused ($field)
-    end)
+    return esc(
+        quote
+            ManifoldsBase.@manifold_element_forwards ($T) _unused ($field)
+        end
+    )
 end
 macro manifold_element_forwards(T, Twhere, field::Symbol)
     TWT = if Twhere === :_unused
@@ -60,14 +61,14 @@ macro manifold_element_forwards(T, Twhere, field::Symbol)
             code.args,
             quote
                 ManifoldsBase.allocate(p::$T) where {$Twhere} = $T(allocate(p.$field))
-                function ManifoldsBase.allocate(p::$T, ::Type{P}) where {P,$Twhere}
+                function ManifoldsBase.allocate(p::$T, ::Type{P}) where {P, $Twhere}
                     return $T(allocate(p.$field, P))
                 end
                 function ManifoldsBase.allocate(
-                    p::$T,
-                    ::Type{P},
-                    dims::Tuple,
-                ) where {P,$Twhere}
+                        p::$T,
+                        ::Type{P},
+                        dims::Tuple,
+                    ) where {P, $Twhere}
                     return $T(allocate(p.$field, P, dims))
                 end
                 @inline Base.copy(p::$T) where {$Twhere} = $T(copy(p.$field))
@@ -76,7 +77,7 @@ macro manifold_element_forwards(T, Twhere, field::Symbol)
                     return q
                 end
                 Base.similar(p::$T) where {$Twhere} = $T(similar(p.$field))
-                Base.similar(p::$T, ::Type{P}) where {P,$Twhere} = $T(similar(p.$field, P))
+                Base.similar(p::$T, ::Type{P}) where {P, $Twhere} = $T(similar(p.$field, P))
                 Base.:(==)(p::$T, q::$T) where {$Twhere} = (p.$field == q.$field)
             end,
         )
@@ -100,11 +101,8 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
             return $TV(a)
         end
         function ManifoldsBase.allocate_result(
-            ::$TM,
-            ::typeof(inverse_retract),
-            p::$TP,
-            ::$TP,
-        )
+                ::$TM, ::typeof(inverse_retract), p::$TP, ::$TP,
+            )
             a = allocate(p.$vfield)
             return $TV(a)
         end
@@ -160,12 +158,8 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
         end
 
         function ManifoldsBase.inverse_retract!(
-            M::$TM,
-            X::$TV,
-            p::$TP,
-            q::$TP,
-            m::LogarithmicInverseRetraction,
-        )
+                M::$TM, X::$TV, p::$TP, q::$TP, m::LogarithmicInverseRetraction,
+            )
             ManifoldsBase.inverse_retract!(M, X.$vfield, p.$pfield, q.$pfield, m)
             return X
         end
@@ -188,24 +182,15 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
         end
 
         function ManifoldsBase.retract!(
-            M::$TM,
-            q::$TP,
-            p::$TP,
-            X::$TV,
-            m::ExponentialRetraction,
-        )
+                M::$TM, q::$TP, p::$TP, X::$TV, m::ExponentialRetraction,
+            )
             ManifoldsBase.retract!(M, q.$pfield, p.$pfield, X.$vfield, m)
             return q
         end
 
         function ManifoldsBase.retract_fused!(
-            M::$TM,
-            q::$TP,
-            p::$TP,
-            X::$TV,
-            t::Number,
-            m::ExponentialRetraction,
-        )
+                M::$TM, q::$TP, p::$TP, X::$TV, t::Number, m::ExponentialRetraction,
+            )
             ManifoldsBase.retract_fused!(M, q.$pfield, p.$pfield, X.$vfield, t, m)
             return q
         end
@@ -257,12 +242,14 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
     end
     for f_postfix in [:polar, :project, :qr, :softmax, :sasaki]
         rm = Symbol("retract_$(f_postfix)!")
-        push!(block.args, quote
-            function ManifoldsBase.$rm(M::$TM, q, p::$TP, X::$TV)
-                ManifoldsBase.$rm(M, q.$pfield, p.$pfield, X.$vfield)
-                return q
+        push!(
+            block.args, quote
+                function ManifoldsBase.$rm(M::$TM, q, p::$TP, X::$TV)
+                    ManifoldsBase.$rm(M, q.$pfield, p.$pfield, X.$vfield)
+                    return q
+                end
             end
-        end)
+        )
         rmf = Symbol("retract_$(f_postfix)_fused!")
         push!(
             block.args,
@@ -278,110 +265,58 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
         block.args,
         quote
             function ManifoldsBase.retract_exp_ode!(
-                M::$TM,
-                q::$TP,
-                p::$TP,
-                X::$TV,
-                m::AbstractRetractionMethod,
-                B::ManifoldsBase.AbstractBasis,
-            )
+                    M::$TM, q::$TP, p::$TP, X::$TV, m::AbstractRetractionMethod,
+                    B::ManifoldsBase.AbstractBasis,
+                )
                 ManifoldsBase.retract_exp_ode!(M, q.$pfield, p.$pfield, X.$vfield, m, B)
                 return q
             end
             function ManifoldsBase.retract_exp_ode_fused!(
-                M::$TM,
-                q::$TP,
-                p::$TP,
-                X::$TV,
-                t::Number,
-                m::AbstractRetractionMethod,
-                B::ManifoldsBase.AbstractBasis,
-            )
+                    M::$TM, q::$TP, p::$TP, X::$TV, t::Number, m::AbstractRetractionMethod,
+                    B::ManifoldsBase.AbstractBasis,
+                )
                 ManifoldsBase.retract_exp_ode_fused!(
-                    M,
-                    q.$pfield,
-                    p.$pfield,
-                    X.$vfield,
-                    t,
-                    m,
-                    B,
+                    M, q.$pfield, p.$pfield, X.$vfield, t, m, B,
                 )
                 return q
             end
             function ManifoldsBase.retract_pade!(
-                M::$TM,
-                q::$TP,
-                p::$TP,
-                X::$TV,
-                m::PadeRetraction,
-            )
+                    M::$TM, q::$TP, p::$TP, X::$TV, m::PadeRetraction,
+                )
                 ManifoldsBase.retract_pade!(M, q.$pfield, p.$pfield, X.$vfield, m)
                 return q
             end
             function ManifoldsBase.retract_pade_fused!(
-                M::$TM,
-                q::$TP,
-                p::$TP,
-                X::$TV,
-                t::Number,
-                m::PadeRetraction,
-            )
+                    M::$TM, q::$TP, p::$TP, X::$TV, t::Number, m::PadeRetraction,
+                )
                 ManifoldsBase.retract_pade_fused!(M, q.$pfield, p.$pfield, X.$vfield, t, m)
                 return q
             end
             function ManifoldsBase.retract_embedded!(
-                M::$TM,
-                q::$TP,
-                p::$TP,
-                X::$TV,
-                m::AbstractRetractionMethod,
-            )
+                    M::$TM, q::$TP, p::$TP, X::$TV, m::AbstractRetractionMethod,
+                )
                 ManifoldsBase.retract_embedded!(M, q.$pfield, p.$pfield, X.$vfield, m)
                 return q
             end
             function ManifoldsBase.retract_embedded_fused!(
-                M::$TM,
-                q::$TP,
-                p::$TP,
-                X::$TV,
-                t::Number,
-                m::AbstractRetractionMethod,
-            )
+                    M::$TM, q::$TP, p::$TP, X::$TV, t::Number, m::AbstractRetractionMethod,
+                )
                 ManifoldsBase.retract_embedded_fused!(
-                    M,
-                    q.$pfield,
-                    p.$pfield,
-                    X.$vfield,
-                    t,
-                    m,
+                    M, q.$pfield, p.$pfield, X.$vfield, t, m,
                 )
                 return q
             end
             function ManifoldsBase.retract_sasaki!(
-                M::$TM,
-                q::$TP,
-                p::$TP,
-                X::$TV,
-                m::SasakiRetraction,
-            )
+                    M::$TM, q::$TP, p::$TP, X::$TV, m::SasakiRetraction,
+                )
                 ManifoldsBase.retract_sasaki!(M, q.$pfield, p.$pfield, X.$vfield, m)
                 return q
             end
             function ManifoldsBase.retract_sasaki_fused!(
-                M::$TM,
-                q::$TP,
-                p::$TP,
-                X::$TV,
-                t::Number,
-                m::SasakiRetraction,
-            )
+                    M::$TM, q::$TP, p::$TP, X::$TV, t::Number, m::SasakiRetraction,
+                )
                 ManifoldsBase.retract_sasaki_fused!(
-                    M,
-                    q.$pfield,
-                    p.$pfield,
-                    X.$vfield,
-                    t,
-                    m,
+                    M, q.$pfield, p.$pfield, X.$vfield, t, m,
                 )
                 return q
             end
@@ -389,46 +324,32 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
     )
     for f_postfix in [:polar, :project, :qr, :softmax]
         rm = Symbol("inverse_retract_$(f_postfix)!")
-        push!(block.args, quote
-            function ManifoldsBase.$rm(M::$TM, Y::$TV, p::$TP, q::$TP)
-                ManifoldsBase.$rm(M, Y.$vfield, p.$pfield, q.$pfield)
-                return Y
+        push!(
+            block.args, quote
+                function ManifoldsBase.$rm(M::$TM, Y::$TV, p::$TP, q::$TP)
+                    ManifoldsBase.$rm(M, Y.$vfield, p.$pfield, q.$pfield)
+                    return Y
+                end
             end
-        end)
+        )
     end
     push!(
         block.args,
         quote
             function ManifoldsBase.inverse_retract_embedded!(
-                M::$TM,
-                X::$TV,
-                p::$TP,
-                q::$TP,
-                m::AbstractInverseRetractionMethod,
-            )
+                    M::$TM, X::$TV, p::$TP, q::$TP, m::AbstractInverseRetractionMethod,
+                )
                 ManifoldsBase.inverse_retract_embedded!(
-                    M,
-                    X.$vfield,
-                    p.$pfield,
-                    q.$pfield,
-                    m,
+                    M, X.$vfield, p.$pfield, q.$pfield, m,
                 )
                 return X
             end
 
             function ManifoldsBase.inverse_retract_nlsolve!(
-                M::$TM,
-                X::$TV,
-                p::$TP,
-                q::$TP,
-                m::NLSolveInverseRetraction,
-            )
+                    M::$TM, X::$TV, p::$TP, q::$TP, m::NLSolveInverseRetraction,
+                )
                 ManifoldsBase.inverse_retract_nlsolve!(
-                    M,
-                    X.$vfield,
-                    p.$pfield,
-                    q.$pfield,
-                    m,
+                    M, X.$vfield, p.$pfield, q.$pfield, m,
                 )
                 return X
             end
@@ -454,33 +375,19 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
         block.args,
         quote
             function ManifoldsBase.parallel_transport_direction(
-                M::$TM,
-                p::$TP,
-                X::$TV,
-                d::$TV,
-            )
+                    M::$TM, p::$TP, X::$TV, d::$TV,
+                )
                 return $TV(
                     ManifoldsBase.parallel_transport_direction(
-                        M,
-                        p.$pfield,
-                        X.$vfield,
-                        d.$vfield,
+                        M, p.$pfield, X.$vfield, d.$vfield,
                     ),
                 )
             end
             function ManifoldsBase.parallel_transport_direction!(
-                M::$TM,
-                Y::$TV,
-                p::$TP,
-                X::$TV,
-                d::$TV,
-            )
+                    M::$TM, Y::$TV, p::$TP, X::$TV, d::$TV,
+                )
                 ManifoldsBase.parallel_transport_direction!(
-                    M,
-                    Y.$vfield,
-                    p.$pfield,
-                    X.$vfield,
-                    d.$vfield,
+                    M, Y.$vfield, p.$pfield, $vfield, d.$vfield,
                 )
                 return Y
             end
@@ -490,18 +397,10 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
                 )
             end
             function ManifoldsBase.parallel_transport_to!(
-                M::$TM,
-                Y::$TV,
-                p::$TP,
-                X::$TV,
-                q::$TP,
-            )
+                    M::$TM, Y::$TV, p::$TP, X::$TV, q::$TP,
+                )
                 ManifoldsBase.parallel_transport_to!(
-                    M,
-                    Y.$vfield,
-                    p.$pfield,
-                    X.$vfield,
-                    q.$pfield,
+                    M, Y.$vfield, p.$pfield, X.$vfield, q.$pfield,
                 )
                 return Y
             end
@@ -509,7 +408,6 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
     )
     return esc(block)
 end
-
 
 
 @doc raw"""
@@ -530,9 +428,11 @@ List of forwarded functions:
     @eval @manifold_vector_forwards ValidationFibreVector{TType} TType value
 """
 macro manifold_vector_forwards(T, field::Symbol)
-    return esc(quote
-        ManifoldsBase.@manifold_vector_forwards ($T) _unused ($field)
-    end)
+    return esc(
+        quote
+            ManifoldsBase.@manifold_vector_forwards ($T) _unused ($field)
+        end
+    )
 end
 macro manifold_vector_forwards(T, Twhere, field::Symbol)
     TWT = if Twhere === :_unused
@@ -587,20 +487,20 @@ macro manifold_vector_forwards(T, Twhere, field::Symbol)
                 end
 
                 function Broadcast.BroadcastStyle(
-                    ::Broadcast.AbstractArrayStyle{0},
-                    b::Broadcast.Style{$T},
-                )
+                        ::Broadcast.AbstractArrayStyle{0},
+                        b::Broadcast.Style{$T},
+                    )
                     return b
                 end
 
                 function Broadcast.instantiate(
-                    bc::Broadcast.Broadcasted{Broadcast.Style{$T},Nothing},
-                )
+                        bc::Broadcast.Broadcasted{Broadcast.Style{$T}, Nothing},
+                    )
                     return bc
                 end
                 function Broadcast.instantiate(
-                    bc::Broadcast.Broadcasted{Broadcast.Style{$T}},
-                )
+                        bc::Broadcast.Broadcasted{Broadcast.Style{$T}},
+                    )
                     Broadcast.check_broadcast_axes(bc.axes, bc.args...)
                     return bc
                 end
@@ -610,9 +510,9 @@ macro manifold_vector_forwards(T, Twhere, field::Symbol)
                 end
 
                 @inline function Base.copyto!(
-                    dest::$T,
-                    bc::Broadcast.Broadcasted{Broadcast.Style{$T}},
-                )
+                        dest::$T,
+                        bc::Broadcast.Broadcasted{Broadcast.Style{$T}},
+                    )
                     return $broadcast_copyto_code
                 end
             end,
@@ -636,34 +536,33 @@ macro manifold_vector_forwards(T, Twhere, field::Symbol)
                 end
 
                 function Broadcast.BroadcastStyle(
-                    ::Broadcast.AbstractArrayStyle{0},
-                    b::Broadcast.Style{$T},
-                ) where {$Twhere}
+                        ::Broadcast.AbstractArrayStyle{0},
+                        b::Broadcast.Style{$T},
+                    ) where {$Twhere}
                     return b
                 end
 
                 function Broadcast.instantiate(
-                    bc::Broadcast.Broadcasted{Broadcast.Style{$T},Nothing},
-                ) where {$Twhere}
+                        bc::Broadcast.Broadcasted{Broadcast.Style{$T}, Nothing},
+                    ) where {$Twhere}
                     return bc
                 end
                 function Broadcast.instantiate(
-                    bc::Broadcast.Broadcasted{Broadcast.Style{$T}},
-                ) where {$Twhere}
+                        bc::Broadcast.Broadcasted{Broadcast.Style{$T}},
+                    ) where {$Twhere}
                     Broadcast.check_broadcast_axes(bc.axes, bc.args...)
                     return bc
                 end
 
                 @inline function Base.copy(
-                    bc::Broadcast.Broadcasted{Broadcast.Style{$T}},
-                ) where {$Twhere}
+                        bc::Broadcast.Broadcasted{Broadcast.Style{$T}},
+                    ) where {$Twhere}
                     return $T(Broadcast._broadcast_getindex(bc, 1))
                 end
 
                 @inline function Base.copyto!(
-                    dest::$T,
-                    bc::Broadcast.Broadcasted{Broadcast.Style{$T}},
-                ) where {$Twhere}
+                        dest::$T, bc::Broadcast.Broadcasted{Broadcast.Style{$T}},
+                    ) where {$Twhere}
                     return $broadcast_copyto_code
                 end
             end,

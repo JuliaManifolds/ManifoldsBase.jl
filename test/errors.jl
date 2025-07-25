@@ -28,7 +28,7 @@ using Test
     e5 = CompositeManifoldError(eV)
     @test repr(e5) == "CompositeManifoldError([$(repr(e2)), $(repr(e2)), ])"
     s5 = sprint(showerror, e5)
-    @test s5 == "CompositeManifoldError: $(s2)\n\n...and $(length(eV)-1) more error(s).\n"
+    @test s5 == "CompositeManifoldError: $(s2)\n\n...and $(length(eV) - 1) more error(s).\n"
 
     e6 = ManifoldDomainError("A.", e)
     s6 = sprint(showerror, e6)

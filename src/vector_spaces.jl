@@ -1,4 +1,3 @@
-
 """
     FVector(type::VectorSpaceType, data, basis::AbstractBasis)
 
@@ -43,7 +42,7 @@ julia> X_back = get_vector(M, p, fX.data, fX.basis)
  -1.0
 ```
 """
-struct FVector{TType<:VectorSpaceType,TData,TBasis<:AbstractBasis}
+struct FVector{TType <: VectorSpaceType, TData, TBasis <: AbstractBasis}
     type::TType
     data::TData
     basis::TBasis
@@ -53,10 +52,10 @@ const TFVector = FVector{TangentSpaceType}
 const CoTFVector = FVector{CotangentSpaceType}
 
 function TFVector(data, basis::AbstractBasis)
-    return TFVector{typeof(data),typeof(basis)}(TangentSpaceType(), data, basis)
+    return TFVector{typeof(data), typeof(basis)}(TangentSpaceType(), data, basis)
 end
 function CoTFVector(data, basis::AbstractBasis)
-    return CoTFVector{typeof(data),typeof(basis)}(CotangentSpaceType(), data, basis)
+    return CoTFVector{typeof(data), typeof(basis)}(CotangentSpaceType(), data, basis)
 end
 
 function Base.show(io::IO, fX::TFVector)
@@ -79,7 +78,7 @@ representations of tangent vectors and their types on a manifold.
 You may use macro [`@manifold_vector_forwards`](@ref) to introduce commonly used method
 definitions for your subtype of `AbstractFibreVector`.
 """
-abstract type AbstractFibreVector{TType<:VectorSpaceType} end
+abstract type AbstractFibreVector{TType <: VectorSpaceType} end
 
 """
     AbstractTangentVector = AbstractFibreVector{TangentSpaceType}
@@ -119,8 +118,8 @@ function Base.copyto!(X::FVector, Y::FVector)
 end
 
 function number_eltype(
-    ::Type{FVector{TType,TData,TBasis}},
-) where {TType<:VectorSpaceType,TData,TBasis}
+        ::Type{FVector{TType, TData, TBasis}},
+    ) where {TType <: VectorSpaceType, TData, TBasis}
     return number_eltype(TData)
 end
 number_eltype(v::FVector) = number_eltype(v.data)

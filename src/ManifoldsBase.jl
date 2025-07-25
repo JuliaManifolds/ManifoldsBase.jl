@@ -82,8 +82,8 @@ allocate(a, T::Type, dim1::Integer, dims::Integer...) = similar(a, T, dim1, dims
 allocate(a, T::Type, dims::Tuple) = similar(a, T, dims)
 allocate(a::AbstractArray{<:AbstractArray}) = map(allocate, a)
 allocate(a::AbstractArray{<:AbstractArray}, T::Type) = map(t -> allocate(t, T), a)
-allocate(a::NTuple{N,AbstractArray} where {N}) = map(allocate, a)
-allocate(a::NTuple{N,AbstractArray} where {N}, T::Type) = map(t -> allocate(t, T), a)
+allocate(a::NTuple{N, AbstractArray} where {N}) = map(allocate, a)
+allocate(a::NTuple{N, AbstractArray} where {N}, T::Type) = map(t -> allocate(t, T), a)
 
 allocate(::AbstractManifold, a) = allocate(a)
 function allocate(::AbstractManifold, a, dim1::Integer, dims::Integer...)
@@ -201,10 +201,10 @@ Return type of element of the array that will represent the result of function `
 [`AbstractManifold`](@ref) `M` on given arguments `args` (passed as a tuple).
 """
 @inline function allocate_result_type(
-    ::AbstractManifold,
-    f::TF,
-    args::NTuple{N,Any},
-) where {N,TF}
+        ::AbstractManifold,
+        f::TF,
+        args::NTuple{N, Any},
+    ) where {N, TF}
     @inline eti_to_one(eti) = one(number_eltype(eti))
     return typeof(sum(map(eti_to_one, args)))
 end
@@ -228,12 +228,12 @@ end
 Check is vectors `X`, `Y` tangent at `p` to `M` are linearly independent.
 """
 function are_linearly_independent(
-    M::AbstractManifold,
-    p,
-    X,
-    Y;
-    atol::Real = sqrt(eps(number_eltype(X))),
-)
+        M::AbstractManifold,
+        p,
+        X,
+        Y;
+        atol::Real = sqrt(eps(number_eltype(X))),
+    )
     norm_X = norm(M, p, X)
     norm_Y = norm(M, p, Y)
     innerXY = inner(M, p, X, Y)
@@ -784,12 +784,12 @@ The second signature is a shorthand, where the boolean is used for `error=:error
 and `error=:none` (default, `false`). This case ignores the `error=` keyword
 """
 function is_point(
-    M::AbstractManifold,
-    p,
-    throw_error::Bool;
-    error::Symbol = :none,
-    kwargs...,
-)
+        M::AbstractManifold,
+        p,
+        throw_error::Bool;
+        error::Symbol = :none,
+        kwargs...,
+    )
     return is_point(M, p; error = throw_error ? :error : :none, kwargs...)
 end
 function is_point(M::AbstractManifold, p; error::Symbol = :none, kwargs...)
@@ -848,14 +848,14 @@ The second signature is a shorthand, where `throw_error` is used for `error=:err
 and `error=:none` (default, `false`). This case ignores the `error=` keyword.
 """
 function is_vector(
-    M::AbstractManifold,
-    p,
-    X,
-    check_base_point::Bool,
-    throw_error::Bool;
-    error::Symbol = :none,
-    kwargs...,
-)
+        M::AbstractManifold,
+        p,
+        X,
+        check_base_point::Bool,
+        throw_error::Bool;
+        error::Symbol = :none,
+        kwargs...,
+    )
     return is_vector(
         M,
         p,
@@ -866,13 +866,13 @@ function is_vector(
     )
 end
 function is_vector(
-    M::AbstractManifold,
-    p,
-    X,
-    check_base_point::Bool = true;
-    error::Symbol = :none,
-    kwargs...,
-)
+        M::AbstractManifold,
+        p,
+        X,
+        check_base_point::Bool = true;
+        error::Symbol = :none,
+        kwargs...,
+    )
     if check_base_point
         # if error, is_point throws, otherwise if not a point return false
         !is_point(M, p; error = error, kwargs...) && return false
@@ -955,11 +955,11 @@ number_eltype(x) = eltype(x)
 @inline function number_eltype(x::AbstractArray)
     return typeof(mapreduce(eti -> one(number_eltype(eti)), +, x))
 end
-@inline number_eltype(::AbstractArray{T}) where {T<:Number} = T
+@inline number_eltype(::AbstractArray{T}) where {T <: Number} = T
 @inline function number_eltype(::Type{<:AbstractArray{T}}) where {T}
     return number_eltype(T)
 end
-@inline function number_eltype(::Type{<:AbstractArray{T}}) where {T<:Number}
+@inline function number_eltype(::Type{<:AbstractArray{T}}) where {T <: Number}
     return T
 end
 @inline function number_eltype(x::Tuple)
@@ -1094,7 +1094,7 @@ sectional_curvature_min(M::AbstractManifold)
 
 Converts a size given by `Tuple{N, M, ...}` into a tuple `(N, M, ...)`.
 """
-Base.@pure size_to_tuple(::Type{S}) where {S<:Tuple} = tuple(S.parameters...)
+Base.@pure size_to_tuple(::Type{S}) where {S <: Tuple} = tuple(S.parameters...)
 
 """
     tangent_vector_type(::AbstractManifold, point_type::Type)
@@ -1185,7 +1185,7 @@ function __init__()
     #
     # Error Hints
     #
-    @static if isdefined(Base.Experimental, :register_error_hint) # COV_EXCL_LINE
+    return @static if isdefined(Base.Experimental, :register_error_hint) # COV_EXCL_LINE
         Base.Experimental.register_error_hint(MethodError) do io, exc, argtypes, kwargs
             if exc.f === plot_slope
                 print(

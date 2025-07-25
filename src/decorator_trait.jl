@@ -89,10 +89,10 @@ get_embedding(M::AbstractDecoratorManifold, p) = get_embedding(M)
 # Introduction and default fallbacks could become a macro?
 # Introduce trait
 @inline function allocate_result(
-    M::AbstractDecoratorManifold,
-    f::TF,
-    x::Vararg{Any,N},
-) where {TF,N}
+        M::AbstractDecoratorManifold,
+        f::TF,
+        x::Vararg{Any, N},
+    ) where {TF, N}
     return allocate_result(trait(allocate_result, M, f, x...), M, f, x...)
 end
 # disambiguation
@@ -112,14 +112,14 @@ end
 
 # Introduce fallback
 @inline function allocate_result(
-    ::EmptyTrait,
-    M::AbstractManifold,
-    f::TF,
-    x::Vararg{Any,N},
-) where {TF,N}
+        ::EmptyTrait,
+        M::AbstractManifold,
+        f::TF,
+        x::Vararg{Any, N},
+    ) where {TF, N}
     return invoke(
         allocate_result,
-        Tuple{AbstractManifold,typeof(f),typeof(x).parameters...},
+        Tuple{AbstractManifold, typeof(f), typeof(x).parameters...},
         M,
         f,
         x...,
@@ -127,37 +127,37 @@ end
 end
 # Introduce automatic forward
 @inline function allocate_result(
-    t::TraitList,
-    M::AbstractManifold,
-    f::TF,
-    x::Vararg{Any,N},
-) where {TF,N}
+        t::TraitList,
+        M::AbstractManifold,
+        f::TF,
+        x::Vararg{Any, N},
+    ) where {TF, N}
     return allocate_result(next_trait(t), M, f, x...)
 end
 function allocate_result(
-    ::TraitList{IsEmbeddedManifold},
-    M::AbstractDecoratorManifold,
-    f::typeof(embed),
-    x::Vararg{Any,N},
-) where {N}
+        ::TraitList{IsEmbeddedManifold},
+        M::AbstractDecoratorManifold,
+        f::typeof(embed),
+        x::Vararg{Any, N},
+    ) where {N}
     T = allocate_result_type(get_embedding(M, x[1]), f, x)
     return allocate(M, x[1], T, representation_size(get_embedding(M, x[1])))
 end
 function allocate_result(
-    ::TraitList{IsEmbeddedManifold},
-    M::AbstractDecoratorManifold,
-    f::typeof(project),
-    x::Vararg{Any,N},
-) where {N}
+        ::TraitList{IsEmbeddedManifold},
+        M::AbstractDecoratorManifold,
+        f::typeof(project),
+        x::Vararg{Any, N},
+    ) where {N}
     T = allocate_result_type(get_embedding(M, x[1]), f, x)
     return allocate(M, x[1], T, representation_size(M))
 end
 @inline function allocate_result(
-    ::TraitList{IsExplicitDecorator},
-    M::AbstractDecoratorManifold,
-    f::TF,
-    x::Vararg{Any,N},
-) where {TF,N}
+        ::TraitList{IsExplicitDecorator},
+        M::AbstractDecoratorManifold,
+        f::TF,
+        x::Vararg{Any, N},
+    ) where {TF, N}
     return allocate_result(decorated_manifold(M), f, x...)
 end
 
@@ -243,12 +243,12 @@ function exp(::TraitList{IsEmbeddedSubmanifold}, M::AbstractDecoratorManifold, p
     return exp(get_embedding(M, p), p, X)
 end
 function exp_fused(
-    ::TraitList{IsEmbeddedSubmanifold},
-    M::AbstractDecoratorManifold,
-    p,
-    X,
-    t::Number,
-)
+        ::TraitList{IsEmbeddedSubmanifold},
+        M::AbstractDecoratorManifold,
+        p,
+        X,
+        t::Number,
+    )
     return exp_fused(get_embedding(M, p), p, X, t)
 end
 
@@ -260,13 +260,13 @@ function exp!(::TraitList{IsEmbeddedSubmanifold}, M::AbstractDecoratorManifold, 
     return exp!(get_embedding(M, p), q, p, X)
 end
 function exp_fused!(
-    ::TraitList{IsEmbeddedSubmanifold},
-    M::AbstractDecoratorManifold,
-    q,
-    p,
-    X,
-    t::Number,
-)
+        ::TraitList{IsEmbeddedSubmanifold},
+        M::AbstractDecoratorManifold,
+        q,
+        p,
+        X,
+        t::Number,
+    )
     return exp_fused!(get_embedding(M, p), q, p, X, t)
 end
 
@@ -292,17 +292,17 @@ end
 
 @trait_function injectivity_radius(M::AbstractDecoratorManifold)
 function injectivity_radius(
-    ::TraitList{IsIsometricEmbeddedManifold},
-    M::AbstractDecoratorManifold,
-)
+        ::TraitList{IsIsometricEmbeddedManifold},
+        M::AbstractDecoratorManifold,
+    )
     return injectivity_radius(get_embedding(M))
 end
 @trait_function injectivity_radius(M::AbstractDecoratorManifold, p)
 function injectivity_radius(
-    ::TraitList{IsIsometricEmbeddedManifold},
-    M::AbstractDecoratorManifold,
-    p,
-)
+        ::TraitList{IsIsometricEmbeddedManifold},
+        M::AbstractDecoratorManifold,
+        p,
+    )
     return injectivity_radius(get_embedding(M, p), p)
 end
 @trait_function injectivity_radius(
@@ -310,10 +310,10 @@ end
     m::AbstractRetractionMethod,
 )
 function injectivity_radius(
-    ::TraitList{IsIsometricEmbeddedManifold},
-    M::AbstractDecoratorManifold,
-    m::AbstractRetractionMethod,
-)
+        ::TraitList{IsIsometricEmbeddedManifold},
+        M::AbstractDecoratorManifold,
+        m::AbstractRetractionMethod,
+    )
     return injectivity_radius(get_embedding(M), m)
 end
 @trait_function injectivity_radius(
@@ -322,11 +322,11 @@ end
     m::AbstractRetractionMethod,
 )
 function injectivity_radius(
-    ::TraitList{IsIsometricEmbeddedManifold},
-    M::AbstractDecoratorManifold,
-    p,
-    m::AbstractRetractionMethod,
-)
+        ::TraitList{IsIsometricEmbeddedManifold},
+        M::AbstractDecoratorManifold,
+        p,
+        m::AbstractRetractionMethod,
+    )
     return injectivity_radius(get_embedding(M, p), p, m)
 end
 
@@ -334,12 +334,12 @@ end
 @trait_function inner(M::AbstractDecoratorManifold, p, X, Y)
 # Isometric Embedded submanifold
 function inner(
-    ::TraitList{IsIsometricEmbeddedManifold},
-    M::AbstractDecoratorManifold,
-    p,
-    X,
-    Y,
-)
+        ::TraitList{IsIsometricEmbeddedManifold},
+        M::AbstractDecoratorManifold,
+        p,
+        X,
+        Y,
+    )
     return inner(get_embedding(M, p), p, X, Y)
 end
 
@@ -352,12 +352,12 @@ end
 )
 # Transparent for Submanifolds
 function inverse_retract(
-    ::TraitList{IsEmbeddedSubmanifold},
-    M::AbstractDecoratorManifold,
-    p,
-    q,
-    m::AbstractInverseRetractionMethod = default_inverse_retraction_method(M, typeof(p)),
-)
+        ::TraitList{IsEmbeddedSubmanifold},
+        M::AbstractDecoratorManifold,
+        p,
+        q,
+        m::AbstractInverseRetractionMethod = default_inverse_retraction_method(M, typeof(p)),
+    )
     return inverse_retract(get_embedding(M, p), p, q, m)
 end
 
@@ -371,13 +371,13 @@ end
     m::AbstractInverseRetractionMethod,
 )
 function inverse_retract!(
-    ::TraitList{IsEmbeddedSubmanifold},
-    M::AbstractDecoratorManifold,
-    X,
-    p,
-    q,
-    m::AbstractInverseRetractionMethod = default_inverse_retraction_method(M, typeof(p)),
-)
+        ::TraitList{IsEmbeddedSubmanifold},
+        M::AbstractDecoratorManifold,
+        X,
+        p,
+        q,
+        m::AbstractInverseRetractionMethod = default_inverse_retraction_method(M, typeof(p)),
+    )
     return inverse_retract!(get_embedding(M, p), X, p, q, m)
 end
 
@@ -390,12 +390,12 @@ end
 @trait_function is_point(M::AbstractDecoratorManifold, p; kwargs...)
 # Embedded
 function is_point(
-    ::TraitList{IsEmbeddedManifold},
-    M::AbstractDecoratorManifold,
-    p;
-    error::Symbol = :none,
-    kwargs...,
-)
+        ::TraitList{IsEmbeddedManifold},
+        M::AbstractDecoratorManifold,
+        p;
+        error::Symbol = :none,
+        kwargs...,
+    )
     # to be safe check_size first
     es = check_size(M, p)
     if es !== nothing
@@ -436,14 +436,14 @@ end
 # EmbeddedManifold
 # I am not yet sure how to properly document this embedding behaviour here in a docstring.
 function is_vector(
-    ::TraitList{IsEmbeddedManifold},
-    M::AbstractDecoratorManifold,
-    p,
-    X,
-    check_base_point::Bool = true;
-    error::Symbol = :none,
-    kwargs...,
-)
+        ::TraitList{IsEmbeddedManifold},
+        M::AbstractDecoratorManifold,
+        p,
+        X,
+        check_base_point::Bool = true;
+        error::Symbol = :none,
+        kwargs...,
+    )
     es = check_size(M, p, X)
     if es !== nothing
         (error === :error) && throw(es)
@@ -521,12 +521,12 @@ end
 @trait_function parallel_transport_direction(M::AbstractDecoratorManifold, p, X, q)
 # EmbeddedSubManifold
 function parallel_transport_direction(
-    ::TraitList{IsEmbeddedSubmanifold},
-    M::AbstractDecoratorManifold,
-    p,
-    X,
-    q,
-)
+        ::TraitList{IsEmbeddedSubmanifold},
+        M::AbstractDecoratorManifold,
+        p,
+        X,
+        q,
+    )
     return parallel_transport_direction(get_embedding(M, p), p, X, q)
 end
 
@@ -534,13 +534,13 @@ end
 @trait_function parallel_transport_direction!(M::AbstractDecoratorManifold, Y, p, X, q)
 # EmbeddedSubManifold
 function parallel_transport_direction!(
-    ::TraitList{IsEmbeddedSubmanifold},
-    M::AbstractDecoratorManifold,
-    Y,
-    p,
-    X,
-    q,
-)
+        ::TraitList{IsEmbeddedSubmanifold},
+        M::AbstractDecoratorManifold,
+        Y,
+        p,
+        X,
+        q,
+    )
     return parallel_transport_direction!(get_embedding(M, p), Y, p, X, q)
 end
 
@@ -548,12 +548,12 @@ end
 @trait_function parallel_transport_to(M::AbstractDecoratorManifold, p, X, q)
 # EmbeddedSubManifold
 function parallel_transport_to(
-    ::TraitList{IsEmbeddedSubmanifold},
-    M::AbstractDecoratorManifold,
-    p,
-    X,
-    q,
-)
+        ::TraitList{IsEmbeddedSubmanifold},
+        M::AbstractDecoratorManifold,
+        p,
+        X,
+        q,
+    )
     return parallel_transport_to(get_embedding(M, p), p, X, q)
 end
 
@@ -561,13 +561,13 @@ end
 @trait_function parallel_transport_to!(M::AbstractDecoratorManifold, Y, p, X, q)
 # EmbeddedSubManifold
 function parallel_transport_to!(
-    ::TraitList{IsEmbeddedSubmanifold},
-    M::AbstractDecoratorManifold,
-    Y,
-    p,
-    X,
-    q,
-)
+        ::TraitList{IsEmbeddedSubmanifold},
+        M::AbstractDecoratorManifold,
+        Y,
+        p,
+        X,
+        q,
+    )
     return parallel_transport_to!(get_embedding(M, p), Y, p, X, q)
 end
 
@@ -617,22 +617,22 @@ end
     m::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
 )
 function retract(
-    ::TraitList{IsEmbeddedSubmanifold},
-    M::AbstractDecoratorManifold,
-    p,
-    X,
-    m::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
-)
+        ::TraitList{IsEmbeddedSubmanifold},
+        M::AbstractDecoratorManifold,
+        p,
+        X,
+        m::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
+    )
     return retract(get_embedding(M, p), p, X, m)
 end
 function retract_fused(
-    ::TraitList{IsEmbeddedSubmanifold},
-    M::AbstractDecoratorManifold,
-    p,
-    X,
-    t::Number,
-    m::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
-)
+        ::TraitList{IsEmbeddedSubmanifold},
+        M::AbstractDecoratorManifold,
+        p,
+        X,
+        t::Number,
+        m::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
+    )
     return retract_fused(get_embedding(M, p), p, X, t, m)
 end
 
@@ -652,24 +652,24 @@ end
     m::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
 )
 function retract!(
-    ::TraitList{IsEmbeddedSubmanifold},
-    M::AbstractDecoratorManifold,
-    q,
-    p,
-    X,
-    m::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
-)
+        ::TraitList{IsEmbeddedSubmanifold},
+        M::AbstractDecoratorManifold,
+        q,
+        p,
+        X,
+        m::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
+    )
     return retract!(get_embedding(M, p), q, p, X, m)
 end
 function retract_fused!(
-    ::TraitList{IsEmbeddedSubmanifold},
-    M::AbstractDecoratorManifold,
-    q,
-    p,
-    X,
-    t::Number,
-    m::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
-)
+        ::TraitList{IsEmbeddedSubmanifold},
+        M::AbstractDecoratorManifold,
+        q,
+        p,
+        X,
+        t::Number,
+        m::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
+    )
     return retract_fused!(get_embedding(M, p), q, p, X, t, m)
 end
 
@@ -681,13 +681,13 @@ end
     m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
 )
 function vector_transport_direction(
-    ::TraitList{IsEmbeddedSubmanifold},
-    M::AbstractDecoratorManifold,
-    p,
-    X,
-    d,
-    m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
-)
+        ::TraitList{IsEmbeddedSubmanifold},
+        M::AbstractDecoratorManifold,
+        p,
+        X,
+        d,
+        m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
+    )
     return vector_transport_direction(get_embedding(M, p), p, X, d, m)
 end
 
@@ -700,14 +700,14 @@ end
     m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
 )
 function vector_transport_direction!(
-    ::TraitList{IsEmbeddedSubmanifold},
-    M::AbstractDecoratorManifold,
-    Y,
-    p,
-    X,
-    d,
-    m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
-)
+        ::TraitList{IsEmbeddedSubmanifold},
+        M::AbstractDecoratorManifold,
+        Y,
+        p,
+        X,
+        d,
+        m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
+    )
     return vector_transport_direction!(get_embedding(M, p), Y, p, X, d, m)
 end
 
@@ -719,13 +719,13 @@ end
     m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
 )
 function vector_transport_to(
-    ::TraitList{IsEmbeddedSubmanifold},
-    M::AbstractDecoratorManifold,
-    p,
-    X,
-    q,
-    m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
-)
+        ::TraitList{IsEmbeddedSubmanifold},
+        M::AbstractDecoratorManifold,
+        p,
+        X,
+        q,
+        m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
+    )
     return vector_transport_to(get_embedding(M, p), p, X, q, m)
 end
 
@@ -738,14 +738,14 @@ end
     m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
 )
 function vector_transport_to!(
-    ::TraitList{IsEmbeddedSubmanifold},
-    M::AbstractDecoratorManifold,
-    Y,
-    p,
-    X,
-    q,
-    m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
-)
+        ::TraitList{IsEmbeddedSubmanifold},
+        M::AbstractDecoratorManifold,
+        Y,
+        p,
+        X,
+        q,
+        m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
+    )
     return vector_transport_to!(get_embedding(M, p), Y, p, X, q, m)
 end
 

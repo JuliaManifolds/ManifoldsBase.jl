@@ -1,4 +1,3 @@
-
 using ManifoldsBase
 using Test
 using Random
@@ -7,7 +6,7 @@ using ManifoldsBase: TraitList, merge_traits
 
 struct PassthoughTrait <: AbstractTrait end
 
-struct PassthroughDecorator{𝔽,MT<:AbstractManifold{𝔽}} <: AbstractDecoratorManifold{𝔽}
+struct PassthroughDecorator{𝔽, MT <: AbstractManifold{𝔽}} <: AbstractDecoratorManifold{𝔽}
     manifold::MT
 end
 
@@ -19,21 +18,21 @@ function ManifoldsBase.active_traits(f, ::AbstractRNG, ::PassthroughDecorator, :
 end
 
 function ManifoldsBase.log!(
-    ::TraitList{PassthoughTrait},
-    M::AbstractDecoratorManifold,
-    X,
-    p,
-    q,
-)
+        ::TraitList{PassthoughTrait},
+        M::AbstractDecoratorManifold,
+        X,
+        p,
+        q,
+    )
     return log!(M.manifold, X, p, q)
 end
 function ManifoldsBase.exp!(
-    ::TraitList{PassthoughTrait},
-    M::AbstractDecoratorManifold,
-    q,
-    p,
-    X,
-)
+        ::TraitList{PassthoughTrait},
+        M::AbstractDecoratorManifold,
+        q,
+        p,
+        X,
+    )
     return exp!(M.manifold, q, p, X)
 end
 
@@ -44,18 +43,18 @@ function ManifoldsBase.rand!(::TraitList{PassthoughTrait}, M::AbstractDecoratorM
     return rand!(M.manifold, p)
 end
 function ManifoldsBase.rand(
-    ::TraitList{PassthoughTrait},
-    rng::AbstractRNG,
-    M::AbstractDecoratorManifold,
-)
+        ::TraitList{PassthoughTrait},
+        rng::AbstractRNG,
+        M::AbstractDecoratorManifold,
+    )
     return rand(rng, M.manifold)
 end
 function ManifoldsBase.rand!(
-    ::TraitList{PassthoughTrait},
-    rng::AbstractRNG,
-    M::AbstractDecoratorManifold,
-    p,
-)
+        ::TraitList{PassthoughTrait},
+        rng::AbstractRNG,
+        M::AbstractDecoratorManifold,
+        p,
+    )
     return rand!(rng, M.manifold, p)
 end
 

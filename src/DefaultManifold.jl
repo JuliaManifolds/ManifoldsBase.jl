@@ -21,19 +21,19 @@ Arguments:
 - `parameter`: whether a type parameter should be used to store `n`. By default size
   is stored in a field. Value can either be `:field` or `:type`.
 """
-struct DefaultManifold{𝔽,T} <: AbstractManifold{𝔽}
+struct DefaultManifold{𝔽, T} <: AbstractManifold{𝔽}
     size::T
 end
 function DefaultManifold(n::Vararg{Int}; field = ℝ, parameter::Symbol = :field)
     size = wrap_type_parameter(parameter, n)
-    return DefaultManifold{field,typeof(size)}(size)
+    return DefaultManifold{field, typeof(size)}(size)
 end
 
 function allocation_promotion_function(
-    ::DefaultManifold{ℂ},
-    ::Union{typeof(get_vector),typeof(get_coordinates)},
-    ::Tuple,
-)
+        ::DefaultManifold{ℂ},
+        ::Union{typeof(get_vector), typeof(get_coordinates)},
+        ::Tuple,
+    )
     return complex
 end
 
@@ -94,12 +94,12 @@ function get_coordinates_orthonormal!(M::DefaultManifold, c, p, X, N::AbstractNu
     return copyto!(c, reshape(X, number_of_coordinates(M, N)))
 end
 function get_coordinates_diagonalizing!(
-    M::DefaultManifold,
-    c,
-    p,
-    X,
-    ::DiagonalizingOrthonormalBasis{ℝ},
-)
+        M::DefaultManifold,
+        c,
+        p,
+        X,
+        ::DiagonalizingOrthonormalBasis{ℝ},
+    )
     return copyto!(c, reshape(X, number_of_coordinates(M, ℝ)))
 end
 function get_coordinates_orthonormal!(::DefaultManifold{ℂ}, c, p, X, ::RealNumbers)
@@ -110,12 +110,12 @@ function get_vector_orthonormal!(M::DefaultManifold, Y, p, c, ::AbstractNumbers)
     return copyto!(Y, reshape(c, representation_size(M)))
 end
 function get_vector_diagonalizing!(
-    M::DefaultManifold,
-    Y,
-    p,
-    c,
-    ::DiagonalizingOrthonormalBasis{ℝ},
-)
+        M::DefaultManifold,
+        Y,
+        p,
+        c,
+        ::DiagonalizingOrthonormalBasis{ℝ},
+    )
     return copyto!(Y, reshape(c, representation_size(M)))
 end
 function get_vector_orthonormal!(M::DefaultManifold{ℂ}, Y, p, c, ::RealNumbers)
@@ -147,7 +147,7 @@ project!(::DefaultManifold, Y, p, X) = copyto!(Y, X)
 
 representation_size(M::DefaultManifold) = get_parameter(M.size)
 
-function Base.show(io::IO, M::DefaultManifold{𝔽,<:TypeParameter}) where {𝔽}
+function Base.show(io::IO, M::DefaultManifold{𝔽, <:TypeParameter}) where {𝔽}
     return print(
         io,
         "DefaultManifold($(join(get_parameter(M.size), ", ")); field = $(𝔽), parameter = :type)",
@@ -166,12 +166,12 @@ function Random.rand!(::DefaultManifold, pX; σ = one(eltype(pX)), vector_at = n
     return pX
 end
 function Random.rand!(
-    rng::AbstractRNG,
-    ::DefaultManifold,
-    pX;
-    σ = one(eltype(pX)),
-    vector_at = nothing,
-)
+        rng::AbstractRNG,
+        ::DefaultManifold,
+        pX;
+        σ = one(eltype(pX)),
+        vector_at = nothing,
+    )
     pX .= randn(rng, size(pX)) .* σ
     return pX
 end

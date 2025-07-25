@@ -16,16 +16,16 @@ using ManifoldsBase, Test
 struct CustomValidationManifoldRetraction <: ManifoldsBase.AbstractRetractionMethod end
 
 function ManifoldsBase.injectivity_radius(
-    ::ManifoldsBase.DefaultManifold,
-    ::CustomValidationManifoldRetraction,
-)
+        ::ManifoldsBase.DefaultManifold,
+        ::CustomValidationManifoldRetraction,
+    )
     return 10.0
 end
 function ManifoldsBase.injectivity_radius(
-    ::ManifoldsBase.DefaultManifold,
-    p,
-    ::CustomValidationManifoldRetraction,
-)
+        ::ManifoldsBase.DefaultManifold,
+        p,
+        ::CustomValidationManifoldRetraction,
+    )
     return 11.0
 end
 

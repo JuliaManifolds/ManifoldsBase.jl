@@ -1,4 +1,3 @@
-
 """
     abstract type FiberType end
 
@@ -27,19 +26,19 @@ isometric to the [`Euclidean`](https://juliamanifolds.github.io/Manifolds.jl/lat
 
 A fiber of type `fiber_type` at point `p` from the manifold `manifold`.
 """
-struct Fiber{𝔽,TFiber<:FiberType,TM<:AbstractManifold,TX} <: AbstractManifold{𝔽}
+struct Fiber{𝔽, TFiber <: FiberType, TM <: AbstractManifold, TX} <: AbstractManifold{𝔽}
     manifold::TM
     point::TX
     fiber_type::TFiber
 end
 
 function Fiber(
-    manifold::TM,
-    point::TX,
-    fiber_type::TFiber;
-    field::AbstractNumbers = ℝ,
-) where {TM<:AbstractManifold,TX,TFiber<:FiberType}
-    return Fiber{field,TFiber,TM,TX}(manifold, point, fiber_type)
+        manifold::TM,
+        point::TX,
+        fiber_type::TFiber;
+        field::AbstractNumbers = ℝ,
+    ) where {TM <: AbstractManifold, TX, TFiber <: FiberType}
+    return Fiber{field, TFiber, TM, TX}(manifold, point, fiber_type)
 end
 
 base_manifold(B::Fiber) = B.manifold
