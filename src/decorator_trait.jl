@@ -62,7 +62,7 @@ function base_manifold(M::AbstractDecoratorManifold, depth::Val{N} = Val(-1)) wh
 end
 
 #
-# Embedded specifix functions.
+# Embedded specific functions.
 """
     get_embedding(M::AbstractDecoratorManifold)
     get_embedding(M::AbstractDecoratorManifold, p)
@@ -127,7 +127,7 @@ end
     return allocate_result(next_trait(t), M, f, x...)
 end
 function allocate_result_embedding(
-    M::AbstractDecoratorManifold,
+    M::AbstractManifold,
     f::typeof(embed),
     x::Vararg{Any,N},
 ) where {N}
@@ -135,11 +135,11 @@ function allocate_result_embedding(
     return allocate(M, x[1], T, representation_size(get_embedding(M, x[1])))
 end
 function allocate_result_embedding(
-    M::AbstractDecoratorManifold,
+    M::AbstractManifold,
     f::typeof(project),
     x::Vararg{Any,N},
 ) where {N}
-    T = allocate_result_type(get_embedding(M, x[1]), f, x)
+    T = allocate_result_type(M, f, x)
     return allocate(M, x[1], T, representation_size(M))
 end
 @inline function allocate_result(

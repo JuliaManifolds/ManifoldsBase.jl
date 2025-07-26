@@ -59,6 +59,10 @@ end
 
 distance(::DefaultManifold, p, q, r::Real = 2) = norm(p - q, r)
 
+embed(::DefaultManifold, p) = p
+
+embed(::DefaultManifold, p, X) = X
+
 embed!(::DefaultManifold, q, p) = copyto!(q, p)
 
 embed!(::DefaultManifold, Y, p, X) = copyto!(Y, X)
@@ -106,6 +110,9 @@ function get_coordinates_orthonormal!(::DefaultManifold{ℂ}, c, p, X, ::RealNum
     m = length(X)
     return copyto!(c, [reshape(real(X), m); reshape(imag(X), m)])
 end
+
+get_embedding(M::DefaultManifold, ::Any) = M
+
 function get_vector_orthonormal!(M::DefaultManifold, Y, p, c, ::AbstractNumbers)
     return copyto!(Y, reshape(c, representation_size(M)))
 end
@@ -142,6 +149,13 @@ number_system(::DefaultManifold{𝔽}) where {𝔽} = 𝔽
 
 norm(::DefaultManifold, p, X, r::Real = 2) = norm(X, r)
 
+function parallel_transport_to!(::DefaultManifold, Y, p, X, q)
+    return copyto!(Y, X)
+end
+
+project(::DefaultManifold, p) = p
+project(::DefaultManifold, p, X) = X
+
 project!(::DefaultManifold, q, p) = copyto!(q, p)
 project!(::DefaultManifold, Y, p, X) = copyto!(Y, X)
 
@@ -155,10 +169,6 @@ function Base.show(io::IO, M::DefaultManifold{𝔽,<:TypeParameter}) where {𝔽
 end
 function Base.show(io::IO, M::DefaultManifold{𝔽}) where {𝔽}
     return print(io, "DefaultManifold($(join(get_parameter(M.size), ", ")); field = $(𝔽))")
-end
-
-function parallel_transport_to!(::DefaultManifold, Y, p, X, q)
-    return copyto!(Y, X)
 end
 
 function Random.rand!(::DefaultManifold, pX; σ = one(eltype(pX)), vector_at = nothing)

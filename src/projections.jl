@@ -10,13 +10,7 @@ accordingly.
 See also: [`EmbeddedManifold`](@ref), [`embed`](@ref embed(M::AbstractManifold, p))
 """
 function project(M::AbstractManifold, p)
-    local q
-    try
-        q = allocate_result_embedding(M, project, p)
-    catch e
-        # because we want `project` to default to identity
-        q = allocate_result(M, project, p)
-    end
+    q = allocate_result_embedding(M, project, p)
     project!(M, q, p)
     return q
 end
@@ -53,13 +47,7 @@ See also: [`EmbeddedManifold`](@ref), [`embed`](@ref embed(M::AbstractManifold, 
 function project(M::AbstractManifold, p, X)
     # Note that the order is switched,
     # since the allocation by default takes the type of the first.
-    local Y
-    try
-        Y = allocate_result_embedding(M, project, X, p)
-    catch e
-        # because we want `project` to default to identity
-        Y = allocate_result(M, project, X, p)
-    end
+    Y = allocate_result_embedding(M, project, X, p)
     project!(M, Y, p, X)
     return Y
 end
