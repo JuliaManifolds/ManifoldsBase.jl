@@ -33,7 +33,7 @@ struct EmbeddedManifold{𝔽,MT<:AbstractManifold{𝔽},NT<:AbstractManifold} <:
     embedding::NT
 end
 
-@inline active_traits(f, ::EmbeddedManifold, ::Any...) = merge_traits(IsEmbeddedManifold())
+is_embedded_manifold(::EmbeddedManifold) = true
 
 function allocate_result(M::EmbeddedManifold, f::typeof(project), x...)
     T = allocate_result_type(M, f, x)

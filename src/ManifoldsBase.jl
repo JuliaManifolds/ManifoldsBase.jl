@@ -491,7 +491,13 @@ The default is set in such a way that memory is allocated and `embed!(M, q, p)` 
 See also: [`EmbeddedManifold`](@ref), [`project`](@ref project(M::AbstractManifold,p))
 """
 function embed(M::AbstractManifold, p)
-    q = allocate_result(M, embed, p)
+    local q
+    try
+        q = allocate_result_embedding(M, embed, p)
+    catch e
+        # because we want `embed` to default to identity
+        q = allocate_result(M, embed, p)
+    end
     embed!(M, q, p)
     return q
 end
@@ -539,7 +545,13 @@ See also: [`EmbeddedManifold`](@ref), [`project`](@ref project(M::AbstractManifo
 """
 function embed(M::AbstractManifold, p, X)
     # the order of args switched, since the allocation by default takes the type of the first.
-    Y = allocate_result(M, embed, X, p)
+    local Y
+    try
+        Y = allocate_result_embedding(M, embed, X, p)
+    catch e
+        # because we want `embed` to default to identity
+        Y = allocate_result(M, embed, X, p)
+    end
     embed!(M, Y, p, X)
     return Y
 end
@@ -793,33 +805,37 @@ function is_point(
     return is_point(M, p; error = throw_error ? :error : :none, kwargs...)
 end
 function is_point(M::AbstractManifold, p; error::Symbol = :none, kwargs...)
-    mps = check_size(M, p)
-    if mps !== nothing
-        (error === :error) && throw(mps)
-        if (error === :info) || (error === :warn)
-            # else: collect and info showerror
-            io = IOBuffer()
-            showerror(io, mps)
-            s = String(take!(io))
-            (error === :info) && @info s
-            (error === :warn) && @warn s
+    if is_embedded_manifold(M)
+        return is_point_embedding(M, p; error = error, kwargs...)
+    else
+        mps = check_size(M, p)
+        if mps !== nothing
+            (error === :error) && throw(mps)
+            if (error === :info) || (error === :warn)
+                # else: collect and info showerror
+                io = IOBuffer()
+                showerror(io, mps)
+                s = String(take!(io))
+                (error === :info) && @info s
+                (error === :warn) && @warn s
+            end
+            return false
         end
-        return false
-    end
-    mpe = check_point(M, p; kwargs...)
-    if mpe !== nothing
-        (error === :error) && throw(mpe)
-        if (error === :info) || (error === :warn)
-            # else: collect and info showerror
-            io = IOBuffer()
-            showerror(io, mpe)
-            s = String(take!(io))
-            (error === :info) && @info s
-            (error === :warn) && @warn s
+        mpe = check_point(M, p; kwargs...)
+        if mpe !== nothing
+            (error === :error) && throw(mpe)
+            if (error === :info) || (error === :warn)
+                # else: collect and info showerror
+                io = IOBuffer()
+                showerror(io, mpe)
+                s = String(take!(io))
+                (error === :info) && @info s
+                (error === :warn) && @warn s
+            end
+            return false
         end
-        return false
+        return true
     end
-    return true
 end
 
 
@@ -1230,7 +1246,7 @@ export VectorSpaceFiber
 export TangentSpace, TangentSpaceType
 export CotangentSpace, CotangentSpaceType
 export AbstractDecoratorManifold
-export AbstractTrait, IsEmbeddedManifold, IsEmbeddedSubmanifold, IsIsometricEmbeddedManifold
+export AbstractTrait, IsEmbeddedSubmanifold, IsIsometricEmbeddedManifold
 export IsExplicitDecorator
 export ValidationManifold,
     ValidationMPoint, ValidationTangentVector, ValidationCotangentVector

@@ -7,25 +7,17 @@ manifold_dimension(M::AbstractDecoratorManifold) = manifold_dimension(base_manif
 # Traits - each passed to a function that is properly documented
 #
 
-"""
-    IsEmbeddedManifold <: AbstractTrait
-
-A trait to declare an [`AbstractManifold`](@ref) as an embedded manifold.
-"""
-struct IsEmbeddedManifold <: AbstractTrait end
+is_embedded_manifold(::AbstractManifold) = false
 
 """
     IsIsometricManifoldEmbeddedManifold <: AbstractTrait
 
 A Trait to determine whether an [`AbstractDecoratorManifold`](@ref) `M` is
 an isometrically embedded manifold.
-It is a special case of the [`IsEmbeddedManifold`](@ref) trait, i.e. it has all properties of this trait.
 
 Here, additionally, netric related functions like [`inner`](@ref) and [`norm`](@ref) are passed to the embedding
 """
 struct IsIsometricEmbeddedManifold <: AbstractTrait end
-
-parent_trait(::IsIsometricEmbeddedManifold) = IsEmbeddedManifold()
 
 """
     IsEmbeddedSubmanifold <: AbstractTrait
@@ -134,8 +126,7 @@ end
 ) where {TF,N}
     return allocate_result(next_trait(t), M, f, x...)
 end
-function allocate_result(
-    ::TraitList{IsEmbeddedManifold},
+function allocate_result_embedding(
     M::AbstractDecoratorManifold,
     f::typeof(embed),
     x::Vararg{Any,N},
@@ -143,8 +134,7 @@ function allocate_result(
     T = allocate_result_type(get_embedding(M, x[1]), f, x)
     return allocate(M, x[1], T, representation_size(get_embedding(M, x[1])))
 end
-function allocate_result(
-    ::TraitList{IsEmbeddedManifold},
+function allocate_result_embedding(
     M::AbstractDecoratorManifold,
     f::typeof(project),
     x::Vararg{Any,N},
@@ -174,10 +164,10 @@ end
     p,
 )
 
-# Introduce Deco Trait | automatic foward | fallback
+# Introduce Deco Trait | automatic forward | fallback
 @trait_function check_size(M::AbstractDecoratorManifold, p)
 # Embedded
-function check_size(::TraitList{IsEmbeddedManifold}, M::AbstractDecoratorManifold, p)
+function check_size_embedding(M::AbstractDecoratorManifold, p)
     mpe = check_size(get_embedding(M, p), embed(M, p))
     if mpe !== nothing
         return ManifoldDomainError(
@@ -187,10 +177,10 @@ function check_size(::TraitList{IsEmbeddedManifold}, M::AbstractDecoratorManifol
     end
     return nothing
 end
-# Introduce Deco Trait | automatic foward | fallback
+# Introduce Deco Trait | automatic forward | fallback
 @trait_function check_size(M::AbstractDecoratorManifold, p, X)
 # Embedded
-function check_size(::TraitList{IsEmbeddedManifold}, M::AbstractDecoratorManifold, p, X)
+function check_size_embedding(M::AbstractDecoratorManifold, p, X)
     mpe = check_size(get_embedding(M, p), embed(M, p), embed(M, p, X))
     if mpe !== nothing
         return ManifoldDomainError(
@@ -208,32 +198,18 @@ end
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function embed(M::AbstractDecoratorManifold, p)
 # EmbeddedManifold
-function embed(::TraitList{IsEmbeddedManifold}, M::AbstractDecoratorManifold, p)
-    q = allocate_result(M, embed, p)
-    return embed!(M, q, p)
-end
 
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function embed!(M::AbstractDecoratorManifold, q, p)
 # EmbeddedManifold
-function embed!(::TraitList{IsEmbeddedManifold}, M::AbstractDecoratorManifold, q, p)
-    return copyto!(M, q, p)
-end
 
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function embed(M::AbstractDecoratorManifold, p, X)
 # EmbeddedManifold
-function embed(::TraitList{IsEmbeddedManifold}, M::AbstractDecoratorManifold, p, X)
-    q = allocate_result(M, embed, p, X)
-    return embed!(M, q, p, X)
-end
 
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function embed!(M::AbstractDecoratorManifold, Y, p, X)
 # EmbeddedManifold
-function embed!(::TraitList{IsEmbeddedManifold}, M::AbstractDecoratorManifold, Y, p, X)
-    return copyto!(M, Y, p, X)
-end
 
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function exp(M::AbstractDecoratorManifold, p, X)
@@ -386,11 +362,11 @@ end
 
 @trait_function is_flat(M::AbstractDecoratorManifold)
 
-# Introduce Deco Trait | automatic foward | fallback
+# Introduce Deco Trait | automatic forward | fallback
 @trait_function is_point(M::AbstractDecoratorManifold, p; kwargs...)
+
 # Embedded
-function is_point(
-    ::TraitList{IsEmbeddedManifold},
+function is_point_embedding(
     M::AbstractDecoratorManifold,
     p;
     error::Symbol = :none,
@@ -415,7 +391,7 @@ function is_point(
                 e,
             )
         end
-        throw(e) #an error occured that we do not handle ourselves -> rethrow.
+        throw(e) #an error occurred that we do not handle ourselves -> rethrow.
     end
     mpe = check_point(M, p; kwargs...)
     if mpe !== nothing
@@ -435,8 +411,7 @@ end
 @trait_function is_vector(M::AbstractDecoratorManifold, p, X, cbp::Bool = true; kwargs...)
 # EmbeddedManifold
 # I am not yet sure how to properly document this embedding behaviour here in a docstring.
-function is_vector(
-    ::TraitList{IsEmbeddedManifold},
+function is_vector_embedding(
     M::AbstractDecoratorManifold,
     p,
     X,
@@ -594,7 +569,7 @@ end
 # Introduce Deco Trait | automatic foward | fallback
 @trait_function representation_size(M::AbstractDecoratorManifold) (no_empty,)
 # Isometric Embedded submanifold
-function representation_size(::TraitList{IsEmbeddedManifold}, M::AbstractDecoratorManifold)
+function representation_size_embedding(M::AbstractDecoratorManifold)
     return representation_size(get_embedding(M))
 end
 function representation_size(::EmptyTrait, M::AbstractDecoratorManifold)
@@ -753,12 +728,12 @@ end
 @trait_function Weingarten!(M::AbstractDecoratorManifold, Y, p, X, V)
 
 @trait_function zero_vector(M::AbstractDecoratorManifold, p)
-function zero_vector(::TraitList{IsEmbeddedManifold}, M::AbstractDecoratorManifold, p)
+function zero_vector_embedding(M::AbstractDecoratorManifold, p)
     return zero_vector(get_embedding(M, p), p)
 end
 
 @trait_function zero_vector!(M::AbstractDecoratorManifold, X, p)
-function zero_vector!(::TraitList{IsEmbeddedManifold}, M::AbstractDecoratorManifold, X, p)
+function zero_vector_embedding!(M::AbstractDecoratorManifold, X, p)
     return zero_vector!(get_embedding(M, p), X, p)
 end
 
@@ -766,7 +741,7 @@ end
 # An unfortunate consequence of Julia's method recursion limitations
 # Add more traits and functions as needed
 
-for trait_type in [TraitList{IsEmbeddedManifold}, TraitList{IsEmbeddedSubmanifold}]
+for trait_type in [TraitList{IsEmbeddedSubmanifold}]
     @eval begin
         @next_trait_function $trait_type isapprox(
             M::AbstractDecoratorManifold,
