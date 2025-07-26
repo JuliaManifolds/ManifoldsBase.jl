@@ -38,7 +38,7 @@ f(::TraitList{IsCool}, a, b) = g(a, b, 5)
 # generic forward to the next trait to be looked at
 f(t::TraitList, a, b) = f(next_trait(t), a, b)
 # generic fallback when no traits are defined
-f(::EmptyTrait, a, b) = invoke(f, Tuple{AbstractA,typeof(b)}, a, b)
+f(::EmptyTrait, a, b) = invoke(f, Tuple{AbstractA, typeof(b)}, a, b)
 
 @testset "Decorator trait tests" begin
     t = ManifoldsBase.EmptyTrait()
@@ -52,12 +52,12 @@ f(::EmptyTrait, a, b) = invoke(f, Tuple{AbstractA,typeof(b)}, a, b)
         merge_traits(IsGreat(), IsNice()),
     ) === merge_traits(IsGreat(), IsNice(), IsGreat(), IsNice())
     @test expand_trait(merge_traits(IsGreat(), IsCool())) ===
-          merge_traits(IsGreat(), IsNice(), IsCool())
+        merge_traits(IsGreat(), IsNice(), IsCool())
     @test expand_trait(merge_traits(IsCool(), IsGreat())) ===
-          merge_traits(IsCool(), IsGreat(), IsNice())
+        merge_traits(IsCool(), IsGreat(), IsNice())
 
     @test string(merge_traits(IsGreat(), IsNice())) ==
-          "TraitList(IsGreat(), TraitList(IsNice(), EmptyTrait()))"
+        "TraitList(IsGreat(), TraitList(IsNice(), EmptyTrait()))"
 
     global f
     @test f(A(), 0) == 2

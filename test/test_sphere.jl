@@ -25,11 +25,11 @@ using ManifoldsBaseTestUtils
                     ProjectionInverseRetraction(),
                     vector_transport,
                     ntp,
-                    1e-9,
+                    1.0e-9,
                     10_000,
                 )
                 Y = inverse_retract(M, p, q, inverse_retraction)
-                @test isapprox(M, p, Y, X; atol = 1e-3)
+                @test isapprox(M, p, Y, X; atol = 1.0e-3)
                 Y2 = similar(Y)
                 inverse_retract!(M, Y2, p, q, inverse_retraction)
                 @test isapprox(M, p, Y2, Y)

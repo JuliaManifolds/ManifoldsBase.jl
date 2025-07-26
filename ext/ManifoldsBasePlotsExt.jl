@@ -6,15 +6,15 @@ using Printf: @sprintf
 import ManifoldsBase: plot_slope
 
 function ManifoldsBase.plot_slope(
-    x,
-    y;
-    slope = 2,
-    line_base = 0,
-    a = 0,
-    b = 2.0,
-    i = 1,
-    j = length(x),
-)
+        x,
+        y;
+        slope = 2,
+        line_base = 0,
+        a = 0,
+        b = 2.0,
+        i = 1,
+        j = length(x),
+    )
     fig = plot(
         x,
         y;

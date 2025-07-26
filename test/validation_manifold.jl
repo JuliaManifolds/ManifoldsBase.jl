@@ -64,7 +64,7 @@ using ManifoldsBaseTestSuite
             if T === ValidationMPoint
                 @test typeof(allocate(p, eltype(x), (3, 1))) == T{Matrix{Float64}}
             else
-                @test typeof(allocate(p, eltype(x), (3, 1))) == T{Matrix{Float64},Nothing}
+                @test typeof(allocate(p, eltype(x), (3, 1))) == T{Matrix{Float64}, Nothing}
             end
             @test allocate(p) isa T
             @test allocate(p, Float32) isa T
@@ -180,11 +180,11 @@ using ManifoldsBaseTestSuite
                 @test_throws DomainError get_coordinates!(A, v, [1.0], [1.0, 0.0, 0.0], cb)
                 @test get_vector(A, x, [1, 2, 3], cb) ≈ get_vector(M, x, [1, 2, 3], cb)
                 @test get_vector!(A, v2, x, [1, 2, 3], cb) ≈
-                      get_vector!(M, v, x, [1, 2, 3], cb)
+                    get_vector!(M, v, x, [1, 2, 3], cb)
                 @test get_coordinates(A, x, [1, 2, 3], cb) ≈
-                      get_coordinates(M, x, [1, 2, 3], cb)
+                    get_coordinates(M, x, [1, 2, 3], cb)
                 @test get_coordinates!(A, v2, x, [1, 2, 3], cb) ≈
-                      get_coordinates!(M, v, x, [1, 2, 3], cb)
+                    get_coordinates!(M, v, x, [1, 2, 3], cb)
 
                 @test_throws ErrorException get_basis(A, x, CachedBasis(cb, [x]))
                 @test_throws ErrorException get_basis(A, x, CachedBasis(cb, [x, x, x]))

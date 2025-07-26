@@ -20,24 +20,24 @@ power_array_wrapper(::Type{NestedPowerRepresentation}, ::Int) = identity
 power_array_wrapper(::Type{NestedReplacingPowerRepresentation}, i::Int) = SVector{i}
 
 function ManifoldsBase.allocate(
-    ::ManifoldsBase.PowerManifoldNestedReplacing,
-    x::AbstractArray{<:SArray},
-)
+        ::ManifoldsBase.PowerManifoldNestedReplacing,
+        x::AbstractArray{<:SArray},
+    )
     return similar(x)
 end
 
 function ManifoldsBase.representation_size(
-    M::ManifoldsBaseTestUtils.TestPowerManifoldMultidimensional,
-)
+        M::ManifoldsBaseTestUtils.TestPowerManifoldMultidimensional,
+    )
     return (representation_size(M.manifold)..., ManifoldsBase.get_parameter(M.size)...)
 end
 
 @inline function ManifoldsBase._write(
-    ::ManifoldsBaseTestUtils.TestPowerManifoldMultidimensional,
-    rep_size::Tuple,
-    x::AbstractArray,
-    i::Tuple,
-)
+        ::ManifoldsBaseTestUtils.TestPowerManifoldMultidimensional,
+        rep_size::Tuple,
+        x::AbstractArray,
+        i::Tuple,
+    )
     return view(x, ManifoldsBase.rep_size_to_colons(rep_size)..., i...)
 end
 
@@ -49,7 +49,7 @@ end
         N = PowerManifold(M, ManifoldsBaseTestUtils.TestArrayRepresentation(), 2)
         O = PowerManifold(N, ManifoldsBaseTestUtils.TestArrayRepresentation(), 3) # joins instead of nesting.
         @test repr(O) ==
-              "PowerManifold(DefaultManifold(3; field = ℝ), ManifoldsBaseTestUtils.TestArrayRepresentation(), 2, 3)"
+            "PowerManifold(DefaultManifold(3; field = ℝ), ManifoldsBaseTestUtils.TestArrayRepresentation(), 2, 3)"
         p = zeros(6)
         X = zeros(6)
         @test has_components(N)
@@ -84,8 +84,8 @@ end
     @testset "PowerManifoldNestedReplacing with SArray element" begin
         M = ManifoldsBase.DefaultManifold(2, 2)
         N = PowerManifold(M, NestedReplacingPowerRepresentation(), 2)
-        p = [SMatrix{2,2,Float64}([i i+1; i-1 i-2]) for i in 1:2]
-        allocate(M, p) isa Vector{SMatrix{2,2,Float64,4}}
+        p = [SMatrix{2, 2, Float64}([i i + 1; i - 1 i - 2]) for i in 1:2]
+        allocate(M, p) isa Vector{SMatrix{2, 2, Float64, 4}}
     end
 
     @testset "allocate_on" begin
@@ -124,16 +124,16 @@ end
 
                 @testset "Constructors" begin
                     @test repr(N) ==
-                          "PowerManifold(DefaultManifold(3; field = ℝ), $(PowerRepr)(), $pow_string)"
+                        "PowerManifold(DefaultManifold(3; field = ℝ), $(PowerRepr)(), $pow_string)"
                     # add to type
                     @test repr(N^3) ==
-                          "PowerManifold(DefaultManifold(3; field = ℝ), $(PowerRepr)(), $pow_string, 3)"
+                        "PowerManifold(DefaultManifold(3; field = ℝ), $(PowerRepr)(), $pow_string, 3)"
                     # add to type
                     @test repr(PowerManifold(N, 3)) ==
-                          "PowerManifold(DefaultManifold(3; field = ℝ), $(PowerRepr)(), $pow_string, 3)"
+                        "PowerManifold(DefaultManifold(3; field = ℝ), $(PowerRepr)(), $pow_string, 3)"
                     # nest
                     @test repr(PowerManifold(N, PowerRepr(), 3)) ==
-                          "PowerManifold(PowerManifold(DefaultManifold(3; field = ℝ), $(PowerRepr)(), $pow_string), $(PowerRepr)(), 3)"
+                        "PowerManifold(PowerManifold(DefaultManifold(3; field = ℝ), $(PowerRepr)(), $pow_string), $(PowerRepr)(), 3)"
                 end
 
                 @test N^3 == PowerManifold(M, PowerRepr(), pow_size..., 3)
@@ -141,7 +141,7 @@ end
                 if pow_size == (2,)
 
                     @test ManifoldsBase.get_iterator(N^3) ==
-                          Base.product(Base.OneTo(2), Base.OneTo(3))
+                        Base.product(Base.OneTo(2), Base.OneTo(3))
                     @testset "point/tangent checks" begin
                         pE1 = [wrapper_3(zeros(3)), wrapper_2(ones(2))] # one component wrong
                         pE2 = wrapper_2.([zeros(2), ones(2)]) # both wrong
@@ -220,11 +220,11 @@ end
                         @test ManifoldsBase.get_iterator(N) == Base.OneTo(2)
                     else
                         @test ManifoldsBase.get_iterator(N) ==
-                              Base.product(Base.OneTo(2), Base.OneTo(3))
+                            Base.product(Base.OneTo(2), Base.OneTo(3))
                     end
                     @test injectivity_radius(N) == injectivity_radius(M)
                     @test injectivity_radius(N, ExponentialRetraction()) ==
-                          injectivity_radius(M)
+                        injectivity_radius(M)
                     @test injectivity_radius(N, p) == injectivity_radius(M, p)
                     @test is_flat(N)
                     p2 = allocate(p)
@@ -303,7 +303,7 @@ end
                     # the method tested below should not be used but it prevents ambiguities from occurring
                     # and the test is here to make coverage happy
                     @test ManifoldsBase.allocate_result(N, get_coordinates, p, q, B) isa
-                          Vector
+                        Vector
                     v2 = similar(v)
                     get_coordinates!(N, v2, p, q, B)
                     @test v2 == v
@@ -326,12 +326,12 @@ end
                     B3 = get_basis(N, p, B2)
                     if pow_size == (2,)
                         @test sprint(show, "text/plain", B) ==
-                              """$(DefaultBasis()) for a power manifold
-          Basis for component (1,):
-          $(sprint(show, "text/plain", B.data.bases[1]))
-          Basis for component (2,):
-          $(sprint(show, "text/plain", B.data.bases[2]))
-          """
+                            """$(DefaultBasis()) for a power manifold
+                            Basis for component (1,):
+                            $(sprint(show, "text/plain", B.data.bases[1]))
+                            Basis for component (2,):
+                            $(sprint(show, "text/plain", B.data.bases[2]))
+                            """
                     end
 
                     bv = get_vectors(N, p, B)
@@ -369,15 +369,15 @@ end
             @test is_point(N, rand(MersenneTwister(123), N))
             @test rand(MersenneTwister(123), N) == rand(MersenneTwister(123), N)
             p = rand(N)
-            @test is_vector(N, p, rand(N; vector_at = p); atol = 1e-15)
+            @test is_vector(N, p, rand(N; vector_at = p); atol = 1.0e-15)
             @test is_vector(
                 N,
                 p,
                 rand(MersenneTwister(123), N; vector_at = p);
-                atol = 1e-15,
+                atol = 1.0e-15,
             )
             @test rand(MersenneTwister(123), N; vector_at = p) ==
-                  rand(MersenneTwister(123), N; vector_at = p)
+                rand(MersenneTwister(123), N; vector_at = p)
         end
     end
 
@@ -441,13 +441,13 @@ end
         @test PowerManifold(N, 3) isa PowerManifold{
             ℝ,
             <:DefaultManifold,
-            ManifoldsBase.TypeParameter{Tuple{2,3}},
+            ManifoldsBase.TypeParameter{Tuple{2, 3}},
             NestedPowerRepresentation,
         }
         @test PowerManifold(N, 3; parameter = :field) isa
-              PowerManifold{ℝ,<:DefaultManifold,Tuple{Int,Int},NestedPowerRepresentation}
+            PowerManifold{ℝ, <:DefaultManifold, Tuple{Int, Int}, NestedPowerRepresentation}
         @test repr(N) ==
-              "PowerManifold(DefaultManifold(3; field = ℝ), NestedPowerRepresentation(), 2; parameter=:type)"
+            "PowerManifold(DefaultManifold(3; field = ℝ), NestedPowerRepresentation(), 2; parameter=:type)"
 
         M = ManifoldsBase.DefaultManifold(3)
         N = PowerManifold(M, NestedPowerRepresentation(), 2, 3; parameter = :type)

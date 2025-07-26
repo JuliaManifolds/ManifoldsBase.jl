@@ -23,11 +23,11 @@ iterations is reached.
 - `max_iterations::Int`: The maximum number of iterations for the shooting method.
 """
 struct ShootingInverseRetraction{
-    R<:AbstractRetractionMethod,
-    IR<:AbstractInverseRetractionMethod,
-    VT<:AbstractVectorTransportMethod,
-    T<:Real,
-} <: ApproximateInverseRetraction
+        R <: AbstractRetractionMethod,
+        IR <: AbstractInverseRetractionMethod,
+        VT <: AbstractVectorTransportMethod,
+        T <: Real,
+    } <: ApproximateInverseRetraction
     retraction::R
     initial_inverse_retraction::IR
     vector_transport::VT
@@ -46,12 +46,12 @@ end
 Approximate the inverse of a retraction using the shooting method.
 """
 function inverse_retract_shooting!(
-    M::AbstractManifold,
-    X,
-    p,
-    q,
-    m::ShootingInverseRetraction,
-)
+        M::AbstractManifold,
+        X,
+        p,
+        q,
+        m::ShootingInverseRetraction,
+    )
     inverse_retract!(M, X, p, q, m.initial_inverse_retraction)
     gap = norm(M, p, X)
     gap < m.tolerance && return X

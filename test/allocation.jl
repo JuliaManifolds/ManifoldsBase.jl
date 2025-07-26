@@ -29,8 +29,8 @@ ManifoldsBase.representation_size(::AllocManifold4) = (2, 3)
     M = AllocManifold()
     v = exp(M, a, b)
     @test v ≈ [[3.0], [5.0], [0.0]]
-    @test allocate(([1.0], [2.0])) isa Tuple{Vector{Float64},Vector{Float64}}
-    @test allocate(([1.0], [2.0]), Int) isa Tuple{Vector{Int},Vector{Int}}
+    @test allocate(([1.0], [2.0])) isa Tuple{Vector{Float64}, Vector{Float64}}
+    @test allocate(([1.0], [2.0]), Int) isa Tuple{Vector{Int}, Vector{Int}}
     @test allocate([[1.0], [2.0]]) isa Vector{Vector{Float64}}
     @test allocate([[1.0], [2.0]], Int) isa Vector{Vector{Int}}
     @test allocate(M, a, 5) isa Vector{Vector{Float64}}
@@ -55,7 +55,7 @@ ManifoldsBase.representation_size(::AllocManifold4) = (2, 3)
     @test a4 isa Matrix{Float64}
     @test size(a4) == (2, 3)
 
-    @test allocate(1, Float64) isa Array{Float64,0}
+    @test allocate(1, Float64) isa Array{Float64, 0}
 
     @test allocation_promotion_function(M, exp, (a, b)) === identity
     @test combine_allocation_promotion_functions(identity, identity) === identity

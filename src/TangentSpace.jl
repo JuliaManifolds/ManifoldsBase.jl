@@ -1,4 +1,3 @@
-
 @doc raw"""
     TangentSpace{𝔽,M} = Fiber{𝔽,TangentSpaceType,M} where {𝔽,M<:AbstractManifold}
 
@@ -13,7 +12,7 @@ This is modelled as an alias for [`VectorSpaceFiber`](@ref) corresponding to
 Return the manifold (vector space) representing the tangent space ``T_p\mathcal M``
 at point `p`, ``p\in\mathcal M``.
 """
-const TangentSpace{𝔽,M} = Fiber{𝔽,TangentSpaceType,M} where {𝔽,M<:AbstractManifold}
+const TangentSpace{𝔽, M} = Fiber{𝔽, TangentSpaceType, M} where {𝔽, M <: AbstractManifold}
 
 TangentSpace(M::AbstractManifold, p) = Fiber(M, p, TangentSpaceType())
 
@@ -31,7 +30,7 @@ This is modelled as an alias for [`VectorSpaceFiber`](@ref) corresponding to
 Return the manifold (vector space) representing the cotangent space ``T^*_p\mathcal M``
 at point `p`, ``p\in\mathcal M``.
 """
-const CotangentSpace{𝔽,M} = Fiber{𝔽,CotangentSpaceType,M} where {𝔽,M<:AbstractManifold}
+const CotangentSpace{𝔽, M} = Fiber{𝔽, CotangentSpaceType, M} where {𝔽, M <: AbstractManifold}
 
 CotangentSpace(M::AbstractManifold, p) = Fiber(M, p, CotangentSpaceType())
 
@@ -100,13 +99,13 @@ fiber_dimension(M::AbstractManifold, ::TangentSpaceType) = manifold_dimension(M)
 function get_basis(TpM::TangentSpace, X, B::CachedBasis)
     return invoke(
         get_basis,
-        Tuple{AbstractManifold,Any,CachedBasis},
+        Tuple{AbstractManifold, Any, CachedBasis},
         TpM.manifold,
         TpM.point,
         B,
     )
 end
-function get_basis(TpM::TangentSpace, X, B::AbstractBasis{<:Any,TangentSpaceType})
+function get_basis(TpM::TangentSpace, X, B::AbstractBasis{<:Any, TangentSpaceType})
     return get_basis(TpM.manifold, TpM.point, B)
 end
 

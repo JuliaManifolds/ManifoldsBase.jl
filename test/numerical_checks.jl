@@ -41,14 +41,14 @@ using ManifoldsBaseTestUtils
             zeros(2),
             [2, 20],
         )
-        @test check_retraction(M, ExponentialRetraction(), p, X; exactness_tol = 1e-7)
+        @test check_retraction(M, ExponentialRetraction(), p, X; exactness_tol = 1.0e-7)
         check_retraction(
             M,
             ExponentialRetraction(),
             p,
             X;
             plot = true,
-            exactness_tol = 1e-7,
+            exactness_tol = 1.0e-7,
         )
     end
     @testset "Test inverse_retract checks" begin
@@ -98,7 +98,7 @@ using ManifoldsBaseTestUtils
             LogarithmicInverseRetraction(),
             p,
             X;
-            exactness_tol = 1e-7,
+            exactness_tol = 1.0e-7,
         )
         check_inverse_retraction(
             M,
@@ -106,7 +106,7 @@ using ManifoldsBaseTestUtils
             p,
             X;
             plot = true,
-            exactness_tol = 1e-7,
+            exactness_tol = 1.0e-7,
         )
     end
     @testset "Test vector_transport_to checks" begin
@@ -158,7 +158,7 @@ using ManifoldsBaseTestUtils
             limits = (-2.5, 2.0),
         )
         # Check exactness case
-        @test check_vector_transport(M, ParallelTransport(), p, X, Y; exactness_tol = 1e-7)
+        @test check_vector_transport(M, ParallelTransport(), p, X, Y; exactness_tol = 1.0e-7)
         check_vector_transport(
             M,
             ParallelTransport(),
@@ -166,7 +166,7 @@ using ManifoldsBaseTestUtils
             X,
             Y;
             plot = true,
-            exactness_tol = 1e-7,
+            exactness_tol = 1.0e-7,
         )
     end
     @testset "StabilizedRetraction" begin
@@ -207,7 +207,7 @@ using ManifoldsBaseTestUtils
         X5 = copy(X1)
         q = similar(p1)
         SR = StabilizedRetraction()
-        err_eps = 1e-5
+        err_eps = 1.0e-5
         for _ in 1:1000
 
             X1 .+= err_eps

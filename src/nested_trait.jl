@@ -54,7 +54,7 @@ the first of the traits takes preceedence if a trait is implemented for both fun
 
     TraitList(head::AbstractTrait, tail::AbstractTrait)
 """
-struct TraitList{T1<:AbstractTrait,T2<:AbstractTrait} <: AbstractTrait
+struct TraitList{T1 <: AbstractTrait, T2 <: AbstractTrait} <: AbstractTrait
     head::T1
     tail::T2
 end
@@ -113,11 +113,8 @@ end
     return TraitList(t1.head, merge_traits(t1.tail, t2))
 end
 @inline function merge_traits(
-    t1::AbstractTrait,
-    t2::AbstractTrait,
-    t3::AbstractTrait,
-    trest::AbstractTrait...,
-)
+        t1::AbstractTrait, t2::AbstractTrait, t3::AbstractTrait, trest::AbstractTrait...,
+    )
     return merge_traits(merge_traits(t1, t2), t3, trest...)
 end
 
@@ -244,11 +241,7 @@ macro invoke_maker(argnum, type, sig)
             function ($fname)($(callargs...); $(kwargs_list...)) where {$(where_exprs...)}
                 return invoke(
                     $fname,
-                    Tuple{
-                        $(argtypes[1:(argnum - 1)]...),
-                        $type,
-                        $(argtypes[(argnum + 1):end]...),
-                    },
+                    Tuple{$(argtypes[1:(argnum - 1)]...), $type, $(argtypes[(argnum + 1):end]...)},
                     $(argnames...);
                     $(kwargs_call...),
                 )
@@ -279,10 +272,8 @@ macro next_trait_function(trait_type, sig)
 
     block = quote
         @inline function ($fname)(
-            _t::$trait_type,
-            $(callargs...);
-            $(kwargs_list...),
-        ) where {$(where_exprs...)}
+                _t::$trait_type, $(callargs...); $(kwargs_list...),
+            ) where {$(where_exprs...)}
             return ($fname)(next_trait(_t), $(argnames...); $(kwargs_call...))
         end
     end
@@ -306,17 +297,15 @@ macro trait_function(sig, opts = :(), manifold_arg_no = 1)
             return ($fname)(trait($fname, $(argnames...)), $(argnames...); $(kwargs_call...))
         end
         @inline function ($fname)(
-            _t::ManifoldsBase.TraitList,
-            $(callargs...);
-            $(kwargs_list...),
-        ) where {$(where_exprs...)}
+                _t::ManifoldsBase.TraitList, $(callargs...); $(kwargs_list...),
+            ) where {$(where_exprs...)}
             return ($fname)(next_trait(_t), $(argnames...); $(kwargs_call...))
         end
         @inline function ($fname)(
-            _t::ManifoldsBase.TraitList{ManifoldsBase.IsExplicitDecorator},
-            $(callargs...);
-            $(kwargs_list...),
-        ) where {$(where_exprs...)}
+                _t::ManifoldsBase.TraitList{ManifoldsBase.IsExplicitDecorator},
+                $(callargs...);
+                $(kwargs_list...),
+            ) where {$(where_exprs...)}
             arg_manifold = decorated_manifold($(argnames[manifold_arg_no]))
             argt_manifold = typeof(arg_manifold)
             return invoke(
@@ -339,10 +328,8 @@ macro trait_function(sig, opts = :(), manifold_arg_no = 1)
             # See https://discourse.julialang.org/t/extremely-slow-invoke-when-inlined/90665
             # for the reasoning behind @noinline
             @noinline function ($fname)(
-                ::ManifoldsBase.EmptyTrait,
-                $(callargs...);
-                $(kwargs_list...),
-            ) where {$(where_exprs...)}
+                    ::ManifoldsBase.EmptyTrait, $(callargs...); $(kwargs_list...),
+                ) where {$(where_exprs...)}
                 return invoke(
                     $fname,
                     Tuple{
