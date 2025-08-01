@@ -67,7 +67,7 @@ the Einstein summation convention is assumed.
 # Constructor
 
     ODEExponentialRetraction(
-        r::AbstractRetractionMethod,
+        r::AbstractRetractionMethod=ExponentialRetraction(),
         b::AbstractBasis=DefaultOrthogonalBasis(),
     )
 
@@ -78,6 +78,9 @@ struct ODEExponentialRetraction{T<:AbstractRetractionMethod,B<:AbstractBasis} <:
        AbstractRetractionMethod
     retraction::T
     basis::B
+end
+function ODEExponentialRetraction()
+    return ODEExponentialRetraction(ExponentialRetraction())
 end
 function ODEExponentialRetraction(r::T) where {T<:AbstractRetractionMethod}
     return ODEExponentialRetraction(r, DefaultOrthonormalBasis())
