@@ -491,7 +491,13 @@ The default is set in such a way that memory is allocated and `embed!(M, q, p)` 
 See also: [`EmbeddedManifold`](@ref), [`project`](@ref project(M::AbstractManifold,p))
 """
 function embed(M::AbstractManifold, p)
-    q = allocate_result(M, embed, p)
+    local q
+    try
+        q = allocate_result_embedding(M, embed, p)
+    catch e
+        # because we want `embed` to default to identity
+        q = allocate_result(M, embed, p)
+    end
     embed!(M, q, p)
     return q
 end
@@ -539,7 +545,13 @@ See also: [`EmbeddedManifold`](@ref), [`project`](@ref project(M::AbstractManifo
 """
 function embed(M::AbstractManifold, p, X)
     # the order of args switched, since the allocation by default takes the type of the first.
-    Y = allocate_result(M, embed, X, p)
+    local Y
+    try
+        Y = allocate_result_embedding(M, embed, X, p)
+    catch e
+        # because we want `embed` to default to identity
+        Y = allocate_result(M, embed, X, p)
+    end
     embed!(M, Y, p, X)
     return Y
 end
@@ -716,7 +728,7 @@ Currently the following are supported
 * `:warn` – prints the information in an `@warn`
 * `:none` (default) – the function just returns `true`/`false`
 
-By default these informations are collected by calling [`check_approx`](@ref).
+By default these pieces of information are collected by calling [`check_approx`](@ref).
 
 Keyword arguments can be used to specify tolerances.
 """
@@ -793,6 +805,9 @@ function is_point(
     return is_point(M, p; error = throw_error ? :error : :none, kwargs...)
 end
 function is_point(M::AbstractManifold, p; error::Symbol = :none, kwargs...)
+    if is_embedded_manifold(M)
+        return is_point_embedding(M, p; error = error, kwargs...)
+    end
     mps = check_size(M, p)
     if mps !== nothing
         (error === :error) && throw(mps)
@@ -873,6 +888,9 @@ function is_vector(
     error::Symbol = :none,
     kwargs...,
 )
+    if is_embedded_manifold(M)
+        return is_vector_embedding(M, p, X, check_base_point; error = error, kwargs...)
+    end
     if check_base_point
         # if error, is_point throws, otherwise if not a point return false
         !is_point(M, p; error = error, kwargs...) && return false
@@ -1230,7 +1248,7 @@ export VectorSpaceFiber
 export TangentSpace, TangentSpaceType
 export CotangentSpace, CotangentSpaceType
 export AbstractDecoratorManifold
-export AbstractTrait, IsEmbeddedManifold, IsEmbeddedSubmanifold, IsIsometricEmbeddedManifold
+export AbstractTrait, IsEmbeddedSubmanifold, IsIsometricEmbeddedManifold
 export IsExplicitDecorator
 export ValidationManifold,
     ValidationMPoint, ValidationTangentVector, ValidationCotangentVector
