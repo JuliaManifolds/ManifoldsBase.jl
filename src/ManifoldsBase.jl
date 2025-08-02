@@ -807,35 +807,34 @@ end
 function is_point(M::AbstractManifold, p; error::Symbol = :none, kwargs...)
     if is_embedded_manifold(M)
         return is_point_embedding(M, p; error = error, kwargs...)
-    else
-        mps = check_size(M, p)
-        if mps !== nothing
-            (error === :error) && throw(mps)
-            if (error === :info) || (error === :warn)
-                # else: collect and info showerror
-                io = IOBuffer()
-                showerror(io, mps)
-                s = String(take!(io))
-                (error === :info) && @info s
-                (error === :warn) && @warn s
-            end
-            return false
-        end
-        mpe = check_point(M, p; kwargs...)
-        if mpe !== nothing
-            (error === :error) && throw(mpe)
-            if (error === :info) || (error === :warn)
-                # else: collect and info showerror
-                io = IOBuffer()
-                showerror(io, mpe)
-                s = String(take!(io))
-                (error === :info) && @info s
-                (error === :warn) && @warn s
-            end
-            return false
-        end
-        return true
     end
+    mps = check_size(M, p)
+    if mps !== nothing
+        (error === :error) && throw(mps)
+        if (error === :info) || (error === :warn)
+            # else: collect and info showerror
+            io = IOBuffer()
+            showerror(io, mps)
+            s = String(take!(io))
+            (error === :info) && @info s
+            (error === :warn) && @warn s
+        end
+        return false
+    end
+    mpe = check_point(M, p; kwargs...)
+    if mpe !== nothing
+        (error === :error) && throw(mpe)
+        if (error === :info) || (error === :warn)
+            # else: collect and info showerror
+            io = IOBuffer()
+            showerror(io, mpe)
+            s = String(take!(io))
+            (error === :info) && @info s
+            (error === :warn) && @warn s
+        end
+        return false
+    end
+    return true
 end
 
 
@@ -889,6 +888,9 @@ function is_vector(
     error::Symbol = :none,
     kwargs...,
 )
+    if is_embedded_manifold(M)
+        return is_vector_embedding(M, p, X, check_base_point; error=error, kwargs...)
+    end
     if check_base_point
         # if error, is_point throws, otherwise if not a point return false
         !is_point(M, p; error = error, kwargs...) && return false

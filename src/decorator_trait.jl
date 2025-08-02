@@ -407,7 +407,7 @@ function is_point_embedding(
     return true
 end
 
-# Introduce Deco Trait | automatic foward | fallback
+# Introduce Deco Trait | automatic forward | fallback
 @trait_function is_vector(M::AbstractDecoratorManifold, p, X, cbp::Bool = true; kwargs...)
 # EmbeddedManifold
 # I am not yet sure how to properly document this embedding behaviour here in a docstring.
