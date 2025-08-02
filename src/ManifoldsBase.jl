@@ -728,7 +728,7 @@ Currently the following are supported
 * `:warn` – prints the information in an `@warn`
 * `:none` (default) – the function just returns `true`/`false`
 
-By default these informations are collected by calling [`check_approx`](@ref).
+By default these pieces of information are collected by calling [`check_approx`](@ref).
 
 Keyword arguments can be used to specify tolerances.
 """
@@ -889,7 +889,7 @@ function is_vector(
     kwargs...,
 )
     if is_embedded_manifold(M)
-        return is_vector_embedding(M, p, X, check_base_point; error=error, kwargs...)
+        return is_vector_embedding(M, p, X, check_base_point; error = error, kwargs...)
     end
     if check_base_point
         # if error, is_point throws, otherwise if not a point return false

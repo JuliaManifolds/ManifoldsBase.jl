@@ -77,6 +77,9 @@ ManifoldsBase.representation_size(::AnotherHalfPlaneManifold) = (2,)
 function ManifoldsBase.active_traits(f, ::AnotherHalfPlaneManifold, args...)
     return ManifoldsBase.merge_traits(ManifoldsBase.IsIsometricEmbeddedManifold())
 end
+function ManifoldsBase.get_embedding_type(::AnotherHalfPlaneManifold)
+    return ManifoldsBase.IsometricallyEmbeddedManifoldType()
+end
 
 function ManifoldsBase.embed!(::AnotherHalfPlaneManifold, q, p)
     q[1:2] .= p
@@ -161,6 +164,9 @@ end
 function ManifoldsBase.active_traits(f, ::NotImplementedEmbeddedSubManifold, args...)
     return ManifoldsBase.merge_traits(ManifoldsBase.IsEmbeddedSubmanifold())
 end
+function ManifoldsBase.get_embedding_type(::NotImplementedEmbeddedSubManifold)
+    return ManifoldsBase.EmbeddedSubmanifoldType()
+end
 
 #
 # A manifold that is isometrically embedded but has no implementations
@@ -169,12 +175,18 @@ struct NotImplementedIsometricEmbeddedManifold <: AbstractDecoratorManifold{ℝ}
 function ManifoldsBase.active_traits(f, ::NotImplementedIsometricEmbeddedManifold, args...)
     return ManifoldsBase.merge_traits(ManifoldsBase.IsIsometricEmbeddedManifold())
 end
+function ManifoldsBase.get_embedding_type(::NotImplementedIsometricEmbeddedManifold)
+    return ManifoldsBase.IsometricallyEmbeddedManifoldType()
+end
 
 #
 # A manifold that is an embedded manifold but not isometric and has no other implementation
 #
 struct NotImplementedEmbeddedManifold <: AbstractDecoratorManifold{ℝ} end
 is_embedded_manifold(::NotImplementedEmbeddedManifold) = true
+function ManifoldsBase.get_embedding_type(::AnotherHalfPlaneManifold)
+    return ManifoldsBase.EmbeddedManifoldType()
+end
 
 #
 # A Manifold with a fallback
@@ -233,7 +245,7 @@ ManifoldsBase.decorated_manifold(::FallbackManifold) = DefaultManifold(3)
         @test !is_point(N, [0, 0, 0])
         @test_throws ManifoldDomainError is_point(N, [0, 0, 0]; error = :error)
         @test !is_vector(N, [1, 1, 0], [0, 0, 0])
-        @test_throws DomainError is_vector(N, [1, 1, 0], [0, 0, 0]; error = :error)
+        @test_throws ManifoldDomainError is_vector(N, [1, 1, 0], [0, 0, 0]; error = :error)
         p = [1.0 1.0 0.0]
         q = [1.0 0.0 0.0]
         X = q - p
