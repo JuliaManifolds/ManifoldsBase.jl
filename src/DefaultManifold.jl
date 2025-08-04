@@ -113,7 +113,7 @@ end
 
 get_embedding(M::DefaultManifold, ::Any) = M
 
-get_embedding_type(::DefaultManifold) = NotEmbeddedManifoldType()
+get_forwarding_type(::DefaultManifold, ::Any) = StopForwardingType()
 
 function get_vector_orthonormal!(M::DefaultManifold, Y, p, c, ::AbstractNumbers)
     return copyto!(Y, reshape(c, representation_size(M)))

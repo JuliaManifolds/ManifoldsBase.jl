@@ -197,6 +197,11 @@ function ManifoldsBase.active_traits(f, ::FallbackManifold, args...)
 end
 ManifoldsBase.decorated_manifold(::FallbackManifold) = DefaultManifold(3)
 
+function ManifoldsBase.get_forwarding_type(::FallbackManifold, ::Any)
+    return ManifoldsBase.SimpleForwardingType()
+end
+
+
 @testset "Embedded Manifolds" begin
     @testset "EmbeddedManifold basic tests" begin
         M = EmbeddedManifold(
