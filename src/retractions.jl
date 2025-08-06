@@ -79,9 +79,6 @@ struct ODEExponentialRetraction{T<:AbstractRetractionMethod,B<:AbstractBasis} <:
     retraction::T
     basis::B
 end
-function ODEExponentialRetraction()
-    return ODEExponentialRetraction(ExponentialRetraction())
-end
 function ODEExponentialRetraction(r::T) where {T<:AbstractRetractionMethod}
     return ODEExponentialRetraction(r, DefaultOrthonormalBasis())
 end
