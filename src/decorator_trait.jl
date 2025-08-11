@@ -58,16 +58,29 @@ A property of an embedded manifold that indicates that `embed` and `project` are
 struct EmbeddedForwardingType <: AbstractForwardingType end
 
 """
+    EmbeddedForwardingType <: AbstractForwardingType
+
+A property of an embedded manifold that indicates that `embed` and `project` are available,
+although not needed to propagate a function to the embedding.
+"""
+struct EmbeddedSimpleForwardingType <: AbstractForwardingType end
+
+
+"""
     get_forwarding_type(M::AbstractManifold, f)
+    get_forwarding_type(M::AbstractManifold, f, p)
 
 Get the type of forwarding to manifold wrapped by [`AbstractManifold`](@ref) `M`, for function `f`.
 The returned value is an object of a subtype of [`AbstractForwardingType`](@ref), either of:
 * [`StopForwardingType`](@ref) (default),
 * [`SimpleForwardingType`](@ref),
 * [`EmbeddedForwardingType`](@ref).
+
+Point `p` can be optionally specified if different point types correspond to different
+embeddings.
 """
 get_forwarding_type(::AbstractManifold, f) = StopForwardingType()
-
+get_forwarding_type(M::AbstractManifold, f, p) = get_forwarding_type(M, f)
 
 abstract type AbstractEmbeddingType end
 
@@ -112,6 +125,7 @@ struct EmbeddedSubmanifoldType <: AbstractEmbeddingType end
 
 """
     get_embedding_type(M::AbstractManifold)
+    get_embedding_type(M::AbstractManifold, p)
 
 Get embedding type of [`AbstractManifold`](@ref) `M`.
 The returned value is an object of a subtype of [`AbstractEmbeddingType`](@ref), either of:
@@ -119,8 +133,12 @@ The returned value is an object of a subtype of [`AbstractEmbeddingType`](@ref),
 * [`EmbeddedManifoldType`](@ref),
 * [`IsometricallyEmbeddedManifoldType`](@ref),
 * [`EmbeddedSubmanifoldType`](@ref).
+
+Point `p` can be optionally specified if different point types correspond to different
+embeddings.
 """
 get_embedding_type(::AbstractManifold) = NotEmbeddedManifoldType()
+get_embedding_type(M::AbstractManifold, p) = get_embedding_type(M)
 
 function is_embedded_manifold(M::AbstractManifold)
     return get_embedding_type(M) !== NotEmbeddedManifoldType()
@@ -399,13 +417,22 @@ function injectivity_radius(
 end
 
 function inner(M::AbstractDecoratorManifold, p, X, Y)
-    return _inner_forwarding(get_forwarding_type(M, inner), M, p, X, Y)
+    return _inner_forwarding(get_forwarding_type(M, inner, p), M, p, X, Y)
 end
 
 function _inner_forwarding(::StopForwardingType, M::AbstractDecoratorManifold, p, X, Y)
     return invoke(inner, Tuple{AbstractManifold,typeof(p),typeof(X),typeof(Y)}, M, p, X, Y)
 end
 function _inner_forwarding(::EmbeddedForwardingType, M::AbstractDecoratorManifold, p, X, Y)
+    return inner(get_embedding(M, p), p, X, Y)
+end
+function _inner_forwarding(
+    ::EmbeddedSimpleForwardingType,
+    M::AbstractDecoratorManifold,
+    p,
+    X,
+    Y,
+)
     return inner(get_embedding(M, p), p, X, Y)
 end
 function _inner_forwarding(::SimpleForwardingType, M::AbstractDecoratorManifold, p, X, Y)
@@ -575,16 +602,48 @@ function norm(::TraitList{IsIsometricEmbeddedManifold}, M::AbstractDecoratorMani
     return norm(get_embedding(M, p), p, X)
 end
 
-@trait_function log(M::AbstractDecoratorManifold, p, q)
-function log(::TraitList{IsEmbeddedSubmanifold}, M::AbstractDecoratorManifold, p, q)
-    return log(get_embedding(M, p), p, q)
+
+function log(M::AbstractDecoratorManifold, p, q)
+    return _log_forwarding(get_forwarding_type(M, log, p), M, p, q)
 end
 
-# Introduce Deco Trait | automatic forward | fallback
-@trait_function log!(M::AbstractDecoratorManifold, X, p, q)
-function log!(::TraitList{IsEmbeddedSubmanifold}, M::AbstractDecoratorManifold, X, p, q)
+function _log_forwarding(::StopForwardingType, M::AbstractDecoratorManifold, p, q)
+    return invoke(log, Tuple{AbstractManifold,typeof(p),typeof(q)}, M, p, q)
+end
+function _log_forwarding(::EmbeddedForwardingType, M::AbstractDecoratorManifold, p, q)
+    return log(get_embedding(M, p), p, q)
+end
+function _log_forwarding(::EmbeddedSimpleForwardingType, M::AbstractDecoratorManifold, p, q)
+    return log(get_embedding(M, p), p, q)
+end
+function _log_forwarding(::SimpleForwardingType, M::AbstractDecoratorManifold, p, q)
+    return log(decorated_manifold(M), p, q)
+end
+
+function log!(M::AbstractDecoratorManifold, X, p, q)
+    return _log_forwarding!(get_forwarding_type(M, log, p), M, X, p, q)
+end
+
+function _log_forwarding!(::StopForwardingType, M::AbstractDecoratorManifold, X, p, q)
+    return invoke(log!, Tuple{AbstractManifold,typeof(X),typeof(p),typeof(q)}, M, X, p, q)
+end
+function _log_forwarding!(::EmbeddedForwardingType, M::AbstractDecoratorManifold, X, p, q)
     return log!(get_embedding(M, p), X, p, q)
 end
+function _log_forwarding!(
+    ::EmbeddedSimpleForwardingType,
+    M::AbstractDecoratorManifold,
+    X,
+    p,
+    q,
+)
+    return log!(get_embedding(M, p), X, p, q)
+end
+function _log_forwarding!(::SimpleForwardingType, M::AbstractDecoratorManifold, X, p, q)
+    return log!(decorated_manifold(M), X, p, q)
+end
+
+
 
 # Introduce Deco Trait | automatic forward | fallback
 @trait_function parallel_transport_direction(M::AbstractDecoratorManifold, p, X, q)
@@ -883,20 +942,16 @@ const metric_functions = [
 function get_forwarding_type(M::AbstractDecoratorManifold, f)
     return get_forwarding_type_embedding(get_embedding_type(M), M, f)
 end
+function get_forwarding_type(M::AbstractDecoratorManifold, f, p)
+    return get_forwarding_type_embedding(get_embedding_type(M, p), M, f)
+end
 
 function get_forwarding_type_embedding(
-    ::Union{EmbeddedManifoldType,IsometricallyEmbeddedManifoldType},
+    ::Union{EmbeddedManifoldType,IsometricallyEmbeddedManifoldType,NotEmbeddedManifoldType},
     M::AbstractDecoratorManifold,
     f,
 )
     return StopForwardingType()
-end
-function get_forwarding_type_embedding(
-    ::Union{IsometricallyEmbeddedManifoldType,EmbeddedSubmanifoldType},
-    M::AbstractDecoratorManifold,
-    f::typeof(inner),
-)
-    return SimpleForwardingType()
 end
 
 for mf in metric_functions
@@ -906,14 +961,14 @@ for mf in metric_functions
             M::AbstractDecoratorManifold,
             ::typeof($mf),
         )
-            return SimpleForwardingType()
+            return EmbeddedSimpleForwardingType()
         end
         function get_forwarding_type_embedding(
             ::IsometricallyEmbeddedManifoldType,
             M::AbstractDecoratorManifold,
             ::typeof($mf),
         )
-            return SimpleForwardingType()
+            return EmbeddedSimpleForwardingType()
         end
     end
 end

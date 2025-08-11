@@ -8,8 +8,12 @@ using ManifoldsBase: DefaultManifold, ℝ
 struct HalfPlaneManifold <: AbstractDecoratorManifold{ℝ} end
 struct PosQuadrantManifold <: AbstractDecoratorManifold{ℝ} end
 
-ManifoldsBase.is_embedded_manifold(::HalfPlaneManifold) = true
-ManifoldsBase.is_embedded_manifold(::PosQuadrantManifold) = true
+function ManifoldsBase.get_embedding_type(::HalfPlaneManifold)
+    return ManifoldsBase.EmbeddedSubmanifoldType()
+end
+function ManifoldsBase.get_embedding_type(::PosQuadrantManifold)
+    return ManifoldsBase.EmbeddedSubmanifoldType()
+end
 
 ManifoldsBase.get_embedding(::HalfPlaneManifold) = ManifoldsBase.DefaultManifold(1, 3)
 ManifoldsBase.decorated_manifold(::HalfPlaneManifold) = ManifoldsBase.DefaultManifold(2)
@@ -197,7 +201,7 @@ function ManifoldsBase.active_traits(f, ::FallbackManifold, args...)
 end
 ManifoldsBase.decorated_manifold(::FallbackManifold) = DefaultManifold(3)
 
-function ManifoldsBase.get_forwarding_type(::FallbackManifold, ::Any)
+function ManifoldsBase.get_forwarding_type(::FallbackManifold, ::Any, p = nothing)
     return ManifoldsBase.SimpleForwardingType()
 end
 
