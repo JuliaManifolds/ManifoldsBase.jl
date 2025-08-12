@@ -322,38 +322,42 @@ end
 # EmbeddedManifold
 
 # Introduce Deco Trait | automatic forward | fallback
-@trait_function exp(M::AbstractDecoratorManifold, p, X)
-@trait_function exp_fused(M::AbstractDecoratorManifold, p, X, t::Number)
-# EmbeddedSubManifold
-function exp(::TraitList{IsEmbeddedSubmanifold}, M::AbstractDecoratorManifold, p, X)
-    return exp(get_embedding(M, p), p, X)
+
+@new_trait_function exp(M::AbstractDecoratorManifold, p, X)
+
+function _exp_forwarding(::EmbeddedForwardingType, M::AbstractDecoratorManifold, p, X)
+    return exp(get_embedding(M, p), embed(M, p), embed(M, p, X))
 end
-function exp_fused(
-    ::TraitList{IsEmbeddedSubmanifold},
+
+@new_trait_function exp!(M::AbstractDecoratorManifold, q, p, X)
+
+function _exp!_forwarding(::EmbeddedForwardingType, M::AbstractDecoratorManifold, q, p, X)
+    return exp!(get_embedding(M, p), q, embed(M, p), embed(M, p, X))
+end
+
+@new_trait_function exp_fused(M::AbstractDecoratorManifold, p, X, t::Number)
+
+function _exp_fused_forwarding(
+    ::EmbeddedForwardingType,
     M::AbstractDecoratorManifold,
     p,
     X,
     t::Number,
 )
-    return exp_fused(get_embedding(M, p), p, X, t)
+    return exp_fused(get_embedding(M, p), embed(M, p), embed(M, p, X), t)
 end
 
-# Introduce Deco Trait | automatic forward | fallback
-@trait_function exp!(M::AbstractDecoratorManifold, q, p, X)
-@trait_function exp_fused!(M::AbstractDecoratorManifold, q, p, X, t::Number)
-# EmbeddedSubManifold
-function exp!(::TraitList{IsEmbeddedSubmanifold}, M::AbstractDecoratorManifold, q, p, X)
-    return exp!(get_embedding(M, p), q, p, X)
-end
-function exp_fused!(
-    ::TraitList{IsEmbeddedSubmanifold},
+@new_trait_function exp_fused!(M::AbstractDecoratorManifold, q, p, X, t::Number)
+
+function _exp_fused!_forwarding(
+    ::EmbeddedForwardingType,
     M::AbstractDecoratorManifold,
     q,
     p,
     X,
     t::Number,
 )
-    return exp_fused!(get_embedding(M, p), q, p, X, t)
+    return exp_fused!(get_embedding(M, p), q, embed(M, p), embed(M, p, X), t)
 end
 
 # Introduce Deco Trait | automatic forward | fallback
@@ -918,7 +922,9 @@ const metric_functions = [
     change_metric,
     change_representer,
     exp,
+    exp!,
     exp_fused,
+    exp_fused!,
     get_basis,
     get_coordinates,
     get_vector,
@@ -926,6 +932,7 @@ const metric_functions = [
     inner,
     inverse_retract,
     log,
+    log!,
     mid_point,
     norm,
     parallel_transport_direction,
