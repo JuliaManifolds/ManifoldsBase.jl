@@ -155,7 +155,6 @@ the manifold without that manifold, i.e. the manifold that _was decorated_.
 """
 decorated_manifold(M::AbstractDecoratorManifold)
 decorated_manifold(M::AbstractManifold) = M
-@trait_function decorated_manifold(M::AbstractDecoratorManifold)
 
 #
 # Implemented Traits
@@ -645,8 +644,21 @@ function _is_vector_forwarding(
     return false
 end
 
-@trait_function isapprox(M::AbstractDecoratorManifold, p, q; kwargs...)
-@trait_function isapprox(M::AbstractDecoratorManifold, p, X, Y; kwargs...)
+@new_trait_function isapprox(M::AbstractDecoratorManifold, p, q; kwargs...)
+@new_trait_function isapprox(M::AbstractDecoratorManifold, p, X, Y; kwargs...)
+
+function _isapprox_forwarding(::EmbeddedForwardingType, M::AbstractDecoratorManifold, p, q)
+    return isapprox(get_embedding(M, p), embed(M, p), embed(M, p, q))
+end
+function _isapprox_forwarding(
+    ::EmbeddedForwardingType,
+    M::AbstractDecoratorManifold,
+    p,
+    X,
+    Y,
+)
+    return isapprox(get_embedding(M, p), embed(M, p), embed(M, p, X), embed(M, p, Y))
+end
 
 @new_trait_function is_flat(M::AbstractDecoratorManifold)
 
@@ -756,13 +768,54 @@ end
 # Introduce Deco Trait | automatic forward | fallback
 @trait_function project!(M::AbstractDecoratorManifold, Y, p, X)
 
-@trait_function Random.rand(M::AbstractDecoratorManifold; kwargs...)
+@new_trait_function Random.rand(M::AbstractDecoratorManifold; kwargs...)
 
-@trait_function Random.rand!(M::AbstractDecoratorManifold, p; kwargs...)
+function _rand_forwarding(::EmbeddedForwardingType, M::AbstractDecoratorManifold; kwargs...)
+    return rand(get_embedding(M); kwargs...)
+end
 
-@trait_function Random.rand(rng::AbstractRNG, M::AbstractDecoratorManifold; kwargs...) :() 2
+@new_trait_function Random.rand!(M::AbstractDecoratorManifold, p; kwargs...)
 
-@trait_function Random.rand!(rng::AbstractRNG, M::AbstractDecoratorManifold, p; kwargs...) :() 2
+function _rand!_forwarding(
+    ::EmbeddedForwardingType,
+    M::AbstractDecoratorManifold,
+    p;
+    kwargs...,
+)
+    return rand(get_embedding(M, p), p; kwargs...)
+end
+
+@new_trait_function Random.rand(rng::AbstractRNG, M::AbstractDecoratorManifold; kwargs...) (
+    EmbeddedSimpleForwardingType,
+    SimpleForwardingType,
+    StopForwardingType,
+) 2
+
+function _rand_forwarding(
+    ::EmbeddedForwardingType,
+    rng::AbstractRNG,
+    M::AbstractDecoratorManifold;
+    kwargs...,
+)
+    return rand(rng, get_embedding(M); kwargs...)
+end
+
+@new_trait_function Random.rand!(
+    rng::AbstractRNG,
+    M::AbstractDecoratorManifold,
+    p;
+    kwargs...,
+) (EmbeddedSimpleForwardingType, SimpleForwardingType, StopForwardingType) 2
+
+function _rand!_forwarding(
+    ::EmbeddedForwardingType,
+    rng::AbstractRNG,
+    M::AbstractDecoratorManifold,
+    p;
+    kwargs...,
+)
+    return rand!(rng, get_embedding(M, p), p; kwargs...)
+end
 
 # Introduce Deco Trait | automatic forward | fallback
 @trait_function representation_size(M::AbstractDecoratorManifold) (no_empty,)
@@ -1062,8 +1115,11 @@ const topological_functions = [
     has_components,
     inverse_retract,
     inverse_retract!,
+    isapprox,
     is_point,
     is_vector,
+    rand,
+    rand!,
     retract,
     retract!,
     retract_fused,

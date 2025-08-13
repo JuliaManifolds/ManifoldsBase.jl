@@ -187,7 +187,6 @@ end
 # A manifold that is an embedded manifold but not isometric and has no other implementation
 #
 struct NotImplementedEmbeddedManifold <: AbstractDecoratorManifold{ℝ} end
-is_embedded_manifold(::NotImplementedEmbeddedManifold) = true
 function ManifoldsBase.get_embedding_type(::NotImplementedEmbeddedManifold)
     return ManifoldsBase.EmbeddedManifoldType()
 end
@@ -412,16 +411,14 @@ end
             @test_throws MethodError vector_transport_to(M2, [1, 2], [2, 3], [3, 4])
             @test_throws MethodError vector_transport_to!(M2, A, [1, 2], [2, 3], [3, 4])
         end
-        @testset "Nonisometric Embedding Fallback Error Rests" begin
+        @testset "Nonisometric Embedding Fallback Error Tests" begin
             M3 = NotImplementedEmbeddedManifold()
             @test_throws MethodError inner(M3, [1, 2], [2, 3], [2, 3])
             @test_throws StackOverflowError manifold_dimension(M3)
             @test_throws MethodError distance(M3, [1, 2], [2, 3])
             @test_throws MethodError norm(M3, [1, 2], [2, 3])
-            # @test_throws MethodError embed(M3, [1, 2], [2, 3])
-            # @test_throws MethodError embed(M3, [1, 2])
-            @test @inferred !isapprox(M3, [1, 2], [2, 3])
-            @test @inferred !isapprox(M3, [1, 2], [2, 3], [4, 5])
+            @test_throws MethodError embed(M3, [1, 2], [2, 3])
+            @test_throws MethodError embed(M3, [1, 2])
         end
     end
     @testset "Explicit Embeddings using EmbeddedManifold" begin
