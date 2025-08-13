@@ -468,7 +468,7 @@ end
 @new_trait_function is_point(M::AbstractDecoratorManifold, p; kwargs...)
 
 function _is_point_forwarding(
-    ::EmbeddedForwardingType,
+    T::Union{EmbeddedForwardingType, EmbeddedSimpleForwardingType},
     M::AbstractDecoratorManifold,
     p;
     error::Symbol = :none,
@@ -484,7 +484,11 @@ function _is_point_forwarding(
         return false
     end
     try
-        pt = is_point(get_embedding(M, p), embed(M, p); error = error, kwargs...)
+        if T isa EmbeddedForwardingType
+            pt = is_point(get_embedding(M, p), embed(M, p); error = error, kwargs...)
+        else
+            pt = is_point(get_embedding(M, p), p; error = error, kwargs...)
+        end
         !pt && return false # no error thrown (deactivated) but returned false -> return false
     catch e
         if e isa DomainError || e isa AbstractManifoldDomainError
@@ -518,7 +522,7 @@ end
 )
 
 function _is_vector_forwarding(
-    ::EmbeddedForwardingType,
+    ::Union{EmbeddedForwardingType, EmbeddedSimpleForwardingType},
     M::AbstractDecoratorManifold,
     p,
     X,
@@ -552,14 +556,25 @@ function _is_vector_forwarding(
         end
     end
     try
-        tv = is_vector(
-            get_embedding(M, p),
-            embed(M, p),
-            embed(M, p, X),
-            check_base_point;
-            error = error,
-            kwargs...,
-        )
+        if T isa EmbeddedForwardingType
+            tv = is_vector(
+                get_embedding(M, p),
+                embed(M, p),
+                embed(M, p, X),
+                check_base_point;
+                error = error,
+                kwargs...,
+            )
+        else
+            tv = is_vector(
+                get_embedding(M, p),
+                p,
+                X,
+                check_base_point;
+                error = error,
+                kwargs...,
+            )
+        end
         !tv && return false # no error thrown (deactivated) but returned false -> return false
     catch e
         if e isa DomainError || e isa AbstractManifoldDomainError
