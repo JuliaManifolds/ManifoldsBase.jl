@@ -381,44 +381,51 @@ end
 
 @trait_function has_components(M::AbstractDecoratorManifold)
 
-@trait_function injectivity_radius(M::AbstractDecoratorManifold)
-function injectivity_radius(
-    ::TraitList{IsIsometricEmbeddedManifold},
+@new_trait_function injectivity_radius(M::AbstractDecoratorManifold)
+
+function _injectivity_radius_forwarding(
+    ::EmbeddedForwardingType,
     M::AbstractDecoratorManifold,
 )
     return injectivity_radius(get_embedding(M))
 end
-@trait_function injectivity_radius(M::AbstractDecoratorManifold, p)
-function injectivity_radius(
-    ::TraitList{IsIsometricEmbeddedManifold},
+
+@new_trait_function injectivity_radius(M::AbstractDecoratorManifold, p)
+
+function _injectivity_radius_forwarding(
+    ::EmbeddedForwardingType,
     M::AbstractDecoratorManifold,
     p,
 )
-    return injectivity_radius(get_embedding(M, p), p)
+    return injectivity_radius(get_embedding(M, p), embed(M, p))
 end
-@trait_function injectivity_radius(
+
+@new_trait_function injectivity_radius(
     M::AbstractDecoratorManifold,
     m::AbstractRetractionMethod,
 )
-function injectivity_radius(
-    ::TraitList{IsIsometricEmbeddedManifold},
+
+function _injectivity_radius_forwarding(
+    ::EmbeddedForwardingType,
     M::AbstractDecoratorManifold,
     m::AbstractRetractionMethod,
 )
     return injectivity_radius(get_embedding(M), m)
 end
-@trait_function injectivity_radius(
+
+@new_trait_function injectivity_radius(
     M::AbstractDecoratorManifold,
     p,
     m::AbstractRetractionMethod,
 )
-function injectivity_radius(
-    ::TraitList{IsIsometricEmbeddedManifold},
+
+function _injectivity_radius_forwarding(
+    ::EmbeddedForwardingType,
     M::AbstractDecoratorManifold,
     p,
     m::AbstractRetractionMethod,
 )
-    return injectivity_radius(get_embedding(M, p), p, m)
+    return injectivity_radius(get_embedding(M, p), embed(M, p), m)
 end
 
 @new_trait_function inner(M::AbstractDecoratorManifold, p, X, Y)
@@ -467,6 +474,7 @@ end
 
 @new_trait_function is_point(M::AbstractDecoratorManifold, p; kwargs...) (
     StopForwardingType,
+    SimpleForwardingType,
 )
 
 function _is_point_forwarding(
@@ -521,7 +529,7 @@ end
     X,
     check_base_point::Bool = true;
     kwargs...,
-) (StopForwardingType,)
+) (StopForwardingType, SimpleForwardingType)
 
 function _is_vector_forwarding(
     T::Union{EmbeddedForwardingType,EmbeddedSimpleForwardingType},
@@ -959,6 +967,7 @@ const metric_functions = [
     get_vector,
     get_vectors,
     inner,
+    injectivity_radius,
     log,
     log!,
     mid_point,

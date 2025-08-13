@@ -188,7 +188,7 @@ end
 #
 struct NotImplementedEmbeddedManifold <: AbstractDecoratorManifold{ℝ} end
 is_embedded_manifold(::NotImplementedEmbeddedManifold) = true
-function ManifoldsBase.get_embedding_type(::AnotherHalfPlaneManifold)
+function ManifoldsBase.get_embedding_type(::NotImplementedEmbeddedManifold)
     return ManifoldsBase.EmbeddedManifoldType()
 end
 
