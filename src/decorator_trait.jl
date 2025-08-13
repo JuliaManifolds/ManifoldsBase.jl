@@ -273,9 +273,12 @@ end
     p,
 )
 
-@new_trait_function check_size(M::AbstractDecoratorManifold, p)
+@new_trait_function check_size(M::AbstractDecoratorManifold, p) (
+    SimpleForwardingType,
+    StopForwardingType,
+)
 function _check_size_forwarding(::EmbeddedForwardingType, M::AbstractDecoratorManifold, p)
-    mpe = check_size(get_embedding(M, p), embed(M,p))
+    mpe = check_size(get_embedding(M, p), embed(M, p))
     if mpe !== nothing
         return ManifoldDomainError(
             "$p is not a point on $M because it is not a valid point in its embedding.",
@@ -284,7 +287,11 @@ function _check_size_forwarding(::EmbeddedForwardingType, M::AbstractDecoratorMa
     end
     return nothing
 end
-function _check_size_forwarding(::EmbeddedSimpleForwardingType, M::AbstractDecoratorManifold, p)
+function _check_size_forwarding(
+    ::EmbeddedSimpleForwardingType,
+    M::AbstractDecoratorManifold,
+    p,
+)
     mpe = check_size(get_embedding(M, p), p)
     if mpe !== nothing
         return ManifoldDomainError(
@@ -294,14 +301,17 @@ function _check_size_forwarding(::EmbeddedSimpleForwardingType, M::AbstractDecor
     end
     return nothing
 end
-@new_trait_function check_size(M::AbstractDecoratorManifold, p, X)
+@new_trait_function check_size(M::AbstractDecoratorManifold, p, X) (
+    SimpleForwardingType,
+    StopForwardingType,
+)
 function _check_size_forwarding(
     ::EmbeddedForwardingType,
     M::AbstractDecoratorManifold,
     p,
     X,
 )
-    mpe = check_size(get_embedding(M, p), embed(M,p), embed(M, p, X))
+    mpe = check_size(get_embedding(M, p), embed(M, p), embed(M, p, X))
     if mpe !== nothing
         return ManifoldDomainError(
             "$X is not a tangent vector at $p on $M because it is not a valid tangent vector in its embedding.",
