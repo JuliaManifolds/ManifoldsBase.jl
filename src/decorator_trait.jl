@@ -274,7 +274,7 @@ end
 )
 
 @new_trait_function check_size(M::AbstractDecoratorManifold, p)
-function check_size_forwarding(::EmbeddedForwardingType, M::AbstractDecoratorManifold, p)
+function _check_size_forwarding(::EmbeddedForwardingType, M::AbstractDecoratorManifold, p)
     mpe = check_size(get_embedding(M, p), p)
     if mpe !== nothing
         return ManifoldDomainError(
@@ -522,7 +522,7 @@ end
 )
 
 function _is_vector_forwarding(
-    ::Union{EmbeddedForwardingType, EmbeddedSimpleForwardingType},
+    T::Union{EmbeddedForwardingType, EmbeddedSimpleForwardingType},
     M::AbstractDecoratorManifold,
     p,
     X,
