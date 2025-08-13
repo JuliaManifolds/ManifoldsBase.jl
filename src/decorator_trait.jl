@@ -412,7 +412,11 @@ end
 # Introduce Deco Trait | automatic forward | fallback
 @trait_function get_vectors(M::AbstractDecoratorManifold, p, B::AbstractBasis)
 
-@trait_function has_components(M::AbstractDecoratorManifold)
+@new_trait_function has_components(M::AbstractDecoratorManifold)
+
+function _has_components_forwarding(::EmbeddedForwardingType, M::AbstractDecoratorManifold)
+    return has_components(get_embedding(M))
+end
 
 @new_trait_function injectivity_radius(M::AbstractDecoratorManifold)
 
@@ -644,7 +648,7 @@ end
 @trait_function isapprox(M::AbstractDecoratorManifold, p, q; kwargs...)
 @trait_function isapprox(M::AbstractDecoratorManifold, p, X, Y; kwargs...)
 
-@trait_function is_flat(M::AbstractDecoratorManifold)
+@new_trait_function is_flat(M::AbstractDecoratorManifold)
 
 @new_trait_function norm(M::AbstractDecoratorManifold, p, X)
 
@@ -1001,6 +1005,7 @@ const metric_functions = [
     get_vectors,
     inner,
     injectivity_radius,
+    is_flat,
     log,
     log!,
     mid_point,
@@ -1054,6 +1059,7 @@ const topological_functions = [
     check_vector,
     copyto!,
     check_size,
+    has_components,
     inverse_retract,
     inverse_retract!,
     is_point,
