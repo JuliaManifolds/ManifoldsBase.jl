@@ -1242,7 +1242,7 @@ export VectorSpaceFiber
 export TangentSpace, TangentSpaceType
 export CotangentSpace, CotangentSpaceType
 export AbstractDecoratorManifold
-export AbstractTrait, IsEmbeddedSubmanifold, IsIsometricEmbeddedManifold
+export AbstractTrait
 export IsExplicitDecorator
 export ValidationManifold,
     ValidationMPoint, ValidationTangentVector, ValidationCotangentVector

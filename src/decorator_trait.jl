@@ -4,34 +4,7 @@
 manifold_dimension(M::AbstractDecoratorManifold) = manifold_dimension(base_manifold(M))
 
 #
-# Traits - each passed to a function that is properly documented
-# TODO: Remove once unused
-
-"""
-    IsIsometricManifoldEmbeddedManifold <: AbstractTrait
-
-A Trait to determine whether an [`AbstractDecoratorManifold`](@ref) `M` is
-an isometrically embedded manifold.
-
-Here, additionally, metric related functions like [`inner`](@ref) and [`norm`](@ref) are passed to the embedding
-"""
-struct IsIsometricEmbeddedManifold <: AbstractTrait end
-
-"""
-    IsEmbeddedSubmanifold <: AbstractTrait
-
-A trait to determine whether an [`AbstractDecoratorManifold`](@ref) `M` is an embedded submanifold.
-It is a special case of the [`IsIsometricEmbeddedManifold`](@ref) trait, i.e. it has all properties of
-this trait.
-
-In this trait, additionally to the isometric embedded manifold, all retractions, inverse retractions,
-and vectors transports, especially [`exp`](@ref), [`log`](@ref), and [`parallel_transport_to`](@ref)
-are passed to the embedding.
-"""
-struct IsEmbeddedSubmanifold <: AbstractTrait end
-
-parent_trait(::IsEmbeddedSubmanifold) = IsIsometricEmbeddedManifold()
-
+# Forwarding types
 
 abstract type AbstractForwardingType end
 
@@ -114,7 +87,7 @@ struct IsometricallyEmbeddedManifoldType <: AbstractEmbeddingType end
     EmbeddedSubmanifoldType <: AbstractEmbeddingType
 
 A property to determine whether an [`AbstractDecoratorManifold`](@ref) `M` is an embedded submanifold.
-It is a special case of the [`IsIsometricEmbeddedManifold`](@ref) property, i.e. it has all properties of
+It is a special case of the [`IsometricallyEmbeddedManifoldType`](@ref) property, i.e. it has all properties of
 this property.
 
 In this property, additionally to the isometric embedded manifold, all retractions, inverse retractions,
@@ -1018,30 +991,6 @@ end
 @new_trait_function zero_vector(M::AbstractDecoratorManifold, p)
 
 @new_trait_function zero_vector!(M::AbstractDecoratorManifold, X, p)
-
-# Trait recursion breaking
-# An unfortunate consequence of Julia's method recursion limitations
-# Add more traits and functions as needed
-
-for trait_type in [TraitList{IsEmbeddedSubmanifold}]
-    @eval begin
-        @next_trait_function $trait_type isapprox(
-            M::AbstractDecoratorManifold,
-            p,
-            q;
-            kwargs...,
-        )
-        @next_trait_function $trait_type isapprox(
-            M::AbstractDecoratorManifold,
-            p,
-            X,
-            Y;
-            kwargs...,
-        )
-    end
-end
-
-
 
 const metric_functions = [
     change_metric,

@@ -60,11 +60,11 @@ function ManifoldsBase.get_vector_orthonormal!(
     return (Y .= [c[1] c[2] 0.0])
 end
 
-function ManifoldsBase.active_traits(f, ::HalfPlaneManifold, args...)
-    return ManifoldsBase.merge_traits(ManifoldsBase.IsEmbeddedSubmanifold())
+function ManifoldsBase.get_embedding_type(::HalfPlaneManifold)
+    return ManifoldsBase.EmbeddedSubmanifoldType()
 end
-function ManifoldsBase.active_traits(f, ::PosQuadrantManifold, args...)
-    return ManifoldsBase.merge_traits(ManifoldsBase.IsEmbeddedSubmanifold())
+function ManifoldsBase.get_embedding_type(::PosQuadrantManifold)
+    return ManifoldsBase.EmbeddedSubmanifoldType()
 end
 
 #
@@ -78,9 +78,6 @@ function ManifoldsBase.decorated_manifold(::AnotherHalfPlaneManifold)
 end
 ManifoldsBase.representation_size(::AnotherHalfPlaneManifold) = (2,)
 
-function ManifoldsBase.active_traits(f, ::AnotherHalfPlaneManifold, args...)
-    return ManifoldsBase.merge_traits(ManifoldsBase.IsIsometricEmbeddedManifold())
-end
 function ManifoldsBase.get_embedding_type(::AnotherHalfPlaneManifold)
     return ManifoldsBase.IsometricallyEmbeddedManifoldType()
 end
@@ -165,9 +162,7 @@ end
 function ManifoldsBase.decorated_manifold(::NotImplementedEmbeddedSubManifold)
     return ManifoldsBase.DefaultManifold(2)
 end
-function ManifoldsBase.active_traits(f, ::NotImplementedEmbeddedSubManifold, args...)
-    return ManifoldsBase.merge_traits(ManifoldsBase.IsEmbeddedSubmanifold())
-end
+
 function ManifoldsBase.get_embedding_type(::NotImplementedEmbeddedSubManifold)
     return ManifoldsBase.EmbeddedSubmanifoldType()
 end
@@ -176,9 +171,6 @@ end
 # A manifold that is isometrically embedded but has no implementations
 #
 struct NotImplementedIsometricEmbeddedManifold <: AbstractDecoratorManifold{ℝ} end
-function ManifoldsBase.active_traits(f, ::NotImplementedIsometricEmbeddedManifold, args...)
-    return ManifoldsBase.merge_traits(ManifoldsBase.IsIsometricEmbeddedManifold())
-end
 function ManifoldsBase.get_embedding_type(::NotImplementedIsometricEmbeddedManifold)
     return ManifoldsBase.IsometricallyEmbeddedManifoldType()
 end
