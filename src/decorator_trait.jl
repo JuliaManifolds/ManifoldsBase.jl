@@ -5,7 +5,7 @@ manifold_dimension(M::AbstractDecoratorManifold) = manifold_dimension(base_manif
 
 #
 # Traits - each passed to a function that is properly documented
-#
+# TODO: Remove once unused
 
 """
     IsIsometricManifoldEmbeddedManifold <: AbstractTrait
@@ -58,7 +58,7 @@ A property of an embedded manifold that indicates that `embed` and `project` are
 struct EmbeddedForwardingType <: AbstractForwardingType end
 
 """
-    EmbeddedForwardingType <: AbstractForwardingType
+    EmbeddedSimpleForwardingType <: AbstractForwardingType
 
 A property of an embedded manifold that indicates that `embed` and `project` are available,
 although not needed to propagate a function to the embedding.
@@ -184,12 +184,6 @@ A unique or default representation might also just be an `AbstractArray`.
 """
 get_embedding(M::AbstractDecoratorManifold, p) = get_embedding(M)
 
-#
-# -----------------------------------------------------------------------------------------
-# This is one new function
-
-# Introduction and default fallbacks could become a macro?
-# Introduce trait
 @inline function allocate_result(
     M::AbstractDecoratorManifold,
     f::TF,
@@ -279,11 +273,9 @@ end
     p,
 )
 
-@trait_function check_size(M::AbstractDecoratorManifold, p)
-
-# Embedded
-function check_size_embedding(M::AbstractDecoratorManifold, p)
-    mpe = check_size(get_embedding(M, p), embed(M, p))
+@new_trait_function check_size(M::AbstractDecoratorManifold, p)
+function check_size_forwarding(::EmbeddedForwardingType, M::AbstractDecoratorManifold, p)
+    mpe = check_size(get_embedding(M, p), p)
     if mpe !== nothing
         return ManifoldDomainError(
             "$p is not a point on $M because it is not a valid point in its embedding.",
@@ -292,11 +284,10 @@ function check_size_embedding(M::AbstractDecoratorManifold, p)
     end
     return nothing
 end
-# Introduce Deco Trait | automatic forward | fallback
-@trait_function check_size(M::AbstractDecoratorManifold, p, X)
-# Embedded
-function check_size_embedding(M::AbstractDecoratorManifold, p, X)
-    mpe = check_size(get_embedding(M, p), embed(M, p), embed(M, p, X))
+
+@new_trait_function check_size(M::AbstractDecoratorManifold, p, X)
+function _check_size_forwarding(::EmbeddedForwardingType, M::AbstractDecoratorManifold, p, X)
+    mpe = check_size(get_embedding(M, p), p, X)
     if mpe !== nothing
         return ManifoldDomainError(
             "$X is not a tangent vector at $p on $M because it is not a valid tangent vector in its embedding.",
@@ -469,16 +460,10 @@ function _inverse_retract!_forwarding(
     return inverse_retract!(get_embedding(M, p), X, embed(M, p), embed(M, q), m)
 end
 
-@trait_function isapprox(M::AbstractDecoratorManifold, p, q; kwargs...)
-@trait_function isapprox(M::AbstractDecoratorManifold, p, X, Y; kwargs...)
+@new_trait_function is_point(M::AbstractDecoratorManifold, p; kwargs...)
 
-@trait_function is_flat(M::AbstractDecoratorManifold)
-
-# Introduce Deco Trait | automatic forward | fallback
-@trait_function is_point(M::AbstractDecoratorManifold, p; kwargs...)
-
-# Embedded
-function is_point_embedding(
+function _is_point_forwarding(
+    ::EmbeddedForwardingType,
     M::AbstractDecoratorManifold,
     p;
     error::Symbol = :none,
@@ -503,7 +488,7 @@ function is_point_embedding(
                 e,
             )
         end
-        throw(e) #an error occurred that we do not handle ourselves -> rethrow.
+        throw(e) #an error occured that we do not handle ourselves -> rethrow.
     end
     mpe = check_point(M, p; kwargs...)
     if mpe !== nothing
@@ -519,11 +504,10 @@ function is_point_embedding(
     return true
 end
 
-# Introduce Deco Trait | automatic forward | fallback
-@trait_function is_vector(M::AbstractDecoratorManifold, p, X, cbp::Bool = true; kwargs...)
-# EmbeddedManifold
-# I am not yet sure how to properly document this embedding behaviour here in a docstring.
-function is_vector_embedding(
+@new_trait_function is_vector(M::AbstractDecoratorManifold, p, X, check_base_point::Bool=true; kwargs...)
+
+function _is_vector_forwarding(
+    ::EmbeddedForwardingType,
     M::AbstractDecoratorManifold,
     p,
     X,
@@ -587,6 +571,11 @@ function is_vector_embedding(
     (error === :warn) && @warn s
     return false
 end
+
+@trait_function isapprox(M::AbstractDecoratorManifold, p, q; kwargs...)
+@trait_function isapprox(M::AbstractDecoratorManifold, p, X, Y; kwargs...)
+
+@trait_function is_flat(M::AbstractDecoratorManifold)
 
 @new_trait_function norm(M::AbstractDecoratorManifold, p, X)
 
