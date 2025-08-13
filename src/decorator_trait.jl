@@ -997,6 +997,8 @@ const topological_functions = [
     check_size,
     inverse_retract,
     inverse_retract!,
+    is_point,
+    is_vector,
     retract,
     retract!,
     retract_fused,
@@ -1024,6 +1026,13 @@ for tf in topological_functions
             ::typeof($tf),
         )
             return EmbeddedSimpleForwardingType()
+        end
+        function get_forwarding_type_embedding(
+            ::EmbeddedManifoldType,
+            M::AbstractDecoratorManifold,
+            ::typeof($tf),
+        )
+            return EmbeddedForwardingType()
         end
     end
 end
