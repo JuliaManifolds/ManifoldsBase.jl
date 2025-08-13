@@ -465,10 +465,12 @@ function _inverse_retract!_forwarding(
     return inverse_retract!(get_embedding(M, p), X, embed(M, p), embed(M, q), m)
 end
 
-@new_trait_function is_point(M::AbstractDecoratorManifold, p; kwargs...)
+@new_trait_function is_point(M::AbstractDecoratorManifold, p; kwargs...) (
+    StopForwardingType,
+)
 
 function _is_point_forwarding(
-    T::Union{EmbeddedForwardingType, EmbeddedSimpleForwardingType},
+    T::Union{EmbeddedForwardingType,EmbeddedSimpleForwardingType},
     M::AbstractDecoratorManifold,
     p;
     error::Symbol = :none,
@@ -519,10 +521,10 @@ end
     X,
     check_base_point::Bool = true;
     kwargs...,
-)
+) (StopForwardingType,)
 
 function _is_vector_forwarding(
-    T::Union{EmbeddedForwardingType, EmbeddedSimpleForwardingType},
+    T::Union{EmbeddedForwardingType,EmbeddedSimpleForwardingType},
     M::AbstractDecoratorManifold,
     p,
     X,

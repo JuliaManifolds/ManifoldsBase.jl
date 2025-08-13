@@ -359,7 +359,15 @@ macro trait_function(sig, opts = :(), manifold_arg_no = 1)
     return esc(block)
 end
 
-macro new_trait_function(sig, opts = :(), manifold_arg_no = 1)
+macro new_trait_function(
+    sig,
+    include_forwards = :((
+        EmbeddedSimpleForwardingType,
+        SimpleForwardingType,
+        StopForwardingType,
+    )),
+    manifold_arg_no = 1,
+)
     parts = ManifoldsBase._split_signature(sig)
     kwargs_list = parts[:kwargs_list]
     callargs = parts[:callargs]
@@ -380,54 +388,67 @@ macro new_trait_function(sig, opts = :(), manifold_arg_no = 1)
                 $(kwargs_call...),
             )
         end
-
-        @inline function ($fname_fwd)(
-            ::ManifoldsBase.EmbeddedSimpleForwardingType,
-            $(callargs...);
-            $(kwargs_list...),
-        ) where {$(where_exprs...)}
-            M = $(argnames[manifold_arg_no])
-            return ($fname)(
-                $(argnames[1:(manifold_arg_no - 1)]...),
-                get_embedding(M, p),
-                $(argnames[(manifold_arg_no + 1):end]...);
-                $(kwargs_call...),
-            )
-        end
-
-        @inline function ($fname_fwd)(
-            ::ManifoldsBase.SimpleForwardingType,
-            $(callargs...);
-            $(kwargs_list...),
-        ) where {$(where_exprs...)}
-            M = $(argnames[manifold_arg_no])
-            return ($fname)(
-                $(argnames[1:(manifold_arg_no - 1)]...),
-                decorated_manifold(M),
-                $(argnames[(manifold_arg_no + 1):end]...);
-                $(kwargs_call...),
-            )
-        end
-
-        @inline function ($fname_fwd)(
-            ::ManifoldsBase.StopForwardingType,
-            $(callargs...);
-            $(kwargs_list...),
-        ) where {$(where_exprs...)}
-            M = $(argnames[manifold_arg_no])
-            return invoke(
-                $fname,
-                Tuple{
-                    $(argnametype_exprs[1:(manifold_arg_no - 1)]...),
-                    ManifoldsBase.AbstractManifold,
-                    $(argnametype_exprs[(manifold_arg_no + 1):end]...),
-                },
-                $(argnames[1:(manifold_arg_no - 1)]...),
-                M,
-                $(argnames[(manifold_arg_no + 1):end]...);
-                $(kwargs_call...),
-            )
+    end
+    if :EmbeddedSimpleForwardingType in include_forwards.args
+        block = quote
+            $block
+            @inline function ($fname_fwd)(
+                ::ManifoldsBase.EmbeddedSimpleForwardingType,
+                $(callargs...);
+                $(kwargs_list...),
+            ) where {$(where_exprs...)}
+                M = $(argnames[manifold_arg_no])
+                return ($fname)(
+                    $(argnames[1:(manifold_arg_no - 1)]...),
+                    get_embedding(M, p),
+                    $(argnames[(manifold_arg_no + 1):end]...);
+                    $(kwargs_call...),
+                )
+            end
         end
     end
+    if :SimpleForwardingType in include_forwards.args
+        block = quote
+            $block
+            @inline function ($fname_fwd)(
+                ::ManifoldsBase.SimpleForwardingType,
+                $(callargs...);
+                $(kwargs_list...),
+            ) where {$(where_exprs...)}
+                M = $(argnames[manifold_arg_no])
+                return ($fname)(
+                    $(argnames[1:(manifold_arg_no - 1)]...),
+                    decorated_manifold(M),
+                    $(argnames[(manifold_arg_no + 1):end]...);
+                    $(kwargs_call...),
+                )
+            end
+        end
+    end
+    if :StopForwardingType in include_forwards.args
+        block = quote
+            $block
+            @inline function ($fname_fwd)(
+                ::ManifoldsBase.StopForwardingType,
+                $(callargs...);
+                $(kwargs_list...),
+            ) where {$(where_exprs...)}
+                M = $(argnames[manifold_arg_no])
+                return invoke(
+                    $fname,
+                    Tuple{
+                        $(argnametype_exprs[1:(manifold_arg_no - 1)]...),
+                        ManifoldsBase.AbstractManifold,
+                        $(argnametype_exprs[(manifold_arg_no + 1):end]...),
+                    },
+                    $(argnames[1:(manifold_arg_no - 1)]...),
+                    M,
+                    $(argnames[(manifold_arg_no + 1):end]...);
+                    $(kwargs_call...),
+                )
+            end
+        end
+    end
+
     return esc(block)
 end
