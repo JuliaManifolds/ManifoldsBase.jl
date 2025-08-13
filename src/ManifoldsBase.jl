@@ -805,9 +805,6 @@ function is_point(
     return is_point(M, p; error = throw_error ? :error : :none, kwargs...)
 end
 function is_point(M::AbstractManifold, p; error::Symbol = :none, kwargs...)
-    if is_embedded_manifold(M)
-        return is_point_embedding(M, p; error = error, kwargs...)
-    end
     mps = check_size(M, p)
     if mps !== nothing
         (error === :error) && throw(mps)
@@ -888,9 +885,6 @@ function is_vector(
     error::Symbol = :none,
     kwargs...,
 )
-    if is_embedded_manifold(M)
-        return is_vector_embedding(M, p, X, check_base_point; error = error, kwargs...)
-    end
     if check_base_point
         # if error, is_point throws, otherwise if not a point return false
         !is_point(M, p; error = error, kwargs...) && return false
