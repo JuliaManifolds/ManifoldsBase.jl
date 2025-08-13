@@ -286,7 +286,12 @@ function check_size_forwarding(::EmbeddedForwardingType, M::AbstractDecoratorMan
 end
 
 @new_trait_function check_size(M::AbstractDecoratorManifold, p, X)
-function _check_size_forwarding(::EmbeddedForwardingType, M::AbstractDecoratorManifold, p, X)
+function _check_size_forwarding(
+    ::EmbeddedForwardingType,
+    M::AbstractDecoratorManifold,
+    p,
+    X,
+)
     mpe = check_size(get_embedding(M, p), p, X)
     if mpe !== nothing
         return ManifoldDomainError(
@@ -504,7 +509,13 @@ function _is_point_forwarding(
     return true
 end
 
-@new_trait_function is_vector(M::AbstractDecoratorManifold, p, X, check_base_point::Bool=true; kwargs...)
+@new_trait_function is_vector(
+    M::AbstractDecoratorManifold,
+    p,
+    X,
+    check_base_point::Bool = true;
+    kwargs...,
+)
 
 function _is_vector_forwarding(
     ::EmbeddedForwardingType,
