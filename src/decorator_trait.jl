@@ -818,13 +818,13 @@ function _rand!_forwarding(
 end
 
 # Introduce Deco Trait | automatic forward | fallback
-@trait_function representation_size(M::AbstractDecoratorManifold) (no_empty,)
-# Isometric Embedded submanifold
-function representation_size_embedding(M::AbstractDecoratorManifold)
+@new_trait_function representation_size(M::AbstractDecoratorManifold)
+
+function _representation_size_forwarding(
+    ::EmbeddedForwardingType,
+    M::AbstractDecoratorManifold,
+)
     return representation_size(get_embedding(M))
-end
-function representation_size(::EmptyTrait, M::AbstractDecoratorManifold)
-    return representation_size(decorated_manifold(M))
 end
 
 
@@ -1120,6 +1120,7 @@ const topological_functions = [
     is_vector,
     rand,
     rand!,
+    representation_size,
     retract,
     retract!,
     retract_fused,
@@ -1131,6 +1132,10 @@ const topological_functions = [
     zero_vector,
     zero_vector!,
 ]
+
+function get_forwarding_type(::AbstractDecoratorManifold, ::typeof(representation_size))
+    return SimpleForwardingType()
+end
 
 for tf in topological_functions
     @eval begin
