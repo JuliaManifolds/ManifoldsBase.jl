@@ -992,7 +992,20 @@ end
 
 @new_trait_function zero_vector!(M::AbstractDecoratorManifold, X, p)
 
-const metric_functions = [
+
+const forward_functions_embedded = [
+    copyto!,
+    check_size,
+    has_components,
+    isapprox,
+    representation_size,
+    zero_vector,
+    zero_vector!,
+]
+
+const forward_functions_isometric = [inner, norm]
+
+const forward_functions_submanifold = [
     change_metric,
     change_metric!,
     change_representer,
@@ -1005,18 +1018,26 @@ const metric_functions = [
     get_coordinates,
     get_vector,
     get_vectors,
-    inner,
     injectivity_radius,
+    inverse_retract,
+    inverse_retract!,
     is_flat,
     log,
     log!,
     mid_point,
-    norm,
     parallel_transport_direction,
     parallel_transport_direction!,
     parallel_transport_to,
     parallel_transport_to!,
+    retract,
+    retract!,
+    retract_fused,
+    retract_fused!,
     riemann_tensor,
+    vector_transport_direction,
+    vector_transport_direction!,
+    vector_transport_to,
+    vector_transport_to!,
     Weingarten,
     Weingarten!,
 ]
@@ -1029,15 +1050,28 @@ function get_forwarding_type(M::AbstractDecoratorManifold, f, p)
     return get_forwarding_type_embedding(get_embedding_type(M, p), M, f)
 end
 
+function get_forwarding_type(::AbstractDecoratorManifold, ::typeof(representation_size))
+    return SimpleForwardingType()
+end
+
 function get_forwarding_type_embedding(
-    ::Union{EmbeddedManifoldType,IsometricallyEmbeddedManifoldType,NotEmbeddedManifoldType},
+    ::Union{
+        EmbeddedManifoldType,
+        IsometricallyEmbeddedManifoldType,
+        NotEmbeddedManifoldType,
+        EmbeddedSubmanifoldType,
+    },
     M::AbstractDecoratorManifold,
     f,
 )
     return StopForwardingType()
 end
 
-for mf in metric_functions
+for mf in vcat(
+    forward_functions_submanifold,
+    forward_functions_isometric,
+    forward_functions_embedded,
+)
     @eval begin
         function get_forwarding_type_embedding(
             ::EmbeddedSubmanifoldType,
@@ -1046,6 +1080,11 @@ for mf in metric_functions
         )
             return EmbeddedSimpleForwardingType()
         end
+    end
+end
+
+for mf in vcat(forward_functions_isometric, forward_functions_embedded)
+    @eval begin
         function get_forwarding_type_embedding(
             ::IsometricallyEmbeddedManifoldType,
             M::AbstractDecoratorManifold,
@@ -1056,54 +1095,3 @@ for mf in metric_functions
     end
 end
 
-const topological_functions = [
-    check_point,
-    check_vector,
-    copyto!,
-    check_size,
-    has_components,
-    inverse_retract,
-    inverse_retract!,
-    isapprox,
-    is_point,
-    is_vector,
-    rand,
-    rand!,
-    representation_size,
-    retract,
-    retract!,
-    retract_fused,
-    retract_fused!,
-    vector_transport_direction,
-    vector_transport_direction!,
-    vector_transport_to,
-    vector_transport_to!,
-    zero_vector,
-    zero_vector!,
-]
-
-for tf in topological_functions
-    @eval begin
-        function get_forwarding_type_embedding(
-            ::EmbeddedSubmanifoldType,
-            M::AbstractDecoratorManifold,
-            ::typeof($tf),
-        )
-            return EmbeddedSimpleForwardingType()
-        end
-        function get_forwarding_type_embedding(
-            ::IsometricallyEmbeddedManifoldType,
-            M::AbstractDecoratorManifold,
-            ::typeof($tf),
-        )
-            return EmbeddedSimpleForwardingType()
-        end
-        function get_forwarding_type_embedding(
-            ::EmbeddedManifoldType,
-            M::AbstractDecoratorManifold,
-            ::typeof($tf),
-        )
-            return EmbeddedForwardingType()
-        end
-    end
-end

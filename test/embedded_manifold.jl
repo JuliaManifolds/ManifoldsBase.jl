@@ -327,11 +327,11 @@ end
         Xs = similar(X)
         @test embed_project!(M, Xs, p, X) == X
         @test project(M, pe, Xe) == X
-        # isometric passthrough
-        @test injectivity_radius(M) == Inf
-        @test injectivity_radius(M, p) == Inf
-        @test injectivity_radius(M, p, ExponentialRetraction()) == Inf
-        @test injectivity_radius(M, ExponentialRetraction()) == Inf
+        # injectivity_radius shouldn't pass through
+        @test_throws MethodError injectivity_radius(M)
+        @test_throws MethodError injectivity_radius(M, p)
+        @test_throws MethodError injectivity_radius(M, p, ExponentialRetraction())
+        @test_throws MethodError injectivity_radius(M, ExponentialRetraction())
 
         # test vector transports in the embedding
         m = EmbeddedVectorTransport(ParallelTransport())
