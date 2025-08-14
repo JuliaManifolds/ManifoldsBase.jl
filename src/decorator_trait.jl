@@ -794,7 +794,7 @@ end
 @new_trait_function representation_size(M::AbstractDecoratorManifold)
 
 function _representation_size_forwarding(
-    ::EmbeddedForwardingType,
+    ::Union{EmbeddedForwardingType,EmbeddedSimpleForwardingType},
     M::AbstractDecoratorManifold,
 )
     return representation_size(get_embedding(M))
@@ -1081,10 +1081,6 @@ const topological_functions = [
     zero_vector,
     zero_vector!,
 ]
-
-function get_forwarding_type(::AbstractDecoratorManifold, ::typeof(representation_size))
-    return SimpleForwardingType()
-end
 
 for tf in topological_functions
     @eval begin
