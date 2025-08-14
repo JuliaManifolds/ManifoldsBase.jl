@@ -483,7 +483,7 @@ end
 )
 
 function _is_point_forwarding(
-    T::Union{EmbeddedForwardingType,EmbeddedSimpleForwardingType},
+    T::Union{EmbeddedForwardingType,EmbeddedSimpleForwardingType, IsometricallyEmbeddedManifoldType},
     M::AbstractDecoratorManifold,
     p;
     error::Symbol = :none,
@@ -537,7 +537,7 @@ end
 ) (StopForwardingType, SimpleForwardingType)
 
 function _is_vector_forwarding(
-    T::Union{EmbeddedForwardingType,EmbeddedSimpleForwardingType},
+    T::Union{EmbeddedForwardingType,EmbeddedSimpleForwardingType, IsometricallyEmbeddedManifoldType},
     M::AbstractDecoratorManifold,
     p,
     X,
@@ -993,6 +993,8 @@ const forward_functions_embedded = [
     copyto!,
     check_size,
     has_components,
+    is_point,
+    is_vector,
     isapprox,
     representation_size,
     zero_vector,
