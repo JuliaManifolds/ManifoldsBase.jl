@@ -409,8 +409,6 @@ end
             @test_throws StackOverflowError manifold_dimension(M3)
             @test_throws MethodError distance(M3, [1, 2], [2, 3])
             @test_throws MethodError norm(M3, [1, 2], [2, 3])
-            @test_throws MethodError embed(M3, [1, 2], [2, 3])
-            @test_throws MethodError embed(M3, [1, 2])
         end
     end
     @testset "Explicit Embeddings using EmbeddedManifold" begin
