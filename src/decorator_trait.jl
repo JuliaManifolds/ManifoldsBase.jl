@@ -1094,4 +1094,3 @@ for mf in vcat(forward_functions_isometric, forward_functions_embedded)
         end
     end
 end
-
