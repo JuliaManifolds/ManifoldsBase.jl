@@ -312,20 +312,16 @@ end
 @new_trait_function copyto!(M::AbstractDecoratorManifold, Y, p, X)
 
 # Introduce Deco Trait | automatic forward | fallback
-@trait_function embed(M::AbstractDecoratorManifold, p)
-# EmbeddedManifold
+@new_trait_function embed(M::AbstractDecoratorManifold, p)
 
 # Introduce Deco Trait | automatic forward | fallback
-@trait_function embed!(M::AbstractDecoratorManifold, q, p)
-# EmbeddedManifold
+@new_trait_function embed!(M::AbstractDecoratorManifold, q, p)
 
 # Introduce Deco Trait | automatic forward | fallback
-@trait_function embed(M::AbstractDecoratorManifold, p, X)
-# EmbeddedManifold
+@new_trait_function embed(M::AbstractDecoratorManifold, p, X)
 
 # Introduce Deco Trait | automatic forward | fallback
-@trait_function embed!(M::AbstractDecoratorManifold, Y, p, X)
-# EmbeddedManifold
+@new_trait_function embed!(M::AbstractDecoratorManifold, Y, p, X)
 
 # Introduce Deco Trait | automatic forward | fallback
 
