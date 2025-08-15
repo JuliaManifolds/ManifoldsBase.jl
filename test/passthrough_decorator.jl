@@ -18,15 +18,8 @@ function ManifoldsBase.active_traits(f, ::AbstractRNG, ::PassthroughDecorator, :
     return merge_traits(PassthoughTrait())
 end
 
-function ManifoldsBase.log!(
-    ::TraitList{PassthoughTrait},
-    M::AbstractDecoratorManifold,
-    X,
-    p,
-    q,
-)
-    return log!(M.manifold, X, p, q)
-end
+ManifoldsBase.decorated_manifold(M::PassthroughDecorator) = M.manifold
+
 function ManifoldsBase.exp!(
     ::TraitList{PassthoughTrait},
     M::AbstractDecoratorManifold,
@@ -57,6 +50,10 @@ function ManifoldsBase.rand!(
     p,
 )
     return rand!(rng, M.manifold, p)
+end
+
+function ManifoldsBase.get_forwarding_type(::PassthroughDecorator, ::Any, p = nothing)
+    return ManifoldsBase.SimpleForwardingType()
 end
 
 @testset "PassthroughDecorator" begin
