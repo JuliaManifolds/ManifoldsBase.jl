@@ -694,7 +694,7 @@ Currently the following are supported
 Keyword arguments can be used to specify tolerances.
 """
 function isapprox(M::AbstractManifold, p, q; error::Symbol = :none, kwargs...)
-    if error === :none
+    if error === :none  # Shortcut to avoid error message allocation
         return _isapprox(M, p, q; kwargs...)
     else
         ma = check_approx(M, p, q; kwargs...)
@@ -733,7 +733,7 @@ By default these pieces of information are collected by calling [`check_approx`]
 Keyword arguments can be used to specify tolerances.
 """
 function isapprox(M::AbstractManifold, p, X, Y; error::Symbol = :none, kwargs...)
-    if error === :none
+    if error === :none # Shortcut to avoid error message allocation
         return _isapprox(M, p, X, Y; kwargs...)::Bool
     else
         mat = check_approx(M, p, X, Y; kwargs...)
