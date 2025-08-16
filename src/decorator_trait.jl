@@ -6,7 +6,20 @@ manifold_dimension(M::AbstractDecoratorManifold) = manifold_dimension(base_manif
 #
 # Forwarding types
 
+"""
+    AbstractForwardingType
+
+An abstract type to specify the forwarding behaviour of a function.
+"""
 abstract type AbstractForwardingType end
+
+"""
+    AbstractEmbeddedForwardingType
+
+An abstract type to specify the forwarding behaviour of a function whem it should forward
+to the embedding of a manifold.
+"""
+abstract type AbstractEmbeddedForwardingType <: AbstractForwardingType end
 
 """
     StopForwardingType <: AbstractForwardingType
@@ -24,19 +37,21 @@ A type that indicates forwarding to the wrapped manifold without any changes.
 struct SimpleForwardingType <: AbstractForwardingType end
 
 """
-    EmbeddedForwardingType <: AbstractForwardingType
+    EmbeddedForwardingType <: AbstractEmbeddedForwardingType
 
-A property of an embedded manifold that indicates that `embed` and `project` are available.
+A property of an embedded manifold that indicates that [`embed`](@ref) and [`project`](@ref) are available
+and that a function using this trait type forwards to the embedding using these.
 """
-struct EmbeddedForwardingType <: AbstractForwardingType end
+struct EmbeddedForwardingType <: AbstractEmbeddedForwardingType end
 
 """
-    EmbeddedSimpleForwardingType <: AbstractForwardingType
+    EmbeddedSimpleForwardingType <: AbstractEmbeddedForwardingType
 
-A property of an embedded manifold that indicates that `embed` and `project` are available,
-although not needed to propagate a function to the embedding.
+A property of an embedded manifold that indicates that a function should forward to the embedding,
+and even if [`embed`](@ref) and [`project`](@ref) are available, to not use these,
+since they are the identity, but calling them might allocate unnecessarily.
 """
-struct EmbeddedSimpleForwardingType <: AbstractForwardingType end
+struct EmbeddedSimpleForwardingType <: AbstractEmbeddedForwardingType end
 
 
 """
@@ -44,17 +59,23 @@ struct EmbeddedSimpleForwardingType <: AbstractForwardingType end
     get_forwarding_type(M::AbstractManifold, f, p)
 
 Get the type of forwarding to manifold wrapped by [`AbstractManifold`](@ref) `M`, for function `f`.
-The returned value is an object of a subtype of [`AbstractForwardingType`](@ref), either of:
-* [`StopForwardingType`](@ref) (default),
-* [`SimpleForwardingType`](@ref),
-* [`EmbeddedForwardingType`](@ref).
+The returned value is an object of a subtype of [`AbstractForwardingType`](@ref).
 
-Point `p` can be optionally specified if different point types correspond to different
-embeddings.
+Point `p` can be optionally specified if different point types correspond
+to different representations of the manifold and hence possibly different embeddings.
 """
 get_forwarding_type(::AbstractManifold, f) = StopForwardingType()
 get_forwarding_type(M::AbstractManifold, f, p) = get_forwarding_type(M, f)
 
+"""
+    AbstractEmbeddingType
+
+Within all [`AbstractEmbeddedForwardingType`](@ref)s this type is used to indicate different kinds of embeddings,
+for example the default fallback that [`NotEmbeddedManifoldType`](@ref) a manifold is not embedded,
+that is is embedded using [`EmbeddedManifoldType`](@ref) or even specifying further that it is
+isometrically embedded using [`IsometricallyEmbeddedManifoldType`](@ref) or as furthermore
+a submanifold using [`EmbeddedSubmanifoldType`](@ref).
+"""
 abstract type AbstractEmbeddingType end
 
 """
@@ -67,7 +88,7 @@ available.
 struct NotEmbeddedManifoldType <: AbstractEmbeddingType end
 
 """
-    EmbeddedManifold <: AbstractEmbeddingType
+    EmbeddedManifoldType <: AbstractEmbeddingType
 
 A property of an embedded manifold that indicates that `embed` and `project` are available.
 """
