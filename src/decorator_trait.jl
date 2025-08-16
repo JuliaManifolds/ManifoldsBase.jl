@@ -1089,18 +1089,6 @@ function get_forwarding_type_embedding(
     return StopForwardingType()
 end
 
-for mf in forward_functions_embedded
-    @eval begin
-        function get_forwarding_type_embedding(
-            ::EmbeddedManifoldType,
-            M::AbstractDecoratorManifold,
-            ::typeof($mf),
-        )
-            return EmbeddedForwardingType()
-        end
-    end
-end
-
 for mf in vcat(
     forward_functions_submanifold,
     forward_functions_isometric,
