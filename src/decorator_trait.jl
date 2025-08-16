@@ -1089,10 +1089,10 @@ function get_forwarding_type_embedding(
     return StopForwardingType()
 end
 
-for mf in vcat(forward_functions_embedded)
+for mf in forward_functions_embedded
     @eval begin
         function get_forwarding_type_embedding(
-            ::EmbeddedForwardingType,
+            ::EmbeddedManifoldType,
             M::AbstractDecoratorManifold,
             ::typeof($mf),
         )
