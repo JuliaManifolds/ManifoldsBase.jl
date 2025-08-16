@@ -786,7 +786,6 @@ function _rand!_forwarding(
     return rand!(rng, get_embedding(M, p), p; kwargs...)
 end
 
-# Introduce Deco Trait | automatic forward | fallback
 @new_trait_function representation_size(M::AbstractDecoratorManifold)
 
 function _representation_size_forwarding(
@@ -1046,10 +1045,6 @@ function get_forwarding_type(M::AbstractDecoratorManifold, f)
 end
 function get_forwarding_type(M::AbstractDecoratorManifold, f, p)
     return get_forwarding_type_embedding(get_embedding_type(M, p), M, f)
-end
-
-function get_forwarding_type(::AbstractDecoratorManifold, ::typeof(representation_size))
-    return SimpleForwardingType()
 end
 
 function get_forwarding_type_embedding(
