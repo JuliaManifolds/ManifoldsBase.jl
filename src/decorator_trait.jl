@@ -67,6 +67,12 @@ to different representations of the manifold and hence possibly different embedd
 get_forwarding_type(::AbstractManifold, f) = StopForwardingType()
 get_forwarding_type(M::AbstractManifold, f, p) = get_forwarding_type(M, f)
 
+
+abstract type AbstractEmbeddingNeed end
+
+struct NeedsEmbedding <: AbstractEmbeddingNeed end
+struct DoesntNeedEmbedding <: AbstractEmbeddingNeed end
+
 """
     AbstractEmbeddingType
 
@@ -84,7 +90,6 @@ abstract type AbstractEmbeddingType end
 A property of an embedded manifold that indicates that `embed` and `project` are *not*
 available.
 """
-
 struct NotEmbeddedManifoldType <: AbstractEmbeddingType end
 
 """
@@ -92,7 +97,11 @@ struct NotEmbeddedManifoldType <: AbstractEmbeddingType end
 
 A property of an embedded manifold that indicates that `embed` and `project` are available.
 """
-struct EmbeddedManifoldType <: AbstractEmbeddingType end
+struct EmbeddedManifoldType{EN<:AbstractEmbeddingNeed} <: AbstractEmbeddingType end
+
+function EmbeddedManifoldType(en::AbstractEmbeddingNeed = DoesntNeedEmbedding())
+    return EmbeddedManifoldType{typeof(en)}()
+end
 
 """
     IsometricallyEmbeddedManifold <: AbstractEmbeddingType
@@ -102,7 +111,13 @@ an isometrically embedded manifold.
 
 Here, additionally, metric related functions like [`inner`](@ref) and [`norm`](@ref) are passed to the embedding
 """
-struct IsometricallyEmbeddedManifoldType <: AbstractEmbeddingType end
+struct IsometricallyEmbeddedManifoldType{EN<:AbstractEmbeddingNeed} <: AbstractEmbeddingType end
+
+function IsometricallyEmbeddedManifoldType(
+    en::AbstractEmbeddingNeed = DoesntNeedEmbedding(),
+)
+    return IsometricallyEmbeddedManifoldType{typeof(en)}()
+end
 
 """
     EmbeddedSubmanifoldType <: AbstractEmbeddingType
@@ -115,7 +130,11 @@ In this property, additionally to the isometric embedded manifold, all retractio
 and vectors transports, especially [`exp`](@ref), [`log`](@ref), and [`parallel_transport_to`](@ref)
 are passed to the embedding.
 """
-struct EmbeddedSubmanifoldType <: AbstractEmbeddingType end
+struct EmbeddedSubmanifoldType{EN<:AbstractEmbeddingNeed} <: AbstractEmbeddingType end
+
+function EmbeddedSubmanifoldType(en::AbstractEmbeddingNeed = DoesntNeedEmbedding())
+    return EmbeddedSubmanifoldType{typeof(en)}()
+end
 
 """
     get_embedding_type(M::AbstractManifold)
@@ -331,6 +350,19 @@ end
 # Introduce Deco Trait | automatic forward | fallback
 @new_trait_function copyto!(M::AbstractDecoratorManifold, q, p)
 @new_trait_function copyto!(M::AbstractDecoratorManifold, Y, p, X)
+
+function _copyto!_forwarding(::EmbeddedForwardingType, M::AbstractDecoratorManifold, q, p)
+    return copyto!(get_embedding(M, p), q, p)
+end
+function _copyto!_forwarding(
+    ::EmbeddedForwardingType,
+    M::AbstractDecoratorManifold,
+    Y,
+    p,
+    X,
+)
+    return copyto!(get_embedding(M, p), Y, p, X)
+end
 
 # Introduce Deco Trait | automatic forward | fallback
 @new_trait_function embed(M::AbstractDecoratorManifold, p)
@@ -645,17 +677,30 @@ end
 @new_trait_function isapprox(M::AbstractDecoratorManifold, p, q; kwargs...)
 @new_trait_function isapprox(M::AbstractDecoratorManifold, p, X, Y; kwargs...)
 
-function _isapprox_forwarding(::EmbeddedForwardingType, M::AbstractDecoratorManifold, p, q)
-    return isapprox(get_embedding(M, p), embed(M, p), embed(M, p, q))
+function _isapprox_forwarding(
+    ::EmbeddedForwardingType,
+    M::AbstractDecoratorManifold,
+    p,
+    q;
+    kwargs...,
+)
+    return isapprox(get_embedding(M, p), embed(M, p), embed(M, q); kwargs...)
 end
 function _isapprox_forwarding(
     ::EmbeddedForwardingType,
     M::AbstractDecoratorManifold,
     p,
     X,
-    Y,
+    Y;
+    kwargs...,
 )
-    return isapprox(get_embedding(M, p), embed(M, p), embed(M, p, X), embed(M, p, Y))
+    return isapprox(
+        get_embedding(M, p),
+        embed(M, p),
+        embed(M, p, X),
+        embed(M, p, Y);
+        kwargs...,
+    )
 end
 
 @new_trait_function is_flat(M::AbstractDecoratorManifold)
@@ -1096,7 +1141,14 @@ for mf in vcat(
 )
     @eval begin
         function get_forwarding_type_embedding(
-            ::EmbeddedSubmanifoldType,
+            ::EmbeddedSubmanifoldType{NeedsEmbedding},
+            M::AbstractDecoratorManifold,
+            ::typeof($mf),
+        )
+            return EmbeddedForwardingType()
+        end
+        function get_forwarding_type_embedding(
+            ::EmbeddedSubmanifoldType{DoesntNeedEmbedding},
             M::AbstractDecoratorManifold,
             ::typeof($mf),
         )
@@ -1108,7 +1160,14 @@ end
 for mf in vcat(forward_functions_isometric, forward_functions_embedded)
     @eval begin
         function get_forwarding_type_embedding(
-            ::IsometricallyEmbeddedManifoldType,
+            ::IsometricallyEmbeddedManifoldType{NeedsEmbedding},
+            M::AbstractDecoratorManifold,
+            ::typeof($mf),
+        )
+            return EmbeddedForwardingType()
+        end
+        function get_forwarding_type_embedding(
+            ::IsometricallyEmbeddedManifoldType{DoesntNeedEmbedding},
             M::AbstractDecoratorManifold,
             ::typeof($mf),
         )
@@ -1120,7 +1179,14 @@ end
 for mf in forward_functions_embedded
     @eval begin
         function get_forwarding_type_embedding(
-            ::EmbeddedManifoldType,
+            ::EmbeddedManifoldType{NeedsEmbedding},
+            M::AbstractDecoratorManifold,
+            ::typeof($mf),
+        )
+            return EmbeddedForwardingType()
+        end
+        function get_forwarding_type_embedding(
+            ::EmbeddedManifoldType{DoesntNeedEmbedding},
             M::AbstractDecoratorManifold,
             ::typeof($mf),
         )
