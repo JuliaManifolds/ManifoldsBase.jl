@@ -415,24 +415,6 @@ function _exp_fused!_forwarding(
     return exp_fused!(get_embedding(M, p), q, embed(M, p), embed(M, p, X), t)
 end
 
-# Introduce Deco Trait | automatic forward | fallback
-@trait_function get_basis(M::AbstractDecoratorManifold, p, B::AbstractBasis)
-
-# Introduce Deco Trait | automatic forward | fallback
-@trait_function get_coordinates(M::AbstractDecoratorManifold, p, X, B::AbstractBasis)
-
-# Introduce Deco Trait | automatic forward | fallback
-@trait_function get_coordinates!(M::AbstractDecoratorManifold, Y, p, X, B::AbstractBasis)
-
-# Introduce Deco Trait | automatic forward | fallback
-@trait_function get_vector(M::AbstractDecoratorManifold, p, c, B::AbstractBasis)
-
-# Introduce Deco Trait | automatic forward | fallback
-@trait_function get_vector!(M::AbstractDecoratorManifold, Y, p, c, B::AbstractBasis)
-
-# Introduce Deco Trait | automatic forward | fallback
-@trait_function get_vectors(M::AbstractDecoratorManifold, p, B::AbstractBasis)
-
 @new_trait_function has_components(M::AbstractDecoratorManifold)
 
 function _has_components_forwarding(::EmbeddedForwardingType, M::AbstractDecoratorManifold)
