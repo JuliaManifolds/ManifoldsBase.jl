@@ -799,18 +799,6 @@ function _parallel_transport_to!_forwarding(
     )
 end
 
-# Introduce Deco Trait | automatic forward | fallback
-@trait_function project(M::AbstractDecoratorManifold, p)
-
-# Introduce Deco Trait | automatic forward | fallback
-@trait_function project!(M::AbstractDecoratorManifold, q, p)
-
-# Introduce Deco Trait | automatic forward | fallback
-@trait_function project(M::AbstractDecoratorManifold, p, X)
-
-# Introduce Deco Trait | automatic forward | fallback
-@trait_function project!(M::AbstractDecoratorManifold, Y, p, X)
-
 @new_trait_function Random.rand(M::AbstractDecoratorManifold; kwargs...)
 
 function _rand_forwarding(::EmbeddedForwardingType, M::AbstractDecoratorManifold; kwargs...)
