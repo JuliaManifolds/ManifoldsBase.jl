@@ -16,7 +16,7 @@ abstract type AbstractForwardingType end
 """
     AbstractEmbeddedForwardingType
 
-An abstract type to specify the forwarding behaviour of a function whem it should forward
+An abstract type to specify the forwarding behaviour of a function when it should forward
 to the embedding of a manifold.
 """
 abstract type AbstractEmbeddedForwardingType <: AbstractForwardingType end
@@ -1109,6 +1109,18 @@ for mf in vcat(forward_functions_isometric, forward_functions_embedded)
     @eval begin
         function get_forwarding_type_embedding(
             ::IsometricallyEmbeddedManifoldType,
+            M::AbstractDecoratorManifold,
+            ::typeof($mf),
+        )
+            return EmbeddedSimpleForwardingType()
+        end
+    end
+end
+
+for mf in forward_functions_embedded
+    @eval begin
+        function get_forwarding_type_embedding(
+            ::EmbeddedManifoldType,
             M::AbstractDecoratorManifold,
             ::typeof($mf),
         )
