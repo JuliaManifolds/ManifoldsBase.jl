@@ -51,15 +51,19 @@ end
     allocate(a)
     allocate(a, dims::Integer...)
     allocate(a, dims::Tuple)
+    allocate(a, ::Nothing)
     allocate(a, T::Type)
     allocate(a, T::Type, dims::Integer...)
     allocate(a, T::Type, dims::Tuple)
+    allocate(a, T::Type, ::Nothing)
     allocate(M::AbstractManifold, a)
     allocate(M::AbstractManifold, a, dims::Integer...)
     allocate(M::AbstractManifold, a, dims::Tuple)
+    allocate(M::AbstractManifold, a, ::Nothing)
     allocate(M::AbstractManifold, a, T::Type)
     allocate(M::AbstractManifold, a, T::Type, dims::Integer...)
     allocate(M::AbstractManifold, a, T::Type, dims::Tuple)
+    allocate(M::AbstractManifold, a, T::Type, ::Nothing)
 
 Allocate an object similar to `a`. It is similar to function `similar`, although
 instead of working only on the outermost layer of a nested structure, it maps recursively
@@ -71,12 +75,18 @@ allocation and is forwarded to the function `similar`.
 It's behavior can be overridden by a specific manifold, for example power manifold with
 nested replacing representation can decide that `allocate` for `Array{<:SArray}` returns
 another `Array{<:SArray}` instead of `Array{<:MArray}`, as would be done by default.
+
+If the last argument is `nothing`, it is ignored to support cases where
+`representation_size` is not defined and returns `nothing` but allocation can still go
+off of `a`.
 """
 allocate(a, args...)
 allocate(a) = similar(a)
+allocate(a, ::Nothing) = similar(a)
 allocate(a, dim1::Integer, dims::Integer...) = similar(a, dim1, dims...)
 allocate(a, dims::Tuple) = similar(a, dims)
 allocate(a, T::Type) = similar(a, T)
+allocate(a, T::Type, ::Nothing) = similar(a, T)
 allocate(::Number, T::Type) = fill(zero(T))
 allocate(a, T::Type, dim1::Integer, dims::Integer...) = similar(a, T, dim1, dims...)
 allocate(a, T::Type, dims::Tuple) = similar(a, T, dims)
@@ -86,11 +96,13 @@ allocate(a::NTuple{N,AbstractArray} where {N}) = map(allocate, a)
 allocate(a::NTuple{N,AbstractArray} where {N}, T::Type) = map(t -> allocate(t, T), a)
 
 allocate(::AbstractManifold, a) = allocate(a)
+allocate(::AbstractManifold, a, ::Nothing) = allocate(a)
 function allocate(::AbstractManifold, a, dim1::Integer, dims::Integer...)
     return allocate(a, dim1, dims...)
 end
 allocate(::AbstractManifold, a, dims::Tuple) = allocate(a, dims)
 allocate(::AbstractManifold, a, T::Type) = allocate(a, T)
+allocate(::AbstractManifold, a, T::Type, ::Nothing) = allocate(a, T)
 function allocate(::AbstractManifold, a, T::Type, dim1::Integer, dims::Integer...)
     return allocate(a, T, dim1, dims...)
 end
