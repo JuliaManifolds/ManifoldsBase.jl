@@ -656,19 +656,19 @@ function _is_vector_forwarding(
     return false
 end
 
-@new_trait_function isapprox(M::AbstractDecoratorManifold, p, q; kwargs...)
-@new_trait_function isapprox(M::AbstractDecoratorManifold, p, X, Y; kwargs...)
+@new_trait_function _isapprox(M::AbstractDecoratorManifold, p, q; kwargs...)
+@new_trait_function _isapprox(M::AbstractDecoratorManifold, p, X, Y; kwargs...)
 
-function _isapprox_forwarding(
+function __isapprox_forwarding(
     ::EmbeddedForwardingType,
     M::AbstractDecoratorManifold,
     p,
     q;
     kwargs...,
 )
-    return isapprox(get_embedding(M, p), embed(M, p), embed(M, q); kwargs...)
+    return _isapprox(get_embedding(M, p), embed(M, p), embed(M, q); kwargs...)
 end
-function _isapprox_forwarding(
+function __isapprox_forwarding(
     ::EmbeddedForwardingType,
     M::AbstractDecoratorManifold,
     p,
@@ -676,7 +676,7 @@ function _isapprox_forwarding(
     Y;
     kwargs...,
 )
-    return isapprox(
+    return _isapprox(
         get_embedding(M, p),
         embed(M, p),
         embed(M, p, X),
@@ -1038,7 +1038,7 @@ const forward_functions_embedded = [
     has_components,
     is_point,
     is_vector,
-    isapprox,
+    _isapprox,
     representation_size,
     zero_vector,
     zero_vector!,
