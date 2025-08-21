@@ -51,15 +51,19 @@ end
     allocate(a)
     allocate(a, dims::Integer...)
     allocate(a, dims::Tuple)
+    allocate(a, ::Nothing)
     allocate(a, T::Type)
     allocate(a, T::Type, dims::Integer...)
     allocate(a, T::Type, dims::Tuple)
+    allocate(a, T::Type, ::Nothing)
     allocate(M::AbstractManifold, a)
     allocate(M::AbstractManifold, a, dims::Integer...)
     allocate(M::AbstractManifold, a, dims::Tuple)
+    allocate(M::AbstractManifold, a, ::Nothing)
     allocate(M::AbstractManifold, a, T::Type)
     allocate(M::AbstractManifold, a, T::Type, dims::Integer...)
     allocate(M::AbstractManifold, a, T::Type, dims::Tuple)
+    allocate(M::AbstractManifold, a, T::Type, ::Nothing)
 
 Allocate an object similar to `a`. It is similar to function `similar`, although
 instead of working only on the outermost layer of a nested structure, it maps recursively
@@ -71,12 +75,18 @@ allocation and is forwarded to the function `similar`.
 It's behavior can be overridden by a specific manifold, for example power manifold with
 nested replacing representation can decide that `allocate` for `Array{<:SArray}` returns
 another `Array{<:SArray}` instead of `Array{<:MArray}`, as would be done by default.
+
+If the last argument is `nothing`, it is ignored to support cases where
+`representation_size` is not defined and returns `nothing` but allocation can still go
+off of `a`.
 """
 allocate(a, args...)
 allocate(a) = similar(a)
+allocate(a, ::Nothing) = similar(a)
 allocate(a, dim1::Integer, dims::Integer...) = similar(a, dim1, dims...)
 allocate(a, dims::Tuple) = similar(a, dims)
 allocate(a, T::Type) = similar(a, T)
+allocate(a, T::Type, ::Nothing) = similar(a, T)
 allocate(::Number, T::Type) = fill(zero(T))
 allocate(a, T::Type, dim1::Integer, dims::Integer...) = similar(a, T, dim1, dims...)
 allocate(a, T::Type, dims::Tuple) = similar(a, T, dims)
@@ -86,11 +96,13 @@ allocate(a::NTuple{N,AbstractArray} where {N}) = map(allocate, a)
 allocate(a::NTuple{N,AbstractArray} where {N}, T::Type) = map(t -> allocate(t, T), a)
 
 allocate(::AbstractManifold, a) = allocate(a)
+allocate(::AbstractManifold, a, ::Nothing) = allocate(a)
 function allocate(::AbstractManifold, a, dim1::Integer, dims::Integer...)
     return allocate(a, dim1, dims...)
 end
 allocate(::AbstractManifold, a, dims::Tuple) = allocate(a, dims)
 allocate(::AbstractManifold, a, T::Type) = allocate(a, T)
+allocate(::AbstractManifold, a, T::Type, ::Nothing) = allocate(a, T)
 function allocate(::AbstractManifold, a, T::Type, dim1::Integer, dims::Integer...)
     return allocate(a, T, dim1, dims...)
 end
@@ -491,7 +503,13 @@ The default is set in such a way that memory is allocated and `embed!(M, q, p)` 
 See also: [`EmbeddedManifold`](@ref), [`project`](@ref project(M::AbstractManifold,p))
 """
 function embed(M::AbstractManifold, p)
-    q = allocate_result(M, embed, p)
+    local q
+    try
+        q = allocate_result_embedding(M, embed, p)
+    catch e
+        # because we want `embed` to default to identity
+        q = allocate_result(M, embed, p)
+    end
     embed!(M, q, p)
     return q
 end
@@ -539,7 +557,13 @@ See also: [`EmbeddedManifold`](@ref), [`project`](@ref project(M::AbstractManifo
 """
 function embed(M::AbstractManifold, p, X)
     # the order of args switched, since the allocation by default takes the type of the first.
-    Y = allocate_result(M, embed, X, p)
+    local Y
+    try
+        Y = allocate_result_embedding(M, embed, X, p)
+    catch e
+        # because we want `embed` to default to identity
+        Y = allocate_result(M, embed, X, p)
+    end
     embed!(M, Y, p, X)
     return Y
 end
@@ -682,7 +706,7 @@ Currently the following are supported
 Keyword arguments can be used to specify tolerances.
 """
 function isapprox(M::AbstractManifold, p, q; error::Symbol = :none, kwargs...)
-    if error === :none
+    if error === :none  # Shortcut to avoid error message allocation
         return _isapprox(M, p, q; kwargs...)
     else
         ma = check_approx(M, p, q; kwargs...)
@@ -716,12 +740,12 @@ Currently the following are supported
 * `:warn` – prints the information in an `@warn`
 * `:none` (default) – the function just returns `true`/`false`
 
-By default these informations are collected by calling [`check_approx`](@ref).
+By default these pieces of information are collected by calling [`check_approx`](@ref).
 
 Keyword arguments can be used to specify tolerances.
 """
 function isapprox(M::AbstractManifold, p, X, Y; error::Symbol = :none, kwargs...)
-    if error === :none
+    if error === :none # Shortcut to avoid error message allocation
         return _isapprox(M, p, X, Y; kwargs...)::Bool
     else
         mat = check_approx(M, p, X, Y; kwargs...)
@@ -1230,7 +1254,7 @@ export VectorSpaceFiber
 export TangentSpace, TangentSpaceType
 export CotangentSpace, CotangentSpaceType
 export AbstractDecoratorManifold
-export AbstractTrait, IsEmbeddedManifold, IsEmbeddedSubmanifold, IsIsometricEmbeddedManifold
+export AbstractTrait
 export IsExplicitDecorator
 export ValidationManifold,
     ValidationMPoint, ValidationTangentVector, ValidationCotangentVector

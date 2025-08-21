@@ -727,6 +727,8 @@ function rand(M::ValidationManifold; vector_at = nothing, kwargs...)
     return pX
 end
 
+representation_size(M::ValidationManifold) = representation_size(M.manifold)
+
 function riemann_tensor(M::ValidationManifold, p, X, Y, Z; kwargs...)
     is_point(M, p; within = riemann_tensor, context = (:Input,), kwargs...)
     for W in (X, Y, Z)

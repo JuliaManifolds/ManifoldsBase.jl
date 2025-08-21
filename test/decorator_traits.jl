@@ -126,9 +126,9 @@ end
 
 # With even less, check that representation size stack overflows
 struct NonDecoratorNonManifold <: AbstractDecoratorManifold{ManifoldsBase.ℝ} end
-@testset "Testing a NonDecoratorNonManifold - emptytrait fallback Errors" begin
+@testset "Testing a NonDecoratorNonManifold - emptytrait fallback returns nothing" begin
     N = NonDecoratorNonManifold()
-    @test_throws StackOverflowError representation_size(N)
+    @test representation_size(N) === nothing
 end
 
 
