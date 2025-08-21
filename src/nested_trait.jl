@@ -379,9 +379,9 @@ macro new_trait_function(
 
     argnametype_exprs = [:(typeof($(argname))) for argname in argnames]
     gft = if :p in callargs
-        :(get_forwarding_type(M, $fname, p))
+        :(ManifoldsBase.get_forwarding_type(M, $fname, p))
     else
-        :(get_forwarding_type(M, $fname))
+        :(ManifoldsBase.get_forwarding_type(M, $fname))
     end
 
     ge = if :p in callargs
