@@ -201,8 +201,48 @@ get_embedding(M::AbstractDecoratorManifold, p) = get_embedding(M)
     f::TF,
     x::Vararg{Any,N},
 ) where {TF,N}
-    return allocate_result(trait(allocate_result, M, f, x...), M, f, x...)
+    return _allocate_result_forwarding(
+        get_forwarding_type(M, allocate_result, x[1]),
+        M,
+        f,
+        x...,
+    )
 end
+@inline function allocate_result(M::AbstractDecoratorManifold, f::TF) where {TF}
+    return _allocate_result_forwarding(get_forwarding_type(M, allocate_result), M, f)
+end
+
+@inline function _allocate_result_forwarding(
+    ::EmbeddedSimpleForwardingType,
+    M::AbstractDecoratorManifold,
+    f::TF,
+    x::Vararg{Any,N},
+) where {TF,N}
+    return allocate_result(get_embedding(M, x[1]), f, x...)
+end
+@inline function _allocate_result_forwarding(
+    ::SimpleForwardingType,
+    M::AbstractDecoratorManifold,
+    f::TF,
+    x::Vararg{Any,N},
+) where {TF,N}
+    return allocate_result(decorated_manifold(M), f, x...)
+end
+@inline function _allocate_result_forwarding(
+    ::StopForwardingType,
+    M::AbstractDecoratorManifold,
+    f::TF,
+    x::Vararg{Any,N},
+) where {TF,N}
+    return invoke(
+        allocate_result,
+        Tuple{AbstractManifold,typeof(f),typeof(x).parameters...},
+        M,
+        f,
+        x...,
+    )
+end
+
 # disambiguation
 @invoke_maker 1 AbstractManifold allocate_result(
     M::AbstractDecoratorManifold,
@@ -218,30 +258,6 @@ end
     c,
 )
 
-# Introduce fallback
-@inline function allocate_result(
-    ::EmptyTrait,
-    M::AbstractManifold,
-    f::TF,
-    x::Vararg{Any,N},
-) where {TF,N}
-    return invoke(
-        allocate_result,
-        Tuple{AbstractManifold,typeof(f),typeof(x).parameters...},
-        M,
-        f,
-        x...,
-    )
-end
-# Introduce automatic forward
-@inline function allocate_result(
-    t::TraitList,
-    M::AbstractManifold,
-    f::TF,
-    x::Vararg{Any,N},
-) where {TF,N}
-    return allocate_result(next_trait(t), M, f, x...)
-end
 function allocate_result_embedding(
     M::AbstractManifold,
     f::typeof(embed),
@@ -257,14 +273,6 @@ function allocate_result_embedding(
 ) where {N}
     T = allocate_result_type(M, f, x)
     return allocate(M, x[1], T, representation_size(M))
-end
-@inline function allocate_result(
-    ::TraitList{IsExplicitDecorator},
-    M::AbstractDecoratorManifold,
-    f::TF,
-    x::Vararg{Any,N},
-) where {TF,N}
-    return allocate_result(decorated_manifold(M), f, x...)
 end
 
 @new_trait_function change_metric(M::AbstractDecoratorManifold, G::AbstractMetric, X, p)
@@ -1029,8 +1037,20 @@ end
 
 @new_trait_function zero_vector(M::AbstractDecoratorManifold, p)
 
+function _zero_vector_forwarding(::EmbeddedForwardingType, M::AbstractDecoratorManifold, p)
+    return zero_vector(get_embedding(M, p), embed(M, p))
+end
+
 @new_trait_function zero_vector!(M::AbstractDecoratorManifold, X, p)
 
+function _zero_vector!_forwarding(
+    ::EmbeddedForwardingType,
+    M::AbstractDecoratorManifold,
+    X,
+    p,
+)
+    return zero_vector!(get_embedding(M, p), X, embed(M, p))
+end
 
 const forward_functions_embedded = [
     copyto!,
