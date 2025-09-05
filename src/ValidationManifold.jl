@@ -210,10 +210,6 @@ const ValidationCotangentVector = ValidationFibreVector{CotangentSpaceType}
 
 @eval @manifold_element_forwards ValidationMPoint value
 
-@inline function active_traits(f, ::ValidationManifold, ::Any...)
-    return merge_traits(IsExplicitDecorator())
-end
-
 """
     internal_value(p)
 

@@ -211,6 +211,7 @@ end
         @test base_manifold(M, Val(2)) == ManifoldsBase.DefaultManifold(2)
         @test get_embedding(M) == ManifoldsBase.DefaultManifold(3)
         @test get_embedding(M, [1, 2, 3]) == ManifoldsBase.DefaultManifold(3)
+        @test ManifoldsBase.is_embedded_manifold(M)
     end
 
     @testset "HalfPlaneManifold" begin
