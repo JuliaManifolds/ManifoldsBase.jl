@@ -973,47 +973,27 @@ function _vector_transport_direction!_forwarding(
 end
 
 @new_trait_function vector_transport_to(
-    M::AbstractDecoratorManifold,
-    p,
-    X,
-    q,
+    M::AbstractDecoratorManifold, p, X, q,
     m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
 )
 
 function _vector_transport_to_forwarding(
         ::EmbeddedForwardingType,
-        M::AbstractDecoratorManifold,
-        p,
-        X,
-        q,
-        m::AbstractVectorTransportMethod,
+        M::AbstractDecoratorManifold, p, X, q, m::AbstractVectorTransportMethod,
     )
     return vector_transport_to(
-        get_embedding(M, p),
-        embed(M, p),
-        embed(M, p, X),
-        embed(M, q),
-        m,
+        get_embedding(M, p), embed(M, p), embed(M, p, X), embed(M, q), m,
     )
 end
 
 @new_trait_function vector_transport_to!(
-    M::AbstractDecoratorManifold,
-    Y,
-    p,
-    X,
-    q,
+    M::AbstractDecoratorManifold, Y, p, X, q,
     m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
 )
 
 function _vector_transport_to!_forwarding(
         ::EmbeddedForwardingType,
-        M::AbstractDecoratorManifold,
-        Y,
-        p,
-        X,
-        q,
-        m::AbstractVectorTransportMethod,
+        M::AbstractDecoratorManifold, Y, p, X, q, m::AbstractVectorTransportMethod,
     )
     return vector_transport_to!(
         get_embedding(M, p),
@@ -1106,10 +1086,8 @@ end
 
 function get_forwarding_type_embedding(
         ::Union{
-            EmbeddedManifoldType,
-            IsometricallyEmbeddedManifoldType,
+            EmbeddedManifoldType, IsometricallyEmbeddedManifoldType, EmbeddedSubmanifoldType,
             NotEmbeddedManifoldType,
-            EmbeddedSubmanifoldType,
         },
         M::AbstractDecoratorManifold,
         f,
@@ -1125,15 +1103,13 @@ for mf in vcat(
     @eval begin
         function get_forwarding_type_embedding(
                 ::EmbeddedSubmanifoldType{NeedsEmbedding},
-                M::AbstractDecoratorManifold,
-                ::typeof($mf),
+                M::AbstractDecoratorManifold, ::typeof($mf),
             )
             return EmbeddedForwardingType()
         end
         function get_forwarding_type_embedding(
                 ::EmbeddedSubmanifoldType{DoesntNeedEmbedding},
-                M::AbstractDecoratorManifold,
-                ::typeof($mf),
+                M::AbstractDecoratorManifold, ::typeof($mf),
             )
             return EmbeddedSimpleForwardingType()
         end
@@ -1144,15 +1120,13 @@ for mf in vcat(forward_functions_isometric, forward_functions_embedded)
     @eval begin
         function get_forwarding_type_embedding(
                 ::IsometricallyEmbeddedManifoldType{NeedsEmbedding},
-                M::AbstractDecoratorManifold,
-                ::typeof($mf),
+                M::AbstractDecoratorManifold, ::typeof($mf),
             )
             return EmbeddedForwardingType()
         end
         function get_forwarding_type_embedding(
                 ::IsometricallyEmbeddedManifoldType{DoesntNeedEmbedding},
-                M::AbstractDecoratorManifold,
-                ::typeof($mf),
+                M::AbstractDecoratorManifold, ::typeof($mf),
             )
             return EmbeddedSimpleForwardingType()
         end
@@ -1163,15 +1137,13 @@ for mf in forward_functions_embedded
     @eval begin
         function get_forwarding_type_embedding(
                 ::EmbeddedManifoldType{NeedsEmbedding},
-                M::AbstractDecoratorManifold,
-                ::typeof($mf),
+                M::AbstractDecoratorManifold, ::typeof($mf),
             )
             return EmbeddedForwardingType()
         end
         function get_forwarding_type_embedding(
                 ::EmbeddedManifoldType{DoesntNeedEmbedding},
-                M::AbstractDecoratorManifold,
-                ::typeof($mf),
+                M::AbstractDecoratorManifold, ::typeof($mf),
             )
             return EmbeddedSimpleForwardingType()
         end

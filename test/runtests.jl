@@ -17,7 +17,6 @@ using ManifoldsBase
     end
 
     include("decorator_traits.jl")
-    include("passthrough_decorator.jl")
     include("allocation.jl")
     include("numbers.jl")
     include("bases.jl")
