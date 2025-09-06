@@ -1,34 +1,30 @@
-name: Format
+name: Runic formatting
 on:
   push:
-    branches: [master]
-    tags: [v*]
+    branches:
+      - 'master'
+      - 'release-'
+    tags:
+      - '*'
   pull_request:
-
 jobs:
-  format:
-    name: "Format Check"
+  runic:
+    name: Runic
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: julia-actions/setup-julia@v2
+      - uses: actions/checkout@v4
+      # - uses: julia-actions/setup-julia@v2
+      #   with:
+      #     version: '1'
+      # - uses: julia-actions/cache@v2
+      - uses: fredrikekre/runic-action@v1
         with:
-          version: "1.10"
-      - name: Install JuliaFormatter and format
-        run: |
-          julia  -e 'using Pkg; Pkg.add(PackageSpec(name="JuliaFormatter"))'
-          julia  -e 'using JuliaFormatter; format(".")'
-      - name: Check format
-        run: |
-          julia -e '
-          out = Cmd(`git diff --name-only`) |> read |> String
-          if out == ""
-              exit(0)
-          else
-              @error "The following files have not been formatted:"
-              write(stdout, out)
-              out_diff = Cmd(`git diff`) |> read |> String
-              @error "Diff:"
-              write(stdout, out_diff)
-              exit(1)
-          end'
+          version: '1'
+          format_files: true
+        # Fail on next step instead
+        continue-on-error: ${{ github.event_name == 'pull_request' }}
+      - uses: reviewdog/action-suggester@v1.22
+        if: github.event_name == 'pull_request'
+        with:
+          tool_name: Runic
+          fail_level: warning

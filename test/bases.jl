@@ -13,13 +13,13 @@ using ManifoldsBaseTestUtils
     @testset "Projected and arbitrary orthonormal basis" begin
         M = ProjManifold()
         x = [
-            sqrt(2)/2 0.0 0.0
-            0.0 sqrt(2)/2 0.0
+            sqrt(2) / 2 0.0 0.0
+            0.0 sqrt(2) / 2 0.0
         ]
 
         for pB in
             (ProjectedOrthonormalBasis(:svd), ProjectedOrthonormalBasis(:gram_schmidt))
-            if pB isa ProjectedOrthonormalBasis{:gram_schmidt,ℝ}
+            if pB isa ProjectedOrthonormalBasis{:gram_schmidt, ℝ}
                 pb = @test_logs (
                     :warn,
                     "Input vector 4 lies in the span of the previous ones.",
@@ -45,7 +45,7 @@ using ManifoldsBaseTestUtils
                 @test norm(M, x, get_vectors(M, x, pb)[i]) ≈ 1
                 for j in (i + 1):N
                     @test inner(M, x, get_vectors(M, x, pb)[i], get_vectors(M, x, pb)[j]) ≈
-                          0 atol = 1e-15
+                        0 atol = 1.0e-15
                 end
             end
         end
@@ -65,11 +65,13 @@ using ManifoldsBaseTestUtils
             tm = ProjectionTestManifold()
             bt = ProjectedOrthonormalBasis(:gram_schmidt)
             p = [sqrt(2) / 2, 0.0, sqrt(2) / 2, 0.0, 0.0]
-            @test_logs (:warn, "Input only has 5 vectors, but manifold dimension is 100.") (@test_throws ErrorException get_basis(
-                tm,
-                p,
-                bt,
-            ))
+            @test_logs (:warn, "Input only has 5 vectors, but manifold dimension is 100.") (
+                @test_throws ErrorException get_basis(
+                    tm,
+                    p,
+                    bt,
+                )
+            )
             b = @test_logs (
                 :warn,
                 "Input only has 5 vectors, but manifold dimension is 100.",
@@ -81,11 +83,13 @@ using ManifoldsBaseTestUtils
                 skip_linearly_dependent = true, #skips 3 and 5
             )
             @test length(get_vectors(tm, p, b)) == 3
-            @test_logs (:warn, "Input only has 1 vectors, but manifold dimension is 3.") (@test_throws ErrorException ManifoldsBase.gram_schmidt(
-                M,
-                p,
-                [V[1]],
-            ))
+            @test_logs (:warn, "Input only has 1 vectors, but manifold dimension is 3.") (
+                @test_throws ErrorException ManifoldsBase.gram_schmidt(
+                    M,
+                    p,
+                    [V[1]],
+                )
+            )
             @test_throws ErrorException ManifoldsBase.gram_schmidt(
                 M,
                 p,
@@ -119,27 +123,27 @@ using ManifoldsBaseTestUtils
         ) == "Cached basis of type NonBasis"
 
         @testset "Constructors" begin
-            @test DefaultBasis{ℂ,TangentSpaceType}() === DefaultBasis(ℂ)
-            @test DefaultOrthogonalBasis{ℂ,TangentSpaceType}() === DefaultOrthogonalBasis(ℂ)
-            @test DefaultOrthonormalBasis{ℂ,TangentSpaceType}() ===
-                  DefaultOrthonormalBasis(ℂ)
+            @test DefaultBasis{ℂ, TangentSpaceType}() === DefaultBasis(ℂ)
+            @test DefaultOrthogonalBasis{ℂ, TangentSpaceType}() === DefaultOrthogonalBasis(ℂ)
+            @test DefaultOrthonormalBasis{ℂ, TangentSpaceType}() ===
+                DefaultOrthonormalBasis(ℂ)
 
             @test DefaultBasis{ℂ}(CotangentSpaceType()) ===
-                  DefaultBasis(ℂ, CotangentSpaceType())
+                DefaultBasis(ℂ, CotangentSpaceType())
             @test DefaultOrthogonalBasis{ℂ}(CotangentSpaceType()) ===
-                  DefaultOrthogonalBasis(ℂ, CotangentSpaceType())
+                DefaultOrthogonalBasis(ℂ, CotangentSpaceType())
             @test DefaultOrthonormalBasis{ℂ}(CotangentSpaceType()) ===
-                  DefaultOrthonormalBasis(ℂ, CotangentSpaceType())
+                DefaultOrthonormalBasis(ℂ, CotangentSpaceType())
         end
 
         _pts = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
         @testset "basis representation" for BT in (
-                DefaultBasis,
-                DefaultOrthonormalBasis,
-                DefaultOrthogonalBasis,
-                DiagonalizingBasisProxy,
-            ),
-            pts in (_pts, map(NonBroadcastBasisThing, _pts))
+                    DefaultBasis,
+                    DefaultOrthonormalBasis,
+                    DefaultOrthogonalBasis,
+                    DiagonalizingBasisProxy,
+                ),
+                pts in (_pts, map(NonBroadcastBasisThing, _pts))
 
             if BT == DiagonalizingBasisProxy && pts !== _pts
                 continue
@@ -157,14 +161,14 @@ using ManifoldsBaseTestUtils
                 if pts[1] isa Array
                     @test isa(
                         b,
-                        CachedBasis{ℝ,BT{ℝ,TangentSpaceType},Vector{Vector{Float64}}},
+                        CachedBasis{ℝ, BT{ℝ, TangentSpaceType}, Vector{Vector{Float64}}},
                     )
                 else
                     @test isa(
                         b,
                         CachedBasis{
                             ℝ,
-                            BT{ℝ,TangentSpaceType},
+                            BT{ℝ, TangentSpaceType},
                             Vector{NonBroadcastBasisThing{Vector{Float64}}},
                         },
                     )
@@ -194,7 +198,7 @@ using ManifoldsBaseTestUtils
 
             if BT != DiagonalizingBasisProxy
                 @test get_coordinates(M, pts[1], X1, b) ≈
-                      get_coordinates(M, pts[1], X1, BT())
+                    get_coordinates(M, pts[1], X1, BT())
                 @test get_vector(M, pts[1], Xb, b) ≈ get_vector(M, pts[1], Xb, BT())
             end
 
@@ -220,7 +224,7 @@ using ManifoldsBaseTestUtils
             get_vector!(M, X1m, p, X1c)
             @test X1m == X1
             @test get_vectors(M, p) ==
-                  get_vectors(M, p, get_basis(M, p, DefaultOrthonormalBasis()))
+                get_vectors(M, p, get_basis(M, p, DefaultOrthonormalBasis()))
         end
         @testset "() Manifolds" begin
             M = ManifoldsBase.DefaultManifold()
@@ -261,19 +265,19 @@ using ManifoldsBaseTestUtils
         @test sprint(show, DefaultOrthonormalBasis()) == "DefaultOrthonormalBasis(ℝ)"
         @test sprint(show, DefaultOrthonormalBasis(ℂ)) == "DefaultOrthonormalBasis(ℂ)"
         @test sprint(show, GramSchmidtOrthonormalBasis(ℂ)) ==
-              "GramSchmidtOrthonormalBasis(ℂ)"
+            "GramSchmidtOrthonormalBasis(ℂ)"
         @test sprint(show, ProjectedOrthonormalBasis(:svd)) ==
-              "ProjectedOrthonormalBasis(:svd, ℝ)"
+            "ProjectedOrthonormalBasis(:svd, ℝ)"
         @test sprint(show, ProjectedOrthonormalBasis(:gram_schmidt, ℂ)) ==
-              "ProjectedOrthonormalBasis(:gram_schmidt, ℂ)"
+            "ProjectedOrthonormalBasis(:gram_schmidt, ℂ)"
 
         diag_onb = DiagonalizingOrthonormalBasis(Float64[1, 2, 3])
         @test sprint(show, "text/plain", diag_onb) == """
-        DiagonalizingOrthonormalBasis(ℝ) with eigenvalue 0 in direction:
-        3-element $(sprint(show, Vector{Float64})):
-          1.0
-          2.0
-          3.0"""
+            DiagonalizingOrthonormalBasis(ℝ) with eigenvalue 0 in direction:
+            3-element $(sprint(show, Vector{Float64})):
+              1.0
+              2.0
+              3.0"""
 
         M = DefaultManifold(2, 3)
         x = collect(reshape(1.0:6.0, (2, 3)))
@@ -307,47 +311,47 @@ using ManifoldsBaseTestUtils
         b = DiagonalizingOrthonormalBasis(get_vectors(M, x, pb)[1])
         dpb = CachedBasis(b, Float64[1, 2, 3, 4, 5, 6], get_vectors(M, x, pb))
         @test sprint(show, "text/plain", dpb) == """
-        DiagonalizingOrthonormalBasis(ℝ) with eigenvalue 0 in direction:
-         2×3 $(sprint(show, Matrix{Float64})):
-           1.0  0.0  0.0
-           0.0  0.0  0.0
-        and 6 basis vectors.
-        Basis vectors:
-         E1 =
-          2×3 $(sprint(show, Matrix{Float64})):
-           1.0  0.0  0.0
-           0.0  0.0  0.0
-         E2 =
-          2×3 $(sprint(show, Matrix{Float64})):
-           0.0  0.0  0.0
-           1.0  0.0  0.0
-         ⋮
-         E5 =
-          2×3 $(sprint(show, Matrix{Float64})):
-           0.0  0.0  1.0
-           0.0  0.0  0.0
-         E6 =
-          2×3 $(sprint(show, Matrix{Float64})):
-           0.0  0.0  0.0
-           0.0  0.0  1.0
-        Eigenvalues:
-         6-element $(sprint(show, Vector{Float64})):
-          1.0
-          2.0
-          3.0
-          4.0
-          5.0
-          6.0"""
+            DiagonalizingOrthonormalBasis(ℝ) with eigenvalue 0 in direction:
+             2×3 $(sprint(show, Matrix{Float64})):
+               1.0  0.0  0.0
+               0.0  0.0  0.0
+            and 6 basis vectors.
+            Basis vectors:
+             E1 =
+              2×3 $(sprint(show, Matrix{Float64})):
+               1.0  0.0  0.0
+               0.0  0.0  0.0
+             E2 =
+              2×3 $(sprint(show, Matrix{Float64})):
+               0.0  0.0  0.0
+               1.0  0.0  0.0
+             ⋮
+             E5 =
+              2×3 $(sprint(show, Matrix{Float64})):
+               0.0  0.0  1.0
+               0.0  0.0  0.0
+             E6 =
+              2×3 $(sprint(show, Matrix{Float64})):
+               0.0  0.0  0.0
+               0.0  0.0  1.0
+            Eigenvalues:
+             6-element $(sprint(show, Vector{Float64})):
+              1.0
+              2.0
+              3.0
+              4.0
+              5.0
+              6.0"""
 
         M = DefaultManifold(1, 1, 1)
         x = reshape(Float64[1], (1, 1, 1))
         pb = get_basis(M, x, DefaultOrthonormalBasis())
         @test sprint(show, "text/plain", pb) == """
-        Cached basis of type $(sprint(show, typeof(DefaultOrthonormalBasis()))) with 1 basis vector:
-         E1 =
-          1×1×1 $(sprint(show, Array{Float64,3})):
-          [:, :, 1] =
-           1.0"""
+            Cached basis of type $(sprint(show, typeof(DefaultOrthonormalBasis()))) with 1 basis vector:
+             E1 =
+              1×1×1 $(sprint(show, Array{Float64, 3})):
+              [:, :, 1] =
+               1.0"""
 
         dpb = CachedBasis(
             DiagonalizingOrthonormalBasis(get_vectors(M, x, pb)),
@@ -356,18 +360,18 @@ using ManifoldsBaseTestUtils
         )
 
         @test sprint(show, "text/plain", dpb) == """
-        DiagonalizingOrthonormalBasis(ℝ) with eigenvalue 0 in direction:
-         1-element $(sprint(show, Vector{Array{Float64,3}})):
-           $(sprint(show, dpb.data.frame_direction[1]))
-        and 1 basis vector.
-        Basis vectors:
-         E1 =
-          1×1×1 $(sprint(show, Array{Float64,3})):
-          [:, :, 1] =
-           1.0
-        Eigenvalues:
-         1-element $(sprint(show, Vector{Float64})):
-          1.0"""
+            DiagonalizingOrthonormalBasis(ℝ) with eigenvalue 0 in direction:
+             1-element $(sprint(show, Vector{Array{Float64, 3}})):
+               $(sprint(show, dpb.data.frame_direction[1]))
+            and 1 basis vector.
+            Basis vectors:
+             E1 =
+              1×1×1 $(sprint(show, Array{Float64, 3})):
+              [:, :, 1] =
+               1.0
+            Eigenvalues:
+             1-element $(sprint(show, Vector{Float64})):
+              1.0"""
     end
 
     @testset "Bases of cotangent spaces" begin

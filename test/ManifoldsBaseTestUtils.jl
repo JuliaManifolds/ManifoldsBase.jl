@@ -18,25 +18,25 @@ import Base: +, *, -
 #
 #
 # minimal implementation of the sphere – to test a few more involved Riemannian functions
-struct TestSphere{N,𝔽} <: AbstractManifold{𝔽} end
-TestSphere(N::Int, 𝔽 = ℝ) = TestSphere{N,𝔽}()
+struct TestSphere{N, 𝔽} <: AbstractManifold{𝔽} end
+TestSphere(N::Int, 𝔽 = ℝ) = TestSphere{N, 𝔽}()
 
 function ManifoldsBase.change_metric!(
-    M::TestSphere,
-    Y,
-    ::ManifoldsBase.EuclideanMetric,
-    p,
-    X,
-)
+        M::TestSphere,
+        Y,
+        ::ManifoldsBase.EuclideanMetric,
+        p,
+        X,
+    )
     return copyto!(M, Y, p, X)
 end
 function ManifoldsBase.change_representer!(
-    M::TestSphere,
-    Y,
-    ::ManifoldsBase.EuclideanMetric,
-    p,
-    X,
-)
+        M::TestSphere,
+        Y,
+        ::ManifoldsBase.EuclideanMetric,
+        p,
+        X,
+    )
     return copyto!(M, Y, p, X)
 end
 function ManifoldsBase.check_point(M::TestSphere, p; kwargs...)
@@ -71,10 +71,10 @@ function ManifoldsBase.exp_fused!(::TestSphere, q, p, X, t::Number)
     return q
 end
 function ManifoldsBase.get_basis_diagonalizing(
-    M::TestSphere{n},
-    p,
-    B::DiagonalizingOrthonormalBasis{ℝ},
-) where {n}
+        M::TestSphere{n},
+        p,
+        B::DiagonalizingOrthonormalBasis{ℝ},
+    ) where {n}
     A = zeros(n + 1, n + 1)
     A[1, :] = transpose(p)
     A[2, :] = transpose(B.frame_direction)
@@ -152,12 +152,12 @@ function Random.rand!(M::TestSphere, pX; vector_at = nothing, σ = one(eltype(pX
     return rand!(Random.default_rng(), M, pX; vector_at = vector_at, σ = σ)
 end
 function Random.rand!(
-    rng::AbstractRNG,
-    M::TestSphere,
-    pX;
-    vector_at = nothing,
-    σ = one(eltype(pX)),
-)
+        rng::AbstractRNG,
+        M::TestSphere,
+        pX;
+        vector_at = nothing,
+        σ = one(eltype(pX)),
+    )
     if vector_at === nothing
         project!(M, pX, randn(rng, eltype(pX), representation_size(M)))
     else
@@ -251,7 +251,7 @@ ManifoldsBase.manifold_dimension(::ProjectionTestManifold) = 100
 #
 # Thre Non-Things to check for the correct errors in case functions are not implemented
 struct NonManifold <: AbstractManifold{ℝ} end
-struct NonBasis <: ManifoldsBase.AbstractBasis{ℝ,TangentSpaceType} end
+struct NonBasis <: ManifoldsBase.AbstractBasis{ℝ, TangentSpaceType} end
 struct NonMPoint <: AbstractManifoldPoint end
 struct NonTangentVector <: AbstractTangentVector end
 struct NonCotangentVector <: AbstractCotangentVector end
@@ -275,10 +275,10 @@ function ManifoldsBase.number_eltype(a::NonBroadcastBasisThing)
 end
 
 function ManifoldsBase.allocate_on(
-    M::AbstractManifold,
-    ::TangentSpaceType,
-    T::Type{<:NonBroadcastBasisThing},
-)
+        M::AbstractManifold,
+        ::TangentSpaceType,
+        T::Type{<:NonBroadcastBasisThing},
+    )
     return NonBroadcastBasisThing(similar(T.parameters[1], representation_size(M)))
 end
 
@@ -297,91 +297,91 @@ end
 
 
 function ManifoldsBase.log!(
-    ::DefaultManifold,
-    X::NonBroadcastBasisThing,
-    p::NonBroadcastBasisThing,
-    q::NonBroadcastBasisThing,
-)
+        ::DefaultManifold,
+        X::NonBroadcastBasisThing,
+        p::NonBroadcastBasisThing,
+        q::NonBroadcastBasisThing,
+    )
     return copyto!(X, q - p)
 end
 
 function ManifoldsBase.exp!(
-    ::DefaultManifold,
-    q::NonBroadcastBasisThing,
-    p::NonBroadcastBasisThing,
-    X::NonBroadcastBasisThing,
-)
+        ::DefaultManifold,
+        q::NonBroadcastBasisThing,
+        p::NonBroadcastBasisThing,
+        X::NonBroadcastBasisThing,
+    )
     return copyto!(q, p + X)
 end
 
 function ManifoldsBase.get_basis_orthonormal(
-    ::DefaultManifold{ℝ},
-    p::NonBroadcastBasisThing,
-    𝔽::RealNumbers,
-)
+        ::DefaultManifold{ℝ},
+        p::NonBroadcastBasisThing,
+        𝔽::RealNumbers,
+    )
     return CachedBasis(
         DefaultOrthonormalBasis(𝔽),
         [
             NonBroadcastBasisThing(ManifoldsBase._euclidean_basis_vector(p.v, i)) for
-            i in eachindex(p.v)
+                i in eachindex(p.v)
         ],
     )
 end
 function ManifoldsBase.get_basis_orthogonal(
-    ::DefaultManifold{ℝ},
-    p::NonBroadcastBasisThing,
-    𝔽::RealNumbers,
-)
+        ::DefaultManifold{ℝ},
+        p::NonBroadcastBasisThing,
+        𝔽::RealNumbers,
+    )
     return CachedBasis(
         DefaultOrthogonalBasis(𝔽),
         [
             NonBroadcastBasisThing(ManifoldsBase._euclidean_basis_vector(p.v, i)) for
-            i in eachindex(p.v)
+                i in eachindex(p.v)
         ],
     )
 end
 function ManifoldsBase.get_basis_default(
-    ::DefaultManifold{ℝ},
-    p::NonBroadcastBasisThing,
-    N::ManifoldsBase.RealNumbers,
-)
+        ::DefaultManifold{ℝ},
+        p::NonBroadcastBasisThing,
+        N::ManifoldsBase.RealNumbers,
+    )
     return CachedBasis(
         DefaultBasis(N),
         [
             NonBroadcastBasisThing(ManifoldsBase._euclidean_basis_vector(p.v, i)) for
-            i in eachindex(p.v)
+                i in eachindex(p.v)
         ],
     )
 end
 
 function ManifoldsBase.get_coordinates_orthonormal!(
-    M::DefaultManifold,
-    Y,
-    ::NonBroadcastBasisThing,
-    X::NonBroadcastBasisThing,
-    ::RealNumbers,
-)
+        M::DefaultManifold,
+        Y,
+        ::NonBroadcastBasisThing,
+        X::NonBroadcastBasisThing,
+        ::RealNumbers,
+    )
     copyto!(Y, reshape(X.v, manifold_dimension(M)))
     return Y
 end
 
 function ManifoldsBase.get_vector_orthonormal!(
-    M::DefaultManifold,
-    Y::NonBroadcastBasisThing,
-    ::NonBroadcastBasisThing,
-    X,
-    ::RealNumbers,
-)
+        M::DefaultManifold,
+        Y::NonBroadcastBasisThing,
+        ::NonBroadcastBasisThing,
+        X,
+        ::RealNumbers,
+    )
     copyto!(Y.v, reshape(X, representation_size(M)))
     return Y
 end
 
 function ManifoldsBase.inner(
-    ::DefaultManifold,
-    ::NonBroadcastBasisThing,
-    X::NonBroadcastBasisThing,
-    Y::NonBroadcastBasisThing,
-)
+        ::DefaultManifold,
+        ::NonBroadcastBasisThing,
+        X::NonBroadcastBasisThing,
+        Y::NonBroadcastBasisThing,
+    )
     return dot(X.v, Y.v)
 end
 
@@ -412,7 +412,7 @@ struct CustomDefinedRetraction <: ManifoldsBase.AbstractRetractionMethod end
 struct CustomUndefinedRetraction <: ManifoldsBase.AbstractRetractionMethod end
 struct CustomDefinedKeywordRetraction <: ManifoldsBase.AbstractRetractionMethod end
 struct CustomDefinedKeywordInverseRetraction <:
-       ManifoldsBase.AbstractInverseRetractionMethod end
+    ManifoldsBase.AbstractInverseRetractionMethod end
 struct CustomDefinedInverseRetraction <: ManifoldsBase.AbstractInverseRetractionMethod end
 
 struct DefaultPoint{T} <: AbstractManifoldPoint
@@ -433,17 +433,17 @@ function Base.fill!(X::DefaultTangentVector, x)
     return X
 end
 function ManifoldsBase.allocate_result_type(
-    ::DefaultManifold,
-    ::typeof(log),
-    ::Tuple{DefaultPoint,DefaultPoint},
-)
+        ::DefaultManifold,
+        ::typeof(log),
+        ::Tuple{DefaultPoint, DefaultPoint},
+    )
     return DefaultTangentVector
 end
 function ManifoldsBase.allocate_result_type(
-    ::DefaultManifold,
-    ::typeof(inverse_retract),
-    ::Tuple{DefaultPoint,DefaultPoint},
-)
+        ::DefaultManifold,
+        ::typeof(inverse_retract),
+        ::Tuple{DefaultPoint, DefaultPoint},
+    )
     return DefaultTangentVector
 end
 
@@ -459,64 +459,64 @@ function ManifoldsBase._injectivity_radius(::DefaultManifold, ::CustomDefinedRet
     return 10.0
 end
 function ManifoldsBase._retract!(
-    M::DefaultManifold,
-    q,
-    p,
-    X,
-    ::CustomDefinedKeywordRetraction;
-    kwargs...,
-)
+        M::DefaultManifold,
+        q,
+        p,
+        X,
+        ::CustomDefinedKeywordRetraction;
+        kwargs...,
+    )
     return retract_custom_kw!(M, q, p, X; kwargs...)
 end
 function ManifoldsBase._retract_fused!(
-    M::DefaultManifold,
-    q,
-    p,
-    X,
-    t::Number,
-    ::CustomDefinedKeywordRetraction;
-    kwargs...,
-)
+        M::DefaultManifold,
+        q,
+        p,
+        X,
+        t::Number,
+        ::CustomDefinedKeywordRetraction;
+        kwargs...,
+    )
     return retract_custom_kw_fused!(M, q, p, X, t; kwargs...)
 end
 function retract_custom_kw_fused!(
-    ::DefaultManifold,
-    q::DefaultPoint,
-    p::DefaultPoint,
-    X::DefaultTangentVector,
-    t::Number;
-    scale = 2.0,
-)
+        ::DefaultManifold,
+        q::DefaultPoint,
+        p::DefaultPoint,
+        X::DefaultTangentVector,
+        t::Number;
+        scale = 2.0,
+    )
     q.value .= scale .* p.value .+ t .* X.value
     return q
 end
 function retract_custom_kw!(
-    ::DefaultManifold,
-    q::DefaultPoint,
-    p::DefaultPoint,
-    X::DefaultTangentVector;
-    scale = 2.0,
-)
+        ::DefaultManifold,
+        q::DefaultPoint,
+        p::DefaultPoint,
+        X::DefaultTangentVector;
+        scale = 2.0,
+    )
     q.value .= scale .* p.value .+ X.value
     return q
 end
 function ManifoldsBase._inverse_retract!(
-    M::DefaultManifold,
-    X,
-    p,
-    q,
-    ::CustomDefinedKeywordInverseRetraction;
-    kwargs...,
-)
+        M::DefaultManifold,
+        X,
+        p,
+        q,
+        ::CustomDefinedKeywordInverseRetraction;
+        kwargs...,
+    )
     return inverse_retract_custom_kw!(M, X, p, q; kwargs...)
 end
 function inverse_retract_custom_kw!(
-    ::DefaultManifold,
-    X::DefaultTangentVector,
-    p::DefaultPoint,
-    q::DefaultPoint;
-    scale = 2.0,
-)
+        ::DefaultManifold,
+        X::DefaultTangentVector,
+        p::DefaultPoint,
+        q::DefaultPoint;
+        scale = 2.0,
+    )
     X.value .= q.value - scale * p.value
     return X
 end
@@ -524,34 +524,34 @@ end
 #
 # Test on layer 2 (omiting a layer 3, since we fully qualify all types here already)
 function ManifoldsBase._retract!(
-    ::DefaultManifold,
-    q::DefaultPoint,
-    p::DefaultPoint,
-    X::DefaultTangentVector,
-    ::CustomDefinedRetraction,
-)
+        ::DefaultManifold,
+        q::DefaultPoint,
+        p::DefaultPoint,
+        X::DefaultTangentVector,
+        ::CustomDefinedRetraction,
+    )
     q.value .= 2 .* p.value .+ X.value
     return q
 end
 function ManifoldsBase._retract_fused!(
-    ::DefaultManifold,
-    q::DefaultPoint,
-    p::DefaultPoint,
-    X::DefaultTangentVector,
-    t::Number,
-    ::CustomDefinedRetraction,
-)
+        ::DefaultManifold,
+        q::DefaultPoint,
+        p::DefaultPoint,
+        X::DefaultTangentVector,
+        t::Number,
+        ::CustomDefinedRetraction,
+    )
     q.value .= 2 .* p.value .+ t * X.value
     return q
 end
 
 function ManifoldsBase._inverse_retract!(
-    ::DefaultManifold,
-    X::DefaultTangentVector,
-    p::DefaultPoint,
-    q::DefaultPoint,
-    ::CustomDefinedInverseRetraction,
-)
+        ::DefaultManifold,
+        X::DefaultTangentVector,
+        p::DefaultPoint,
+        q::DefaultPoint,
+        ::CustomDefinedInverseRetraction,
+    )
     X.value .= q.value .- 2 .* p.value
     return X
 end
@@ -575,24 +575,24 @@ end
 ManifoldsBase.retract_qr!(::DefaultManifold, q, p, X) = (q .= p .+ X)
 ManifoldsBase.retract_qr_fused!(::DefaultManifold, q, p, X, t::Number) = (q .= p .+ t .* X)
 function ManifoldsBase.retract_exp_ode!(
-    ::DefaultManifold,
-    q,
-    p,
-    X,
-    m::AbstractRetractionMethod,
-    B::ManifoldsBase.AbstractBasis,
-)
+        ::DefaultManifold,
+        q,
+        p,
+        X,
+        m::AbstractRetractionMethod,
+        B::ManifoldsBase.AbstractBasis,
+    )
     return (q .= p .+ X)
 end
 function ManifoldsBase.retract_exp_ode_fused!(
-    ::DefaultManifold,
-    q,
-    p,
-    X,
-    t::Number,
-    m::AbstractRetractionMethod,
-    B::ManifoldsBase.AbstractBasis,
-)
+        ::DefaultManifold,
+        q,
+        p,
+        X,
+        t::Number,
+        m::AbstractRetractionMethod,
+        B::ManifoldsBase.AbstractBasis,
+    )
     return (q .= p .+ t .* X)
 end
 
@@ -600,26 +600,26 @@ function ManifoldsBase.retract_pade!(::DefaultManifold, q, p, X, m::PadeRetracti
     return (q .= p .+ X)
 end
 function ManifoldsBase.retract_pade_fused!(
-    ::DefaultManifold,
-    q,
-    p,
-    X,
-    t::Number,
-    m::PadeRetraction,
-)
+        ::DefaultManifold,
+        q,
+        p,
+        X,
+        t::Number,
+        m::PadeRetraction,
+    )
     return (q .= p .+ t .* X)
 end
 function ManifoldsBase.retract_sasaki!(::DefaultManifold, q, p, X, ::SasakiRetraction)
     return (q .= p .+ X)
 end
 function ManifoldsBase.retract_sasaki_fused!(
-    ::DefaultManifold,
-    q,
-    p,
-    X,
-    t::Number,
-    ::SasakiRetraction,
-)
+        ::DefaultManifold,
+        q,
+        p,
+        X,
+        t::Number,
+        ::SasakiRetraction,
+    )
     return (q .= p .+ t .* X)
 end
 function ManifoldsBase.retract_softmax!(::DefaultManifold, q, p, X)
@@ -634,12 +634,12 @@ ManifoldsBase.inverse_retract_project!(::DefaultManifold, Y, p, q) = (Y .= q .- 
 ManifoldsBase.inverse_retract_qr!(::DefaultManifold, Y, p, q) = (Y .= q .- p)
 ManifoldsBase.inverse_retract_softmax!(::DefaultManifold, Y, p, q) = (Y .= q .- p)
 function ManifoldsBase.inverse_retract_nlsolve!(
-    ::DefaultManifold,
-    Y,
-    p,
-    q,
-    m::NLSolveInverseRetraction,
-)
+        ::DefaultManifold,
+        Y,
+        p,
+        q,
+        m::NLSolveInverseRetraction,
+    )
     return (Y .= q .- p)
 end
 Base.getindex(x::MatrixVectorTransport, i) = x.m[:, i]
@@ -648,7 +648,7 @@ Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
 struct TestArrayRepresentation <: AbstractPowerRepresentation end
 
 const TestPowerManifoldMultidimensional =
-    AbstractPowerManifold{𝔽,<:AbstractManifold{𝔽},TestArrayRepresentation} where {𝔽}
+    AbstractPowerManifold{𝔽, <:AbstractManifold{𝔽}, TestArrayRepresentation} where {𝔽}
 
 export CustomDefinedInverseRetraction, CustomDefinedKeywordInverseRetraction
 export CustomDefinedKeywordRetraction, CustomDefinedRetraction, CustomUndefinedRetraction

@@ -12,13 +12,13 @@ using ManifoldsBaseTestUtils
     X = [2.0]
     Y = similar(X)
     for B in [
-        VeeOrthogonalBasis(),
-        DefaultBasis(),
-        DefaultOrthogonalBasis(),
-        DefaultOrthonormalBasis(),
-        DiagonalizingOrthonormalBasis(X),
-        CachedBasis(DefaultBasis(), X),
-    ]
+            VeeOrthogonalBasis(),
+            DefaultBasis(),
+            DefaultOrthogonalBasis(),
+            DefaultOrthonormalBasis(),
+            DiagonalizingOrthonormalBasis(X),
+            CachedBasis(DefaultBasis(), X),
+        ]
         if !(B isa CachedBasis)
             @test_throws MethodError get_basis(M, p, B)
             @test_throws MethodError get_vector(M, p, X, B)
@@ -35,16 +35,16 @@ using ManifoldsBaseTestUtils
     @test_throws MethodError inverse_retract!(M, Y, p, q)
     @test_throws ErrorException PadeInverseRetraction(0)
     for IR in [
-        CayleyInverseRetraction(),
-        EmbeddedInverseRetraction(ProjectionInverseRetraction()),
-        LogarithmicInverseRetraction(),
-        PadeInverseRetraction(2),
-        PolarInverseRetraction(),
-        ProjectionInverseRetraction(),
-        QRInverseRetraction(),
-        NLSolveInverseRetraction(ExponentialRetraction()),
-        SoftmaxInverseRetraction(),
-    ]
+            CayleyInverseRetraction(),
+            EmbeddedInverseRetraction(ProjectionInverseRetraction()),
+            LogarithmicInverseRetraction(),
+            PadeInverseRetraction(2),
+            PolarInverseRetraction(),
+            ProjectionInverseRetraction(),
+            QRInverseRetraction(),
+            NLSolveInverseRetraction(ExponentialRetraction()),
+            SoftmaxInverseRetraction(),
+        ]
         @test_throws MethodError inverse_retract(M, p, q, IR)
         @test_throws MethodError inverse_retract!(M, Y, p, q, IR)
     end
@@ -52,29 +52,29 @@ using ManifoldsBaseTestUtils
     @test_throws MethodError retract!(M, q, p, X)
     @test_throws ErrorException PadeRetraction(0)
     for R in [
-        CayleyRetraction(),
-        EmbeddedRetraction(ProjectionRetraction()),
-        ExponentialRetraction(),
-        ODEExponentialRetraction(ProjectionRetraction(), DefaultBasis()),
-        ODEExponentialRetraction(ProjectionRetraction()),
-        PadeRetraction(2),
-        PolarRetraction(),
-        ProjectionRetraction(),
-        QRRetraction(),
-        SoftmaxRetraction(),
-        CayleyRetraction(),
-        PadeRetraction(2),
-    ]
+            CayleyRetraction(),
+            EmbeddedRetraction(ProjectionRetraction()),
+            ExponentialRetraction(),
+            ODEExponentialRetraction(ProjectionRetraction(), DefaultBasis()),
+            ODEExponentialRetraction(ProjectionRetraction()),
+            PadeRetraction(2),
+            PolarRetraction(),
+            ProjectionRetraction(),
+            QRRetraction(),
+            SoftmaxRetraction(),
+            CayleyRetraction(),
+            PadeRetraction(2),
+        ]
         @test_throws MethodError retract(M, p, X, R)
         @test_throws MethodError ManifoldsBase.retract_fused(M, p, X, 1.0, R)
         @test_throws MethodError retract!(M, q, p, X, R)
         @test_throws MethodError ManifoldsBase.retract_fused!(M, q, p, X, 1.0, R)
     end
     for VT in [
-        DifferentiatedRetractionVectorTransport(ExponentialRetraction()),
-        ProjectionTransport(),
-        ParallelTransport(),
-    ]
+            DifferentiatedRetractionVectorTransport(ExponentialRetraction()),
+            ProjectionTransport(),
+            ParallelTransport(),
+        ]
         @test_throws MethodError vector_transport_direction(M, p, X, X, VT)
         @test_throws MethodError vector_transport_direction!(M, Y, p, X, X, VT)
         @test_throws MethodError vector_transport_to(M, p, X, q, VT)

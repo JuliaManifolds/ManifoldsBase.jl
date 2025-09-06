@@ -19,13 +19,13 @@ using Test
 
     # by default isapprox compares given points or vectors
     @test isapprox(M, [0], [0])
-    @test isapprox(M, [0], [0]; atol = 1e-6)
+    @test isapprox(M, [0], [0]; atol = 1.0e-6)
     @test !isapprox(M, [0], [1])
-    @test !isapprox(M, [0], [1]; atol = 1e-6)
+    @test !isapprox(M, [0], [1]; atol = 1.0e-6)
     @test isapprox(M, [0], [0], [0])
-    @test isapprox(M, [0], [0], [0]; atol = 1e-6)
+    @test isapprox(M, [0], [0], [0]; atol = 1.0e-6)
     @test !isapprox(M, [0], [0], [1])
-    @test !isapprox(M, [0], [0], [1]; atol = 1e-6)
+    @test !isapprox(M, [0], [0], [1]; atol = 1.0e-6)
 
     exp_retr = ManifoldsBase.ExponentialRetraction()
 
