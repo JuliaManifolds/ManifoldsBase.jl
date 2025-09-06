@@ -42,21 +42,21 @@ ManifoldsBase.project!(::HalfPlaneManifold, q, p) = (q .= [p[1] p[2] 0.0])
 ManifoldsBase.project!(::HalfPlaneManifold, Y, p, X) = (Y .= [X[1] X[2] 0.0])
 
 function ManifoldsBase.get_coordinates_orthonormal!(
-    ::HalfPlaneManifold,
-    Y,
-    p,
-    X,
-    ::ManifoldsBase.RealNumbers,
-)
+        ::HalfPlaneManifold,
+        Y,
+        p,
+        X,
+        ::ManifoldsBase.RealNumbers,
+    )
     return (Y .= [X[1], X[2]])
 end
 function ManifoldsBase.get_vector_orthonormal!(
-    ::HalfPlaneManifold,
-    Y,
-    p,
-    c,
-    ::ManifoldsBase.RealNumbers,
-)
+        ::HalfPlaneManifold,
+        Y,
+        p,
+        c,
+        ::ManifoldsBase.RealNumbers,
+    )
     return (Y .= [c[1] c[2] 0.0])
 end
 
@@ -98,10 +98,10 @@ end
 # Third example - explicitly mention an embedding.
 #
 function ManifoldsBase.embed!(
-    ::EmbeddedManifold{𝔽,DefaultManifold{𝔽,nL},DefaultManifold{𝔽2,mL}},
-    q,
-    p,
-) where {nL,mL,𝔽,𝔽2}
+        ::EmbeddedManifold{𝔽, DefaultManifold{𝔽, nL}, DefaultManifold{𝔽2, mL}},
+        q,
+        p,
+    ) where {nL, mL, 𝔽, 𝔽2}
     n = size(p)
     ln = length(n)
     m = size(q)
@@ -122,10 +122,10 @@ function ManifoldsBase.embed!(
 end
 
 function ManifoldsBase.project!(
-    ::EmbeddedManifold{𝔽,DefaultManifold{𝔽,nL},DefaultManifold{𝔽2,mL}},
-    q,
-    p,
-) where {nL,mL,𝔽,𝔽2}
+        ::EmbeddedManifold{𝔽, DefaultManifold{𝔽, nL}, DefaultManifold{𝔽2, mL}},
+        q,
+        p,
+    ) where {nL, mL, 𝔽, 𝔽2}
     n = size(p)
     ln = length(n)
     m = size(q)
@@ -197,7 +197,7 @@ end
             ManifoldsBase.DefaultManifold(3),
         )
         @test repr(M) ==
-              "EmbeddedManifold($(sprint(show, M.manifold)), $(sprint(show, M.embedding)))"
+            "EmbeddedManifold($(sprint(show, M.manifold)), $(sprint(show, M.embedding)))"
         @test base_manifold(M) == ManifoldsBase.DefaultManifold(2)
         @test base_manifold(M, Val(0)) == M
         @test base_manifold(M, Val(1)) == ManifoldsBase.DefaultManifold(2)

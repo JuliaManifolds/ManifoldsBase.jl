@@ -5,12 +5,12 @@ using ManifoldsBase
 import ManifoldsBase: find_best_slope_window
 
 function ManifoldsBase.find_best_slope_window(
-    X,
-    Y,
-    window = nothing;
-    slope::Real = 2.0,
-    slope_tol::Real = 0.1,
-)
+        X,
+        Y,
+        window = nothing;
+        slope::Real = 2.0,
+        slope_tol::Real = 0.1,
+    )
     n = length(X)
     if window !== nothing && (any(window .> n))
         error(

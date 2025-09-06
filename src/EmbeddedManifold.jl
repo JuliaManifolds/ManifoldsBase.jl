@@ -27,8 +27,8 @@ nor a submanifold.
 Generate the `EmbeddedManifold` of the [`AbstractManifold`](@ref) `M` into the
 [`AbstractManifold`](@ref) `N`.
 """
-struct EmbeddedManifold{𝔽,MT<:AbstractManifold{𝔽},NT<:AbstractManifold} <:
-       AbstractDecoratorManifold{𝔽}
+struct EmbeddedManifold{𝔽, MT <: AbstractManifold{𝔽}, NT <: AbstractManifold} <:
+    AbstractDecoratorManifold{𝔽}
     manifold::MT
     embedding::NT
 end
@@ -72,8 +72,7 @@ function project(M::EmbeddedManifold, p)
 end
 
 function show(
-    io::IO,
-    M::EmbeddedManifold{𝔽,MT,NT},
-) where {𝔽,MT<:AbstractManifold{𝔽},NT<:AbstractManifold}
+        io::IO, M::EmbeddedManifold{𝔽, MT, NT},
+    ) where {𝔽, MT <: AbstractManifold{𝔽}, NT <: AbstractManifold}
     return print(io, "EmbeddedManifold($(M.manifold), $(M.embedding))")
 end

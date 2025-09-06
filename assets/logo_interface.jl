@@ -76,29 +76,33 @@ p3 = γ3(1)
 #
 # Setup Axes
 if dark_mode
-    tp = @pgf Axis({
-        axis_lines = "none",
-        axis_equal,
-        view = "{135}{35}",
-        zmin = -0.05,
-        zmax = 1.0,
-        xmin = 0.0,
-        xmax = 1.0,
-        ymin = 0.0,
-        ymax = 1.0,
-    })
+    tp = @pgf Axis(
+        {
+            axis_lines = "none",
+            axis_equal,
+            view = "{135}{35}",
+            zmin = -0.05,
+            zmax = 1.0,
+            xmin = 0.0,
+            xmax = 1.0,
+            ymin = 0.0,
+            ymax = 1.0,
+        }
+    )
 else
-    tp = @pgf Axis({
-        axis_lines = "none",
-        axis_equal,
-        view = "{135}{35}",
-        zmin = -0.05,
-        zmax = 1.0,
-        xmin = 0.0,
-        xmax = 1.0,
-        ymin = 0.0,
-        ymax = 1.0,
-    })
+    tp = @pgf Axis(
+        {
+            axis_lines = "none",
+            axis_equal,
+            view = "{135}{35}",
+            zmin = -0.05,
+            zmax = 1.0,
+            xmin = 0.0,
+            xmax = 1.0,
+            ymin = 0.0,
+            ymax = 1.0,
+        }
+    )
 end
 rs = range(0, π / 5; length = 6)
 θs = range(0, 2π; length = 100)

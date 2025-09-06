@@ -1,4 +1,3 @@
-
 function parallel_transport_direction!(M::AbstractManifold, Y, p, X, d; kwargs...)
     return parallel_transport_to!(M, Y, p, X, exp(M, p, d); kwargs...)
 end

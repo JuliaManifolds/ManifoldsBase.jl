@@ -63,11 +63,11 @@ Generate the Validation manifold for `M` with the default values of `V`.
   The key here is the non-mutating function variant (if it exists). The contexts are thre same as in `ignore_contexts`.
 """
 struct ValidationManifold{
-    𝔽,
-    M<:AbstractManifold{𝔽},
-    D<:Dict{<:Function,<:Union{Symbol,<:AbstractVector{Symbol}}},
-    V<:AbstractVector{Symbol},
-} <: AbstractDecoratorManifold{𝔽}
+        𝔽,
+        M <: AbstractManifold{𝔽},
+        D <: Dict{<:Function, <:Union{Symbol, <:AbstractVector{Symbol}}},
+        V <: AbstractVector{Symbol},
+    } <: AbstractDecoratorManifold{𝔽}
     manifold::M
     mode::Symbol
     store_base_point::Bool
@@ -75,15 +75,15 @@ struct ValidationManifold{
     ignore_contexts::V
 end
 function ValidationManifold(
-    M::AbstractManifold;
-    error::Symbol = :error,
-    store_base_point::Bool = false,
-    ignore_functions::D = Dict{Function,Union{Symbol,<:Vector{Symbol}}}(),
-    ignore_contexts::V = Vector{Symbol}(),
-) where {
-    D<:Dict{<:Function,<:Union{Symbol,<:AbstractVector{Symbol}}},
-    V<:AbstractVector{Symbol},
-}
+        M::AbstractManifold;
+        error::Symbol = :error,
+        store_base_point::Bool = false,
+        ignore_functions::D = Dict{Function, Union{Symbol, <:Vector{Symbol}}}(),
+        ignore_contexts::V = Vector{Symbol}(),
+    ) where {
+        D <: Dict{<:Function, <:Union{Symbol, <:AbstractVector{Symbol}}},
+        V <: AbstractVector{Symbol},
+    }
     return ValidationManifold(M, error, store_base_point, ignore_functions, ignore_contexts)
 end
 function ValidationManifold(M::AbstractManifold, V::ValidationManifold; kwargs...)
@@ -131,7 +131,7 @@ function _vMc(M::ValidationManifold, f::Function, context::Symbol)
     !_vMc(M, nothing, context) && return false
     return true
 end
-function _vMc(M::ValidationManifold, f, contexts::NTuple{N,Symbol}) where {N}
+function _vMc(M::ValidationManifold, f, contexts::NTuple{N, Symbol}) where {N}
     for c in contexts
         !_vMc(M, f, c) && return false
     end
@@ -141,7 +141,7 @@ end
 # If a and b are symbols, equality is checked
 _vMc(a::Symbol, b::Symbol) = !(a === b)
 # If a is a vector multiple, then return false if b appears in a
-_vMc(a::Union{<:NTuple{N,Symbol} where {N},<:AbstractVector{Symbol}}, b::Symbol) = !(b ∈ a)
+_vMc(a::Union{<:NTuple{N, Symbol} where {N}, <:AbstractVector{Symbol}}, b::Symbol) = !(b ∈ a)
 
 """
     ValidationMPoint{P} <: AbstractManifoldPoint
@@ -180,12 +180,12 @@ The `TType` indicates the type of fibre, for example [`TangentSpaceType`](@ref) 
         ValidationFibreVector{TType}(value, point=nothing)
 
 """
-struct ValidationFibreVector{TType<:VectorSpaceType,V,P} <: AbstractFibreVector{TType}
+struct ValidationFibreVector{TType <: VectorSpaceType, V, P} <: AbstractFibreVector{TType}
     value::V
     point::P
 end
-function ValidationFibreVector{TType}(value::V, point::P = nothing) where {TType,V,P}
-    return ValidationFibreVector{TType,V,P}(value, point)
+function ValidationFibreVector{TType}(value::V, point::P = nothing) where {TType, V, P}
+    return ValidationFibreVector{TType, V, P}(value, point)
 end
 
 """
@@ -223,17 +223,17 @@ internal_value(X::ValidationFibreVector) = X.value
 
 _update_basepoint!(::ValidationManifold, X, p) = X
 function _update_basepoint!(
-    ::ValidationManifold,
-    X::ValidationTangentVector{P,Nothing},
-    p,
-) where {P}
+        ::ValidationManifold,
+        X::ValidationTangentVector{P, Nothing},
+        p,
+    ) where {P}
     return X
 end
 function _update_basepoint!(
-    M::ValidationManifold,
-    X::ValidationTangentVector{P,V},
-    p,
-) where {P,V}
+        M::ValidationManifold,
+        X::ValidationTangentVector{P, V},
+        p,
+    ) where {P, V}
     copyto!(M.manifold, X.point, p)
     return X
 end
@@ -246,12 +246,12 @@ end
 issue a message `str` according to the mode `mode` (as `@error`, `@warn`, `@info`).
 """
 function _msg(
-    M::ValidationManifold,
-    str;
-    error = M.mode,
-    within::Union{Nothing,<:Function} = nothing,
-    context::Union{NTuple{N,Symbol} where N} = NTuple{0,Symbol}(),
-)
+        M::ValidationManifold,
+        str;
+        error = M.mode,
+        within::Union{Nothing, <:Function} = nothing,
+        context::Union{NTuple{N, Symbol} where {N}} = NTuple{0, Symbol}(),
+    )
     !_vMc(M, within, context) && return nothing
     (error === :error) && (throw(ErrorException(str)))
     (error === :warn) && (@warn str)
@@ -259,12 +259,12 @@ function _msg(
     return nothing
 end
 function _msg(
-    M::ValidationManifold,
-    err::Union{DomainError,ArgumentError,ErrorException};
-    error = M.mode,
-    within::Union{Nothing,<:Function} = nothing,
-    context::Union{NTuple{N,Symbol} where N} = NTuple{0,Symbol}(),
-)
+        M::ValidationManifold,
+        err::Union{DomainError, ArgumentError, ErrorException};
+        error = M.mode,
+        within::Union{Nothing, <:Function} = nothing,
+        context::Union{NTuple{N, Symbol} where {N}} = NTuple{0, Symbol}(),
+    )
     !_vMc(M, within, context) && return nothing
     (error === :error) && (throw(err))
     (error === :warn) && (@warn "$err")
@@ -272,27 +272,27 @@ function _msg(
     return nothing
 end
 
-convert(::Type{M}, m::ValidationManifold{𝔽,M}) where {𝔽,M<:AbstractManifold{𝔽}} = m.manifold
-function convert(::Type{<:ValidationManifold{𝔽,M}}, m::M) where {𝔽,M<:AbstractManifold{𝔽}}
+convert(::Type{M}, m::ValidationManifold{𝔽, M}) where {𝔽, M <: AbstractManifold{𝔽}} = m.manifold
+function convert(::Type{<:ValidationManifold{𝔽, M}}, m::M) where {𝔽, M <: AbstractManifold{𝔽}}
     return ValidationManifold(m)
 end
 function convert(
-    ::Type{V},
-    p::ValidationMPoint{V},
-) where {V<:Union{AbstractArray,AbstractManifoldPoint}}
+        ::Type{V},
+        p::ValidationMPoint{V},
+    ) where {V <: Union{AbstractArray, AbstractManifoldPoint}}
     return p.value
 end
-function convert(::Type{ValidationMPoint{V}}, x::V) where {V<:AbstractArray}
+function convert(::Type{ValidationMPoint{V}}, x::V) where {V <: AbstractArray}
     return ValidationMPoint{V}(x)
 end
 
 function convert(
-    ::Type{V},
-    X::ValidationFibreVector{TType,V,Nothing},
-) where {TType,V<:Union{AbstractArray,AbstractFibreVector}}
+        ::Type{V},
+        X::ValidationFibreVector{TType, V, Nothing},
+    ) where {TType, V <: Union{AbstractArray, AbstractFibreVector}}
     return X.value
 end
-function convert(::Type{ValidationFibreVector{TType,V,Nothing}}, X::V) where {TType,V}
+function convert(::Type{ValidationFibreVector{TType, V, Nothing}}, X::V) where {TType, V}
     return ValidationFibreVector{TType}(X)
 end
 
@@ -303,12 +303,12 @@ function copyto!(M::ValidationManifold, q::ValidationMPoint, p::ValidationMPoint
     return q
 end
 function copyto!(
-    M::ValidationManifold,
-    Y::ValidationFibreVector{TType},
-    p::ValidationMPoint,
-    X::ValidationFibreVector{TType};
-    kwargs...,
-) where {TType}
+        M::ValidationManifold,
+        Y::ValidationFibreVector{TType},
+        p::ValidationMPoint,
+        X::ValidationFibreVector{TType};
+        kwargs...,
+    ) where {TType}
     is_point(M, p; within = copyto!, context = (:Input,), kwargs...)
     copyto!(M.manifold, Y.value, p.value, X.value)
     return p
@@ -439,13 +439,13 @@ function get_basis(M::ValidationManifold, p, B::AbstractBasis; kwargs...)
     return Ξ
 end
 function get_basis(
-    M::ValidationManifold,
-    p,
-    B::Union{AbstractOrthogonalBasis,CachedBasis{𝔽,<:AbstractOrthogonalBasis{𝔽}} where {𝔽}};
-    kwargs...,
-)
+        M::ValidationManifold,
+        p,
+        B::Union{AbstractOrthogonalBasis, CachedBasis{𝔽, <:AbstractOrthogonalBasis{𝔽}} where {𝔽}};
+        kwargs...,
+    )
     is_point(M, p; within = get_basis, context = (:Input,), kwargs...)
-    Ξ = invoke(get_basis, Tuple{ValidationManifold,Any,AbstractBasis}, M, p, B; kwargs...)
+    Ξ = invoke(get_basis, Tuple{ValidationManifold, Any, AbstractBasis}, M, p, B; kwargs...)
     bvectors = get_vectors(M, p, Ξ)
     N = length(bvectors)
     for i in 1:N
@@ -466,21 +466,21 @@ function get_basis(
     return Ξ
 end
 function get_basis(
-    M::ValidationManifold,
-    p,
-    B::Union{
-        AbstractOrthonormalBasis,
-        <:CachedBasis{𝔽,<:AbstractOrthonormalBasis{𝔽}} where {𝔽},
-    };
-    kwargs...,
-)
+        M::ValidationManifold,
+        p,
+        B::Union{
+            AbstractOrthonormalBasis,
+            <:CachedBasis{𝔽, <:AbstractOrthonormalBasis{𝔽}} where {𝔽},
+        };
+        kwargs...,
+    )
     is_point(M, p; within = get_basis, context = (:Input,), kwargs...)
     get_basis_invoke_types = Tuple{
         ValidationManifold,
         Any,
         Union{
             AbstractOrthogonalBasis,
-            CachedBasis{𝔽2,<:AbstractOrthogonalBasis{𝔽2}},
+            CachedBasis{𝔽2, <:AbstractOrthogonalBasis{𝔽2}},
         } where {𝔽2},
     }
     Ξ = invoke(get_basis, get_basis_invoke_types, M, p, B; kwargs...)
@@ -564,11 +564,11 @@ function injectivity_radius(M::ValidationManifold, p; kwargs...)
     return injectivity_radius(M.manifold, internal_value(p))
 end
 function injectivity_radius(
-    M::ValidationManifold,
-    p,
-    method::AbstractRetractionMethod;
-    kwargs...,
-)
+        M::ValidationManifold,
+        p,
+        method::AbstractRetractionMethod;
+        kwargs...,
+    )
     is_point(M, p; within = injectivity_radius, context = (:Input,), kwargs...)
     return injectivity_radius(M.manifold, internal_value(p), method)
 end
@@ -594,13 +594,13 @@ where two additional keywords can be used
 all other keywords are passed on.
 """
 function is_point(
-    M::ValidationManifold,
-    p;
-    error::Symbol = M.mode,
-    within::Union{Nothing,Function} = nothing,
-    context::NTuple{N,Symbol} where {N} = (),
-    kwargs...,
-)
+        M::ValidationManifold,
+        p;
+        error::Symbol = M.mode,
+        within::Union{Nothing, Function} = nothing,
+        context::NTuple{N, Symbol} where {N} = (),
+        kwargs...,
+    )
     !_vMc(M, within, (:Point, context...)) && return true
     return is_point(M.manifold, internal_value(p); error = error, kwargs...)
 end
@@ -619,15 +619,15 @@ where two additional keywords can be used
 all other keywords are passed on.
 """
 function is_vector(
-    M::ValidationManifold,
-    p,
-    X,
-    cbp::Bool = true;
-    error::Symbol = M.mode,
-    within::Union{Nothing,Function} = nothing,
-    context::NTuple{N,Symbol} where {N} = (),
-    kwargs...,
-)
+        M::ValidationManifold,
+        p,
+        X,
+        cbp::Bool = true;
+        error::Symbol = M.mode,
+        within::Union{Nothing, Function} = nothing,
+        context::NTuple{N, Symbol} where {N} = (),
+        kwargs...,
+    )
     !_vMc(M, within, (:Vector, context...)) && return true
     return is_vector(
         M.manifold,
@@ -700,7 +700,7 @@ function norm(M::ValidationManifold, p, X; kwargs...)
 end
 
 number_eltype(::Type{ValidationMPoint{V}}) where {V} = number_eltype(V)
-number_eltype(::Type{ValidationFibreVector{TType,V,P}}) where {TType,V,P} = number_eltype(V)
+number_eltype(::Type{ValidationFibreVector{TType, V, P}}) where {TType, V, P} = number_eltype(V)
 
 function project!(M::ValidationManifold, Y, p, X; kwargs...)
     is_point(M, p; within = project, context = (:Input,), kwargs...)
@@ -775,13 +775,13 @@ function show(io::IO, M::ValidationManifold)
 end
 
 function vector_transport_to(
-    M::ValidationManifold,
-    p,
-    X,
-    q,
-    m::AbstractVectorTransportMethod;
-    kwargs...,
-)
+        M::ValidationManifold,
+        p,
+        X,
+        q,
+        m::AbstractVectorTransportMethod;
+        kwargs...,
+    )
     is_point(M, q; within = vector_transport_to, context = (:Input,), kwargs...)
     is_vector(M, p, X; within = vector_transport_to, context = (:Input,), kwargs...)
     Y = vector_transport_to(
@@ -795,14 +795,14 @@ function vector_transport_to(
     return Y
 end
 function vector_transport_to!(
-    M::ValidationManifold,
-    Y,
-    p,
-    X,
-    q,
-    m::AbstractVectorTransportMethod;
-    kwargs...,
-)
+        M::ValidationManifold,
+        Y,
+        p,
+        X,
+        q,
+        m::AbstractVectorTransportMethod;
+        kwargs...,
+    )
     is_point(M, q; within = vector_transport_to, context = (:Input,), kwargs...)
     is_vector(M, p, X; within = vector_transport_to, context = (:Input,), kwargs...)
     vector_transport_to!(

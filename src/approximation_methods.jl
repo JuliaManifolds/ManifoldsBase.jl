@@ -34,7 +34,7 @@ struct EfficientEstimator <: AbstractApproximationMethod end
 Method for estimation in the ambient space with a method of type `T` and projecting the result back
 to the manifold.
 """
-struct ExtrinsicEstimation{T<:AbstractApproximationMethod} <: AbstractApproximationMethod
+struct ExtrinsicEstimation{T <: AbstractApproximationMethod} <: AbstractApproximationMethod
     extrinsic_estimation::T
 end
 
@@ -62,9 +62,9 @@ Method for estimation based on geodesic interpolation that is restricted to some
 
     GeodesicInterpolationWithinRadius(radius::Real)
 """
-struct GeodesicInterpolationWithinRadius{T<:Real} <: AbstractApproximationMethod
+struct GeodesicInterpolationWithinRadius{T <: Real} <: AbstractApproximationMethod
     radius::T
-    function GeodesicInterpolationWithinRadius(radius::T) where {T<:Real}
+    function GeodesicInterpolationWithinRadius(radius::T) where {T <: Real}
         radius > 0 && return new{T}(radius)
         return throw(
             DomainError("The radius must be strictly postive, received $(radius)."),

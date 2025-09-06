@@ -7,9 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.3.0] unreleased
 
+### Changed
+
 * refactor the trait system to no longer use a list of traits but single traits separately for the metric and the embedding specification
 * Introduce an `is_embedded` trait to check if a manifold is embedded.
 * introduce a
+* Switch to using [Runic.jl](https://github.com/fredrikekre/Runic.jl) as code formatter
 
 ## [1.2.0] 08/05/2025
 

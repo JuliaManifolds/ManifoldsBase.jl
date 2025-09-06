@@ -246,17 +246,10 @@ end
 
 # disambiguation
 @invoke_maker 1 AbstractManifold allocate_result(
-    M::AbstractDecoratorManifold,
-    f::typeof(get_coordinates),
-    p,
-    X,
-    B::AbstractBasis,
+    M::AbstractDecoratorManifold, f::typeof(get_coordinates), p, X, B::AbstractBasis,
 )
 @invoke_maker 1 AbstractManifold allocate_result(
-    M::AbstractDecoratorManifold,
-    f::typeof(get_vector),
-    p,
-    c,
+    M::AbstractDecoratorManifold, f::typeof(get_vector), p, c,
 )
 
 function allocate_result_embedding(
@@ -302,8 +295,7 @@ function _check_size_forwarding(::EmbeddedForwardingType, M::AbstractDecoratorMa
     mpe = check_size(get_embedding(M, p), embed(M, p))
     if mpe !== nothing
         return ManifoldDomainError(
-            "$p is not a point on $M because it is not a valid point in its embedding.",
-            mpe,
+            "$p is not a point on $M because it is not a valid point in its embedding.", mpe,
         )
     end
     return nothing

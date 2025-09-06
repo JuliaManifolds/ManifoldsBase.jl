@@ -1,4 +1,3 @@
-
 @doc raw"""
     check_inverse_retraction(
         M::AbstractManifold,
@@ -44,22 +43,22 @@ no plot is generated,
   the default is, to use all window sizes `2:N`.
 """
 function check_inverse_retraction(
-    M::AbstractManifold,
-    inverse_retraction_method::AbstractInverseRetractionMethod,
-    p = rand(M),
-    X = rand(M; vector_at = p);
-    exactness_tol::Real = 1e-12,
-    io::Union{IO,Nothing} = nothing,
-    limits = (-8.0, 0.0),
-    N::Int = 101,
-    second_order::Bool = true,
-    name::String = second_order ? "second order inverse retraction" : "inverse retraction",
-    log_range::AbstractVector = range(limits[1], limits[2]; length = N),
-    plot::Bool = false,
-    slope_tol::Real = 0.1,
-    error::Symbol = :none,
-    window = nothing,
-)
+        M::AbstractManifold,
+        inverse_retraction_method::AbstractInverseRetractionMethod,
+        p = rand(M),
+        X = rand(M; vector_at = p);
+        exactness_tol::Real = 1.0e-12,
+        io::Union{IO, Nothing} = nothing,
+        limits = (-8.0, 0.0),
+        N::Int = 101,
+        second_order::Bool = true,
+        name::String = second_order ? "second order inverse retraction" : "inverse retraction",
+        log_range::AbstractVector = range(limits[1], limits[2]; length = N),
+        plot::Bool = false,
+        slope_tol::Real = 0.1,
+        error::Symbol = :none,
+        window = nothing,
+    )
     Xn = X ./ norm(M, p, X) # normalize tangent direction
     # function for the directional derivative
     #
@@ -133,22 +132,22 @@ no plot is generated,
   the default is, to use all window sizes `2:N`.
 """
 function check_retraction(
-    M::AbstractManifold,
-    retraction_method::AbstractRetractionMethod,
-    p = rand(M),
-    X = rand(M; vector_at = p);
-    exactness_tol::Real = 1e-12,
-    io::Union{IO,Nothing} = nothing,
-    limits::Tuple = (-8.0, 0.0),
-    N::Int = 101,
-    second_order::Bool = true,
-    name::String = second_order ? "second order retraction" : "retraction",
-    log_range = range(limits[1], limits[2]; length = N),
-    plot::Bool = false,
-    slope_tol::Real = 0.1,
-    error::Symbol = :none,
-    window = nothing,
-)
+        M::AbstractManifold,
+        retraction_method::AbstractRetractionMethod,
+        p = rand(M),
+        X = rand(M; vector_at = p);
+        exactness_tol::Real = 1.0e-12,
+        io::Union{IO, Nothing} = nothing,
+        limits::Tuple = (-8.0, 0.0),
+        N::Int = 101,
+        second_order::Bool = true,
+        name::String = second_order ? "second order retraction" : "retraction",
+        log_range = range(limits[1], limits[2]; length = N),
+        plot::Bool = false,
+        slope_tol::Real = 0.1,
+        error::Symbol = :none,
+        window = nothing,
+    )
     Xn = X ./ norm(M, p, X) # normalize tangent direction
     # function for the directional derivative
     #
@@ -222,23 +221,23 @@ no plot is generated,
   the default is, to use all window sizes `2:N`.
 """
 function check_vector_transport(
-    M::AbstractManifold,
-    vector_transport_method::AbstractVectorTransportMethod,
-    p = rand(M),
-    X = rand(M; vector_at = p),
-    Y = rand(M; vector_at = p);
-    exactness_tol::Real = 1e-12,
-    io::Union{IO,Nothing} = nothing,
-    limits::Tuple = (-8.0, 0.0),
-    N::Int = 101,
-    second_order::Bool = true,
-    name::String = second_order ? "second order vector transport" : "vector transport",
-    log_range::AbstractVector = range(limits[1], limits[2]; length = N),
-    plot::Bool = false,
-    slope_tol::Real = 0.1,
-    error::Symbol = :none,
-    window = nothing,
-)
+        M::AbstractManifold,
+        vector_transport_method::AbstractVectorTransportMethod,
+        p = rand(M),
+        X = rand(M; vector_at = p),
+        Y = rand(M; vector_at = p);
+        exactness_tol::Real = 1.0e-12,
+        io::Union{IO, Nothing} = nothing,
+        limits::Tuple = (-8.0, 0.0),
+        N::Int = 101,
+        second_order::Bool = true,
+        name::String = second_order ? "second order vector transport" : "vector transport",
+        log_range::AbstractVector = range(limits[1], limits[2]; length = N),
+        plot::Bool = false,
+        slope_tol::Real = 0.1,
+        error::Symbol = :none,
+        window = nothing,
+    )
     Xn = X ./ norm(M, p, X) # normalize tangent direction
     # function for the directional derivative
     #
@@ -316,17 +315,17 @@ no plot is be generated,
 """
 
 function prepare_check_result(
-    log_range::AbstractVector,
-    errors::AbstractVector,
-    slope::Real;
-    io::Union{IO,Nothing} = nothing,
-    name::String = "estimated slope",
-    slope_tol::Real = 1e-1,
-    plot::Bool = false,
-    error::Symbol = :none,
-    window = nothing,
-    exactness_tol::Real = 1e3 * eps(eltype(errors)),
-)
+        log_range::AbstractVector,
+        errors::AbstractVector,
+        slope::Real;
+        io::Union{IO, Nothing} = nothing,
+        name::String = "estimated slope",
+        slope_tol::Real = 1.0e-1,
+        plot::Bool = false,
+        error::Symbol = :none,
+        window = nothing,
+        exactness_tol::Real = 1.0e3 * eps(eltype(errors)),
+    )
     if max(errors...) < exactness_tol
         (io !== nothing) && print(
             io,

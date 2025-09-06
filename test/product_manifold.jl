@@ -87,11 +87,11 @@ using RecursiveArrayTools
     @test ManifoldsBase.default_retraction_method(M) === retraction_methods[1]
     @test ManifoldsBase.default_retraction_method(M, typeof(p1)) === retraction_methods[1]
     @test ManifoldsBase.default_inverse_retraction_method(M) ===
-          inverse_retraction_methods[1]
+        inverse_retraction_methods[1]
     @test ManifoldsBase.default_inverse_retraction_method(M, typeof(X1)) ===
-          inverse_retraction_methods[1]
+        inverse_retraction_methods[1]
     @test ManifoldsBase.default_inverse_retraction_method(M, typeof(p1)) ===
-          inverse_retraction_methods[1]
+        inverse_retraction_methods[1]
 
     @testset "get_component, set_component!, getindex and setindex!" begin
         @test get_component(M, p1, 1) == p1.x[1]
@@ -144,26 +144,26 @@ using RecursiveArrayTools
 
     @testset "allocate_on" begin
         p1 = allocate_on(M)
-        @test p1 isa ArrayPartition{Float64,Tuple{Vector{Float64},Matrix{Float64}}}
+        @test p1 isa ArrayPartition{Float64, Tuple{Vector{Float64}, Matrix{Float64}}}
 
-        p1 = allocate_on(M, ArrayPartition{Float32,Tuple{Vector{Float32},Matrix{Float32}}})
-        @test p1 isa ArrayPartition{Float32,Tuple{Vector{Float32},Matrix{Float32}}}
+        p1 = allocate_on(M, ArrayPartition{Float32, Tuple{Vector{Float32}, Matrix{Float32}}})
+        @test p1 isa ArrayPartition{Float32, Tuple{Vector{Float32}, Matrix{Float32}}}
 
         p1 = allocate_on(M, ArrayPartition)
-        @test p1 isa ArrayPartition{Float64,Tuple{Vector{Float64},Matrix{Float64}}}
+        @test p1 isa ArrayPartition{Float64, Tuple{Vector{Float64}, Matrix{Float64}}}
 
         X1 = allocate_on(M, TangentSpaceType())
-        @test X1 isa ArrayPartition{Float64,Tuple{Vector{Float64},Matrix{Float64}}}
+        @test X1 isa ArrayPartition{Float64, Tuple{Vector{Float64}, Matrix{Float64}}}
 
         X1 = allocate_on(
             M,
             TangentSpaceType(),
-            ArrayPartition{Float32,Tuple{Vector{Float32},Matrix{Float32}}},
+            ArrayPartition{Float32, Tuple{Vector{Float32}, Matrix{Float32}}},
         )
-        @test X1 isa ArrayPartition{Float32,Tuple{Vector{Float32},Matrix{Float32}}}
+        @test X1 isa ArrayPartition{Float32, Tuple{Vector{Float32}, Matrix{Float32}}}
 
         X1 = allocate_on(M, TangentSpaceType(), ArrayPartition)
-        @test X1 isa ArrayPartition{Float64,Tuple{Vector{Float64},Matrix{Float64}}}
+        @test X1 isa ArrayPartition{Float64, Tuple{Vector{Float64}, Matrix{Float64}}}
     end
 
     p1 = ArrayPartition([1.0, 0.0, 0.0], [4.0 5.0; 6.0 7.0])
@@ -194,7 +194,7 @@ using RecursiveArrayTools
         qr = similar(p1)
         exp!(M, qr, p1, X1)
         @test exp(M, p1, X1) ≈
-              ArrayPartition(exp(M1, p1[M, 1], X1[M, 1]), exp(M2, p1[M, 2], X1[M, 2]))
+            ArrayPartition(exp(M1, p1[M, 1], X1[M, 1]), exp(M2, p1[M, 2], X1[M, 2]))
         @test exp(M, p1, X1) ≈ qr
         @test ManifoldsBase.exp_fused(M, p1, X1, 2.0) ≈ exp(M, p1, 2 * X1)
         ManifoldsBase.exp_fused!(M, qr, p1, X1, 2.0)
@@ -327,9 +327,9 @@ using RecursiveArrayTools
     @testset "CompositeManifoldError" begin
         Mpr = ProductManifold(M1, M1)
         let p1 = [1.0, 0.0, 0.0],
-            p2 = [0.0, 1.0, 0.0],
-            X1 = [0.0, 1.0, 0.2],
-            X2 = [1.0, 0.0, 0.2]
+                p2 = [0.0, 1.0, 0.0],
+                X1 = [0.0, 1.0, 0.2],
+                X2 = [1.0, 0.0, 0.2]
 
             p = ArrayPartition(p1, p2)
             X = ArrayPartition(X1, X2)
@@ -374,21 +374,21 @@ using RecursiveArrayTools
         @test sprint(show, M2p) == "ProductManifold($(M1), $(M1), $(M2), $(M2))"
         withenv("LINES" => 10, "COLUMNS" => 100) do
             @test sprint(show, "text/plain", ProductManifold(M1)) ==
-                  "ProductManifold with 1 submanifold:\n $(M1)"
+                "ProductManifold with 1 submanifold:\n $(M1)"
             @test sprint(show, "text/plain", M2p) ==
-                  "ProductManifold with 4 submanifolds:\n $(M1)\n $(M1)\n $(M2)\n $(M2)"
+                "ProductManifold with 4 submanifolds:\n $(M1)\n $(M1)\n $(M2)\n $(M2)"
             return nothing
         end
         withenv("LINES" => 7, "COLUMNS" => 100) do
             @test sprint(show, "text/plain", M2p) ==
-                  "ProductManifold with 4 submanifolds:\n $(M1)\n ⋮\n $(M2)"
+                "ProductManifold with 4 submanifolds:\n $(M1)\n ⋮\n $(M2)"
             return nothing
         end
 
         @test sprint(show, "text/plain", ProductManifold(M, M)) == """
-        ProductManifold with 2 submanifolds:
-         ProductManifold($(M1), $(M2))
-         ProductManifold($(M1), $(M2))"""
+            ProductManifold with 2 submanifolds:
+             ProductManifold($(M1), $(M2))
+             ProductManifold($(M1), $(M2))"""
     end
 
     @testset "Change Representer and Metric" begin
@@ -541,12 +541,12 @@ using RecursiveArrayTools
         Bc = get_basis(M, p, B)
         Bc_components_s = sprint.(show, "text/plain", Bc.data.parts)
         @test sprint(show, "text/plain", Bc) == """
-        $(typeof(B)) for a product manifold
-        Basis for component 1:
-        $(Bc_components_s[1])
-        Basis for component 2:
-        $(Bc_components_s[2])
-        """
+            $(typeof(B)) for a product manifold
+            Basis for component 1:
+            $(Bc_components_s[1])
+            Basis for component 2:
+            $(Bc_components_s[2])
+            """
     end
 
     @testset "Basis-related errors" begin

@@ -1,4 +1,3 @@
-
 allocate(a::AbstractArray{<:ArrayPartition}) = map(allocate, a)
 allocate(x::ArrayPartition) = ArrayPartition(map(allocate, x.x)...)
 function allocate(x::ArrayPartition, T::Type)
@@ -9,7 +8,7 @@ allocate_on(M::ProductManifold) = ArrayPartition(map(N -> allocate_on(N), M.mani
 function allocate_on(M::ProductManifold, ::Type{ArrayPartition})
     return ArrayPartition(map(N -> allocate_on(N), M.manifolds)...)
 end
-function allocate_on(M::ProductManifold, ::Type{ArrayPartition{T,U}}) where {T,U}
+function allocate_on(M::ProductManifold, ::Type{ArrayPartition{T, U}}) where {T, U}
     return ArrayPartition(map((N, V) -> allocate_on(N, V), M.manifolds, U.parameters)...)
 end
 function allocate_on(M::ProductManifold, ft::TangentSpaceType)
@@ -19,10 +18,10 @@ function allocate_on(M::ProductManifold, ft::TangentSpaceType, ::Type{ArrayParti
     return ArrayPartition(map(N -> allocate_on(N, ft), M.manifolds)...)
 end
 function allocate_on(
-    M::ProductManifold,
-    ft::TangentSpaceType,
-    ::Type{ArrayPartition{T,U}},
-) where {T,U}
+        M::ProductManifold,
+        ft::TangentSpaceType,
+        ::Type{ArrayPartition{T, U}},
+    ) where {T, U}
     return ArrayPartition(
         map((N, V) -> allocate_on(N, ft, V), M.manifolds, U.parameters)...,
     )
@@ -37,11 +36,11 @@ function copyto!(M::ProductManifold, q::ArrayPartition, p::ArrayPartition)
     return q
 end
 function copyto!(
-    M::ProductManifold,
-    Y::ArrayPartition,
-    p::ArrayPartition,
-    X::ArrayPartition,
-)
+        M::ProductManifold,
+        Y::ArrayPartition,
+        p::ArrayPartition,
+        X::ArrayPartition,
+    )
     map(
         copyto!,
         M.manifolds,
@@ -53,25 +52,25 @@ function copyto!(
 end
 
 
-function default_retraction_method(M::ProductManifold, ::Type{T}) where {T<:ArrayPartition}
+function default_retraction_method(M::ProductManifold, ::Type{T}) where {T <: ArrayPartition}
     return ProductRetraction(
         map(default_retraction_method, M.manifolds, T.parameters[2].parameters)...,
     )
 end
 
 function default_inverse_retraction_method(
-    M::ProductManifold,
-    ::Type{T},
-) where {T<:ArrayPartition}
+        M::ProductManifold,
+        ::Type{T},
+    ) where {T <: ArrayPartition}
     return InverseProductRetraction(
         map(default_inverse_retraction_method, M.manifolds, T.parameters[2].parameters)...,
     )
 end
 
 function default_vector_transport_method(
-    M::ProductManifold,
-    ::Type{T},
-) where {T<:ArrayPartition}
+        M::ProductManifold,
+        ::Type{T},
+    ) where {T <: ArrayPartition}
     return ProductVectorTransport(
         map(default_vector_transport_method, M.manifolds, T.parameters[2].parameters)...,
     )
@@ -88,11 +87,11 @@ function Base.exp(M::ProductManifold, p::ArrayPartition, X::ArrayPartition)
     )
 end
 function ManifoldsBase.exp_fused(
-    M::ProductManifold,
-    p::ArrayPartition,
-    X::ArrayPartition,
-    t::Number,
-)
+        M::ProductManifold,
+        p::ArrayPartition,
+        X::ArrayPartition,
+        t::Number,
+    )
     return ArrayPartition(
         map(
             (N, pc, Xc) -> ManifoldsBase.exp_fused(N, pc, Xc, t),
@@ -104,11 +103,11 @@ function ManifoldsBase.exp_fused(
 end
 
 function get_vector(
-    M::ProductManifold,
-    p::ArrayPartition,
-    Xⁱ,
-    B::AbstractBasis{𝔽,TangentSpaceType},
-) where {𝔽}
+        M::ProductManifold,
+        p::ArrayPartition,
+        Xⁱ,
+        B::AbstractBasis{𝔽, TangentSpaceType},
+    ) where {𝔽}
     dims = map(manifold_dimension, M.manifolds)
     @assert length(Xⁱ) == sum(dims)
     dim_ranges = _get_dim_ranges(dims)
@@ -117,11 +116,11 @@ function get_vector(
     return ArrayPartition(map((@inline t -> get_vector(t..., B)), ts))
 end
 function get_vector(
-    M::ProductManifold,
-    p::ArrayPartition,
-    Xⁱ,
-    B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:ProductBasisData},
-) where {𝔽}
+        M::ProductManifold,
+        p::ArrayPartition,
+        Xⁱ,
+        B::CachedBasis{𝔽, <:AbstractBasis{𝔽}, <:ProductBasisData},
+    ) where {𝔽}
     dims = map(manifold_dimension, M.manifolds)
     @assert length(Xⁱ) == sum(dims)
     dim_ranges = _get_dim_ranges(dims)
@@ -131,10 +130,10 @@ function get_vector(
 end
 
 function get_vectors(
-    M::ProductManifold,
-    p::ArrayPartition,
-    B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:ProductBasisData},
-) where {𝔽}
+        M::ProductManifold,
+        p::ArrayPartition,
+        B::CachedBasis{𝔽, <:AbstractBasis{𝔽}, <:ProductBasisData},
+    ) where {𝔽}
     N = number_of_components(M)
     xparts = submanifold_components(p)
     BVs = map(t -> get_vectors(t...), ziptuples(M.manifolds, xparts, B.data.parts))
@@ -160,19 +159,19 @@ linear indexing.
 See also [Array Indexing](https://docs.julialang.org/en/v1/manual/arrays/#man-array-indexing-1) in Julia.
 """
 @inline Base.@propagate_inbounds function Base.getindex(
-    p::ArrayPartition,
-    M::ProductManifold,
-    i::Union{Integer,Colon,AbstractVector,Val},
-)
+        p::ArrayPartition,
+        M::ProductManifold,
+        i::Union{Integer, Colon, AbstractVector, Val},
+    )
     return get_component(M, p, i)
 end
 
 function inverse_retract(
-    M::ProductManifold,
-    p::ArrayPartition,
-    q::ArrayPartition,
-    method::InverseProductRetraction,
-)
+        M::ProductManifold,
+        p::ArrayPartition,
+        q::ArrayPartition,
+        method::InverseProductRetraction,
+    )
     return ArrayPartition(
         map(
             inverse_retract,
@@ -196,11 +195,11 @@ function Base.log(M::ProductManifold, p::ArrayPartition, q::ArrayPartition)
 end
 
 function parallel_transport_direction(
-    M::ProductManifold,
-    p::ArrayPartition,
-    X::ArrayPartition,
-    d::ArrayPartition,
-)
+        M::ProductManifold,
+        p::ArrayPartition,
+        X::ArrayPartition,
+        d::ArrayPartition,
+    )
     return ArrayPartition(
         map(
             parallel_transport_direction,
@@ -213,11 +212,11 @@ function parallel_transport_direction(
 end
 
 function parallel_transport_to(
-    M::ProductManifold,
-    p::ArrayPartition,
-    X::ArrayPartition,
-    q::ArrayPartition,
-)
+        M::ProductManifold,
+        p::ArrayPartition,
+        X::ArrayPartition,
+        q::ArrayPartition,
+    )
     return ArrayPartition(
         map(
             parallel_transport_to,
@@ -250,10 +249,10 @@ Return a random point on [`ProductManifold`](@ref)  `M`. `parts_kwargs` is
 a tuple of keyword arguments for `rand` on each manifold in `M.manifolds`.
 """
 function Random.rand(
-    M::ProductManifold;
-    vector_at = nothing,
-    parts_kwargs = map(_ -> (;), M.manifolds),
-)
+        M::ProductManifold;
+        vector_at = nothing,
+        parts_kwargs = map(_ -> (;), M.manifolds),
+    )
     if vector_at === nothing
         return ArrayPartition(
             map((N, kwargs) -> rand(N; kwargs...), M.manifolds, parts_kwargs)...,
@@ -270,11 +269,11 @@ function Random.rand(
     end
 end
 function Random.rand(
-    rng::AbstractRNG,
-    M::ProductManifold;
-    vector_at = nothing,
-    parts_kwargs = map(_ -> (;), M.manifolds),
-)
+        rng::AbstractRNG,
+        M::ProductManifold;
+        vector_at = nothing,
+        parts_kwargs = map(_ -> (;), M.manifolds),
+    )
     if vector_at === nothing
         return ArrayPartition(
             map((N, kwargs) -> rand(rng, N; kwargs...), M.manifolds, parts_kwargs)...,
@@ -292,12 +291,12 @@ function Random.rand(
 end
 
 function riemann_tensor(
-    M::ProductManifold,
-    p::ArrayPartition,
-    X::ArrayPartition,
-    Y::ArrayPartition,
-    Z::ArrayPartition,
-)
+        M::ProductManifold,
+        p::ArrayPartition,
+        X::ArrayPartition,
+        Y::ArrayPartition,
+        Z::ArrayPartition,
+    )
     return ArrayPartition(
         map(
             riemann_tensor,
@@ -318,11 +317,11 @@ set the element `[i...]` of a point `q` on a [`ProductManifold`](@ref) by linear
 See also [Array Indexing](https://docs.julialang.org/en/v1/manual/arrays/#man-array-indexing-1) in Julia.
 """
 Base.@propagate_inbounds function Base.setindex!(
-    q::ArrayPartition,
-    p,
-    M::ProductManifold,
-    i::Union{Integer,Colon,AbstractVector,Val},
-)
+        q::ArrayPartition,
+        p,
+        M::ProductManifold,
+        i::Union{Integer, Colon, AbstractVector, Val},
+    )
     return set_component!(M, q, p, i)
 end
 
@@ -330,12 +329,12 @@ end
 @inline submanifold_components(p::ArrayPartition) = p.x
 
 function vector_transport_direction(
-    M::ProductManifold,
-    p::ArrayPartition,
-    X::ArrayPartition,
-    d::ArrayPartition,
-    m::ProductVectorTransport,
-)
+        M::ProductManifold,
+        p::ArrayPartition,
+        X::ArrayPartition,
+        d::ArrayPartition,
+        m::ProductVectorTransport,
+    )
     return ArrayPartition(
         map(
             vector_transport_direction,
@@ -349,12 +348,12 @@ function vector_transport_direction(
 end
 
 function vector_transport_to(
-    M::ProductManifold,
-    p::ArrayPartition,
-    X::ArrayPartition,
-    q::ArrayPartition,
-    m::ProductVectorTransport,
-)
+        M::ProductManifold,
+        p::ArrayPartition,
+        X::ArrayPartition,
+        q::ArrayPartition,
+        m::ProductVectorTransport,
+    )
     return ArrayPartition(
         map(
             vector_transport_to,
@@ -367,12 +366,12 @@ function vector_transport_to(
     )
 end
 function vector_transport_to(
-    M::ProductManifold,
-    p::ArrayPartition,
-    X::ArrayPartition,
-    q::ArrayPartition,
-    m::ParallelTransport,
-)
+        M::ProductManifold,
+        p::ArrayPartition,
+        X::ArrayPartition,
+        q::ArrayPartition,
+        m::ParallelTransport,
+    )
     return ArrayPartition(
         map(
             (iM, ip, iX, id) -> vector_transport_to(iM, ip, iX, id, m),
