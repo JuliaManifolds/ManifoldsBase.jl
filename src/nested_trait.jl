@@ -347,14 +347,16 @@ macro trait_function(sig, opts = :(), manifold_arg_no = 1)
 end
 
 macro new_trait_function(
-    sig,
-    include_forwards = :((
-        EmbeddedSimpleForwardingType,
-        SimpleForwardingType,
-        StopForwardingType,
-    )),
-    manifold_arg_no = 1,
-)
+        sig,
+        include_forwards = :(
+            (
+                EmbeddedSimpleForwardingType,
+                SimpleForwardingType,
+                StopForwardingType,
+            )
+        ),
+        manifold_arg_no = 1,
+    )
     parts = ManifoldsBase._split_signature(sig)
     kwargs_list = parts[:kwargs_list]
     callargs = parts[:callargs]
@@ -388,10 +390,10 @@ macro new_trait_function(
         block = quote
             $block
             @inline function ($fname_fwd)(
-                ::ManifoldsBase.EmbeddedSimpleForwardingType,
-                $(callargs...);
-                $(kwargs_list...),
-            ) where {$(where_exprs...)}
+                    ::ManifoldsBase.EmbeddedSimpleForwardingType,
+                    $(callargs...);
+                    $(kwargs_list...),
+                ) where {$(where_exprs...)}
                 M = $(argnames[manifold_arg_no])
                 return ($fname)(
                     $(argnames[1:(manifold_arg_no - 1)]...),
@@ -406,10 +408,10 @@ macro new_trait_function(
         block = quote
             $block
             @inline function ($fname_fwd)(
-                ::ManifoldsBase.SimpleForwardingType,
-                $(callargs...);
-                $(kwargs_list...),
-            ) where {$(where_exprs...)}
+                    ::ManifoldsBase.SimpleForwardingType,
+                    $(callargs...);
+                    $(kwargs_list...),
+                ) where {$(where_exprs...)}
                 M = $(argnames[manifold_arg_no])
                 return ($fname)(
                     $(argnames[1:(manifold_arg_no - 1)]...),
@@ -424,10 +426,10 @@ macro new_trait_function(
         block = quote
             $block
             @inline function ($fname_fwd)(
-                ::ManifoldsBase.StopForwardingType,
-                $(callargs...);
-                $(kwargs_list...),
-            ) where {$(where_exprs...)}
+                    ::ManifoldsBase.StopForwardingType,
+                    $(callargs...);
+                    $(kwargs_list...),
+                ) where {$(where_exprs...)}
                 M = $(argnames[manifold_arg_no])
                 return invoke(
                     $fname,

@@ -685,6 +685,6 @@ using ManifoldsBaseTestUtils
     end
     @testset "Trait forwarding" begin
         @test ManifoldsBase.get_forwarding_type(ManifoldsBase.DefaultManifold(2), [1, 2]) ==
-              ManifoldsBase.StopForwardingType()
+            ManifoldsBase.StopForwardingType()
     end
 end

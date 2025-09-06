@@ -18,8 +18,8 @@ import Base: +, *, -
 #
 #
 # minimal implementation of the sphere – to test a few more involved Riemannian functions
-struct TestSphere{N,𝔽} <: AbstractDecoratorManifold{𝔽} end
-TestSphere(N::Int, 𝔽 = ℝ) = TestSphere{N,𝔽}()
+struct TestSphere{N, 𝔽} <: AbstractDecoratorManifold{𝔽} end
+TestSphere(N::Int, 𝔽 = ℝ) = TestSphere{N, 𝔽}()
 
 function ManifoldsBase.change_metric!(
         M::TestSphere,
@@ -103,7 +103,7 @@ function ManifoldsBase.get_coordinates_orthonormal!(M::TestSphere, Y, p, X, ::Re
     Y .= Xend .- pend .* factor
     return Y
 end
-function ManifoldsBase.get_embedding(::TestSphere{n,𝔽}) where {n,𝔽}
+function ManifoldsBase.get_embedding(::TestSphere{n, 𝔽}) where {n, 𝔽}
     return DefaultManifold(n + 1; field = 𝔽)
 end
 function ManifoldsBase.get_vector_orthonormal!(M::TestSphere, Y, p, X, ::RealNumbers)
