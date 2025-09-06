@@ -180,9 +180,6 @@ end
 # A Manifold with a fallback
 #
 struct FallbackManifold <: AbstractDecoratorManifold{ℝ} end
-function ManifoldsBase.active_traits(f, ::FallbackManifold, args...)
-    return ManifoldsBase.merge_traits(ManifoldsBase.IsExplicitDecorator())
-end
 ManifoldsBase.decorated_manifold(::FallbackManifold) = DefaultManifold(3)
 
 function ManifoldsBase.get_forwarding_type(::FallbackManifold, ::Any, p = nothing)

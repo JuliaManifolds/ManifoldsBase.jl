@@ -6,15 +6,12 @@ using ManifoldsBase
     ambiguities = Test.detect_ambiguities(ManifoldsBase)
     num_ambiguities = length(ambiguities)
     #num_ambiguities > 0 && @warn "The number of ambiguities in ManifoldsBase is $(num_ambiguities)."
-    if VERSION >= v"1.10-DEV"
-        # One ambiguity from JSON library loaded by VSCode
-        if num_ambiguities > bound + 1
-            for amb in ambiguities
-                println(amb)
-            end
+    if num_ambiguities > bound
+        for amb in ambiguities
+            println(amb)
         end
-        @test num_ambiguities <= bound + 1
     end
+    @test num_ambiguities <= bound
 
     include("decorator_traits.jl")
     include("allocation.jl")
