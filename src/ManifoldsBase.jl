@@ -1254,6 +1254,8 @@ export VectorSpaceFiber
 export TangentSpace, TangentSpaceType
 export CotangentSpace, CotangentSpaceType
 export AbstractDecoratorManifold
+export AbstractForwardingType, StopForwardingType, SimpleForwardingType
+export AbstractEmbeddedForwardingType, EmbeddedForwardingType, EmbeddedSimpleForwardingType
 export AbstractTrait
 export IsExplicitDecorator
 export ValidationManifold,
@@ -1381,6 +1383,7 @@ export ×,
     get_coordinates,
     get_coordinates!,
     get_embedding,
+    get_embedding_type,
     get_vector,
     get_vector!,
     get_vectors,
@@ -1393,6 +1396,7 @@ export ×,
     inverse_retract,
     inverse_retract!,
     isapprox,
+    is_embedded,
     is_flat,
     is_point,
     is_vector,

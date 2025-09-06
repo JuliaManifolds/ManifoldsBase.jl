@@ -60,13 +60,6 @@ function ManifoldsBase.get_vector_orthonormal!(
     return (Y .= [c[1] c[2] 0.0])
 end
 
-function ManifoldsBase.get_embedding_type(::HalfPlaneManifold)
-    return ManifoldsBase.EmbeddedSubmanifoldType()
-end
-function ManifoldsBase.get_embedding_type(::PosQuadrantManifold)
-    return ManifoldsBase.EmbeddedSubmanifoldType()
-end
-
 #
 # A second manifold that is modelled as just isometrically embedded but not a submanifold
 #
@@ -211,7 +204,7 @@ end
         @test base_manifold(M, Val(2)) == ManifoldsBase.DefaultManifold(2)
         @test get_embedding(M) == ManifoldsBase.DefaultManifold(3)
         @test get_embedding(M, [1, 2, 3]) == ManifoldsBase.DefaultManifold(3)
-        @test ManifoldsBase.is_embedded_manifold(M)
+        @test ManifoldsBase.is_embedded(M)
     end
 
     @testset "HalfPlaneManifold" begin

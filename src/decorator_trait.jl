@@ -9,7 +9,8 @@ manifold_dimension(M::AbstractDecoratorManifold) = manifold_dimension(base_manif
 """
     AbstractForwardingType
 
-An abstract type to specify the forwarding behaviour of a function.
+An abstract type to specify the forwarding behaviour of a function for a decorator
+manifold or a trait within `ManifoldsBase.jl`.
 """
 abstract type AbstractForwardingType end
 
@@ -153,7 +154,7 @@ embeddings.
 get_embedding_type(::AbstractManifold) = NotEmbeddedManifoldType()
 get_embedding_type(M::AbstractManifold, p) = get_embedding_type(M)
 
-function is_embedded_manifold(M::AbstractManifold)
+function is_embedded(M::AbstractManifold)
     return get_embedding_type(M) !== NotEmbeddedManifoldType()
 end
 
