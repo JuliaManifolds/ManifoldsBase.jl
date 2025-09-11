@@ -67,7 +67,7 @@ the Einstein summation convention is assumed.
 # Constructor
 
     ODEExponentialRetraction(
-        r::AbstractRetractionMethod,
+        r::AbstractRetractionMethod=ExponentialRetraction(),
         b::AbstractBasis=DefaultOrthogonalBasis(),
     )
 

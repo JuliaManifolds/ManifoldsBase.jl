@@ -18,7 +18,7 @@ import Base: +, *, -
 #
 #
 # minimal implementation of the sphere – to test a few more involved Riemannian functions
-struct TestSphere{N, 𝔽} <: AbstractManifold{𝔽} end
+struct TestSphere{N, 𝔽} <: AbstractDecoratorManifold{𝔽} end
 TestSphere(N::Int, 𝔽 = ℝ) = TestSphere{N, 𝔽}()
 
 function ManifoldsBase.change_metric!(
@@ -102,6 +102,9 @@ function ManifoldsBase.get_coordinates_orthonormal!(M::TestSphere, Y, p, X, ::Re
     factor = λ * X[1] / (1 + cosθ)
     Y .= Xend .- pend .* factor
     return Y
+end
+function ManifoldsBase.get_embedding(::TestSphere{n, 𝔽}) where {n, 𝔽}
+    return DefaultManifold(n + 1; field = 𝔽)
 end
 function ManifoldsBase.get_vector_orthonormal!(M::TestSphere, Y, p, X, ::RealNumbers)
     n = manifold_dimension(M)
@@ -231,7 +234,13 @@ ManifoldsBase.representation_size(M::TestSPD) = (M.n, M.n)
 #
 # A simple Manifold based on a projection onto a subspace
 struct ProjManifold <: AbstractManifold{ℝ} end
+
 ManifoldsBase.inner(::ProjManifold, p, X, Y) = dot(X, Y)
+function ManifoldsBase.project(M::ProjManifold, p, X)
+    Y = similar(X)
+    project!(M, Y, p, X)
+    return Y
+end
 ManifoldsBase.project!(::ProjManifold, Y, p, X) = (Y .= X .- dot(p, X) .* p)
 ManifoldsBase.representation_size(::ProjManifold) = (2, 3)
 ManifoldsBase.manifold_dimension(::ProjManifold) = 5
@@ -241,6 +250,11 @@ ManifoldsBase.get_vector_orthonormal(::ProjManifold, p, X, N) = reverse(X)
 # A second simple Manifold based on a projection onto a subspace
 struct ProjectionTestManifold <: AbstractManifold{ℝ} end
 ManifoldsBase.inner(::ProjectionTestManifold, ::Any, X, Y) = dot(X, Y)
+function ManifoldsBase.project(M::ProjectionTestManifold, p, X)
+    Y = similar(X)
+    project!(M, Y, p, X)
+    return Y
+end
 function ManifoldsBase.project!(::ProjectionTestManifold, Y, p, X)
     Y .= X .- dot(p, X) .* p
     Y[end] = 0
