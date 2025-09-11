@@ -230,7 +230,7 @@ end
     return allocate_result(decorated_manifold(M), f, x...)
 end
 @inline function _allocate_result_forwarding(
-        ::Union{StopForwardingType,EmbeddedForwardingType},
+        ::Union{StopForwardingType, EmbeddedForwardingType},
         M::AbstractDecoratorManifold,
         f::TF,
         x::Vararg{Any, N},
