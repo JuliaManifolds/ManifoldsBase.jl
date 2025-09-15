@@ -349,6 +349,7 @@ end
         Y = similar(X)
         copyto!(M, Y, p, X)
         @test Y == X
+        @test isapprox(M, p, X, Y)
         @test exp(M, p, X) ≈ p + X
         exp!(M, q, p, X)
         @test isapprox(M, q, p + X)
@@ -384,6 +385,8 @@ end
             @test A == [2, 3]
             @test @inferred !isapprox(M, [1, 2], [2, 3])
             @test @inferred !isapprox(M, [1, 2], [2, 3], [4, 5])
+
+            @test ManifoldsBase.get_forwarding_type_embedding(ManifoldsBase.EmbeddedSubmanifoldType{ManifoldsBase.NeedsEmbedding}(), M, exp) === EmbeddedForwardingType()
         end
         @testset "Isometric Embedding Fallbacks & Error Tests" begin
             for M2 in [NotImplementedIsometricEmbeddedManifoldNE(), NotImplementedIsometricEmbeddedManifoldDNE()]
