@@ -25,8 +25,9 @@ abstract type AbstractEmbeddedForwardingType <: AbstractForwardingType end
 """
     StopForwardingType <: AbstractForwardingType
 
-A property of an embedded manifold that indicates that `embed` and `project` are *not*
-available.
+
+A type that indicates that a function should not forward to a certain other manifold, e.g.
+and embedding. This means that the user is asked to implement this function themselfes.
 """
 struct StopForwardingType <: AbstractForwardingType end
 

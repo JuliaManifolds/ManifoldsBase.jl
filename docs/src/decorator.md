@@ -29,14 +29,11 @@ Pages = ["nested_trait.jl"]
 Order = [:type, :macro, :function]
 ```
 
-The key part of the trait system is that it forms a list of traits, from the most specific one to the least specific one, and tries to find a specific implementation of a function for a trait in the least. This ensures that there are, by design, no ambiguities (caused by traits) in the method selection process. Trait resolution is driven by Julia's method dispatch and the compiler is sufficiently clever to quite reliably constant-propagate traits and inline method calls.
-
-The list of traits is browsed from the most specific one for implementation of a given function for that trait. If one is found, the implementation is called and it may internally call completely different function, breaking the trait dispatch chain. When no implementation for a trait is found, the next trait on the list is checked, until [`EmptyTrait`](@ref ManifoldsBase.EmptyTrait) is reached, which is conventionally the last trait to be considered, expected to have the most generic default implementation of a function
-If you want to continue with the following traits afterwards, use `s = `[`next_trait`](@ref ManifoldsBase.next_trait)`(t)` of a [`TraitList`] (@ref ManifoldsBase.TraitList) `t` to continue working on the next trait in the list by calling the function with `s` as first argument.
-
 ## The Manifold decorator
 
-Based on the generic [`TraitList`](@ref ManifoldsBase.TraitList) the following types, functions, and macros introduce the decorator trait which allows to decorate an arbitrary `<: `[`AbstractDecoratorManifold`](@ref) with further features.
+The idea of the decorator for a manifold is to allow to exchange certain functionality by
+a dispatch layer. For example that for an embedded manifold some functions are passed to the embedding,
+or that for a metric manifold decorator, all functions unrelated to the metric are passed to the original manifold. The following types, functions, and macros introduce the decorator trait which allows to decorate an arbitrary `<: `[`AbstractDecoratorManifold`](@ref) with further features.
 
 ```@autodocs
 Modules = [ManifoldsBase]

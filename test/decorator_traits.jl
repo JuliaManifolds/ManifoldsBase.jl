@@ -1,16 +1,6 @@
 using Test
 using ManifoldsBase
 
-abstract type AbstractA end
-abstract type DecoA <: AbstractA end
-# A few concrete types
-struct A <: AbstractA end
-struct A1 <: DecoA end
-struct A2 <: DecoA end
-struct A3 <: DecoA end
-struct A4 <: DecoA end
-struct A5 <: DecoA end
-
 #
 # A Manifold decorator test - check that StopForwarding cases call Abstract and those fail with
 # MethodError due to ambiguities (between Abstract and Decorator)
