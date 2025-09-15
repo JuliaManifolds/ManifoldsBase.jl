@@ -52,6 +52,10 @@ ManifoldsBase.representation_size(::NonDecoratorManifold) = (2,)
     @test_throws MethodError parallel_transport_direction!(M, Y, p, X, X)
     @test_throws MethodError parallel_transport_to(M, p, X, q)
     @test_throws MethodError parallel_transport_to!(M, Y, p, X, q)
+
+    # trait defaults
+    @test ManifoldsBase.get_forwarding_type(M, exp) === StopForwardingType()
+    @test ManifoldsBase.get_forwarding_type(M, exp, p) === StopForwardingType()
 end
 
 # With even less, check that representation size stack overflows
@@ -61,6 +65,15 @@ struct NonDecoratorNonManifold <: AbstractDecoratorManifold{ManifoldsBase.ℝ} e
     @test representation_size(N) === nothing
 end
 
+abstract type AbstractA end
+abstract type DecoA <: AbstractA end
+# A few concrete types
+struct A <: AbstractA end
+struct A1 <: DecoA end
+struct A2 <: DecoA end
+struct A3 <: DecoA end
+struct A4 <: DecoA end
+struct A5 <: DecoA end
 
 h(::AbstractA, x::Float64, y; a = 1) = x + y - a
 h(::DecoA, x, y) = x + y
