@@ -204,14 +204,14 @@ get_embedding(M::AbstractDecoratorManifold, p) = get_embedding(M)
         x::Vararg{Any, N},
     ) where {TF, N}
     return _allocate_result_forwarding(
-        get_forwarding_type(M, allocate_result, x[1]),
+        get_forwarding_type(M, f, x[1]),
         M,
         f,
         x...,
     )
 end
 @inline function allocate_result(M::AbstractDecoratorManifold, f::TF) where {TF}
-    return _allocate_result_forwarding(get_forwarding_type(M, allocate_result), M, f)
+    return _allocate_result_forwarding(get_forwarding_type(M, f), M, f)
 end
 
 @inline function _allocate_result_forwarding(
@@ -382,40 +382,11 @@ end
 
 @new_trait_function exp(M::AbstractDecoratorManifold, p, X)
 
-function _exp_forwarding(::EmbeddedForwardingType, M::AbstractDecoratorManifold, p, X)
-    return exp(get_embedding(M, p), embed(M, p), embed(M, p, X))
-end
-
 @new_trait_function exp!(M::AbstractDecoratorManifold, q, p, X)
-
-function _exp!_forwarding(::EmbeddedForwardingType, M::AbstractDecoratorManifold, q, p, X)
-    return exp!(get_embedding(M, p), q, embed(M, p), embed(M, p, X))
-end
 
 @new_trait_function exp_fused(M::AbstractDecoratorManifold, p, X, t::Number)
 
-function _exp_fused_forwarding(
-        ::EmbeddedForwardingType,
-        M::AbstractDecoratorManifold,
-        p,
-        X,
-        t::Number,
-    )
-    return exp_fused(get_embedding(M, p), embed(M, p), embed(M, p, X), t)
-end
-
 @new_trait_function exp_fused!(M::AbstractDecoratorManifold, q, p, X, t::Number)
-
-function _exp_fused!_forwarding(
-        ::EmbeddedForwardingType,
-        M::AbstractDecoratorManifold,
-        q,
-        p,
-        X,
-        t::Number,
-    )
-    return exp_fused!(get_embedding(M, p), q, embed(M, p), embed(M, p, X), t)
-end
 
 @new_trait_function has_components(M::AbstractDecoratorManifold)
 
@@ -425,50 +396,18 @@ end
 
 @new_trait_function injectivity_radius(M::AbstractDecoratorManifold)
 
-function _injectivity_radius_forwarding(
-        ::EmbeddedForwardingType,
-        M::AbstractDecoratorManifold,
-    )
-    return injectivity_radius(get_embedding(M))
-end
-
 @new_trait_function injectivity_radius(M::AbstractDecoratorManifold, p)
-
-function _injectivity_radius_forwarding(
-        ::EmbeddedForwardingType,
-        M::AbstractDecoratorManifold,
-        p,
-    )
-    return injectivity_radius(get_embedding(M, p), embed(M, p))
-end
 
 @new_trait_function injectivity_radius(
     M::AbstractDecoratorManifold,
     m::AbstractRetractionMethod,
 )
-
-function _injectivity_radius_forwarding(
-        ::EmbeddedForwardingType,
-        M::AbstractDecoratorManifold,
-        m::AbstractRetractionMethod,
-    )
-    return injectivity_radius(get_embedding(M), m)
-end
 
 @new_trait_function injectivity_radius(
     M::AbstractDecoratorManifold,
     p,
     m::AbstractRetractionMethod,
 )
-
-function _injectivity_radius_forwarding(
-        ::EmbeddedForwardingType,
-        M::AbstractDecoratorManifold,
-        p,
-        m::AbstractRetractionMethod,
-    )
-    return injectivity_radius(get_embedding(M, p), embed(M, p), m)
-end
 
 @new_trait_function inner(M::AbstractDecoratorManifold, p, X, Y)
 
@@ -484,17 +423,6 @@ end
     m::AbstractInverseRetractionMethod = default_inverse_retraction_method(M, typeof(p)),
 )
 
-function _inverse_retract_forwarding(
-        ::EmbeddedForwardingType,
-        M::AbstractDecoratorManifold,
-        p,
-        q,
-        m::AbstractInverseRetractionMethod,
-    )
-    return inverse_retract(get_embedding(M, p), embed(M, p), embed(M, q), m)
-end
-
-
 @new_trait_function inverse_retract!(
     M::AbstractDecoratorManifold,
     X,
@@ -502,17 +430,6 @@ end
     q,
     m::AbstractInverseRetractionMethod = default_inverse_retraction_method(M, typeof(p)),
 )
-
-function _inverse_retract!_forwarding(
-        ::EmbeddedForwardingType,
-        M::AbstractDecoratorManifold,
-        X,
-        p,
-        q,
-        m::AbstractInverseRetractionMethod,
-    )
-    return inverse_retract!(get_embedding(M, p), X, embed(M, p), embed(M, q), m)
-end
 
 @new_trait_function is_point(M::AbstractDecoratorManifold, p; kwargs...) (
     StopForwardingType,
@@ -697,108 +614,23 @@ end
 
 @new_trait_function log(M::AbstractDecoratorManifold, p, q)
 
-function _log_forwarding(::EmbeddedForwardingType, M::AbstractDecoratorManifold, p, q)
-    return log(get_embedding(M, p), embed(M, p), embed(M, q))
-end
-
 @new_trait_function log!(M::AbstractDecoratorManifold, X, p, q)
-
-function _log!_forwarding(::EmbeddedForwardingType, M::AbstractDecoratorManifold, X, p, q)
-    return log!(get_embedding(M, p), X, embed(M, p), embed(M, q))
-end
 
 # Introduce Deco Trait | automatic forward | fallback
 
 @new_trait_function parallel_transport_direction(M::AbstractDecoratorManifold, p, X, d)
 
-function _parallel_transport_direction_forwarding(
-        ::EmbeddedForwardingType,
-        M::AbstractDecoratorManifold,
-        p,
-        X,
-        d,
-    )
-    return parallel_transport_direction(
-        get_embedding(M, p),
-        embed(M, p),
-        embed(M, p, X),
-        embed(M, p, d),
-    )
-end
-
 @new_trait_function parallel_transport_direction!(M::AbstractDecoratorManifold, Y, p, X, d)
-
-function _parallel_transport_direction!_forwarding(
-        ::EmbeddedForwardingType,
-        M::AbstractDecoratorManifold,
-        Y,
-        p,
-        X,
-        d,
-    )
-    return parallel_transport_direction!(
-        get_embedding(M, p),
-        Y,
-        embed(M, p),
-        embed(M, p, X),
-        embed(M, p, d),
-    )
-end
 
 # Introduce Deco Trait | automatic forward | fallback
 
 @new_trait_function parallel_transport_to(M::AbstractDecoratorManifold, p, X, q)
 
-function _parallel_transport_to_forwarding(
-        ::EmbeddedForwardingType,
-        M::AbstractDecoratorManifold,
-        p,
-        X,
-        q,
-    )
-    return parallel_transport_to(
-        get_embedding(M, p),
-        embed(M, p),
-        embed(M, p, X),
-        embed(M, q),
-    )
-end
-
 @new_trait_function parallel_transport_to!(M::AbstractDecoratorManifold, Y, p, X, q)
-
-function _parallel_transport_to!_forwarding(
-        ::EmbeddedForwardingType,
-        M::AbstractDecoratorManifold,
-        Y,
-        p,
-        X,
-        q,
-    )
-    return parallel_transport_to!(
-        get_embedding(M, p),
-        Y,
-        embed(M, p),
-        embed(M, p, X),
-        embed(M, q),
-    )
-end
 
 @new_trait_function Random.rand(M::AbstractDecoratorManifold; kwargs...)
 
-function _rand_forwarding(::EmbeddedForwardingType, M::AbstractDecoratorManifold; kwargs...)
-    return rand(get_embedding(M); kwargs...)
-end
-
 @new_trait_function Random.rand!(M::AbstractDecoratorManifold, p; kwargs...)
-
-function _rand!_forwarding(
-        ::EmbeddedForwardingType,
-        M::AbstractDecoratorManifold,
-        p;
-        kwargs...,
-    )
-    return rand(get_embedding(M, p), p; kwargs...)
-end
 
 @new_trait_function Random.rand(rng::AbstractRNG, M::AbstractDecoratorManifold; kwargs...) (
     EmbeddedSimpleForwardingType,
@@ -806,31 +638,12 @@ end
     StopForwardingType,
 ) 2
 
-function _rand_forwarding(
-        ::EmbeddedForwardingType,
-        rng::AbstractRNG,
-        M::AbstractDecoratorManifold;
-        kwargs...,
-    )
-    return rand(rng, get_embedding(M); kwargs...)
-end
-
 @new_trait_function Random.rand!(
     rng::AbstractRNG,
     M::AbstractDecoratorManifold,
     p;
     kwargs...,
 ) (EmbeddedSimpleForwardingType, SimpleForwardingType, StopForwardingType) 2
-
-function _rand!_forwarding(
-        ::EmbeddedForwardingType,
-        rng::AbstractRNG,
-        M::AbstractDecoratorManifold,
-        p;
-        kwargs...,
-    )
-    return rand!(rng, get_embedding(M, p), p; kwargs...)
-end
 
 @new_trait_function representation_size(M::AbstractDecoratorManifold)
 
@@ -850,16 +663,6 @@ end
     m::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
 )
 
-function _retract_forwarding(
-        ::EmbeddedForwardingType,
-        M::AbstractDecoratorManifold,
-        p,
-        X,
-        m::AbstractRetractionMethod,
-    )
-    return retract(get_embedding(M, p), embed(M, p), embed(M, p, X), m)
-end
-
 @new_trait_function retract_fused(
     M::AbstractDecoratorManifold,
     p,
@@ -868,17 +671,6 @@ end
     m::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
 )
 
-function _retract_fused_forwarding(
-        ::EmbeddedForwardingType,
-        M::AbstractDecoratorManifold,
-        p,
-        X,
-        t::Number,
-        m::AbstractRetractionMethod,
-    )
-    return retract_fused(get_embedding(M, p), embed(M, p), embed(M, p, X), t, m)
-end
-
 @new_trait_function retract!(
     M::AbstractDecoratorManifold,
     q,
@@ -886,17 +678,6 @@ end
     X,
     m::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
 )
-
-function _retract!_forwarding(
-        ::EmbeddedForwardingType,
-        M::AbstractDecoratorManifold,
-        q,
-        p,
-        X,
-        m::AbstractRetractionMethod,
-    )
-    return retract!(get_embedding(M, p), q, embed(M, p), embed(M, p, X), m)
-end
 
 @new_trait_function retract_fused!(
     M::AbstractDecoratorManifold,
@@ -907,19 +688,6 @@ end
     m::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
 )
 
-function _retract_fused!_forwarding(
-        ::EmbeddedForwardingType,
-        M::AbstractDecoratorManifold,
-        q,
-        p,
-        X,
-        t::Number,
-        m::AbstractRetractionMethod,
-    )
-    return retract_fused!(get_embedding(M, p), q, embed(M, p), embed(M, p, X), t, m)
-end
-
-
 @new_trait_function vector_transport_direction(
     M::AbstractDecoratorManifold,
     p,
@@ -927,23 +695,6 @@ end
     d,
     m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
 )
-
-function _vector_transport_direction_forwarding(
-        ::EmbeddedForwardingType,
-        M::AbstractDecoratorManifold,
-        p,
-        X,
-        d,
-        m::AbstractVectorTransportMethod,
-    )
-    return vector_transport_direction(
-        get_embedding(M, p),
-        embed(M, p),
-        embed(M, p, X),
-        embed(M, d),
-        m,
-    )
-end
 
 @new_trait_function vector_transport_direction!(
     M::AbstractDecoratorManifold,
@@ -954,77 +705,22 @@ end
     m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
 )
 
-function _vector_transport_direction!_forwarding(
-        ::EmbeddedForwardingType,
-        M::AbstractDecoratorManifold,
-        Y,
-        p,
-        X,
-        d,
-        m::AbstractVectorTransportMethod,
-    )
-    return vector_transport_direction!(
-        get_embedding(M, p),
-        Y,
-        embed(M, p),
-        embed(M, p, X),
-        embed(M, p, d),
-        m,
-    )
-end
-
 @new_trait_function vector_transport_to(
     M::AbstractDecoratorManifold, p, X, q,
     m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
 )
-
-function _vector_transport_to_forwarding(
-        ::EmbeddedForwardingType,
-        M::AbstractDecoratorManifold, p, X, q, m::AbstractVectorTransportMethod,
-    )
-    return vector_transport_to(
-        get_embedding(M, p), embed(M, p), embed(M, p, X), embed(M, q), m,
-    )
-end
 
 @new_trait_function vector_transport_to!(
     M::AbstractDecoratorManifold, Y, p, X, q,
     m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
 )
 
-function _vector_transport_to!_forwarding(
-        ::EmbeddedForwardingType,
-        M::AbstractDecoratorManifold, Y, p, X, q, m::AbstractVectorTransportMethod,
-    )
-    return vector_transport_to!(
-        get_embedding(M, p),
-        Y,
-        embed(M, p),
-        embed(M, p, X),
-        embed(M, q),
-        m,
-    )
-end
-
 @new_trait_function Weingarten(M::AbstractDecoratorManifold, p, X, V)
 @new_trait_function Weingarten!(M::AbstractDecoratorManifold, Y, p, X, V)
 
 @new_trait_function zero_vector(M::AbstractDecoratorManifold, p)
 
-function _zero_vector_forwarding(::EmbeddedForwardingType, M::AbstractDecoratorManifold, p)
-    return zero_vector(get_embedding(M, p), embed(M, p))
-end
-
 @new_trait_function zero_vector!(M::AbstractDecoratorManifold, X, p)
-
-function _zero_vector!_forwarding(
-        ::EmbeddedForwardingType,
-        M::AbstractDecoratorManifold,
-        X,
-        p,
-    )
-    return zero_vector!(get_embedding(M, p), X, embed(M, p))
-end
 
 const forward_functions_embedded = [
     copyto!,

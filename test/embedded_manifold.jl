@@ -177,11 +177,19 @@ function ManifoldsBase.get_embedding_type(::NotImplementedIsometricEmbeddedManif
 end
 
 #
-# A manifold that is an embedded manifold but not isometric and has no other implementation
+# A manifold that is an embedded manifold and `embed` is indicated as not an identity but not isometric and has no other implementation
 #
-struct NotImplementedEmbeddedManifold <: AbstractDecoratorManifold{ℝ} end
-function ManifoldsBase.get_embedding_type(::NotImplementedEmbeddedManifold)
-    return ManifoldsBase.EmbeddedManifoldType()
+struct NotImplementedEmbeddedManifoldNE <: AbstractDecoratorManifold{ℝ} end
+function ManifoldsBase.get_embedding_type(::NotImplementedEmbeddedManifoldNE)
+    return ManifoldsBase.EmbeddedManifoldType(ManifoldsBase.NeedsEmbedding())
+end
+
+#
+# A manifold that is an embedded manifold and `embed` is indicated as an identity but not isometric and has no other implementation
+#
+struct NotImplementedEmbeddedManifoldDNE <: AbstractDecoratorManifold{ℝ} end
+function ManifoldsBase.get_embedding_type(::NotImplementedEmbeddedManifoldDNE)
+    return ManifoldsBase.EmbeddedManifoldType(ManifoldsBase.DoesntNeedEmbedding())
 end
 
 #
@@ -332,6 +340,9 @@ end
         @test_throws MethodError injectivity_radius(M, p, ExponentialRetraction())
         @test_throws MethodError injectivity_radius(M, ExponentialRetraction())
 
+        @test inner(M, p, X, X) ≈ dot(X, X)
+        @test norm(M, p, X) ≈ norm(X)
+
         q = similar(p)
         copyto!(M, q, p)
         @test p == q
@@ -378,6 +389,11 @@ end
             for M2 in [NotImplementedIsometricEmbeddedManifoldNE(), NotImplementedIsometricEmbeddedManifoldDNE()]
                 @test base_manifold(M2) == M2
                 A = zeros(2)
+                if M2 isa NotImplementedIsometricEmbeddedManifoldDNE
+                    @test_throws MethodError ManifoldsBase.allocate_result(M2, zero_vector, A)
+                else
+                    @test size(ManifoldsBase.allocate_result(M2, zero_vector, A)) == size(A)
+                end
                 # Check that all of these report not to be implemented, i.e.
                 @test_throws MethodError exp(M2, [1, 2], [2, 3])
                 @test_throws MethodError ManifoldsBase.exp_fused(M2, [1, 2], [2, 3], 1.0)
@@ -416,12 +432,14 @@ end
             end
         end
         @testset "Nonisometric Embedding Fallback Error Tests" begin
-            M3 = NotImplementedEmbeddedManifold()
-            @test_throws MethodError inner(M3, [1, 2], [2, 3], [2, 3])
-            # this test started to randomly fail with StackOverflowError being thrown outside of a test
-            # @test_throws StackOverflowError manifold_dimension(M3)
-            @test_throws MethodError distance(M3, [1, 2], [2, 3])
-            @test_throws MethodError norm(M3, [1, 2], [2, 3])
+            for M3 in [NotImplementedEmbeddedManifoldNE(), NotImplementedEmbeddedManifoldDNE()]
+                @test_throws MethodError inner(M3, [1, 2], [2, 3], [2, 3])
+                # this test started to randomly fail with StackOverflowError being thrown outside of a test
+                # @test_throws StackOverflowError manifold_dimension(M3)
+                @test_throws MethodError distance(M3, [1, 2], [2, 3])
+                @test_throws MethodError norm(M3, [1, 2], [2, 3])
+                @test_throws MethodError zero_vector(M3, [1, 2])
+            end
         end
     end
     @testset "Explicit Embeddings using EmbeddedManifold" begin
