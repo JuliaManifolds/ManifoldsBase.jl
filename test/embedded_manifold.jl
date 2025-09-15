@@ -72,7 +72,7 @@ end
 ManifoldsBase.representation_size(::AnotherHalfPlaneManifold) = (2,)
 
 function ManifoldsBase.get_embedding_type(::AnotherHalfPlaneManifold)
-    return ManifoldsBase.IsometricallyEmbeddedManifoldType()
+    return ManifoldsBase.IsometricallyEmbeddedManifoldType(ManifoldsBase.NeedsEmbedding())
 end
 
 function ManifoldsBase.embed!(::AnotherHalfPlaneManifold, q, p)
@@ -332,6 +332,18 @@ end
         @test_throws MethodError injectivity_radius(M, p, ExponentialRetraction())
         @test_throws MethodError injectivity_radius(M, ExponentialRetraction())
 
+        q = similar(p)
+        copyto!(M, q, p)
+        @test p == q
+        Y = similar(X)
+        copyto!(M, Y, p, X)
+        @test Y == X
+        @test exp(M, p, X) ≈ p + X
+        exp!(M, q, p, X)
+        @test isapprox(M, q, p + X)
+
+        @test has_components(M)
+
         # test vector transports in the embedding
         m = EmbeddedVectorTransport(ParallelTransport())
         q = [2.0, 2.0]
@@ -364,7 +376,6 @@ end
         end
         @testset "Isometric Embedding Fallbacks & Error Tests" begin
             for M2 in [NotImplementedIsometricEmbeddedManifoldNE(), NotImplementedIsometricEmbeddedManifoldDNE()]
-                println(M2)
                 @test base_manifold(M2) == M2
                 A = zeros(2)
                 # Check that all of these report not to be implemented, i.e.

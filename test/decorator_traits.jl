@@ -52,10 +52,6 @@ ManifoldsBase.representation_size(::NonDecoratorManifold) = (2,)
     @test_throws MethodError parallel_transport_direction!(M, Y, p, X, X)
     @test_throws MethodError parallel_transport_to(M, p, X, q)
     @test_throws MethodError parallel_transport_to!(M, Y, p, X, q)
-
-    # trait defaults
-    @test ManifoldsBase.get_forwarding_type(M, exp) === StopForwardingType()
-    @test ManifoldsBase.get_forwarding_type(M, exp, p) === StopForwardingType()
 end
 
 # With even less, check that representation size stack overflows
@@ -63,6 +59,17 @@ struct NonDecoratorNonManifold <: AbstractDecoratorManifold{ManifoldsBase.ℝ} e
 @testset "Testing a NonDecoratorNonManifold - StopForwarding fallback returns nothing" begin
     N = NonDecoratorNonManifold()
     @test representation_size(N) === nothing
+end
+
+@testset "Non-decorator manifold trait defaults" begin
+    M = ProjManifold()
+    p = [
+        sqrt(2) / 2 0.0 0.0
+        0.0 sqrt(2) / 2 0.0
+    ]
+
+    @test ManifoldsBase.get_forwarding_type(M, exp) === StopForwardingType()
+    @test ManifoldsBase.get_forwarding_type(M, exp, p) === StopForwardingType()
 end
 
 abstract type AbstractA end
