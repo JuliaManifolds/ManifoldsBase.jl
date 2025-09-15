@@ -247,15 +247,12 @@ function allocate_result(M::PowerManifoldNestedReplacing, f, x...)
     end
 end
 function allocate_result_embedding(
-        M::PowerManifoldNestedReplacing,
-        f::typeof(project),
-        x...,
+        ::PowerManifoldNestedReplacing,
+        ::typeof(project),
+        x,
+        args...
     )
-    if length(x) == 0
-        return [allocate_result(M.manifold, f) for _ in get_iterator(M)]
-    else
-        return copy(x[1])
-    end
+    return copy(x)
 end
 # the following is not used but necessary to avoid ambiguities
 function allocate_result(
