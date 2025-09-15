@@ -1,6 +1,10 @@
 using Test
 using ManifoldsBase
 
+s = @__DIR__
+!(s in LOAD_PATH) && (push!(LOAD_PATH, s))
+using ManifoldsBaseTestUtils
+
 #
 # A Manifold decorator test - check that StopForwarding cases call Abstract and those fail with
 # MethodError due to ambiguities (between Abstract and Decorator)
