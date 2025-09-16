@@ -505,14 +505,22 @@ end
         M = SimpleEmbeddedTestManifold()
         p = [1.0, 2.0, 3.0]
         X = [2.0, 3.0, 4.0]
-        is_point(M, p, true)
-        is_vector(M, p, X, true)
+        vf = [1.0, 2.0, 3.0, 4.0]
+        is_point(M, p; error = :error)
+        is_vector(M, p, X; error = :error)
+        @test_throws ManifoldDomainError is_point(M, vf; error = :error)
+        @test_throws ManifoldDomainError is_vector(M, p, vf; error = :error)
+        @test_throws ManifoldDomainError is_vector(M, vf, X; error = :error)
     end
     @testset "EmbeddedTestManifold" begin
         M = EmbeddedTestManifold()
         p = [1.0, 2.0, 3.0]
         X = [2.0, 3.0, 4.0]
-        is_point(M, p, true)
-        is_vector(M, p, X, true)
+        vf = [1.0, 2.0, 3.0, 4.0]
+        is_point(M, p; error = :error)
+        is_vector(M, p, X; error = :error)
+        @test_throws ManifoldDomainError is_point(M, vf; error = :error)
+        @test_throws ManifoldDomainError is_vector(M, p, vf; error = :error)
+        @test_throws ManifoldDomainError is_vector(M, vf, X; error = :error)
     end
 end
