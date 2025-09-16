@@ -1,4 +1,4 @@
-using ManifoldsBase, Test
+using LinearAlgebra, ManifoldsBase, Test
 
 using ManifoldsBase: DefaultManifold, ℝ
 #
@@ -191,6 +191,26 @@ struct NotImplementedEmbeddedManifoldDNE <: AbstractDecoratorManifold{ℝ} end
 function ManifoldsBase.get_embedding_type(::NotImplementedEmbeddedManifoldDNE)
     return ManifoldsBase.EmbeddedManifoldType(ManifoldsBase.DoesntNeedEmbedding())
 end
+
+struct SimpleEmbeddedTestManifold <: AbstractDecoratorManifold{ℝ} end
+ManifoldsBase.get_embedding(::SimpleEmbeddedTestManifold) = DefaultManifold(3)
+function ManifoldsBase.get_forwarding_type(::SimpleEmbeddedTestManifold, ::Any, p = nothing)
+    return ManifoldsBase.EmbeddedSimpleForwardingType()
+end
+
+struct EmbeddedTestManifold <: AbstractDecoratorManifold{ℝ} end
+ManifoldsBase.get_embedding(::EmbeddedTestManifold) = DefaultManifold(3)
+function ManifoldsBase.get_forwarding_type(::EmbeddedTestManifold, ::Any, p = nothing)
+    return ManifoldsBase.EmbeddedForwardingType()
+end
+ManifoldsBase.embed(::EmbeddedTestManifold, p) = p
+ManifoldsBase.embed!(::EmbeddedTestManifold, q, p) = (q .= p)
+ManifoldsBase.embed(::EmbeddedTestManifold, p, X) = X
+ManifoldsBase.embed!(::EmbeddedTestManifold, Y, p, X) = (Y .= X)
+ManifoldsBase.project(::EmbeddedTestManifold, p) = p
+ManifoldsBase.project!(::EmbeddedTestManifold, q, p) = (q .= p)
+ManifoldsBase.project(::EmbeddedTestManifold, p, X) = X
+ManifoldsBase.project!(::EmbeddedTestManifold, Y, p, X) = (Y .= X)
 
 #
 # A Manifold with a fallback
@@ -480,5 +500,19 @@ end
         @test inner(M, [1, 0, 0], [1, 2, 3], [0, 1, 0]) == 2
         @test is_point(M, [1, 0, 0])
         @test ManifoldsBase.allocate_result(M, exp, [1.0, 0.0, 2.0]) isa Vector
+    end
+    @testset "SimpleEmbeddedTestManifold" begin
+        M = SimpleEmbeddedTestManifold()
+        p = [1.0, 2.0, 3.0]
+        X = [2.0, 3.0, 4.0]
+        is_point(M, p, true)
+        is_vector(M, p, X, true)
+    end
+    @testset "EmbeddedTestManifold" begin
+        M = EmbeddedTestManifold()
+        p = [1.0, 2.0, 3.0]
+        X = [2.0, 3.0, 4.0]
+        is_point(M, p, true)
+        is_vector(M, p, X, true)
     end
 end

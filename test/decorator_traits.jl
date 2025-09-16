@@ -81,10 +81,6 @@ abstract type DecoA <: AbstractA end
 # A few concrete types
 struct A <: AbstractA end
 struct A1 <: DecoA end
-struct A2 <: DecoA end
-struct A3 <: DecoA end
-struct A4 <: DecoA end
-struct A5 <: DecoA end
 
 h(::AbstractA, x::Float64, y; a = 1) = x + y - a
 h(::DecoA, x, y) = x + y
