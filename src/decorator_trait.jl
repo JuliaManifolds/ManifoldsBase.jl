@@ -464,13 +464,13 @@ function _is_point_forwarding(
         end
         !pt && return false # no error thrown (deactivated) but returned false -> return false
     catch e
-        if e isa DomainError || e isa AbstractManifoldDomainError
-            e = ManifoldDomainError(
+        !(e isa DomainError || e isa AbstractManifoldDomainError) && rethrow(e)
+        throw(
+            ManifoldDomainError(
                 "$p is not a point on $M because it is not a valid point in its embedding.",
                 e,
             )
-        end
-        throw(e) #an error occured that we do not handle ourselves -> rethrow.
+        )
     end
     mpe = check_point(M, p; kwargs...)
     if mpe !== nothing
@@ -523,13 +523,13 @@ function _is_vector_forwarding(
             ep = is_point(M, p; error = error, kwargs...)
             !ep && return false
         catch e
-            if e isa DomainError || e isa AbstractManifoldDomainError
+            !(e isa DomainError || e isa AbstractManifoldDomainError) && rethrow(e)
+            throw(
                 ManifoldDomainError(
                     "$X is not a tangent vector to $p on $M because $p is not a valid point on $p",
                     e,
                 )
-            end
-            throw(e)
+            )
         end
     end
     try
@@ -554,13 +554,13 @@ function _is_vector_forwarding(
         end
         !tv && return false # no error thrown (deactivated) but returned false -> return false
     catch e
-        if e isa DomainError || e isa AbstractManifoldDomainError
-            e = ManifoldDomainError(
+        !(e isa DomainError || e isa AbstractManifoldDomainError) && rethrow(e)
+        throw(
+            ManifoldDomainError(
                 "$X is not a tangent vector to $p on $M because it is not a valid tangent vector in its embedding.",
                 e,
             )
-        end
-        throw(e)
+        )
     end
     # Check (additional) local stuff
     mXe = check_vector(M, p, X; kwargs...)
