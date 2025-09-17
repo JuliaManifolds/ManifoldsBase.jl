@@ -108,7 +108,7 @@ macro invoke_maker(argnum, type, sig)
 end
 
 #TODO: Document thoroughly
-macro new_trait_function(
+macro trait_function(
         sig,
         include_forwards = :(
             (
