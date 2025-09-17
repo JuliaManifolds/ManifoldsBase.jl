@@ -450,14 +450,14 @@ end
 
 function _is_point_forwarding(
         T::Union{
-            EmbeddedForwardingType,
-            IsometricallyEmbeddedManifoldType,
+            EmbeddedForwardingType{D},
+            IsometricallyEmbeddedManifoldType{D},
         },
         M::AbstractDecoratorManifold,
         p;
         error::Symbol = :none,
         kwargs...,
-    )
+    ) where {D <: AbstractEmbeddingDirectness}
     # to be safe check_size first
     es = check_size(M, p)
     if es !== nothing
@@ -468,7 +468,7 @@ function _is_point_forwarding(
         return false
     end
     try
-        if T isa EmbeddedForwardingType
+        if D isa IndirectEmbedding
             pt = is_point(get_embedding(M, p), embed(M, p); error = error, kwargs...)
         else
             pt = is_point(get_embedding(M, p), p; error = error, kwargs...)
@@ -507,8 +507,8 @@ end
 
 function _is_vector_forwarding(
         T::Union{
-            EmbeddedForwardingType,
-            IsometricallyEmbeddedManifoldType,
+            EmbeddedForwardingType{D},
+            IsometricallyEmbeddedManifoldType{D},
         },
         M::AbstractDecoratorManifold,
         p,
@@ -516,7 +516,7 @@ function _is_vector_forwarding(
         check_base_point::Bool = true;
         error::Symbol = :none,
         kwargs...,
-    )
+    ) where {D <: AbstractEmbeddingDirectness}
     es = check_size(M, p, X)
     if es !== nothing
         (error === :error) && throw(es)
@@ -543,7 +543,7 @@ function _is_vector_forwarding(
         end
     end
     try
-        if T isa EmbeddedForwardingType
+        if D isa IndirectEmbedding
             tv = is_vector(
                 get_embedding(M, p),
                 embed(M, p),
