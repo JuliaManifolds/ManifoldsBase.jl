@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.3.0] unreleased
 
+### Added
+
+* an interface for quotient manifolds.
+  this also unified the naming a bit. Formerly `differential_canonical_project` is now `diff_canonical_project` and `get_total_space` is now `total_space`.
+
 ### Changed
 
 * refactor the trait system to no longer use a list of traits but single traits separately for the metric and the embedding specification

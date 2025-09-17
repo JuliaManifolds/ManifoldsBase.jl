@@ -20,6 +20,30 @@ Pages = ["src/ProductManifold.jl"]
 Order = [:macro, :type, :function]
 ```
 
+## Quotient manifolds
+
+A manifold ``\mathcal M`` is then a a quotient manifold of another manifold ``\mathcal N``,
+i.e. for an [equivalence relation](https://en.wikipedia.org/wiki/Equivalence_relation) ``∼``
+on ``\mathcal N`` we have
+
+```math
+    \mathcal M = \mathcal N / ∼ = \bigl\{ [p] : p ∈ \mathcal N \bigr\},
+```
+
+where ``[p] ≔ \{ q ∈ \mathcal N : q ∼ p\}`` denotes the equivalence class containing ``p``.
+For more details see Subsection 3.4.1 [AbsilMahonySepulchre:2008](@cite).
+
+This manifold type models an explicit quotient structure.
+This should be done if either the default implementation of ``\mathcal M``
+uses another representation different from the quotient structure or if
+it provides a (default) quotient structure that is different from the one introduced here.
+
+```@autodocs
+Modules = [ManifoldsBase]
+Pages = ["quotientmanifold.jl"]
+Order = [:macro, :type, :function]
+```
+
 ## Fiber
 
 ```@autodocs
