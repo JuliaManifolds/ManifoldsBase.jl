@@ -201,7 +201,7 @@ end
 struct EmbeddedTestManifold <: AbstractDecoratorManifold{ℝ} end
 ManifoldsBase.get_embedding(::EmbeddedTestManifold) = DefaultManifold(3)
 function ManifoldsBase.get_forwarding_type(::EmbeddedTestManifold, ::Any, p = nothing)
-    return ManifoldsBase.EmbeddedForwardingType()
+    return ManifoldsBase.EmbeddedForwardingType(ManifoldsBase.IndirectEmbedding())
 end
 ManifoldsBase.embed(::EmbeddedTestManifold, p) = p
 ManifoldsBase.embed!(::EmbeddedTestManifold, q, p) = (q .= p)
