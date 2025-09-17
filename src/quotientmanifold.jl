@@ -28,7 +28,7 @@ _doc_diff_canonical_project = @doc raw"""
     diff_canonical_project!(M::AbstractManifold, Y, p, X)
 
 Compute the differential of the canonical projection ``π`` on a quotient manifold
-``\mathcal M``, e.g. a [`QuotientManifold`](@ref).
+``\mathcal M``.
 The canonical (or natural) projection ``π`` from the total space ``\mathcal N``
 onto ``\mathcal M``, such that its differential
 
@@ -36,14 +36,13 @@ onto ``\mathcal M``, such that its differential
  Dπ(p) : T_p\mathcal N → T_{π(p)}\mathcal M
 ```
 
-where again the total space might be implicitly assumed, or explicitly when using a
-[`QuotientManifold`](@ref) `M`. So here `p` is a point on `N` and `X` is from ``T_p\mathcal N``.
+where again the total space might be implicitly assumed.
 """
 
 @doc "$(_doc_diff_canonical_project)"
 function diff_canonical_project(M::AbstractManifold, p, X)
-    q = allocate_result(M, differential_canonical_project, p, X)
-    return differential_canonical_project!(M, q, p, X)
+    q = allocate_result(M, diff_canonical_project, p, X)
+    return diff_canonical_project!(M, q, p, X)
 end
 
 function diff_canonical_project! end
@@ -94,7 +93,7 @@ function total_space end
 @doc raw"""
     total_space(M::AbstractManifold)
 
-Return the total space of a quotient manifold, e.g. a [`QuotientManifold`](@ref).
+Return the total space of a quotient manifold.
 """
 total_space(::AbstractManifold)
 
