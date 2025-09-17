@@ -1099,7 +1099,8 @@ sectional_curvature_min(M::AbstractManifold)
 
 Converts a size given by `Tuple{N, M, ...}` into a tuple `(N, M, ...)`.
 """
-Base.@pure size_to_tuple(::Type{S}) where {S <: Tuple} = tuple(S.parameters...)
+Base.@pure size_to_tuple(::Type{S}) where {S <: Tuple} = tuple(S.parameters...) # COV_EXCL_LINE
+# the line above is excluded from coverage, since codecov has sometimes troubles with macros.
 
 """
     tangent_vector_type(::AbstractManifold, point_type::Type)
