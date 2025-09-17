@@ -687,4 +687,11 @@ using ManifoldsBaseTestUtils
         @test ManifoldsBase.get_forwarding_type(ManifoldsBase.DefaultManifold(2), [1, 2]) ==
             ManifoldsBase.StopForwardingType()
     end
+    @testset "Error on nonnumeric types on Complex" begin
+        Mc = ManifoldsBase.DefaultManifold(3; field = ManifoldsBase.ℂ)
+        # Error on nonnumber points and vectors
+        @test_throws DomainError is_point(Mc, ["a", "b", "c"]; error = :error)
+        @test_throws DomainError is_vector(Mc, zeros(3), ["a", "b", "c"]; error = :error)
+        @test_throws DomainError is_vector(Mc, ["a", "b", "c"], zeros(3); error = :error)
+    end
 end
