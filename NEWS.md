@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 * an interface for quotient manifolds.
-  this also unified the naming a bit. Formerly `differential_canonical_project` is now `diff_canonical_project` and `get_total_space` is now `total_space`.
+  this also unified the naming a bit. Formerly `differential_canonical_project` is now `diff_canonical_project`.
 
 ### Changed
 

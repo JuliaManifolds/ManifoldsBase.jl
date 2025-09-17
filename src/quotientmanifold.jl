@@ -89,13 +89,13 @@ function horizontal_component! end
 @doc "$(_doc_horizontal_lift)"
 horizontal_component!(N::AbstractManifold, Y, p, X)
 
-function total_space end
+function get_total_space end
 @doc raw"""
-    total_space(M::AbstractManifold)
+    get_total_space(M::AbstractManifold)
 
 Return the total space of a quotient manifold.
 """
-total_space(::AbstractManifold)
+get_total_space(::AbstractManifold)
 
 _doc_vertical_component = raw"""
     vertical_component(N::AbstractManifold, p, X)
