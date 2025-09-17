@@ -72,7 +72,7 @@ end
 ManifoldsBase.representation_size(::AnotherHalfPlaneManifold) = (2,)
 
 function ManifoldsBase.get_embedding_type(::AnotherHalfPlaneManifold)
-    return ManifoldsBase.IsometricallyEmbeddedManifoldType(ManifoldsBase.NeedsEmbedding())
+    return ManifoldsBase.IsometricallyEmbeddedManifoldType(ManifoldsBase.DirectEmbedding())
 end
 
 function ManifoldsBase.embed!(::AnotherHalfPlaneManifold, q, p)
@@ -165,7 +165,7 @@ end
 #
 struct NotImplementedIsometricEmbeddedManifoldNE <: AbstractDecoratorManifold{ℝ} end
 function ManifoldsBase.get_embedding_type(::NotImplementedIsometricEmbeddedManifoldNE)
-    return ManifoldsBase.IsometricallyEmbeddedManifoldType(ManifoldsBase.NeedsEmbedding())
+    return ManifoldsBase.IsometricallyEmbeddedManifoldType(ManifoldsBase.DirectEmbedding())
 end
 
 #
@@ -173,7 +173,7 @@ end
 #
 struct NotImplementedIsometricEmbeddedManifoldDNE <: AbstractDecoratorManifold{ℝ} end
 function ManifoldsBase.get_embedding_type(::NotImplementedIsometricEmbeddedManifoldDNE)
-    return ManifoldsBase.IsometricallyEmbeddedManifoldType(ManifoldsBase.DoesntNeedEmbedding())
+    return ManifoldsBase.IsometricallyEmbeddedManifoldType(ManifoldsBase.IndirectEmbedding())
 end
 
 #
@@ -181,7 +181,7 @@ end
 #
 struct NotImplementedEmbeddedManifoldNE <: AbstractDecoratorManifold{ℝ} end
 function ManifoldsBase.get_embedding_type(::NotImplementedEmbeddedManifoldNE)
-    return ManifoldsBase.EmbeddedManifoldType(ManifoldsBase.NeedsEmbedding())
+    return ManifoldsBase.EmbeddedManifoldType(ManifoldsBase.DirectEmbedding())
 end
 
 #
@@ -189,13 +189,13 @@ end
 #
 struct NotImplementedEmbeddedManifoldDNE <: AbstractDecoratorManifold{ℝ} end
 function ManifoldsBase.get_embedding_type(::NotImplementedEmbeddedManifoldDNE)
-    return ManifoldsBase.EmbeddedManifoldType(ManifoldsBase.DoesntNeedEmbedding())
+    return ManifoldsBase.EmbeddedManifoldType(ManifoldsBase.IndirectEmbedding())
 end
 
 struct SimpleEmbeddedTestManifold <: AbstractDecoratorManifold{ℝ} end
 ManifoldsBase.get_embedding(::SimpleEmbeddedTestManifold) = DefaultManifold(3)
 function ManifoldsBase.get_forwarding_type(::SimpleEmbeddedTestManifold, ::Any, p = nothing)
-    return ManifoldsBase.EmbeddedSimpleForwardingType()
+    return ManifoldsBase.EmbeddedForwardingType(ManifoldsBase.DirectEmbedding())
 end
 
 struct EmbeddedTestManifold <: AbstractDecoratorManifold{ℝ} end
@@ -406,7 +406,7 @@ end
             @test @inferred !isapprox(M, [1, 2], [2, 3])
             @test @inferred !isapprox(M, [1, 2], [2, 3], [4, 5])
 
-            @test ManifoldsBase.get_forwarding_type_embedding(ManifoldsBase.EmbeddedSubmanifoldType{ManifoldsBase.NeedsEmbedding}(), M, exp) === EmbeddedForwardingType()
+            @test ManifoldsBase.get_forwarding_type_embedding(ManifoldsBase.EmbeddedSubmanifoldType{ManifoldsBase.DirectEmbedding}(), M, exp) === EmbeddedForwardingType()
         end
         @testset "Isometric Embedding Fallbacks & Error Tests" begin
             for M2 in [NotImplementedIsometricEmbeddedManifoldNE(), NotImplementedIsometricEmbeddedManifoldDNE()]

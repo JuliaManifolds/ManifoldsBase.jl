@@ -112,7 +112,7 @@ macro trait_function(
         sig,
         include_forwards = :(
             (
-                EmbeddedSimpleForwardingType,
+                EmbeddedForwardingType{DirectEmbedding},
                 SimpleForwardingType,
                 StopForwardingType,
             )
@@ -148,11 +148,11 @@ macro trait_function(
             return ($fname_fwd)(($gft), $(argnames...); $(kwargs_call...))
         end
     end
-    if :EmbeddedSimpleForwardingType in include_forwards.args
+    if :(EmbeddedForwardingType{DirectEmbedding}) in include_forwards.args
         block = quote
             $block
             @inline function ($fname_fwd)(
-                    ::ManifoldsBase.EmbeddedSimpleForwardingType,
+                    ::ManifoldsBase.EmbeddedForwardingType{ManifoldsBase.DirectEmbedding},
                     $(callargs...);
                     $(kwargs_list...),
                 ) where {$(where_exprs...)}

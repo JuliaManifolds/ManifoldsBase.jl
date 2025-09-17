@@ -1237,7 +1237,7 @@ export TangentSpace, TangentSpaceType
 export CotangentSpace, CotangentSpaceType
 export AbstractDecoratorManifold
 export AbstractForwardingType, StopForwardingType, SimpleForwardingType
-export AbstractEmbeddedForwardingType, EmbeddedForwardingType, EmbeddedSimpleForwardingType
+export AbstractEmbeddedForwardingType, EmbeddedForwardingType
 export ValidationManifold,
     ValidationMPoint, ValidationTangentVector, ValidationCotangentVector
 export EmbeddedManifold

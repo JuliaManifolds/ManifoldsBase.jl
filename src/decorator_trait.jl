@@ -6,6 +6,29 @@ manifold_dimension(M::AbstractDecoratorManifold) = manifold_dimension(base_manif
 #
 # Forwarding types
 
+
+"""
+    abstract type AbstractEmbeddingDirectness end
+
+Supertype for [`DirectEmbedding`](@ref) and [`IndirectEmbedding`](@ref) that indicate
+whether [`embed`](@ref) on a manifold is an identity or not.
+"""
+abstract type AbstractEmbeddingDirectness end
+
+"""
+    struct DirectEmbedding <: AbstractEmbeddingDirectness end
+
+A struct indicating that `embed` *is* an identity function on a manifold.
+"""
+struct DirectEmbedding <: AbstractEmbeddingDirectness end
+
+"""
+    struct IndirectEmbedding <: AbstractEmbeddingDirectness end
+
+A struct indicating that `embed` *is not* an identity function on a manifold.
+"""
+struct IndirectEmbedding <: AbstractEmbeddingDirectness end
+
 """
     AbstractForwardingType
 
@@ -39,22 +62,17 @@ A type that indicates forwarding to the wrapped manifold without any changes.
 struct SimpleForwardingType <: AbstractForwardingType end
 
 """
-    EmbeddedForwardingType <: AbstractEmbeddedForwardingType
+    EmbeddedForwardingType{TED<:AbstractEmbeddingDirectness} <: AbstractEmbeddedForwardingType
 
-A property of an embedded manifold that indicates that [`embed`](@ref) and [`project`](@ref) are available
-and that a function using this trait type forwards to the embedding using these.
+A property of an embedded manifold that indicates that [`embed`](@ref) and [`project`](@ref)
+are available and that a function using this trait type forwards to the embedding.
+The type parameter `TED`, a subtype of [`AbstractEmbeddingDirectness`](@ref), indicates
+whether `embed` on points and tangent vectors needs to be called or is an identity and can
+be skipped.
 """
-struct EmbeddedForwardingType <: AbstractEmbeddedForwardingType end
+struct EmbeddedForwardingType{TED <: AbstractEmbeddingDirectness} <: AbstractEmbeddedForwardingType end
 
-"""
-    EmbeddedSimpleForwardingType <: AbstractEmbeddedForwardingType
-
-A property of an embedded manifold that indicates that a function should forward to the embedding,
-and even if [`embed`](@ref) and [`project`](@ref) are available, to not use these,
-since they are the identity, but calling them might allocate unnecessarily.
-"""
-struct EmbeddedSimpleForwardingType <: AbstractEmbeddedForwardingType end
-
+EmbeddedForwardingType(ed::AbstractEmbeddingDirectness = IndirectEmbedding()) = EmbeddedForwardingType{typeof(ed)}()
 
 """
     get_forwarding_type(M::AbstractManifold, f)
@@ -68,12 +86,6 @@ to different representations of the manifold and hence possibly different embedd
 """
 get_forwarding_type(::AbstractManifold, f) = StopForwardingType()
 get_forwarding_type(M::AbstractManifold, f, p) = get_forwarding_type(M, f)
-
-
-abstract type AbstractEmbeddingNeed end
-
-struct NeedsEmbedding <: AbstractEmbeddingNeed end
-struct DoesntNeedEmbedding <: AbstractEmbeddingNeed end
 
 """
     AbstractEmbeddingType
@@ -99,9 +111,9 @@ struct NotEmbeddedManifoldType <: AbstractEmbeddingType end
 
 A property of an embedded manifold that indicates that `embed` and `project` are available.
 """
-struct EmbeddedManifoldType{EN <: AbstractEmbeddingNeed} <: AbstractEmbeddingType end
+struct EmbeddedManifoldType{EN <: AbstractEmbeddingDirectness} <: AbstractEmbeddingType end
 
-function EmbeddedManifoldType(en::AbstractEmbeddingNeed = DoesntNeedEmbedding())
+function EmbeddedManifoldType(en::AbstractEmbeddingDirectness = IndirectEmbedding())
     return EmbeddedManifoldType{typeof(en)}()
 end
 
@@ -113,10 +125,10 @@ an isometrically embedded manifold.
 
 Here, additionally, metric related functions like [`inner`](@ref) and [`norm`](@ref) are passed to the embedding
 """
-struct IsometricallyEmbeddedManifoldType{EN <: AbstractEmbeddingNeed} <: AbstractEmbeddingType end
+struct IsometricallyEmbeddedManifoldType{EN <: AbstractEmbeddingDirectness} <: AbstractEmbeddingType end
 
 function IsometricallyEmbeddedManifoldType(
-        en::AbstractEmbeddingNeed = DoesntNeedEmbedding(),
+        en::AbstractEmbeddingDirectness = IndirectEmbedding(),
     )
     return IsometricallyEmbeddedManifoldType{typeof(en)}()
 end
@@ -132,9 +144,9 @@ In this property, additionally to the isometric embedded manifold, all retractio
 and vectors transports, especially [`exp`](@ref), [`log`](@ref), and [`parallel_transport_to`](@ref)
 are passed to the embedding.
 """
-struct EmbeddedSubmanifoldType{EN <: AbstractEmbeddingNeed} <: AbstractEmbeddingType end
+struct EmbeddedSubmanifoldType{EN <: AbstractEmbeddingDirectness} <: AbstractEmbeddingType end
 
-function EmbeddedSubmanifoldType(en::AbstractEmbeddingNeed = DoesntNeedEmbedding())
+function EmbeddedSubmanifoldType(en::AbstractEmbeddingDirectness = IndirectEmbedding())
     return EmbeddedSubmanifoldType{typeof(en)}()
 end
 
@@ -215,7 +227,7 @@ end
 end
 
 @inline function _allocate_result_forwarding(
-        ::EmbeddedSimpleForwardingType,
+        ::EmbeddedForwardingType{DirectEmbedding},
         M::AbstractDecoratorManifold,
         f::TF,
         x::Vararg{Any, N},
@@ -302,7 +314,7 @@ function _check_size_forwarding(::EmbeddedForwardingType, M::AbstractDecoratorMa
     return nothing
 end
 function _check_size_forwarding(
-        ::EmbeddedSimpleForwardingType,
+        ::EmbeddedForwardingType{DirectEmbedding},
         M::AbstractDecoratorManifold,
         p,
     )
@@ -335,7 +347,7 @@ function _check_size_forwarding(
     return nothing
 end
 function _check_size_forwarding(
-        ::EmbeddedSimpleForwardingType,
+        ::EmbeddedForwardingType{DirectEmbedding},
         M::AbstractDecoratorManifold,
         p,
         X,
@@ -439,7 +451,6 @@ end
 function _is_point_forwarding(
         T::Union{
             EmbeddedForwardingType,
-            EmbeddedSimpleForwardingType,
             IsometricallyEmbeddedManifoldType,
         },
         M::AbstractDecoratorManifold,
@@ -497,7 +508,6 @@ end
 function _is_vector_forwarding(
         T::Union{
             EmbeddedForwardingType,
-            EmbeddedSimpleForwardingType,
             IsometricallyEmbeddedManifoldType,
         },
         M::AbstractDecoratorManifold,
@@ -633,7 +643,7 @@ end
 @trait_function Random.rand!(M::AbstractDecoratorManifold, p; kwargs...)
 
 @trait_function Random.rand(rng::AbstractRNG, M::AbstractDecoratorManifold; kwargs...) (
-    EmbeddedSimpleForwardingType,
+    EmbeddedForwardingType{DirectEmbedding},
     SimpleForwardingType,
     StopForwardingType,
 ) 2
@@ -643,12 +653,12 @@ end
     M::AbstractDecoratorManifold,
     p;
     kwargs...,
-) (EmbeddedSimpleForwardingType, SimpleForwardingType, StopForwardingType) 2
+) (EmbeddedForwardingType{DirectEmbedding}, SimpleForwardingType, StopForwardingType) 2
 
 @trait_function representation_size(M::AbstractDecoratorManifold)
 
 function _representation_size_forwarding(
-        ::Union{EmbeddedForwardingType, EmbeddedSimpleForwardingType},
+        ::Union{EmbeddedForwardingType, EmbeddedForwardingType{DirectEmbedding}},
         M::AbstractDecoratorManifold,
     )
     return representation_size(get_embedding(M))
@@ -799,16 +809,16 @@ for mf in vcat(
     )
     @eval begin
         function get_forwarding_type_embedding(
-                ::EmbeddedSubmanifoldType{NeedsEmbedding},
+                ::EmbeddedSubmanifoldType{DirectEmbedding},
                 M::AbstractDecoratorManifold, ::typeof($mf),
             )
             return EmbeddedForwardingType()
         end
         function get_forwarding_type_embedding(
-                ::EmbeddedSubmanifoldType{DoesntNeedEmbedding},
+                ::EmbeddedSubmanifoldType{IndirectEmbedding},
                 M::AbstractDecoratorManifold, ::typeof($mf),
             )
-            return EmbeddedSimpleForwardingType()
+            return EmbeddedForwardingType(DirectEmbedding())
         end
     end
 end
@@ -816,16 +826,16 @@ end
 for mf in vcat(forward_functions_isometric, forward_functions_embedded)
     @eval begin
         function get_forwarding_type_embedding(
-                ::IsometricallyEmbeddedManifoldType{NeedsEmbedding},
+                ::IsometricallyEmbeddedManifoldType{DirectEmbedding},
                 M::AbstractDecoratorManifold, ::typeof($mf),
             )
             return EmbeddedForwardingType()
         end
         function get_forwarding_type_embedding(
-                ::IsometricallyEmbeddedManifoldType{DoesntNeedEmbedding},
+                ::IsometricallyEmbeddedManifoldType{IndirectEmbedding},
                 M::AbstractDecoratorManifold, ::typeof($mf),
             )
-            return EmbeddedSimpleForwardingType()
+            return EmbeddedForwardingType(DirectEmbedding())
         end
     end
 end
@@ -833,16 +843,16 @@ end
 for mf in forward_functions_embedded
     @eval begin
         function get_forwarding_type_embedding(
-                ::EmbeddedManifoldType{NeedsEmbedding},
+                ::EmbeddedManifoldType{DirectEmbedding},
                 M::AbstractDecoratorManifold, ::typeof($mf),
             )
             return EmbeddedForwardingType()
         end
         function get_forwarding_type_embedding(
-                ::EmbeddedManifoldType{DoesntNeedEmbedding},
+                ::EmbeddedManifoldType{IndirectEmbedding},
                 M::AbstractDecoratorManifold, ::typeof($mf),
             )
-            return EmbeddedSimpleForwardingType()
+            return EmbeddedForwardingType(DirectEmbedding())
         end
     end
 end
