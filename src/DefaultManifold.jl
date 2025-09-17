@@ -57,6 +57,39 @@ function check_approx(M::DefaultManifold, p, X, Y; kwargs...)
     return ApproximatelyError(v, s)
 end
 
+
+function check_point(M::DefaultManifold{𝔽}, p) where {𝔽}
+    if (𝔽 === ℝ) && !(eltype(p) <: Real)
+        return DomainError(
+            eltype(p),
+            "The matrix $(p) is not a real-valued matrix, so it does not lie on $(M).",
+        )
+    end
+    if (𝔽 === ℂ) && !(eltype(p) <: Real) && !(eltype(p) <: Complex)
+        return DomainError(
+            eltype(p),
+            "The matrix $(p) is neither a real- nor complex-valued matrix, so it does not lie on $(M).",
+        )
+    end
+    return nothing
+end
+
+function check_vector(M::DefaultManifold{𝔽}, p, X; kwargs...) where {𝔽}
+    if (𝔽 === ℝ) && !(eltype(X) <: Real)
+        return DomainError(
+            eltype(X),
+            "The matrix $(X) is not a real-valued matrix, so it can not be a tangent vector to $(p) on $(M).",
+        )
+    end
+    if (𝔽 === ℂ) && !(eltype(X) <: Real) && !(eltype(X) <: Complex)
+        return DomainError(
+            eltype(X),
+            "The matrix $(X) is neither a real- nor complex-valued matrix, so it can not be a tangent vector to $(p) on $(M).",
+        )
+    end
+    return nothing
+end
+
 distance(::DefaultManifold, p, q, r::Real = 2) = norm(p - q, r)
 
 embed(::DefaultManifold, p) = p

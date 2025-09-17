@@ -511,6 +511,10 @@ end
         @test_throws ManifoldDomainError is_point(M, vf; error = :error)
         @test_throws ManifoldDomainError is_vector(M, p, vf; error = :error)
         @test_throws ManifoldDomainError is_vector(M, vf, X; error = :error)
+        # Triggert actual test in embedding to fail
+        @test_throws ManifoldDomainError is_point(M, [1.0, 2.0im, 3.0]; error = :error)
+        @test_throws ManifoldDomainError is_vector(M, [1.0, 2.0im, 3.0], X; error = :error)
+        @test_throws ManifoldDomainError is_vector(M, p, [1.0, 2.0im, 3.0]; error = :error)
     end
     @testset "EmbeddedTestManifold" begin
         M = EmbeddedTestManifold()
@@ -522,5 +526,9 @@ end
         @test_throws ManifoldDomainError is_point(M, vf; error = :error)
         @test_throws ManifoldDomainError is_vector(M, p, vf; error = :error)
         @test_throws ManifoldDomainError is_vector(M, vf, X; error = :error)
+        # Triggert actual test in embedding to fail
+        @test_throws ManifoldDomainError is_point(M, [1.0, 2.0im, 3.0]; error = :error)
+        @test_throws ManifoldDomainError is_vector(M, [1.0, 2.0im, 3.0], X; error = :error)
+        @test_throws ManifoldDomainError is_vector(M, p, [1.0, 2.0im, 3.0]; error = :error)
     end
 end
