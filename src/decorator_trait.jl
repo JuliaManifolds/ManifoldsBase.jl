@@ -468,7 +468,7 @@ function _is_point_forwarding(
         return false
     end
     try
-        if D isa IndirectEmbedding
+        if (D<:IndirectEmbedding)
             pt = is_point(get_embedding(M, p), embed(M, p); error = error, kwargs...)
         else
             pt = is_point(get_embedding(M, p), p; error = error, kwargs...)
@@ -543,7 +543,7 @@ function _is_vector_forwarding(
         end
     end
     try
-        if D isa IndirectEmbedding
+        if (D <: IndirectEmbedding)
             tv = is_vector(
                 get_embedding(M, p),
                 embed(M, p),

@@ -1,6 +1,6 @@
 # A Decorator for manifolds
 
-Several properties of a manifold are often implicitly assumed, for example the choice of the (Riemannian) metric, the group structure or the embedding. The latter shall serve as an example how to either implicitly or explicitly specify the embedding to avoid re-implementations and/or distinguish different embeddings.
+Several properties of a manifold are often implicitly assumed, for example the choice of the (Riemannian) metric or the embedding. The latter shall serve as an example how to either implicitly or explicitly specify the embedding to avoid re-implementations and/or distinguish different embeddings.
 
 ## The abstract decorator
 
@@ -21,7 +21,11 @@ If the manifold is even isometrically embedded, it is embedded but also inherits
 But it also inherits the functions defined for the plain embedding, for example checking some conditions for the validity of points and vectors.
 If it is even a submanifold, also further functions are inherited like the [`shortest_geodesic`](@ref).
 
-We use a variation of [Tim Holy's Traits Trick](https://github.com/JuliaLang/julia/issues/2345#issuecomment-54537633) (THTT) which takes into account this nestedness of traits.
+We use a variation of [Tim Holy's Traits Trick](https://github.com/JuliaLang/julia/issues/2345#issuecomment-54537633) (THTT) which takes into account kind of traits.
+
+To be precise we have a generic [`AbstractForwardingType`](@ref) to indicate that on the decorator manifold
+we want to (or not want to) forward a certain function.
+To add more semantics one can use subtypes of this type like [`AbstractEmbeddedForwardingType`](@ref) to indicate how to forward certain functions for the embedding type.
 
 ```@autodocs
 Modules = [ManifoldsBase]
