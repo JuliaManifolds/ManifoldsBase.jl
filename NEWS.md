@@ -5,7 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.3.0] unreleased
+## [2.0.0] unreleased
+
+While this release should be mostly backward compatible, especially when using defined manifolds from `Manifolds.jl`, some breaking changes were introduced.
+To be precise, defining and using traits e.g. to dispatch functions to the embedding changed internally.
+If you defined your own manifolds and used traits, please check the documentation of the new trait
 
 ### Added
 
@@ -16,7 +20,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * refactor the trait system to no longer use a list of traits but single traits separately for the metric and the embedding specification
 * Introduce an `is_embedded` trait to check if a manifold is embedded.
-* introduce a
 * Switch to using [Runic.jl](https://github.com/fredrikekre/Runic.jl) as code formatter
 
 ## [1.2.0] 08/05/2025
