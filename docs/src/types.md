@@ -11,7 +11,7 @@ AbstractManifold
 
 which should store information about the manifold, for example parameters inherent to the manifold.
 
-In order of parameters for any subtype of [`AbstractManifold`](@ref) it would be good if the first parameter is the number type that the abstract type has as well.
+In order of parameters for any subtype of [`AbstractManifold`](@ref) it would be good if the first parameter is the number type that the abstract type has as well, if it is not fixed to a specific one.
 The second one should be the type of field type for size information. This might be the dimension of the manifold, like for the [`Sphere`](@extref `Manifolds.Sphere`) or any other number(s) determining the manifolds representation or dimension, like the matrix size for the [`SymmetricPositiveDefinite`](@extref `Manifolds.SymmetricPositiveDefinite`) manifold.
 
 ## Points on a manifold
