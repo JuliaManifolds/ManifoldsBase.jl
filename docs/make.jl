@@ -107,7 +107,7 @@ end
 generated_path = joinpath(@__DIR__, "src")
 base_url = "https://github.com/JuliaManifolds/Manifolds.jl/blob/master/"
 isdir(generated_path) || mkdir(generated_path)
-for fname in ["NEWS.md",]
+for fname in ["NEWS.md"]
     open(joinpath(generated_path, fname), "w") do io
         # Point to source license file
         println(
