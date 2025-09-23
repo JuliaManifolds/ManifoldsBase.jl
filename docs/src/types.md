@@ -3,13 +3,16 @@
 ## The `AbstractManifold`
 
 The main type is the [`AbstractManifold`](@ref). It represents the manifold per se.
-Throughout the documentation of `ManifoldsBase.jl` we might use the [Euclidean Space](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/euclidean.html) and the [Sphere](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/sphere.html) (both implemented in [Manifolds.jl](https://github.com/JuliaManifolds/Manifolds.jl)) as easy examples to illustrate properties and features of this interface on concrete examples.
+Throughout the documentation of `ManifoldsBase.jl` we might use the [Euclidean Space](@extref `Manifolds.Euclidean`) and the [Sphere](@extref `Manifolds.Sphere`) (both implemented in [Manifolds.jl](https://github.com/JuliaManifolds/Manifolds.jl)) as easy examples to illustrate properties and features of this interface on concrete examples.
 
 ```@docs
 AbstractManifold
 ```
 
 which should store information about the manifold, for example parameters inherent to the manifold.
+
+In order of parameters for any subtype of [`AbstractManifold`](@ref) it would be good if the first parameter is the number type that the abstract type has as well.
+The second one should be the type of field type for size information. This might be the dimension of the manifold, like for the [`Sphere`](@extref `Manifolds.Sphere`) or any other number(s) determining the manifolds representation or dimension, like the matrix size for the [`SymmetricPositiveDefinite`](@extref `Manifolds.SymmetricPositiveDefinite`) manifold.
 
 ## Points on a manifold
 

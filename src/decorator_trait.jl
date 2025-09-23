@@ -536,7 +536,7 @@ function _is_vector_forwarding(
             !(e isa DomainError || e isa AbstractManifoldDomainError) && rethrow(e)
             throw(
                 ManifoldDomainError(
-                    "$X is not a tangent vector to $p on $M because $p is not a valid point on $p",
+                    "$X is not a tangent vector to $p on $M because $p is not a valid point on $M",
                     e,
                 )
             )
