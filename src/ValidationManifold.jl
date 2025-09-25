@@ -210,10 +210,6 @@ const ValidationCotangentVector = ValidationFibreVector{CotangentSpaceType}
 
 @eval @manifold_element_forwards ValidationMPoint value
 
-@inline function active_traits(f, ::ValidationManifold, ::Any...)
-    return merge_traits(IsExplicitDecorator())
-end
-
 """
     internal_value(p)
 
@@ -726,6 +722,8 @@ function rand(M::ValidationManifold; vector_at = nothing, kwargs...)
     end
     return pX
 end
+
+representation_size(M::ValidationManifold) = representation_size(M.manifold)
 
 function riemann_tensor(M::ValidationManifold, p, X, Y, Z; kwargs...)
     is_point(M, p; within = riemann_tensor, context = (:Input,), kwargs...)

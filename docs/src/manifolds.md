@@ -19,11 +19,9 @@ The embedded manifold is a manifold ``\mathcal M`` which is modelled _explicitly
 Most prominently [`is_point`](@ref) and [`is_vector`](@ref) of an embedded manifold are implemented to check whether the point is a valid point in the embedding. This can of course still be extended by further tests.
 `ManifoldsBase.jl` provides two possibilities of easily introducing this in order to dispatch some functions to the embedding.
 
-### [Implicit case: the `IsEmbeddedManifold` Trait](@id subsec-implicit-embedded)
+### [Implicit case: the decorator Trait](@id subsec-implicit-embedded)
 
-For the implicit case, your manifold has to be a subtype of the [`AbstractDecoratorManifold`](@ref).
-Adding a method to the [`active_traits`](@ref ManifoldsBase.active_traits) function for a manifold that returns an [`AbstractTrait`](@ref)
-[`IsEmbeddedManifold`](@ref), makes that manifold an embedded manifold. You just have to also define [`get_embedding`](@ref) so that appropriate functions are passed on to that embedding.
+For the implicit case, your manifold has to be a subtype of the [`AbstractDecoratorManifold`](@ref) and specifying the [`get_embedding_type`](@ref) makes that manifold an embedded manifold. You just have to also define [`get_embedding`](@ref) so that appropriate functions are passed on to that embedding. Which are passed on also depends on the [`AbstractForwardingType`](@ref) you specify.
 This is the implicit case, since the manifold type itself does not carry any information about the embedding, just the trait and the function definition do.
 
 ### [Explicit case: the `EmbeddedManifold`](@id subsec-explicit-embedded)
