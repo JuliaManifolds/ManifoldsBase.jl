@@ -9,3 +9,6 @@ Documenter = "1"
 DocumenterCitations = "1.2"
 DocumenterInterLinks = "1.1"
 ManifoldsBase = "1,2"
+
+[sources]
+ManifoldsBase = { path = ".." }
