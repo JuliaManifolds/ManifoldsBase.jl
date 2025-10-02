@@ -55,8 +55,6 @@ using ManifoldsBaseTestUtils
             CayleyRetraction(),
             EmbeddedRetraction(ProjectionRetraction()),
             ExponentialRetraction(),
-            ODEExponentialRetraction(ProjectionRetraction(), DefaultBasis()),
-            ODEExponentialRetraction(ProjectionRetraction()),
             PadeRetraction(2),
             PolarRetraction(),
             ProjectionRetraction(),
@@ -86,13 +84,6 @@ end
     M = ManifoldsBase.DefaultManifold(3)
     p = [1.0, 0.0, 0.0]
     @test number_of_coordinates(M, ManifoldsBase.ℝ) == 3
-    B = get_basis(M, p, DefaultBasis())
-    @test_throws DomainError ODEExponentialRetraction(ProjectionRetraction(), B)
-    @test_throws DomainError ODEExponentialRetraction(
-        ExponentialRetraction(),
-        DefaultBasis(),
-    )
-    @test_throws DomainError ODEExponentialRetraction(ExponentialRetraction(), B)
     @test_throws ErrorException PadeRetraction(0)
 end
 

@@ -215,6 +215,20 @@ function allocate_result(M::PowerManifoldNested, f, x...)
         ]
     end
 end
+
+function allocate_result_embedding(M::PowerManifoldNested, f::typeof(project), x...)
+    if representation_size(M.manifold) === () && length(x) > 0
+        return allocate(M, x[1])
+    else
+        return [
+            allocate_result_embedding(
+                    M.manifold,
+                    f,
+                    map(y -> _allocate_access_nested(M, y, i), x)...,
+                ) for i in get_iterator(M)
+        ]
+    end
+end
 # avoid ambiguities - though usually not used
 function allocate_result(
         M::PowerManifoldNested, f::typeof(get_coordinates), p, X, B::AbstractBasis,
@@ -231,6 +245,14 @@ function allocate_result(M::PowerManifoldNestedReplacing, f, x...)
     else
         return copy(x[1])
     end
+end
+function allocate_result_embedding(
+        ::PowerManifoldNestedReplacing,
+        ::typeof(project),
+        x,
+        args...
+    )
+    return copy(x)
 end
 # the following is not used but necessary to avoid ambiguities
 function allocate_result(
@@ -725,6 +747,16 @@ function get_coordinates!(
         v_iter += dim
     end
     return c
+end
+
+_get_field(::AbstractManifold{𝔽}) where {𝔽} = 𝔽
+
+function get_embedding(
+        M::PowerManifold{𝔽, TM, TSW, TPR},
+        p,
+    ) where {𝔽, TM <: AbstractManifold{𝔽}, TSW, TPR <: AbstractPowerRepresentation}
+    ME = get_embedding(M.manifold, first(p))
+    return PowerManifold{_get_field(ME), typeof(ME), TSW, TPR}(ME, M.size)
 end
 
 function get_iterator(

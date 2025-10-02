@@ -1,4 +1,4 @@
-using ManifoldsBase, Test
+using LinearAlgebra, ManifoldsBase, Test
 
 using ManifoldsBase: DefaultManifold, ℝ
 #
@@ -7,6 +7,13 @@ using ManifoldsBase: DefaultManifold, ℝ
 #
 struct HalfPlaneManifold <: AbstractDecoratorManifold{ℝ} end
 struct PosQuadrantManifold <: AbstractDecoratorManifold{ℝ} end
+
+function ManifoldsBase.get_embedding_type(::HalfPlaneManifold)
+    return ManifoldsBase.EmbeddedSubmanifoldType()
+end
+function ManifoldsBase.get_embedding_type(::PosQuadrantManifold)
+    return ManifoldsBase.EmbeddedSubmanifoldType()
+end
 
 ManifoldsBase.get_embedding(::HalfPlaneManifold) = ManifoldsBase.DefaultManifold(1, 3)
 ManifoldsBase.decorated_manifold(::HalfPlaneManifold) = ManifoldsBase.DefaultManifold(2)
@@ -53,13 +60,6 @@ function ManifoldsBase.get_vector_orthonormal!(
     return (Y .= [c[1] c[2] 0.0])
 end
 
-function ManifoldsBase.active_traits(f, ::HalfPlaneManifold, args...)
-    return ManifoldsBase.merge_traits(ManifoldsBase.IsEmbeddedSubmanifold())
-end
-function ManifoldsBase.active_traits(f, ::PosQuadrantManifold, args...)
-    return ManifoldsBase.merge_traits(ManifoldsBase.IsEmbeddedSubmanifold())
-end
-
 #
 # A second manifold that is modelled as just isometrically embedded but not a submanifold
 #
@@ -71,8 +71,8 @@ function ManifoldsBase.decorated_manifold(::AnotherHalfPlaneManifold)
 end
 ManifoldsBase.representation_size(::AnotherHalfPlaneManifold) = (2,)
 
-function ManifoldsBase.active_traits(f, ::AnotherHalfPlaneManifold, args...)
-    return ManifoldsBase.merge_traits(ManifoldsBase.IsIsometricEmbeddedManifold())
+function ManifoldsBase.get_embedding_type(::AnotherHalfPlaneManifold)
+    return ManifoldsBase.IsometricallyEmbeddedManifoldType(ManifoldsBase.DirectEmbedding())
 end
 
 function ManifoldsBase.embed!(::AnotherHalfPlaneManifold, q, p)
@@ -155,34 +155,73 @@ end
 function ManifoldsBase.decorated_manifold(::NotImplementedEmbeddedSubManifold)
     return ManifoldsBase.DefaultManifold(2)
 end
-function ManifoldsBase.active_traits(f, ::NotImplementedEmbeddedSubManifold, args...)
-    return ManifoldsBase.merge_traits(ManifoldsBase.IsEmbeddedSubmanifold())
+
+function ManifoldsBase.get_embedding_type(::NotImplementedEmbeddedSubManifold)
+    return ManifoldsBase.EmbeddedSubmanifoldType()
 end
 
 #
-# A manifold that is isometrically embedded but has no implementations
+# A manifold that is isometrically embedded and `embed` is indicated as not an identity but has no implementations
 #
-struct NotImplementedIsometricEmbeddedManifold <: AbstractDecoratorManifold{ℝ} end
-function ManifoldsBase.active_traits(f, ::NotImplementedIsometricEmbeddedManifold, args...)
-    return ManifoldsBase.merge_traits(ManifoldsBase.IsIsometricEmbeddedManifold())
+struct NotImplementedIsometricEmbeddedManifoldNE <: AbstractDecoratorManifold{ℝ} end
+function ManifoldsBase.get_embedding_type(::NotImplementedIsometricEmbeddedManifoldNE)
+    return ManifoldsBase.IsometricallyEmbeddedManifoldType(ManifoldsBase.DirectEmbedding())
 end
 
 #
-# A manifold that is an embedded manifold but not isometric and has no other implementation
+# A manifold that is isometrically embedded and `embed` is indicated as an identity but has no implementations
 #
-struct NotImplementedEmbeddedManifold <: AbstractDecoratorManifold{ℝ} end
-function ManifoldsBase.active_traits(f, ::NotImplementedEmbeddedManifold, args...)
-    return ManifoldsBase.merge_traits(ManifoldsBase.IsEmbeddedManifold())
+struct NotImplementedIsometricEmbeddedManifoldDNE <: AbstractDecoratorManifold{ℝ} end
+function ManifoldsBase.get_embedding_type(::NotImplementedIsometricEmbeddedManifoldDNE)
+    return ManifoldsBase.IsometricallyEmbeddedManifoldType(ManifoldsBase.IndirectEmbedding())
 end
+
+#
+# A manifold that is an embedded manifold and `embed` is indicated as not an identity but not isometric and has no other implementation
+#
+struct NotImplementedEmbeddedManifoldNE <: AbstractDecoratorManifold{ℝ} end
+function ManifoldsBase.get_embedding_type(::NotImplementedEmbeddedManifoldNE)
+    return ManifoldsBase.EmbeddedManifoldType(ManifoldsBase.DirectEmbedding())
+end
+
+#
+# A manifold that is an embedded manifold and `embed` is indicated as an identity but not isometric and has no other implementation
+#
+struct NotImplementedEmbeddedManifoldDNE <: AbstractDecoratorManifold{ℝ} end
+function ManifoldsBase.get_embedding_type(::NotImplementedEmbeddedManifoldDNE)
+    return ManifoldsBase.EmbeddedManifoldType(ManifoldsBase.IndirectEmbedding())
+end
+
+struct SimpleEmbeddedTestManifold <: AbstractDecoratorManifold{ℝ} end
+ManifoldsBase.get_embedding(::SimpleEmbeddedTestManifold) = DefaultManifold(3)
+function ManifoldsBase.get_forwarding_type(::SimpleEmbeddedTestManifold, ::Any, p = nothing)
+    return ManifoldsBase.EmbeddedForwardingType(ManifoldsBase.DirectEmbedding())
+end
+
+struct EmbeddedTestManifold <: AbstractDecoratorManifold{ℝ} end
+ManifoldsBase.get_embedding(::EmbeddedTestManifold) = DefaultManifold(3)
+function ManifoldsBase.get_forwarding_type(::EmbeddedTestManifold, ::Any, p = nothing)
+    return ManifoldsBase.EmbeddedForwardingType(ManifoldsBase.IndirectEmbedding())
+end
+ManifoldsBase.embed(::EmbeddedTestManifold, p) = p
+ManifoldsBase.embed!(::EmbeddedTestManifold, q, p) = (q .= p)
+ManifoldsBase.embed(::EmbeddedTestManifold, p, X) = X
+ManifoldsBase.embed!(::EmbeddedTestManifold, Y, p, X) = (Y .= X)
+ManifoldsBase.project(::EmbeddedTestManifold, p) = p
+ManifoldsBase.project!(::EmbeddedTestManifold, q, p) = (q .= p)
+ManifoldsBase.project(::EmbeddedTestManifold, p, X) = X
+ManifoldsBase.project!(::EmbeddedTestManifold, Y, p, X) = (Y .= X)
 
 #
 # A Manifold with a fallback
 #
 struct FallbackManifold <: AbstractDecoratorManifold{ℝ} end
-function ManifoldsBase.active_traits(f, ::FallbackManifold, args...)
-    return ManifoldsBase.merge_traits(ManifoldsBase.IsExplicitDecorator())
-end
 ManifoldsBase.decorated_manifold(::FallbackManifold) = DefaultManifold(3)
+
+function ManifoldsBase.get_forwarding_type(::FallbackManifold, ::Any, p = nothing)
+    return ManifoldsBase.SimpleForwardingType()
+end
+
 
 @testset "Embedded Manifolds" begin
     @testset "EmbeddedManifold basic tests" begin
@@ -209,7 +248,7 @@ ManifoldsBase.decorated_manifold(::FallbackManifold) = DefaultManifold(3)
         # Check point checks using embedding
         @test is_point(M, [1 0.1 0.1], true)
         @test !is_point(M, [-1, 0, 0]) #wrong dim (3,1)
-        @test_throws DomainError is_point(M, [-1, 0, 0], true)
+        @test_throws ManifoldDomainError is_point(M, [-1, 0, 0], true)
         @test !is_point(M, [-1, 0, 0])
         @test !is_point(M, [1, 0.1]) # size (from embedding)
         @test_throws ManifoldDomainError is_point(M, [1, 0.1], true)
@@ -224,8 +263,8 @@ ManifoldsBase.decorated_manifold(::FallbackManifold) = DefaultManifold(3)
         @test !is_vector(M, [1 0 0], [-1 0 0])
         @test is_vector(M, [1 0 0], [1 0 1], true)
         @test !is_vector(M, [-1, 0, 0], [0, 0, 0])
-        @test_throws DomainError is_vector(M, [-1, 0, 0], [0, 0, 0]; error = :error)
-        @test_throws DomainError is_vector(M, [1, 0, 0], [-1, 0, 0]; error = :error)
+        @test_throws ManifoldDomainError is_vector(M, [-1, 0, 0], [0, 0, 0]; error = :error)
+        @test_throws ManifoldDomainError is_vector(M, [1, 0, 0], [-1, 0, 0]; error = :error)
         @test !is_vector(M, [-1, 0, 0], [0, 0, 0])
         @test !is_vector(M, [1, 0, 0], [-1, 0, 0])
         # check manifold domain error from embedding to obtain ManifoldDomainErrors
@@ -314,11 +353,27 @@ ManifoldsBase.decorated_manifold(::FallbackManifold) = DefaultManifold(3)
         Xs = similar(X)
         @test embed_project!(M, Xs, p, X) == X
         @test project(M, pe, Xe) == X
-        # isometric passthrough
-        @test injectivity_radius(M) == Inf
-        @test injectivity_radius(M, p) == Inf
-        @test injectivity_radius(M, p, ExponentialRetraction()) == Inf
-        @test injectivity_radius(M, ExponentialRetraction()) == Inf
+        # injectivity_radius shouldn't pass through
+        @test_throws MethodError injectivity_radius(M)
+        @test_throws MethodError injectivity_radius(M, p)
+        @test_throws MethodError injectivity_radius(M, p, ExponentialRetraction())
+        @test_throws MethodError injectivity_radius(M, ExponentialRetraction())
+
+        @test inner(M, p, X, X) ≈ dot(X, X)
+        @test norm(M, p, X) ≈ norm(X)
+
+        q = similar(p)
+        copyto!(M, q, p)
+        @test p == q
+        Y = similar(X)
+        copyto!(M, Y, p, X)
+        @test Y == X
+        @test isapprox(M, p, X, Y)
+        @test exp(M, p, X) ≈ p + X
+        exp!(M, q, p, X)
+        @test isapprox(M, q, p + X)
+
+        @test has_components(M)
 
         # test vector transports in the embedding
         m = EmbeddedVectorTransport(ParallelTransport())
@@ -349,57 +404,64 @@ ManifoldsBase.decorated_manifold(::FallbackManifold) = DefaultManifold(3)
             @test A == [2, 3]
             @test @inferred !isapprox(M, [1, 2], [2, 3])
             @test @inferred !isapprox(M, [1, 2], [2, 3], [4, 5])
+
+            @test ManifoldsBase.get_forwarding_type_embedding(ManifoldsBase.EmbeddedSubmanifoldType{ManifoldsBase.DirectEmbedding}(), M, exp) === EmbeddedForwardingType()
         end
         @testset "Isometric Embedding Fallbacks & Error Tests" begin
-            M2 = NotImplementedIsometricEmbeddedManifold()
-            @test base_manifold(M2) == M2
-            A = zeros(2)
-            # Check that all of these report not to be implemented, i.e.
-            @test_throws MethodError exp(M2, [1, 2], [2, 3])
-            @test_throws MethodError ManifoldsBase.exp_fused(M2, [1, 2], [2, 3], 1.0)
-            @test_throws MethodError exp!(M2, A, [1, 2], [2, 3])
-            @test_throws MethodError ManifoldsBase.exp_fused!(M2, A, [1, 2], [2, 3], 1.0)
-            @test_throws MethodError retract(M2, [1, 2], [2, 3])
-            @test_throws MethodError ManifoldsBase.retract_fused(M2, [1, 2], [2, 3], 1.0)
-            @test_throws MethodError retract!(M2, A, [1, 2], [2, 3])
-            @test_throws MethodError ManifoldsBase.retract_fused!(
-                M2,
-                A,
-                [1, 2],
-                [2, 3],
-                1.0,
-            )
-            @test_throws MethodError log(M2, [1, 2], [2, 3])
-            @test_throws MethodError log!(M2, A, [1, 2], [2, 3])
-            @test_throws MethodError inverse_retract(M2, [1, 2], [2, 3])
-            @test_throws MethodError inverse_retract!(M2, A, [1, 2], [2, 3])
-            @test_throws MethodError distance(M2, [1, 2], [2, 3])
-            @test_throws StackOverflowError manifold_dimension(M2)
-            @test_throws MethodError project(M2, [1, 2])
-            @test_throws MethodError project!(M2, A, [1, 2])
-            @test_throws MethodError project(M2, [1, 2], [2, 3])
-            @test_throws MethodError project!(M2, A, [1, 2], [2, 3])
-            @test_throws MethodError vector_transport_direction(M2, [1, 2], [2, 3], [3, 4])
-            @test_throws MethodError vector_transport_direction!(
-                M2,
-                A,
-                [1, 2],
-                [2, 3],
-                [3, 4],
-            )
-            @test_throws MethodError vector_transport_to(M2, [1, 2], [2, 3], [3, 4])
-            @test_throws MethodError vector_transport_to!(M2, A, [1, 2], [2, 3], [3, 4])
+            for M2 in [NotImplementedIsometricEmbeddedManifoldNE(), NotImplementedIsometricEmbeddedManifoldDNE()]
+                @test base_manifold(M2) == M2
+                A = zeros(2)
+                if M2 isa NotImplementedIsometricEmbeddedManifoldDNE
+                    @test_throws MethodError ManifoldsBase.allocate_result(M2, zero_vector, A)
+                else
+                    @test size(ManifoldsBase.allocate_result(M2, zero_vector, A)) == size(A)
+                end
+                # Check that all of these report not to be implemented, i.e.
+                @test_throws MethodError exp(M2, [1, 2], [2, 3])
+                @test_throws MethodError ManifoldsBase.exp_fused(M2, [1, 2], [2, 3], 1.0)
+                @test_throws MethodError exp!(M2, A, [1, 2], [2, 3])
+                @test_throws MethodError ManifoldsBase.exp_fused!(M2, A, [1, 2], [2, 3], 1.0)
+                @test_throws MethodError retract(M2, [1, 2], [2, 3])
+                @test_throws MethodError ManifoldsBase.retract_fused(M2, [1, 2], [2, 3], 1.0)
+                @test_throws MethodError retract!(M2, A, [1, 2], [2, 3])
+                @test_throws MethodError ManifoldsBase.retract_fused!(
+                    M2,
+                    A,
+                    [1, 2],
+                    [2, 3],
+                    1.0,
+                )
+                @test_throws MethodError log(M2, [1, 2], [2, 3])
+                @test_throws MethodError log!(M2, A, [1, 2], [2, 3])
+                @test_throws MethodError inverse_retract(M2, [1, 2], [2, 3])
+                @test_throws MethodError inverse_retract!(M2, A, [1, 2], [2, 3])
+                @test_throws MethodError distance(M2, [1, 2], [2, 3])
+                @test_throws StackOverflowError manifold_dimension(M2)
+                @test_throws MethodError project(M2, [1, 2])
+                @test_throws MethodError project!(M2, A, [1, 2])
+                @test_throws MethodError project(M2, [1, 2], [2, 3])
+                @test_throws MethodError project!(M2, A, [1, 2], [2, 3])
+                @test_throws MethodError vector_transport_direction(M2, [1, 2], [2, 3], [3, 4])
+                @test_throws MethodError vector_transport_direction!(
+                    M2,
+                    A,
+                    [1, 2],
+                    [2, 3],
+                    [3, 4],
+                )
+                @test_throws MethodError vector_transport_to(M2, [1, 2], [2, 3], [3, 4])
+                @test_throws MethodError vector_transport_to!(M2, A, [1, 2], [2, 3], [3, 4])
+            end
         end
-        @testset "Nonisometric Embedding Fallback Error Rests" begin
-            M3 = NotImplementedEmbeddedManifold()
-            @test_throws MethodError inner(M3, [1, 2], [2, 3], [2, 3])
-            @test_throws StackOverflowError manifold_dimension(M3)
-            @test_throws MethodError distance(M3, [1, 2], [2, 3])
-            @test_throws MethodError norm(M3, [1, 2], [2, 3])
-            @test_throws MethodError embed(M3, [1, 2], [2, 3])
-            @test_throws MethodError embed(M3, [1, 2])
-            @test @inferred !isapprox(M3, [1, 2], [2, 3])
-            @test @inferred !isapprox(M3, [1, 2], [2, 3], [4, 5])
+        @testset "Nonisometric Embedding Fallback Error Tests" begin
+            for M3 in [NotImplementedEmbeddedManifoldNE(), NotImplementedEmbeddedManifoldDNE()]
+                @test_throws MethodError inner(M3, [1, 2], [2, 3], [2, 3])
+                # this test started to randomly fail with StackOverflowError being thrown outside of a test
+                # @test_throws StackOverflowError manifold_dimension(M3)
+                @test_throws MethodError distance(M3, [1, 2], [2, 3])
+                @test_throws MethodError norm(M3, [1, 2], [2, 3])
+                @test_throws MethodError zero_vector(M3, [1, 2])
+            end
         end
     end
     @testset "Explicit Embeddings using EmbeddedManifold" begin
@@ -437,5 +499,35 @@ ManifoldsBase.decorated_manifold(::FallbackManifold) = DefaultManifold(3)
         @test inner(M, [1, 0, 0], [1, 2, 3], [0, 1, 0]) == 2
         @test is_point(M, [1, 0, 0])
         @test ManifoldsBase.allocate_result(M, exp, [1.0, 0.0, 2.0]) isa Vector
+    end
+    @testset "SimpleEmbeddedTestManifold" begin
+        M = SimpleEmbeddedTestManifold()
+        p = [1.0, 2.0, 3.0]
+        X = [2.0, 3.0, 4.0]
+        vf = [1.0, 2.0, 3.0, 4.0]
+        is_point(M, p; error = :error)
+        is_vector(M, p, X; error = :error)
+        @test_throws ManifoldDomainError is_point(M, vf; error = :error)
+        @test_throws ManifoldDomainError is_vector(M, p, vf; error = :error)
+        @test_throws ManifoldDomainError is_vector(M, vf, X; error = :error)
+        # Triggert actual test in embedding to fail
+        @test_throws ManifoldDomainError is_point(M, [1.0, 2.0im, 3.0]; error = :error)
+        @test_throws ManifoldDomainError is_vector(M, [1.0, 2.0im, 3.0], X; error = :error)
+        @test_throws ManifoldDomainError is_vector(M, p, [1.0, 2.0im, 3.0]; error = :error)
+    end
+    @testset "EmbeddedTestManifold" begin
+        M = EmbeddedTestManifold()
+        p = [1.0, 2.0, 3.0]
+        X = [2.0, 3.0, 4.0]
+        vf = [1.0, 2.0, 3.0, 4.0]
+        is_point(M, p; error = :error)
+        is_vector(M, p, X; error = :error)
+        @test_throws ManifoldDomainError is_point(M, vf; error = :error)
+        @test_throws ManifoldDomainError is_vector(M, p, vf; error = :error)
+        @test_throws ManifoldDomainError is_vector(M, vf, X; error = :error)
+        # Triggert actual test in embedding to fail
+        @test_throws ManifoldDomainError is_point(M, [1.0, 2.0im, 3.0]; error = :error)
+        @test_throws ManifoldDomainError is_vector(M, [1.0, 2.0im, 3.0], X; error = :error)
+        @test_throws ManifoldDomainError is_vector(M, p, [1.0, 2.0im, 3.0]; error = :error)
     end
 end

@@ -1,11 +1,14 @@
 [deps]
-CondaPkg = "992eb4ea-22a4-4c89-a5bb-47a3300528ab"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 DocumenterCitations = "daee34ce-89f3-4625-b898-19384cb65244"
+DocumenterInterLinks = "d12716ef-a0f6-4df4-a9f1-a5a34e75c656"
 ManifoldsBase = "3362f125-f0bb-47a3-aa74-596ffd7ef2fb"
 
 [compat]
-CondaPkg = "0.2"
 Documenter = "1"
 DocumenterCitations = "1.2"
-ManifoldsBase = "1.0"
+DocumenterInterLinks = "1.1"
+ManifoldsBase = "1,2"
+
+[sources]
+ManifoldsBase = { path = ".." }

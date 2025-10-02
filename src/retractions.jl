@@ -49,64 +49,6 @@ Retraction using the exponential map.
 """
 struct ExponentialRetraction <: AbstractRetractionMethod end
 
-
-@doc raw"""
-    ODEExponentialRetraction{T<:AbstractRetractionMethod, B<:AbstractBasis} <: AbstractRetractionMethod
-
-Approximate the exponential map on the manifold by evaluating the ODE descripting the geodesic at 1,
-assuming the default connection of the given manifold by solving the ordinary differential
-equation
-
-```math
-\frac{d^2}{dt^2} p^k + Γ^k_{ij} \frac{d}{dt} p_i \frac{d}{dt} p_j = 0,
-```
-
-where ``Γ^k_{ij}`` are the Christoffel symbols of the second kind, and
-the Einstein summation convention is assumed.
-
-# Constructor
-
-    ODEExponentialRetraction(
-        r::AbstractRetractionMethod,
-        b::AbstractBasis=DefaultOrthogonalBasis(),
-    )
-
-Generate the retraction with a retraction to use internally (for some approaches)
-and a basis for the tangent space(s).
-"""
-struct ODEExponentialRetraction{T <: AbstractRetractionMethod, B <: AbstractBasis} <:
-    AbstractRetractionMethod
-    retraction::T
-    basis::B
-end
-function ODEExponentialRetraction(r::T) where {T <: AbstractRetractionMethod}
-    return ODEExponentialRetraction(r, DefaultOrthonormalBasis())
-end
-function ODEExponentialRetraction(::T, b::CachedBasis) where {T <: AbstractRetractionMethod}
-    return throw(
-        DomainError(
-            b,
-            "Cached Bases are currently not supported, since the basis has to be implemented in a surrounding of the start point as well.",
-        ),
-    )
-end
-function ODEExponentialRetraction(r::ExponentialRetraction, ::AbstractBasis)
-    return throw(
-        DomainError(
-            r,
-            "You can not use the exponential map as an inner method to solve the ode for the exponential map.",
-        ),
-    )
-end
-function ODEExponentialRetraction(r::ExponentialRetraction, ::CachedBasis)
-    return throw(
-        DomainError(
-            r,
-            "Neither the exponential map nor a Cached Basis can be used with this retraction type.",
-        ),
-    )
-end
-
 """
     PolarRetraction <: AbstractRetractionMethod
 
@@ -774,9 +716,6 @@ end
 function _retract!(M::AbstractManifold, q, p, X, ::ExponentialRetraction; kwargs...)
     return exp!(M, q, p, X; kwargs...)
 end
-function _retract!(M::AbstractManifold, q, p, X, m::ODEExponentialRetraction; kwargs...)
-    return retract_exp_ode!(M, q, p, X, m.retraction, m.basis; kwargs...)
-end
 function _retract!(M::AbstractManifold, q, p, X, ::PolarRetraction; kwargs...)
     return retract_polar!(M, q, p, X; kwargs...)
 end
@@ -888,17 +827,6 @@ function _retract_fused!(
         kwargs...,
     )
     return exp_fused!(M, q, p, X, t; kwargs...)
-end
-function _retract_fused!(
-        M::AbstractManifold,
-        q,
-        p,
-        X,
-        t::Number,
-        m::ODEExponentialRetraction;
-        kwargs...,
-    )
-    return retract_exp_ode_fused!(M, q, p, X, t, m.retraction, m.basis; kwargs...)
 end
 function _retract_fused!(
         M::AbstractManifold,
@@ -1037,25 +965,6 @@ end
 
 function retract_cayley_fused!(M::AbstractManifold, q, p, X, t::Number; kwargs...)
     return retract_cayley!(M, q, p, t * X; kwargs...)
-end
-
-function retract_exp_ode! end
-"""
-    retract_exp_ode!(M::AbstractManifold, q, p, X, m::AbstractRetractionMethod, B::AbstractBasis)
-
-Compute the in-place variant of the [`ODEExponentialRetraction`](@ref)`(m, B)`.
-"""
-retract_exp_ode!(
-    M::AbstractManifold,
-    q,
-    p,
-    X,
-    m::AbstractRetractionMethod,
-    B::AbstractBasis,
-)
-
-function retract_exp_ode_fused!(M::AbstractManifold, q, p, X, t::Number, m, B)
-    return retract_exp_ode!(M, q, p, t * X, m, B)
 end
 
 function retract_pade! end

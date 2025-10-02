@@ -42,6 +42,10 @@ ManifoldsBase.representation_size(::AllocManifold4) = (2, 3)
     @test allocate(M, a, Int, 5) isa Vector{Int}
     @test length(allocate(M, a, Int, 5)) == 5
 
+    @test typeof(allocate([1])) == typeof(allocate([1], nothing))
+    @test typeof(allocate(M, [1])) == typeof(allocate(M, [1], nothing))
+    @test typeof(allocate([1], Int)) == typeof(allocate([1], Int, nothing))
+
     a1 = allocate([1], 2, 3)
     @test a1 isa Matrix{Int}
     @test size(a1) == (2, 3)

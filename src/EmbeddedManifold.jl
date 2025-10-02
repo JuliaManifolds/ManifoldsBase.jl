@@ -33,7 +33,13 @@ struct EmbeddedManifold{𝔽, MT <: AbstractManifold{𝔽}, NT <: AbstractManifo
     embedding::NT
 end
 
-@inline active_traits(f, ::EmbeddedManifold, ::Any...) = merge_traits(IsEmbeddedManifold())
+"""
+    get_embedding_type(::EmbeddedManifold)
+
+Specify the type of embedding. This by default returns [`EmbeddedManifoldType`](@ref)`()`.
+It can be further specified by dispatching in the parameters of the [`EmbeddedManifold`](@ref).
+"""
+get_embedding_type(::EmbeddedManifold) = EmbeddedManifoldType()
 
 function allocate_result(M::EmbeddedManifold, f::typeof(project), x...)
     T = allocate_result_type(M, f, x)

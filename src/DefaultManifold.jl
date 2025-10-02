@@ -57,7 +57,44 @@ function check_approx(M::DefaultManifold, p, X, Y; kwargs...)
     return ApproximatelyError(v, s)
 end
 
+
+function check_point(M::DefaultManifold{𝔽}, p) where {𝔽}
+    if (𝔽 === ℝ) && !(eltype(p) <: Real)
+        return DomainError(
+            eltype(p),
+            "The matrix $(p) is not a real-valued matrix, so it does not lie on $(M).",
+        )
+    end
+    if (𝔽 === ℂ) && !(eltype(p) <: Real) && !(eltype(p) <: Complex)
+        return DomainError(
+            eltype(p),
+            "The matrix $(p) is neither a real- nor complex-valued matrix, so it does not lie on $(M).",
+        )
+    end
+    return nothing
+end
+
+function check_vector(M::DefaultManifold{𝔽}, p, X; kwargs...) where {𝔽}
+    if (𝔽 === ℝ) && !(eltype(X) <: Real)
+        return DomainError(
+            eltype(X),
+            "The matrix $(X) is not a real-valued matrix, so it can not be a tangent vector to $(p) on $(M).",
+        )
+    end
+    if (𝔽 === ℂ) && !(eltype(X) <: Real) && !(eltype(X) <: Complex)
+        return DomainError(
+            eltype(X),
+            "The matrix $(X) is neither a real- nor complex-valued matrix, so it can not be a tangent vector to $(p) on $(M).",
+        )
+    end
+    return nothing
+end
+
 distance(::DefaultManifold, p, q, r::Real = 2) = norm(p - q, r)
+
+embed(::DefaultManifold, p) = p
+
+embed(::DefaultManifold, p, X) = X
 
 embed!(::DefaultManifold, q, p) = copyto!(q, p)
 
@@ -106,6 +143,11 @@ function get_coordinates_orthonormal!(::DefaultManifold{ℂ}, c, p, X, ::RealNum
     m = length(X)
     return copyto!(c, [reshape(real(X), m); reshape(imag(X), m)])
 end
+
+get_embedding(M::DefaultManifold, ::Any) = M
+
+get_forwarding_type(::DefaultManifold, ::Any) = StopForwardingType()
+
 function get_vector_orthonormal!(M::DefaultManifold, Y, p, c, ::AbstractNumbers)
     return copyto!(Y, reshape(c, representation_size(M)))
 end
@@ -142,6 +184,13 @@ number_system(::DefaultManifold{𝔽}) where {𝔽} = 𝔽
 
 norm(::DefaultManifold, p, X, r::Real = 2) = norm(X, r)
 
+function parallel_transport_to!(::DefaultManifold, Y, p, X, q)
+    return copyto!(Y, X)
+end
+
+project(::DefaultManifold, p) = p
+project(::DefaultManifold, p, X) = X
+
 project!(::DefaultManifold, q, p) = copyto!(q, p)
 project!(::DefaultManifold, Y, p, X) = copyto!(Y, X)
 
@@ -155,10 +204,6 @@ function Base.show(io::IO, M::DefaultManifold{𝔽, <:TypeParameter}) where {�
 end
 function Base.show(io::IO, M::DefaultManifold{𝔽}) where {𝔽}
     return print(io, "DefaultManifold($(join(get_parameter(M.size), ", ")); field = $(𝔽))")
-end
-
-function parallel_transport_to!(::DefaultManifold, Y, p, X, q)
-    return copyto!(Y, X)
 end
 
 function Random.rand!(::DefaultManifold, pX; σ = one(eltype(pX)), vector_at = nothing)

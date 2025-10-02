@@ -61,6 +61,7 @@ end
         @test default_inverse_retraction_method(M) == default_inverse_retraction_method(N)
         @test default_retraction_method(M) == default_retraction_method(N)
         @test default_vector_transport_method(M) == default_vector_transport_method(N)
+        @test get_embedding(N, p) === N
     end
 
     @testset "PowerManifold and allocation with empty representation size" begin
@@ -71,6 +72,7 @@ end
         # check - though only because this function exists for avoiding ambiguities.
         cm = ManifoldsBase.allocate_result(N, get_coordinates, p, X, DefaultBasis())
         @test size(X) == size(cm)
+        @test project(N, p) == p
     end
 
     @testset "PowerManifoldNested with mutable element" begin
@@ -106,6 +108,8 @@ end
         X = allocate_on(N, TangentSpaceType(), Vector{Matrix{Float32}})
         @test X isa Vector{Matrix{Float32}}
         @test size(X) == (2,)
+
+        @test project(N, p) isa typeof(p)
     end
 
     for PowerRepr in [NestedPowerRepresentation, NestedReplacingPowerRepresentation]

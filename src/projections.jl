@@ -10,7 +10,7 @@ accordingly.
 See also: [`EmbeddedManifold`](@ref), [`embed`](@ref embed(M::AbstractManifold, p))
 """
 function project(M::AbstractManifold, p)
-    q = allocate_result(M, project, p)
+    q = allocate_result_embedding(M, project, p)
     project!(M, q, p)
     return q
 end
@@ -19,7 +19,7 @@ end
     project!(M::AbstractManifold, q, p)
 
 Project point `p` from the ambient space onto the [`AbstractManifold`](@ref) `M`. The result is
-storedin `q`.
+stored in `q`.
 This method is only available for manifolds where implicitly an embedding or ambient space
 is given. Additionally, the projection includes changing data representation, if applicable,
 i.e. if the points on `M` are not represented in the same array data, the data is changed
@@ -40,14 +40,14 @@ Additionally, `project` includes changing data representation, if applicable, i.
 if the tangents on `M` are not represented in the same way as points on the embedding,
 the representation is changed accordingly. This is the case for example for Lie groups,
 when tangent vectors are represented in the Lie algebra. after projection the change to the
-Lie algebra is perfomed, too.
+Lie algebra is performed, too.
 
 See also: [`EmbeddedManifold`](@ref), [`embed`](@ref embed(M::AbstractManifold, p, X))
 """
 function project(M::AbstractManifold, p, X)
     # Note that the order is switched,
     # since the allocation by default takes the type of the first.
-    Y = allocate_result(M, project, X, p)
+    Y = allocate_result_embedding(M, project, X, p)
     project!(M, Y, p, X)
     return Y
 end

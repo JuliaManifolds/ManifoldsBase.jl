@@ -117,6 +117,16 @@ function get_coordinates!(TpM::TangentSpace, c, X, V, B::AbstractBasis)
     return get_coordinates!(TpM.manifold, c, TpM.point, V, B)
 end
 
+function get_embedding(TpM::TangentSpace)
+    return TangentSpace(
+        get_embedding(TpM.manifold, TpM.point),
+        embed(TpM.manifold, TpM.point),
+    )
+end
+function get_embedding(TpM::TangentSpace, X)
+    return get_embedding(TpM)
+end
+
 function get_vector(TpM::TangentSpace, X, c, B::AbstractBasis)
     return get_vector(TpM.manifold, TpM.point, c, B)
 end
