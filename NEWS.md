@@ -19,7 +19,6 @@ If you defined your own manifolds and used traits, please check the documentatio
 ### Changed
 
 * refactor the trait system to no longer use a list of traits but single traits separately for the metric and the embedding specification
-* Introduce an `is_embedded` trait to check if a manifold is embedded.
 * Switch to using [Runic.jl](https://github.com/fredrikekre/Runic.jl) as code formatter
 
 ## [1.2.0] 08/05/2025
