@@ -21,7 +21,7 @@ also avoiding ambiguities in multiple dispatch using the [dispatch on one argume
 Since the central element for functions on a manifold is the manifold itself, it should always be the first parameter, even for in-place functions. Then the classical parameters of a function (for example a point and a tangent vector for the retraction) follow and the final part are parameters to further dispatch on, which usually have their defaults.
 
 Besides this order the functions follow the scheme “allocate early”, i.e. to switch to the
-mutating variant when reasonable, cf. [Mutating and allocating functions](@ref inplace-and-noninplace).
+mutating variant when reasonable, cf. [Mutating and allocating functions](@ref inplace-and-noninplace). Usually this is done after handling the decorator trait, cf. [A Decorator for manifolds](decorator.md), which still acts on the first layer.
 
 ## A 3-Layer architecture for dispatch
 
