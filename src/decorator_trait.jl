@@ -167,10 +167,6 @@ embeddings.
 get_embedding_type(::AbstractManifold) = NotEmbeddedManifoldType()
 get_embedding_type(M::AbstractManifold, p) = get_embedding_type(M)
 
-function is_embedded(M::AbstractManifold)
-    return get_embedding_type(M) !== NotEmbeddedManifoldType()
-end
-
 
 #
 # Generic Decorator functions

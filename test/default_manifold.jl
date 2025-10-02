@@ -471,7 +471,6 @@ using ManifoldsBaseTestUtils
                 ProjectionRetraction(),
                 QRRetraction(),
                 SoftmaxRetraction(),
-                ODEExponentialRetraction(PolarRetraction(), DefaultBasis()),
                 PadeRetraction(2),
                 EmbeddedRetraction(ExponentialRetraction()),
                 SasakiRetraction(5),

@@ -588,27 +588,6 @@ function ManifoldsBase.retract_project_fused!(::DefaultManifold, q, p, X, t::Num
 end
 ManifoldsBase.retract_qr!(::DefaultManifold, q, p, X) = (q .= p .+ X)
 ManifoldsBase.retract_qr_fused!(::DefaultManifold, q, p, X, t::Number) = (q .= p .+ t .* X)
-function ManifoldsBase.retract_exp_ode!(
-        ::DefaultManifold,
-        q,
-        p,
-        X,
-        m::AbstractRetractionMethod,
-        B::ManifoldsBase.AbstractBasis,
-    )
-    return (q .= p .+ X)
-end
-function ManifoldsBase.retract_exp_ode_fused!(
-        ::DefaultManifold,
-        q,
-        p,
-        X,
-        t::Number,
-        m::AbstractRetractionMethod,
-        B::ManifoldsBase.AbstractBasis,
-    )
-    return (q .= p .+ t .* X)
-end
 
 function ManifoldsBase.retract_pade!(::DefaultManifold, q, p, X, m::PadeRetraction)
     return (q .= p .+ X)
