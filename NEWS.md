@@ -21,6 +21,10 @@ If you defined your own manifolds and used traits, please check the documentatio
 * refactor the trait system to no longer use a list of traits but single traits separately for the metric and the embedding specification
 * Switch to using [Runic.jl](https://github.com/fredrikekre/Runic.jl) as code formatter
 
+### Removed
+
+* `ODEExponentialRetraction` was removed in favor of `solve_chart_exp_ode` implemented in `Manifolds.jl`.
+
 ## [1.2.0] 08/05/2025
 
 ### Added

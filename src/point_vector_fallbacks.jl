@@ -264,22 +264,6 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
     push!(
         block.args,
         quote
-            function ManifoldsBase.retract_exp_ode!(
-                    M::$TM, q::$TP, p::$TP, X::$TV, m::AbstractRetractionMethod,
-                    B::ManifoldsBase.AbstractBasis,
-                )
-                ManifoldsBase.retract_exp_ode!(M, q.$pfield, p.$pfield, X.$vfield, m, B)
-                return q
-            end
-            function ManifoldsBase.retract_exp_ode_fused!(
-                    M::$TM, q::$TP, p::$TP, X::$TV, t::Number, m::AbstractRetractionMethod,
-                    B::ManifoldsBase.AbstractBasis,
-                )
-                ManifoldsBase.retract_exp_ode_fused!(
-                    M, q.$pfield, p.$pfield, X.$vfield, t, m, B,
-                )
-                return q
-            end
             function ManifoldsBase.retract_pade!(
                     M::$TM, q::$TP, p::$TP, X::$TV, m::PadeRetraction,
                 )
