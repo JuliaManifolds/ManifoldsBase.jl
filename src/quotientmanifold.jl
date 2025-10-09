@@ -23,7 +23,7 @@ function canonical_project! end
 @doc "$(_doc_canonical_project)"
 canonical_project!(M::AbstractManifold, q, p)
 
-_doc_diff_canonical_project = @doc raw"""
+_doc_diff_canonical_project = raw"""
     diff_canonical_project(M::AbstractManifold, p, X)
     diff_canonical_project!(M::AbstractManifold, Y, p, X)
 
