@@ -396,6 +396,46 @@ end
 
 @trait_function exp_fused!(M::AbstractDecoratorManifold, q, p, X, t::Number)
 
+@trait_function get_coordinates(M::AbstractDecoratorManifold, p, X) (
+    SimpleForwardingType,
+    StopForwardingType,
+)
+
+@trait_function get_coordinates(M::AbstractDecoratorManifold, p, X, B::AbstractBasis) (
+    SimpleForwardingType,
+    StopForwardingType,
+)
+
+@trait_function get_coordinates!(M::AbstractDecoratorManifold, c, p, X) (
+    SimpleForwardingType,
+    StopForwardingType,
+)
+
+@trait_function get_coordinates!(M::AbstractDecoratorManifold, c, p, X, B::AbstractBasis) (
+    SimpleForwardingType,
+    StopForwardingType,
+)
+
+@trait_function get_vector(M::AbstractDecoratorManifold, p, c) (
+    SimpleForwardingType,
+    StopForwardingType,
+)
+
+@trait_function get_vector(M::AbstractDecoratorManifold, p, c, B::AbstractBasis) (
+    SimpleForwardingType,
+    StopForwardingType,
+)
+
+@trait_function get_vector!(M::AbstractDecoratorManifold, X, p, c) (
+    SimpleForwardingType,
+    StopForwardingType,
+)
+
+@trait_function get_vector!(M::AbstractDecoratorManifold, X, p, c, B::AbstractBasis) (
+    SimpleForwardingType,
+    StopForwardingType,
+)
+
 @trait_function has_components(M::AbstractDecoratorManifold)
 
 function _has_components_forwarding(::EmbeddedForwardingType, M::AbstractDecoratorManifold)
@@ -633,6 +673,26 @@ end
 @trait_function parallel_transport_to(M::AbstractDecoratorManifold, p, X, q)
 
 @trait_function parallel_transport_to!(M::AbstractDecoratorManifold, Y, p, X, q)
+
+@trait_function project(M::AbstractDecoratorManifold, p) (
+    SimpleForwardingType,
+    StopForwardingType,
+)
+
+@trait_function project(M::AbstractDecoratorManifold, p, X) (
+    SimpleForwardingType,
+    StopForwardingType,
+)
+
+@trait_function project!(M::AbstractDecoratorManifold, q, p) (
+    SimpleForwardingType,
+    StopForwardingType,
+)
+
+@trait_function project!(M::AbstractDecoratorManifold, Y, p, X) (
+    SimpleForwardingType,
+    StopForwardingType,
+)
 
 @trait_function Random.rand(M::AbstractDecoratorManifold; kwargs...)
 
