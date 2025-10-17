@@ -334,9 +334,13 @@ end
         Xc = [X[1], X[2]]
         Yc = similar(Xc)
         @test get_coordinates(M, p, X, DefaultOrthonormalBasis()) == Xc
+        @test get_coordinates(M, p, X) == Xc
         @test get_coordinates!(M, Yc, p, X, DefaultOrthonormalBasis()) == Xc
+        @test get_coordinates!(M, Yc, p, X) == Xc
         @test get_vector(M, p, Xc, DefaultOrthonormalBasis()) == X
+        @test get_vector(M, p, Xc) == X
         @test get_vector!(M, Y, p, Xc, DefaultOrthonormalBasis()) == X
+        @test get_vector!(M, Y, p, Xc) == X
     end
 
     @testset "AnotherHalfPlaneManifold" begin

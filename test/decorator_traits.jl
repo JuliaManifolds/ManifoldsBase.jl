@@ -16,7 +16,9 @@ ManifoldsBase.representation_size(::NonDecoratorManifold) = (2,)
     p = [2.0, 1.0]
     q = similar(p)
     X = [1.0, 0.0]
+    Xc = [1.0, 0.0]
     Y = similar(X)
+    Yc = similar(Xc)
     @test ManifoldsBase.check_size(M, p) === nothing
     @test ManifoldsBase.check_size(M, p, X) === nothing
     # default to identity
@@ -56,6 +58,19 @@ ManifoldsBase.representation_size(::NonDecoratorManifold) = (2,)
     @test_throws MethodError parallel_transport_direction!(M, Y, p, X, X)
     @test_throws MethodError parallel_transport_to(M, p, X, q)
     @test_throws MethodError parallel_transport_to!(M, Y, p, X, q)
+    @test_throws StackOverflowError get_coordinates(M, p, X)
+    @test_throws MethodError get_vector(M, p, Xc)
+    @test_throws StackOverflowError get_coordinates(M, p, X, DefaultOrthogonalBasis())
+    @test_throws MethodError get_vector(M, p, Xc, DefaultOrthogonalBasis())
+    @test_throws MethodError get_coordinates!(M, Yc, p, X)
+    @test_throws MethodError get_vector!(M, Y, p, Xc)
+    @test_throws MethodError get_coordinates!(M, Yc, p, X, DefaultOrthogonalBasis())
+    @test_throws MethodError get_vector!(M, Y, p, Xc, DefaultOrthogonalBasis())
+
+    @test_throws MethodError project(M, p)
+    @test_throws MethodError project(M, p, X)
+    @test_throws MethodError project!(M, q, p)
+    @test_throws MethodError project!(M, Y, p, X)
 end
 
 # With even less, check that representation size stack overflows
