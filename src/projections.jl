@@ -41,8 +41,10 @@ if the tangents on `M` are not represented in the same way as points on the embe
 the representation is changed accordingly. This is the case for example for Lie groups,
 when tangent vectors are represented in the Lie algebra. after projection the change to the
 Lie algebra is performed, too.
+If you do not want to change the data representation, you should use [`embed_project`](@ref embed_project(M::AbstractManifold, p, X)) instead.
 
-See also: [`EmbeddedManifold`](@ref), [`embed`](@ref embed(M::AbstractManifold, p, X))
+See also: [`EmbeddedManifold`](@ref), [`embed`](@ref embed(M::AbstractManifold, p, X)),
+[`embed_project`](@ref embed_project(M::AbstractManifold, p, X)).
 """
 function project(M::AbstractManifold, p, X)
     # Note that the order is switched,
@@ -63,8 +65,10 @@ Additionally, `project!` includes changing data representation, if applicable, i
 if the tangents on `M` are not represented in the same way as points on the embedding,
 the representation is changed accordingly. This is the case for example for Lie groups,
 when tangent vectors are represented in the Lie algebra. after projection the change to the
-Lie algebra is perfomed, too.
+Lie algebra is performed, too.
+If you do not want to change the data representation, you should use [`embed_project!`](@ref embed_project!(M::AbstractManifold, Y, p, X)) instead.
 
-See also: [`EmbeddedManifold`](@ref), [`embed!`](@ref embed!(M::AbstractManifold, Y, p, X))
+See also: [`EmbeddedManifold`](@ref), [`embed!`](@ref embed!(M::AbstractManifold, Y, p, X)),
+[`embed_project!`](@ref embed_project!(M::AbstractManifold, Y, p, X)).
 """
 project!(::AbstractManifold, Y, p, X)
