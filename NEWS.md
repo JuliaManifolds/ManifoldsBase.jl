@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 * Reference to `embed_project` in `project` documentation.
+* Expanded docs of `inner`.
 
 ## [2.0.1] 17/10/2025
 
