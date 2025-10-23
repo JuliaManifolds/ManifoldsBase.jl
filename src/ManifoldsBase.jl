@@ -686,7 +686,18 @@ injectivity_radius_exp(M::AbstractManifold) = injectivity_radius(M)
     inner(M::AbstractManifold, p, X, Y)
 
 Compute the inner product of tangent vectors `X` and `Y` at point `p` from the
-[`AbstractManifold`](@ref) `M`.
+[`AbstractManifold`](@ref) `M`. The result type varies by the exact type of `M`:
+
+1. On a [Riemannian manifold](https://en.wikipedia.org/wiki/Riemannian_manifold)
+   the result is a real number.
+2. On an [almost complex manifold](https://en.wikipedia.org/wiki/Almost_complex_manifold)
+   the result is a complex number.
+3. On an [almost quaternionic manifold](https://en.wikipedia.org/wiki/Quaternionic_manifold#Almost_quaternionic_structure)
+   the result is a quaternion.
+4. On a [CR manifold](https://en.wikipedia.org/wiki/CR_manifold) the result may be either
+   real or complex, depending on the particular manifold.
+
+In cases 2, 3 and 4 the Riemannian inner product can be obtained by taking the real part.
 """
 inner(M::AbstractManifold, p, X, Y)
 
