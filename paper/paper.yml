@@ -1,0 +1,24 @@
+title: "ManifoldsBase.jl – an interface for manifolds in Julia"
+keywords:
+  - Julia
+  - Riemannian manifolds
+  - Lie groups
+  - differential geometry
+  - numerical analysis
+  - scientific computing
+authors:
+  - name: Mateusz Baran
+    email: mbaran@agh.edu.pl
+    orcid: 0000-0001-9667-5579
+    affiliation: 2
+  - name: Ronny Bergmann
+    email: ronny.bergmann@ntnu.no
+    orcid: 0000-0001-8342-7218
+    affiliation: 1, 2
+affiliations:
+  - name: Department of Mathematical Sciences, Norwegian University of Science and Technology, Trondheim, Norway
+    index: 1
+  - name: AGH University of Science and Technology, Kraków, Poland
+    index: 2
+date: 15 November 2025
+bibliography: ref.bib
