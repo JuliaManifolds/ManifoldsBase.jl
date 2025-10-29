@@ -4,7 +4,8 @@
 \setcounter{page}{1}
 \usepackage{amsmath,booktabs,mathtools,amssymb}
 \newcommand{\term}[1]{\emph{#1}}
-%
+\newcommand{\ManifoldsBaseVersion}{2.0}
+
 \hypersetup{colorlinks=true}
 %
 \begin{document}
@@ -14,31 +15,81 @@
 \maketitle
 
 \begin{abstract}
+    We present an overview about the interface of the Julia package \texttt{ManifoldsBase.jl}
+    to define and work with manifolds in Julia.
+    The package is a central component of the \texttt{JuliaManifolds} ecosystem and is used by
+    nearly all other packages in the ecosystem and several packages in the Julia community.
+
+    We discuss the main design ideas of the interface and present an overview of the features
+    and functions provided in \verb|ManifoldsBase.jl| \ManifoldsBaseVersion.
 \end{abstract}
 %
 \section{Introduction}%
 \label{sec:Introduction}
 %
+In many scenarios one encounters data that does not lie in a Euclidean space.
+Informally phrased, for certain data, we are not allowed do just add or scale them.
+Examples are rotations, data on spheres, in hyperbolic spaces, like when working with general relativity,
+symmetric positive definite matrices, like when working with covariance matrices,
+or when the data is either bases of subspaces or subspaces themselves, i.e.\ data on the
+Stiefel or Grassmann manifold.
+The data of interest for this paper still bear enough “structure”, i.e. they live on smooth manifolds.
+
+In a prior paper about \verb|Manifolds.jl|~\cite{AxenBaranBergmannRzecki:2023}, a partial presentation of the interface
+of \verb|ManifoldsBase.jl| was given, when the interface was still in an early stage.
+A few fundamental design decissions have changed since then.
+\\
+This paper presents the current state of the interface of \verb|ManifoldsBase.jl| \ManifoldsBaseVersion,
+which has reached a stable state.
+The paper is organized as follows: in Section~\ref{sec:Notation} we introduce the mathematical background and notation.
+In Section~\ref{sec:DesignPrinciples} we present the main design principles and structure of the interface.
+Section~\ref{sec:Interface} presents the interface components in detail.
+In Section~\ref{sec:Example} we present an example of defining a new manifold,
+and Section~\ref{sec:Usage} presents an overview of packages using \verb|ManifoldsBase.jl|.
+
 \section{Mathematical Background}%
 \label{sec:Notation}
 
 \begin{figure}
     \centering
-    \includegraphics[width=0.1875\textwidth]{logo.png}
+    \includegraphics[width=0.15\textwidth]{logo.png}
     \caption*{\ \\[-.5\baselineskip]Logo of \texttt{ManifoldsBase.jl}.}%
-    \label{fig:liegroups_logo}
+    \label{fig:manifoldsbase_logo}
 \end{figure}
+
+\section{Components and design principles of the interface}\label{sec:DesignPrinciples}
+
+\subsection{Main types}
+
+\subsection{General function design and a scheme of 3 layers}
+
+\subsection{A trait system to avoid code duplication.}
 
 \section{The interface}\label{sec:Interface}
 
 \subsection{Topological functions}
 
 \subsection{Metric and connection related functions}
-\subsection{}
+\subsection{???}
 
-\section{Use cases of the interface}\label{sec:LieGroups}
+\section{An example}\label{sec:Example}
 
+\subsection{Defining an own manifold}
 
-\section{An example how to use {\texttt{LieGroups.jl}}}\label{sec:Example}
+\subsection{Adding a second metric to an existin manifold}
+
+\subsection{Implementing a generic algorithm on a manifold}
+
+\section{Where the interface is used}\label{sec:Usage}
+\begin{itemize}
+    \item Manifolds.jl
+    \item Manopt.jl \cite{Bergmann:2022}
+    \item ManifoldDiff.jl
+    \item ManifoldDiffEq.jl
+    \item GeometricKalman.jl
+    \item ExponentialFamilyManifolds.jl (Mykola) - and a second one he built on that?
+    \item ROMe.jl (?)
+\end{itemize}
+\label{sec:Example}
 \input{bib.tex}
 \end{document}
