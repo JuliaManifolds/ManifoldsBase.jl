@@ -169,7 +169,7 @@ using ManifoldsBaseTestUtils
             exactness_tol = 1.0e-7,
         )
     end
-    @testset "StabilizedRetraction" begin
+    @testset "StabilizedRetraction and its inverse" begin
         M = TestSphere(10)
         p1 = [
             -0.3676232664793671,
@@ -205,44 +205,61 @@ using ManifoldsBaseTestUtils
         X3 = copy(X1)
         X4 = copy(X1)
         X5 = copy(X1)
+        # inverse
+        p6 = copy(p1) # keep for checks
+        p7 = exp(M, p1, X1)
+        p8 = exp(M, p1, X1)
+        p9 = exp(M, p1, X1)
+        Y1 = copy(X1)
+        Y2 = copy(X1)
+        Y3 = copy(X1)
         q = similar(p1)
         SR = StabilizedRetraction()
+        @test repr(SR) == "StabilizedRetraction()"
+        SIR = StabilizedInverseRetraction()
+        @test repr(SIR) == "StabilizedInverseRetraction()"
         err_eps = 1.0e-5
         for _ in 1:1000
-
             X1 .+= err_eps
             exp!(M, q, p1, X1)
             parallel_transport_to!(M, X1, p1, X1, q)
             p1 .= q
-
             # mutating non-fused
             X2 .+= err_eps
             retract!(M, q, p2, X2, SR)
             parallel_transport_to!(M, X2, p2, X2, q)
             p2 .= q
-
             # mutating fused
             X3 .+= err_eps
             ManifoldsBase.retract_fused!(M, q, p3, X3, 1.0, SR)
             parallel_transport_to!(M, X3, p3, X3, q)
             p3 .= q
-
             # non-mutating non-fused
             X4 .+= err_eps
             q4 = retract(M, p4, X4, SR)
             parallel_transport_to!(M, X4, p4, X4, q4)
             p4 .= q4
-
             # non-mutating fused
             X5 .+= err_eps
             q5 = ManifoldsBase.retract_fused(M, p5, X5, 1.0, SR)
             parallel_transport_to!(M, X5, p5, X5, q5)
             p5 .= q5
+
+            p7 .+= err_eps
+            Y1 .= log(M, p6, p7)
+            p8 .+= err_eps
+            Y2 .= inverse_retract(M, p6, p8, SIR)
+            p9 .+= err_eps
+            inverse_retract!(M, Y3, p6, p9, SIR)
         end
         @test !is_point(M, p1)
-        @test is_point(M, p2)
-        @test is_point(M, p3)
-        @test is_point(M, p4)
-        @test is_point(M, p5)
+        @test is_point(M, p2; error = :error)
+        @test is_point(M, p3; error = :error)
+        @test is_point(M, p4; error = :error)
+        @test is_point(M, p5; error = :error)
+        # test the inverse as well
+        @test !is_vector(M, p6, Y1)
+        @test is_vector(M, p6, Y2; error = :error, atol = 1.0e-16)
+        @test is_vector(M, p6, Y3; error = :error, atol = 1.0e-16)
     end
 end
