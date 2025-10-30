@@ -158,6 +158,9 @@ for numerical stability.
 # Constructor
 
     StabilizedRetraction(::AbstractRetractionMethod=ExponentialRetraction())
+
+# See also
+[`ExponentialRetraction`](@ref), [`project!`](@ref)
 """
 struct StabilizedRetraction{TRM <: AbstractRetractionMethod} <: AbstractRetractionMethod
     retraction::TRM
@@ -239,6 +242,7 @@ function PadeInverseRetraction(m::Int)
     )
     return PadeInverseRetraction{m}()
 end
+
 @doc raw"""
     CayleyInverseRetraction <: AbstractInverseRetractionMethod
 
@@ -317,20 +321,12 @@ struct NLSolveInverseRetraction{TR <: AbstractRetractionMethod, TV, TK} <:
     nlsolve_kwargs::TK
     function NLSolveInverseRetraction(m, X0, project_point, project_tangent, nlsolve_kwargs)
         return new{typeof(m), typeof(X0), typeof(nlsolve_kwargs)}(
-            m,
-            X0,
-            project_point,
-            project_tangent,
-            nlsolve_kwargs,
+            m, X0, project_point, project_tangent, nlsolve_kwargs,
         )
     end
 end
 function NLSolveInverseRetraction(
-        m,
-        X0 = nothing;
-        project_tangent::Bool = false,
-        project_point::Bool = false,
-        nlsolve_kwargs...,
+        m, X0 = nothing; project_tangent::Bool = false, project_point::Bool = false, nlsolve_kwargs...,
     )
     return NLSolveInverseRetraction(m, X0, project_point, project_tangent, nlsolve_kwargs)
 end
@@ -381,6 +377,24 @@ Describes an inverse retraction that is based on the softmax function.
 struct SoftmaxInverseRetraction <: AbstractInverseRetractionMethod end
 
 """
+    StabilizedInveerseRetraction <: AbstractInverseRetractionMethod
+
+An inverse retraction wraps another inverse retraction and projects
+the resulting tangent vector onto the corresponding tangent space for numerical stability.
+
+# Constructor
+
+    StabilizedInverseRetraction(::AbstractInverseRetractionMethod=LogarithmicInverseRetraction())
+
+# See also
+[`LogarithmicInverseRetraction`](@ref), [`project!`](@ref)
+"""
+struct StabilizedInverseRetraction{TRM <: AbstractInverseRetractionMethod} <: AbstractInverseRetractionMethod
+    inverse_retraction::TRM
+end
+StabilizedInverseRetraction() = StabilizedInverseRetraction(LogarithmicInverseRetraction())
+
+"""
     default_inverse_retraction_method(M::AbstractManifold)
     default_inverse_retraction_method(M::AbstractManifold, ::Type{T}) where {T}
 
@@ -428,9 +442,7 @@ corresponding manifold.
 See also [`retract`](@ref).
 """
 function inverse_retract(
-        M::AbstractManifold,
-        p,
-        q,
+        M::AbstractManifold, p, q,
         m::AbstractInverseRetractionMethod = default_inverse_retraction_method(M, typeof(p)),
     )
     return _inverse_retract(M, p, q, m)
@@ -457,21 +469,13 @@ available methods.
 See also [`retract!`](@ref).
 """
 function inverse_retract!(
-        M::AbstractManifold,
-        X,
-        p,
-        q,
+        M::AbstractManifold, X, p, q,
         m::AbstractInverseRetractionMethod = default_inverse_retraction_method(M, typeof(p)),
     )
     return _inverse_retract!(M, X, p, q, m)
 end
 function _inverse_retract!(
-        M::AbstractManifold,
-        X,
-        p,
-        q,
-        ::LogarithmicInverseRetraction;
-        kwargs...,
+        M::AbstractManifold, X, p, q, ::LogarithmicInverseRetraction; kwargs...,
     )
     return log!(M, X, p, q; kwargs...)
 end
@@ -479,62 +483,32 @@ end
 #
 # dispatch to lower level
 function _inverse_retract!(
-        M::AbstractManifold,
-        X,
-        p,
-        q,
-        ::CayleyInverseRetraction;
-        kwargs...,
+        M::AbstractManifold, X, p, q, ::CayleyInverseRetraction; kwargs...,
     )
     return inverse_retract_cayley!(M, X, p, q; kwargs...)
 end
 function _inverse_retract!(
-        M::AbstractManifold,
-        X,
-        p,
-        q,
-        m::EmbeddedInverseRetraction;
-        kwargs...,
+        M::AbstractManifold, X, p, q, m::EmbeddedInverseRetraction; kwargs...,
     )
     return inverse_retract_embedded!(M, X, p, q, m.inverse_retraction; kwargs...)
 end
 function _inverse_retract!(
-        M::AbstractManifold,
-        X,
-        p,
-        q,
-        m::NLSolveInverseRetraction;
-        kwargs...,
+        M::AbstractManifold, X, p, q, m::NLSolveInverseRetraction; kwargs...,
     )
     return inverse_retract_nlsolve!(M, X, p, q, m; kwargs...)
 end
 function _inverse_retract!(
-        M::AbstractManifold,
-        X,
-        p,
-        q,
-        m::PadeInverseRetraction;
-        kwargs...,
+        M::AbstractManifold, X, p, q, m::PadeInverseRetraction; kwargs...,
     )
     return inverse_retract_pade!(M, X, p, q, m; kwargs...)
 end
 function _inverse_retract!(
-        M::AbstractManifold,
-        X,
-        p,
-        q,
-        ::PolarInverseRetraction;
-        kwargs...,
+        M::AbstractManifold, X, p, q, ::PolarInverseRetraction; kwargs...,
     )
     return inverse_retract_polar!(M, X, p, q; kwargs...)
 end
 function _inverse_retract!(
-        M::AbstractManifold,
-        X,
-        p,
-        q,
-        ::ProjectionInverseRetraction;
-        kwargs...,
+        M::AbstractManifold, X, p, q, ::ProjectionInverseRetraction; kwargs...,
     )
     return inverse_retract_project!(M, X, p, q; kwargs...)
 end
@@ -542,25 +516,21 @@ function _inverse_retract!(M::AbstractManifold, X, p, q, ::QRInverseRetraction; 
     return inverse_retract_qr!(M, X, p, q; kwargs...)
 end
 function _inverse_retract!(
-        M::AbstractManifold,
-        X,
-        p,
-        q,
-        m::InverseRetractionWithKeywords;
-        kwargs...,
+        M::AbstractManifold, X, p, q, m::InverseRetractionWithKeywords; kwargs...,
     )
     return _inverse_retract!(M, X, p, q, m.inverse_retraction; kwargs..., m.kwargs...)
 end
 function _inverse_retract!(
-        M::AbstractManifold,
-        X,
-        p,
-        q,
-        ::SoftmaxInverseRetraction;
-        kwargs...,
+        M::AbstractManifold, X, p, q, ::SoftmaxInverseRetraction; kwargs...,
     )
     return inverse_retract_softmax!(M, X, p, q; kwargs...)
 end
+function _inverse_retract!(
+        M::AbstractManifold, X, p, q, m::StabilizedInverseRetraction; kwargs...,
+    )
+    return inverse_retract_stabilized!(M, X, p, q, m; kwargs...)
+end
+
 """
     inverse_retract_embedded!(M::AbstractManifold, X, p, q, m::AbstractInverseRetractionMethod)
 
@@ -569,21 +539,12 @@ the [`AbstractInverseRetractionMethod`](@ref) `m` in the embedding (see [`get_em
 and projecting the result back.
 """
 function inverse_retract_embedded!(
-        M::AbstractManifold,
-        X,
-        p,
-        q,
-        m::AbstractInverseRetractionMethod,
+        M::AbstractManifold, X, p, q, m::AbstractInverseRetractionMethod,
     )
     return project!(
-        M,
-        X,
-        p,
+        M, X, p,
         inverse_retract(
-            get_embedding(M),
-            embed(get_embedding(M), p),
-            embed(get_embedding(M), q),
-            m,
+            get_embedding(M), embed(get_embedding(M), p), embed(get_embedding(M), q), m,
         ),
     )
 end
@@ -652,6 +613,11 @@ inverse_retract_softmax!(M::AbstractManifold, X, p, q)
 
 function inverse_retract_softmax! end
 
+function inverse_retract_stabilized!(M::AbstractManifold, X, p, q, m::StabilizedInverseRetraction; kwargs...)
+    inverse_retract!(M, X, p, q, m.inverse_retraction; kwargs...)
+    return project!(M, p, X)
+end
+
 _doc_retract = raw"""
     retract(M::AbstractManifold, p, X, method::AbstractRetractionMethod=default_retraction_method(M, typeof(p)))
     retract!(M::AbstractManifold, q, p, X, method::AbstractRetractionMethod=default_retraction_method(M, typeof(p)))
@@ -679,9 +645,7 @@ Locally, the retraction is invertible. For the inverse operation, see [`inverse_
 
 @doc "$(_doc_retract)"
 function retract(
-        M::AbstractManifold,
-        p,
-        X,
+        M::AbstractManifold, p, X,
         m::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
     )
     return _retract(M, p, X, m)
@@ -697,10 +661,7 @@ end
 
 @doc "$(_doc_retract)"
 function retract!(
-        M::AbstractManifold,
-        q,
-        p,
-        X,
+        M::AbstractManifold, q, p, X,
         method::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
     )
     return _retract!(M, q, p, X, method)
@@ -765,10 +726,7 @@ By default, this falls back to calling [`retract`](@ref) with `t*X`.
 
 @doc "$(_doc_retract_fused)"
 function retract_fused(
-        M::AbstractManifold,
-        p,
-        X,
-        t::Number,
+        M::AbstractManifold, p, X, t::Number,
         m::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
     )
     return _retract_fused(M, p, X, t, m)
@@ -784,11 +742,7 @@ end
 
 @doc "$(_doc_retract_fused)"
 function retract_fused!(
-        M::AbstractManifold,
-        q,
-        p,
-        X,
-        t::Number,
+        M::AbstractManifold, q, p, X, t::Number,
         m::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
     )
     return _retract_fused!(M, q, p, X, t, m)
@@ -796,57 +750,27 @@ end
 # Retract fused Layer 2
 # Retract Layer 2 – dispatch on the method
 function _retract_fused!(
-        M::AbstractManifold,
-        q,
-        p,
-        X,
-        t::Number,
-        ::CayleyRetraction;
-        kwargs...,
+        M::AbstractManifold, q, p, X, t::Number, ::CayleyRetraction; kwargs...,
     )
     return retract_cayley_fused!(M, q, p, X, t; kwargs...)
 end
 function _retract_fused!(
-        M::AbstractManifold,
-        q,
-        p,
-        X,
-        t::Number,
-        m::EmbeddedRetraction;
-        kwargs...,
+        M::AbstractManifold, q, p, X, t::Number, m::EmbeddedRetraction; kwargs...,
     )
     return retract_embedded_fused!(M, q, p, X, t, m.retraction; kwargs...)
 end
 function _retract_fused!(
-        M::AbstractManifold,
-        q,
-        p,
-        X,
-        t::Number,
-        ::ExponentialRetraction;
-        kwargs...,
+        M::AbstractManifold, q, p, X, t::Number, ::ExponentialRetraction; kwargs...,
     )
     return exp_fused!(M, q, p, X, t; kwargs...)
 end
 function _retract_fused!(
-        M::AbstractManifold,
-        q,
-        p,
-        X,
-        t::Number,
-        ::PolarRetraction;
-        kwargs...,
+        M::AbstractManifold, q, p, X, t::Number, ::PolarRetraction; kwargs...,
     )
     return retract_polar_fused!(M, q, p, X, t; kwargs...)
 end
 function _retract_fused!(
-        M::AbstractManifold,
-        q,
-        p,
-        X,
-        t::Number,
-        ::ProjectionRetraction;
-        kwargs...,
+        M::AbstractManifold, q, p, X, t::Number, ::ProjectionRetraction; kwargs...,
     )
     return retract_project_fused!(M, q, p, X, t; kwargs...)
 end
@@ -857,13 +781,7 @@ function _retract_fused!(M::AbstractManifold, q, p, X, t::Number, m::SasakiRetra
     return retract_sasaki_fused!(M, q, p, X, t, m)
 end
 function _retract_fused!(
-        M::AbstractManifold,
-        q,
-        p,
-        X,
-        t::Number,
-        ::SoftmaxRetraction;
-        kwargs...,
+        M::AbstractManifold, q, p, X, t::Number, ::SoftmaxRetraction; kwargs...,
     )
     return retract_softmax_fused!(M, q, p, X, t; kwargs...)
 end
@@ -871,24 +789,12 @@ function _retract_fused!(M::AbstractManifold, q, p, X, t::Number, m::StabilizedR
     return retract_stabilized_fused!(M, q, p, X, t, m)
 end
 function _retract_fused!(
-        M::AbstractManifold,
-        q,
-        p,
-        X,
-        t::Number,
-        m::PadeRetraction;
-        kwargs...,
+        M::AbstractManifold, q, p, X, t::Number, m::PadeRetraction; kwargs...,
     )
     return retract_pade_fused!(M, q, p, X, t, m; kwargs...)
 end
 function _retract_fused!(
-        M::AbstractManifold,
-        q,
-        p,
-        X,
-        t::Number,
-        m::RetractionWithKeywords;
-        kwargs...,
+        M::AbstractManifold, q, p, X, t::Number, m::RetractionWithKeywords; kwargs...,
     )
     return _retract_fused!(M, q, p, X, t, m.retraction; kwargs..., m.kwargs...)
 end
@@ -905,21 +811,13 @@ the [`AbstractRetractionMethod`](@ref) `m` in the embedding (see [`get_embedding
 and projecting the result back.
 """
 function retract_embedded!(
-        M::AbstractManifold,
-        q,
-        p,
-        X,
-        m::AbstractRetractionMethod;
-        kwargs...,
+        M::AbstractManifold, q, p, X, m::AbstractRetractionMethod; kwargs...,
     )
     return project!(
         M,
         q,
         retract(
-            get_embedding(M),
-            embed(get_embedding(M), p),
-            embed(get_embedding(M), p, X),
-            m;
+            get_embedding(M), embed(get_embedding(M), p), embed(get_embedding(M), p, X), m;
             kwargs...,
         ),
     )
@@ -931,24 +829,13 @@ end
 Compute the scaled variant of `retract_embedded!`.
 """
 function retract_embedded_fused!(
-        M::AbstractManifold,
-        q,
-        p,
-        X,
-        t::Number,
-        m::AbstractRetractionMethod;
-        kwargs...,
+        M::AbstractManifold, q, p, X, t::Number, m::AbstractRetractionMethod; kwargs...,
     )
     return project!(
         M,
         q,
         retract_fused(
-            get_embedding(M),
-            embed(get_embedding(M), p),
-            embed(get_embedding(M), p, X),
-            t,
-            m;
-            kwargs...,
+            get_embedding(M), embed(get_embedding(M), p), embed(get_embedding(M), p, X), t, m; kwargs...,
         ),
     )
 end
@@ -1052,12 +939,7 @@ function retract_stabilized!(M::AbstractManifold, q, p, X, m::StabilizedRetracti
 end
 
 function retract_stabilized_fused!(
-        M::AbstractManifold,
-        q,
-        p,
-        X,
-        t::Number,
-        m::StabilizedRetraction,
+        M::AbstractManifold, q, p, X, t::Number, m::StabilizedRetraction,
     )
     retract_fused!(M, q, p, X, t, m.retraction)
     return embed_project!(M, q, q)
@@ -1065,6 +947,14 @@ end
 
 Base.show(io::IO, ::CayleyRetraction) = print(io, "CayleyRetraction()")
 Base.show(io::IO, ::PadeRetraction{m}) where {m} = print(io, "PadeRetraction($m)")
+function Base.show(io::IO, s::StabilizedRetraction)
+    r = s.retraction isa ExponentialRetraction ? "" : "$(s.retraction)"
+    return print(io, "StabilizedRetraction($r)")
+end
+function Base.show(io::IO, s::StabilizedInverseRetraction)
+    r = s.inverse_retraction isa LogarithmicInverseRetraction ? "" : "$(s.inverse_retraction)"
+    return print(io, "StabilizedInverseRetraction($r)")
+end
 
 #
 # default estimation methods pass down with and without the point type
