@@ -160,7 +160,7 @@ for numerical stability.
     StabilizedRetraction(::AbstractRetractionMethod=ExponentialRetraction())
 
 # See also
-[`ExponentialRetraction`](@ref), [`project!`](@ref)
+[`ExponentialRetraction`](@ref), [`embed_project!`](@ref)
 """
 struct StabilizedRetraction{TRM <: AbstractRetractionMethod} <: AbstractRetractionMethod
     retraction::TRM
@@ -387,7 +387,7 @@ the resulting tangent vector onto the corresponding tangent space for numerical 
     StabilizedInverseRetraction(::AbstractInverseRetractionMethod=LogarithmicInverseRetraction())
 
 # See also
-[`LogarithmicInverseRetraction`](@ref), [`project!`](@ref)
+[`LogarithmicInverseRetraction`](@ref), [`embed_project!`](@ref)
 """
 struct StabilizedInverseRetraction{TRM <: AbstractInverseRetractionMethod} <: AbstractInverseRetractionMethod
     inverse_retraction::TRM
@@ -615,7 +615,7 @@ function inverse_retract_softmax! end
 
 function inverse_retract_stabilized!(M::AbstractManifold, X, p, q, m::StabilizedInverseRetraction; kwargs...)
     inverse_retract!(M, X, p, q, m.inverse_retraction; kwargs...)
-    project!(M, X, p, X)
+    embed_project!(M, X, p, X)
     return X
 end
 

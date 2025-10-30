@@ -257,7 +257,7 @@ using ManifoldsBaseTestUtils
         @test is_point(M, p3; error = :error)
         @test is_point(M, p4; error = :error)
         @test is_point(M, p5; error = :error)
-        # test the inverse as welll
+        # test the inverse as well
         @test !is_vector(M, p6, Y1)
         @test is_vector(M, p6, Y2; error = :error, atol = 1.0e-16)
         @test is_vector(M, p6, Y3; error = :error, atol = 1.0e-16)
