@@ -615,7 +615,8 @@ function inverse_retract_softmax! end
 
 function inverse_retract_stabilized!(M::AbstractManifold, X, p, q, m::StabilizedInverseRetraction; kwargs...)
     inverse_retract!(M, X, p, q, m.inverse_retraction; kwargs...)
-    return project!(M, p, X)
+    project!(M, X, p, X)
+    return X
 end
 
 _doc_retract = raw"""
