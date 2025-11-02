@@ -37,34 +37,17 @@ The data of interest for this paper still bear enough “structure”, i.e. they
 
 In a prior paper about \verb|Manifolds.jl|~\cite{AxenBaranBergmannRzecki:2023}, a partial presentation of the interface
 of \verb|ManifoldsBase.jl| was given, when the interface was still in an early stage.
-A few fundamental design decissions have changed since then.
+A few fundamental design decisions have changed since then.
 \\
 This paper presents the current state of the interface of \verb|ManifoldsBase.jl| \ManifoldsBaseVersion,
 since that state can be considered as having reached a very stable state.
+Its logo is shown in the Figure on the right.
+
 The paper is organized as follows: in Section~\ref{sec:Notation} we introduce the mathematical background and notation.
 In Section~\ref{sec:DesignPrinciples} we present the main design principles and structure of the interface.
 Section~\ref{sec:Interface} presents the interface components in detail.
 In Section~\ref{sec:Example} we present an example of defining a new manifold,
 and Section~\ref{sec:Usage} presents an overview of packages using \verb|ManifoldsBase.jl|.
-
-\section{Mathematical Background}%
-\label{sec:Notattion}
-
-This section introduces the mathematical background and notation used throughout this paper,
-for more details see, e.g. \cite{Lee:2003:1,AbsilMahonySepulchre:2008:1,DoCarmo:1992}.
-
-A \term{manifold} \( \mathcal{M} \) is a topological space%
-\footnote{we assume that the spaces we consider here are second countable and Hausdorff}
- that locally resembles Euclidean space $\mathbb R^n$, $n \in \mathbb N$.
-To make this more precise, for every point \( p \in \mathcal{M} \), there exists a neighborhood \( \mathcal{U} \subseteq \mathcal{M} \)
-and a homeomorphism \( \varphi\colon \mathcal{U} \to \mathbb{R}^n \).
-The dimension of the manifold is defined as the dimension of the Euclidean space \( \mathbb{R}^n \). This can be interpreted as the number of degrees of freedom. The homeomorphism \( \varphi \) is called a \term{chart}, $\varphi(p)$
-is called the \term{coordinates} of the point \( p \) in the chart \( \varphi \). A collection of charts $\varphi_i\colon \mathcal{U_i} \to \mathbb{R}^n$, $i \in \mathcal I$ for some index set \( \mathcal{I} \), that cover the manifold \( \mathcal{M} = \bigcup_i \mathcal{U}_i \) is called an \term{atlas}. If we can “smoothly change charts”, i.e. the transition maps \( \varphi_j \circ \varphi_i^{-1} \) are smooth\footnote{while one could consider different kinds of smoothness, $C^1$, $C^2$,..., for simplicity one usually just assumes $C^\infty$}, we say that the atlas \(\mathcal A\) is \term{smooth}.
-A manifold \(\mathcal{M}\) together with a smooth atlas is called a \term{smooth manifold}.
-Informally, a smooth manifold allows us to compute derivatives on the manifold
-by “looking at it through a chart”. The smooth atlas then allows to argue, that this derivative is independent of the chosen chart.
-
-
 
 \begin{figure}
     \centering
@@ -73,26 +56,166 @@ by “looking at it through a chart”. The smooth atlas then allows to argue, t
     \label{fig:manifoldsbase_logo}
 \end{figure}
 
-\section{Components and design principles of the interface}\label{sec:DesignPrinciples}
+\section{Mathematical Background}%
+\label{sec:Notattion}
+
+This section introduces the mathematical background and notation used throughout this paper,
+for more details see, e.g. \cite{Lee:2003:1,AbsilMahonySepulchre:2008:1,DoCarmo:1992}.
+
+\subsubsection{A topological manifold} A \term{manifold} \( \mathcal{M} \) is a topological space%
+\footnote{we assume that the spaces we consider here are second countable and Hausdorff}
+ that locally resembles Euclidean space $\mathbb R^n$, $n \in \mathbb N$.
+To make this more precise, for every point \( p \in \mathcal{M} \), there exists a neighborhood \( \mathcal{U} \subseteq \mathcal{M} \)
+and a homeomorphism \( \varphi\colon \mathcal{U} \to \mathbb{R}^n \).
+The dimension of the manifold is defined as the dimension of the Euclidean space \( \mathbb{R}^n \). This can be interpreted as the number of degrees of freedom. The homeomorphism \( \varphi \) is called a \term{chart}, $\varphi(p)$
+is called the \term{coordinates} of the point \( p \) in the chart \( \varphi \). A collection of charts $\varphi_i\colon \mathcal{U_i} \to \mathbb{R}^n$, $i \in \mathcal I$ for some index set \( \mathcal{I} \), that cover the manifold \( \mathcal{M} = \bigcup_i \mathcal{U}_i \) is called an \term{atlas}. If we can “smoothly change charts”, i.e. the transition maps \( \varphi_j \circ \varphi_i^{-1} \) are smooth\footnote{while one could consider different kinds of smoothness, $C^1$, $C^2$,..., for simplicity one usually just assumes $C^\infty$}, we say that the atlas \(\mathcal A\) is \term{smooth}.
+A manifold \(\mathcal{M}\) together with a smooth atlas is called a \term{smooth manifold}%
+\footnote{more precisely, one usually considers a maximal smooth atlas collecting all compatible charts.}
+
+Informally, a smooth manifold allows us to compute derivatives on the manifold
+by “looking at it through a chart”. The smooth atlas then allows to argue, that this derivative is independent of the chosen chart.
+
+As a guiding example, consider the $n$-dimensional sphere
+\begin{equation*}
+    \mathbb{S}^n = \{ p \in \mathbb{R}^{n+1} \mid \lVert p \rVert_2 = 1 \},
+\end{equation*}
+which is a smooth manifold of dimension \( n \). A set of charts is for example the so-called \term{stereographic projections} onto the planes tangent to the sphere. Indeed, it is enough to consider the projections from the north and south pole to cover the sphere.
+
+\subsubsection{Tangent spaces} Consider any \( p \in \mathcal{M} \) on  a smooth manifold. In order to take (directional) derivatives at the point \( p \), consider the set of all curves \( c\colon (-\epsilon, \epsilon) \to \mathcal{M} \) with \( c(0) = p \) that “run through \( p \)”. We can now consider the derivative of the curve \( \dot c \) around \( p \) in any chart \( \varphi \) such that \( p \in \mathcal{U}\).
+
+Collecting all $\dot c(0)$ yields “all possible walking directions”, which is called the \term{tangent space} \( T_p \mathcal{M} \) at \( p \in \mathcal{M} \). Formally, we have to consider equivalence classes of curves, that have the same derivative in a chart as elements of \( T_p \mathcal{M} \). The tangent space \( T_p \mathcal{M} \) is a vector space of dimension \( n \).
+The disjoint union of all tangent spaces \( T \mathcal{M} = \bigsqcup_{p \in \mathcal{M}} T_p \mathcal{M} \) is called the \term{tangent bundle}.
+
+For the sphere \( \mathbb{S}^n \), the tangent space at a point \( p \in \mathbb{S}^n \) is given by
+
+\begin{equation*}
+    T_p \mathbb{S}^n = \bigl\{ X \in \mathbb{R}^{n+1} \bigm| X^{\mathrm{T}} p = 0 \bigr\},
+\end{equation*}
+i.e. the set of all vectors in \( \mathbb{R}^{n+1} \) that are orthogonal to \( p \). Visually, these are all vectors that are tangent to the sphere at the point \( p \).
+
+Since the tangent space is a vector space, we can introduce an inner product \( \langle \cdot, \cdot \rangle_p \colon T_p \mathcal{M} \times T_p \mathcal{M} \to \mathbb{R} \) on each tangent space \( T_p \mathcal{M} \).
+With two tangent vector fields \( \mathcal{X}, \mathcal{Y} \colon \mathcal{M} \to T \mathcal{M} \), \( \mathcal{X}(p), \mathcal{Y}(p) \in T_p \mathcal{M} \), we can consider the function \( p \mapsto \langle \mathcal{X}(p), \mathcal{Y}(p) \rangle_p \).
+We say family of inner products \( \langle \cdot, \cdot \rangle_p \) is \term{smoothly varying} (in \(p\)) if this map is a smooth map.
+
+A \term{Riemannian manifold} is a smooth manifold \( \mathcal{M} \) together with a smoothly varying inner product on the tangent spaces \( T_p \mathcal{M} \), called the \term{Riemannian metric}.
+
+All further terminology will be introduced throughout the introduction of the interface.
+
+\section{The interface working with manifolds}\label{sec:Interface}
 
 \subsection{Main types}
 
-\subsection{General function design and a scheme of 3 layers}
+The central type to represent a manifold is \verb|AbstractManifold{|$\mathbb{F}$\verb|}| to represent a Riemannian manifold. The type parameter $\mathbb{F}$ indicates, whether the representation of points and tangent vectors are arrays or data types over the reals \(\mathbb{R}\), complex numbers \(\mathbb{C}\) or quaternions \(\mathbb{H}\).
 
-\subsection{A trait system to avoid code duplication.}
+To build a possibly hierarchical structure of points or tangent vectors, the abstract types \verb|AbstractManifoldPoint| and \verb|AbstractTangentVector| exist\footnote{the tangent vector type is more precisely a \texttt{AbstractFibreVector\{TangentSpaceType\}}, since other vector spaces can be modelled as well}.
+These are, however not necessary to define or use the interface. For example the sphere can be used with plain \verb|Vector{Float64}| as well. We recommend to use these as supertypes when defining new manifold point or tangent vector types, especially when these are mainly used to avoid type piracy.
 
-\section{The interface}\label{sec:Interface}
+\subsection{General scheme of functions}
+
+Functions within \verb|ManifoldsBase.jl| have a consistent order of arguments. The first argument should always be the manifold, followed by points and tangent vectors, and finally possibly positional arguments. when ever a function computes or returns a point, tangent vector, or array, both an allocating and an in-place version are available. The in-place version has an additional argument at the second position, i.\,e.\ directly following the manifold.
+For example generating a zero vector in the tangent space at a point \( p \) on a manifold \( \mathcal{M} \) is either \verb|zero_vector(M, p)| or \verb|zero_vector!(M, X, p)| to return the result in the pre-allocated vector \verb|X|.
+By default, the allocating version should allocate a result and call the in-place version.
+This can be realised by using \verb|allocate_result(M, f, args...)| for a function \verb|f(M, args...)|. This allows to for example allocate the correct type of a tangent vector, when the arguments only contain the manifold and points. This is the case for example in the function \verb|zero_vector(M, p)|.
 
 \subsection{Topological functions}
 
-\subsection{Metric and connection related functions}
-\subsection{???}
+\begin{itemize}
+    \item \verb|manifold_dimension(M, p)|
+    \item \verb|is_point(M, p)| (mention error and kwargs...)
+    \item \verb|is_vector(M, X, p)|
+    \item \verb|isapprox(M, p, q)|
+    \item \verb|copy(M, p)| \& \verb|copy(M, p, X)|
+    \item \verb|copy_to!(M, q, p)| and \verb|copy_to!(M, Y, X, p)|
+    \item \verb|rand(M)| \& \verb|rand(M; vector_at=p)|
+    \item technically:
+    \verb|allocate(M, p, T)| \& \verb|allocate_result(M, f, args...)|
+    \item \verb|base_manifold(M)|
+    \item \verb|embed(M, p)| \& \verb|embed(M, p, X)|
+    \item \verb|project(M, p)| \& \verb|project(M, p, X)| (mention \verb|embed_project|.)
+    \item \verb|get_embeddding(M)|
+    \item \verb|get_coordinates(M, p, X, b)| \& \verb|get_vector(M, p, c, b)|
+    \item \verb|zero_vector(M, p)|
+    \item maybe a bit about bases?
+\end{itemize}
+
+\subsection{Functions on smooth manifolds}
+
+\begin{itemize}
+    \item \verb|inner(M, p, X, Y)|
+    \item \verb|angle(M, p, X, Y)|
+    \item \verb|norm(M, p, X)|
+\end{itemize}
+
+\subsection{Functions on Riemannian manifolds}
+
+\begin{itemize}
+    \item \verb|distance(M, p, q)|
+    \item \verb|exp(M, p, X)|
+    \item \verb|exp_fused(M, p, X, t)| (in footnote?)
+    \item \verb|retract(M, p, X, m)|
+    \item \verb|retract_fused(M, p, X, t, m)| (in footnote?)
+    \item \verb|geodesic(M, p, X, t)|
+    \item \verb|shortest_geodesic(M, p, q, t)|
+    \item \verb|injection_radius(M, p)|
+    \item \verb|log(M, p, q)|
+    \item \verb|inverse_retract(M, p, q, m)|
+    \item \verb|is_flat(M)|
+    \item \verb|parallel_transport_to(M, p, X, p)|
+    \item \verb|parallel_transport_direction(M, p, X, d)|
+    \item \verb|riemannian_tensor(M, p, X, Y, Z)|
+    \item \verb|sectional_curvature(M, p, X, Y)| (mention max/min)
+    \item \verb|ricci_curvature(M, p, X)|
+    \item \verb|Weingarten(M, p, X, V)|
+    \item \verb|vector_transport_to(M, p, X, q, vtm)|
+    \item \verb|vector_transport_direction(M, p, X, d, vtm)|
+\end{itemize}
+
+\section{The Interface to define new manifolds.}\label{sec:DesignPrinciples}
+
+This section presents the main data structures and design principles of \verb|ManifoldsBase.jl|.
+
+\subsection{Avoiding ambiguities with 3 layers of multiple dispatch.}
+
+Multiple dispatch is used in three separate layers to avoid ambiguities. The parameters of a function are groups into three parts: the manifold, the points and tangent vectors, and finally positional arguments.
+A concrete example would be the retraction \verb|retract(M, p, X, m)|, that besides a manifold \verb|M|, a point \verb|p| and a tangent vector \verb|X| at $p \in \mathcal M$, has a positional \verb|m| as the type of retraction, that has a reasonable default.
+
+\subsubsection*{Layer I.} On the first layer, only the manifold type should be used to dispatch the function.
+This allows to define functions for specific manifolds or generic manifold types. This layer should pass on to layer two.
+A user working on manifolds should usually only interact with functions defined on this layer.
+
+\subsubsection*{Layer II.} On the second layer, dispatching on certain positional arguments should be done. This allows to define functions that depend on specific positional arguments for all manifolds. Functions in this layer should be prefixed with an underscore \verb|_| and should pass on to layer three. For our retraction example, this would be \verb|_retract(M, p, X, ::ExponentialRetraction)| which would pass to the exponential map for any manifold with any point/tangent vector representation.
+
+\subsubsection*{Layer III.} On the third layer, dispatching on the point and tangent vector types should be done. This is usually also on concrete manifold types.
+Functions on this layer should usually have a postfix indicating the kind of positional arguments or be prefixed with two underscores. This layer would allocate a result and call the in-place version of the same function.
+A user implementing a new manifold would usually only have to implement the in-place functions on this layer.
+For a retraction example, consider the \verb|ProjectionRetraction|, for which layer two would pass to a function \verb|retract_project(M, p, X)|. This function would allocate the result \verb|Y| and call \verb|retract_project!(M, Y, p, X)|. This function defaults to calling \verb|project!(M, Y, p, X)|, but also allows a user to implement a more efficient version, either for a specific manifold or for specific point or tangent vector types.
+
+If there are no positional arguments, layer two and hence functions with the double underscore prefix or a suffix can be skipped.
+
+\subsection{A trait system to avoid code duplication.}
+
+Certain properties of a manifold can be accessed via traits%
+\footnote{This is sometimes referred to as Tim Holy's Traits Trick (THTT) from the issue \href{https://github.com/JuliaLang/julia/issues/2345\#issuecomment-54537633}{github.com/JuliaLang/julia\#2345}}.
+This aims to avoid code duplication. A manifold using this trait system
+has to use the \verb|AbstractDecoratorManifold{|$\mathbb F$\verb|}| as supertype.
+
+Then, on layer one, function arguments are
+prefixed with an argument of type \verb|AbstractForwardingType|, which is used to “forward” the function call, e.\,g.\ to the embedding.
+
+They can also be “marked” as \verb|StopForwardingType| to indicate, that something is not passed, but needs to actually be implemented.
+
+For the example of embedded manifolds, the \verb|EmbeddedForwardingType| is used to distinguish between different types of embeddings,, e.\,g.\ isometric or submanifold type embeddings and whether the representation does change or not.
+
+As a concrete example consider again the sphere \(\mathbb{S}^n\) as embedded submanifold of \(\mathbb{R}^{n+1}\).
+Here, the function \verb|is_point(M, p)| is implemented by forwarding to first check that \verb|p| is a point on the embedding manifold \(\mathbb{R}^{n+1}\) and then check that \(\lVert p \rVert_2 = 1\).
+We avoid implemeting the test in the embedding.
+Similarly since the sphere is an \verb|IsometricallyEmbeddedManifold|, also \verb|inner(M, p, X, Y)| is forwarded to the embedding using the \verb|SimpleForwardingType|, i.e.\ without any changes to the point or tangent vector representation.
 
 \section{An example}\label{sec:Example}
 
 \subsection{Defining an own manifold}
 
-\subsection{Adding a second metric to an existin manifold}
+\subsection{Adding a second metric to an existing manifold}
 
 \subsection{Implementing a generic algorithm on a manifold}
 
