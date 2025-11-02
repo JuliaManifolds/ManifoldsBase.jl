@@ -15,7 +15,7 @@
 \maketitle
 
 \begin{abstract}
-    We present an overview about the interface of the Julia package \texttt{ManifoldsBase.jl}
+    We present an overview about the interface of the Julia package \href{https://juliamanifolds.github.io/ManifoldsBase.jl/stable/}{\texttt{ManifoldsBase.jl}}
     to define and work with manifolds in Julia.
     The package is a central component of the \texttt{JuliaManifolds} ecosystem and is used by
     nearly all other packages in the ecosystem and several packages in the Julia community.
@@ -36,7 +36,7 @@ Stiefel or Grassmann manifold.
 The data of interest for this paper still bear enough “structure”, i.e. they live on smooth manifolds.
 
 In a prior paper about \verb|Manifolds.jl|~\cite{AxenBaranBergmannRzecki:2023}, a partial presentation of the interface
-of \verb|ManifoldsBase.jl| was given, when the interface was still in an early stage.
+of \href{https://juliamanifolds.github.io/ManifoldsBase.jl/stable/}{\texttt{ManifoldsBase.jl}}\footnote{Available at \href{https://juliamanifolds.github.io/ManifoldsBase.jl/stable/}{juliamanifolds.github.io/ManifoldsBase.jl/stable/}, see also the zenodo archive~\cite{ManifoldsBasejl}} was given, when the interface was still in an early stage.
 A few fundamental design decisions have changed since then.
 \\
 This paper presents the current state of the interface of \verb|ManifoldsBase.jl| \ManifoldsBaseVersion,
@@ -57,7 +57,7 @@ and Section~\ref{sec:Usage} presents an overview of packages using \verb|Manifol
 \end{figure}
 
 \section{Mathematical Background}%
-\label{sec:Notattion}
+\label{sec:Notation}
 
 This section introduces the mathematical background and notation used throughout this paper,
 for more details see, e.g. \cite{Lee:2003:1,AbsilMahonySepulchre:2008:1,DoCarmo:1992}.
@@ -149,6 +149,9 @@ This can be realised by using \verb|allocate_result(M, f, args...)| for a functi
 \subsection{Functions on Riemannian manifolds}
 
 \begin{table}
+    \centering
+    \caption{Retraction types available in \texttt{ManifoldsBase.jl}~\ManifoldsBaseVersion.}
+    \label{tab:retractions}
     \begin{tabular}{ll}
         \toprule
         \textbf{Retraction} & comment/code \\
@@ -171,8 +174,6 @@ This can be realised by using \verb|allocate_result(M, f, args...)| for a functi
         \verb|StabilizedRetraction| & \\
         \bottomrule
     \end{tabular}
-    \caption{Retraction types available in \texttt{ManifoldsBase.jl}~\ManifoldsBaseVersion.}
-    \label{tab:retractions}
 \end{table}
 
 \begin{table}
