@@ -148,6 +148,82 @@ This can be realised by using \verb|allocate_result(M, f, args...)| for a functi
 
 \subsection{Functions on Riemannian manifolds}
 
+\begin{table}
+    \begin{tabular}{ll}
+        \toprule
+        \textbf{Retraction} & comment/code \\
+        \midrule
+        \verb|ApproximateRetraction| & (internal)\\
+        \verb|EmbeddedRetraction{R}| & use retraction \verb|R| in the embedding \\
+        \verb|ExponentialRetraction| & falls back to \verb|exp|\\
+        % Currently in Manifolds.jl
+        % \verb|FiberBundleProductRetraction| & \\
+        %\verb|OrthographicRetraction| & \\
+        \verb|PadeRetraction{m}| & of order $m$ \\
+        \verb|PolarRetraction| & \\
+        \verb|ProductRetraction{R,S,...}| & \\
+        \verb|ProjectionRetraction| & falls back to \verb|project|\\
+        \verb|QRRetraction| & \\
+        % technical internal type
+        %\verb|RetractionWithKeywords| & \\
+        \verb|SasakiRetraction| & \\
+        \verb|SoftmaxRetraction| & \\
+        \verb|StabilizedRetraction| & \\
+        \bottomrule
+    \end{tabular}
+    \caption{Retraction types available in \texttt{ManifoldsBase.jl}~\ManifoldsBaseVersion.}
+    \label{tab:retractions}
+\end{table}
+
+\begin{table}
+    \centering
+    \caption{Inverse retraction types available in \texttt{ManifoldsBase.jl}~\ManifoldsBaseVersion.}
+    \label{tab:inverse_retractions}
+    \begin{tabular}{ll}
+        \toprule
+        \textbf{Inverse retraction} & comment/code \\
+        \midrule
+        \verb|ApproximateInverseRetraction| & \\
+        \verb|EmbeddedInverseRetraction{R}| & use \verb|R| in the embedding \\
+        % Currently in Manifolds.jl
+        % \verb|FiberBundleInverseProductRetraction| & \\
+        \verb|InverseProductRetraction{R,S,...}| & \\
+        % technical internal type
+        %\verb|InverseRetractionWithKeywords| & \\
+        \verb|LogarithmicInverseRetraction| & falls back to \verb|log|\\
+        % Currently in Manifolds.jl
+        %\verb|OrthographicInverseRetraction| & \\
+        \verb|PadeInverseRetraction| & \\
+        \verb|PolarInverseRetraction| & \\
+        \verb|ProjectionInverseRetraction| & falls back to \verb|project|\\
+        \verb|QRInverseRetraction| & \\
+        \verb|SoftmaxInverseRetraction| & \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{table}
+    \centering
+    \caption{Vector transport types available in \texttt{ManifoldsBase.jl}~\ManifoldsBaseVersion.}
+    \label{tab:vector_transports}
+    \begin{tabular}{ll}
+        \toprule
+        \textbf{Vector transport} & comment/code \\
+        \midrule
+            \verb|EmbeddedVectorTransport{V}| & use \verb|V| in the embedding \\
+            % internal, not exported
+            % \verb|AbstractLinearVectorTransportMethod| & \\
+            \verb|ProductVectorTransport{V,W,...}| & \\
+            \verb|ScaledVectorTransport| & \\
+            % What were the following two for?
+            %\verb|VectorTransportDirection| & \\
+            %\verb|VectorTransportTo| & \\
+            % technical internal type
+            %\verb|VectorTransportWithKeywords| & \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
 \begin{itemize}
     \item \verb|distance(M, p, q)|
     \item \verb|exp(M, p, X)|
