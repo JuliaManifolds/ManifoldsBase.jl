@@ -211,11 +211,19 @@ This can be realised by using \verb|allocate_result(M, f, args...)| for a functi
         \toprule
         \textbf{Vector transport} & comment/code \\
         \midrule
+            \multicolumn{2}{l}{%
+            \texttt{DifferentiatedRetractionVectorTransport\{R\}}\footnotemark[1]}\\
+            & induced by retraction \verb|R|\\
             \verb|EmbeddedVectorTransport{V}| & use \verb|V| in the embedding \\
             % internal, not exported
             % \verb|AbstractLinearVectorTransportMethod| & \\
-            \verb|ProductVectorTransport{V,W,...}| & \\
+            \verb|ParallelTransport|\footnotemark & uses \verb|parallel_transport_to|\\
+            \verb|PoleLadderTransport|\footnotemark[\value{footnote}] & \\
+            \verb|ProjectionTransport|\footnotemark[\value{footnote}] & \\
+            \multicolumn{2}{l}{%
+            \texttt{ProductVectorTransport\{V,W,...\}}}\\
             \verb|ScaledVectorTransport| & \\
+            \verb|SchildsLadderTransport|\footnotemark[\value{footnote}] & \\
             % What were the following two for?
             %\verb|VectorTransportDirection| & \\
             %\verb|VectorTransportTo| & \\
@@ -224,6 +232,10 @@ This can be realised by using \verb|allocate_result(M, f, args...)| for a functi
         \bottomrule
     \end{tabular}
 \end{table}
+
+% fix and place manually on next page maybe
+\footnotetext{\label{fn:linear}This vector transport is a \texttt{AbstractLinearVectorTransportMethod}, i.\,e.\ it is linear in $X$.}
+
 
 \begin{itemize}
     \item \verb|distance(M, p, q)|
@@ -256,7 +268,7 @@ This section presents the main data structures and design principles of \verb|Ma
 Multiple dispatch is used in three separate layers to avoid ambiguities. The parameters of a function are groups into three parts: the manifold, the points and tangent vectors, and finally positional arguments.
 A concrete example would be the retraction \verb|retract(M, p, X, m)|, that besides a manifold \verb|M|, a point \verb|p| and a tangent vector \verb|X| at $p \in \mathcal M$, has a positional \verb|m| as the type of retraction, that has a reasonable default.
 
-\subsubsection*{Layer I.} On the first layer, only the manifold type should be used to dispatch the function.
+\subsubsection*{Layer I} On the first layer, only the manifold type should be used to dispatch the function.
 This allows to define functions for specific manifolds or generic manifold types. This layer should pass on to layer two.
 A user working on manifolds should usually only interact with functions defined on this layer.
 
