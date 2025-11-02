@@ -40,7 +40,7 @@ of \verb|ManifoldsBase.jl| was given, when the interface was still in an early s
 A few fundamental design decissions have changed since then.
 \\
 This paper presents the current state of the interface of \verb|ManifoldsBase.jl| \ManifoldsBaseVersion,
-which has reached a stable state.
+since that state can be considered as having reached a very stable state.
 The paper is organized as follows: in Section~\ref{sec:Notation} we introduce the mathematical background and notation.
 In Section~\ref{sec:DesignPrinciples} we present the main design principles and structure of the interface.
 Section~\ref{sec:Interface} presents the interface components in detail.
@@ -48,7 +48,23 @@ In Section~\ref{sec:Example} we present an example of defining a new manifold,
 and Section~\ref{sec:Usage} presents an overview of packages using \verb|ManifoldsBase.jl|.
 
 \section{Mathematical Background}%
-\label{sec:Notation}
+\label{sec:Notattion}
+
+This section introduces the mathematical background and notation used throughout this paper,
+for more details see, e.g. \cite{Lee:2003:1,AbsilMahonySepulchre:2008:1,DoCarmo:1992}.
+
+A \term{manifold} \( \mathcal{M} \) is a topological space%
+\footnote{we assume that the spaces we consider here are second countable and Hausdorff}
+ that locally resembles Euclidean space $\mathbb R^n$, $n \in \mathbb N$.
+To make this more precise, for every point \( p \in \mathcal{M} \), there exists a neighborhood \( \mathcal{U} \subseteq \mathcal{M} \)
+and a homeomorphism \( \varphi\colon \mathcal{U} \to \mathbb{R}^n \).
+The dimension of the manifold is defined as the dimension of the Euclidean space \( \mathbb{R}^n \). This can be interpreted as the number of degrees of freedom. The homeomorphism \( \varphi \) is called a \term{chart}, $\varphi(p)$
+is called the \term{coordinates} of the point \( p \) in the chart \( \varphi \). A collection of charts $\varphi_i\colon \mathcal{U_i} \to \mathbb{R}^n$, $i \in \mathcal I$ for some index set \( \mathcal{I} \), that cover the manifold \( \mathcal{M} = \bigcup_i \mathcal{U}_i \) is called an \term{atlas}. If we can “smoothly change charts”, i.e. the transition maps \( \varphi_j \circ \varphi_i^{-1} \) are smooth\footnote{while one could consider different kinds of smoothness, $C^1$, $C^2$,..., for simplicity one usually just assumes $C^\infty$}, we say that the atlas \(\mathcal A\) is \term{smooth}.
+A manifold \(\mathcal{M}\) together with a smooth atlas is called a \term{smooth manifold}.
+Informally, a smooth manifold allows us to compute derivatives on the manifold
+by “looking at it through a chart”. The smooth atlas then allows to argue, that this derivative is independent of the chosen chart.
+
+
 
 \begin{figure}
     \centering
