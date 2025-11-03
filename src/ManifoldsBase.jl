@@ -161,7 +161,7 @@ julia> allocate_on(M, TangentSpaceType(), Array{Float64})
 """
 allocate_on(M::AbstractManifold) = similar(Array{Float64}, representation_size(M))
 function allocate_on(M::AbstractManifold, T::Type{<:AbstractArray})
-    return similar(T, representation_size(M))
+    return similar(T, representation_size(M, T))
 end
 
 """
@@ -333,8 +333,8 @@ corresponding correct representation sizes for points and tangent vectors on `M`
 By default, `check_size` returns `nothing`, i.e. if no checks are implemented, the
 assumption is to be optimistic.
 """
-function check_size(M::AbstractManifold, p)
-    m = representation_size(M)
+function check_size(M::AbstractManifold, p::P) where {P}
+    m = representation_size(M, P)
     m === nothing && return nothing # nothing reasonable in size to check
     n = size(p)
     if length(n) != length(m)
@@ -350,10 +350,10 @@ function check_size(M::AbstractManifold, p)
         )
     end
 end
-function check_size(M::AbstractManifold, p, X)
+function check_size(M::AbstractManifold, p, X::T) where {T}
     mse = check_size(M, p)
     mse === nothing || return mse
-    m = representation_size(M)
+    m = representation_size(M, T)
     m === nothing && return nothing # without a representation size - nothing to check.
     n = size(X)
     if length(n) != length(m)
@@ -1049,13 +1049,32 @@ end
 @doc raw"""
     representation_size(M::AbstractManifold)
 
-The size of an array representing a point on [`AbstractManifold`](@ref) `M`.
-Returns `nothing` by default indicating that points are not represented using an
-`AbstractArray`.
+Return the size of an array representing a point or a tangent vector on a
+certain [`AbstractManifold`](@ref) `M`.
+This is either the size of the [`AbstractArray`](@ref) representing points or tangent vectors on `M`
+or what a `size(p)` would return for the case of points and tangent vectors that are
+subtypes of [`AbstractManifoldPoint`](@ref) or [`AbstractTangentVector`](@ref), respectively.
+
+By default this function returns `nothing` indicating that the representation on
+`M` can not be done in (plain, wrapped) arrays, for example because it is a number of a collection of arrays.
 """
 function representation_size(::AbstractManifold)
     return nothing
 end
+
+@doc """
+    representation_size(M::AbstractManifold, ::Type{PT}) where {PT}
+
+return the size of an array to represent points or tangent vectors of type `PT` on the [`AbstractManifold`](@ref) `M`..
+The returned size tuple is the size of the [`AbstractArray`](@ref) representing points or tangent vectors on `M`,
+i.e. what a `size(p)` or -: size(X) would return if they are of type `PT`.
+
+By default this function passes to `representation_size(M)`, the generic default.
+If some representation is possible in plain arrays, this function should return `nothing`,
+indicating that the representation on `M` with a point or tangent vector of type `P` or `T`
+can not be done in (plain, wrapped) arrays.
+"""
+representation_size(M::AbstractManifold, ::Type) = representation_size(M)
 
 @doc raw"""
     riemann_tensor(M::AbstractManifold, p, X, Y, Z)

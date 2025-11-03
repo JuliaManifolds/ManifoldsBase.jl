@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+* `representationsize(M, T)` to distinguish representation sizes for different types for points and tangent vectors.
 * an `StabilizedInverseRetraction` that improves numerical stability of another inverse retraction by projecting the resulting tangent vector onto its tangent space.
 
 ## [2.0.2] 23/10/2025

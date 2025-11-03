@@ -267,7 +267,7 @@ function allocate_result_embedding(
         x::Vararg{Any, N},
     ) where {N}
     T = allocate_result_type(get_embedding(M, x[1]), f, x)
-    return allocate(M, x[1], T, representation_size(get_embedding(M, x[1])))
+    return allocate(M, x[1], T, representation_size(get_embedding(M, x[1]), T))
 end
 function allocate_result_embedding(
         M::AbstractManifold,
@@ -275,7 +275,7 @@ function allocate_result_embedding(
         x::Vararg{Any, N},
     ) where {N}
     T = allocate_result_type(M, f, x)
-    return allocate(M, x[1], T, representation_size(M))
+    return allocate(M, x[1], T, representation_size(M, T))
 end
 
 @trait_function change_metric(M::AbstractDecoratorManifold, G::AbstractMetric, X, p)
@@ -728,12 +728,20 @@ end
 ) (EmbeddedForwardingType{DirectEmbedding}, SimpleForwardingType, StopForwardingType) 2
 
 @trait_function representation_size(M::AbstractDecoratorManifold)
+@trait_function representation_size(M::AbstractDecoratorManifold, T::Type)
 
 function _representation_size_forwarding(
         ::Union{EmbeddedForwardingType, EmbeddedForwardingType{DirectEmbedding}},
         M::AbstractDecoratorManifold,
     )
     return representation_size(get_embedding(M))
+end
+function _representation_size_forwarding(
+        ::Union{EmbeddedForwardingType, EmbeddedForwardingType{DirectEmbedding}},
+        M::AbstractDecoratorManifold,
+        T::Type,
+    )
+    return representation_size(get_embedding(M), T)
 end
 
 
