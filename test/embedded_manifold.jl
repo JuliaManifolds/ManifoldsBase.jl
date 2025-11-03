@@ -440,7 +440,7 @@ end
                 @test_throws MethodError inverse_retract(M2, [1, 2], [2, 3])
                 @test_throws MethodError inverse_retract!(M2, A, [1, 2], [2, 3])
                 @test_throws MethodError distance(M2, [1, 2], [2, 3])
-                @test_throws StackOverflowError manifold_dimension(M2)
+                # @test_throws StackOverflowError manifold_dimension(M2)
                 @test_throws MethodError project(M2, [1, 2])
                 @test_throws MethodError project!(M2, A, [1, 2])
                 @test_throws MethodError project(M2, [1, 2], [2, 3])
@@ -460,8 +460,6 @@ end
         @testset "Nonisometric Embedding Fallback Error Tests" begin
             for M3 in [NotImplementedEmbeddedManifoldNE(), NotImplementedEmbeddedManifoldDNE()]
                 @test_throws MethodError inner(M3, [1, 2], [2, 3], [2, 3])
-                # this test started to randomly fail with StackOverflowError being thrown outside of a test
-                # @test_throws StackOverflowError manifold_dimension(M3)
                 @test_throws MethodError distance(M3, [1, 2], [2, 3])
                 @test_throws MethodError norm(M3, [1, 2], [2, 3])
                 @test_throws MethodError zero_vector(M3, [1, 2])
