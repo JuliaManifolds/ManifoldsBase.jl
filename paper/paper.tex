@@ -29,14 +29,14 @@
 %
 In many scenarios one encounters data that does not lie in a Euclidean space.
 Informally phrased, for certain data, we are not allowed do just add or scale them.
-Examples are rotations, data on spheres, in hyperbolic spaces, like when working with general relativity,
-symmetric positive definite matrices, like when working with covariance matrices,
+Examples are rotations, data on spheres, in hyperbolic spaces,
+symmetric positive definite matrices, like when working with covariance matrices, for example in processing diffusion tensor magnetic resonance images,
 or when the data is either bases of subspaces or subspaces themselves, i.e.\ data on the
-Stiefel or Grassmann manifold.
+Stiefel, Grassmann or flag manifold.
 The data of interest for this paper still bear enough “structure”, i.e. they live on smooth manifolds.
 
 In a prior paper about \verb|Manifolds.jl|~\cite{AxenBaranBergmannRzecki:2023}, a partial presentation of the interface
-of \href{https://juliamanifolds.github.io/ManifoldsBase.jl/stable/}{\texttt{ManifoldsBase.jl}}\footnote{Available at \href{https://juliamanifolds.github.io/ManifoldsBase.jl/stable/}{juliamanifolds.github.io/ManifoldsBase.jl/stable/}, see also the zenodo archive~\cite{ManifoldsBasejl}} was given, when the interface was still in an early stage.
+of \href{https://juliamanifolds.github.io/ManifoldsBase.jl/stable/}{\texttt{ManifoldsBase.jl}}\footnote{Available at \href{https://juliamanifolds.github.io/ManifoldsBase.jl/stable/}{juliamanifolds.github.io/ManifoldsBase.jl/stable/}, see also the Zenodo archive~\cite{ManifoldsBasejl}} was given, when the interface was still in an early stage.
 A few fundamental design decisions have changed since then.
 \\
 This paper presents the current state of the interface of \verb|ManifoldsBase.jl| \ManifoldsBaseVersion,
@@ -63,14 +63,13 @@ This section introduces the mathematical background and notation used throughout
 for more details see, e.g. \cite{Lee:2003:1,AbsilMahonySepulchre:2008:1,DoCarmo:1992}.
 
 \subsubsection{A topological manifold} A \term{manifold} \( \mathcal{M} \) is a topological space%
-\footnote{we assume that the spaces we consider here are second countable and Hausdorff}
+\footnote{We assume that the spaces we consider here are second countable and Hausdorff to exclude pathological examples.}
  that locally resembles Euclidean space $\mathbb R^n$, $n \in \mathbb N$.
 To make this more precise, for every point \( p \in \mathcal{M} \), there exists a neighborhood \( \mathcal{U} \subseteq \mathcal{M} \)
 and a homeomorphism \( \varphi\colon \mathcal{U} \to \mathbb{R}^n \).
-The dimension of the manifold is defined as the dimension of the Euclidean space \( \mathbb{R}^n \). This can be interpreted as the number of degrees of freedom. The homeomorphism \( \varphi \) is called a \term{chart}, $\varphi(p)$
-is called the \term{coordinates} of the point \( p \) in the chart \( \varphi \). A collection of charts $\varphi_i\colon \mathcal{U_i} \to \mathbb{R}^n$, $i \in \mathcal I$ for some index set \( \mathcal{I} \), that cover the manifold \( \mathcal{M} = \bigcup_i \mathcal{U}_i \) is called an \term{atlas}. If we can “smoothly change charts”, i.e. the transition maps \( \varphi_j \circ \varphi_i^{-1} \) are smooth\footnote{while one could consider different kinds of smoothness, $C^1$, $C^2$,..., for simplicity one usually just assumes $C^\infty$}, we say that the atlas \(\mathcal A\) is \term{smooth}.
-A manifold \(\mathcal{M}\) together with a smooth atlas is called a \term{smooth manifold}%
-\footnote{more precisely, one usually considers a maximal smooth atlas collecting all compatible charts.}
+The dimension of the manifold is defined as the dimension of the Euclidean space \( \mathbb{R}^n \), which is the same for each point \(p \in \mathcal{M}\). This can be interpreted as the number of degrees of freedom. The homeomorphism \( \varphi \) is called a \term{chart}, $\varphi(p)$
+is called the \term{parameters} of the point \( p \) in the chart \( \varphi \). A collection of charts $\varphi_i\colon \mathcal{U}_i \to \mathbb{R}^n$, $i \in \mathcal I$ for some index set \( \mathcal{I} \), that cover the manifold \( \mathcal{M} = \bigcup_i \mathcal{U}_i \) is called an \term{atlas}. If we can “smoothly change charts”, i.e. the transition maps \( \varphi_j \circ \varphi_i^{-1} \) are smooth\footnote{While one could consider different kinds of smoothness, $C^1$, $C^2$,..., for simplicity one usually focuses on $C^\infty$.}, we say that the atlas \(\mathcal A\) is \term{smooth}.
+A manifold \(\mathcal{M}\) together with a smooth atlas is called a \term{smooth manifold}.
 
 Informally, a smooth manifold allows us to compute derivatives on the manifold
 by “looking at it through a chart”. The smooth atlas then allows to argue, that this derivative is independent of the chosen chart.
@@ -81,9 +80,10 @@ As a guiding example, consider the $n$-dimensional sphere
 \end{equation*}
 which is a smooth manifold of dimension \( n \). A set of charts is for example the so-called \term{stereographic projections} onto the planes tangent to the sphere. Indeed, it is enough to consider the projections from the north and south pole to cover the sphere.
 
-\subsubsection{Tangent spaces} Consider any \( p \in \mathcal{M} \) on  a smooth manifold. In order to take (directional) derivatives at the point \( p \), consider the set of all curves \( c\colon (-\epsilon, \epsilon) \to \mathcal{M} \) with \( c(0) = p \) that “run through \( p \)”. We can now consider the derivative of the curve \( \dot c \) around \( p \) in any chart \( \varphi \) such that \( p \in \mathcal{U}\).
+\subsubsection{Tangent spaces} Consider any \( p \in \mathcal{M} \) on  a smooth manifold. In order to take (directional) derivatives at the point \( p \), consider the set of all curves \( c\colon (-\epsilon, \epsilon) \to \mathcal{M} \) with \( c(0) = p \) that “run through \( p \)”. We can now consider the derivative of the curve \( \dot c \) around \( p \) in any chart \( \varphi_i \) such that \( p \in \mathcal{U}_i\).
 
-Collecting all $\dot c(0)$ yields “all possible walking directions”, which is called the \term{tangent space} \( T_p \mathcal{M} \) at \( p \in \mathcal{M} \). Formally, we have to consider equivalence classes of curves, that have the same derivative in a chart as elements of \( T_p \mathcal{M} \). The tangent space \( T_p \mathcal{M} \) is a vector space of dimension \( n \).
+This derivative can be computed in any such chart \(\varphi_i\), though it is usually defined in a chart-independent way.
+In a single chart, any direction is equivalent to the first order to the curve \(t \to \varphi_i^{-1}(\varphi_i(p) + b_i t)\) for some \(b_i \in \mathbb{R}^n\). The vector \(b_i\) contains \term{coordinates} of the tangent vector in a basis induced by \(\varphi_i\). Then we have to consider equivalence classes of curves that have the same derivative in a chart, which results in the \term{tangent space} \( T_p \mathcal{M} \) at \( p \in \mathcal{M} \). The tangent space \( T_p \mathcal{M} \) is a vector space of dimension \( n \).
 The disjoint union of all tangent spaces \( T \mathcal{M} = \bigsqcup_{p \in \mathcal{M}} T_p \mathcal{M} \) is called the \term{tangent bundle}.
 
 For the sphere \( \mathbb{S}^n \), the tangent space at a point \( p \in \mathbb{S}^n \) is given by
@@ -92,6 +92,8 @@ For the sphere \( \mathbb{S}^n \), the tangent space at a point \( p \in \mathbb
     T_p \mathbb{S}^n = \bigl\{ X \in \mathbb{R}^{n+1} \bigm| X^{\mathrm{T}} p = 0 \bigr\},
 \end{equation*}
 i.e. the set of all vectors in \( \mathbb{R}^{n+1} \) that are orthogonal to \( p \). Visually, these are all vectors that are tangent to the sphere at the point \( p \).
+
+{\color{red} MB: TODO: de-emphasize inner, emphasize affine connection. }
 
 Since the tangent space is a vector space, we can introduce an inner product \( \langle \cdot, \cdot \rangle_p \colon T_p \mathcal{M} \times T_p \mathcal{M} \to \mathbb{R} \) on each tangent space \( T_p \mathcal{M} \).
 With two tangent vector fields \( \mathcal{X}, \mathcal{Y} \colon \mathcal{M} \to T \mathcal{M} \), \( \mathcal{X}(p), \mathcal{Y}(p) \in T_p \mathcal{M} \), we can consider the function \( p \mapsto \langle \mathcal{X}(p), \mathcal{Y}(p) \rangle_p \).
