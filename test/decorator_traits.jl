@@ -88,12 +88,11 @@ end
     ]
 
     @test ManifoldsBase.get_forwarding_type(M, exp) === StopForwardingType()
-    @test ManifoldsBase.get_forwarding_type(M, exp, p) === StopForwardingType()
+    @test ManifoldsBase.get_forwarding_type(M, exp, typeof(p)) === StopForwardingType()
 end
 
 abstract type AbstractA end
-abstract type DecoA <: AbstractA end
-# A few concrete types
+abstract type DecoA <: AbstractA end # A few concrete types
 struct A <: AbstractA end
 struct A1 <: DecoA end
 

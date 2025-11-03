@@ -621,7 +621,6 @@ end
 function ManifoldsBase.retract_softmax_fused!(::DefaultManifold, q, p, X, t::Number)
     return (q .= p .+ t .* X)
 end
-ManifoldsBase.get_embedding(M::DefaultManifold) = M # dummy embedding
 ManifoldsBase.inverse_retract_polar!(::DefaultManifold, Y, p, q) = (Y .= q .- p)
 ManifoldsBase.inverse_retract_project!(::DefaultManifold, Y, p, q) = (Y .= q .- p)
 ManifoldsBase.inverse_retract_qr!(::DefaultManifold, Y, p, q) = (Y .= q .- p)

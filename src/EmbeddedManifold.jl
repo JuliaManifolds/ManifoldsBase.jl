@@ -43,7 +43,7 @@ get_embedding_type(::EmbeddedManifold) = EmbeddedManifoldType()
 
 function allocate_result(M::EmbeddedManifold, f::typeof(project), x...)
     T = allocate_result_type(M, f, x)
-    return allocate(M, x[1], T, representation_size(base_manifold(M, T)))
+    return allocate(M, x[1], T, representation_size(base_manifold(M), T))
 end
 
 """
@@ -56,10 +56,11 @@ See also [`base_manifold`](@ref), where this is used to (potentially) completely
 """
 decorated_manifold(M::EmbeddedManifold) = M.manifold
 
+
 """
     get_embedding(M::EmbeddedManifold)
 
-Return the embedding [`AbstractManifold`](@ref) `N` of `M`, if it exists.
+Return the embedding [`EmbeddedManifold`](@ref) `N` of `M`, if it exists.
 """
 function get_embedding(M::EmbeddedManifold)
     return M.embedding

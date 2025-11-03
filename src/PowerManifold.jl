@@ -753,9 +753,9 @@ _get_field(::AbstractManifold{𝔽}) where {𝔽} = 𝔽
 
 function get_embedding(
         M::PowerManifold{𝔽, TM, TSW, TPR},
-        p,
-    ) where {𝔽, TM <: AbstractManifold{𝔽}, TSW, TPR <: AbstractPowerRepresentation}
-    ME = get_embedding(M.manifold, first(p))
+        P::Type,
+    ) where {𝔽, TM <: AbstractManifold{𝔽}, TSW, TPR <: Union{NestedPowerRepresentation, NestedReplacingPowerRepresentation}}
+    ME = get_embedding(M.manifold, eltype(P))
     return PowerManifold{_get_field(ME), typeof(ME), TSW, TPR}(ME, M.size)
 end
 

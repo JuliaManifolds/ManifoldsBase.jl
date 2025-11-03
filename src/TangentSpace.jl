@@ -119,12 +119,9 @@ end
 
 function get_embedding(TpM::TangentSpace)
     return TangentSpace(
-        get_embedding(TpM.manifold, TpM.point),
+        get_embedding(TpM.manifold, typeof(TpM.point)),
         embed(TpM.manifold, TpM.point),
     )
-end
-function get_embedding(TpM::TangentSpace, X)
-    return get_embedding(TpM)
 end
 
 function get_vector(TpM::TangentSpace, X, c, B::AbstractBasis)

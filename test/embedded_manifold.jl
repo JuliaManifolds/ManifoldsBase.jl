@@ -194,13 +194,13 @@ end
 
 struct SimpleEmbeddedTestManifold <: AbstractDecoratorManifold{ℝ} end
 ManifoldsBase.get_embedding(::SimpleEmbeddedTestManifold) = DefaultManifold(3)
-function ManifoldsBase.get_forwarding_type(::SimpleEmbeddedTestManifold, ::Any, p = nothing)
+function ManifoldsBase.get_forwarding_type(::SimpleEmbeddedTestManifold, ::Any, P::Type = Nothing)
     return ManifoldsBase.EmbeddedForwardingType(ManifoldsBase.DirectEmbedding())
 end
 
 struct EmbeddedTestManifold <: AbstractDecoratorManifold{ℝ} end
 ManifoldsBase.get_embedding(::EmbeddedTestManifold) = DefaultManifold(3)
-function ManifoldsBase.get_forwarding_type(::EmbeddedTestManifold, ::Any, p = nothing)
+function ManifoldsBase.get_forwarding_type(::EmbeddedTestManifold, ::Any, P::Type = Nothing)
     return ManifoldsBase.EmbeddedForwardingType(ManifoldsBase.IndirectEmbedding())
 end
 ManifoldsBase.embed(::EmbeddedTestManifold, p) = p
@@ -218,10 +218,9 @@ ManifoldsBase.project!(::EmbeddedTestManifold, Y, p, X) = (Y .= X)
 struct FallbackManifold <: AbstractDecoratorManifold{ℝ} end
 ManifoldsBase.decorated_manifold(::FallbackManifold) = DefaultManifold(3)
 
-function ManifoldsBase.get_forwarding_type(::FallbackManifold, ::Any, p = nothing)
+function ManifoldsBase.get_forwarding_type(::FallbackManifold, ::Any, P::Type = Nothing)
     return ManifoldsBase.SimpleForwardingType()
 end
-
 
 @testset "Embedded Manifolds" begin
     @testset "EmbeddedManifold basic tests" begin
@@ -236,7 +235,7 @@ end
         @test base_manifold(M, Val(1)) == ManifoldsBase.DefaultManifold(2)
         @test base_manifold(M, Val(2)) == ManifoldsBase.DefaultManifold(2)
         @test get_embedding(M) == ManifoldsBase.DefaultManifold(3)
-        @test get_embedding(M, [1, 2, 3]) == ManifoldsBase.DefaultManifold(3)
+        @test get_embedding(M, Vector{Int}) == ManifoldsBase.DefaultManifold(3)
     end
 
     @testset "HalfPlaneManifold" begin

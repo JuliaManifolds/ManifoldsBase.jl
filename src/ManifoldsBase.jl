@@ -628,6 +628,19 @@ function embed_project!(M::AbstractManifold, Y, p, X)
     return project!(M, Y, p, embed(M, p, X))
 end
 
+_doc_embedding = """
+    get_embedding(M::AbstractManifold)
+    get_embedding(M::AbstractManifold, ::Type)
+
+Return the embedding [`AbstractManifold`](@ref) of `M`, if it exists.
+The embedding might depend on the type  ``P`` points are represented with.
+The default is, that the signature with the type defaults to the one without.
+"""
+@doc "$(_doc_embedding)"
+get_embedding(M::AbstractManifold, ::Type) = get_embedding(M)
+@doc "$(_doc_embedding)"
+get_embedding(M::AbstractManifold)
+
 """
     has_components(M::AbstractManifold)
 
