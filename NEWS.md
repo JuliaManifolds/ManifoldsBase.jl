@@ -5,7 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.1.0] unreleased
+## [2.1.1] 04/11/2025
+
+### Added
+
+* `representationsize(M, T)` to distinguish representation sizes for different types for points and tangent vectors.
+
+### Fixed
+
+* bugfixes on `get_embedding`, `get_embedding_type`, and `get_forwarding_type`, which now all accept as their second (third for the last case) argumument consistently take the Type of a point (and no longer sometimes a point sometimes its type)
+
+## [2.1.0] 30/10/2025
 
 ### Added
 
