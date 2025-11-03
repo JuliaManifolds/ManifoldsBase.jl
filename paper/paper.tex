@@ -130,7 +130,6 @@ Furthermore the functions \verb|copy(M, p)| and \verb|copy(M, p, X)|, as well as
 We also extend the \verb|rand| interface: \verb|rand(M)| generates a random point, \verb|rand(M; vector_at=p)| a random tangent vector. Both can be used with an random number generator as additional first argument.
 
 \begin{itemize}
-    \item \verb|base_manifold(M)|
     \item \verb|embed(M, p)| \& \verb|embed(M, p, X)|
     \item \verb|project(M, p)| \& \verb|project(M, p, X)| (mention \verb|embed_project|.)
 \end{itemize}
@@ -289,6 +288,8 @@ Certain properties of a manifold can be accessed via traits%
 \footnote{This is sometimes referred to as Tim Holy's Traits Trick (THTT) from the issue \href{https://github.com/JuliaLang/julia/issues/2345\#issuecomment-54537633}{github.com/JuliaLang/julia\#2345}}.
 This aims to avoid code duplication. A manifold using this trait system
 has to use the \verb|AbstractDecoratorManifold{|$\mathbb F$\verb|}| as supertype.
+These manifolds usually decorate the a manifold to add or modify certain properties. To access the
+internally stored manifold, use \verb|base_manifold(M)|, which has an optional parameter \verb|depth=-1| indicating how many decorators to “unwrap” with a default to remove all.
 
 Then, on layer one, function arguments are
 prefixed with an argument of type \verb|AbstractForwardingType|, which is used to “forward” the function call, e.\,g.\ to the embedding.
@@ -299,8 +300,17 @@ For the example of embedded manifolds, the \verb|EmbeddedForwardingType| is used
 
 As a concrete example consider again the sphere \(\mathbb{S}^n\) as embedded submanifold of \(\mathbb{R}^{n+1}\).
 Here, the function \verb|is_point(M, p)| is implemented by forwarding to first check that \verb|p| is a point on the embedding manifold \(\mathbb{R}^{n+1}\) and then check that \(\lVert p \rVert_2 = 1\).
-We avoid implemeting the test in the embedding.
+We avoid implementing the test in the embedding.
 Similarly since the sphere is an \verb|IsometricallyEmbeddedManifold|, also \verb|inner(M, p, X, Y)| is forwarded to the embedding using the \verb|SimpleForwardingType|, i.e.\ without any changes to the point or tangent vector representation.
+
+\subsubsection*{Adding numerical validation.}
+By default, functions from the interface in \verb|ManifoldsBase.jl| assume, that their input
+consists of valid points and tangent vectors and does not verify input or output values.
+For debugging and numerical verification purposes, the package provides
+the \verb|ValidationManifold| as a special manifold.
+It is implemented as a wrapper around any existing Riemannian manifold, \verb|M2 = ValidationManifold(M)| and provides additional checks of correctness for both input parameters and output values of any function from the interface.
+That is, that type calls \verb|is_point| and \verb|is_vector| on all points and tangent vectors, respectively.
+While by default these checks do result in errors, this can be changed setting the \verb|error=| keyword to either \verb|:warn| or \verb|:info|.
 
 \section{An example}\label{sec:Example}
 
