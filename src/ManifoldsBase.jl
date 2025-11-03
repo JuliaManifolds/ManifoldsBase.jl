@@ -1316,7 +1316,8 @@ export AbstractInverseRetractionMethod,
     PolarInverseRetraction,
     ProjectionInverseRetraction,
     InverseRetractionWithKeywords,
-    SoftmaxInverseRetraction
+    SoftmaxInverseRetraction,
+    StabilizedInverseRetraction
 
 # (d) Vector Transport Types
 export AbstractVectorTransportMethod,
