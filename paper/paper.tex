@@ -130,8 +130,6 @@ Furthermore the functions \verb|copy(M, p)| and \verb|copy(M, p, X)|, as well as
 We also extend the \verb|rand| interface: \verb|rand(M)| generates a random point, \verb|rand(M; vector_at=p)| a random tangent vector. Both can be used with an random number generator as additional first argument.
 
 \begin{itemize}
-    \item technically:\\
-    \verb|allocate(M, p, T)| \& \verb|allocate_result(M, f, args...)|
     \item \verb|base_manifold(M)|
     \item \verb|embed(M, p)| \& \verb|embed(M, p, X)|
     \item \verb|project(M, p)| \& \verb|project(M, p, X)| (mention \verb|embed_project|.)
@@ -276,9 +274,9 @@ A concrete example would be the retraction \verb|retract(M, p, X, m)|, that besi
 This allows to define functions for specific manifolds or generic manifold types. This layer should pass on to layer two.
 A user working on manifolds should usually only interact with functions defined on this layer.
 
-\subsubsection*{Layer II.} On the second layer, dispatching on certain positional arguments should be done. This allows to define functions that depend on specific positional arguments for all manifolds. Functions in this layer should be prefixed with an underscore \verb|_| and should pass on to layer three. For our retraction example, this would be \verb|_retract(M, p, X, ::ExponentialRetraction)| which would pass to the exponential map for any manifold with any point/tangent vector representation.
+\subsubsection*{Layer II} On the second layer, dispatching on certain positional arguments should be done. This allows to define functions that depend on specific positional arguments for all manifolds. Functions in this layer should be prefixed with an underscore \verb|_| and should pass on to layer three. For our retraction example, this would be \verb|_retract(M, p, X, ::ExponentialRetraction)| which would pass to the exponential map for any manifold with any point/tangent vector representation.
 
-\subsubsection*{Layer III.} On the third layer, dispatching on the point and tangent vector types should be done. This is usually also on concrete manifold types.
+\subsubsection*{Layer III} On the third layer, dispatching on the point and tangent vector types should be done. This is usually also on concrete manifold types.
 Functions on this layer should usually have a postfix indicating the kind of positional arguments or be prefixed with two underscores. This layer would allocate a result and call the in-place version of the same function.
 A user implementing a new manifold would usually only have to implement the in-place functions on this layer.
 For a retraction example, consider the \verb|ProjectionRetraction|, for which layer two would pass to a function \verb|retract_project(M, p, X)|. This function would allocate the result \verb|Y| and call \verb|retract_project!(M, Y, p, X)|. This function defaults to calling \verb|project!(M, Y, p, X)|, but also allows a user to implement a more efficient version, either for a specific manifold or for specific point or tangent vector types.
