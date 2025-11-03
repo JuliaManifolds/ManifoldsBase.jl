@@ -758,6 +758,12 @@ function get_embedding(
     ME = get_embedding(M.manifold, eltype(P))
     return PowerManifold{_get_field(ME), typeof(ME), TSW, TPR}(ME, M.size)
 end
+function get_embedding(
+        M::PowerManifold{𝔽, TM, TSW, TPR}
+    ) where {𝔽, TM <: AbstractManifold{𝔽}, TSW, TPR <: AbstractPowerRepresentation}
+    ME = get_embedding(M.manifold)
+    return PowerManifold{_get_field(ME), typeof(ME), TSW, TPR}(ME, M.size)
+end
 
 function get_iterator(
         ::PowerManifold{𝔽, <:AbstractManifold{𝔽}, TypeParameter{Tuple{N}}},

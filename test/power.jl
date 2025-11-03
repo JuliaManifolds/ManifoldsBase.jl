@@ -88,6 +88,8 @@ end
         p = [UpperTriangular([1 2; 2 1]), UpperTriangular([1 2; 2 1])]
         q = [UpperTriangular([2 3; 3 2]), UpperTriangular([1 2; 2 1])]
         @test typeof(log(N, p, q)) === typeof(p)
+        # Defaultmanifold is always its own embedding independen of the point type, so
+        @test get_embedding(N) == get_embedding(N, typeof(p))
     end
 
     @testset "PowerManifoldNestedReplacing with SArray element" begin
@@ -95,6 +97,8 @@ end
         N = PowerManifold(M, NestedReplacingPowerRepresentation(), 2)
         p = [SMatrix{2, 2, Float64}([i i + 1; i - 1 i - 2]) for i in 1:2]
         allocate(M, p) isa Vector{SMatrix{2, 2, Float64, 4}}
+        # Defaultmanifold is always its own embedding independen of the point type, so
+        @test get_embedding(N) == get_embedding(N, typeof(p))
     end
 
     @testset "allocate_on" begin
