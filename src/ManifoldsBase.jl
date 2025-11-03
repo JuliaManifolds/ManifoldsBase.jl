@@ -1064,7 +1064,7 @@ end
 
 Return the size of an array representing a point or a tangent vector on a
 certain [`AbstractManifold`](@ref) `M`.
-This is either the size of the [`AbstractArray`](@ref) representing points or tangent vectors on `M`
+This is either the size of the `AbstractArray` representing points or tangent vectors on `M`
 or what a `size(p)` would return for the case of points and tangent vectors that are
 subtypes of [`AbstractManifoldPoint`](@ref) or [`AbstractTangentVector`](@ref), respectively.
 
@@ -1079,7 +1079,7 @@ end
     representation_size(M::AbstractManifold, ::Type{PT}) where {PT}
 
 return the size of an array to represent points or tangent vectors of type `PT` on the [`AbstractManifold`](@ref) `M`..
-The returned size tuple is the size of the [`AbstractArray`](@ref) representing points or tangent vectors on `M`,
+The returned size tuple is the size of the `AbstractArray` representing points or tangent vectors on `M`,
 i.e. what a `size(p)` or -: size(X) would return if they are of type `PT`.
 
 By default this function passes to `representation_size(M)`, the generic default.
