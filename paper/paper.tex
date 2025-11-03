@@ -84,7 +84,7 @@ which is a smooth manifold of dimension \( n \). A set of charts is for example 
 
 This derivative can be computed in any such chart \(\varphi_i\), though it is usually defined in a chart-independent way.
 In a single chart, any direction is equivalent to the first order to the curve \(t \to \varphi_i^{-1}(\varphi_i(p) + b_i t)\) for some \(b_i \in \mathbb{R}^n\). The vector \(b_i\) contains \term{coordinates} of the tangent vector in a basis induced by \(\varphi_i\). Then we have to consider equivalence classes of curves that have the same derivative in a chart, which results in the \term{tangent space} \( T_p \mathcal{M} \) at \( p \in \mathcal{M} \). The tangent space \( T_p \mathcal{M} \) is a vector space of dimension \( n \).
-The disjoint union of all tangent spaces \( T \mathcal{M} = \bigsqcup_{p \in \mathcal{M}} T_p \mathcal{M} \) is called the \term{tangent bundle}.
+The disjoint union of all tangent spaces \( T \mathcal{M} = \dot\bigcup_{p \in \mathcal{M}} T_p \mathcal{M} \) is called the \term{tangent bundle}.
 
 For the sphere \( \mathbb{S}^n \), the tangent space at a point \( p \in \mathbb{S}^n \) is given by
 
@@ -107,7 +107,7 @@ All further terminology will be introduced throughout the introduction of the in
 
 \subsection{Main types}
 
-The central type to represent a manifold is \verb|AbstractManifold{|$\mathbb{F}$\verb|}| to represent a Riemannian manifold. The type parameter $\mathbb{F}$ indicates, whether the representation of points and tangent vectors are arrays or data types over the reals \(\mathbb{R}\), complex numbers \(\mathbb{C}\) or quaternions \(\mathbb{H}\).
+The central type to represent a manifold is \verb|AbstractManifold{|$\mathbb{F}$\verb|}| to represent a Riemannian manifold. The type parameter $\mathbb{F}$ indicates, whether the representation of points and tangent vectors are arrays or data types over the reals \(\mathbb{R}\), complex numbers \(\mathbb{C}\) or quaternions \(\mathbb{H}\). A concrete manifold type should be a subtype of \verb|AbstractManifold{|$\mathbb{F}$\verb|}| and contain all information about the manifold, most prominently its dimension.
 
 To build a possibly hierarchical structure of points or tangent vectors, the abstract types \verb|AbstractManifoldPoint| and \verb|AbstractTangentVector| exist\footnote{the tangent vector type is more precisely a \texttt{AbstractFibreVector\{TangentSpaceType\}}, since other vector spaces can be modelled as well}.
 These are, however not necessary to define or use the interface. For example the sphere can be used with plain \verb|Vector{Float64}| as well. We recommend to use these as supertypes when defining new manifold point or tangent vector types, especially when these are mainly used to avoid type piracy.
@@ -121,23 +121,19 @@ This can be realised by using \verb|allocate_result(M, f, args...)| for a functi
 
 \subsection{Topological functions}
 
+Given a manifold \(\mathcal{M}\), the following functions are defined to work with its topological structure. One can determine the dimension of the manifold with \verb|manifold_dimension(M)|.
+A related function is \verb|representation_size(M)|, that returns the array dimensions of a point or tangent vector in default representation, if this is applicaple. If there is no default array representation, this function returns \lstinline|nothing|. Points and tangent vectors can be represented in different ways. To distinguish these, one can pass a point type as positional second argument\footnote{\color{red} TODO: currently only concrete type.}.
+Whether a point \verb|p| is a valid point on the manifold \verb|M| can be checked with \verb|is_point(M, p)|. Similarly, whether a tangent vector \verb|X| is a valid tangent vector in $T_p\mathcal M$ can be checked with \verb|is_vector(M, p, X)|. By default the point \verb|p| is checked as well, but with \verb|check_base_point=false| this can be disabled.
+To check whether two points \verb|p| and \verb|q| or two tangent vectors \verb|X| and \verb|Y| are approximately equal, one can use \verb|isapprox(M, p, q)| and \verb|isapprox(M, p, X, Y)|, respectively.
+All three functions just return true or false by default, but one can also obtain more information
+in case of the function returning false by setting \verb|error=:error|, \verb|:warn|, or \verb|:info|, specifying how to handle the error.
+
+Furthermore the functions \verb|copy(M, p)| and \verb|copy(M, p, X)|, as well as \verb|copy_to(M, q, p)| and \verb|copy_to(M, Y, X, p)| create copies of or copy over values of one point to another.
+We also extend the \verb|rand| interface: \verb|rand(M)| generates a random point, \verb|rand(M; vector_at=p)| a random tangent vector. Both can be used with an random number generator as additional first argument.
+
 \begin{itemize}
-    \item \verb|manifold_dimension(M, p)|
-    \item \verb|is_point(M, p)| (mention error and kwargs...)
-    \item \verb|is_vector(M, X, p)|
-    \item \verb|isapprox(M, p, q)|
-    \item \verb|copy(M, p)| \& \verb|copy(M, p, X)|
-    \item \verb|copy_to!(M, q, p)| and \verb|copy_to!(M, Y, X, p)|
-    \item \verb|rand(M)| \& \verb|rand(M; vector_at=p)|
-    \item technically:
-    \verb|allocate(M, p, T)| \& \verb|allocate_result(M, f, args...)|
-    \item \verb|base_manifold(M)|
     \item \verb|embed(M, p)| \& \verb|embed(M, p, X)|
     \item \verb|project(M, p)| \& \verb|project(M, p, X)| (mention \verb|embed_project|.)
-    \item \verb|get_embeddding(M)|
-    \item \verb|get_coordinates(M, p, X, b)| \& \verb|get_vector(M, p, c, b)|
-    \item \verb|zero_vector(M, p)|
-    \item maybe a bit about bases?
 \end{itemize}
 
 \subsection{Functions on smooth manifolds}
@@ -146,6 +142,11 @@ This can be realised by using \verb|allocate_result(M, f, args...)| for a functi
     \item \verb|inner(M, p, X, Y)|
     \item \verb|angle(M, p, X, Y)|
     \item \verb|norm(M, p, X)|
+    \item \verb|get_embeddding(M)|
+    \item \verb|get_coordinates(M, p, X, b)| \& \verb|get_vector(M, p, c, b)|
+    \item \verb|zero_vector(M, p)|
+    \item Bases
+    \item Charts \& Atlases
 \end{itemize}
 
 \subsection{Functions on Riemannian manifolds}
@@ -274,9 +275,9 @@ A concrete example would be the retraction \verb|retract(M, p, X, m)|, that besi
 This allows to define functions for specific manifolds or generic manifold types. This layer should pass on to layer two.
 A user working on manifolds should usually only interact with functions defined on this layer.
 
-\subsubsection*{Layer II.} On the second layer, dispatching on certain positional arguments should be done. This allows to define functions that depend on specific positional arguments for all manifolds. Functions in this layer should be prefixed with an underscore \verb|_| and should pass on to layer three. For our retraction example, this would be \verb|_retract(M, p, X, ::ExponentialRetraction)| which would pass to the exponential map for any manifold with any point/tangent vector representation.
+\subsubsection*{Layer II} On the second layer, dispatching on certain positional arguments should be done. This allows to define functions that depend on specific positional arguments for all manifolds. Functions in this layer should be prefixed with an underscore \verb|_| and should pass on to layer three. For our retraction example, this would be \verb|_retract(M, p, X, ::ExponentialRetraction)| which would pass to the exponential map for any manifold with any point/tangent vector representation.
 
-\subsubsection*{Layer III.} On the third layer, dispatching on the point and tangent vector types should be done. This is usually also on concrete manifold types.
+\subsubsection*{Layer III} On the third layer, dispatching on the point and tangent vector types should be done. This is usually also on concrete manifold types.
 Functions on this layer should usually have a postfix indicating the kind of positional arguments or be prefixed with two underscores. This layer would allocate a result and call the in-place version of the same function.
 A user implementing a new manifold would usually only have to implement the in-place functions on this layer.
 For a retraction example, consider the \verb|ProjectionRetraction|, for which layer two would pass to a function \verb|retract_project(M, p, X)|. This function would allocate the result \verb|Y| and call \verb|retract_project!(M, Y, p, X)|. This function defaults to calling \verb|project!(M, Y, p, X)|, but also allows a user to implement a more efficient version, either for a specific manifold or for specific point or tangent vector types.
@@ -289,6 +290,8 @@ Certain properties of a manifold can be accessed via traits%
 \footnote{This is sometimes referred to as Tim Holy's Traits Trick (THTT) from the issue \href{https://github.com/JuliaLang/julia/issues/2345\#issuecomment-54537633}{github.com/JuliaLang/julia\#2345}}.
 This aims to avoid code duplication. A manifold using this trait system
 has to use the \verb|AbstractDecoratorManifold{|$\mathbb F$\verb|}| as supertype.
+These manifolds usually decorate the a manifold to add or modify certain properties. To access the
+internally stored manifold, use \verb|base_manifold(M)|, which has an optional parameter \verb|depth=-1| indicating how many decorators to “unwrap” with a default to remove all.
 
 Then, on layer one, function arguments are
 prefixed with an argument of type \verb|AbstractForwardingType|, which is used to “forward” the function call, e.\,g.\ to the embedding.
@@ -299,8 +302,17 @@ For the example of embedded manifolds, the \verb|EmbeddedForwardingType| is used
 
 As a concrete example consider again the sphere \(\mathbb{S}^n\) as embedded submanifold of \(\mathbb{R}^{n+1}\).
 Here, the function \verb|is_point(M, p)| is implemented by forwarding to first check that \verb|p| is a point on the embedding manifold \(\mathbb{R}^{n+1}\) and then check that \(\lVert p \rVert_2 = 1\).
-We avoid implemeting the test in the embedding.
+We avoid implementing the test in the embedding.
 Similarly since the sphere is an \verb|IsometricallyEmbeddedManifold|, also \verb|inner(M, p, X, Y)| is forwarded to the embedding using the \verb|SimpleForwardingType|, i.e.\ without any changes to the point or tangent vector representation.
+
+\subsubsection*{Adding numerical validation.}
+By default, functions from the interface in \verb|ManifoldsBase.jl| assume, that their input
+consists of valid points and tangent vectors and does not verify input or output values.
+For debugging and numerical verification purposes, the package provides
+the \verb|ValidationManifold| as a special manifold.
+It is implemented as a wrapper around any existing Riemannian manifold, \verb|M2 = ValidationManifold(M)| and provides additional checks of correctness for both input parameters and output values of any function from the interface.
+That is, that type calls \verb|is_point| and \verb|is_vector| on all points and tangent vectors, respectively.
+While by default these checks do result in errors, this can be changed setting the \verb|error=| keyword to either \verb|:warn| or \verb|:info|.
 
 \section{An example}\label{sec:Example}
 
