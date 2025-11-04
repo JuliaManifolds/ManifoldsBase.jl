@@ -730,16 +730,6 @@ end
 ) (EmbeddedForwardingType{DirectEmbedding}, SimpleForwardingType, StopForwardingType) 2
 
 @trait_function representation_size(M::AbstractDecoratorManifold)
-@trait_function representation_size(M::AbstractDecoratorManifold, T::Type)
-
-# ... otherwise we fall back to the decorated manifold
-function _representation_size_forwarding(
-        ::AbstractForwardingType,
-        M::AbstractDecoratorManifold,
-        T::Type,
-    )
-    return representation_size(M)
-end
 
 # Introduce Deco Trait | automatic forward | fallback
 @trait_function retract(
