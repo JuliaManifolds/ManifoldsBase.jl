@@ -329,35 +329,35 @@ function distance(M::ValidationManifold, p, q; kwargs...)
     return d
 end
 
-function embed(M::ValidationManifold, p; kwargs...)
+function embed(M::ValidationManifold, p::P; kwargs...) where {P}
     is_point(M, p; within = embed, context = (:Input,), kwargs...)
     q = embed(M.manifold, internal_value(p))
-    MEV = ValidationManifold(get_embedding(M.manifold), M)
+    MEV = ValidationManifold(get_embedding(M.manifold, P), M)
     is_point(MEV, q; error = MEV.mode, within = embed, context = (:Output,), kwargs...)
     return ValidationMPoint(q)
 end
-function embed(M::ValidationManifold, p, X; kwargs...)
+function embed(M::ValidationManifold, p::P, X; kwargs...) where {P}
     is_point(M, p; within = embed, context = (:Input,), kwargs...)
     is_vector(M, p, X; within = embed, context = (:Input,), kwargs...)
     Y = embed(M.manifold, internal_value(p), internal_value(X))
-    MEV = ValidationManifold(get_embedding(M.manifold), M)
+    MEV = ValidationManifold(get_embedding(M.manifold, P), M)
     q = embed(M.manifold, internal_value(p))
     is_vector(MEV, q, Y; within = embed, context = (:Output,), kwargs...)
     return ValidationTangentVector(Y, M.store_base_point ? q : nothing)
 end
 
-function embed!(M::ValidationManifold, q, p; kwargs...)
+function embed!(M::ValidationManifold, q, p::P; kwargs...) where {P}
     is_point(M, p; within = embed, context = (:Input,), kwargs...)
     embed!(M.manifold, internal_value(q), internal_value(p))
-    MEV = ValidationManifold(get_embedding(M.manifold), M)
+    MEV = ValidationManifold(get_embedding(M.manifold, P), M)
     is_point(MEV, q; error = MEV.mode, within = embed, context = (:Output,), kwargs...)
     return q
 end
-function embed!(M::ValidationManifold, Y, p, X; kwargs...)
+function embed!(M::ValidationManifold, Y, p::P, X; kwargs...) where {P}
     is_point(M, p; within = embed, context = (:Input,), kwargs...)
     is_vector(M, p, X; within = embed, context = (:Input,), kwargs...)
     embed!(M.manifold, internal_value(Y), internal_value(p), internal_value(X))
-    MEV = ValidationManifold(get_embedding(M.manifold), M)
+    MEV = ValidationManifold(get_embedding(M.manifold, P), M)
     q = embed(M.manifold, internal_value(p))
     _update_basepoint!(M, Y, q)
     is_vector(MEV, q, Y; within = embed, context = (:Output,), kwargs...)

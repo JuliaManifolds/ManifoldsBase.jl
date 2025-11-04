@@ -41,6 +41,13 @@ end
     return view(x, ManifoldsBase.rep_size_to_colons(rep_size)..., i...)
 end
 
+function ManifoldsBase.get_embedding(
+        M::PowerManifold{𝔽, TM, TSW, ManifoldsBaseTestUtils.TestArrayRepresentation},
+        P::Type,
+    ) where {𝔽, TM <: AbstractManifold{𝔽}, TSW}
+    ME = get_embedding(M.manifold, P)
+    return PowerManifold{ManifoldsBase._get_field(ME), typeof(ME), TSW, ManifoldsBaseTestUtils.TestArrayRepresentation}(ME, M.size)
+end
 
 @testset "Power Manifold" begin
 
@@ -61,7 +68,7 @@ end
         @test default_inverse_retraction_method(M) == default_inverse_retraction_method(N)
         @test default_retraction_method(M) == default_retraction_method(N)
         @test default_vector_transport_method(M) == default_vector_transport_method(N)
-        @test get_embedding(N, p) === N
+        @test get_embedding(N, typeof(p)) === N
     end
 
     @testset "PowerManifold and allocation with empty representation size" begin
@@ -81,6 +88,8 @@ end
         p = [UpperTriangular([1 2; 2 1]), UpperTriangular([1 2; 2 1])]
         q = [UpperTriangular([2 3; 3 2]), UpperTriangular([1 2; 2 1])]
         @test typeof(log(N, p, q)) === typeof(p)
+        # DefaultManifold is always its own embedding independent of the point type, so
+        @test get_embedding(N) == get_embedding(N, typeof(p))
     end
 
     @testset "PowerManifoldNestedReplacing with SArray element" begin
@@ -88,6 +97,8 @@ end
         N = PowerManifold(M, NestedReplacingPowerRepresentation(), 2)
         p = [SMatrix{2, 2, Float64}([i i + 1; i - 1 i - 2]) for i in 1:2]
         allocate(M, p) isa Vector{SMatrix{2, 2, Float64, 4}}
+        # DefaultManifold is always its own embedding independent of the point type, so
+        @test get_embedding(N) == get_embedding(N, typeof(p))
     end
 
     @testset "allocate_on" begin

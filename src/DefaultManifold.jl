@@ -144,7 +144,7 @@ function get_coordinates_orthonormal!(::DefaultManifold{ℂ}, c, p, X, ::RealNum
     return copyto!(c, [reshape(real(X), m); reshape(imag(X), m)])
 end
 
-get_embedding(M::DefaultManifold, ::Any) = M
+get_embedding(M::DefaultManifold) = M
 
 get_forwarding_type(::DefaultManifold, ::Any) = StopForwardingType()
 

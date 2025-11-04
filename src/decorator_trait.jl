@@ -76,16 +76,16 @@ EmbeddedForwardingType(ed::AbstractEmbeddingDirectness = IndirectEmbedding()) = 
 
 """
     get_forwarding_type(M::AbstractManifold, f)
-    get_forwarding_type(M::AbstractManifold, f, p)
+    get_forwarding_type(M::AbstractManifold, f, P::Type)
 
 Get the type of forwarding to manifold wrapped by [`AbstractManifold`](@ref) `M`, for function `f`.
 The returned value is an object of a subtype of [`AbstractForwardingType`](@ref).
 
-Point `p` can be optionally specified if different point types correspond
+Point type `P` can be optionally specified if different point types correspond
 to different representations of the manifold and hence possibly different embeddings.
 """
 get_forwarding_type(::AbstractManifold, f) = StopForwardingType()
-get_forwarding_type(M::AbstractManifold, f, p) = get_forwarding_type(M, f)
+get_forwarding_type(M::AbstractManifold, f, P::Type) = get_forwarding_type(M, f)
 
 """
     AbstractEmbeddingType
@@ -152,20 +152,21 @@ end
 
 """
     get_embedding_type(M::AbstractManifold)
-    get_embedding_type(M::AbstractManifold, p)
+    get_embedding_type(M::AbstractManifold, P::Type)
 
 Get embedding type of [`AbstractManifold`](@ref) `M`.
 The returned value is an object of a subtype of [`AbstractEmbeddingType`](@ref), either of:
+
 * [`NotEmbeddedManifoldType`](@ref) (default),
 * [`EmbeddedManifoldType`](@ref),
 * [`IsometricallyEmbeddedManifoldType`](@ref),
 * [`EmbeddedSubmanifoldType`](@ref).
 
-Point `p` can be optionally specified if different point types correspond to different
+Point type `P` can be optionally specified if different point types correspond to different
 embeddings.
 """
 get_embedding_type(::AbstractManifold) = NotEmbeddedManifoldType()
-get_embedding_type(M::AbstractManifold, p) = get_embedding_type(M)
+get_embedding_type(M::AbstractManifold, ::Type) = get_embedding_type(M)
 
 
 #
@@ -197,14 +198,15 @@ end
 # Embedded specific functions.
 """
     get_embedding(M::AbstractDecoratorManifold)
-    get_embedding(M::AbstractDecoratorManifold, p)
+    get_embedding(M::AbstractDecoratorManifold, P::Type)
 
 Specify the embedding of a manifold that has abstract decorators.
-the embedding might depend on a point representation, where different point representations
+The embedding might depend on a point representation type `P`,
+where different point representations
 are distinguished as subtypes of [`AbstractManifoldPoint`](@ref).
 A unique or default representation might also just be an `AbstractArray`.
 """
-get_embedding(M::AbstractDecoratorManifold, p) = get_embedding(M)
+get_embedding(M::AbstractDecoratorManifold, ::Type) = get_embedding(M)
 
 @inline function allocate_result(
         M::AbstractDecoratorManifold,
@@ -212,7 +214,7 @@ get_embedding(M::AbstractDecoratorManifold, p) = get_embedding(M)
         x::Vararg{Any, N},
     ) where {TF, N}
     return _allocate_result_forwarding(
-        get_forwarding_type(M, f, x[1]),
+        get_forwarding_type(M, f, typeof(x[1])),
         M,
         f,
         x...,
@@ -228,7 +230,7 @@ end
         f::TF,
         x::Vararg{Any, N},
     ) where {TF, N}
-    return allocate_result(get_embedding(M, x[1]), f, x...)
+    return allocate_result(get_embedding(M, typeof(x[1])), f, x...)
 end
 @inline function _allocate_result_forwarding(
         ::SimpleForwardingType,
@@ -266,8 +268,8 @@ function allocate_result_embedding(
         f::typeof(embed),
         x::Vararg{Any, N},
     ) where {N}
-    T = allocate_result_type(get_embedding(M, x[1]), f, x)
-    return allocate(M, x[1], T, representation_size(get_embedding(M, x[1])))
+    T = allocate_result_type(get_embedding(M, typeof(x[1])), f, x)
+    return allocate(M, x[1], T, representation_size(get_embedding(M, typeof(x[1]))))
 end
 function allocate_result_embedding(
         M::AbstractManifold,
@@ -301,7 +303,7 @@ end
     StopForwardingType,
 )
 function _check_size_forwarding(::EmbeddedForwardingType, M::AbstractDecoratorManifold, p)
-    mpe = check_size(get_embedding(M, p), embed(M, p))
+    mpe = check_size(get_embedding(M, typeof(p)), embed(M, p))
     if mpe !== nothing
         return ManifoldDomainError(
             "$p is not a point on $M because it is not a valid point in its embedding.", mpe,
@@ -314,7 +316,7 @@ function _check_size_forwarding(
         M::AbstractDecoratorManifold,
         p,
     )
-    mpe = check_size(get_embedding(M, p), p)
+    mpe = check_size(get_embedding(M, typeof(p)), p)
     if mpe !== nothing
         return ManifoldDomainError(
             "$p is not a point on $M because it is not a valid point in its embedding.",
@@ -333,7 +335,7 @@ function _check_size_forwarding(
         p,
         X,
     )
-    mpe = check_size(get_embedding(M, p), embed(M, p), embed(M, p, X))
+    mpe = check_size(get_embedding(M, typeof(p)), embed(M, p), embed(M, p, X))
     if mpe !== nothing
         return ManifoldDomainError(
             "$X is not a tangent vector at $p on $M because it is not a valid tangent vector in its embedding.",
@@ -348,7 +350,7 @@ function _check_size_forwarding(
         p,
         X,
     )
-    mpe = check_size(get_embedding(M, p), p, X)
+    mpe = check_size(get_embedding(M, typeof(p)), p, X)
     if mpe !== nothing
         return ManifoldDomainError(
             "$X is not a tangent vector at $p on $M because it is not a valid tangent vector in its embedding.",
@@ -362,7 +364,7 @@ end
 @trait_function copyto!(M::AbstractDecoratorManifold, Y, p, X)
 
 function _copyto!_forwarding(::EmbeddedForwardingType, M::AbstractDecoratorManifold, q, p)
-    return copyto!(get_embedding(M, p), q, p)
+    return copyto!(get_embedding(M, typeof(p)), q, p)
 end
 function _copyto!_forwarding(
         ::EmbeddedForwardingType,
@@ -371,7 +373,7 @@ function _copyto!_forwarding(
         p,
         X,
     )
-    return copyto!(get_embedding(M, p), Y, p, X)
+    return copyto!(get_embedding(M, typeof(p)), Y, p, X)
 end
 
 # Introduce Deco Trait | automatic forward | fallback
@@ -454,10 +456,6 @@ end
 
 @trait_function has_components(M::AbstractDecoratorManifold)
 
-function _has_components_forwarding(::EmbeddedForwardingType, M::AbstractDecoratorManifold)
-    return has_components(get_embedding(M))
-end
-
 @trait_function injectivity_radius(M::AbstractDecoratorManifold)
 
 @trait_function injectivity_radius(M::AbstractDecoratorManifold, p)
@@ -476,7 +474,7 @@ end
 @trait_function inner(M::AbstractDecoratorManifold, p, X, Y)
 
 function _inner_forwarding(::EmbeddedForwardingType, M::AbstractDecoratorManifold, p, X, Y)
-    return inner(get_embedding(M, p), embed(M, p), embed(M, p, X), embed(M, p, Y))
+    return inner(get_embedding(M, typeof(p)), embed(M, p), embed(M, p, X), embed(M, p, Y))
 end
 
 # Introduce Deco Trait | automatic forward | fallback
@@ -521,9 +519,9 @@ function _is_point_forwarding(
     end
     try
         if (D <: IndirectEmbedding)
-            pt = is_point(get_embedding(M, p), embed(M, p); error = error, kwargs...)
+            pt = is_point(get_embedding(M, typeof(p)), embed(M, p); error = error, kwargs...)
         else
-            pt = is_point(get_embedding(M, p), p; error = error, kwargs...)
+            pt = is_point(get_embedding(M, typeof(p)), p; error = error, kwargs...)
         end
         !pt && return false # no error thrown (deactivated) but returned false -> return false
     catch e
@@ -597,7 +595,7 @@ function _is_vector_forwarding(
     try
         if (D <: IndirectEmbedding)
             tv = is_vector(
-                get_embedding(M, p),
+                get_embedding(M, typeof(p)),
                 embed(M, p),
                 embed(M, p, X),
                 check_base_point;
@@ -606,7 +604,7 @@ function _is_vector_forwarding(
             )
         else
             tv = is_vector(
-                get_embedding(M, p),
+                get_embedding(M, typeof(p)),
                 p,
                 X,
                 check_base_point;
@@ -647,7 +645,7 @@ function __isapprox_forwarding(
         q;
         kwargs...,
     )
-    return _isapprox(get_embedding(M, p), embed(M, p), embed(M, q); kwargs...)
+    return _isapprox(get_embedding(M, typeof(p)), embed(M, p), embed(M, q); kwargs...)
 end
 function __isapprox_forwarding(
         ::EmbeddedForwardingType,
@@ -658,7 +656,7 @@ function __isapprox_forwarding(
         kwargs...,
     )
     return _isapprox(
-        get_embedding(M, p),
+        get_embedding(M, typeof(p)),
         embed(M, p),
         embed(M, p, X),
         embed(M, p, Y);
@@ -671,7 +669,7 @@ end
 @trait_function norm(M::AbstractDecoratorManifold, p, X)
 
 function _norm_forwarding(::EmbeddedForwardingType, M::AbstractDecoratorManifold, p, X)
-    return norm(get_embedding(M, p), embed(M, p), embed(M, p, X))
+    return norm(get_embedding(M, typeof(p)), embed(M, p), embed(M, p, X))
 end
 
 @trait_function log(M::AbstractDecoratorManifold, p, q)
@@ -728,14 +726,6 @@ end
 ) (EmbeddedForwardingType{DirectEmbedding}, SimpleForwardingType, StopForwardingType) 2
 
 @trait_function representation_size(M::AbstractDecoratorManifold)
-
-function _representation_size_forwarding(
-        ::Union{EmbeddedForwardingType, EmbeddedForwardingType{DirectEmbedding}},
-        M::AbstractDecoratorManifold,
-    )
-    return representation_size(get_embedding(M))
-end
-
 
 # Introduce Deco Trait | automatic forward | fallback
 @trait_function retract(
@@ -807,7 +797,6 @@ end
 const forward_functions_embedded = [
     copyto!,
     check_size,
-    has_components,
     is_point,
     is_vector,
     _isapprox,
@@ -859,8 +848,8 @@ const forward_functions_submanifold = [
 function get_forwarding_type(M::AbstractDecoratorManifold, f)
     return get_forwarding_type_embedding(get_embedding_type(M), M, f)
 end
-function get_forwarding_type(M::AbstractDecoratorManifold, f, p)
-    return get_forwarding_type_embedding(get_embedding_type(M, p), M, f)
+function get_forwarding_type(M::AbstractDecoratorManifold, f, P::Type)
+    return get_forwarding_type_embedding(get_embedding_type(M, P), M, f)
 end
 
 function get_forwarding_type_embedding(

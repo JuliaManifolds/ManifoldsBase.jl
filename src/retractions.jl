@@ -539,12 +539,12 @@ the [`AbstractInverseRetractionMethod`](@ref) `m` in the embedding (see [`get_em
 and projecting the result back.
 """
 function inverse_retract_embedded!(
-        M::AbstractManifold, X, p, q, m::AbstractInverseRetractionMethod,
-    )
+        M::AbstractManifold, X, p::P, q, m::AbstractInverseRetractionMethod,
+    ) where {P}
     return project!(
         M, X, p,
         inverse_retract(
-            get_embedding(M), embed(get_embedding(M), p), embed(get_embedding(M), q), m,
+            get_embedding(M, P), embed(get_embedding(M, P), p), embed(get_embedding(M, P), q), m,
         ),
     )
 end
@@ -812,13 +812,13 @@ the [`AbstractRetractionMethod`](@ref) `m` in the embedding (see [`get_embedding
 and projecting the result back.
 """
 function retract_embedded!(
-        M::AbstractManifold, q, p, X, m::AbstractRetractionMethod; kwargs...,
-    )
+        M::AbstractManifold, q, p::P, X, m::AbstractRetractionMethod; kwargs...,
+    ) where {P}
     return project!(
         M,
         q,
         retract(
-            get_embedding(M), embed(get_embedding(M), p), embed(get_embedding(M), p, X), m;
+            get_embedding(M, P), embed(get_embedding(M, P), p), embed(get_embedding(M, P), p, X), m;
             kwargs...,
         ),
     )
@@ -830,13 +830,13 @@ end
 Compute the scaled variant of `retract_embedded!`.
 """
 function retract_embedded_fused!(
-        M::AbstractManifold, q, p, X, t::Number, m::AbstractRetractionMethod; kwargs...,
-    )
+        M::AbstractManifold, q, p::P, X, t::Number, m::AbstractRetractionMethod; kwargs...,
+    ) where {P}
     return project!(
         M,
         q,
         retract_fused(
-            get_embedding(M), embed(get_embedding(M), p), embed(get_embedding(M), p, X), t, m; kwargs...,
+            get_embedding(M, P), embed(get_embedding(M, P), p), embed(get_embedding(M, P), p, X), t, m; kwargs...,
         ),
     )
 end

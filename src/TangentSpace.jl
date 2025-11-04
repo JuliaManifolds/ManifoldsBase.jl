@@ -119,12 +119,9 @@ end
 
 function get_embedding(TpM::TangentSpace)
     return TangentSpace(
-        get_embedding(TpM.manifold, TpM.point),
+        get_embedding(TpM.manifold, typeof(TpM.point)),
         embed(TpM.manifold, TpM.point),
     )
-end
-function get_embedding(TpM::TangentSpace, X)
-    return get_embedding(TpM)
 end
 
 function get_vector(TpM::TangentSpace, X, c, B::AbstractBasis)
@@ -239,9 +236,7 @@ function Random.rand!(rng::AbstractRNG, TpM::TangentSpace, X; vector_at = nothin
     return X
 end
 
-function representation_size(TpM::TangentSpace)
-    return representation_size(TpM.manifold)
-end
+representation_size(TpM::TangentSpace) = representation_size(TpM.manifold)
 
 function Base.show(io::IO, ::MIME"text/plain", TpM::TangentSpace)
     println(io, "Tangent space to the manifold $(base_manifold(TpM)) at point:")
