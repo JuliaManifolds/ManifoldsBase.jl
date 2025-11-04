@@ -683,7 +683,7 @@ using ManifoldsBaseTestUtils
         @test ManifoldsBase.exp_fused(M, [1, 2], [2, 3], 1.0) isa Vector{Float64}
     end
     @testset "Trait forwarding" begin
-        @test ManifoldsBase.get_forwarding_type(ManifoldsBase.DefaultManifold(2), [1, 2]) ==
+        @test ManifoldsBase.get_forwarding_type(ManifoldsBase.DefaultManifold(2), Vector{Int}) ==
             ManifoldsBase.StopForwardingType()
     end
     @testset "Error on nonnumeric types on Complex" begin

@@ -660,15 +660,15 @@ embedding and the resulting point, but the final projection is performed in plac
 function vector_transport_direction_embedded!(
         M::AbstractManifold,
         Y,
-        p,
+        p::P,
         X,
         d,
         m::AbstractVectorTransportMethod,
-    )
+    ) where {P}
     p_e = embed(M, p)
     d_e = embed(M, d)
     X_e = embed(M, p, X)
-    Y_e = vector_transport_direction(get_embedding(M), p_e, X_e, d_e, m)
+    Y_e = vector_transport_direction(get_embedding(M, P), p_e, X_e, d_e, m)
     q = exp(M, p, d)
     return project!(M, Y, q, Y_e)
 end
@@ -886,11 +886,11 @@ using the  of the [`AbstractRetractionMethod`](@ref) `m` in th embedding.
 The default implementataion requires one allocation for the points and tangent vectors in the
 embedding and the resulting point, but the final projection is performed in place of `Y`
 """
-function vector_transport_to_embedded!(M::AbstractManifold, Y, p, X, q, m)
+function vector_transport_to_embedded!(M::AbstractManifold, Y, p::P, X, q, m) where {P}
     p_e = embed(M, p)
     X_e = embed(M, p, X)
     q_e = embed(M, q)
-    Y_e = vector_transport_to(get_embedding(M), p_e, X_e, q_e, m)
+    Y_e = vector_transport_to(get_embedding(M, P), p_e, X_e, q_e, m)
     return project!(M, Y, q, Y_e)
 end
 

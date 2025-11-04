@@ -130,13 +130,13 @@ macro trait_function(
 
     argnametype_exprs = [:(typeof($(argname))) for argname in argnames]
     gft = if :p in callargs
-        :(ManifoldsBase.get_forwarding_type(M, $fname, p))
+        :(ManifoldsBase.get_forwarding_type(M, $fname, typeof(p)))
     else
         :(ManifoldsBase.get_forwarding_type(M, $fname))
     end
 
     ge = if :p in callargs
-        :(get_embedding(M, p))
+        :(get_embedding(M, typeof(p)))
     else
         :(get_embedding(M))
     end
