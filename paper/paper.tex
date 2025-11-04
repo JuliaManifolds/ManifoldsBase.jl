@@ -80,20 +80,24 @@ As a guiding example, consider the $n$-dimensional sphere
 \end{equation*}
 which is a smooth manifold of dimension \( n \). A set of charts is for example the so-called \term{stereographic projections} onto the planes tangent to the sphere. Indeed, it is enough to consider the projections from the north and south pole to cover the sphere.
 
-\subsubsection{Tangent spaces} Consider any \( p \in \mathcal{M} \) on  a smooth manifold. In order to take (directional) derivatives at the point \( p \), consider the set of all curves \( c\colon (-\epsilon, \epsilon) \to \mathcal{M} \) with \( c(0) = p \) that “run through \( p \)”. We can now consider the derivative of the curve \( \dot c \) around \( p \) in any chart \( \varphi_i \) such that \( p \in \mathcal{U}_i\).
+\subsubsection{Tangent spaces} Consider any \( p \in \mathcal{M} \) on a smooth manifold.
+In order to take (directional) derivatives at the point \( p \), consider the set of all smooth curves \( c\colon (-\epsilon, \epsilon) \to \mathcal{M} \) with \( c(0) = p \) that “run through \( p \)”.
+To be precise, smoothness of the curve \( c \) means that for a chart \( \varphi \) with \( p \in \mathcal{U} \), the map \( c_\varphi(t) = \varphi_i(c(t)) \) is a smooth in the classical sense as a map from \( (-\epsilon, \epsilon) \) to \( \mathbb{R}^n \). Since transitions of charts are smooth, this is independent of the choice of the actual chart.
+Hence we can now consider the derivative \( \dot c_\varphi(0)  \in \mathbb{R}^n \) of the curve in the chart \( \varphi_i \). This can again be made independent of the chart and we obtain \(\dot c(0)\).
 
-This derivative can be computed in any such chart \(\varphi_i\), though it is usually defined in a chart-independent way.
-In a single chart, any direction is equivalent to the first order to the curve \(t \to \varphi_i^{-1}(\varphi_i(p) + b_i t)\) for some \(b_i \in \mathbb{R}^n\). The vector \(b_i\) contains \term{coordinates} of the tangent vector in a basis induced by \(\varphi_i\). Then we have to consider equivalence classes of curves that have the same derivative in a chart, which results in the \term{tangent space} \( T_p \mathcal{M} \) at \( p \in \mathcal{M} \). The tangent space \( T_p \mathcal{M} \) is a vector space of dimension \( n \).
+In a single chart, any derivative \(\dot c_\varphi(0)\) is equivalent to the first order to the curve \(t \to \varphi^{-1}(\varphi(p) + bt)\) for some \(b \in \mathbb{R}^n\). The vector \(b\) contains \term{coordinates} of the tangent vector in a basis induced by \(\varphi\).
+Identifying each derivative \(\dot c(0)\) with its coordinates \(b\) in a chart \(\varphi\) thus results in a one-to-one correspondence between curves through \( p \) and vectors in \( \mathbb{R}^n \), formally this identification yields equivalence classes of curves.
+Overall we obtain the \term{tangent space} \( T_p \mathcal{M} \) at \( p \in \mathcal{M} \), which is a vector space of dimension \( n \).
+Informally speaking, the tangent space contains all directions in which one can tangentially pass through the point \( p \) on the manifold \( \mathcal{M} \). This is (again) independent of the choice of chart and we denote a tangent vector at \( p \) by \( X \in T_p \mathcal{M} \).
 The disjoint union of all tangent spaces \( T \mathcal{M} = \dot\bigcup_{p \in \mathcal{M}} T_p \mathcal{M} \) is called the \term{tangent bundle}.
 
-For the sphere \( \mathbb{S}^n \), the tangent space at a point \( p \in \mathbb{S}^n \) is given by
-
+As an example, on the sphere \( \mathbb{S}^n \) the tangent space at a point \( p \in \mathbb{S}^n \) is given by
 \begin{equation*}
     T_p \mathbb{S}^n = \bigl\{ X \in \mathbb{R}^{n+1} \bigm| X^{\mathrm{T}} p = 0 \bigr\},
 \end{equation*}
 i.e. the set of all vectors in \( \mathbb{R}^{n+1} \) that are orthogonal to \( p \). Visually, these are all vectors that are tangent to the sphere at the point \( p \).
 
-{\color{red} MB: TODO: de-emphasize inner, emphasize affine connection. }
+On Euclidean space, the one chart \( \varphi(p) = p \) is enough to cover the whole space and we obtain that all tangent spaces are isomorphic to \( \mathbb{R}^n \) itself.
 
 Since the tangent space is a vector space, we can introduce an inner product \( \langle \cdot, \cdot \rangle_p \colon T_p \mathcal{M} \times T_p \mathcal{M} \to \mathbb{R} \) on each tangent space \( T_p \mathcal{M} \).
 With two tangent vector fields \( \mathcal{X}, \mathcal{Y} \colon \mathcal{M} \to T \mathcal{M} \), \( \mathcal{X}(p), \mathcal{Y}(p) \in T_p \mathcal{M} \), we can consider the function \( p \mapsto \langle \mathcal{X}(p), \mathcal{Y}(p) \rangle_p \).
@@ -101,7 +105,12 @@ We say family of inner products \( \langle \cdot, \cdot \rangle_p \) is \term{sm
 
 A \term{Riemannian manifold} is a smooth manifold \( \mathcal{M} \) together with a smoothly varying inner product on the tangent spaces \( T_p \mathcal{M} \), called the \term{Riemannian metric}.
 
-All further terminology will be introduced throughout the introduction of the interface.
+\begin{itemize}
+    \item geodesic, exp, log, parallel transport
+    \item affine connection, there is a default for inner products.
+\end{itemize}
+
+%All further terminology will be introduced throughout the introduction of the interface.
 
 \section{The interface working with manifolds}\label{sec:Interface}
 
