@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 * bugfixes on `get_embedding`, `get_embedding_type`, and `get_forwarding_type`, which now all accept as their second (third for the last case) argument consistently take the Type of a point (and no longer sometimes a point sometimes its type)
+* `has_components` no longer propagates to the embedding
 
 ## [2.1.0] 30/10/2025
 

@@ -801,7 +801,6 @@ end
 const forward_functions_embedded = [
     copyto!,
     check_size,
-    has_components,
     is_point,
     is_vector,
     _isapprox,
