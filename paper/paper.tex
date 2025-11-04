@@ -61,6 +61,7 @@ and Section~\ref{sec:Usage} presents an overview of packages using \verb|Manifol
 
 This section introduces the mathematical background and notation used throughout this paper,
 for more details see, e.g. \cite{Lee:2003:1,AbsilMahonySepulchre:2008:1,DoCarmo:1992}.
+For differential geometry from a computational perspective see~\cite{GallierQuaintance:2020}.
 
 \subsubsection{A topological manifold} A \term{manifold} \( \mathcal{M} \) is a topological space%
 \footnote{We assume that the spaces we consider here are second countable and Hausdorff to exclude pathological examples.}
@@ -132,31 +133,45 @@ This can be realised by using \verb|allocate_result(M, f, args...)| for a functi
 \subsection{Topological functions}
 
 Given a manifold \(\mathcal{M}\), the following functions are defined to work with its topological structure. One can determine the dimension of the manifold with \verb|manifold_dimension(M)|.
-A related function is \verb|representation_size(M)|, that returns the array dimensions of a point or tangent vector in default representation, if this is applicaple. If there is no default array representation, this function returns \lstinline|nothing|. Points and tangent vectors can be represented in different ways. To distinguish these, one can pass a point type as positional second argument\footnote{\color{red} TODO: currently only concrete type.}.
+A related function is \verb|representation_size(M)|, that returns the array dimensions of a point or tangent vector in default representation, if this is applicable. If there is no default array representation, this function returns \lstinline|nothing|. Points and tangent vectors can be represented in different ways. To distinguish these, one can pass a point type as positional second argument\footnote{\color{red} TODO: currently only concrete type.}.
 Whether a point \verb|p| is a valid point on the manifold \verb|M| can be checked with \verb|is_point(M, p)|. Similarly, whether a tangent vector \verb|X| is a valid tangent vector in $T_p\mathcal M$ can be checked with \verb|is_vector(M, p, X)|. By default the point \verb|p| is checked as well, but with \verb|check_base_point=false| this can be disabled.
 To check whether two points \verb|p| and \verb|q| or two tangent vectors \verb|X| and \verb|Y| are approximately equal, one can use \verb|isapprox(M, p, q)| and \verb|isapprox(M, p, X, Y)|, respectively.
 All three functions just return true or false by default, but one can also obtain more information
 in case of the function returning false by setting \verb|error=:error|, \verb|:warn|, or \verb|:info|, specifying how to handle the error.
 
-Furthermore the functions \verb|copy(M, p)| and \verb|copy(M, p, X)|, as well as \verb|copy_to(M, q, p)| and \verb|copy_to(M, Y, X, p)| create copies of or copy over values of one point to another.
-We also extend the \verb|rand| interface: \verb|rand(M)| generates a random point, \verb|rand(M; vector_at=p)| a random tangent vector. Both can be used with an random number generator as additional first argument.
+Furthermore the functions \verb|copy(M, p)| and \verb|copy(M, p, X)|, as well as \verb|copyto!(M, q, p)| and \verb|copyto!(M, Y, p, X)| create copies of or copy over values of one point to another.
+
+We also extend the \verb|rand| interface: \verb|rand(M)| generates a random point, \verb|rand(M; vector_at=p)| a random tangent vector. Both can be used with an random number generator as additional first argument. Random points and tangent vectors can also be generated in-place using \verb|rand!(M, p)| and \verb|rand!(M, X; vector_at=p)|.
 
 \begin{itemize}
+    \item \verb|get_embeddding(M)|
     \item \verb|embed(M, p)| \& \verb|embed(M, p, X)|
     \item \verb|project(M, p)| \& \verb|project(M, p, X)| (mention \verb|embed_project|.)
+    \item \verb|zero_vector(M, p)|
+    \item \verb|retract(M, p, X, m)|
+    \item \verb|retract_fused(M, p, X, t, m)| (in footnote?)
+    \item Bases
+    \item \verb|get_coordinates(M, p, X, b)| \& \verb|get_vector(M, p, c, b)|
+    \item Charts \& Atlases
 \end{itemize}
 
-\subsection{Functions on smooth manifolds}
+\subsection{Functions on manifolds with an affine connection}
 
-\begin{itemize}
-    \item \verb|inner(M, p, X, Y)|
-    \item \verb|angle(M, p, X, Y)|
-    \item \verb|norm(M, p, X)|
-    \item \verb|get_embeddding(M)|
-    \item \verb|get_coordinates(M, p, X, b)| \& \verb|get_vector(M, p, c, b)|
-    \item \verb|zero_vector(M, p)|
-    \item Bases
-    \item Charts \& Atlases
+\begin{itemize} 
+    \item \verb|exp(M, p, X)|
+    \item \verb|exp_fused(M, p, X, t)| (in footnote?)
+    \item \verb|geodesic(M, p, X, t)|
+    \item \verb|shortest_geodesic(M, p, q, t)|
+    \item \verb|injection_radius(M, p)|
+    \item \verb|log(M, p, q)|
+    \item \verb|inverse_retract(M, p, q, m)|
+    \item \verb|is_flat(M)|
+    \item \verb|parallel_transport_to(M, p, X, p)|
+    \item \verb|parallel_transport_direction(M, p, X, d)|
+    \item \verb|riemannian_tensor(M, p, X, Y, Z)|
+    \item \verb|sectional_curvature(M, p, X, Y)| (mention max/min)
+    \item \verb|vector_transport_to(M, p, X, q, vtm)|
+    \item \verb|vector_transport_direction(M, p, X, d, vtm)|
 \end{itemize}
 
 \subsection{Functions on Riemannian manifolds}
@@ -251,25 +266,11 @@ We also extend the \verb|rand| interface: \verb|rand(M)| generates a random poin
 
 
 \begin{itemize}
+    \item \verb|inner(M, p, X, Y)|
+    \item \verb|angle(M, p, X, Y)|
+    \item \verb|norm(M, p, X)|
     \item \verb|distance(M, p, q)|
-    \item \verb|exp(M, p, X)|
-    \item \verb|exp_fused(M, p, X, t)| (in footnote?)
-    \item \verb|retract(M, p, X, m)|
-    \item \verb|retract_fused(M, p, X, t, m)| (in footnote?)
-    \item \verb|geodesic(M, p, X, t)|
-    \item \verb|shortest_geodesic(M, p, q, t)|
-    \item \verb|injection_radius(M, p)|
-    \item \verb|log(M, p, q)|
-    \item \verb|inverse_retract(M, p, q, m)|
-    \item \verb|is_flat(M)|
-    \item \verb|parallel_transport_to(M, p, X, p)|
-    \item \verb|parallel_transport_direction(M, p, X, d)|
-    \item \verb|riemannian_tensor(M, p, X, Y, Z)|
-    \item \verb|sectional_curvature(M, p, X, Y)| (mention max/min)
-    \item \verb|ricci_curvature(M, p, X)|
     \item \verb|Weingarten(M, p, X, V)|
-    \item \verb|vector_transport_to(M, p, X, q, vtm)|
-    \item \verb|vector_transport_direction(M, p, X, d, vtm)|
 \end{itemize}
 
 \section{The Interface to define new manifolds.}\label{sec:DesignPrinciples}
