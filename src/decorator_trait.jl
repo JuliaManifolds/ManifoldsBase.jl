@@ -456,10 +456,6 @@ end
 
 @trait_function has_components(M::AbstractDecoratorManifold)
 
-function _has_components_forwarding(::EmbeddedForwardingType, M::AbstractDecoratorManifold)
-    return has_components(get_embedding(M))
-end
-
 @trait_function injectivity_radius(M::AbstractDecoratorManifold)
 
 @trait_function injectivity_radius(M::AbstractDecoratorManifold, p)
