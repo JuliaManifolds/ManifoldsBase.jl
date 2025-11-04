@@ -269,7 +269,7 @@ function allocate_result_embedding(
         x::Vararg{Any, N},
     ) where {N}
     T = allocate_result_type(get_embedding(M, typeof(x[1])), f, x)
-    return allocate(M, x[1], T, representation_size(get_embedding(M, typeof(x[1])), T))
+    return allocate(M, x[1], T, representation_size(get_embedding(M, typeof(x[1]))))
 end
 function allocate_result_embedding(
         M::AbstractManifold,
@@ -277,7 +277,7 @@ function allocate_result_embedding(
         x::Vararg{Any, N},
     ) where {N}
     T = allocate_result_type(M, f, x)
-    return allocate(M, x[1], T, representation_size(M, T))
+    return allocate(M, x[1], T, representation_size(M))
 end
 
 @trait_function change_metric(M::AbstractDecoratorManifold, G::AbstractMetric, X, p)

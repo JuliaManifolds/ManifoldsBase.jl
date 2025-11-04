@@ -148,21 +148,21 @@ get_embedding(M::DefaultManifold) = M
 
 get_forwarding_type(::DefaultManifold, ::Any) = StopForwardingType()
 
-function get_vector_orthonormal!(M::DefaultManifold, Y::T, p, c, ::AbstractNumbers) where {T}
-    return copyto!(Y, reshape(c, representation_size(M, T)))
+function get_vector_orthonormal!(M::DefaultManifold, Y, p, c, ::AbstractNumbers)
+    return copyto!(Y, reshape(c, representation_size(M)))
 end
 function get_vector_diagonalizing!(
         M::DefaultManifold,
-        Y::T,
+        Y,
         p,
         c,
         ::DiagonalizingOrthonormalBasis{ℝ},
-    ) where {T}
-    return copyto!(Y, reshape(c, representation_size(M, T)))
+    )
+    return copyto!(Y, reshape(c, representation_size(M)))
 end
-function get_vector_orthonormal!(M::DefaultManifold{ℂ}, Y::T, p, c, ::RealNumbers) where {T}
+function get_vector_orthonormal!(M::DefaultManifold{ℂ}, Y, p, c, ::RealNumbers)
     n = div(length(c), 2)
-    return copyto!(Y, reshape(c[1:n] + c[(n + 1):(2n)] * 1im, representation_size(M, T)))
+    return copyto!(Y, reshape(c[1:n] + c[(n + 1):(2n)] * 1im, representation_size(M)))
 end
 
 has_components(::DefaultManifold) = true

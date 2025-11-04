@@ -284,7 +284,7 @@ function allocate_on(M::AbstractManifold, ::TangentSpaceType)
     return similar(Array{Float64}, representation_size(M))
 end
 function allocate_on(M::AbstractManifold, ::TangentSpaceType, T::Type{<:AbstractArray})
-    return similar(T, representation_size(M, T))
+    return similar(T, representation_size(M))
 end
 
 """
@@ -295,7 +295,7 @@ on manifold `M`.
 """
 allocate_coordinates(::AbstractManifold, p, T, n::Int) = allocate(p, T, n)
 function allocate_coordinates(M::AbstractManifold, p::Int, T, n::Int)
-    return (representation_size(M, T) == () && n == 0) ? zero(T) : zeros(T, n)
+    return (representation_size(M) == () && n == 0) ? zero(T) : zeros(T, n)
 end
 function allocate_result(
         M::AbstractManifold,
@@ -468,8 +468,8 @@ end
 function _get_basis(::AbstractManifold, ::Any, B::CachedBasis)
     return B
 end
-function _get_basis(M::AbstractManifold, p::P, B::ProjectedOrthonormalBasis{:svd, ℝ}) where {P}
-    S = representation_size(M, P)
+function _get_basis(M::AbstractManifold, p, B::ProjectedOrthonormalBasis{:svd, ℝ})
+    S = representation_size(M)
     PS = prod(S)
     dim = manifold_dimension(M)
     # projection

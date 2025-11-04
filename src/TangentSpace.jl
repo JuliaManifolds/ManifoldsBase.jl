@@ -237,8 +237,6 @@ function Random.rand!(rng::AbstractRNG, TpM::TangentSpace, X; vector_at = nothin
 end
 
 representation_size(TpM::TangentSpace) = representation_size(TpM.manifold)
-representation_size(TpM::TangentSpace, T::Type) = representation_size(TpM.manifold, T)
-
 
 function Base.show(io::IO, ::MIME"text/plain", TpM::TangentSpace)
     println(io, "Tangent space to the manifold $(base_manifold(TpM)) at point:")
