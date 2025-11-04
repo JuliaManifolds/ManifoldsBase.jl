@@ -439,7 +439,6 @@ end
                 @test_throws MethodError inverse_retract(M2, [1, 2], [2, 3])
                 @test_throws MethodError inverse_retract!(M2, A, [1, 2], [2, 3])
                 @test_throws MethodError distance(M2, [1, 2], [2, 3])
-                # @test_throws StackOverflowError manifold_dimension(M2)
                 @test_throws MethodError project(M2, [1, 2])
                 @test_throws MethodError project!(M2, A, [1, 2])
                 @test_throws MethodError project(M2, [1, 2], [2, 3])
