@@ -75,6 +75,8 @@ function ManifoldsBase.get_embedding_type(::AnotherHalfPlaneManifold)
     return ManifoldsBase.IsometricallyEmbeddedManifoldType(ManifoldsBase.DirectEmbedding())
 end
 
+ManifoldsBase.has_components(::AnotherHalfPlaneManifold) = true
+
 function ManifoldsBase.embed!(::AnotherHalfPlaneManifold, q, p)
     q[1:2] .= p
     q[3] = 0
