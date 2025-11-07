@@ -51,7 +51,7 @@ function ManifoldsBase.plot_slope(
 end
 function ManifoldsBase.plot_check_geodesic(T, N, e_norm, e_pt, e_alpha)
     fig = plot(
-        T[1:N-1], e_norm;
+        T[1:(N - 1)], e_norm;
         label = "\$\\|X_i\\|-c\$", linewidth = 3, legend = :topright, color = :lightblue,
     )
     plot!(
