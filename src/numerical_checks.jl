@@ -82,6 +82,93 @@ function check_inverse_retraction(
     )
 end
 
+function plot_check_geodesic end
+
+@doc raw"""
+    check_geodesic(
+        M::AbstractManifold,
+        p=rand(M),
+        X=rand(M; vector_at=p);
+        #
+        exactness_tol::Real = 1e-12,
+        io::Union{IO,Nothing} = nothing,
+        N::Int = 101,
+        name::String = "geodesic",
+        plot::Bool = false,
+        error::Symbol = :none,
+        inverse_retraction_method::AbstractInverseRetractionMethod = default_inverse_retraction(M),
+        vector_transport_method::AbstractVectorTransportMethod = default_vector_transport(M),
+    )
+
+Numerically check whether the [`geodesic`](@ref) implementation is correct.
+This check requires both the [`log`](@ref) and [`parallel_transport_to`](@ref) functions to be implemented
+in order to an exact numerical verification.
+We further require the [`norm`](@ref) function to be implemented for the [`AbstractManifold`](@ref) `M`.
+
+You can provide an `inverse_retraction_method` and `vector_transport_method` to be used,
+but the verification will then be less accurate.
+
+The tests performed are the following based on sampling the geodesic ``\gamma(t) = ``[`geodesic`](@ref)`(M, p, X)` at
+`N` equidistant points ``t_i = i/(N-1)``, `i=0,...,N-1` we denote by ``p_i = \gamma(t_i)``
+
+1. Compute the norms of the tangent vectors ``\dot\gamma(t_i) ≈ X_i = \log_{p_i}(p_{i+1})``, ``i=0,...,N-2``
+   and check how far these norms deviate from their mean value.
+2. Check how far this mean deviates from being ``\frac{||X||}{N-1}``
+3. Check that the parallel transport of each ``X_i`` from ``p_i`` to ``p_{i+1}`` is close to ``X_{i+1}``.
+
+# Arguments
+* `M`:    the manifold to check
+* `p`:    point on the manifold to start the geodesic
+* `X`:    tangent vector at `p` to start the geodesic
+
+# Keyword arguments
+* `tol`:     if all errors are below this tolerance, the geodesic is considered to be exact
+"""
+function check_geodesic(
+        M::AbstractManifold,
+        p = rand(M),
+        X = rand(M; vector_at = p);
+        tol::Real = 1.0e-12,
+        io::Union{IO, Nothing} = nothing,
+        N::Int = 101,
+        name::String = "geodesic",
+        plot::Bool = false,
+        error::Symbol = :none,
+        inverse_retraction_method::AbstractInverseRetractionMethod = default_inverse_retraction_method(M),
+        vector_transport_method::AbstractVectorTransportMethod = default_vector_transport_method(M),
+    )
+    T = range(0.0, 1.0; length = N)
+    γ = geodesic(M, p, X)
+    # points `p_i` to evaluate the error function at
+    ps = [ γ(t) for t in T ]
+    Xs = [ inverse_retract(M, ps[i], ps[i + 1], inverse_retraction_method) for i in 1:(N - 1) ]
+    norms = [ norm(M, p, X) for (p, X) in zip(ps[1:(end - 1)], Xs) ]
+    mean_norm = sum(norms) / length(norms)
+    # errors_1 how far awary are we from constant speed
+    errors_norm = [ abs(n - mean_norm) for n in norms ]
+    err_n_max = maximum(errors_norm)
+    # PT Xs to their neighbors, now Xi and Yi are in the same tangent space
+    Ys = [ vector_transport_to(M, ps[i + 1], Xs[i + 1], ps[i], vector_transport_method) for i in 1:(N - 2)]
+    errors_pt = [ norm(M, p, X - Y) for (p, X, Y) in zip(ps[1:(N-2)], Xs[1:(N-2)], Ys) ]
+    err_pt_max = maximum(errors_pt)
+    errors_α = [ abs(1 - inner(M, p, X, Y) / (norm(M, p, X) * norm(M, p, Y))) for (p, X, Y) in zip(ps[1:(N-2)], Xs[1:(N-2)], Ys) ]
+    err_α_max = maximum(errors_α)
+    msg = """
+    Geodesic check results:
+    - max deviation from constant speed: $(err_n_max)
+    - max deviation from parallel transport: $(err_pt_max)
+    - max deviation from angle preservation: $(err_α_max)
+    """
+    (io !== nothing) && print(io, msg)
+    plot && return ManifoldsBase.plot_check_geodesic(T, N, errors_norm, errors_pt, errors_α)
+    if (err_n_max > tol) || (err_pt_max > tol) || (err_α_max > tol)
+        (error === :info) && @info msg
+        (error === :warn) && @warn msg
+        (error === :error) && throw(ErrorException(msg))
+        return false
+    end
+    return true
+end
 @doc raw"""
     check_retraction(
         M::AbstractManifold,
@@ -102,7 +189,7 @@ end
         window = nothing,
     )
 
-Check numerically wether the retraction `vector_transport_to` is correct, by selecting
+Check numerically whether the retraction `vector_transport_to` is correct, by selecting
 a set of points ``q_i = \exp_p (t_i X)`` where ``t`` takes all values from `log_range`,
 to then compare [`parallel_transport_to`](@ref) to the `vector_transport_method`
 applied to the vector `Y`.
