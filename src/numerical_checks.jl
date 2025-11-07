@@ -41,6 +41,10 @@ no plot is generated,
 * `error`:             specify how to report errors: `:none`, `:info`, `:warn`, or `:error` are available
 * `window`:            specify window sizes within the `log_range` that are used for the slope estimation.
   the default is, to use all window sizes `2:N`.
+
+Note that since the plot yields more information than throwing an error, when both are specified,
+the plot is generated first and returned (to be shown/displayed), such that no error is thrown.
+You can switch to e.g. `:warn` to get a warning together with the plot.
 """
 function check_inverse_retraction(
         M::AbstractManifold,
@@ -129,6 +133,10 @@ The tests performed are the following based on sampling the geodesic ``\gamma(t)
 * `error`:   specify how to report errors: `:none`, `:info`, `:warn`, or `:error` are available
 * `inverse_retraction_method`:  method to use for the inverse retraction, it is recommended to use [`LogarithmicInverseRetraction`](@ref)
 * `vector_transport_method`:    method to use for the vector transport, it is recommended to use [`ParallelTransport`](@ref)
+
+Note that since the plot yields more information than throwing an error, when both are specified,
+the plot is generated first and returned (to be shown/displayed), such that no error is thrown.
+You can switch to e.g. `:warn` to get a warning together with the plot.
 """
 function check_geodesic(
         M::AbstractManifold,
@@ -165,10 +173,12 @@ function check_geodesic(
     - max deviation from angle preservation: $(err_α_max)
     """
     (io !== nothing) && print(io, msg)
-    plot && return ManifoldsBase.plot_check_geodesic(T, N, errors_norm, errors_pt, errors_α)
     if (err_n_max > tol) || (err_pt_max > tol) || (err_α_max > tol)
         (error === :info) && @info msg
         (error === :warn) && @warn msg
+    end
+    plot && return ManifoldsBase.plot_check_geodesic(T, N, errors_norm, errors_pt, errors_α)
+    if (err_n_max > tol) || (err_pt_max > tol) || (err_α_max > tol)
         (error === :error) && throw(ErrorException(msg))
         return false
     end
@@ -222,6 +232,10 @@ no plot is generated,
 * `error`:             specify how to report errors: `:none`, `:info`, `:warn`, or `:error` are available
 * `window`:            specify window sizes within the `log_range` that are used for the slope estimation.
   the default is, to use all window sizes `2:N`.
+
+Note that since the plot yields more information than throwing an error, when both are specified,
+the plot is generated first and returned (to be shown/displayed), such that no error is thrown.
+You can switch to e.g. `:warn` to get a warning together with the plot.
 """
 function check_retraction(
         M::AbstractManifold,
@@ -311,6 +325,10 @@ no plot is generated,
 * `error`:             specify how to report errors: `:none`, `:info`, `:warn`, or `:error` are available
 * `window`:            specify window sizes within the `log_range` that are used for the slope estimation.
   the default is, to use all window sizes `2:N`.
+
+Note that since the plot yields more information than throwing an error, when both are specified,
+the plot is generated first and returned (to be shown/displayed), such that no error is thrown.
+You can switch to e.g. `:warn` to get a warning together with the plot.
 """
 function check_vector_transport(
         M::AbstractManifold,
@@ -404,6 +422,10 @@ no plot is be generated,
   The plot is in log-log-scale. This is returned and can then also be saved.
 * `slope_tol`:     tolerance for the slope (global) of the approximation
 * `error`:         specify how to handle errors, `:none`, `:info`, `:warn`, `:error`
+
+Note that since the plot yields more information than throwing an error, when both are specified,
+the plot is generated first and returned (to be shown/displayed), such that no error is thrown.
+You you can switch to e.g. `:warn` to get a warning together with the plot.
 """
 
 function prepare_check_result(
@@ -451,6 +473,8 @@ function prepare_check_result(
     (ab, bb, ib, jb) = find_best_slope_window(x, y, window; slope_tol = slope_tol)
     msg = "The $(name) fits best on [$(T[ib]),$(T[jb])] with slope  $(@sprintf("%.4f", bb)), but globally your slope $(@sprintf("%.4f", b)) is outside of the tolerance $slope ± $(slope_tol).\n"
     (io !== nothing) && print(io, msg)
+    (error === :info) && @info msg
+    (error === :warn) && @warn msg
     plot && return plot_slope(
         T,
         errors[errors .> 0];
@@ -461,8 +485,6 @@ function prepare_check_result(
         i = ib,
         j = jb,
     )
-    (error === :info) && @info msg
-    (error === :warn) && @warn msg
     (error === :error) && throw(ErrorException(msg))
     return false
 end
