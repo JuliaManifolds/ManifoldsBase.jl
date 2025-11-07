@@ -96,8 +96,8 @@ function plot_check_geodesic end
         name::String = "geodesic",
         plot::Bool = false,
         error::Symbol = :none,
-        inverse_retraction_method::AbstractInverseRetractionMethod = default_inverse_retraction(M),
-        vector_transport_method::AbstractVectorTransportMethod = default_vector_transport(M),
+        inverse_retraction_method::AbstractInverseRetractionMethod = LogarithmicInverseRetraction(),
+        vector_transport_method::AbstractVectorTransportMethod = ParallelTransport(),
     )
 
 Numerically check whether the [`geodesic`](@ref) implementation is correct.
@@ -139,8 +139,8 @@ function check_geodesic(
         N::Int = 101,
         plot::Bool = false,
         error::Symbol = :none,
-        inverse_retraction_method::AbstractInverseRetractionMethod = default_inverse_retraction_method(M),
-        vector_transport_method::AbstractVectorTransportMethod = default_vector_transport_method(M),
+        inverse_retraction_method::AbstractInverseRetractionMethod = LogarithmicInverseRetraction(),
+        vector_transport_method::AbstractVectorTransportMethod = ParallelTransport(),
     )
     T = range(0.0, 1.0; length = N)
     γ = geodesic(M, p, X)
