@@ -90,7 +90,7 @@ function plot_check_geodesic end
         p=rand(M),
         X=rand(M; vector_at=p);
         #
-        exactness_tol::Real = 1e-12,
+        tol::Real = 1e-12,
         io::Union{IO,Nothing} = nothing,
         N::Int = 101,
         name::String = "geodesic",
@@ -118,11 +118,17 @@ The tests performed are the following based on sampling the geodesic ``\gamma(t)
 
 # Arguments
 * `M`:    the manifold to check
-* `p`:    point on the manifold to start the geodesic
-* `X`:    tangent vector at `p` to start the geodesic
+* `p`:    point on the manifold to start the geodesic, a random point is used by default
+* `X`:    tangent vector at `p` to start the geodesic, a random tangent vector is used by default
 
 # Keyword arguments
 * `tol`:     if all errors are below this tolerance, the geodesic is considered to be exact
+* `io`:      provide an `IO` to print the result to
+* `N`:       number of points to sample the geodesic on ``[0,1]`` (default: 101)
+* `plot`:    whether to plot the result (if `Plots.jl` is loaded).
+* `error`:   specify how to report errors: `:none`, `:info`, `:warn`, or `:error` are available
+* `inverse_retraction_method`:  method to use for the inverse retraction, it is recommended to use [`LogarithmicInverseRetraction`](@ref)
+* `vector_transport_method`:    method to use for the vector transport, it is recommended to use [`ParallelTransport`](@ref)
 """
 function check_geodesic(
         M::AbstractManifold,
@@ -131,7 +137,6 @@ function check_geodesic(
         tol::Real = 1.0e-12,
         io::Union{IO, Nothing} = nothing,
         N::Int = 101,
-        name::String = "geodesic",
         plot::Bool = false,
         error::Symbol = :none,
         inverse_retraction_method::AbstractInverseRetractionMethod = default_inverse_retraction_method(M),
