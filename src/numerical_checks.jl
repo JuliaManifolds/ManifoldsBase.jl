@@ -162,8 +162,11 @@ function check_geodesic(
     err_n_max = maximum(errors_norm)
     # PT Xs to their neighbors, now Xi and Yi are in the same tangent space
     Ys = [ vector_transport_to(M, ps[i + 1], Xs[i + 1], ps[i], vector_transport_method) for i in 1:(N - 2)]
+    # transporting (an approximation of) γ'(t_{i+1}) to T_{p_i}M should approximately equal γ'(t_i)
+    # (a) we measure this in norm
     errors_pt = [ norm(M, p, X - Y) for (p, X, Y) in zip(ps[1:(N - 2)], Xs[1:(N - 2)], Ys) ]
     err_pt_max = maximum(errors_pt)
+    # (b) we measure the angle preservation
     errors_α = [ abs(1 - inner(M, p, X, Y) / (norm(M, p, X) * norm(M, p, Y))) for (p, X, Y) in zip(ps[1:(N - 2)], Xs[1:(N - 2)], Ys) ]
     err_α_max = maximum(errors_α)
     msg = """
