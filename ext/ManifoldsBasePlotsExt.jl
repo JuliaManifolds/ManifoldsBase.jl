@@ -55,7 +55,7 @@ function ManifoldsBase.plot_check_geodesic(T, N, e_norm, e_pt, e_alpha)
         label = "\$\\|X_i\\|-c\$", linewidth = 3, legend = :topright, color = :lightblue,
     )
     plot!(
-        fig, T[1:N-2], e_pt; label = "\$E_{\\mathrm{n}})\$", linewidth = 3, color = :blue,
+        fig, T[1:(N - 2)], e_pt; label = "\$E_{\\mathrm{n}})\$", linewidth = 3, color = :blue,
     )
     plot!(
         fig, T[1:N-2], e_alpha; label = "\$E_α\$", linewidth = 3, color = :green,
