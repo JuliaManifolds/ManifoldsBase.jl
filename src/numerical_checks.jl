@@ -173,16 +173,12 @@ function check_geodesic(
     - max deviation from angle preservation: $(err_α_max)
     """
     (io !== nothing) && print(io, msg)
-    if (err_n_max > tol) || (err_pt_max > tol) || (err_α_max > tol)
-        (error === :info) && @info msg
-        (error === :warn) && @warn msg
-    end
+    dre = (err_n_max > tol) || (err_pt_max > tol) || (err_α_max > tol)
+    dre && (error === :info) && @info msg
+    dre && (error === :warn) && @warn msg
     plot && return ManifoldsBase.plot_check_geodesic(T, N, errors_norm, errors_pt, errors_α)
-    if (err_n_max > tol) || (err_pt_max > tol) || (err_α_max > tol)
-        (error === :error) && throw(ErrorException(msg))
-        return false
-    end
-    return true
+    dre && (error === :error) && throw(ErrorException(msg))
+    return !dre
 end
 @doc raw"""
     check_retraction(
