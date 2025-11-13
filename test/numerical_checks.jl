@@ -21,34 +21,20 @@ using ManifoldsBaseTestUtils
 
         # ProjectionRetraction only works <= 1 well in stepsize
         @test_throws ErrorException check_retraction(
-            M,
-            ProjectionRetraction(),
-            p,
-            X;
-            limits = (-2.5, 2.0),
-            error = :error,
+            M, ProjectionRetraction(), p, X; limits = (-2.5, 2.0), error = :error,
         )
         @test !check_retraction(M, ProjectionRetraction(), p, X; limits = (-2.5, 2.0))
 
         #test window size error
         @test_throws ErrorException ManifoldsBase.find_best_slope_window(
-            zeros(2),
-            zeros(2),
-            20,
+            zeros(2), zeros(2), 20,
         )
         @test_throws ErrorException ManifoldsBase.find_best_slope_window(
-            zeros(2),
-            zeros(2),
-            [2, 20],
+            zeros(2), zeros(2), [2, 20],
         )
         @test check_retraction(M, ExponentialRetraction(), p, X; exactness_tol = 1.0e-7)
         check_retraction(
-            M,
-            ExponentialRetraction(),
-            p,
-            X;
-            plot = true,
-            exactness_tol = 1.0e-7,
+            M, ExponentialRetraction(), p, X; plot = true, exactness_tol = 1.0e-7,
         )
     end
     @testset "Test inverse_retract checks" begin
@@ -261,5 +247,22 @@ using ManifoldsBaseTestUtils
         @test !is_vector(M, p6, Y1)
         @test is_vector(M, p6, Y2; error = :error, atol = 1.0e-16)
         @test is_vector(M, p6, Y3; error = :error, atol = 1.0e-16)
+    end
+    @testset "Test check_geodesic" begin
+        M = TestSphere(10)
+        q = zeros(11)
+        q[1] = 1.0
+        p = zeros(11)
+        p[1:4] .= 1 / sqrt(4)
+        X = log(M, p, q)
+        @test check_geodesic(M, p, X)
+        # One call with generating a plot
+        check_geodesic(M, p, X; plot = true)
+
+        # Check with too large steps
+        X2 = zeros(11) # but make it non-tangent to q
+        X2[1] = 1.0
+        X2[2:4] .= 2.0
+        @test_throws ErrorException check_geodesic(M, q, X2; error = :error)
     end
 end
