@@ -574,6 +574,12 @@ struct MatrixVectorTransport{T} <: AbstractVector{T}
     m::Matrix{T}
 end
 # dummy retractions, inverse retracions for fallback tests - mutating should be enough
+function ManifoldsBase.retract_approx!(::DefaultManifold, q, p, X, m::ApproximateExponentialRetraction)
+    return (q .= p .+ X)
+end
+function ManifoldsBase.retract_approx_fused!(::DefaultManifold, q, p, X, t::Number, m::ApproximateExponentialRetraction)
+    return (q .= p .+ t .* X)
+end
 function ManifoldsBase.retract_polar!(::DefaultManifold, q, p, X)
     return (q .= p .+ X)
 end
@@ -593,25 +599,15 @@ function ManifoldsBase.retract_pade!(::DefaultManifold, q, p, X, m::PadeRetracti
     return (q .= p .+ X)
 end
 function ManifoldsBase.retract_pade_fused!(
-        ::DefaultManifold,
-        q,
-        p,
-        X,
-        t::Number,
-        m::PadeRetraction,
+        ::DefaultManifold, q, p, X, t::Number, m::PadeRetraction,
     )
     return (q .= p .+ t .* X)
 end
-function ManifoldsBase.retract_sasaki!(::DefaultManifold, q, p, X, ::SasakiRetraction)
+function ManifoldsBase.retract_sasaki!(::DefaultManifold, q, p, X, m::SasakiRetraction)
     return (q .= p .+ X)
 end
 function ManifoldsBase.retract_sasaki_fused!(
-        ::DefaultManifold,
-        q,
-        p,
-        X,
-        t::Number,
-        ::SasakiRetraction,
+        ::DefaultManifold, q, p, X, t::Number, ::SasakiRetraction,
     )
     return (q .= p .+ t .* X)
 end
@@ -621,6 +617,7 @@ end
 function ManifoldsBase.retract_softmax_fused!(::DefaultManifold, q, p, X, t::Number)
     return (q .= p .+ t .* X)
 end
+ManifoldsBase.inverse_retract_approx!(::DefaultManifold, Y, p, q, m::ApproximateLogarithmicInverseRetraction) = (Y .= q .- p)
 ManifoldsBase.inverse_retract_polar!(::DefaultManifold, Y, p, q) = (Y .= q .- p)
 ManifoldsBase.inverse_retract_project!(::DefaultManifold, Y, p, q) = (Y .= q .- p)
 ManifoldsBase.inverse_retract_qr!(::DefaultManifold, Y, p, q) = (Y .= q .- p)

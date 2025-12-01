@@ -264,6 +264,18 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
     push!(
         block.args,
         quote
+            function ManifoldsBase.retract_approx!(
+                    M::$TM, q::$TP, p::$TP, X::$TV, m::ApproximateExponentialRetraction,
+                )
+                ManifoldsBase.retract_approx!(M, q.$pfield, p.$pfield, X.$vfield, m)
+                return q
+            end
+            function ManifoldsBase.retract_approx_fused!(
+                    M::$TM, q::$TP, p::$TP, X::$TV, t::Number, m::ApproximateExponentialRetraction,
+                )
+                ManifoldsBase.retract_approx_fused!(M, q.$pfield, p.$pfield, X.$vfield, t, m)
+                return q
+            end
             function ManifoldsBase.retract_pade!(
                     M::$TM, q::$TP, p::$TP, X::$TV, m::PadeRetraction,
                 )
@@ -320,6 +332,12 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
     push!(
         block.args,
         quote
+            function ManifoldsBase.inverse_retract_approx!(
+                    M::$TM, X::$TV, p::$TP, q::$TP, m::ApproximateLogarithmicInverseRetraction,
+                )
+                ManifoldsBase.inverse_retract_approx!(M, X.$vfield, p.$pfield, q.$pfield, m)
+                return X
+            end
             function ManifoldsBase.inverse_retract_embedded!(
                     M::$TM, X::$TV, p::$TP, q::$TP, m::AbstractInverseRetractionMethod,
                 )
@@ -328,7 +346,6 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
                 )
                 return X
             end
-
             function ManifoldsBase.inverse_retract_nlsolve!(
                     M::$TM, X::$TV, p::$TP, q::$TP, m::NLSolveInverseRetraction,
                 )
