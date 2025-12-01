@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * `ApproximateExponentialRetraction` and `ApproximateLogarithmicInverseRetraction` as types
   to specify approximation methods for exp and log, which due to their approximation are also
-  only approximate retractions and inverse retractions, respectively.
+  only approximate retractions and inverse retractions, respectively. (#248)
 
 ## [2.2.1] 13/11/2025
 
