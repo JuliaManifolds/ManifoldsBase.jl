@@ -872,9 +872,7 @@ Compute the in-place variant of the [`ApproximateExponentialRetraction`](@ref) `
 """
 retract_approx!(M::AbstractManifold, q, p, X, m::ApproximateExponentialRetraction)
 
-function retract_approx_fused!(M::AbstractManifold, q, p, X, t::Number, m::ApproximateExponentialRetraction)
-    return retract_approx!(M, q, p, t * X, m)
-end
+function retract_approx_fused! end
 
 """
     retract_embedded!(M::AbstractManifold, q, p, X, m::AbstractRetractionMethod)
