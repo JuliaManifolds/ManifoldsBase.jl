@@ -27,6 +27,27 @@ An abstract type for representing approximate retraction methods.
 """
 abstract type ApproximateRetraction <: AbstractRetractionMethod end
 
+
+"""
+    ApproximateExponentialRetraction{N <: NamedTuple} <: ApproximateRetraction
+
+Retraction using an algorithm with certain parameters to approximate the exponential map.
+
+The intended implementation should use [`solve_chart_exp_ode`](@extref `Manifolds.solve_chart_exp_ode`).
+
+# Fields
+
+* `keyword_arguments` – a named tuple containing the parameters meant to be the keywords
+  for the approximation algorithm
+
+# Constructor
+
+    ApproximateExponentialRetraction(keyword_arguments::NamedTuple)
+"""
+struct ApproximateExponentialRetraction{N <: NamedTuple} <: ApproximateRetraction
+    keyword_arguments::N
+end
+
 @doc raw"""
     EmbeddedRetraction{T<:AbstractRetractionMethod} <: AbstractRetractionMethod
 
@@ -195,10 +216,31 @@ A retraction based on the Cayley transform, which is realized by using the
 
 !!! note "Technical Note"
     Though you would call e.g. [`retract`](@ref)`(M, p, X, CayleyRetraction())`,
-    to implement a caley retraction, define [`retract_cayley!`](@ref)`(M, q, p, X, t)` for your manifold `M`.
+    to implement a Cayley retraction, define [`retract_cayley!`](@ref)`(M, q, p, X, t)` for your manifold `M`.
     By default both these functions fall back to calling a [`PadeRetraction`](@ref)`(1)`.
 """
 const CayleyRetraction = PadeRetraction{1}
+
+"""
+    ApproximateLogarithmicInverseRetraction{N <: NamedTuple} <: ApproximateInverseRetraction
+
+Inverse retraction using an algorithm with certain parameters to approximate the logarithmic map.
+
+The intended implementation should use [`solve_chart_log_bvp`](@extref `Manifolds.solve_chart_log_bvp`).
+
+# Fields
+
+* `keyword_arguments` – a named tuple containing the parameters meant to be the keywords
+  for the approximation algorithm
+
+# Constructor
+
+    ApproximateLogarithmicInverseRetraction(keyword_arguments::NamedTuple)
+"""
+struct ApproximateLogarithmicInverseRetraction{N <: NamedTuple} <: ApproximateInverseRetraction
+    keyword_arguments::N
+end
+
 
 @doc raw"""
    EmbeddedInverseRetraction{T<:AbstractInverseRetractionMethod} <: AbstractInverseRetractionMethod
@@ -251,7 +293,7 @@ A retraction based on the Cayley transform, which is realized by using the
 
 !!! note "Technical Note"
     Though you would call e.g. [`inverse_retract`](@ref)`(M, p, q, CayleyInverseRetraction())`,
-    to implement an inverse caley retraction, define [`inverse_retract_cayley!`](@ref)`(M, X, p, q)` for your manifold `M`.
+    to implement an inverse Cayley retraction, define [`inverse_retract_cayley!`](@ref)`(M, X, p, q)` for your manifold `M`.
     By default both these functions fall back to calling a [`PadeInverseRetraction`](@ref)`(1)`.
 """
 const CayleyInverseRetraction = PadeInverseRetraction{1}
@@ -483,6 +525,11 @@ end
 #
 # dispatch to lower level
 function _inverse_retract!(
+        M::AbstractManifold, X, p, q, m::ApproximateLogarithmicInverseRetraction; kwargs...,
+    )
+    return inverse_retract_approx!(M, X, p, q, m; kwargs...)
+end
+function _inverse_retract!(
         M::AbstractManifold, X, p, q, ::CayleyInverseRetraction; kwargs...,
     )
     return inverse_retract_cayley!(M, X, p, q; kwargs...)
@@ -530,6 +577,15 @@ function _inverse_retract!(
     )
     return inverse_retract_stabilized!(M, X, p, q, m; kwargs...)
 end
+
+"""
+    inverse_retract_approx!(M::AbstractManifold, p, q, m::ApproximateLogarithmicInverseRetraction)
+
+Compute the in-place variant of the [`ApproximateLogarithmicInverseRetraction`](@ref) `m`.
+"""
+inverse_retract_approx!(M::AbstractManifold, p, q, m::ApproximateLogarithmicInverseRetraction)
+
+function inverse_retract_approx! end
 
 """
     inverse_retract_embedded!(M::AbstractManifold, X, p, q, m::AbstractInverseRetractionMethod)
@@ -647,28 +703,33 @@ Locally, the retraction is invertible. For the inverse operation, see [`inverse_
 @doc "$(_doc_retract)"
 function retract(
         M::AbstractManifold, p, X,
-        m::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
+        m::AbstractRetractionMethod = default_retraction_method(M, typeof(p));
+        kwargs...
     )
-    return _retract(M, p, X, m)
+    return _retract(M, p, X, m; kwargs...)
 end
 # Layer 2 – dispatch on the method
-function _retract(M::AbstractManifold, p, X, ::ExponentialRetraction)
-    return exp(M, p, X)
+function _retract(M::AbstractManifold, p, X, ::ExponentialRetraction; kwargs...)
+    return exp(M, p, X; kwargs...)
 end
-function _retract(M::AbstractManifold, p, X, m::AbstractRetractionMethod)
+function _retract(M::AbstractManifold, p, X, m::AbstractRetractionMethod; kwargs...)
     q = allocate_result(M, retract, p, X)
-    return retract!(M, q, p, X, m)
+    return retract!(M, q, p, X, m; kwargs...)
 end
 
 @doc "$(_doc_retract)"
 function retract!(
         M::AbstractManifold, q, p, X,
-        method::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
+        method::AbstractRetractionMethod = default_retraction_method(M, typeof(p));
+        kwargs...
     )
-    return _retract!(M, q, p, X, method)
+    return _retract!(M, q, p, X, method; kwargs...)
 end
 
 # Retract Layer 2 – dispatch on the method
+function _retract!(M::AbstractManifold, q, p, X, m::ApproximateExponentialRetraction; kwargs...)
+    return retract_approx!(M, q, p, X, m; kwargs...)
+end
 function _retract!(M::AbstractManifold, q, p, X, ::CayleyRetraction; kwargs...)
     return retract_cayley!(M, q, p, X; kwargs...)
 end
@@ -744,12 +805,18 @@ end
 @doc "$(_doc_retract_fused)"
 function retract_fused!(
         M::AbstractManifold, q, p, X, t::Number,
-        m::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
+        m::AbstractRetractionMethod = default_retraction_method(M, typeof(p));
+        kwargs...
     )
-    return _retract_fused!(M, q, p, X, t, m)
+    return _retract_fused!(M, q, p, X, t, m; kwargs...)
 end
 # Retract fused Layer 2
 # Retract Layer 2 – dispatch on the method
+function _retract_fused!(
+        M::AbstractManifold, q, p, X, t::Number, m::ApproximateExponentialRetraction; kwargs...,
+    )
+    return retract_approx_fused!(M, q, p, X, t, m; kwargs...)
+end
 function _retract_fused!(
         M::AbstractManifold, q, p, X, t::Number, ::CayleyRetraction; kwargs...,
     )
@@ -786,8 +853,8 @@ function _retract_fused!(
     )
     return retract_softmax_fused!(M, q, p, X, t; kwargs...)
 end
-function _retract_fused!(M::AbstractManifold, q, p, X, t::Number, m::StabilizedRetraction)
-    return retract_stabilized_fused!(M, q, p, X, t, m)
+function _retract_fused!(M::AbstractManifold, q, p, X, t::Number, m::StabilizedRetraction; kwargs...)
+    return retract_stabilized_fused!(M, q, p, X, t, m; kwargs...)
 end
 function _retract_fused!(
         M::AbstractManifold, q, p, X, t::Number, m::PadeRetraction; kwargs...,
@@ -803,6 +870,16 @@ end
 #
 #
 # retract and retract_fused layer 3
+
+function retract_approx! end
+"""
+    retract_approx!(M::AbstractManifold, q, p, X)
+
+Compute the in-place variant of the [`ApproximateExponentialRetraction`](@ref) `m`.
+"""
+retract_approx!(M::AbstractManifold, q, p, X, m::ApproximateExponentialRetraction)
+
+function retract_approx_fused! end
 
 """
     retract_embedded!(M::AbstractManifold, q, p, X, m::AbstractRetractionMethod)

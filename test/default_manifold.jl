@@ -132,35 +132,17 @@ using ManifoldsBaseTestUtils
                 @test isapprox(M, p, X_p_zero, log(M, p, p); atol = eps(eltype(p)))
                 if T <: Array
                     @test_logs (:info,) !isapprox(
-                        M,
-                        p,
-                        X_p_zero,
-                        X_p_nan;
-                        atol = eps(eltype(p)),
-                        error = :info,
+                        M, p, X_p_zero, X_p_nan; atol = eps(eltype(p)), error = :info,
                     )
                     @test isapprox(
-                        M,
-                        p,
-                        X_p_zero,
-                        log(M, p, p);
-                        atol = eps(eltype(p)),
-                        error = :info,
+                        M, p, X_p_zero, log(M, p, p); atol = eps(eltype(p)), error = :info,
                     )
                 end
                 @test isapprox(
-                    M,
-                    p,
-                    X_p_zero,
-                    inverse_retract(M, p, p);
-                    atol = eps(eltype(p)),
+                    M, p, X_p_zero, inverse_retract(M, p, p); atol = eps(eltype(p)),
                 )
                 @test isapprox(
-                    M,
-                    p,
-                    X_p_zero,
-                    inverse_retract(M, p, p, irm);
-                    atol = eps(eltype(p)),
+                    M, p, X_p_zero, inverse_retract(M, p, p, irm); atol = eps(eltype(p)),
                 )
             end
             zero_vector!(M, tv1, pts[1])
@@ -172,8 +154,7 @@ using ManifoldsBaseTestUtils
             @test isapprox(M, ManifoldsBase.exp_fused(M, pts[1], tv1, 0), pts[1])
 
             @test distance(M, pts[1], pts[2]) ≈ norm(M, pts[1], tv1)
-            @test distance(M, pts[1], pts[2], LogarithmicInverseRetraction()) ≈
-                norm(M, pts[1], tv1)
+            @test distance(M, pts[1], pts[2], LogarithmicInverseRetraction()) ≈ norm(M, pts[1], tv1)
 
             @test mid_point(M, pts[1], pts[2]) == convert(T, [0.5, 0.5, 0.0])
             midp = allocate(pts[1])
@@ -219,9 +200,7 @@ using ManifoldsBaseTestUtils
                 )
                 @test all(
                     isapprox.(
-                        Ref(M),
-                        shortest_geodesic(M, pts[1], pts[2], Ts),
-                        [pts[1], midp, pts[2]],
+                        Ref(M), shortest_geodesic(M, pts[1], pts[2], Ts), [pts[1], midp, pts[2]],
                     ),
                 )
                 Q = [copy(M, q), copy(M, q), copy(M, q)]
@@ -233,11 +212,7 @@ using ManifoldsBaseTestUtils
 
             @testset "basic linear algebra in tangent space" begin
                 @test isapprox(
-                    M,
-                    pts[1],
-                    0 * tv1,
-                    zero_vector(M, pts[1]);
-                    atol = eps(eltype(pts[1])),
+                    M, pts[1], 0 * tv1, zero_vector(M, pts[1]); atol = eps(eltype(pts[1])),
                 )
                 @test isapprox(M, pts[1], 2 * tv1, tv1 + tv1)
                 @test isapprox(M, pts[1], 0 * tv1, tv1 - tv1)
@@ -307,7 +282,7 @@ using ManifoldsBaseTestUtils
                 @test Weingarten(M, pts[1], tv, tv) == zero_vector(M, pts[1])
             end
 
-            @testset "randon tests" begin
+            @testset "random tests" begin
                 Random.seed!(23)
                 pr = rand(M)
                 @test is_point(M, pr, true)
@@ -350,28 +325,17 @@ using ManifoldsBaseTestUtils
 
                 # On Euclidean Space Schild & Pole are identity
                 @test vector_transport_to(
-                    M,
-                    pts[1],
-                    X2,
-                    pts[2],
-                    SchildsLadderTransport(),
+                    M, pts[1], X2, pts[2], SchildsLadderTransport(),
                 ) == X2
                 @test vector_transport_to(M, pts[1], X2, pts[2], PoleLadderTransport()) ==
                     X2
                 @test vector_transport_to(
-                    M,
-                    pts[1],
-                    X2,
-                    pts[2],
-                    ScaledVectorTransport(ParallelTransport()),
+                    M, pts[1], X2, pts[2], ScaledVectorTransport(ParallelTransport()),
                 ) == X2
 
                 # along is also the identity
                 c = [
-                    mid_point(M, pts[1], pts[2]),
-                    pts[2],
-                    mid_point(M, pts[2], pts[3]),
-                    pts[3],
+                    mid_point(M, pts[1], pts[2]), pts[2], mid_point(M, pts[2], pts[3]), pts[3],
                 ]
                 # check mutating ones with defaults
                 p = allocate(pts[1])
@@ -392,7 +356,6 @@ using ManifoldsBaseTestUtils
                 for t in 0.1:0.1:0.9
                     @test d12 ≈ ForwardDiff.derivative(exp_f, t)
                 end
-
                 retract_f(t) = distance(M, pts[1], retract(M, pts[1], t * tv1))
                 for t in 0.1:0.1:0.9
                     @test ForwardDiff.derivative(retract_f, t) ≥ 0
@@ -424,7 +387,6 @@ using ManifoldsBaseTestUtils
     @testset "Retraction" begin
         a = NLSolveInverseRetraction(ExponentialRetraction())
         @test a.retraction isa ExponentialRetraction
-
     end
 
     @testset "copy of points and vectors" begin
@@ -474,6 +436,7 @@ using ManifoldsBaseTestUtils
                 PadeRetraction(2),
                 EmbeddedRetraction(ExponentialRetraction()),
                 SasakiRetraction(5),
+                ApproximateExponentialRetraction((;)),
             ]
             @test retract(M, q, Y, retr) == DefaultPoint(q.value + Y.value)
             @test ManifoldsBase.retract_fused(M, q, Y, 0.5, retr) ==
@@ -516,36 +479,25 @@ using ManifoldsBaseTestUtils
         @test X4 == inverse_retract(M, p, q)
         # rest not implemented but check passthrough
         for r in [
-                PolarInverseRetraction,
-                ProjectionInverseRetraction,
-                QRInverseRetraction,
-                SoftmaxInverseRetraction,
+                PolarInverseRetraction(),
+                ProjectionInverseRetraction(),
+                QRInverseRetraction(),
+                SoftmaxInverseRetraction(),
+                ApproximateLogarithmicInverseRetraction((;)),
             ]
-            @test inverse_retract(M, q, p, r()) == DefaultTangentVector(p.value - q.value)
-            @test inverse_retract!(M, Z, q, p, r()) ==
-                DefaultTangentVector(p.value - q.value)
+            @test inverse_retract(M, q, p, r) == DefaultTangentVector(p.value - q.value)
+            @test inverse_retract!(M, Z, q, p, r) == DefaultTangentVector(p.value - q.value)
         end
         @test inverse_retract(
-            M,
-            q,
-            p,
-            EmbeddedInverseRetraction(LogarithmicInverseRetraction()),
+            M, q, p, EmbeddedInverseRetraction(LogarithmicInverseRetraction()),
         ) == DefaultTangentVector(p.value - q.value)
         @test inverse_retract(M, q, p, NLSolveInverseRetraction(ExponentialRetraction())) ==
             DefaultTangentVector(p.value - q.value)
         @test inverse_retract!(
-            M,
-            Z,
-            q,
-            p,
-            EmbeddedInverseRetraction(LogarithmicInverseRetraction()),
+            M, Z, q, p, EmbeddedInverseRetraction(LogarithmicInverseRetraction()),
         ) == DefaultTangentVector(p.value - q.value)
         @test inverse_retract!(
-            M,
-            Z,
-            q,
-            p,
-            NLSolveInverseRetraction(ExponentialRetraction()),
+            M, Z, q, p, NLSolveInverseRetraction(ExponentialRetraction()),
         ) == DefaultTangentVector(p.value - q.value)
         c = ManifoldsBase.allocate_coordinates(M, p, Float64, manifold_dimension(M))
         @test c isa Vector

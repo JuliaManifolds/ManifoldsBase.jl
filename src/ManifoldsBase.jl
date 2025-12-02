@@ -1305,7 +1305,8 @@ export GeodesicInterpolationWithinRadius,
 
 # (b) Retraction Types
 export AbstractRetractionMethod,
-    ApproximateInverseRetraction,
+    ApproximateRetraction,
+    ApproximateExponentialRetraction,
     CayleyRetraction,
     EmbeddedRetraction,
     ExponentialRetraction,
@@ -1324,6 +1325,7 @@ export AbstractRetractionMethod,
 # (c) Inverse Retraction Types
 export AbstractInverseRetractionMethod,
     ApproximateInverseRetraction,
+    ApproximateLogarithmicInverseRetraction,
     CayleyInverseRetraction,
     EmbeddedInverseRetraction,
     InverseProductRetraction,
