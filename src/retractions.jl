@@ -34,14 +34,16 @@ abstract type ApproximateRetraction <: AbstractRetractionMethod end
 Retraction using an algorithm with certain parameters to approximate the exponential map.
 
 # Fields
-* `parameters` – a named tuple containing the parameters for the approximation algorithm
+
+* `keyword_arguments` – a named tuple containing the parameters meant to be the keywords
+  for the approximation algorithm
 
 # Constructor
 
-    ApproximateExponentialRetraction(parameters::NamedTuple)
+    ApproximateExponentialRetraction(keyword_arguments::NamedTuple)
 """
 struct ApproximateExponentialRetraction{N <: NamedTuple} <: ApproximateRetraction
-    parameters::N
+    keyword_arguments::N
 end
 
 @doc raw"""
@@ -224,14 +226,16 @@ Inverse retraction using an algorithm with certain parameters to approximate the
 
 # Fields
 
-* `parameters` – a named tuple containing the parameters for the approximation algorithm
+* `keywoird_arguments` – a named tuple containing the parameters meant to be the keywords
+  for the approximation algorithm
 
 # Constructor
 
-    ApproximateLogarithmicInverseRetraction(parameters::NamedTuple)
-"""
+    ApproximateLogarithmicInverseRetraction(keyword_arguments::NamedTuple)
+
+    """
 struct ApproximateLogarithmicInverseRetraction{N <: NamedTuple} <: ApproximateInverseRetraction
-    parameters::N
+    keyword_arguments::N
 end
 
 
