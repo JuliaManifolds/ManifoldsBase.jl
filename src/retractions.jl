@@ -33,6 +33,8 @@ abstract type ApproximateRetraction <: AbstractRetractionMethod end
 
 Retraction using an algorithm with certain parameters to approximate the exponential map.
 
+The intended implementation should use [`solve_chart_exp_ode`](@extref `Manifolds.solve_chart_exp_ode`).
+
 # Fields
 
 * `keyword_arguments` – a named tuple containing the parameters meant to be the keywords
@@ -214,7 +216,7 @@ A retraction based on the Cayley transform, which is realized by using the
 
 !!! note "Technical Note"
     Though you would call e.g. [`retract`](@ref)`(M, p, X, CayleyRetraction())`,
-    to implement a caley retraction, define [`retract_cayley!`](@ref)`(M, q, p, X, t)` for your manifold `M`.
+    to implement a Cayley retraction, define [`retract_cayley!`](@ref)`(M, q, p, X, t)` for your manifold `M`.
     By default both these functions fall back to calling a [`PadeRetraction`](@ref)`(1)`.
 """
 const CayleyRetraction = PadeRetraction{1}
@@ -224,16 +226,17 @@ const CayleyRetraction = PadeRetraction{1}
 
 Inverse retraction using an algorithm with certain parameters to approximate the logarithmic map.
 
+The intended implementation should use [`solve_chart_log_bvp`](@extref `Manifolds.solve_chart_log_bvp`).
+
 # Fields
 
-* `keywoird_arguments` – a named tuple containing the parameters meant to be the keywords
+* `keyword_arguments` – a named tuple containing the parameters meant to be the keywords
   for the approximation algorithm
 
 # Constructor
 
     ApproximateLogarithmicInverseRetraction(keyword_arguments::NamedTuple)
-
-    """
+"""
 struct ApproximateLogarithmicInverseRetraction{N <: NamedTuple} <: ApproximateInverseRetraction
     keyword_arguments::N
 end
@@ -290,7 +293,7 @@ A retraction based on the Cayley transform, which is realized by using the
 
 !!! note "Technical Note"
     Though you would call e.g. [`inverse_retract`](@ref)`(M, p, q, CayleyInverseRetraction())`,
-    to implement an inverse caley retraction, define [`inverse_retract_cayley!`](@ref)`(M, X, p, q)` for your manifold `M`.
+    to implement an inverse Cayley retraction, define [`inverse_retract_cayley!`](@ref)`(M, X, p, q)` for your manifold `M`.
     By default both these functions fall back to calling a [`PadeInverseRetraction`](@ref)`(1)`.
 """
 const CayleyInverseRetraction = PadeInverseRetraction{1}
