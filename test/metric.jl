@@ -77,13 +77,6 @@ function ManifoldsBase.get_vector_orthogonal!(
     X .= 2 .* [1.0:manifold_dimension(M)...] .* c
     return X
 end
-struct TestSphere{N, T} <: AbstractManifold{ℝ}
-    r::T
-end
-
-struct TestSphericalMetric <: AbstractMetric end
-
-ManifoldsBase.manifold_dimension(::TestSphere{N}) where {N} = N
 
 struct BaseManifold{N} <: AbstractManifold{ℝ} end
 struct BaseManifoldMetric{M} <: AbstractMetric end
