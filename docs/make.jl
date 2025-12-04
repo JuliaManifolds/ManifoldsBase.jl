@@ -146,7 +146,7 @@ makedocs(;
         (tutorials_in_menu ? [tutorials_menu] : [])...,
         "Design principles" => "design.md",
         "An abstract manifold" => "types.md",
-        "Functions on maniolds" => [
+        "Functions on manifolds" => [
             "Basic functions" => "functions.md",
             "Projections" => "projections.md",
             "Retractions" => "retractions.md",
