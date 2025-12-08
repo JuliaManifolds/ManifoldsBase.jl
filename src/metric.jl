@@ -11,7 +11,7 @@ varying inner products on the tangent space. See [`inner`](@ref).
 
 Generate the `MetricManifold` that wraps the manifold `M` with given `metric`.
 This works for both a variable containing the metric as well as a subtype `T<:AbstractMetric`,
-where a zero parameter constructor `T()` is availabe.
+where a zero parameter constructor `T()` is available.
 If `M` is already a metric manifold, the inner manifold with the new `metric` is returned.
 """
 abstract type AbstractMetric end
@@ -112,14 +112,11 @@ metric(::AbstractManifold) = DefaultMetric()
     MetricManifold{𝔽,M<:AbstractManifold{𝔽},G<:AbstractMetric} <: AbstractDecoratorManifold{𝔽}
 
 Equip a [`AbstractManifold`](@ref) explicitly with an
-[`AbstractMetric`](@ref `AbstractMetric`) `G`.
+[`AbstractMetric`](@ref) `G`.
 
-For a Metric AbstractManifold, by default, assumes, that you implement the linear form
-from [`local_metric`](@ref) in order to evaluate the exponential map.
-
-If the corresponding `AbstractMetric` `G` yields closed form formulae for e.g.
-the exponential map and this is implemented directly (without solving the ODE),
-you can of course still implement that directly.
+If the `AbstractMetric` `G` yields closed form formulae for the exponential map or another
+function, you can implement it directly. Otherwise, you can use chart-based solvers, see
+for example [`solve_chart_exp_ode`](@extref `Manifolds.solve_chart_exp_ode`).
 
 # Constructor
 
@@ -307,7 +304,7 @@ Compute the inverse retraction on the [`MetricManifold`](@ref) `M`.
 Since every inverse retraction is an inverse retraction with respect to any logarithmic map (induced by the metric),
 this method falls back to calling [`inverse_retract`](@ref) on the base manifold.
 The two exceptions are the [`LogarithmicInverseRetraction`](@ref) and [`ShootingInverseRetraction`](@ref),
-in which case the method falls back to the default, that is to calling, respectively, [`log`](@ref `Base.log-Tuple{AbstractManifold, Any, Any}`) and
+in which case the method falls back to the default, that is to calling, respectively, [`log(::AbstractManifold, ::Any, ::Any)`](@ref) and
 `inverse_retract_shooting!`.
 """
 inverse_retract(::MetricManifold, ::Any, ::Any)
@@ -421,7 +418,7 @@ Compute the retraction on the [`MetricManifold`](@ref) `M`.
 Since every retraction is a retraction with respect to any exponential map (here induced by the metric),
 this method falls back to calling [`retract`](@ref) on the inner manifold.
 The one exception is the [`ExponentialRetraction`](@ref), in which case the method falls back to
-the default, i.e. to calling [`exp`](@ref `Base.exp-Tuple{AbstractManifold, Any, Any}`) but still on `M`.
+the default, i.e. to calling [`exp(::AbstractManifold, ::Any, ::Any)`](@ref) but still on `M`.
 """
 retract(::MetricManifold, ::Any, ::Any)
 
