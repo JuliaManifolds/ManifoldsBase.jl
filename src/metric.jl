@@ -325,10 +325,6 @@ function inverse_retract!(M::MetricManifold, X, p, q, ::LogarithmicInverseRetrac
     (metric(M.manifold) === M.metric) && (return log!(M.manifold, X, p, q))
     return log!(M, X, p, q)
 end
-function inverse_retract!(M::MetricManifold, X, p, q, m::ShootingInverseRetraction)
-    (metric(M.manifold) === M.metric) && (return inverse_retract!(M.manifold, X, p, q, m))
-    return inverse_retract_shooting!(M, X, p, q, m)
-end
 
 """
     is_default_metric(M::AbstractManifold, G::AbstractMetric)

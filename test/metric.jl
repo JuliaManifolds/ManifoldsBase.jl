@@ -89,6 +89,7 @@ ManifoldsBase.representation_size(::BaseManifold{N}) where {N} = (N,)
 function ManifoldsBase.rand!(rng::AbstractRNG, ::BaseManifold, p; kwargs...)
     return randn!(rng, p)
 end
+ManifoldsBase.get_embedding(::BaseManifold{N}) where {N} = ManifoldsBase.DefaultManifold(N)
 ManifoldsBase.exp!(::BaseManifold, q, p, X) = q .= p + 2 * X
 ManifoldsBase.exp_fused!(::BaseManifold, q, p, X, t::Number) = q .= p + 2 * t * X
 ManifoldsBase.log!(::BaseManifold, Y, p, q) = Y .= (q - p) / 2
@@ -163,17 +164,11 @@ ManifoldsBase.metric(::BaseManifold) = DefaultBaseManifoldMetric()
         @test decorated_manifold(M) == E
         @test connection(M) == LeviCivitaConnection()
         @test is_default_connection(E, LeviCivitaConnection())
-        # Defaults passthrough for retr/inverse retr and vector transport
-        @test default_retraction_method(M) == default_retraction_method(E)
-        @test default_inverse_retraction_method(M) == default_inverse_retraction_method(E)
-        @test default_vector_transport_method(M) == default_vector_transport_method(E)
-        # same for point type added
-        T = Vector{Float64}
-        @test default_retraction_method(M, T) == default_retraction_method(E, T)
-        @test default_inverse_retraction_method(M, T) == default_inverse_retraction_method(E, T)
-        @test default_vector_transport_method(M, T) == default_vector_transport_method(E, T)
         @test !is_default_connection(TestDefaultManifold{3}(), LeviCivitaConnection())
         @test connection(TestDefaultManifold{3}()) == TestConnection()
+
+        @test manifold_dimension(M) == manifold_dimension(E)
+        @test representation_size(M) == representation_size(E)
     end
 
     @testset "solve_exp_ode error message" begin
@@ -181,6 +176,8 @@ ManifoldsBase.metric(::BaseManifold) = DefaultBaseManifoldMetric()
         g = TestDefaultManifoldMetric()
         M = MetricManifold(E, g)
         default_retraction_method(::TestDefaultManifold) = TestRetraction()
+        @test TestDefaultManifoldMetric(E) === M
+        @test g(E) === M
         p = [1.0, 2.0, 3.0]
         X = [2.0, 3.0, 4.0]
         q = similar(X)
@@ -218,6 +215,7 @@ ManifoldsBase.metric(::BaseManifold) = DefaultBaseManifoldMetric()
         @test connection(M) === ManifoldsBase.LeviCivitaConnection()
 
         @test manifold_dimension(M) == n
+        @test representation_size(M) === nothing
         @test base_manifold(M) === E
         @test metric(M) === g
 
@@ -230,13 +228,21 @@ ManifoldsBase.metric(::BaseManifold) = DefaultBaseManifoldMetric()
     @testset "default_* functions" begin
         E = DefaultManifold(3)
         EM = MetricManifold(E, ManifoldsBase.EuclideanMetric())
+        T = Vector{Float64}
         @test default_retraction_method(EM) === default_retraction_method(E)
         @test default_inverse_retraction_method(EM) === default_inverse_retraction_method(E)
         @test default_vector_transport_method(EM) === default_vector_transport_method(E)
+        @test default_retraction_method(EM, T) == default_retraction_method(E, T)
+        @test default_inverse_retraction_method(EM, T) == default_inverse_retraction_method(E, T)
+        @test default_vector_transport_method(EM, T) == default_vector_transport_method(E, T)
+
         EC = ConnectionManifold(E, TestConnection())
         @test default_retraction_method(EC) === default_retraction_method(E)
         @test default_inverse_retraction_method(EC) === default_inverse_retraction_method(E)
         @test default_vector_transport_method(EC) === default_vector_transport_method(E)
+        @test default_retraction_method(EC, T) == default_retraction_method(E, T)
+        @test default_inverse_retraction_method(EC, T) == default_inverse_retraction_method(E, T)
+        @test default_vector_transport_method(EC, T) == default_vector_transport_method(E, T)
     end
 
     @testset "is_metric_function" begin
@@ -252,6 +258,7 @@ ManifoldsBase.metric(::BaseManifold) = DefaultBaseManifoldMetric()
         M = BaseManifold{3}()
         g = BaseManifoldMetric{3}()
         MM = MetricManifold(M, g)
+        TP = Vector{Float64}
 
         @test DefaultBaseManifoldMetric(BaseManifold{3}()) ===
             MetricManifold(BaseManifold{3}(), DefaultBaseManifoldMetric())
@@ -266,6 +273,9 @@ ManifoldsBase.metric(::BaseManifold) = DefaultBaseManifoldMetric()
         @test is_default_metric(MM2) == is_default_metric(base_manifold(MM2), metric(MM2))
         @test is_default_metric(MM2)
 
+        @test get_embedding(MM) === get_embedding(M)
+        @test get_embedding(MM, TP) === get_embedding(M, TP)
+
         @test convert(typeof(MM2), M) == MM2
         @test_throws ErrorException convert(typeof(MM), M)
         p = [0.1, 0.2, 0.4]
@@ -278,6 +288,8 @@ ManifoldsBase.metric(::BaseManifold) = DefaultBaseManifoldMetric()
         @test is_vector(MM, p, rand(MM; vector_at = p))
         rand!(MM, q)
         @test is_point(MM, q)
+        @test embed(MM, p) == p
+        @test embed!(MM, q, p) == q
 
         p2 = allocate(p)
         copyto!(MM, p2, p)
@@ -306,6 +318,8 @@ ManifoldsBase.metric(::BaseManifold) = DefaultBaseManifoldMetric()
             ManifoldsBase.retract_fused!(M, q, p, X, 1)
         @test ManifoldsBase.retract_fused(MM, p, X, 1) ==
             ManifoldsBase.retract_fused(M, p, X, 1)
+        @test project(MM, p) == project(M, p)
+        @test project(MM, p, X) == project(M, p, X)
         @test project!(MM, Y, p, X) === project!(M, Y, p, X)
         @test project!(MM, q, p) === project!(M, q, p)
         # without a definition for the metric from the embedding, no projection possible
@@ -316,6 +330,8 @@ ManifoldsBase.metric(::BaseManifold) = DefaultBaseManifoldMetric()
         @test_throws MethodError exp(MM, p, X, 1:3)
         # these always fall back anyways.
         @test zero_vector!(MM, X, p) === zero_vector!(M, X, p)
+
+        @test default_approximation_method(MM, retract) === default_approximation_method(M, retract)
 
         @test injectivity_radius(MM, p) === injectivity_radius(M, p)
         @test injectivity_radius(MM) === injectivity_radius(M)
@@ -336,8 +352,18 @@ ManifoldsBase.metric(::BaseManifold) = DefaultBaseManifoldMetric()
         @test log!(MM2, X, p, q) === log!(M, X, p, q)
         @test log(MM2, p, q) == log(M, p, q)
         @test retract!(MM2, q, p, X) === retract!(M, q, p, X)
+        for rm in [ExponentialRetraction(), EmbeddedRetraction(ExponentialRetraction())]
+            @test retract(MM2, p, X, rm) == retract(M, p, X, rm)
+            @test retract!(MM2, q, p, X, rm) === retract!(M, q, p, X, rm)
+        end
+        @test inverse_retract!(MM2, Y2, p, q) === inverse_retract!(M, Y2, q, p)
+        for irm in [LogarithmicInverseRetraction(), EmbeddedInverseRetraction(LogarithmicInverseRetraction())]
+            @test inverse_retract(MM2, p, q, irm) == inverse_retract(M, q, p, irm)
+            @test inverse_retract!(MM2, Y2, p, q, irm) === inverse_retract!(M, Y2, q, p, irm)
+        end
         @test ManifoldsBase.retract_fused!(MM2, q, p, X, 1) ===
             ManifoldsBase.retract_fused!(M, q, p, X, 1)
+        @test_throws MethodError is_flat(MM)
 
         @test project!(MM2, q, p) === project!(M, q, p)
         @test project!(MM2, Y, p, X) === project!(M, Y, p, X)
@@ -345,7 +371,12 @@ ManifoldsBase.metric(::BaseManifold) = DefaultBaseManifoldMetric()
         @test parallel_transport_to!(MM2, Y, p, X, q) ==
             parallel_transport_to!(M, Y, q, X, p)
         @test project!(MM2, Y, p, X) === project!(M, Y, p, X)
+        @test vector_transport_to(MM2, p, X, q) == vector_transport_to(M, q, X, p)
         @test vector_transport_to!(MM2, Y, p, X, q) == vector_transport_to!(M, Y, p, X, q)
+
+        @test vector_transport_direction(MM2, p, X, Y) == vector_transport_to(M, p, X, Y)
+        @test vector_transport_direction!(MM2, Y2, p, X, Y) == vector_transport_to!(M, Y2, p, X, Y)
+
         c = 2 * ones(3)
         m = ParallelTransport()
         @test zero_vector!(MM2, X, p) === zero_vector!(M, X, p)
@@ -362,8 +393,16 @@ ManifoldsBase.metric(::BaseManifold) = DefaultBaseManifoldMetric()
         @test is_point(MM2, p) === is_point(M, p)
         @test is_vector(MM2, p, X) === is_vector(M, p, X)
 
+        @test_throws MethodError log(MM, p, q)
+
         @test get_basis(M, p, DefaultOrthonormalBasis()).data ==
             get_basis(MM2, p, DefaultOrthonormalBasis()).data
         @test_throws MethodError get_basis(MM, p, DefaultOrthonormalBasis())
+
+        @test_throws MethodError get_coordinates(MM, p, X, DefaultOrthonormalBasis())
+        c2 = similar(c)
+        @test_throws MethodError get_coordinates!(MM, c2, p, X, DefaultOrthonormalBasis())
+        @test_throws MethodError get_vector(MM, p, c, DefaultOrthonormalBasis())
+        @test_throws MethodError get_vector!(MM, Y2, p, c, DefaultOrthonormalBasis())
     end
 end
