@@ -273,6 +273,9 @@ ManifoldsBase.metric(::BaseManifold) = DefaultBaseManifoldMetric()
         @test is_default_metric(MM2) == is_default_metric(base_manifold(MM2), metric(MM2))
         @test is_default_metric(MM2)
 
+        @test g2(MM) === g2(M)
+        @test DefaultBaseManifoldMetric(MM) === g2(M)
+
         @test get_embedding(MM) === get_embedding(M)
         @test get_embedding(MM, TP) === get_embedding(M, TP)
 
@@ -313,6 +316,7 @@ ManifoldsBase.metric(::BaseManifold) = DefaultBaseManifoldMetric()
         @test exp!(MM, q, p, X) === exp!(M, q, p, X)
         @test ManifoldsBase.exp_fused!(MM, q, p, X, 0.5) ===
             ManifoldsBase.exp_fused!(M, q, p, X, 0.5)
+        @test retract(MM, p, X) == retract(M, p, X)
         @test retract!(MM, q, p, X) === retract!(M, q, p, X)
         @test ManifoldsBase.retract_fused!(MM, q, p, X, 1) ===
             ManifoldsBase.retract_fused!(M, q, p, X, 1)
@@ -368,12 +372,16 @@ ManifoldsBase.metric(::BaseManifold) = DefaultBaseManifoldMetric()
         @test project!(MM2, q, p) === project!(M, q, p)
         @test project!(MM2, Y, p, X) === project!(M, Y, p, X)
         @test parallel_transport_to(MM2, p, X, q) == parallel_transport_to(M, q, X, p)
+        @test_throws MethodError parallel_transport_to(MM, p, X, q)
         @test parallel_transport_to!(MM2, Y, p, X, q) ==
             parallel_transport_to!(M, Y, q, X, p)
         @test project!(MM2, Y, p, X) === project!(M, Y, p, X)
+        @test_throws MethodError vector_transport_to(MM, p, X, q)
         @test vector_transport_to(MM2, p, X, q) == vector_transport_to(M, q, X, p)
         @test vector_transport_to!(MM2, Y, p, X, q) == vector_transport_to!(M, Y, p, X, q)
 
+        @test_throws MethodError vector_transport_direction(MM, p, X, Y)
+        @test_throws MethodError vector_transport_direction!(MM, Y2, p, X, Y)
         @test vector_transport_direction(MM2, p, X, Y) == vector_transport_to(M, p, X, Y)
         @test vector_transport_direction!(MM2, Y2, p, X, Y) == vector_transport_to!(M, Y2, p, X, Y)
 
