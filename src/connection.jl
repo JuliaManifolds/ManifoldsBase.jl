@@ -31,7 +31,7 @@ end
     connection(M::AbstractManifold)
 
 Get the connection (an object of a subtype of [`AbstractAffineConnection`](@ref))
-of [`AbstractManifold`](@extref `ManifoldsBase.AbstractManifold`) `M`.
+of [`AbstractManifold`](@ref) `M`.
 
 The global default connection is the [`LeviCivitaConnection`](@ref).
 """
