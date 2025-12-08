@@ -22,7 +22,7 @@ struct CyclicProximalPointEstimation <: AbstractApproximationMethod end
 @doc raw"""
     EfficientEstimator <: AbstractApproximationMethod
 
-Method for estimation in the best possible sense, see [Efficiency (Statictsics)](https://en.wikipedia.org/wiki/Efficiency_(statistics)) for more details.
+Method for estimation in the best possible sense, see [Efficiency (Statistics)](https://en.wikipedia.org/wiki/Efficiency_(statistics)) for more details.
 This can for example be used when computing the usual mean on an Euclidean space, which is the best estimator.
 """
 struct EfficientEstimator <: AbstractApproximationMethod end
@@ -67,14 +67,14 @@ struct GeodesicInterpolationWithinRadius{T <: Real} <: AbstractApproximationMeth
     function GeodesicInterpolationWithinRadius(radius::T) where {T <: Real}
         radius > 0 && return new{T}(radius)
         return throw(
-            DomainError("The radius must be strictly postive, received $(radius)."),
+            DomainError("The radius must be strictly positive, received $(radius)."),
         )
     end
 end
 
 @doc raw"""
     default_approximation_method(M::AbstractManifold, f)
-    default_approximation_method(M::AbtractManifold, f, T)
+    default_approximation_method(M::AbstractManifold, f, T)
 
 Specify a default estimation method for an [`AbstractManifold`](@ref) and a specific function `f`
 and optionally as well a type `T` to distinguish different (point or vector) representations on `M`.
@@ -84,7 +84,7 @@ The exceptional functions are:
 
 * `retract` and `retract!` which fall back to [`default_retraction_method`](@ref)
 * `inverse_retract` and `inverse_retract!` which fall back to [`default_inverse_retraction_method`](@ref)
-* any of the vector transport mehods fall back to [`default_vector_transport_method`](@ref)
+* any of the vector transport methods fall back to [`default_vector_transport_method`](@ref)
 """
 default_approximation_method(M::AbstractManifold, f)
 default_approximation_method(M::AbstractManifold, f, T) = default_approximation_method(M, f)

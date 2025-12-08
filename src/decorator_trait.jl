@@ -376,6 +376,13 @@ function _copyto!_forwarding(
     return copyto!(get_embedding(M, typeof(p)), Y, p, X)
 end
 
+for mf in [inverse_retract, retract]
+    @eval @trait_function default_approximation_method(
+        M::AbstractDecoratorManifold,
+        f::typeof($mf),
+    )
+end
+
 # Introduce Deco Trait | automatic forward | fallback
 @trait_function embed(M::AbstractDecoratorManifold, p)
 
@@ -708,7 +715,7 @@ end
     StopForwardingType,
 )
 
-@trait_function Random.rand(M::AbstractDecoratorManifold; kwargs...)
+@trait_function Random.rand(M::AbstractDecoratorManifold; vector_at = nothing, kwargs...)
 
 @trait_function Random.rand!(M::AbstractDecoratorManifold, p; kwargs...)
 

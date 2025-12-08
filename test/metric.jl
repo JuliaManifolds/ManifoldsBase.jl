@@ -365,6 +365,8 @@ ManifoldsBase.metric(::BaseManifold) = DefaultBaseManifoldMetric()
             @test inverse_retract(MM2, p, q, irm) == inverse_retract(M, q, p, irm)
             @test inverse_retract!(MM2, Y2, p, q, irm) === inverse_retract!(M, Y2, q, p, irm)
         end
+        @test_throws MethodError inverse_retract(MM, p, q, LogarithmicInverseRetraction())
+        @test_throws MethodError inverse_retract!(MM, Y2, p, q, LogarithmicInverseRetraction())
         @test ManifoldsBase.retract_fused!(MM2, q, p, X, 1) ===
             ManifoldsBase.retract_fused!(M, q, p, X, 1)
         @test_throws MethodError is_flat(MM)

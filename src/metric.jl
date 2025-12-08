@@ -219,9 +219,6 @@ end
 function get_forwarding_type(::MetricManifold, ::typeof(rand), P::Type)
     return SimpleForwardingType()
 end
-function get_forwarding_type(::MetricManifold, ::typeof(rand!))
-    return SimpleForwardingType()
-end
 function get_forwarding_type(::MetricManifold, ::typeof(rand!), P::Type)
     return SimpleForwardingType()
 end
