@@ -361,21 +361,23 @@ ManifoldsBase.metric(::BaseManifold) = DefaultBaseManifoldMetric()
             @test retract!(MM2, q, p, X, rm) === retract!(M, q, p, X, rm)
         end
         @test inverse_retract!(MM2, Y2, p, q) === inverse_retract!(M, Y2, q, p)
+        shooting_ir = ShootingInverseRetraction(
+            ExponentialRetraction(),
+            EmbeddedInverseRetraction(LogarithmicInverseRetraction()),
+            ParallelTransport(),
+            4,
+            1.0e-9,
+            10_000,
+        )
         for irm in [
                 LogarithmicInverseRetraction(),
                 EmbeddedInverseRetraction(LogarithmicInverseRetraction()),
-                ShootingInverseRetraction(
-                    ExponentialRetraction(),
-                    EmbeddedInverseRetraction(LogarithmicInverseRetraction()),
-                    ParallelTransport(),
-                    4,
-                    1.0e-9,
-                    10_000,
-                ),
+                shooting_ir,
             ]
             @test inverse_retract(MM2, p, q, irm) == inverse_retract(M, q, p, irm)
             @test inverse_retract!(MM2, Y2, p, q, irm) === inverse_retract!(M, Y2, q, p, irm)
         end
+        @test_throws MethodError inverse_retract(MM, p, q, shooting_ir)
         @test_throws MethodError inverse_retract(MM, p, q, LogarithmicInverseRetraction())
         @test_throws MethodError inverse_retract!(MM, Y2, p, q, LogarithmicInverseRetraction())
         @test ManifoldsBase.retract_fused!(MM2, q, p, X, 1) ===
