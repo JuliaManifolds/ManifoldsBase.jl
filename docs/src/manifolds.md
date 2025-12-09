@@ -38,16 +38,25 @@ Pages = ["EmbeddedManifold.jl"]
 Order = [:type, :macro, :function]
 ```
 
+## Connections
+
+Most connection-related functionality previously defined in [`Manifolds.jl`](https://juliamanifolds.github.io/Manifolds.jl/latest/) is currently available here.
+
+```@autodocs
+Modules = [ManifoldsBase]
+Pages = ["connection.jl"]
+Order = [:type, :function]
+```
+
 ## Metrics
 
-Most metric-related functionality is currently defined in [`Manifolds.jl`](https://juliamanifolds.github.io/Manifolds.jl/latest/) but a few basic types are defined here.
+Most metric-related functionality is available here. A few additional functions are defined in [`Manifolds.jl`](https://juliamanifolds.github.io/Manifolds.jl/latest/).
 
 ```@autodocs
 Modules = [ManifoldsBase]
 Pages = ["metric.jl"]
 Order = [:type, :function]
 ```
-
 
 ## A manifold for validation
 

@@ -35,7 +35,6 @@ include("approximation_methods.jl")
 include("retractions.jl")
 include("exp_log_geo.jl")
 include("projections.jl")
-include("metric.jl")
 
 if isdefined(Base, Symbol("@constprop"))
     macro aggressive_constprop(ex)
@@ -1059,6 +1058,11 @@ function Random.rand(rng::AbstractRNG, M::AbstractManifold; vector_at = nothing,
     return pX
 end
 
+function Random.rand!(M::AbstractManifold, pX; kwargs...)
+    return rand!(Random.default_rng(), M, pX; kwargs...)
+end
+
+
 @doc raw"""
     representation_size(M::AbstractManifold)
 
@@ -1216,6 +1220,10 @@ include("shooting.jl")
 include("vector_spaces.jl")
 include("point_vector_fallbacks.jl")
 include("nested_trait.jl")
+
+include("connection.jl")
+include("metric.jl")
+
 include("decorator_trait.jl")
 include("numerical_checks.jl")
 
@@ -1278,6 +1286,8 @@ export AbstractManifold,
     AbstractCotangentVector,
     TFVector,
     CoTFVector
+export AbstractAffineConnection, ConnectionManifold, LeviCivitaConnection
+export AbstractMetric, MetricManifold
 export VectorSpaceFiber
 export TangentSpace, TangentSpaceType
 export CotangentSpace, CotangentSpaceType

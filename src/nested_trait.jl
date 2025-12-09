@@ -131,6 +131,9 @@ macro trait_function(
     argnametype_exprs = [:(typeof($(argname))) for argname in argnames]
     gft = if :p in callargs
         :(ManifoldsBase.get_forwarding_type(M, $fname, typeof(p)))
+    elseif :(vector_at = vector_at) in kwargs_call
+        # For rand(M; vector_at=p)
+        :(ManifoldsBase.get_forwarding_type(M, $fname, typeof(vector_at)))
     else
         :(ManifoldsBase.get_forwarding_type(M, $fname))
     end
