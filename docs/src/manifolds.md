@@ -50,7 +50,7 @@ Order = [:type, :function]
 
 ## Metrics
 
-Most metric-related functionality previously defined in [`Manifolds.jl`](https://juliamanifolds.github.io/Manifolds.jl/latest/) is currently available here.
+Most metric-related functionality is available here. A few additional functions are defined in [`Manifolds.jl`](https://juliamanifolds.github.io/Manifolds.jl/latest/).
 
 ```@autodocs
 Modules = [ManifoldsBase]
