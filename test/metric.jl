@@ -361,7 +361,18 @@ ManifoldsBase.metric(::BaseManifold) = DefaultBaseManifoldMetric()
             @test retract!(MM2, q, p, X, rm) === retract!(M, q, p, X, rm)
         end
         @test inverse_retract!(MM2, Y2, p, q) === inverse_retract!(M, Y2, q, p)
-        for irm in [LogarithmicInverseRetraction(), EmbeddedInverseRetraction(LogarithmicInverseRetraction())]
+        for irm in [
+                LogarithmicInverseRetraction(),
+                EmbeddedInverseRetraction(LogarithmicInverseRetraction()),
+                ShootingInverseRetraction(
+                    ExponentialRetraction(),
+                    EmbeddedInverseRetraction(LogarithmicInverseRetraction()),
+                    ParallelTransport(),
+                    4,
+                    1.0e-9,
+                    10_000,
+                ),
+            ]
             @test inverse_retract(MM2, p, q, irm) == inverse_retract(M, q, p, irm)
             @test inverse_retract!(MM2, Y2, p, q, irm) === inverse_retract!(M, Y2, q, p, irm)
         end
