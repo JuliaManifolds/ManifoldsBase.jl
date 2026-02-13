@@ -55,6 +55,8 @@ end
     allocate(a, T::Type, dims::Integer...)
     allocate(a, T::Type, dims::Tuple)
     allocate(a, T::Type, ::Nothing)
+    allocate(::Number)
+    allocate(::Number, T::Type)
     allocate(M::AbstractManifold, a)
     allocate(M::AbstractManifold, a, dims::Integer...)
     allocate(M::AbstractManifold, a, dims::Tuple)
@@ -78,6 +80,9 @@ another `Array{<:SArray}` instead of `Array{<:MArray}`, as would be done by defa
 If the last argument is `nothing`, it is ignored to support cases where
 `representation_size` is not defined and returns `nothing` but allocation can still go
 off of `a`.
+
+If the first argument is a `Number`, it returns a zero-index array with element of type `T`
+(if given) or the element type of the number.
 """
 allocate(a, args...)
 allocate(a) = similar(a)
@@ -86,6 +91,7 @@ allocate(a, dim1::Integer, dims::Integer...) = similar(a, dim1, dims...)
 allocate(a, dims::Tuple) = similar(a, dims)
 allocate(a, T::Type) = similar(a, T)
 allocate(a, T::Type, ::Nothing) = similar(a, T)
+allocate(::T) where {T<:Number} = fill(zero(T))
 allocate(::Number, T::Type) = fill(zero(T))
 allocate(a, T::Type, dim1::Integer, dims::Integer...) = similar(a, T, dim1, dims...)
 allocate(a, T::Type, dims::Tuple) = similar(a, T, dims)
