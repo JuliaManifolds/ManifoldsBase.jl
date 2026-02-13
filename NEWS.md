@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.1] 14/02/2026
+
+### Added
+
+* `allocate(::T) where {T<:Number}` method to allocate numeric scalars, which is used as a fallback for `allocate` when the input is a number. The method returns a zero-index array with element of type `T`.
+
 ## [2.3.0] 09/12/2025
 
 ### Added

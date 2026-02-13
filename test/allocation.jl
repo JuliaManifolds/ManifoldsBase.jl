@@ -59,6 +59,7 @@ ManifoldsBase.representation_size(::AllocManifold4) = (2, 3)
     @test a4 isa Matrix{Float64}
     @test size(a4) == (2, 3)
 
+    @test allocate(1) isa Array{Int, 0}
     @test allocate(1, Float64) isa Array{Float64, 0}
 
     @test allocation_promotion_function(M, exp, (a, b)) === identity
