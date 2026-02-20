@@ -34,5 +34,6 @@ using ManifoldsBase
     include("numerical_checks.jl")
     include("quotient_manifold.jl")
     include("deprecated.jl")
+    include("test_cuda_ext.jl")
     include("test_aqua.jl")
 end
