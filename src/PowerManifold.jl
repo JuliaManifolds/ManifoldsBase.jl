@@ -798,7 +798,8 @@ function get_vector!(
     v_iter = 1
     for i in get_iterator(M)
         get_vector!(
-            M.manifold, _write(M, rep_size, Y, i), _read(M, rep_size, p, i), c[v_iter:(v_iter + dim - 1)], _access_nested(M, B.data.bases, i),
+            M.manifold, _write(M, rep_size, Y, i), _read(M, rep_size, p, i),
+            view(c, v_iter:(v_iter + dim - 1)), _access_nested(M, B.data.bases, i),
         )
         v_iter += dim
     end
@@ -812,7 +813,8 @@ function get_vector!(
     v_iter = 1
     for i in get_iterator(M)
         Y[i...] = get_vector(
-            M.manifold, _read(M, rep_size, p, i), c[v_iter:(v_iter + dim - 1)], _access_nested(M, B.data.bases, i),
+            M.manifold, _read(M, rep_size, p, i), view(c, v_iter:(v_iter + dim - 1)),
+            _access_nested(M, B.data.bases, i),
         )
         v_iter += dim
     end
@@ -828,7 +830,8 @@ function get_vector!(M::AbstractPowerManifold, Y, p, c, B::AbstractBasis)
     v_iter = 1
     for i in get_iterator(M)
         get_vector!(
-            M.manifold, _write(M, rep_size, Y, i), _read(M, rep_size, p, i), c[v_iter:(v_iter + dim - 1)], B,
+            M.manifold, _write(M, rep_size, Y, i), _read(M, rep_size, p, i),
+            view(c, v_iter:(v_iter + dim - 1)), B,
         )
         v_iter += dim
     end
@@ -840,7 +843,7 @@ function get_vector!(M::PowerManifoldNestedReplacing, Y, p, c, B::AbstractBasis)
     v_iter = 1
     for i in get_iterator(M)
         Y[i...] = get_vector(
-            M.manifold, _read(M, rep_size, p, i), c[v_iter:(v_iter + dim - 1)], B,
+            M.manifold, _read(M, rep_size, p, i), view(c, v_iter:(v_iter + dim - 1)), B,
         )
         v_iter += dim
     end

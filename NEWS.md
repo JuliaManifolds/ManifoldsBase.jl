@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.2] 25/02/2026
+
+### Changed
+
+* `get_vector!` on `AbstractPowerManifold` now works faster by constructing views of the vector of coordinates instead of slicing it.
+
+
 ## [2.3.1] 14/02/2026
 
 ### Added
