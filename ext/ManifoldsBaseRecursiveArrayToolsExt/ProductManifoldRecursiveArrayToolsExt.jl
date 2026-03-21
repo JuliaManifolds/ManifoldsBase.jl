@@ -30,6 +30,10 @@ end
 @inline function allocate_result(M::ProductManifold, f)
     return ArrayPartition(map(N -> allocate_result(N, f), M.manifolds))
 end
+function allocate_result(M::ProductManifold, f, p::ArrayPartition)
+    return ArrayPartition(map((N, p_i) -> allocate_result(N, f, p_i), M.manifolds, p.x))
+end
+
 
 function copyto!(M::ProductManifold, q::ArrayPartition, p::ArrayPartition)
     map(copyto!, M.manifolds, submanifold_components(q), submanifold_components(p))

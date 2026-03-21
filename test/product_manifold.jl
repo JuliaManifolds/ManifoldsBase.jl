@@ -687,4 +687,11 @@ using RecursiveArrayTools
         @test distance(M, p1, p2, m, Inf) == norm(ds, Inf)
         @test distance(M, p1, p2, m, -Inf) == norm(ds, -Inf)
     end
+
+    @testset "Product with a custom point type" begin
+        M = ProductManifold(ManifoldsBase.DefaultManifold(3), ManifoldsBase.DefaultManifold(2))
+        p = ArrayPartition(DefaultPoint([1.0, 0.0]), DefaultPoint([0.0, 0.0, 0.0]))
+        X = zero_vector(M, p)
+        @test X isa ArrayPartition{Float64, Tuple{DefaultTangentVector{Vector{Float64}}, DefaultTangentVector{Vector{Float64}}}}
+    end
 end
