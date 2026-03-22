@@ -446,6 +446,9 @@ function Base.fill!(X::DefaultTangentVector, x)
     fill!(X.value, x)
     return X
 end
+function ManifoldsBase.allocate_result(::DefaultManifold, ::typeof(zero_vector), p::DefaultPoint)
+    return DefaultTangentVector(allocate(p.value))
+end
 function ManifoldsBase.allocate_result_type(
         ::DefaultManifold,
         ::typeof(log),
