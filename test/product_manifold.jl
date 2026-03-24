@@ -505,8 +505,11 @@ using RecursiveArrayTools
 
     @testset "ArrayPartition" begin
         @test submanifold_component(M, p1, 1) === p1.x[1]
+        # @invoke to test that the generic fallback is used, which should behave the same as the specialized version
+        @test (@invoke submanifold_component(M, p1::Any, 1)) === p1.x[1]
         @test submanifold_component(M, p1, Val(1)) === p1.x[1]
         @test submanifold_component(p1, 1) === p1.x[1]
+        @test (@invoke submanifold_component(p1::Any, 1)) === p1.x[1]
         @test submanifold_component(p1, Val(1)) === p1.x[1]
         @test submanifold_components(M, p1) === p1.x
         @test submanifold_components(p1) === p1.x
