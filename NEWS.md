@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.4] 25/03/2026
+
+### Changed
+
+* `submanifold_component` with an integer index on `ArrayPartition` now skips creating `Val` objects and directly accesses the component. This is a more efficient way to access components of an `ArrayPartition`.
+
 ## [2.3.3] 21/03/2026
 
 ### Fixed
