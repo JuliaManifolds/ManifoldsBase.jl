@@ -330,6 +330,8 @@ Base.@propagate_inbounds function Base.setindex!(
 end
 
 @inline submanifold_component(p::ArrayPartition, ::Val{I}) where {I} = p.x[I]
+@inline submanifold_component(::ProductManifold, p::ArrayPartition, i::Integer) = p.x[i]
+@inline submanifold_component(p::ArrayPartition, i::Integer) = p.x[i]
 @inline submanifold_components(p::ArrayPartition) = p.x
 
 function vector_transport_direction(
