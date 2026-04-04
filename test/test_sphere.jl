@@ -3,17 +3,12 @@ using ManifoldsBase
 using ManifoldsBase: ℝ, ℂ, DefaultManifold, RealNumbers
 using Test
 
-s = @__DIR__
-!(s in LOAD_PATH) && (push!(LOAD_PATH, s))
-
-using ManifoldsBaseTestUtils
-
 @testset "TestSphere" begin
     @testset "ShootingInverseRetraction" begin
         vector_transports =
             [ScaledVectorTransport(ProjectionTransport()), PoleLadderTransport()]
         num_transport_points = [2, 4]
-        @testset for M in [TestSphere(2), TestSphere(3, ℂ)]
+        @testset for M in [ManifoldsBase.Test.TestSphere(2), ManifoldsBase.Test.TestSphere(3, ℂ)]
             T = number_system(M) === ℝ ? Float64 : ComplexF64
             p = project(M, randn(T, representation_size(M)))
             X = project(M, p, randn(T, representation_size(M)))
@@ -42,14 +37,14 @@ using ManifoldsBaseTestUtils
         end
     end
     @testset "Weingarten" begin
-        M = TestSphere(2)
+        M = ManifoldsBase.Test.TestSphere(2)
         p = [1.0, 0.0, 0.0]
         X = [0.0, 0.2, 0.0]
         V = [0.1, 0.0, 0.0] #orthogonal to TpM -> parallel to p
         @test isapprox(M, p, Weingarten(M, p, X, V), -0.1 * X)
     end
     @testset "Tangent Space" begin
-        M = TestSphere(2)
+        M = ManifoldsBase.Test.TestSphere(2)
         p = [1.0, 0.0, 0.0]
         X = [0.0, 0.2, 0.0]
         TpM = TangentSpace(M, p)

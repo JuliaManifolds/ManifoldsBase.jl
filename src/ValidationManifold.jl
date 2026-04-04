@@ -60,7 +60,7 @@ Generate the Validation manifold for `M` with the default values of `V`.
   is associated with. This can be useful for debugging purposes.
 * `ignore_contexts = Vector{Symbol}()` a vector to indicate which validation contexts should not be performed.
 * `ignore_functions=Dict{Function,Union{Symbol,Vector{Symbol}}}()` a dictionary to disable certain contexts within functions.
-  The key here is the non-mutating function variant (if it exists). The contexts are thre same as in `ignore_contexts`.
+  The key here is the non-mutating function variant (if it exists). The contexts are three same as in `ignore_contexts`.
 """
 struct ValidationManifold{
         𝔽,

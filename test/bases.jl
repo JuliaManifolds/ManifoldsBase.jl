@@ -5,17 +5,10 @@ using ManifoldsBase: CotangentSpaceType, TangentSpaceType
 using ManifoldsBase: FVector
 using Test
 
-s = @__DIR__
-!(s in LOAD_PATH) && (push!(LOAD_PATH, s))
-using ManifoldsBaseTestUtils
-
 @testset "Bases" begin
     @testset "Projected and arbitrary orthonormal basis" begin
-        M = ProjManifold()
-        x = [
-            sqrt(2) / 2 0.0 0.0
-            0.0 sqrt(2) / 2 0.0
-        ]
+        M = ManifoldsBase.Test.ProjManifold()
+        x = [sqrt(2) / 2  0.0  0.0; 0.0 sqrt(2) / 2 0.0 ]
 
         for pB in
             (ProjectedOrthonormalBasis(:svd), ProjectedOrthonormalBasis(:gram_schmidt))
@@ -29,7 +22,7 @@ using ManifoldsBaseTestUtils
                     pB;
                     warn_linearly_dependent = true,
                     skip_linearly_dependent = true,
-                ) # skip V4, wich is -V1 after proj.
+                ) # skip V4, which is -V1 after proj.
                 @test_throws ErrorException get_basis(M, x, pB) # error
             else
                 pb = get_basis(M, x, pB) # skips V4 automatically
@@ -62,39 +55,24 @@ using ManifoldsBaseTestUtils
             b2 = ManifoldsBase.gram_schmidt(M, zeros(3), CachedBasis(DefaultBasis(), V))
             @test b1 == get_vectors(M, p, b2)
             # projected gram schmidt
-            tm = ProjectionTestManifold()
-            bt = ProjectedOrthonormalBasis(:gram_schmidt)
+            tm = ManifoldsBase.Test.ProjectionTestManifold()
+            bt = ManifoldsBase.Test.ProjectedOrthonormalBasis(:gram_schmidt)
             p = [sqrt(2) / 2, 0.0, sqrt(2) / 2, 0.0, 0.0]
             @test_logs (:warn, "Input only has 5 vectors, but manifold dimension is 100.") (
-                @test_throws ErrorException get_basis(
-                    tm,
-                    p,
-                    bt,
-                )
+                @test_throws ErrorException get_basis(tm, p, bt)
             )
             b = @test_logs (
                 :warn,
                 "Input only has 5 vectors, but manifold dimension is 100.",
             ) get_basis(
-                tm,
-                p,
-                bt;
-                return_incomplete_set = true,
-                skip_linearly_dependent = true, #skips 3 and 5
+                tm, p, bt; return_incomplete_set = true, skip_linearly_dependent = true, #skips 3 and 5
             )
             @test length(get_vectors(tm, p, b)) == 3
             @test_logs (:warn, "Input only has 1 vectors, but manifold dimension is 3.") (
-                @test_throws ErrorException ManifoldsBase.gram_schmidt(
-                    M,
-                    p,
-                    [V[1]],
-                )
+                @test_throws ErrorException ManifoldsBase.gram_schmidt(M, p, [V[1]])
             )
             @test_throws ErrorException ManifoldsBase.gram_schmidt(
-                M,
-                p,
-                [V[1], V[1], V[1]];
-                skip_linearly_dependent = true,
+                M, p, [V[1], V[1], V[1]]; skip_linearly_dependent = true,
             )
         end
     end
@@ -102,50 +80,42 @@ using ManifoldsBaseTestUtils
     @testset "ManifoldsBase.jl stuff" begin
 
         @testset "Errors" begin
-            m = NonManifold()
+            m = ManifoldsBase.Test.NonManifold()
             onb = DefaultOrthonormalBasis()
 
             @test_throws MethodError get_basis(m, [0], onb)
-            @test_throws MethodError get_basis(m, [0], NonBasis())
+            @test_throws MethodError get_basis(m, [0], ManifoldsBase.Test.NonBasis())
             @test_throws MethodError get_coordinates(m, [0], [0], onb)
             @test_throws MethodError get_coordinates!(m, [0], [0], [0], onb)
             @test_throws MethodError get_vector(m, [0], [0], onb)
             @test_throws MethodError get_vector!(m, [0], [0], [0], onb)
-            @test_throws MethodError get_vectors(m, [0], NonBasis())
+            @test_throws MethodError get_vectors(m, [0], ManifoldsBase.Test.NonBasis())
         end
 
         M = DefaultManifold(3)
 
         @test sprint(
-            show,
-            "text/plain",
-            CachedBasis(NonBasis(), NonBroadcastBasisThing([])),
-        ) == "Cached basis of type NonBasis"
+            show, "text/plain", CachedBasis(ManifoldsBase.Test.NonBasis(), ManifoldsBase.Test.NonBroadcastBasisThing([])),
+        ) == "Cached basis of type ManifoldsBase.Test.NonBasis"
 
         @testset "Constructors" begin
             @test DefaultBasis{ℂ, TangentSpaceType}() === DefaultBasis(ℂ)
             @test DefaultOrthogonalBasis{ℂ, TangentSpaceType}() === DefaultOrthogonalBasis(ℂ)
-            @test DefaultOrthonormalBasis{ℂ, TangentSpaceType}() ===
-                DefaultOrthonormalBasis(ℂ)
+            @test DefaultOrthonormalBasis{ℂ, TangentSpaceType}() === DefaultOrthonormalBasis(ℂ)
 
-            @test DefaultBasis{ℂ}(CotangentSpaceType()) ===
-                DefaultBasis(ℂ, CotangentSpaceType())
-            @test DefaultOrthogonalBasis{ℂ}(CotangentSpaceType()) ===
-                DefaultOrthogonalBasis(ℂ, CotangentSpaceType())
-            @test DefaultOrthonormalBasis{ℂ}(CotangentSpaceType()) ===
-                DefaultOrthonormalBasis(ℂ, CotangentSpaceType())
+            @test DefaultBasis{ℂ}(CotangentSpaceType()) === DefaultBasis(ℂ, CotangentSpaceType())
+            @test DefaultOrthogonalBasis{ℂ}(CotangentSpaceType()) === DefaultOrthogonalBasis(ℂ, CotangentSpaceType())
+            @test DefaultOrthonormalBasis{ℂ}(CotangentSpaceType()) === DefaultOrthonormalBasis(ℂ, CotangentSpaceType())
         end
 
         _pts = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
         @testset "basis representation" for BT in (
-                    DefaultBasis,
-                    DefaultOrthonormalBasis,
-                    DefaultOrthogonalBasis,
-                    DiagonalizingBasisProxy,
+                    DefaultBasis, DefaultOrthonormalBasis, DefaultOrthogonalBasis,
+                    ManifoldsBase.Test.DiagonalizingBasisProxy,
                 ),
-                pts in (_pts, map(NonBroadcastBasisThing, _pts))
+                pts in (_pts, map(ManifoldsBase.Test.NonBroadcastBasisThing, _pts))
 
-            if BT == DiagonalizingBasisProxy && pts !== _pts
+            if BT == ManifoldsBase.Test.DiagonalizingBasisProxy && pts !== _pts
                 continue
             end
             X1 = log(M, pts[1], pts[2])
@@ -157,7 +127,7 @@ using ManifoldsBaseTestUtils
             @test isapprox(M, pts[1], X1, Xbi)
 
             b = get_basis(M, pts[1], BT())
-            if BT != DiagonalizingBasisProxy
+            if BT != ManifoldsBase.Test.DiagonalizingBasisProxy
                 if pts[1] isa Array
                     @test isa(
                         b,
@@ -167,9 +137,7 @@ using ManifoldsBaseTestUtils
                     @test isa(
                         b,
                         CachedBasis{
-                            ℝ,
-                            BT{ℝ, TangentSpaceType},
-                            Vector{NonBroadcastBasisThing{Vector{Float64}}},
+                            ℝ, BT{ℝ, TangentSpaceType}, Vector{ManifoldsBase.Test.NonBroadcastBasisThing{Vector{Float64}}},
                         },
                     )
                 end
@@ -196,9 +164,8 @@ using ManifoldsBaseTestUtils
                 end
             end
 
-            if BT != DiagonalizingBasisProxy
-                @test get_coordinates(M, pts[1], X1, b) ≈
-                    get_coordinates(M, pts[1], X1, BT())
+            if BT != ManifoldsBase.Test.DiagonalizingBasisProxy
+                @test get_coordinates(M, pts[1], X1, b) ≈ get_coordinates(M, pts[1], X1, BT())
                 @test get_vector(M, pts[1], Xb, b) ≈ get_vector(M, pts[1], Xb, BT())
             end
 
@@ -211,7 +178,7 @@ using ManifoldsBaseTestUtils
             @test isapprox(M, pts[1], X1, X1cv)
         end
 
-        @testset "Convencience defaults" begin
+        @testset "Convenience defaults" begin
             p = [1.0, 0.0, 0.0]
             X1 = [2.0, 1.0, -1.0]
             X1c = [2.0, 1.0, -1.0]

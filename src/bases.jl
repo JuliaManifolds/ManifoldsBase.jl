@@ -971,7 +971,7 @@ function gram_schmidt(
             return Ξ
         end
     end
-    if return_incomplete_set # if we rech this point - length(Ξ) < dim
+    if return_incomplete_set # if we reach this point - length(Ξ) < dim
         return Ξ
     else
         throw(

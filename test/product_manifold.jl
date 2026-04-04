@@ -6,12 +6,8 @@ using ManifoldsBase:
 using LinearAlgebra
 using Random
 
-s = (@__DIR__)
-!(s in LOAD_PATH) && (push!(LOAD_PATH, s))
-using ManifoldsBaseTestUtils
-
 @testset "Product manifold without RecursiveArrayTools.jl" begin
-    M1 = TestSphere(2)
+    M1 = ManifoldsBase.Test.TestSphere(2)
     M2 = ManifoldsBase.DefaultManifold(2, 2)
 
     M = ProductManifold(M1, M2)
@@ -21,7 +17,7 @@ end
 using RecursiveArrayTools
 
 @testset "Product manifold" begin
-    M1 = TestSphere(2)
+    M1 = ManifoldsBase.Test.TestSphere(2)
     M2 = ManifoldsBase.DefaultManifold(2, 2)
     @test (@inferred ProductManifold(M1, M2)) isa ProductManifold
 
@@ -678,7 +674,7 @@ using RecursiveArrayTools
     end
 
     @testset "Special Case for r-distance" begin
-        M1 = TestSphere(2)
+        M1 = ManifoldsBase.Test.TestSphere(2)
         M = ProductManifold(M1, M1)
         p1 = ArrayPartition([1.0, 0.0, 0.0], 1 / sqrt(2) .* [1.0, 1.0, 0.0])
         p2 = ArrayPartition(1 / sqrt(2) .* [1.0, 1.0, 0.0], [0.0, 1.0, 0.0])
@@ -693,8 +689,8 @@ using RecursiveArrayTools
 
     @testset "Product with a custom point type" begin
         M = ProductManifold(ManifoldsBase.DefaultManifold(3), ManifoldsBase.DefaultManifold(2))
-        p = ArrayPartition(DefaultPoint([1.0, 0.0]), DefaultPoint([0.0, 0.0, 0.0]))
+        p = ArrayPartition(ManifoldsBase.Test.DefaultPoint([1.0, 0.0]), ManifoldsBase.Test.DefaultPoint([0.0, 0.0, 0.0]))
         X = zero_vector(M, p)
-        @test X isa ArrayPartition{Float64, Tuple{DefaultTangentVector{Vector{Float64}}, DefaultTangentVector{Vector{Float64}}}}
+        @test X isa ArrayPartition{Float64, Tuple{ManifoldsBase.Test.DefaultTangentVector{Vector{Float64}}, ManifoldsBase.Test.DefaultTangentVector{Vector{Float64}}}}
     end
 end

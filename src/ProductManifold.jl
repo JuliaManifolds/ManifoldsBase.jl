@@ -8,7 +8,7 @@ Product manifold $M_1 × M_2 × …  × M_n$ with product geometry.
     ProductManifold(M_1, M_2, ..., M_n)
 
 generates the product manifold $M_1 × M_2 × … × M_n$.
-Alternatively, the same manifold can be contructed using the `×` operator:
+Alternatively, the same manifold can be constructed using the `×` operator:
 `M_1 × M_2 × M_3`.
 """
 struct ProductManifold{𝔽, TM <: Tuple} <: AbstractDecoratorManifold{𝔽}
@@ -1138,7 +1138,7 @@ Extract the factor of the product manifold `M` indicated by indices in `i`.
 For example, for `i` equal to `Val((1, 3))` the product manifold constructed
 from the first and the third factor is returned.
 
-The version with `AbstractVector` is not type-stable, for better preformance use `Val`.
+The version with `AbstractVector` is not type-stable, for better performance use `Val`.
 """
 function submanifold(M::ProductManifold, i::Val)
     return ProductManifold(select_from_tuple(M.manifolds, i)...)

@@ -2,10 +2,6 @@ using RecursiveArrayTools, ManifoldsBase, Test
 using Random
 using ManifoldsBase: DefaultManifold, VectorSpaceType, ℝ, Fiber
 
-s = @__DIR__
-!(s in LOAD_PATH) && (push!(LOAD_PATH, s))
-using ManifoldsBaseTestUtils
-
 @testset "vector space fibers" begin
     M = DefaultManifold(3)
 
@@ -61,9 +57,9 @@ using ManifoldsBaseTestUtils
         @test rand(Random.default_rng(), t_p) isa Vector{Float64}
         @test rand(Random.default_rng(), t_p; vector_at = X) isa Vector{Float64}
         # generic vector space at
-        X_p = Fiber(M, p, TestVectorSpaceType())
+        X_p = Fiber(M, p, ManifoldsBase.Test.TestVectorSpaceType())
         X_ps = sprint(show, "text/plain", X_p)
-        X_ps_test = "VectorSpaceFiber{ℝ, DefaultManifold{ℝ, Tuple{Int64}}, TestVectorSpaceType, Vector{Float64}}\nFiber:\n TestVectorSpaceType()DefaultManifold(3; field = ℝ)\nBase point:\n $(sp)"
+        X_ps_test = "VectorSpaceFiber{ℝ, DefaultManifold{ℝ, Tuple{Int64}}, ManifoldsBase.Test.TestVectorSpaceType, Vector{Float64}}\nFiber:\n ManifoldsBase.Test.TestVectorSpaceType()DefaultManifold(3; field = ℝ)\nBase point:\n $(sp)"
         @test X_ps == X_ps_test
 
         for basis in

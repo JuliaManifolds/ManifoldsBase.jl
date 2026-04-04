@@ -1,13 +1,43 @@
 """
-    ManifoldsBaseTestUtils
+    ManifoldsBase.Test
 
-A small module to collect common definitions and functions used in (several) tests of
-`ManifoldsBase.jl`.
-
-* A `TestSphere`
-*
+The module `ManifoldsBase.Test` contains functions and dummy types for the manifolds interface
+provided in `ManifoldsBase.jl`.
 """
-module ManifoldsBaseTestUtils
+module Test
+using ..ManifoldsBase
+
+struct CustomValidationManifoldRetraction <: ManifoldsBase.AbstractRetractionMethod end
+
+function ManifoldsBase.injectivity_radius(
+        ::ManifoldsBase.DefaultManifold, ::CustomValidationManifoldRetraction,
+    )
+    return 10.0
+end
+function ManifoldsBase.injectivity_radius(
+        ::ManifoldsBase.DefaultManifold, p, ::CustomValidationManifoldRetraction,
+    )
+    return 11.0
+end
+
+struct ValidationDummyManifold <: ManifoldsBase.AbstractManifold{ℝ} end
+ManifoldsBase.check_point(::ValidationDummyManifold, p) = nothing
+ManifoldsBase.check_vector(::ValidationDummyManifold, p, X) = nothing
+function ManifoldsBase.project(M::ValidationDummyManifold, p, X)
+    Y = similar(X)
+    project!(M, Y, p, X)
+    return Y
+end
+ManifoldsBase.project!(::ValidationDummyManifold, Y, p, X) = (Y .= 2 .* X)
+function ManifoldsBase.project(M::ValidationDummyManifold, p)
+    q = similar(p)
+    project!(M, q, p)
+    return q
+end
+ManifoldsBase.project!(::ValidationDummyManifold, q, p) = (q .= 2 .* p)
+ManifoldsBase.distance(::ValidationDummyManifold, p, q) = -1.0
+ManifoldsBase.norm(::ValidationDummyManifold, p, v) = -1.0
+ManifoldsBase.get_embedding(::ValidationDummyManifold) = ManifoldsBase.DefaultManifold(3)
 
 using ManifoldsBase, LinearAlgebra, Random
 using ManifoldsBase: ℝ, ℂ, AbstractManifold, DefaultManifold, EuclideanMetric
@@ -22,20 +52,12 @@ struct TestSphere{N, 𝔽} <: AbstractDecoratorManifold{𝔽} end
 TestSphere(N::Int, 𝔽 = ℝ) = TestSphere{N, 𝔽}()
 
 function ManifoldsBase.change_metric!(
-        M::TestSphere,
-        Y,
-        ::ManifoldsBase.EuclideanMetric,
-        p,
-        X,
+        M::TestSphere, Y, ::ManifoldsBase.EuclideanMetric, p, X,
     )
     return copyto!(M, Y, p, X)
 end
 function ManifoldsBase.change_representer!(
-        M::TestSphere,
-        Y,
-        ::ManifoldsBase.EuclideanMetric,
-        p,
-        X,
+        M::TestSphere, Y, ::ManifoldsBase.EuclideanMetric, p, X,
     )
     return copyto!(M, Y, p, X)
 end
@@ -225,8 +247,8 @@ function ManifoldsBase.log!(::TestSPD, X, p, q)
     T = Symmetric(p_sqrt_inv * convert(AbstractMatrix, q) * p_sqrt_inv)
     e2 = eigen(T)
     Se = Diagonal(log.(max.(e2.values, eps())))
-    pUe = p_sqrt * e2.vectors
-    return mul!(X, pUe, Se * transpose(pUe))
+    pU_e = p_sqrt * e2.vectors
+    return mul!(X, pU_e, Se * transpose(pU_e))
 end
 ManifoldsBase.representation_size(M::TestSPD) = (M.n, M.n)
 
@@ -263,7 +285,7 @@ end
 ManifoldsBase.manifold_dimension(::ProjectionTestManifold) = 100
 
 #
-# Thre Non-Things to check for the correct errors in case functions are not implemented
+# Three Non-Things to check for the correct errors in case functions are not implemented
 struct NonManifold <: AbstractManifold{ℝ} end
 struct NonBasis <: ManifoldsBase.AbstractBasis{ℝ, TangentSpaceType} end
 struct NonMPoint <: AbstractManifoldPoint end
@@ -369,22 +391,14 @@ function ManifoldsBase.get_basis_default(
 end
 
 function ManifoldsBase.get_coordinates_orthonormal!(
-        M::DefaultManifold,
-        Y,
-        ::NonBroadcastBasisThing,
-        X::NonBroadcastBasisThing,
-        ::RealNumbers,
+        M::DefaultManifold{ℝ}, Y, ::NonBroadcastBasisThing, X::NonBroadcastBasisThing, ::RealNumbers,
     )
     copyto!(Y, reshape(X.v, manifold_dimension(M)))
     return Y
 end
 
 function ManifoldsBase.get_vector_orthonormal!(
-        M::DefaultManifold,
-        Y::NonBroadcastBasisThing,
-        ::NonBroadcastBasisThing,
-        X,
-        ::RealNumbers,
+        M::DefaultManifold{ℝ}, Y::NonBroadcastBasisThing, ::NonBroadcastBasisThing, X, ::RealNumbers,
     )
     copyto!(Y.v, reshape(X, representation_size(M)))
     return Y
@@ -470,104 +484,63 @@ end
 
 ManifoldsBase.@manifold_element_forwards DefaultPoint value
 ManifoldsBase.@manifold_vector_forwards DefaultTangentVector value
-ManifoldsBase.@default_manifold_fallbacks ManifoldsBase.DefaultManifold DefaultPoint DefaultTangentVector value value
+ManifoldsBase.@default_manifold_fallbacks ManifoldsBase.DefaultManifold{ℝ} DefaultPoint DefaultTangentVector value value
 
 function ManifoldsBase._injectivity_radius(::DefaultManifold, ::CustomDefinedRetraction)
     return 10.0
 end
 function ManifoldsBase._retract!(
-        M::DefaultManifold,
-        q,
-        p,
-        X,
-        ::CustomDefinedKeywordRetraction;
-        kwargs...,
+        M::DefaultManifold, q, p, X, ::CustomDefinedKeywordRetraction; kwargs...,
     )
     return retract_custom_kw!(M, q, p, X; kwargs...)
 end
 function ManifoldsBase._retract_fused!(
-        M::DefaultManifold,
-        q,
-        p,
-        X,
-        t::Number,
-        ::CustomDefinedKeywordRetraction;
-        kwargs...,
+        M::DefaultManifold, q, p, X, t::Number, ::CustomDefinedKeywordRetraction; kwargs...,
     )
     return retract_custom_kw_fused!(M, q, p, X, t; kwargs...)
 end
 function retract_custom_kw_fused!(
-        ::DefaultManifold,
-        q::DefaultPoint,
-        p::DefaultPoint,
-        X::DefaultTangentVector,
-        t::Number;
+        ::DefaultManifold, q::DefaultPoint, p::DefaultPoint, X::DefaultTangentVector, t::Number;
         scale = 2.0,
     )
     q.value .= scale .* p.value .+ t .* X.value
     return q
 end
 function retract_custom_kw!(
-        ::DefaultManifold,
-        q::DefaultPoint,
-        p::DefaultPoint,
-        X::DefaultTangentVector;
-        scale = 2.0,
+        ::DefaultManifold, q::DefaultPoint, p::DefaultPoint, X::DefaultTangentVector; scale = 2.0,
     )
     q.value .= scale .* p.value .+ X.value
     return q
 end
 function ManifoldsBase._inverse_retract!(
-        M::DefaultManifold,
-        X,
-        p,
-        q,
-        ::CustomDefinedKeywordInverseRetraction;
-        kwargs...,
+        M::DefaultManifold, X, p, q, ::CustomDefinedKeywordInverseRetraction; kwargs...,
     )
     return inverse_retract_custom_kw!(M, X, p, q; kwargs...)
 end
 function inverse_retract_custom_kw!(
-        ::DefaultManifold,
-        X::DefaultTangentVector,
-        p::DefaultPoint,
-        q::DefaultPoint;
-        scale = 2.0,
+        ::DefaultManifold, X::DefaultTangentVector, p::DefaultPoint, q::DefaultPoint; scale = 2.0,
     )
     X.value .= q.value - scale * p.value
     return X
 end
 
 #
-# Test on layer 2 (omiting a layer 3, since we fully qualify all types here already)
+# Test on layer 2 (omitting a layer 3, since we fully qualify all types here already)
 function ManifoldsBase._retract!(
-        ::DefaultManifold,
-        q::DefaultPoint,
-        p::DefaultPoint,
-        X::DefaultTangentVector,
-        ::CustomDefinedRetraction,
+        ::DefaultManifold, q::DefaultPoint, p::DefaultPoint, X::DefaultTangentVector, ::CustomDefinedRetraction,
     )
     q.value .= 2 .* p.value .+ X.value
     return q
 end
 function ManifoldsBase._retract_fused!(
-        ::DefaultManifold,
-        q::DefaultPoint,
-        p::DefaultPoint,
-        X::DefaultTangentVector,
-        t::Number,
-        ::CustomDefinedRetraction,
+        ::DefaultManifold, q::DefaultPoint, p::DefaultPoint, X::DefaultTangentVector, t::Number, ::CustomDefinedRetraction,
     )
     q.value .= 2 .* p.value .+ t * X.value
     return q
 end
 
 function ManifoldsBase._inverse_retract!(
-        ::DefaultManifold,
-        X::DefaultTangentVector,
-        p::DefaultPoint,
-        q::DefaultPoint,
-        ::CustomDefinedInverseRetraction,
+        ::DefaultManifold, X::DefaultTangentVector, p::DefaultPoint, q::DefaultPoint, ::CustomDefinedInverseRetraction,
     )
     X.value .= q.value .- 2 .* p.value
     return X
@@ -626,31 +599,35 @@ ManifoldsBase.inverse_retract_project!(::DefaultManifold, Y, p, q) = (Y .= q .- 
 ManifoldsBase.inverse_retract_qr!(::DefaultManifold, Y, p, q) = (Y .= q .- p)
 ManifoldsBase.inverse_retract_softmax!(::DefaultManifold, Y, p, q) = (Y .= q .- p)
 function ManifoldsBase.inverse_retract_nlsolve!(
-        ::DefaultManifold,
-        Y,
-        p,
-        q,
-        m::NLSolveInverseRetraction,
+        ::DefaultManifold, Y, p, q, m::NLSolveInverseRetraction,
     )
     return (Y .= q .- p)
 end
-Base.getindex(x::MatrixVectorTransport, i) = x.m[:, i]
+Base.getindex(x::MatrixVectorTransport, i::Int) = x.m[:, i]
 Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
 
 struct TestArrayRepresentation <: AbstractPowerRepresentation end
 
-const TestPowerManifoldMultidimensional =
-    AbstractPowerManifold{𝔽, <:AbstractManifold{𝔽}, TestArrayRepresentation} where {𝔽}
+const TestPowerManifoldMultidimensional = AbstractPowerManifold{𝔽, <:AbstractManifold{𝔽}, TestArrayRepresentation} where {𝔽}
 
-export CustomDefinedInverseRetraction, CustomDefinedKeywordInverseRetraction
-export CustomDefinedKeywordRetraction, CustomDefinedRetraction, CustomUndefinedRetraction
-export DefaultPoint, DefaultTangentVector
-export DiagonalizingBasisProxy
-export MatrixVectorTransport
-export NonManifold, NonBasis, NonBroadcastBasisThing
-export NonMPoint, NonTangentVector, NonCotangentVector
-export NotImplementedRetraction, NotImplementedInverseRetraction
-export ProjManifold, ProjectionTestManifold
-export TestSphere, TestSPD
-export TestVectorSpaceType, TestFiberType
+function ManifoldsBase.representation_size(
+        M::TestPowerManifoldMultidimensional,
+    )
+    return (representation_size(M.manifold)..., ManifoldsBase.get_parameter(M.size)...)
+end
+
+@inline function ManifoldsBase._write(
+        ::TestPowerManifoldMultidimensional,
+        rep_size::Tuple, x::AbstractArray, i::Tuple,
+    )
+    return view(x, ManifoldsBase.rep_size_to_colons(rep_size)..., i...)
+end
+
+function ManifoldsBase.get_embedding(
+        M::PowerManifold{𝔽, TM, TSW, TestArrayRepresentation}, P::Type,
+    ) where {𝔽, TM <: AbstractManifold{𝔽}, TSW}
+    ME = get_embedding(M.manifold, P)
+    return PowerManifold{ManifoldsBase._get_field(ME), typeof(ME), TSW, TestArrayRepresentation}(ME, M.size)
+end
+
 end

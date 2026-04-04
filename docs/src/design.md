@@ -93,7 +93,7 @@ _retract!(M::AbstractManifold, q, p, X, m::Exponentialretraction) = exp(M, q, p,
 _retract!(M::AbstractManifold, q, p, X, m::PolarRetraction) = retract_polar(M, q, p, X)
 ```
 
-where the [`ExponentialRetraction`](@ref) is resolved by again calling a function on [Layer I](@ref design-layer1) (to fill futher default values if these exist). The [`PolarRetraction`](@ref) is dispatched to [`retract_polar!`](@ref ManifoldsBase.retract_polar!), a function on [Layer III](@ref design-layer3).
+where the [`ExponentialRetraction`](@ref) is resolved by again calling a function on [Layer I](@ref design-layer1) (to fill further default values if these exist). The [`PolarRetraction`](@ref) is dispatched to [`retract_polar!`](@ref ManifoldsBase.retract_polar!), a function on [Layer III](@ref design-layer3).
 
 For further details and dispatches, see [retractions and inverse retractions](@ref sec-retractions) for an overview.
 

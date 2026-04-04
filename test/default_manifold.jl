@@ -8,10 +8,6 @@ using ReverseDiff
 using StaticArrays
 using Test
 
-s = @__DIR__
-!(s in LOAD_PATH) && (push!(LOAD_PATH, s))
-using ManifoldsBaseTestUtils
-
 @testset "Testing Default (Euclidean)" begin
     M = ManifoldsBase.DefaultManifold(3)
     types = [
@@ -24,7 +20,7 @@ using ManifoldsBaseTestUtils
         Vector{Double64},
         MVector{3, Double64},
         SizedVector{3, Double64, Vector{Double64}},
-        DefaultPoint{Vector{Float64}},
+        ManifoldsBase.Test.DefaultPoint{Vector{Float64}},
     ]
 
     @test repr(M) == "DefaultManifold(3; field = ℝ)"
@@ -52,8 +48,8 @@ using ManifoldsBaseTestUtils
     # Representation sizes not equal
     @test ManifoldsBase.check_size(M, zeros(3, 3)) isa DomainError
     @test ManifoldsBase.check_size(M, zeros(3), zeros(3, 3)) isa DomainError
-    rm2 = CustomDefinedRetraction()
-    rm3 = CustomUndefinedRetraction()
+    rm2 = ManifoldsBase.Test.CustomDefinedRetraction()
+    rm3 = ManifoldsBase.Test.CustomUndefinedRetraction()
 
     for T in types
         @testset "Type $T" begin
@@ -245,7 +241,7 @@ using ManifoldsBaseTestUtils
                 @test a == b
                 @test X == Y
                 @test Z == X
-                @test a == ((T <: DefaultPoint) ? vec(X.value) : vec(X))
+                @test a == ((T <: ManifoldsBase.Test.DefaultPoint) ? vec(X.value) : vec(X))
             end
 
             @testset "broadcasted linear algebra in tangent space" begin
@@ -393,7 +389,7 @@ using ManifoldsBaseTestUtils
         M = ManifoldsBase.DefaultManifold(2)
         for (p, X) in (
                 ([2.0, 3.0], [4.0, 5.0]),
-                (DefaultPoint([2.0, 3.0]), DefaultTangentVector([4.0, 5.0])),
+                (ManifoldsBase.Test.DefaultPoint([2.0, 3.0]), ManifoldsBase.Test.DefaultTangentVector([4.0, 5.0])),
             )
             q = similar(p)
             copyto!(M, q, p)
@@ -407,21 +403,21 @@ using ManifoldsBaseTestUtils
             @test Z == X
         end
 
-        p1 = DefaultPoint([2.0, 3.0])
+        p1 = ManifoldsBase.Test.DefaultPoint([2.0, 3.0])
         p2 = copy(p1)
         @test (p1 == p2) && (p1 !== p2)
     end
 
     @testset "further vector and point automatic forwards" begin
         M = ManifoldsBase.DefaultManifold(3)
-        p = DefaultPoint([1.0, 0.0, 0.0])
-        q = DefaultPoint([0.0, 0.0, 0.0])
-        X = DefaultTangentVector([0.0, 1.0, 0.0])
-        Y = DefaultTangentVector([1.0, 0.0, 0.0])
+        p = ManifoldsBase.Test.DefaultPoint([1.0, 0.0, 0.0])
+        q = ManifoldsBase.Test.DefaultPoint([0.0, 0.0, 0.0])
+        X = ManifoldsBase.Test.DefaultTangentVector([0.0, 1.0, 0.0])
+        Y = ManifoldsBase.Test.DefaultTangentVector([1.0, 0.0, 0.0])
         @test angle(M, p, X, Y) ≈ π / 2
         @test inverse_retract(M, p, q, LogarithmicInverseRetraction()) == -Y
-        @test retract(M, q, Y, CustomDefinedRetraction()) == p
-        @test ManifoldsBase.retract_fused(M, q, Y, 1.0, CustomDefinedRetraction()) == p
+        @test retract(M, q, Y, ManifoldsBase.Test.CustomDefinedRetraction()) == p
+        @test ManifoldsBase.retract_fused(M, q, Y, 1.0, ManifoldsBase.Test.CustomDefinedRetraction()) == p
         @test retract(M, q, Y, ExponentialRetraction()) == p
         @test ManifoldsBase.retract_fused(M, q, Y, 1.0, ExponentialRetraction()) == p
         # rest not implemented - so they also fall back even onto mutating
@@ -438,31 +434,22 @@ using ManifoldsBaseTestUtils
                 SasakiRetraction(5),
                 ApproximateExponentialRetraction((;)),
             ]
-            @test retract(M, q, Y, retr) == DefaultPoint(q.value + Y.value)
-            @test ManifoldsBase.retract_fused(M, q, Y, 0.5, retr) ==
-                DefaultPoint(q.value + 0.5 * Y.value)
-            @test retract!(M, r, q, Y, retr) == DefaultPoint(q.value + Y.value)
-            @test ManifoldsBase.retract_fused!(M, r, q, Y, 0.5, retr) ==
-                DefaultPoint(q.value + 0.5 * Y.value)
+            @test retract(M, q, Y, retr) == ManifoldsBase.Test.DefaultPoint(q.value + Y.value)
+            @test ManifoldsBase.retract_fused(M, q, Y, 0.5, retr) == ManifoldsBase.Test.DefaultPoint(q.value + 0.5 * Y.value)
+            @test retract!(M, r, q, Y, retr) == ManifoldsBase.Test.DefaultPoint(q.value + Y.value)
+            @test ManifoldsBase.retract_fused!(M, r, q, Y, 0.5, retr) == ManifoldsBase.Test.DefaultPoint(q.value + 0.5 * Y.value)
         end
 
-        mRK = RetractionWithKeywords(CustomDefinedKeywordRetraction(); scale = 3.0)
+        mRK = RetractionWithKeywords(ManifoldsBase.Test.CustomDefinedKeywordRetraction(); scale = 3.0)
         pRK = allocate(p, eltype(p.value), size(p.value))
-        @test retract(M, p, X, mRK) == DefaultPoint(3 * p.value + X.value)
-        @test ManifoldsBase.retract_fused(M, p, X, 0.5, mRK) ==
-            DefaultPoint(3 * p.value + 0.5 * X.value)
-        @test retract!(M, pRK, p, X, mRK) == DefaultPoint(3 * p.value + X.value)
-        @test ManifoldsBase.retract_fused!(M, pRK, p, X, 0.5, mRK) ==
-            DefaultPoint(3 * p.value + 0.5 * X.value)
-        mIRK = InverseRetractionWithKeywords(
-            CustomDefinedKeywordInverseRetraction();
-            scale = 3.0,
-        )
+        @test retract(M, p, X, mRK) == ManifoldsBase.Test.DefaultPoint(3 * p.value + X.value)
+        @test ManifoldsBase.retract_fused(M, p, X, 0.5, mRK) == ManifoldsBase.Test.DefaultPoint(3 * p.value + 0.5 * X.value)
+        @test retract!(M, pRK, p, X, mRK) == ManifoldsBase.Test.DefaultPoint(3 * p.value + X.value)
+        @test ManifoldsBase.retract_fused!(M, pRK, p, X, 0.5, mRK) == ManifoldsBase.Test.DefaultPoint(3 * p.value + 0.5 * X.value)
+        mIRK = InverseRetractionWithKeywords(ManifoldsBase.Test.CustomDefinedKeywordInverseRetraction(); scale = 3.0)
         XIRK = allocate(X, eltype(X.value), size(X.value))
-        @test inverse_retract(M, p, pRK, mIRK) ==
-            DefaultTangentVector(pRK.value - 3 * p.value)
-        @test inverse_retract!(M, XIRK, p, pRK, mIRK) ==
-            DefaultTangentVector(pRK.value - 3 * p.value)
+        @test inverse_retract(M, p, pRK, mIRK) == ManifoldsBase.Test.DefaultTangentVector(pRK.value - 3 * p.value)
+        @test inverse_retract!(M, XIRK, p, pRK, mIRK) == ManifoldsBase.Test.DefaultTangentVector(pRK.value - 3 * p.value)
         p2 = allocate(p, eltype(p.value), size(p.value))
         @test size(p2.value) == size(p.value)
         X2 = allocate(X, eltype(X.value), size(X.value))
@@ -472,8 +459,8 @@ using ManifoldsBaseTestUtils
         @test X3 == log(M, p, q)
         @test log!(M, X3, p, q) == log(M, p, q)
         @test X3 == log(M, p, q)
-        @test inverse_retract(M, p, q, CustomDefinedInverseRetraction()) == -2 * Y
-        @test distance(M, p, q, CustomDefinedInverseRetraction()) == 2.0
+        @test inverse_retract(M, p, q, ManifoldsBase.Test.CustomDefinedInverseRetraction()) == -2 * Y
+        @test distance(M, p, q, ManifoldsBase.Test.CustomDefinedInverseRetraction()) == 2.0
         X4 = ManifoldsBase.allocate_result(M, inverse_retract, p, q)
         @test inverse_retract!(M, X4, p, q) == inverse_retract(M, p, q)
         @test X4 == inverse_retract(M, p, q)
@@ -485,25 +472,25 @@ using ManifoldsBaseTestUtils
                 SoftmaxInverseRetraction(),
                 ApproximateLogarithmicInverseRetraction((;)),
             ]
-            @test inverse_retract(M, q, p, r) == DefaultTangentVector(p.value - q.value)
-            @test inverse_retract!(M, Z, q, p, r) == DefaultTangentVector(p.value - q.value)
+            @test inverse_retract(M, q, p, r) == ManifoldsBase.Test.DefaultTangentVector(p.value - q.value)
+            @test inverse_retract!(M, Z, q, p, r) == ManifoldsBase.Test.DefaultTangentVector(p.value - q.value)
         end
         @test inverse_retract(
             M, q, p, EmbeddedInverseRetraction(LogarithmicInverseRetraction()),
-        ) == DefaultTangentVector(p.value - q.value)
+        ) == ManifoldsBase.Test.DefaultTangentVector(p.value - q.value)
         @test inverse_retract(M, q, p, NLSolveInverseRetraction(ExponentialRetraction())) ==
-            DefaultTangentVector(p.value - q.value)
+            ManifoldsBase.Test.DefaultTangentVector(p.value - q.value)
         @test inverse_retract!(
             M, Z, q, p, EmbeddedInverseRetraction(LogarithmicInverseRetraction()),
-        ) == DefaultTangentVector(p.value - q.value)
+        ) == ManifoldsBase.Test.DefaultTangentVector(p.value - q.value)
         @test inverse_retract!(
             M, Z, q, p, NLSolveInverseRetraction(ExponentialRetraction()),
-        ) == DefaultTangentVector(p.value - q.value)
+        ) == ManifoldsBase.Test.DefaultTangentVector(p.value - q.value)
         c = ManifoldsBase.allocate_coordinates(M, p, Float64, manifold_dimension(M))
         @test c isa Vector
         @test length(c) == 3
-        @test 2.0 \ X == DefaultTangentVector(2.0 \ X.value)
-        @test X + Y == DefaultTangentVector(X.value + Y.value)
+        @test 2.0 \ X == ManifoldsBase.Test.DefaultTangentVector(2.0 \ X.value)
+        @test X + Y == ManifoldsBase.Test.DefaultTangentVector(X.value + Y.value)
         @test +X == X
         @test (Y .= X) === Y
         # vector transport pass through
@@ -610,25 +597,18 @@ using ManifoldsBaseTestUtils
             default_approximation_method(M, exp)
         # Retraction
         @test default_approximation_method(M, retract) == default_retraction_method(M)
-        @test default_approximation_method(M, retract, DefaultPoint) ==
-            default_retraction_method(M)
+        @test default_approximation_method(M, retract, ManifoldsBase.Test.DefaultPoint) == default_retraction_method(M)
         # Inverse Retraction
-        @test default_approximation_method(M, inverse_retract) ==
-            default_inverse_retraction_method(M)
-        @test default_approximation_method(M, inverse_retract, DefaultPoint) ==
-            default_inverse_retraction_method(M)
+        @test default_approximation_method(M, inverse_retract) == default_inverse_retraction_method(M)
+        @test default_approximation_method(M, inverse_retract, ManifoldsBase.Test.DefaultPoint) == default_inverse_retraction_method(M)
         # Vector Transports – all 3: to
-        @test default_approximation_method(M, vector_transport_to) ==
-            default_vector_transport_method(M)
-        @test default_approximation_method(M, vector_transport_to, DefaultPoint) ==
-            default_vector_transport_method(M)
-        @test default_approximation_method(M, vector_transport_direction) ==
-            default_vector_transport_method(M)
-        @test default_approximation_method(M, vector_transport_direction, DefaultPoint) ==
-            default_vector_transport_method(M)
+        @test default_approximation_method(M, vector_transport_to) == default_vector_transport_method(M)
+        @test default_approximation_method(M, vector_transport_to, ManifoldsBase.Test.DefaultPoint) == default_vector_transport_method(M)
+        @test default_approximation_method(M, vector_transport_direction) == default_vector_transport_method(M)
+        @test default_approximation_method(M, vector_transport_direction, ManifoldsBase.Test.DefaultPoint) == default_vector_transport_method(M)
     end
 
-    @test ManifoldsBase.tangent_vector_type(M, DefaultPoint) === DefaultTangentVector
+    @test ManifoldsBase.tangent_vector_type(M, ManifoldsBase.Test.DefaultPoint) === ManifoldsBase.Test.DefaultTangentVector
     @test ManifoldsBase.tangent_vector_type(M, Array) === Array
 
     @testset "Type promotion in allocation" begin
