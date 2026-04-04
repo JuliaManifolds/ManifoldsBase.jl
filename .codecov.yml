@@ -1,0 +1,2 @@
+ignore:
+  - "src/test_suite.jl" # exclude tests since they are not part of the package code but merely helpers
