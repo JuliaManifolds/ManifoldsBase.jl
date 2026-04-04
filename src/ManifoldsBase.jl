@@ -1501,6 +1501,6 @@ export ×,
     zero_vector!
 
 # last but not least – load the test suite
-include("test-suite.jl")
+include("test_suite.jl")
 
 end # module
