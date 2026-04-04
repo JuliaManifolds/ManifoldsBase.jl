@@ -1,15 +1,9 @@
 using ManifoldsBase, Test
 
-s = @__DIR__
-!(s in LOAD_PATH) && (push!(LOAD_PATH, s))
-using ManifoldsBaseTestUtils
-
-using Test
-
 @testset "AbstractManifold with empty implementation" begin
-    M = NonManifold()
-    p = NonMPoint()
-    v = NonTangentVector()
+    M = ManifoldsBase.Test.NonManifold()
+    p = ManifoldsBase.Test.NonMPoint()
+    v = ManifoldsBase.Test.NonTangentVector()
     @test base_manifold(M) === M
     @test number_system(M) === ℝ
     @test representation_size(M) === nothing
@@ -45,7 +39,7 @@ using Test
     @test_throws MethodError retract(M, [0.0], [0.0], exp_retr)
     @test_throws MethodError ManifoldsBase.retract_fused(M, [0.0], [0.0], 0.0)
     @test_throws MethodError ManifoldsBase.retract_fused(M, [0.0], [0.0], 0.0, exp_retr)
-    @test_throws MethodError retract(M, [0.0], [0.0], NotImplementedRetraction())
+    @test_throws MethodError retract(M, [0.0], [0.0], ManifoldsBase.Test.NotImplementedRetraction())
     sr = SasakiRetraction(2)
     @test_throws MethodError ManifoldsBase.retract_fused(M, [0.0], [0.0], 0.0, sr)
     @test_throws MethodError retract(M, [0.0], [0.0], sr)
@@ -61,10 +55,7 @@ using Test
     @test_throws MethodError inverse_retract(M, [0.0], [0.0])
     @test_throws MethodError inverse_retract(M, [0.0], [0.0], log_invretr)
     @test_throws MethodError inverse_retract(
-        M,
-        [0.0],
-        [0.0],
-        NotImplementedInverseRetraction(),
+        M, [0.0], [0.0], ManifoldsBase.Test.NotImplementedInverseRetraction(),
     )
 
     @test_throws MethodError project!(M, p, [0])

@@ -1,9 +1,5 @@
 using ManifoldsBase, LinearAlgebra, Random, Test
 
-s = joinpath(@__DIR__, "ManifoldsBaseTestSuite.jl")
-!(s in LOAD_PATH) && (push!(LOAD_PATH, s))
-using ManifoldsBaseTestSuite
-
 @testset "Validation manifold" begin
     M = ManifoldsBase.DefaultManifold(3)
     A = ValidationManifold(M)
@@ -155,12 +151,12 @@ using ManifoldsBaseTestSuite
         @test injectivity_radius(A, x, ManifoldsBase.ExponentialRetraction()) == Inf
         @test injectivity_radius(
             A,
-            ManifoldsBaseTestSuite.CustomValidationManifoldRetraction(),
+            ManifoldsBase.Test.CustomValidationManifoldRetraction(),
         ) == 10
         @test injectivity_radius(
             A,
             x,
-            ManifoldsBaseTestSuite.CustomValidationManifoldRetraction(),
+            ManifoldsBase.Test.CustomValidationManifoldRetraction(),
         ) == 11
     end
     @testset "ValidationManifold basis" begin
@@ -212,7 +208,7 @@ using ManifoldsBaseTestSuite
         end
     end
     @testset "Output distance an norm – on different message types" begin
-        Dm = ManifoldsBaseTestSuite.ValidationDummyManifold()
+        Dm = ManifoldsBase.Test.ValidationDummyManifold()
         Ad = ValidationManifold(Dm)
         @test_throws DomainError distance(Ad, [], [])
         @test_throws DomainError norm(Ad, [], [])
@@ -237,7 +233,7 @@ using ManifoldsBaseTestSuite
         @test is_vector(A, p, X)
     end
     @testset "embed and project" begin
-        Dm = ManifoldsBaseTestSuite.ValidationDummyManifold()
+        Dm = ManifoldsBase.Test.ValidationDummyManifold()
         Ad = ValidationManifold(Dm)
         p = [0.0, 0.0, 1.0]
         X = [1.0, 0.0, 0.0]

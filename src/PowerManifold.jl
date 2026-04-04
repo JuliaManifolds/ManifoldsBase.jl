@@ -404,7 +404,7 @@ end
     check_vector(M::AbstractPowerManifold, p, X; kwargs... )
 
 Check whether `X` is a tangent vector to `p` an the [`AbstractPowerManifold`](@ref)
-`M`, i.e. atfer [`check_point`](@ref)`(M, p)`, and all projections to
+`M`, i.e. after [`check_point`](@ref)`(M, p)`, and all projections to
 base manifolds must be respective tangent vectors.
 If `X` is not a tangent vector to `p` on `M` a [`CompositeManifoldError`](@ref) consisting of all error
 messages of the components, for which the tests fail is returned.

@@ -43,14 +43,14 @@ function Base.showerror(io::IO, ex::ApproximatelyError)
 end
 
 @doc """
-    CompnentError{I,E} <: Exception
+    ComponentError{I,E} <: Exception
 
-Store an error that occured in a component, where the additional `index` is stored.
+Store an error that occurred in a component, where the additional `index` is stored.
 
 # Fields
 
-* `index::I` index where the error occured`
-* `error::E` error that occured.
+* `index::I` index where the error occurred`
+* `error::E` error that occurred.
 """
 struct ComponentManifoldError{I, E} <: AbstractManifoldDomainError where {I, E <: Exception}
     index::I
@@ -63,8 +63,8 @@ end
 @doc """
     CompositeManifoldError{T} <: Exception
 
-A composite type to collect a set of errors that occured. Mainly used in conjunction
-with [`ComponentManifoldError`](@ref) to store a set of errors that occured.
+A composite type to collect a set of errors that occurred. Mainly used in conjunction
+with [`ComponentManifoldError`](@ref) to store a set of errors that occurred.
 
 # Fields
 * `errors` a `Vector` of `<:Exceptions`.

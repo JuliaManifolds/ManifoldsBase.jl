@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.5] 03/04/2026
+
+### Changed
+
+* moved Julia package dependency action to using dependabot
+* Bump compat of RecursiveArrayTools to include 4
+* unify the TestUtils and TestSuite package into one `ManifoldsBase.Test` submodule the same way was in `Manifolds.jl`
+* setup a CI to check for typographical errors with `typos`.
+
 ## [2.3.4] 25/03/2026
 
 ### Changed
@@ -306,7 +315,7 @@ to sometimes cause an error, cf [#199](https://github.com/JuliaManifolds/Manifol
 ### Fixed
 
 * `is_point` and `is_vector` can now more stably `:info` or `:warn` when they return false,
-  since they emply `showerror` for these displays.
+  since they employ `showerror` for these displays.
 
 ## [0.15.6] 15/12/2023
 
@@ -367,7 +376,7 @@ as well as a `default_approximation_method` to specify defaults on manifolds.
   This is by default the previous `:error` mode.
 - `change_representer!`, `change_metric!` and `Weingarten!` methods added to `PowerManifold`.
 - `×` now also works for retractions, inverse retractions, and vector transports to create their product versions
-- `retract`, `inverse_retract`, and `vector_transport_to` (and `_dir`) now also accept arbirtrary retractions on the product manifold. These act the same as the n-fold product of a retraction.
+- `retract`, `inverse_retract`, and `vector_transport_to` (and `_dir`) now also accept arbitrary retractions on the product manifold. These act the same as the n-fold product of a retraction.
 
 ### Changed
 

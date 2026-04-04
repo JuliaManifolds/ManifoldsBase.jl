@@ -75,3 +75,16 @@ Modules = [ManifoldsBase]
 Pages = ["errors.jl"]
 Order = [:type]
 ```
+
+## Test Suite
+
+```@docs
+ManifoldsBase.Test
+```
+
+```@autodocs
+Modules = [ManifoldsBase]
+Pages = ["test_suite.jl"]
+Order = [:module, :type, :function]
+Private=true
+```

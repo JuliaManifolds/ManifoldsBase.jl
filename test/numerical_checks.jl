@@ -2,13 +2,9 @@ using ManifoldsBase, Plots, Statistics, Test
 # don't show plots actually
 default(; show = false, reuse = true)
 
-s = @__DIR__
-!(s in LOAD_PATH) && (push!(LOAD_PATH, s))
-using ManifoldsBaseTestUtils
-
 @testset "Numerical Check functions" begin
     @testset "Test retract checks" begin
-        M = TestSphere(10)
+        M = ManifoldsBase.Test.TestSphere(10)
         q = zeros(11)
         q[1] = 1.0
         p = zeros(11)
@@ -26,19 +22,15 @@ using ManifoldsBaseTestUtils
         @test !check_retraction(M, ProjectionRetraction(), p, X; limits = (-2.5, 2.0))
 
         #test window size error
-        @test_throws ErrorException ManifoldsBase.find_best_slope_window(
-            zeros(2), zeros(2), 20,
-        )
-        @test_throws ErrorException ManifoldsBase.find_best_slope_window(
-            zeros(2), zeros(2), [2, 20],
-        )
+        @test_throws ErrorException ManifoldsBase.find_best_slope_window(zeros(2), zeros(2), 20)
+        @test_throws ErrorException ManifoldsBase.find_best_slope_window(zeros(2), zeros(2), [2, 20])
         @test check_retraction(M, ExponentialRetraction(), p, X; exactness_tol = 1.0e-7)
         check_retraction(
             M, ExponentialRetraction(), p, X; plot = true, exactness_tol = 1.0e-7,
         )
     end
     @testset "Test inverse_retract checks" begin
-        M = TestSphere(10)
+        M = ManifoldsBase.Test.TestSphere(10)
         q = zeros(11)
         q[1] = 1.0
         p = zeros(11)
@@ -46,57 +38,32 @@ using ManifoldsBaseTestUtils
         X = log(M, p, q)
 
         @test check_inverse_retraction(
-            M,
-            ProjectionInverseRetraction(),
-            p,
-            X;
-            limits = (-2.5, 0.0),
+            M, ProjectionInverseRetraction(), p, X; limits = (-2.5, 0.0),
         )
         # One call with generating a plot
         check_inverse_retraction(
-            M,
-            ProjectionInverseRetraction(),
-            p,
-            X;
-            limits = (-2.5, 0.0),
-            plot = true,
+            M, ProjectionInverseRetraction(), p, X; limits = (-2.5, 0.0), plot = true,
         )
 
         # ProjectionRetraction only works <= 1 well in stepsize
         @test_throws ErrorException check_inverse_retraction(
-            M,
-            ProjectionInverseRetraction(),
-            p,
-            X;
+            M, ProjectionInverseRetraction(), p, X;
             limits = (-2.5, 2.0), # yields a bit too long tangents
             error = :error,
         )
         @test !check_inverse_retraction(
-            M,
-            ProjectionInverseRetraction(),
-            p,
-            X;
-            limits = (-2.5, 2.0),
+            M, ProjectionInverseRetraction(), p, X; limits = (-2.5, 2.0),
         )
         # Check exatness case
         @test check_inverse_retraction(
-            M,
-            LogarithmicInverseRetraction(),
-            p,
-            X;
-            exactness_tol = 1.0e-7,
+            M, LogarithmicInverseRetraction(), p, X; exactness_tol = 1.0e-7,
         )
         check_inverse_retraction(
-            M,
-            LogarithmicInverseRetraction(),
-            p,
-            X;
-            plot = true,
-            exactness_tol = 1.0e-7,
+            M, LogarithmicInverseRetraction(), p, X; plot = true, exactness_tol = 1.0e-7,
         )
     end
     @testset "Test vector_transport_to checks" begin
-        M = TestSphere(10)
+        M = ManifoldsBase.Test.TestSphere(10)
         q = zeros(11)
         q[1] = 1.0
         p = zeros(11)
@@ -107,56 +74,31 @@ using ManifoldsBaseTestUtils
         Y = log(M, p, r)
 
         @test check_vector_transport(
-            M,
-            ProjectionTransport(),
-            p,
-            X,
-            Y;
-            second_order = false,
+            M, ProjectionTransport(), p, X, Y; second_order = false,
         )
         # One call with generating a plot
         check_vector_transport(
-            M,
-            ProjectionTransport(),
-            p,
-            X,
-            Y;
-            second_order = false,
-            plot = true,
+            M, ProjectionTransport(), p, X, Y; second_order = false, plot = true,
         )
 
         # ProjectionRetraction only works <= 1 well in stepsize
         @test_throws ErrorException check_vector_transport(
-            M,
-            ProjectionTransport(),
-            p,
-            X,
-            Y;
+            M, ProjectionTransport(), p, X, Y;
             limits = (-2.5, 2.0), # yields a bit too long tangents
             error = :error,
         )
         @test !check_vector_transport(
-            M,
-            ProjectionTransport(),
-            p,
-            X,
-            Y;
+            M, ProjectionTransport(), p, X, Y;
             limits = (-2.5, 2.0),
         )
         # Check exactness case
         @test check_vector_transport(M, ParallelTransport(), p, X, Y; exactness_tol = 1.0e-7)
         check_vector_transport(
-            M,
-            ParallelTransport(),
-            p,
-            X,
-            Y;
-            plot = true,
-            exactness_tol = 1.0e-7,
+            M, ParallelTransport(), p, X, Y; plot = true, exactness_tol = 1.0e-7,
         )
     end
     @testset "StabilizedRetraction and its inverse" begin
-        M = TestSphere(10)
+        M = ManifoldsBase.Test.TestSphere(10)
         p1 = [
             -0.3676232664793671,
             0.6626844596366377,
@@ -249,7 +191,7 @@ using ManifoldsBaseTestUtils
         @test is_vector(M, p6, Y3; error = :error, atol = 1.0e-16)
     end
     @testset "Test check_geodesic" begin
-        M = TestSphere(10)
+        M = ManifoldsBase.Test.TestSphere(10)
         q = zeros(11)
         q[1] = 1.0
         p = zeros(11)

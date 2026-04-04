@@ -1,10 +1,6 @@
 using Test
 using ManifoldsBase
 
-s = @__DIR__
-!(s in LOAD_PATH) && (push!(LOAD_PATH, s))
-using ManifoldsBaseTestUtils
-
 #
 # A Manifold decorator test - check that StopForwarding cases call Abstract and those fail with
 # MethodError due to ambiguities (between Abstract and Decorator)
@@ -79,11 +75,8 @@ struct NonDecoratorNonManifold <: AbstractDecoratorManifold{ManifoldsBase.ℝ} e
 end
 
 @testset "Non-decorator manifold trait defaults" begin
-    M = ProjManifold()
-    p = [
-        sqrt(2) / 2 0.0 0.0
-        0.0 sqrt(2) / 2 0.0
-    ]
+    M = ManifoldsBase.Test.ProjManifold()
+    p = [sqrt(2) / 2 0.0 0.0; 0.0 sqrt(2) / 2 0.0]
 
     @test ManifoldsBase.get_forwarding_type(M, exp) === StopForwardingType()
     @test ManifoldsBase.get_forwarding_type(M, exp, typeof(p)) === StopForwardingType()

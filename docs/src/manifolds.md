@@ -61,7 +61,7 @@ Order = [:type, :function]
 ## A manifold for validation
 
 [`ValidationManifold`](@ref) is a simple decorator using the [`AbstractDecoratorManifold`](@ref) that “decorates” a manifold with tests that all involved points and vectors are valid for the wrapped manifold.
-For example involved input and output paratemers are checked before and after running a function, repectively.
+For example involved input and output parameters are checked before and after running a function, respectively.
 This is done by calling [`is_point`](@ref) or [`is_vector`](@ref) whenever applicable.
 
 ```@autodocs

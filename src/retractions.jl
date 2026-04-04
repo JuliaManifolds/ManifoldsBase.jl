@@ -779,7 +779,7 @@ By default, this falls back to calling [`retract`](@ref) with `t*X`.
     This fallback is happening on the in-place variant in [Layer 3](@ref design-layer3).
     Hence implementing this performant variant requires to implement the corresponding
     third layer fused function, like for example `retract_polar_fused!`.
-    The “non-fused” variant always also has to be implemented, but can then be just spefied
+    The “non-fused” variant always also has to be implemented, but can then be just specified
     to fallback to the fused variant. for example
     ```
     retract_polar!(M, q, p, X) = retract_polar_fused!(M, q, p, X, one(eltype(p)))

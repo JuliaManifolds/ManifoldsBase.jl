@@ -18,7 +18,7 @@
         window = nothing,
     )
 
-Check numerically wether the inverse retraction `inverse_retraction_method` is correct.
+Check numerically whether the inverse retraction `inverse_retraction_method` is correct.
 This requires the [`exp`](@ref) and [`norm`](@ref) functions to be implemented for the [`AbstractManifold`](@ref) `M`.
 
 This implements a method similar to [Boumal:2023; Section 4.8 or Section 6.8](@cite).
@@ -296,7 +296,7 @@ end
         window = nothing,
     )
 
-Check numerically wether the retraction `vector_transport_to` is correct, by selecting
+Check numerically whether the retraction `vector_transport_to` is correct, by selecting
 a set of points ``q_i = \exp_p (t_i X)`` where ``t`` takes all values from `log_range`,
 to then compare [`parallel_transport_to`](@ref) to the `vector_transport_method`
 applied to the vector `Y`.

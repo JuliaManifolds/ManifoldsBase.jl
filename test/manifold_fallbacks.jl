@@ -1,23 +1,14 @@
-using Test
-using ManifoldsBase
-
-s = @__DIR__
-!(s in LOAD_PATH) && (push!(LOAD_PATH, s))
-using ManifoldsBaseTestUtils
+using ManifoldsBase, Test
 
 @testset "NotImplemented Errors" begin
-    M = NonManifold()
+    M = ManifoldsBase.Test.NonManifold()
     p = [1.0]
     q = similar(p)
     X = [2.0]
     Y = similar(X)
     for B in [
-            VeeOrthogonalBasis(),
-            DefaultBasis(),
-            DefaultOrthogonalBasis(),
-            DefaultOrthonormalBasis(),
-            DiagonalizingOrthonormalBasis(X),
-            CachedBasis(DefaultBasis(), X),
+            VeeOrthogonalBasis(), DefaultBasis(), DefaultOrthogonalBasis(),
+            DefaultOrthonormalBasis(), DiagonalizingOrthonormalBasis(X), CachedBasis(DefaultBasis(), X),
         ]
         if !(B isa CachedBasis)
             @test_throws MethodError get_basis(M, p, B)

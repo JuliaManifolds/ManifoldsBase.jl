@@ -173,24 +173,24 @@ end
 #
 # A manifold that is isometrically embedded and `embed` is indicated as an identity but has no implementations
 #
-struct NotImplementedIsometricEmbeddedManifoldDNE <: AbstractDecoratorManifold{ℝ} end
-function ManifoldsBase.get_embedding_type(::NotImplementedIsometricEmbeddedManifoldDNE)
+struct NotImplementedIsometricEmbeddedManifoldIsoIndirect <: AbstractDecoratorManifold{ℝ} end
+function ManifoldsBase.get_embedding_type(::NotImplementedIsometricEmbeddedManifoldIsoIndirect)
     return ManifoldsBase.IsometricallyEmbeddedManifoldType(ManifoldsBase.IndirectEmbedding())
 end
 
 #
 # A manifold that is an embedded manifold and `embed` is indicated as not an identity but not isometric and has no other implementation
 #
-struct NotImplementedEmbeddedManifoldNE <: AbstractDecoratorManifold{ℝ} end
-function ManifoldsBase.get_embedding_type(::NotImplementedEmbeddedManifoldNE)
+struct NotImplementedEmbeddedManifoldDirect <: AbstractDecoratorManifold{ℝ} end
+function ManifoldsBase.get_embedding_type(::NotImplementedEmbeddedManifoldDirect)
     return ManifoldsBase.EmbeddedManifoldType(ManifoldsBase.DirectEmbedding())
 end
 
 #
 # A manifold that is an embedded manifold and `embed` is indicated as an identity but not isometric and has no other implementation
 #
-struct NotImplementedEmbeddedManifoldDNE <: AbstractDecoratorManifold{ℝ} end
-function ManifoldsBase.get_embedding_type(::NotImplementedEmbeddedManifoldDNE)
+struct NotImplementedEmbeddedManifoldIndirect <: AbstractDecoratorManifold{ℝ} end
+function ManifoldsBase.get_embedding_type(::NotImplementedEmbeddedManifoldIndirect)
     return ManifoldsBase.EmbeddedManifoldType(ManifoldsBase.IndirectEmbedding())
 end
 
@@ -413,10 +413,10 @@ end
             @test ManifoldsBase.get_forwarding_type_embedding(ManifoldsBase.EmbeddedSubmanifoldType{ManifoldsBase.DirectEmbedding}(), M, exp) === EmbeddedForwardingType()
         end
         @testset "Isometric Embedding Fallbacks & Error Tests" begin
-            for M2 in [NotImplementedIsometricEmbeddedManifoldNE(), NotImplementedIsometricEmbeddedManifoldDNE()]
+            for M2 in [NotImplementedIsometricEmbeddedManifoldNE(), NotImplementedIsometricEmbeddedManifoldIsoIndirect()]
                 @test base_manifold(M2) == M2
                 A = zeros(2)
-                if M2 isa NotImplementedIsometricEmbeddedManifoldDNE
+                if M2 isa NotImplementedIsometricEmbeddedManifoldIsoIndirect
                     @test_throws MethodError ManifoldsBase.allocate_result(M2, zero_vector, A)
                 else
                     @test size(ManifoldsBase.allocate_result(M2, zero_vector, A)) == size(A)
@@ -458,7 +458,7 @@ end
             end
         end
         @testset "Nonisometric Embedding Fallback Error Tests" begin
-            for M3 in [NotImplementedEmbeddedManifoldNE(), NotImplementedEmbeddedManifoldDNE()]
+            for M3 in [NotImplementedEmbeddedManifoldDirect(), NotImplementedEmbeddedManifoldIndirect()]
                 @test_throws MethodError inner(M3, [1, 2], [2, 3], [2, 3])
                 @test_throws MethodError distance(M3, [1, 2], [2, 3])
                 @test_throws MethodError norm(M3, [1, 2], [2, 3])
@@ -512,7 +512,7 @@ end
         @test_throws ManifoldDomainError is_point(M, vf; error = :error)
         @test_throws ManifoldDomainError is_vector(M, p, vf; error = :error)
         @test_throws ManifoldDomainError is_vector(M, vf, X; error = :error)
-        # Triggert actual test in embedding to fail
+        # Trigger actual test in embedding to fail
         @test_throws ManifoldDomainError is_point(M, [1.0, 2.0im, 3.0]; error = :error)
         @test_throws ManifoldDomainError is_vector(M, [1.0, 2.0im, 3.0], X; error = :error)
         @test_throws ManifoldDomainError is_vector(M, p, [1.0, 2.0im, 3.0]; error = :error)
@@ -527,7 +527,7 @@ end
         @test_throws ManifoldDomainError is_point(M, vf; error = :error)
         @test_throws ManifoldDomainError is_vector(M, p, vf; error = :error)
         @test_throws ManifoldDomainError is_vector(M, vf, X; error = :error)
-        # Triggert actual test in embedding to fail
+        # Trigger actual test in embedding to fail
         @test_throws ManifoldDomainError is_point(M, [1.0, 2.0im, 3.0]; error = :error)
         @test_throws ManifoldDomainError is_vector(M, [1.0, 2.0im, 3.0], X; error = :error)
         @test_throws ManifoldDomainError is_vector(M, p, [1.0, 2.0im, 3.0]; error = :error)

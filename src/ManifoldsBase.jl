@@ -272,8 +272,8 @@ The keyword arguments `kwargs` can be used to set tolerances, similar to Julia's
 
 This function might use `isapprox` from Julia internally and is similar to [`isapprox`](@ref),
 with the difference that is returns an [`ApproximatelyError`](@ref) if the two elements are
-not approximately equal, containting a more detailed description/reason.
-If the two elements are approximalely equal, this method returns `nothing`.
+not approximately equal, containing a more detailed description/reason.
+If the two elements are approximately equal, this method returns `nothing`.
 
 This method is an internal function and is called by `isapprox` whenever the user specifies
 an `error=` keyword therein. [`_isapprox`](@ref) is another related internal function. It is
@@ -1499,4 +1499,8 @@ export ×,
     Weingarten!,
     zero_vector,
     zero_vector!
+
+# last but not least – load the test suite
+include("test_suite.jl")
+
 end # module

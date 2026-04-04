@@ -101,7 +101,7 @@ point to transport to. Then $x = \exp_pX$ is used to call
 `y = `[`pole_ladder`](@ref)`(M, p, x, q)` and the resulting vector is obtained by computing
 $Y = -\log_qy$.
 
-The [`PoleLadderTransport`](@ref) posesses two advantages compared to
+The [`PoleLadderTransport`](@ref) possesses two advantages compared to
 [`SchildsLadderTransport`](@ref):
 * it is cheaper to evaluate, if you want to transport several vectors, since the
   mid point $c$ then stays unchanged.
@@ -472,7 +472,7 @@ implicitly given (and documented) for a vector transport.
 To explicitly distinguish different retractions for a vector transport,
 see [`VectorTransportDirection`](@ref).
 
-Instead of spcifying a start direction `d` one can equivalently also specify a target tanget space
+Instead of specifying a start direction `d` one can equivalently also specify a target tangent space
 ``T_q\mathcal M``, see [`vector_transport_to`](@ref).
 By default [`vector_transport_direction`](@ref) falls back to using [`vector_transport_to`](@ref),
 using the [`default_retraction_method`](@ref) on `M`.
@@ -654,7 +654,7 @@ end
 Compute the vector transport of `X` from ``T_p\mathcal M`` into the direction `d`
 using the [`AbstractRetractionMethod`](@ref) `m` in the embedding.
 
-The default implementataion requires one allocation for the points and tangent vectors in the
+The default implementation requires one allocation for the points and tangent vectors in the
 embedding and the resulting point, but the final projection is performed in place of `Y`
 """
 function vector_transport_direction_embedded!(
@@ -883,7 +883,7 @@ function vector_transport_to_diff! end
 Compute the vector transport of `X` from ``T_p\mathcal M`` to the point `q`
 using the  of the [`AbstractRetractionMethod`](@ref) `m` in th embedding.
 
-The default implementataion requires one allocation for the points and tangent vectors in the
+The default implementation requires one allocation for the points and tangent vectors in the
 embedding and the resulting point, but the final projection is performed in place of `Y`
 """
 function vector_transport_to_embedded!(M::AbstractManifold, Y, p::P, X, q, m) where {P}

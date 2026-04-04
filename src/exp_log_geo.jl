@@ -145,7 +145,7 @@ with ``γ_{p,X}(0) = p`` and ``\dot γ_{p,X}(0) = X`` a geodesic further fulfill
 ```
 
 i.e. the curve is acceleration free with respect to the Riemannian metric.
-This function evaluates the geodeic at time points `t` fom `T` in place of `Q`.
+This function evaluates the geodesic at time points `t` from `T` in place of `Q`.
 """
 function geodesic!(M::AbstractManifold, Q, p, X, T::AbstractVector)
     for (q, t) in zip(Q, T)

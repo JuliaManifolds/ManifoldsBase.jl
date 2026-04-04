@@ -131,13 +131,9 @@ function get_coordinates_orthonormal!(M::DefaultManifold, c, p, X, N::AbstractNu
     return copyto!(c, reshape(X, number_of_coordinates(M, N)))
 end
 function get_coordinates_diagonalizing!(
-        M::DefaultManifold,
-        c,
-        p,
-        X,
-        ::DiagonalizingOrthonormalBasis{ℝ},
-    )
-    return copyto!(c, reshape(X, number_of_coordinates(M, ℝ)))
+        M::DefaultManifold, c, p, X, ::DiagonalizingOrthonormalBasis{𝔽},
+    ) where {𝔽}
+    return copyto!(c, reshape(X, number_of_coordinates(M, 𝔽)))
 end
 function get_coordinates_orthonormal!(::DefaultManifold{ℂ}, c, p, X, ::RealNumbers)
     m = length(X)
@@ -152,11 +148,7 @@ function get_vector_orthonormal!(M::DefaultManifold, Y, p, c, ::AbstractNumbers)
     return copyto!(Y, reshape(c, representation_size(M)))
 end
 function get_vector_diagonalizing!(
-        M::DefaultManifold,
-        Y,
-        p,
-        c,
-        ::DiagonalizingOrthonormalBasis{ℝ},
+        M::DefaultManifold, Y, p, c, ::DiagonalizingOrthonormalBasis,
     )
     return copyto!(Y, reshape(c, representation_size(M)))
 end

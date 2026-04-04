@@ -12,10 +12,6 @@ using LinearAlgebra
 using Random
 using RecursiveArrayTools
 
-s = @__DIR__
-!(s in LOAD_PATH) && (push!(LOAD_PATH, s))
-using ManifoldsBaseTestUtils
-
 power_array_wrapper(::Type{NestedPowerRepresentation}, ::Int) = identity
 power_array_wrapper(::Type{NestedReplacingPowerRepresentation}, i::Int) = SVector{i}
 
@@ -26,37 +22,15 @@ function ManifoldsBase.allocate(
     return similar(x)
 end
 
-function ManifoldsBase.representation_size(
-        M::ManifoldsBaseTestUtils.TestPowerManifoldMultidimensional,
-    )
-    return (representation_size(M.manifold)..., ManifoldsBase.get_parameter(M.size)...)
-end
-
-@inline function ManifoldsBase._write(
-        ::ManifoldsBaseTestUtils.TestPowerManifoldMultidimensional,
-        rep_size::Tuple,
-        x::AbstractArray,
-        i::Tuple,
-    )
-    return view(x, ManifoldsBase.rep_size_to_colons(rep_size)..., i...)
-end
-
-function ManifoldsBase.get_embedding(
-        M::PowerManifold{𝔽, TM, TSW, ManifoldsBaseTestUtils.TestArrayRepresentation},
-        P::Type,
-    ) where {𝔽, TM <: AbstractManifold{𝔽}, TSW}
-    ME = get_embedding(M.manifold, P)
-    return PowerManifold{ManifoldsBase._get_field(ME), typeof(ME), TSW, ManifoldsBaseTestUtils.TestArrayRepresentation}(ME, M.size)
-end
 
 @testset "Power Manifold" begin
 
     @testset "Power Manifold with a test representation" begin
         M = ManifoldsBase.DefaultManifold(3)
-        N = PowerManifold(M, ManifoldsBaseTestUtils.TestArrayRepresentation(), 2)
-        O = PowerManifold(N, ManifoldsBaseTestUtils.TestArrayRepresentation(), 3) # joins instead of nesting.
+        N = PowerManifold(M, ManifoldsBase.Test.TestArrayRepresentation(), 2)
+        O = PowerManifold(N, ManifoldsBase.Test.TestArrayRepresentation(), 3) # joins instead of nesting.
         @test repr(O) ==
-            "PowerManifold(DefaultManifold(3; field = ℝ), ManifoldsBaseTestUtils.TestArrayRepresentation(), 2, 3)"
+            "PowerManifold(DefaultManifold(3; field = ℝ), ManifoldsBase.Test.TestArrayRepresentation(), 2, 3)"
         p = zeros(6)
         X = zeros(6)
         @test has_components(N)
@@ -397,7 +371,7 @@ end
     end
 
     @testset "metric conversion" begin
-        M = TestSPD(3)
+        M = ManifoldsBase.Test.TestSPD(3)
         N = PowerManifold(M, NestedPowerRepresentation(), 2)
         e = ManifoldsBase.EuclideanMetric()
         p = [1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1]
@@ -416,16 +390,14 @@ end
     end
 
     @testset "Curvature" begin
-        M1 = TestSphere(2)
+        M1 = ManifoldsBase.Test.TestSphere(2)
         @testset "Weingarten" begin
             Mpr = PowerManifold(M1, NestedPowerRepresentation(), 2)
             p = [1.0, 0.0, 0.0]
             X = [0.0, 0.2, 0.0]
             V = [0.1, 0.0, 0.0] #orthogonal to TpM -> parallel to p
             @test isapprox(
-                Mpr,
-                Weingarten(Mpr, [p, p], [X, X], [V, V]),
-                [-0.1 * X, -0.1 * X],
+                Mpr, Weingarten(Mpr, [p, p], [X, X], [V, V]), [-0.1 * X, -0.1 * X],
             )
         end
 
@@ -502,7 +474,7 @@ end
         @test P2[NR, 1] === p
         @test P2[NR, 2] === p
 
-        NAR = PowerManifold(M, ManifoldsBaseTestUtils.TestArrayRepresentation(), 2)
+        NAR = PowerManifold(M, ManifoldsBase.Test.TestArrayRepresentation(), 2)
         P1 = fill(p, NAR)
         @test P1 isa Matrix{Float64}
         @test P1 == [1.0 1.0; 2.0 2.0; 3.0 3.0]
@@ -525,7 +497,7 @@ end
     end
 
     @testset "r-norm with an inverse retraction" begin
-        M = ManifoldsBaseTestUtils.TestSphere(2)
+        M = ManifoldsBase.Test.TestSphere(2)
         m = ProjectionInverseRetraction()
         N = PowerManifold(M, NestedPowerRepresentation(), 2)
         p1 = [1 / sqrt(2) .* [1.0, 1.0, 0.0], [1.0, 0.0, 0.0]]

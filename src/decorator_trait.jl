@@ -50,7 +50,7 @@ abstract type AbstractEmbeddedForwardingType <: AbstractForwardingType end
 
 
 A type that indicates that a function should not forward to a certain other manifold, e.g.
-and embedding. This means that the user is asked to implement this function themselfes.
+and embedding. This means that the user is asked to implement this function themselves.
 """
 struct StopForwardingType <: AbstractForwardingType end
 
