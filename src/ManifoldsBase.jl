@@ -674,8 +674,8 @@ is injective for all tangent vectors shorter than ``d`` (i.e. has an inverse) fo
 if provided or all manifold points otherwise.
 
 In order to dispatch on different retraction methods, please either implement
-`_injectivity_radius(M[, p], m::T)` for your retraction `R` or specifically `injectivity_radius_exp(M[, p])` for the exponential map.
-By default the variant with a point `p` assumes that the default (without `p`) can ve called as a lower bound.
+`_injectivity_radius(M[, p], m::T)` for your retraction `m` or specifically `injectivity_radius_exp(M[, p])` for the exponential map.
+By default the variant with a point `p` assumes that the default (without `p`) can be called as a lower bound.
 """
 injectivity_radius(M::AbstractManifold)
 injectivity_radius(M::AbstractManifold, p) = injectivity_radius(M)
