@@ -24,6 +24,7 @@ import Random: rand, rand!
 
 using LinearAlgebra
 using Markdown: @doc_str
+using Preferences
 using Printf: @sprintf
 using Random
 
@@ -1218,6 +1219,18 @@ function zero_vector(M::AbstractManifold, p)
     X = allocate_result(M, zero_vector, p)
     zero_vector!(M, X, p)
     return X
+end
+
+#
+#
+# Internal function to set plotting backend
+function set_plotting_backend!(e::String)
+    (length(e) == 0) && return Preferences.@delete_preferences!("PlottingBackend")
+    return Preferences.@set_preferences!("PlottingBackend" => e)
+end
+# Internal function to set plotting backend
+function get_plotting_backend()
+    return Preferences.@load_preference("PlottingBackend", "Makie")
 end
 include("errors.jl")
 include("parallel_transport.jl")
