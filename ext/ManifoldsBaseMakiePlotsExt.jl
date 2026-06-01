@@ -21,4 +21,4 @@ function ManifoldsBase.plot_check_geodesic(T, N, e_norm, e_pt, e_alpha)
     return _preferred_plotting_ext().plot_check_geodesic(T, N, e_norm, e_pt, e_alpha)
 end
 
-end # module ManifoldsBasePlotsMakieExt
+end # module ManifoldsBaseMakiePlotsExt
