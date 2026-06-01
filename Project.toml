@@ -1,7 +1,7 @@
 name = "ManifoldsBase"
 uuid = "3362f125-f0bb-47a3-aa74-596ffd7ef2fb"
+version = "2.4.0"
 authors = ["Seth Axen <seth.axen@gmail.com>", "Mateusz Baran <mateuszbaran89@gmail.com>", "Ronny Bergmann <manopt@ronnybergmann.net>", "Antoine Levitt <antoine.levitt@gmail.com>"]
-version = "2.3.5"
 
 [workspace]
 projects = ["test", "docs", "tutorials"]
@@ -13,12 +13,14 @@ Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 
 [weakdeps]
+Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 Quaternions = "94ee1d12-ae83-5a48-8b1c-48b8ff168ae0"
 RecursiveArrayTools = "731186ca-8d62-57ce-b412-fbd966d074cd"
 Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 
 [extensions]
+ManifoldsBaseMakieExt = "Makie"
 ManifoldsBasePlotsExt = "Plots"
 ManifoldsBaseQuaternionsExt = "Quaternions"
 ManifoldsBaseRecursiveArrayToolsExt = "RecursiveArrayTools"
@@ -26,6 +28,7 @@ ManifoldsBaseStatisticsExt = "Statistics"
 
 [compat]
 LinearAlgebra = "1.6"
+Makie = "0.24"
 Markdown = "1.6"
 Plots = "1"
 Printf = "1.6"
