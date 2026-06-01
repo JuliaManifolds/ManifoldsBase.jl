@@ -3,10 +3,14 @@ module ManifoldsBaseMakieExt
 using ManifoldsBase
 using Makie
 using Printf: @sprintf
+import ManifoldsBase: splot_slope, plot_check_geodesic
 
 function ManifoldsBase.plot_slope(
         x, y; slope = 2, line_base = 0, a = 0, b = 2.0, i = 1, j = length(x),
     )
+    return _plot_slope(x, y; slope = slope, line_base = line_base, a = a, b = b, i = i, j = j)
+end
+function _plot_slope(x, y; slope = 2, line_base = 0, a = 0, b = 2.0, i = 1, j = length(x))
     fig = Makie.Figure()
     # Setup the log log plot
     ax = Makie.Axis(
@@ -35,6 +39,9 @@ function ManifoldsBase.plot_slope(
     return fig
 end
 function ManifoldsBase.plot_check_geodesic(T, N, e_norm, e_pt, e_alpha)
+    return _plot_check_geodesic(T, N, e_norm, e_pt, e_alpha)
+end
+function _plot_check_geodesic(T, N, e_norm, e_pt, e_alpha)
     fig = Figure()
     ax = Axis(
         fig[1, 1];

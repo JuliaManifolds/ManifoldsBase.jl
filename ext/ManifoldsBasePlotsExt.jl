@@ -8,6 +8,9 @@ function ManifoldsBase.plot_slope(
         x, y;
         slope = 2, line_base = 0, a = 0, b = 2.0, i = 1, j = length(x),
     )
+    return _plot_slope(x, y; slope = slope, line_base = line_base, a = a, b = b, i = i, j = j)
+end
+function _plot_slope(x, y; slope = 2, line_base = 0, a = 0, b = 2.0, i = 1, j = length(x))
     fig = plot(
         x, y; xaxis = :log, yaxis = :log, label = "\$E(t)\$",
         linewidth = 3, legend = :topleft, color = :lightblue,
@@ -28,6 +31,9 @@ function ManifoldsBase.plot_slope(
     return fig
 end
 function ManifoldsBase.plot_check_geodesic(T, N, e_norm, e_pt, e_alpha)
+    return _plot_check_geodesic(T, N, e_norm, e_pt, e_alpha)
+end
+function _plot_check_geodesic(T, N, e_norm, e_pt, e_alpha)
     fig = plot(
         T[1:(N - 1)], e_norm;
         # Deviation from constant speed: |‖Xᵢ‖ − mean‖X‖|

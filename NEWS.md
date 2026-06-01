@@ -9,11 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-* an extension to also perform the numerical checks plots with [`Makie.jl](https://https://makie.org/).
+* an extension to also perform the numerical checks plots with [`Makie.jl](https://https://makie.org/) (#272).
 
 ### Fixed
 
-* (documentation of the `injectivity_radius` function now displays clearer instructions for the implementation of a radius linked to a user's own `AbstractRetractionMethod`. (#270)
+* documentation of the `injectivity_radius` function now displays clearer instructions for the implementation of a radius linked to a user's own `AbstractRetractionMethod`. (#270)
 
 ## [2.3.5] 03/04/2026
 

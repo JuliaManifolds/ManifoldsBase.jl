@@ -1,4 +1,4 @@
-using ManifoldsBase, Plots, Statistics, Test
+using ManifoldsBase, GLMakie, Plots, Statistics, Test
 # don't show plots actually
 default(; show = false, reuse = true)
 
