@@ -5,12 +5,9 @@ using Plots
 using Printf: @sprintf
 
 function ManifoldsBase.plot_slope(
-        x, y;
+        ::Val{:Plots}, x, y;
         slope = 2, line_base = 0, a = 0, b = 2.0, i = 1, j = length(x),
     )
-    return _plot_slope(x, y; slope = slope, line_base = line_base, a = a, b = b, i = i, j = j)
-end
-function _plot_slope(x, y; slope = 2, line_base = 0, a = 0, b = 2.0, i = 1, j = length(x))
     fig = plot(
         x, y; xaxis = :log, yaxis = :log, label = "\$E(t)\$",
         linewidth = 3, legend = :topleft, color = :lightblue,
@@ -30,10 +27,7 @@ function _plot_slope(x, y; slope = 2, line_base = 0, a = 0, b = 2.0, i = 1, j = 
     end
     return fig
 end
-function ManifoldsBase.plot_check_geodesic(T, N, e_norm, e_pt, e_alpha)
-    return _plot_check_geodesic(T, N, e_norm, e_pt, e_alpha)
-end
-function _plot_check_geodesic(T, N, e_norm, e_pt, e_alpha)
+function ManifoldsBase.plot_check_geodesic(::Val{:Plots}, T, N, e_norm, e_pt, e_alpha)
     fig = plot(
         T[1:(N - 1)], e_norm;
         # Deviation from constant speed: |‖Xᵢ‖ − mean‖X‖|
@@ -55,4 +49,11 @@ function _plot_check_geodesic(T, N, e_norm, e_pt, e_alpha)
     )
     return fig
 end
+# Check whether the default fallback is not Plots and if so set it to this.
+# Then, if no persistent backend is set, plotting “just works”
+ManifoldsBase._MANIFOLDSBASE_PLOTTING_BACKEND != "Plots" && (ManifoldsBase.set_plotting_backend!("Plots"; only_fallback = true))
+nm = isnothing(Base.get_extension(ManifoldsBase, :ManifoldsBaseMakieExt))
+pb = ManifoldsBase.get_plotting_backend()
+# Makie is not loaded but current default – warn
+(pb != "Plots") && nm && (@warn "PLots was loaded, but the current backend is `Makie`, which is not loaded. consider calling `ManifoldsBase.set_plotting_backend!(\"Plots\")`.")
 end

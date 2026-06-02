@@ -3,14 +3,12 @@ module ManifoldsBaseMakieExt
 using ManifoldsBase
 using Makie
 using Printf: @sprintf
-import ManifoldsBase: splot_slope, plot_check_geodesic
+import ManifoldsBase: plot_slope, plot_check_geodesic
 
 function ManifoldsBase.plot_slope(
-        x, y; slope = 2, line_base = 0, a = 0, b = 2.0, i = 1, j = length(x),
+        ::Val{:Makie}, x, y;
+        slope = 2, line_base = 0, a = 0, b = 2.0, i = 1, j = length(x),
     )
-    return _plot_slope(x, y; slope = slope, line_base = line_base, a = a, b = b, i = i, j = j)
-end
-function _plot_slope(x, y; slope = 2, line_base = 0, a = 0, b = 2.0, i = 1, j = length(x))
     fig = Makie.Figure()
     # Setup the log log plot
     ax = Makie.Axis(
@@ -38,10 +36,7 @@ function _plot_slope(x, y; slope = 2, line_base = 0, a = 0, b = 2.0, i = 1, j = 
     Makie.axislegend(ax; position = :lt)
     return fig
 end
-function ManifoldsBase.plot_check_geodesic(T, N, e_norm, e_pt, e_alpha)
-    return _plot_check_geodesic(T, N, e_norm, e_pt, e_alpha)
-end
-function _plot_check_geodesic(T, N, e_norm, e_pt, e_alpha)
+function ManifoldsBase.plot_check_geodesic(::Val{:Makie}, T, N, e_norm, e_pt, e_alpha)
     fig = Figure()
     ax = Axis(
         fig[1, 1];
@@ -65,4 +60,11 @@ function _plot_check_geodesic(T, N, e_norm, e_pt, e_alpha)
     axislegend(ax; position = :rt)
     return fig
 end
+# Check whether the default fallback is not Makie and if so set it to this.
+# Then, if no persistent backend is set, plotting “just works”
+ManifoldsBase._MANIFOLDSBASE_PLOTTING_BACKEND != "Makie" && (ManifoldsBase.set_plotting_backend!("Makie"; only_fallback = true))
+np = isnothing(Base.get_extension(ManifoldsBase, :ManifoldsBasePlotsExt))
+pb = ManifoldsBase.get_plotting_backend()
+# Plots is not loaded but current default – warn
+(pb != "Makie") && np && (@warn "Makie was loaded, but the current backend is `Plots`, which is not loaded. consider calling `ManifoldsBase.set_plotting_backend!(\"Makie\")`.")
 end

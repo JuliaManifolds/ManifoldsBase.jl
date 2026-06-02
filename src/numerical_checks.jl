@@ -73,20 +73,25 @@ function check_inverse_retraction(
     approx_Xs = [inverse_retract(M, p, q, inverse_retraction_method) for q in points]
     errors = [norm(M, p, X - Y) for (X, Y) in zip(Xs, approx_Xs)]
     return prepare_check_result(
-        log_range,
-        errors,
-        second_order ? 3.0 : 2.0;
-        exactness_tol = exactness_tol,
-        io = io,
-        name = name,
-        plot = plot,
-        slope_tol = slope_tol,
-        error = error,
-        window = window,
+        log_range, errors, second_order ? 3.0 : 2.0;
+        error = error, exactness_tol = exactness_tol, io = io,
+        name = name, plot = plot, slope_tol = slope_tol, window = window,
     )
 end
 
+"""
+    plot_check_geodesic(T, N, e_norm, e_pt, e_alpha)
+
+Plot the three errors `e_norm`, `e_pt, `e_alpha` as described in [`check_geodesic`](@ref),
+where `T` are all time points used, `N` is their length, where
+* `e_norm` is of length N-1, since it is obtained from forward differences,
+* `e_pt` and `e_alpha` are of length `N-2` since they are second order forward differences
+"""
 function plot_check_geodesic end
+
+function plot_check_geodesic(T, N, e_norm, e_pt, e_alpha)
+    return plot_check_geodesic(Val(Symbol(get_plotting_backend())), T, N, e_norm, e_pt, e_alpha)
+end
 
 @doc raw"""
     check_geodesic(
@@ -139,14 +144,9 @@ the plot is generated first and returned (to be shown/displayed), such that no e
 You can switch to e.g. `:warn` to get a warning together with the plot.
 """
 function check_geodesic(
-        M::AbstractManifold,
-        p = rand(M),
-        X = rand(M; vector_at = p);
-        tol::Real = 1.0e-12,
-        io::Union{IO, Nothing} = nothing,
-        N::Int = 101,
-        plot::Bool = false,
-        error::Symbol = :none,
+        M::AbstractManifold, p = rand(M), X = rand(M; vector_at = p);
+        error::Symbol = :none, io::Union{IO, Nothing} = nothing,
+        N::Int = 101, tol::Real = 1.0e-12, plot::Bool = false,
         inverse_retraction_method::AbstractInverseRetractionMethod = LogarithmicInverseRetraction(),
         vector_transport_method::AbstractVectorTransportMethod = ParallelTransport(),
     )
@@ -185,10 +185,8 @@ function check_geodesic(
 end
 @doc raw"""
     check_retraction(
-        M::AbstractManifold,
-        rectraction_method::AbstractRetractionMethod,
-        p=rand(M),
-        X=rand(M; vector_at=p);
+        M::AbstractManifold, rectraction_method::AbstractRetractionMethod,
+        p=rand(M), X=rand(M; vector_at=p);
         #
         exactness_tol::Real = 1e-12,
         io::Union{IO,Nothing} = nothing,
@@ -237,21 +235,14 @@ the plot is generated first and returned (to be shown/displayed), such that no e
 You can switch to e.g. `:warn` to get a warning together with the plot.
 """
 function check_retraction(
-        M::AbstractManifold,
-        retraction_method::AbstractRetractionMethod,
-        p = rand(M),
-        X = rand(M; vector_at = p);
-        exactness_tol::Real = 1.0e-12,
-        io::Union{IO, Nothing} = nothing,
-        limits::Tuple = (-8.0, 0.0),
-        N::Int = 101,
+        M::AbstractManifold, retraction_method::AbstractRetractionMethod,
+        p = rand(M), X = rand(M; vector_at = p);
+        error::Symbol = :none, exactness_tol::Real = 1.0e-12,
+        io::Union{IO, Nothing} = nothing, limits::Tuple = (-8.0, 0.0), N::Int = 101,
         second_order::Bool = true,
         name::String = second_order ? "second order retraction" : "retraction",
         log_range = range(limits[1], limits[2]; length = N),
-        plot::Bool = false,
-        slope_tol::Real = 0.1,
-        error::Symbol = :none,
-        window = nothing,
+        plot::Bool = false, slope_tol::Real = 0.1, window = nothing,
     )
     Xn = X ./ norm(M, p, X) # normalize tangent direction
     # function for the directional derivative
@@ -262,27 +253,18 @@ function check_retraction(
     approx_points = [retract_fused(M, p, Xn, t, retraction_method) for t in T]
     errors = [distance(M, p, q) for (p, q) in zip(points, approx_points)]
     return prepare_check_result(
-        log_range,
-        errors,
-        second_order ? 3.0 : 2.0;
-        exactness_tol = exactness_tol,
-        io = io,
-        name = name,
-        plot = plot,
-        slope_tol = slope_tol,
-        error = error,
-        window = window,
+        log_range, errors, second_order ? 3.0 : 2.0;
+        error = error, exactness_tol = exactness_tol, io = io,
+        name = name, plot = plot, slope_tol = slope_tol, window = window,
     )
 end
 
 @doc raw"""
     check_vector_transport(
-        M::AbstractManifold,
-        vector_transport_method::AbstractVectorTransportMethod,
-        p=rand(M),
-        X=rand(M; vector_at=p),
-        Y=rand(M; vector_at=p);
+        M::AbstractManifold, vector_transport_method::AbstractVectorTransportMethod,
+        p=rand(M), X=rand(M; vector_at=p), Y=rand(M; vector_at=p);
         #
+        error::Symbol = :none,
         exactness_tol::Real = 1e-12,
         io::Union{IO,Nothing} = nothing,
         limits::Tuple = (-8.0, 0.0),
@@ -292,7 +274,6 @@ end
         plot::Bool = false,
         second_order::Bool = true
         slope_tol::Real = 0.1,
-        error::Symbol = :none,
         window = nothing,
     )
 
@@ -330,22 +311,16 @@ the plot is generated first and returned (to be shown/displayed), such that no e
 You can switch to e.g. `:warn` to get a warning together with the plot.
 """
 function check_vector_transport(
-        M::AbstractManifold,
-        vector_transport_method::AbstractVectorTransportMethod,
-        p = rand(M),
-        X = rand(M; vector_at = p),
-        Y = rand(M; vector_at = p);
-        exactness_tol::Real = 1.0e-12,
+        M::AbstractManifold, vector_transport_method::AbstractVectorTransportMethod,
+        p = rand(M), X = rand(M; vector_at = p), Y = rand(M; vector_at = p);
+        error::Symbol = :none, exactness_tol::Real = 1.0e-12,
         io::Union{IO, Nothing} = nothing,
         limits::Tuple = (-8.0, 0.0),
         N::Int = 101,
+        log_range::AbstractVector = range(limits[1], limits[2]; length = N),
         second_order::Bool = true,
         name::String = second_order ? "second order vector transport" : "vector transport",
-        log_range::AbstractVector = range(limits[1], limits[2]; length = N),
-        plot::Bool = false,
-        slope_tol::Real = 0.1,
-        error::Symbol = :none,
-        window = nothing,
+        plot::Bool = false, slope_tol::Real = 0.1, window = nothing,
     )
     Xn = X ./ norm(M, p, X) # normalize tangent direction
     # function for the directional derivative
@@ -357,29 +332,17 @@ function check_vector_transport(
     Yp = [parallel_transport_to(M, p, Y, q) for q in points]
     errors = [norm(M, q, X - Y) for (q, X, Y) in zip(points, Yv, Yp)]
     return prepare_check_result(
-        log_range,
-        errors,
-        second_order ? 3.0 : 2.0;
-        exactness_tol = exactness_tol,
-        io = io,
-        name = name,
-        plot = plot,
-        slope_tol = slope_tol,
-        error = error,
-        window = window,
+        log_range, errors, second_order ? 3.0 : 2.0;
+        error = error, exactness_tol = exactness_tol,
+        io = io, name = name, plot = plot, slope_tol = slope_tol, window = window,
     )
 end
 
 function plot_slope end
 
 """
-    plot_slope(x, y;
-        slope=2,
-        line_base=0,
-        a=0,
-        b=2.0,
-        i=1,
-        j=length(x)
+    plot_slope(
+        x, y; slope=2, line_base=0, a=0, b=2.0, i=1, j=length(x)
     )
 
 Plot the result from the verification functions on data `x,y` with two comparison lines
@@ -391,19 +354,18 @@ Plot the result from the verification functions on data `x,y` with two compariso
     This function has to be implemented for a certain plotting package.
     loading [Plots.jl](https://docs.juliaplots.org/stable/) provides a default implementation.
 """
-plot_slope(x, y)
+plot_slope(x, y; kwargs...)
+
+function plot_slope(x, y; kwargs...)
+    return plot_slope(Val(Symbol(get_plotting_backend())), x, y; kwargs...)
+end
 
 """
     prepare_check_result(
-        log_range::AbstractVector,
-        errors::AbstractVector,
-        slope::Real;
-        exactness_to::Real = 1e3*eps(eltype(errors)),
-        io::Union{IO,Nothing} = nothing
-        name::String = "estimated slope",
-        plot::Bool = false,
-        slope_tol::Real = 0.1,
-        error::Symbol = :none,
+        log_range::AbstractVector, errors::AbstractVector, slope::Real;
+        error::Symbol = :none, exactness_to::Real = 1e3*eps(eltype(errors)),
+        io::Union{IO,Nothing} = nothing name::String = "estimated slope",
+        plot::Bool = false, slope_tol::Real = 0.1,
     )
 
 Given a range of values `log_range`, with computed `errors`,
@@ -426,18 +388,11 @@ Note that since the plot yields more information than throwing an error, when bo
 the plot is generated first and returned (to be shown/displayed), such that no error is thrown.
 You you can switch to e.g. `:warn` to get a warning together with the plot.
 """
-
 function prepare_check_result(
-        log_range::AbstractVector,
-        errors::AbstractVector,
-        slope::Real;
-        io::Union{IO, Nothing} = nothing,
-        name::String = "estimated slope",
-        slope_tol::Real = 1.0e-1,
-        plot::Bool = false,
-        error::Symbol = :none,
-        window = nothing,
-        exactness_tol::Real = 1.0e3 * eps(eltype(errors)),
+        log_range::AbstractVector, errors::AbstractVector, slope::Real;
+        error::Symbol = :none, exactness_tol::Real = 1.0e3 * eps(eltype(errors)),
+        io::Union{IO, Nothing} = nothing, name::String = "estimated slope",
+        plot::Bool = false, slope_tol::Real = 1.0e-1, window = nothing,
     )
     if max(errors...) < exactness_tol
         (io !== nothing) && print(
@@ -452,14 +407,8 @@ function prepare_check_result(
     (a, b) = find_best_slope_window(x, y, length(x))[1:2]
     if isapprox(b, slope; atol = slope_tol)
         plot && return plot_slope(
-            T,
-            errors[errors .> 0];
-            slope = slope,
-            line_base = errors[1],
-            a = a,
-            b = b,
-            i = 1,
-            j = length(y),
+            T, errors[errors .> 0];
+            slope = slope, line_base = errors[1], a = a, b = b, i = 1, j = length(y),
         )
         (io !== nothing) && print(
             io,
@@ -475,14 +424,8 @@ function prepare_check_result(
     (error === :info) && @info msg
     (error === :warn) && @warn msg
     plot && return plot_slope(
-        T,
-        errors[errors .> 0];
-        slope = slope,
-        line_base = errors[1],
-        a = ab,
-        b = bb,
-        i = ib,
-        j = jb,
+        T, errors[errors .> 0];
+        slope = slope, line_base = errors[1], a = ab, b = bb, i = ib, j = jb,
     )
     (error === :error) && throw(ErrorException(msg))
     return false
