@@ -1,4 +1,4 @@
-using ManifoldsBase, GLMakie, Plots, Statistics, Test
+using ManifoldsBase, Plots, Statistics, Test
 # don't show plots actually
 default(; show = false, reuse = true)
 
@@ -206,5 +206,39 @@ default(; show = false, reuse = true)
         X2[1] = 1.0
         X2[2:4] .= 2.0
         @test_throws ErrorException check_geodesic(M, q, X2; error = :error)
+    end
+    # Now load CairoMakie – default is Makie so we test the slope and geodesic again
+    using CairoMakie
+    @testset "Test retract checks" begin
+        M = ManifoldsBase.Test.TestSphere(10)
+        q = zeros(11)
+        q[1] = 1.0
+        p = zeros(11)
+        p[1:4] .= 1 / sqrt(4)
+        X = log(M, p, q)
+        # One call with generating a plot
+        f = check_retraction(M, ProjectionRetraction(), p, X; limits = (-2.5, 0.0), plot = true)
+        @test f isa Figure
+        # One call with generating a plot
+        f2 = check_geodesic(M, p, X; plot = true)
+        @test f2 isa CairoMakie.Figure
+    end
+    @testset "get/set plotting backend and that it actually switches back to Plots.jl" begin
+        ManifoldsBase.set_plotting_backend!("Plots")
+        @test ManifoldsBase.get_plotting_backend() == "Plots"
+
+        M = ManifoldsBase.Test.TestSphere(10)
+        q = zeros(11)
+        q[1] = 1.0
+        p = zeros(11)
+        p[1:4] .= 1 / sqrt(4)
+        X = log(M, p, q)
+        # One call with generating a plot
+        f = check_retraction(M, ProjectionRetraction(), p, X; limits = (-2.5, 0.0), plot = true)
+        @test f isa Plots.Plot
+        # and back
+        ManifoldsBase.set_plotting_backend!("Makie")
+        f2 = check_retraction(M, ProjectionRetraction(), p, X; limits = (-2.5, 0.0), plot = true)
+        @test f2 isa CairoMakie.Figure
     end
 end
