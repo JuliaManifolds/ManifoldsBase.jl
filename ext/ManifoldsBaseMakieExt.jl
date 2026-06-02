@@ -60,11 +60,4 @@ function ManifoldsBase.plot_check_geodesic(::Val{:Makie}, T, N, e_norm, e_pt, e_
     axislegend(ax; position = :rt)
     return fig
 end
-# Check whether the default fallback is not Makie and if so set it to this.
-# Then, if no persistent backend is set, plotting “just works”
-ManifoldsBase._MANIFOLDSBASE_PLOTTING_BACKEND != "Makie" && (ManifoldsBase.set_plotting_backend!("Makie"; only_fallback = true))
-np = isnothing(Base.get_extension(ManifoldsBase, :ManifoldsBasePlotsExt))
-pb = ManifoldsBase.get_plotting_backend()
-# Plots is not loaded but current default – warn
-(pb != "Makie") && np && (@warn "Makie was loaded, but the current backend is `Plots`, which is not loaded. consider calling `ManifoldsBase.set_plotting_backend!(\"Makie\")`.")
 end

@@ -7,10 +7,6 @@
 """
 module ManifoldsBase
 
-# A Nonpersistent default, i.e. it gets reset when reloading the package
-# see get/set_plotting_backend for details
-_MANIFOLDSBASE_PLOTTING_BACKEND = "Makie"
-
 import Base:
     isapprox,
     exp,
@@ -1240,16 +1236,14 @@ end
 """
     set_plotting_backend!(backend::String; only_fallback = false)
 
-Set the plotting backend to `backend`. Currently supported: `"Plots"` and `"Makie"`.
+Set the plotting backend to `backend`.
+Currently supported: `"Plots"` and `"Makie"`.
 
-The keyword `only_fallback` determines whether to only set the fallback
-or store this value in with `Preferences.jl` overwriting the fallback persistently
-An empty `backend = ""` deletes the persistent one.
+An empty string resets to the default to use the last loaded one.
 """
-function set_plotting_backend!(e::String; only_fallback = false)
-    (length(e) == 0) && return Preferences.@delete_preferences!("PlottingBackend")
+function set_plotting_backend!(e::String)
+    (length(e) == 0) && (return Preferences.@delete_preferences!("PlottingBackend"))
     # for the nonpersistent / fallback case, only set the value in the package
-    only_fallback && return (ManifoldsBase._MANIFOLDSBASE_PLOTTING_BACKEND = e)
     return Preferences.@set_preferences!("PlottingBackend" => e)
 end
 
@@ -1257,10 +1251,15 @@ end
     get_plotting_backend()
 
 Return the current plotting backend.
-If no (persistent) one is set via `Preferences.jl`, the internal one is returned.
+If none was set by the user, the last loaded one is returned. If none was loaded `nothing` is returned
 """
 function get_plotting_backend()
-    return Preferences.@load_preference("PlottingBackend", ManifoldsBase._MANIFOLDSBASE_PLOTTING_BACKEND)
+    def = nothing
+    # Choose a default – if both are loaded this order makes it Makie
+    !isnothing(Base.get_extension(ManifoldsBase, :ManifoldsBasePlotsExt)) && (def = "Plots")
+    !isnothing(Base.get_extension(ManifoldsBase, :ManifoldsBaseMakieExt)) && (def = "Makie")
+    # unless the user has set one
+    return Preferences.@load_preference("PlottingBackend", def)
 end
 
 

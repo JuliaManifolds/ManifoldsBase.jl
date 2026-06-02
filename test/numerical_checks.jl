@@ -1,7 +1,7 @@
 using ManifoldsBase
 using Plots, Statistics, Test
 
-# don't show plots actually
+# don't show plots actually when using Plots
 default(; show = false, reuse = true)
 
 @testset "Numerical Check functions" begin
@@ -42,7 +42,6 @@ default(; show = false, reuse = true)
             M, ProjectionInverseRetraction(), p, X; limits = (-2.5, 0.0),
         )
         # One call with generating a plot
-        @info ManifoldsBase._MANIFOLDSBASE_PLOTTING_BACKEND
         @info ManifoldsBase.get_plotting_backend()
         check_inverse_retraction(
             M, ProjectionInverseRetraction(), p, X; limits = (-2.5, 0.0), plot = true,
@@ -227,11 +226,9 @@ default(; show = false, reuse = true)
         @test f2 isa CairoMakie.Figure
     end
     @testset "get/set plotting backend and that it actually switches back to Plots.jl" begin
+        # Both are loaded, so here we set to Plots manually
         ManifoldsBase.set_plotting_backend!("Plots")
         @test ManifoldsBase.get_plotting_backend() == "Plots"
-        # Reset persistent state again
-        ManifoldsBase.set_plotting_backend!("")
-
         M = ManifoldsBase.Test.TestSphere(10)
         q = zeros(11)
         q[1] = 1.0
@@ -241,8 +238,9 @@ default(; show = false, reuse = true)
         # One call with generating a plot
         f = check_retraction(M, ProjectionRetraction(), p, X; limits = (-2.5, 0.0), plot = true)
         @test f isa Plots.Plot
-        # Reset persistent state again – default Makie should be used now again
+        # Reset persistent state again
         ManifoldsBase.set_plotting_backend!("")
+        # Now we use last loaded again: Makie
         f2 = check_retraction(M, ProjectionRetraction(), p, X; limits = (-2.5, 0.0), plot = true)
         @test f2 isa CairoMakie.Figure
     end
