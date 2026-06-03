@@ -1,3 +1,10 @@
+@doc """
+🏔️ ManifoldsBase.jl: An interface for manifolds in Julia
+
+* 📚 Documentation: [juliamanifolds.github.io/ManifoldsBase.jl/](https://juliamanifolds.github.io/ManifoldsBase.jl/)
+* 📦 Repository: [github.com/JuliaManifolds/ManifoldsBase.jl](https://github.com/JuliaManifolds/ManifoldsBase.jl)
+* 🎯 Issues: [github.com/JuliaManifolds/ManifoldsBase.jl/issues](https://github.com/JuliaManifolds/ManifoldsBase.jl/issues)
+"""
 module ManifoldsBase
 
 import Base:
@@ -24,8 +31,10 @@ import Random: rand, rand!
 
 using LinearAlgebra
 using Markdown: @doc_str
+using Preferences
 using Printf: @sprintf
 using Random
+
 
 include("maintypes.jl")
 include("numbers.jl")
@@ -1219,6 +1228,41 @@ function zero_vector(M::AbstractManifold, p)
     zero_vector!(M, X, p)
     return X
 end
+
+#
+#
+# Internal function to set plotting backend
+
+"""
+    set_plotting_backend!(backend::String; only_fallback = false)
+
+Set the plotting backend to `backend`.
+Currently supported: `"Plots"` and `"Makie"`.
+
+An empty string resets to the default to use the last loaded one.
+"""
+function set_plotting_backend!(e::String)
+    (length(e) == 0) && (return Preferences.@delete_preferences!("PlottingBackend"))
+    # for the nonpersistent / fallback case, only set the value in the package
+    return Preferences.@set_preferences!("PlottingBackend" => e)
+end
+
+"""
+    get_plotting_backend()
+
+Return the current plotting backend.
+If none was set by the user, the last loaded one is returned. If none was loaded `nothing` is returned
+"""
+function get_plotting_backend()
+    def = nothing
+    # Choose a default – if both are loaded this order makes it Makie
+    !isnothing(Base.get_extension(ManifoldsBase, :ManifoldsBasePlotsExt)) && (def = "Plots")
+    !isnothing(Base.get_extension(ManifoldsBase, :ManifoldsBaseMakieExt)) && (def = "Makie")
+    # unless the user has set one
+    return Preferences.@load_preference("PlottingBackend", def)
+end
+
+
 include("errors.jl")
 include("parallel_transport.jl")
 include("vector_transport.jl")
@@ -1253,17 +1297,20 @@ function __init__()
     #
     return @static if isdefined(Base.Experimental, :register_error_hint) # COV_EXCL_LINE
         Base.Experimental.register_error_hint(MethodError) do io, exc, argtypes, kwargs
-            if exc.f === plot_slope
+            if (exc.f === plot_slope) || (exc.f === plot_check_geodesic)
                 print(
                     io,
                     """
 
-                    `plot_slope` has to be implemented using your favourite plotting package.
-                    A default is available when Plots.jl is added to the current environment.
+                    `$(exc.f)` has to be implemented using your favourite plotting package.
+                    A default is available when either `Plots.jl` or `Makie.jl` is loaded..
                     To then get the plotting functionality activated, do
                     """,
                 )
                 printstyled(io, "`using Plots`"; color = :cyan)
+                print(io, " or ")
+                printstyled(io, "`using CairoMakie`"; color = :cyan)
+                print(io, " or your favourite other Makie backend. You might have to add these to your environment first as well.")
             end
             if exc.f === find_best_slope_window
                 print(

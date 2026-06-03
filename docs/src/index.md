@@ -1,6 +1,8 @@
 # ManifoldsBase.jl
 
-`ManifoldsBase.jl` is a lightweight interface for manifolds.
+```@docs
+ManifoldsBase.ManifoldsBase
+```
 
 This packages has two main purposes.
 You can add it as a dependency if you plan to work on manifolds (generically) or if you plan to
