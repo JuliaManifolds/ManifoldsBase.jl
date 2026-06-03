@@ -42,7 +42,6 @@ default(; show = false, reuse = true)
             M, ProjectionInverseRetraction(), p, X; limits = (-2.5, 0.0),
         )
         # One call with generating a plot
-        @info ManifoldsBase.get_plotting_backend()
         check_inverse_retraction(
             M, ProjectionInverseRetraction(), p, X; limits = (-2.5, 0.0), plot = true,
         )
