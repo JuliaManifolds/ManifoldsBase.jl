@@ -8,24 +8,9 @@
 module ManifoldsBase
 
 import Base:
-    isapprox,
-    exp,
-    log,
-    convert,
-    copy,
-    copyto!,
-    angle,
-    eltype,
-    fill,
-    fill!,
-    isempty,
-    length,
-    similar,
-    show,
-    +,
-    -,
-    *,
-    ==
+    isapprox, exp, log,
+    convert, copy, copyto!, angle, eltype, fill, fill!, isempty, length, similar, show,
+    +, -, *, ==
 import LinearAlgebra: ×, dot, norm, det, cross, I, UniformScaling, Diagonal
 import Random: rand, rand!
 
@@ -1266,6 +1251,7 @@ end
 include("errors.jl")
 include("parallel_transport.jl")
 include("vector_transport.jl")
+
 include("shooting.jl")
 include("vector_spaces.jl")
 include("point_vector_fallbacks.jl")
@@ -1273,6 +1259,8 @@ include("nested_trait.jl")
 
 include("connection.jl")
 include("metric.jl")
+
+include("zero_vector.jl")
 
 include("decorator_trait.jl")
 include("numerical_checks.jl")

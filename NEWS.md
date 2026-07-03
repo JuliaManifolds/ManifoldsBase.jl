@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.0] unreleased
+
+## Added
+
+* a `ZeroVector` type, to avoid allocating unnecessary zeros similar to the [`Identity`](https://juliamanifolds.github.io/LieGroups.jl/stable/interface/operations/#LieGroups.Identity) on [`LieGroups.jl`](https://github.com/JuliaManifolds/LieGroups.jl).
+
 ## [2.4.0] 03/06/2026
 
 ### Added

@@ -298,20 +298,14 @@ function allocate_coordinates(M::AbstractManifold, p::Int, T, n::Int)
     return (representation_size(M) == () && n == 0) ? zero(T) : zeros(T, n)
 end
 function allocate_result(
-        M::AbstractManifold,
-        f::typeof(get_coordinates),
-        p,
-        X,
-        basis::AbstractBasis{𝔽},
+        M::AbstractManifold, f::typeof(get_coordinates), p, X, basis::AbstractBasis{𝔽},
     ) where {𝔽}
     T = coordinate_eltype(M, p, 𝔽)
     return allocate_coordinates(M, p, T, number_of_coordinates(M, basis))
 end
 
 @inline function allocate_result_type(
-        M::AbstractManifold,
-        f::typeof(get_vector),
-        args::Tuple{Any, Vararg{Any}},
+        M::AbstractManifold, f::typeof(get_vector), args::Tuple{Any, Vararg{Any}},
     )
     apf = allocation_promotion_function(M, f, args)
     return apf(
@@ -369,12 +363,7 @@ function change_basis(M::AbstractManifold, p, c, B_in::AbstractBasis, B_out::Abs
 end
 
 function change_basis!(
-        M::AbstractManifold,
-        c_out,
-        p,
-        c,
-        B_in::AbstractBasis,
-        B_out::AbstractBasis,
+        M::AbstractManifold, c_out, p, c, B_in::AbstractBasis, B_out::AbstractBasis,
     )
     return get_coordinates!(M, c_out, p, get_vector(M, p, c, B_in), B_out)
 end
@@ -561,10 +550,7 @@ requires either a dual basis or the cached basis to be selfdual, for example ort
 See also: [`get_vector`](@ref), [`get_basis`](@ref)
 """
 function get_coordinates(
-        M::AbstractManifold,
-        p,
-        X,
-        B::AbstractBasis = default_basis(M, typeof(p)),
+        M::AbstractManifold, p, X, B::AbstractBasis = default_basis(M, typeof(p)),
     )
     return _get_coordinates(M, p, X, B)
 end
@@ -681,25 +667,13 @@ function _get_coordinates!(M::AbstractManifold, Y, p, X, B::CachedBasis)
     return get_coordinates_cached!(M, number_system(M), Y, p, X, B, number_system(B))
 end
 function get_coordinates_cached!(
-        M::AbstractManifold,
-        ::ComplexNumbers,
-        Y,
-        p,
-        X,
-        B::CachedBasis,
-        ::ComplexNumbers,
+        M::AbstractManifold, ::ComplexNumbers, Y, p, X, B::CachedBasis, ::ComplexNumbers,
     )
     map!(vb -> conj(inner(M, p, X, vb)), Y, get_vectors(M, p, B))
     return Y
 end
 function get_coordinates_cached!(
-        M::AbstractManifold,
-        ::𝔽,
-        Y,
-        p,
-        X,
-        C::CachedBasis,
-        ::RealNumbers,
+        M::AbstractManifold, ::𝔽, Y, p, X, C::CachedBasis, ::RealNumbers,
     ) where {𝔽}
     map!(vb -> real(inner(M, p, X, vb)), Y, get_vectors(M, p, C))
     return Y
@@ -721,10 +695,7 @@ requires either a dual basis or the cached basis to be selfdual, for example ort
 See also: [`get_coordinates`](@ref), [`get_basis`](@ref), [`default_basis`](@ref)
 """
 @inline function get_vector(
-        M::AbstractManifold,
-        p,
-        c,
-        B::AbstractBasis = default_basis(M, typeof(p)),
+        M::AbstractManifold, p, c, B::AbstractBasis = default_basis(M, typeof(p)),
     )
     return _get_vector(M, p, c, B)
 end
@@ -830,11 +801,7 @@ end
 function get_vector_orthonormal! end
 
 @inline function _get_vector!(
-        M::AbstractManifold,
-        Y,
-        p,
-        c,
-        B::DiagonalizingOrthonormalBasis,
+        M::AbstractManifold, Y, p, c, B::DiagonalizingOrthonormalBasis,
     )
     return get_vector_diagonalizing!(M, Y, p, c, B)
 end
@@ -917,33 +884,21 @@ When a set of vectors is orthonormalized a set of vectors is returned.
 When an [`AbstractBasis`](@ref) is orthonormalized, a [`CachedBasis`](@ref) is returned.
 """
 function gram_schmidt(
-        M::AbstractManifold{𝔽},
-        p,
-        B::AbstractBasis{𝔽};
-        warn_linearly_dependent = false,
-        return_incomplete_set = false,
-        skip_linearly_dependent = false,
+        M::AbstractManifold{𝔽}, p, B::AbstractBasis{𝔽};
+        warn_linearly_dependent = false, return_incomplete_set = false, skip_linearly_dependent = false,
         kwargs...,
     ) where {𝔽}
     V = gram_schmidt(
-        M,
-        p,
-        get_vectors(M, p, B);
-        warn_linearly_dependent = warn_linearly_dependent,
-        skip_linearly_dependent = skip_linearly_dependent,
-        return_incomplete_set = return_incomplete_set,
-        kwargs...,
+        M, p, get_vectors(M, p, B);
+        warn_linearly_dependent = warn_linearly_dependent, skip_linearly_dependent = skip_linearly_dependent,
+        return_incomplete_set = return_incomplete_set, kwargs...,
     )
     return CachedBasis(GramSchmidtOrthonormalBasis(𝔽), V)
 end
 function gram_schmidt(
-        M::AbstractManifold,
-        p,
-        V::AbstractVector;
-        atol = eps(number_eltype(first(V))),
-        warn_linearly_dependent = false,
-        return_incomplete_set = false,
-        skip_linearly_dependent = false,
+        M::AbstractManifold, p, V::AbstractVector;
+        atol = eps(number_eltype(first(V))), warn_linearly_dependent = false,
+        return_incomplete_set = false, skip_linearly_dependent = false,
         kwargs...,
     )
     N = length(V)
