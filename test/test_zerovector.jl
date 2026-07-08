@@ -9,6 +9,8 @@ using ManifoldsBase, Test
     @test X - Y == -Y
     @test Y - X == Y
     @test X - X == X
+    @test -X == X
+    @test allocate(X) == ZeroVector()
     @test 1.0 * X == X
     @test 0.1 * X == X
 
