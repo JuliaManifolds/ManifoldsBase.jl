@@ -114,7 +114,7 @@ when it is beneficial to statically dispatch on a zero vector.
     only happens on the most inner (third) layer, providing generic implementations
     with this type is a very manifold-specific task and should be considered carefully.
 
-    Therefore there are also only a few generic implementations available, e.g. [`zero_vector`](@ref zero_vector(::AbstractManifold, ::Any, ::Bool))
+    Therefore there are also only a few generic implementations available, for example the vector operations `+`, `-` and scaling with real number.
 """
 struct ZeroVector <: AbstractTangentVector end
 
