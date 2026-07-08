@@ -107,7 +107,7 @@ const AbstractCotangentVector = AbstractFibreVector{CotangentSpaceType}
     ZeroVector <: AbstractTangentVector
 
 A type to represent the zero vector. This can be used generically
-when it is beneficial to not allocate memory in certain places of computations.
+when it is beneficial to statically dispatch on a zero vector.
 
 !!! note "Technical Note"
     Following our [Design principles](design.md) the dispatch on tangent vectors
