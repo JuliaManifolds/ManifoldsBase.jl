@@ -163,15 +163,3 @@ vector_space_dimension(::AbstractManifold, ::VectorSpaceType)
 function vector_space_dimension(M::AbstractManifold, ::TCoTSpaceType)
     return manifold_dimension(M)
 end
-
-@doc raw"""
-    zero_vector(M::AbstractManifold, p, allocate::Bool = true)
-
-Return the tangent vector from the tangent space ``T_p\mathcal M`` at `p` on the
-[`AbstractManifold`](@ref) `M`, that represents the zero vector.
-Setting `allocate = false` avoids allocation of memory for this vector
-and returns a [`ZeroVector`](@ref)`()`.
-"""
-function zero_vector(M::AbstractManifold, p, allocate::Bool)
-    return allocate ? zero_vector(M, p) : ZeroVector()
-end

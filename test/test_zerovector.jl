@@ -17,5 +17,4 @@ using ManifoldsBase, Test
     M = ManifoldsBase.DefaultManifold(3)
     p = [0.0, 1.0, 2.0]
     @test copy(M, p, X) == X
-    zero_vector(M, p, false) == X
 end
