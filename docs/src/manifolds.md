@@ -5,9 +5,9 @@ helpers to build or create manifolds based on existing manifolds
 
 ## A default manifold
 
-[`DefaultManifold`](@ref ManifoldsBase.DefaultManifold) is a simplified version of [`Euclidean`](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/euclidean.html) and demonstrates a basic interface implementation.
+[`DefaultManifold`](@ref ManifoldsBase.DefaultManifold) is a simplified version of [`Euclidean`](@extref `Manifolds.Euclidean`) and demonstrates a basic interface implementation.
 It can be used to perform simple tests.
-Since when using `Manifolds.jl` the [`Euclidean`](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/euclidean.html) is available, the `DefaultManifold` itself is not exported.
+Since when using `Manifolds.jl` the [`Euclidean`](@extref `Manifolds.Euclidean`) is available, the [`DefaultManifold`](@ref ManifoldsBase.DefaultManifold) itself is not exported.
 
 ```@docs
 ManifoldsBase.DefaultManifold

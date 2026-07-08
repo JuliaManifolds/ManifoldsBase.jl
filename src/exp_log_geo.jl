@@ -18,7 +18,7 @@ function exp(M::AbstractManifold, p, X)
 end
 
 @doc raw"""
-    exp_fused(M::AbstractManifold, p, X, t::Number = 1)
+    exp_fused(M::AbstractManifold, p, X, t::Number)
 
 Compute the exponential map of tangent vector `X` scaled by `t` at point `p`.
 Compared to [`exp`](@ref), this method provides the opportunity to

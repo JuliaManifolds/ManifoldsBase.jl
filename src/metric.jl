@@ -186,24 +186,15 @@ end
 function get_coordinates(M::MetricManifold, p, X, B::AbstractBasis)
     (metric(M.manifold) === M.metric) && (return get_coordinates(M.manifold, p, X, B))
     return invoke(
-        get_coordinates,
-        Tuple{AbstractManifold, Any, Any, AbstractBasis},
-        M,
-        p,
-        X,
-        B,
+        get_coordinates, Tuple{AbstractManifold, Any, Any, AbstractBasis},
+        M, p, X, B,
     )
 end
-function get_coordinates!(M::MetricManifold, Y, p, X, B::AbstractBasis)
-    (metric(M.manifold) === M.metric) && (return get_coordinates!(M.manifold, Y, p, X, B))
+function get_coordinates!(M::MetricManifold, c, p, X, B::AbstractBasis)
+    (metric(M.manifold) === M.metric) && (return get_coordinates!(M.manifold, c, p, X, B))
     return invoke(
-        get_coordinates!,
-        Tuple{AbstractManifold, Any, Any, Any, AbstractBasis},
-        M,
-        Y,
-        p,
-        X,
-        B,
+        get_coordinates!, Tuple{AbstractManifold, Any, Any, Any, AbstractBasis},
+        M, c, p, X, B,
     )
 end
 
@@ -236,11 +227,7 @@ function get_vector!(M::MetricManifold, Y, p, c, B::AbstractBasis)
     return invoke(
         get_vector!,
         Tuple{AbstractManifold, Any, Any, Any, AbstractBasis},
-        M,
-        Y,
-        p,
-        c,
-        B,
+        M, Y, p, c, B,
     )
 end
 
@@ -280,10 +267,7 @@ where ``G_p`` is the local matrix representation of the `AbstractMetric` `G`.
 inner(::MetricManifold, ::Any, ::Any, ::Any)
 
 function inner(
-        M::MetricManifold{𝔽, TM, G},
-        p,
-        X,
-        Y,
+        M::MetricManifold{𝔽, TM, G}, p, X, Y,
     ) where {𝔽, G <: AbstractMetric, TM <: AbstractManifold}
     (metric(M.manifold) === M.metric) && (return inner(M.manifold, p, X, Y))
     throw(MethodError(inner, (M, p, X, Y)))
@@ -543,41 +527,15 @@ zero_vector!(M::MetricManifold, X, p) = zero_vector!(M.manifold, X, p)
 is_metric_function(::Any) = false
 
 for mf in [
-        change_metric,
-        change_metric!,
-        change_representer,
-        change_representer!,
-        exp,
-        exp!,
-        exp_fused,
-        exp_fused!,
-        get_basis,
-        get_coordinates,
-        get_coordinates!,
-        get_vector,
-        get_vector!,
-        get_vectors,
-        inner,
-        inverse_retract,
-        inverse_retract!,
-        log,
-        log!,
-        mid_point,
-        norm,
-        parallel_transport_direction,
-        parallel_transport_direction!,
-        parallel_transport_to,
-        parallel_transport_to!,
-        retract,
-        retract!,
-        retract_fused,
-        retract_fused!,
-        vector_transport_direction,
-        vector_transport_direction!,
-        vector_transport_to,
-        vector_transport_to!,
-        Weingarten,
-        Weingarten!,
+        change_metric, change_metric!, change_representer, change_representer!,
+        exp, exp!, exp_fused, exp_fused!,
+        get_basis, get_coordinates, get_coordinates!, get_vector, get_vector!, get_vectors,
+        inner, inverse_retract, inverse_retract!,
+        log, log!, mid_point, norm,
+        parallel_transport_direction, parallel_transport_direction!, parallel_transport_to, parallel_transport_to!,
+        retract, retract!, retract_fused, retract_fused!,
+        vector_transport_direction, vector_transport_direction!, vector_transport_to, vector_transport_to!,
+        Weingarten, Weingarten!,
     ]
     @eval is_metric_function(::typeof($mf)) = true
 end
