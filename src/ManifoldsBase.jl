@@ -1214,6 +1214,7 @@ function zero_vector(M::AbstractManifold, p)
     return X
 end
 
+
 #
 #
 # Internal function to set plotting backend
@@ -1259,8 +1260,6 @@ include("nested_trait.jl")
 
 include("connection.jl")
 include("metric.jl")
-
-include("zero_vector.jl")
 
 include("decorator_trait.jl")
 include("numerical_checks.jl")

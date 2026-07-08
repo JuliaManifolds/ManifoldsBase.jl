@@ -102,15 +102,44 @@ manifold.
 """
 const AbstractCotangentVector = AbstractFibreVector{CotangentSpaceType}
 
+
+"""
+    ZeroVector <: AbstractTangentVector
+
+A type to represent the zero vector. This can be used generically
+when it is beneficial to not allocate memory in certain places of computations.
+
+!!! note "Technical Note"
+    Following our [Design principles](design.md) the dispatch on tangent vectors
+    only happens on the most inner (third) layer, providing generic implementations
+    with this type is a very manifold-specific task and should be considered carefully.
+
+    Therefore there are also only a few generic implementations available, e.g. [`zero_vector`](@ref zero_vector(::AbstractManifold, ::Any, ::Bool))
+"""
+struct ZeroVector <: AbstractTangentVector end
+
 Base.:+(X::FVector, Y::FVector) = FVector(X.type, X.data + Y.data, X.basis)
+Base.:+(::ZeroVector, Y) = Y
+Base.:+(X, ::ZeroVector) = X
+Base.:+(::ZeroVector, ::ZeroVector) = ZeroVector()
+
 
 Base.:-(X::FVector, Y::FVector) = FVector(X.type, X.data - Y.data, X.basis)
+Base.:-(::ZeroVector, Y) = -Y
+Base.:-(X, ::ZeroVector) = X
+Base.:-(::ZeroVector, ::ZeroVector) = ZeroVector()
+
 Base.:-(X::FVector) = FVector(X.type, -X.data, X.basis)
+Base.:-(::ZeroVector) = ZeroVector()
 
 Base.:*(a::Number, X::FVector) = FVector(X.type, a * X.data, X.basis)
+Base.:*(::Number, ::ZeroVector) = ZeroVector()
 
 allocate(x::FVector) = FVector(x.type, allocate(x.data), x.basis)
 allocate(x::FVector, ::Type{T}) where {T} = FVector(x.type, allocate(x.data, T), x.basis)
+allocate(::ZeroVector) = ZeroVector()
+
+copy(::AbstractManifold, p, ::ZeroVector) = ZeroVector()
 
 function Base.copyto!(X::FVector, Y::FVector)
     copyto!(X.data, Y.data)
@@ -133,4 +162,16 @@ vector_space_dimension(::AbstractManifold, ::VectorSpaceType)
 
 function vector_space_dimension(M::AbstractManifold, ::TCoTSpaceType)
     return manifold_dimension(M)
+end
+
+@doc raw"""
+    zero_vector(M::AbstractManifold, p, allocate::Bool = true)
+
+Return the tangent vector from the tangent space ``T_p\mathcal M`` at `p` on the
+[`AbstractManifold`](@ref) `M`, that represents the zero vector.
+Setting `allocate = false` avoids allocation of memory for this vector
+and returns a [`ZeroVector`](@ref)`()`.
+"""
+function zero_vector(M::AbstractManifold, p, allocate::Bool)
+    return allocate ? zero_vector(M, p) : ZeroVector()
 end
