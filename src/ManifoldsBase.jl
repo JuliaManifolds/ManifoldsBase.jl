@@ -1319,13 +1319,10 @@ end
 # Export
 # ------
 #
-# (a) Manifolds and general types
+# Manifolds and general types
 export AbstractManifold,
-    AbstractManifoldPoint,
-    AbstractTangentVector,
-    AbstractCotangentVector,
-    TFVector,
-    CoTFVector
+    AbstractManifoldPoint, AbstractTangentVector, AbstractCotangentVector,
+    TFVector, CoTFVector, ZeroVector
 export AbstractAffineConnection, ConnectionManifold, LeviCivitaConnection
 export AbstractMetric, MetricManifold
 export VectorSpaceFiber
@@ -1342,8 +1339,7 @@ export AbstractPowerRepresentation,
     NestedPowerRepresentation, NestedReplacingPowerRepresentation
 export ProductManifold
 
-# (b) Generic Estimation Types
-
+# Generic Estimation Types
 export GeodesicInterpolationWithinRadius,
     CyclicProximalPointEstimation,
     ExtrinsicEstimation,
@@ -1352,8 +1348,7 @@ export GeodesicInterpolationWithinRadius,
     AbstractApproximationMethod,
     GeodesicInterpolation
 
-
-# (b) Retraction Types
+# Retraction Types
 export AbstractRetractionMethod,
     ApproximateRetraction,
     ApproximateExponentialRetraction,
@@ -1372,7 +1367,7 @@ export AbstractRetractionMethod,
     SoftmaxRetraction,
     StabilizedRetraction
 
-# (c) Inverse Retraction Types
+# Inverse Retraction Types
 export AbstractInverseRetractionMethod,
     ApproximateInverseRetraction,
     ApproximateLogarithmicInverseRetraction,
@@ -1389,7 +1384,7 @@ export AbstractInverseRetractionMethod,
     SoftmaxInverseRetraction,
     StabilizedInverseRetraction
 
-# (d) Vector Transport Types
+# Vector Transport Types
 export AbstractVectorTransportMethod,
     DifferentiatedRetractionVectorTransport,
     EmbeddedVectorTransport,
@@ -1403,7 +1398,7 @@ export AbstractVectorTransportMethod,
     VectorTransportTo,
     VectorTransportWithKeywords
 
-# (e) Basis Types
+# Basis Types
 export CachedBasis,
     DefaultBasis,
     DefaultOrthogonalBasis,
@@ -1414,12 +1409,12 @@ export CachedBasis,
     ProjectedOrthonormalBasis,
     VeeOrthogonalBasis
 
-# (f) Error Messages
+# Error Messages
 export OutOfInjectivityRadiusError, ManifoldDomainError
 export ApproximatelyError
 export CompositeManifoldError, ComponentManifoldError, ManifoldDomainError
 
-# (g) Functions on Manifolds
+# Functions on Manifolds
 export ×,
     ℝ,
     ℂ,
