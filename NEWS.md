@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Added
 
-* a `ZeroVector` type, to avoid allocating unnecessary zeros similar to the [`Identity`](https://juliamanifolds.github.io/LieGroups.jl/stable/interface/operations/#LieGroups.Identity) on [`LieGroups.jl`](https://github.com/JuliaManifolds/LieGroups.jl).
+* a `ZeroVector` type, to allow for static dispatch and avoid allocating unnecessary zeros similar to the [`Identity`](https://juliamanifolds.github.io/LieGroups.jl/stable/interface/operations/#LieGroups.Identity) on [`LieGroups.jl`](https://github.com/JuliaManifolds/LieGroups.jl).
 
 ## [2.4.0] 03/06/2026
 
