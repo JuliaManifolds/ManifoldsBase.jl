@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.1] 02/09/2026
+
+### Fixed
+
+* `prepare_check_result` no longer fits the slope through errors that are down to round-off from evaluating the function; these no longer decrease with `t` and flattened the estimate, the more so the higher the order.
+* `prepare_check_result` now passes `slope` on to `find_best_slope_window`, which before looked for its default slope of `2.0`.
+* `prepare_check_result` now passes `line_base` to `plot_slope` as the log10-intercept it is documented to be, anchored at the first fitted sample.
+
 ## [2.5.0] 08/07/2026
 
 ## Added

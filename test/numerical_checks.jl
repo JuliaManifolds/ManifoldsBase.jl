@@ -191,6 +191,21 @@ default(; show = false, reuse = true)
         @test is_vector(M, p6, Y2; error = :error, atol = 1.0e-16)
         @test is_vector(M, p6, Y3; error = :error, atol = 1.0e-16)
     end
+    @testset "Slope estimation with errors down to round-off" begin
+        log_range = collect(range(-8.0, 0.0; length = 101))
+        # a third order error whose smallest values are down to round-off
+        errors = [max(exp10(3 * t), 4.0e-16) for t in log_range]
+        @test ManifoldsBase.prepare_check_result(log_range, errors, 3.0)
+        # fitting those in would be a full order off
+        b = ManifoldsBase.find_best_slope_window(log_range, log10.(errors), 101)[2]
+        @test !isapprox(b, 3.0; atol = 0.1)
+        # on a failure the reported window uses the slope asked for, not the default 2.0
+        steep = [t > -3.0 ? exp10(3.6 * t + 1.8) : exp10(3 * t) for t in log_range]
+        io = IOBuffer()
+        @test !ManifoldsBase.prepare_check_result(log_range, steep, 3.0; io = io)
+        m = match(r"with slope\s+([0-9.]+)", String(take!(io)))
+        @test isapprox(parse(Float64, m[1]), 3.0; atol = 0.1)
+    end
     @testset "Test check_geodesic" begin
         M = ManifoldsBase.Test.TestSphere(10)
         q = zeros(11)
