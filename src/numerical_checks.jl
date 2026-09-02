@@ -376,7 +376,9 @@ no plot is be generated,
 
 # Keyword arguments
 
-* `exactness_tol`: is all errors are below this tolerance, the verification is considered to be exact
+* `exactness_tol`: if all errors are below this tolerance, the verification is considered exact.
+  Errors below it are excluded from the slope estimation, since an error that small is round-off
+  from evaluating the function rather than approximation error.
 * `io`:            provide an `IO` to print the result to
 * `name`:          name to display in the plot title
 * `plot`:          whether to plot the result, see [`plot_slope`](@ref)
@@ -401,14 +403,25 @@ function prepare_check_result(
         )
         return true
     end
-    x = log_range[errors .> 0]
-    T = exp10.(x)
-    y = log10.(errors[errors .> 0])
+    # all samples that can be displayed in a log-log plot
+    x_all = log_range[errors .> 0]
+    T = exp10.(x_all)
+    e_all = errors[errors .> 0]
+    y_all = log10.(e_all)
+    # samples that still say something: once the error is down to the round-off of evaluating
+    # the function it no longer decreases with `t`, and fitting those in flattens the slope –
+    # the more so the higher the order, whose error reaches round-off for larger `t` already
+    k = findall(>(exactness_tol), e_all)
+    (length(k) < 3) && (k = eachindex(e_all)) # too little left to fit a line through
+    x = x_all[k]
+    y = y_all[k]
+    # anchor the reference line at the first sample that is used for the fit
+    line_base = y[1] - slope * x[1]
     (a, b) = find_best_slope_window(x, y, length(x))[1:2]
     if isapprox(b, slope; atol = slope_tol)
         plot && return plot_slope(
-            T, errors[errors .> 0];
-            slope = slope, line_base = errors[1], a = a, b = b, i = 1, j = length(y),
+            T, e_all;
+            slope = slope, line_base = line_base, a = a, b = b, i = first(k), j = last(k),
         )
         (io !== nothing) && print(
             io,
@@ -418,14 +431,16 @@ function prepare_check_result(
     end
     # otherwise
     # find best contiguous window of length w
-    (ab, bb, ib, jb) = find_best_slope_window(x, y, window; slope_tol = slope_tol)
-    msg = "The $(name) fits best on [$(T[ib]),$(T[jb])] with slope  $(@sprintf("%.4f", bb)), but globally your slope $(@sprintf("%.4f", b)) is outside of the tolerance $slope ± $(slope_tol).\n"
+    (ab, bb, ib, jb) = find_best_slope_window(
+        x, y, window; slope = slope, slope_tol = slope_tol
+    )
+    msg = "The $(name) fits best on [$(exp10(x[ib])),$(exp10(x[jb]))] with slope  $(@sprintf("%.4f", bb)), but globally your slope $(@sprintf("%.4f", b)) is outside of the tolerance $slope ± $(slope_tol).\n"
     (io !== nothing) && print(io, msg)
     (error === :info) && @info msg
     (error === :warn) && @warn msg
     plot && return plot_slope(
-        T, errors[errors .> 0];
-        slope = slope, line_base = errors[1], a = ab, b = bb, i = ib, j = jb,
+        T, e_all;
+        slope = slope, line_base = line_base, a = ab, b = bb, i = k[ib], j = k[jb],
     )
     (error === :error) && throw(ErrorException(msg))
     return false
