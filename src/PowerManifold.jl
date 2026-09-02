@@ -210,8 +210,8 @@ function allocate_result(M::PowerManifoldNested, f, x...)
     else
         return [
             allocate_result(
-                    M.manifold, f, map(y -> _allocate_access_nested(M, y, i), x)...,
-                ) for i in get_iterator(M)
+                M.manifold, f, map(y -> _allocate_access_nested(M, y, i), x)...,
+            ) for i in get_iterator(M)
         ]
     end
 end
@@ -222,10 +222,10 @@ function allocate_result_embedding(M::PowerManifoldNested, f::typeof(project), x
     else
         return [
             allocate_result_embedding(
-                    M.manifold,
-                    f,
-                    map(y -> _allocate_access_nested(M, y, i), x)...,
-                ) for i in get_iterator(M)
+                M.manifold,
+                f,
+                map(y -> _allocate_access_nested(M, y, i), x)...,
+            ) for i in get_iterator(M)
         ]
     end
 end
@@ -415,11 +415,11 @@ function check_vector(M::AbstractPowerManifold, p, X; kwargs...)
     rep_size = representation_size(M.manifold)
     e = [
         (
-                i, check_vector(
-                    M.manifold, _read(M, rep_size, p, i), _read(M, rep_size, X, i);
-                    kwargs...,
-                ),
-            ) for i in get_iterator(M)
+            i, check_vector(
+                M.manifold, _read(M, rep_size, p, i), _read(M, rep_size, X, i);
+                kwargs...,
+            ),
+        ) for i in get_iterator(M)
     ]
     errors = filter((x) -> !(x[2] === nothing), e)
     cerr = [ComponentManifoldError(er...) for er in errors]
@@ -685,8 +685,8 @@ function get_basis(M::AbstractPowerManifold, p, B::DiagonalizingOrthonormalBasis
     rep_size = representation_size(M.manifold)
     vs = [
         get_basis(
-                M.manifold, _read(M, rep_size, p, i), DiagonalizingOrthonormalBasis(_read(M, rep_size, B.frame_direction, i)),
-            ) for i in get_iterator(M)
+            M.manifold, _read(M, rep_size, p, i), DiagonalizingOrthonormalBasis(_read(M, rep_size, B.frame_direction, i)),
+        ) for i in get_iterator(M)
     ]
     return CachedBasis(B, PowerBasisData(vs))
 end
@@ -714,8 +714,8 @@ function get_coordinates(
     rep_size = representation_size(M.manifold)
     vs = [
         get_coordinates(
-                M.manifold, _read(M, rep_size, p, i), _read(M, rep_size, X, i), _access_nested(M, B.data.bases, i),
-            ) for i in get_iterator(M)
+            M.manifold, _read(M, rep_size, p, i), _read(M, rep_size, X, i), _access_nested(M, B.data.bases, i),
+        ) for i in get_iterator(M)
     ]
     return reduce(vcat, reshape(vs, length(vs)))
 end
