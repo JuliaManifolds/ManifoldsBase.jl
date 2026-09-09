@@ -80,7 +80,7 @@ To close this section, let‘s look at an example.
 The high level (or [Layer I](@ref design-layer1)) definition of the retraction is given by
 
 ```julia
-retract!(M::AbstractManifold, q, p, X, m::AbstractRetractionMethod=default_retraction_method(M, typeof(p))) = _retract!(M, q, p, X, m)
+retract!(M::AbstractManifold, q, p, X, m::AbstractRetractionMethod = default_retraction_method(M, typeof(p))) = _retract!(M, q, p, X, m)
 ```
 
 Note that the convenience function `retract(M, q, p, X, m)` first allocates a `q` before calling this function as well.
