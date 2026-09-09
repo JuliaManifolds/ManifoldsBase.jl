@@ -278,8 +278,9 @@ end
         window = nothing,
     )
 
-Check numerically whether the retraction `vector_transport_to` is correct, by selecting
-a set of points ``q_i = \exp_p (t_i X)`` where ``t`` takes all values from `log_range`,
+Check numerically whether the vector transport is correct.
+This is done by selecting a set of points ``q_i = \exp_p (t_i X)``
+where ``t`` takes all values from `log_range`,
 to then compare [`parallel_transport_to`](@ref) to the `vector_transport_method`
 applied to the vector `Y`.
 

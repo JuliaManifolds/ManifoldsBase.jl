@@ -436,7 +436,7 @@ struct StabilizedInverseRetraction{TRM <: AbstractInverseRetractionMethod} <: Ab
 end
 StabilizedInverseRetraction() = StabilizedInverseRetraction(LogarithmicInverseRetraction())
 
-"""
+_doc_default_inverse_retraction_method = """
     default_inverse_retraction_method(M::AbstractManifold)
     default_inverse_retraction_method(M::AbstractManifold, ::Type{T}) where {T}
 
@@ -448,12 +448,16 @@ This method can also be specified more precisely with a point type `T`, for the 
 that on a `M` there are two different representations of points, which provide
 different inverse retraction methods.
 """
+
+@doc "$(_doc_default_inverse_retraction_method)"
 default_inverse_retraction_method(::AbstractManifold) = LogarithmicInverseRetraction()
+
+@doc "$(_doc_default_inverse_retraction_method)"
 function default_inverse_retraction_method(M::AbstractManifold, ::Type{T}) where {T}
     return default_inverse_retraction_method(M)
 end
 
-"""
+_doc_default_retraction_method = """
     default_retraction_method(M::AbstractManifold)
     default_retraction_method(M::AbstractManifold, ::Type{T}) where {T}
 
@@ -464,7 +468,11 @@ This method can also be specified more precisely with a point type `T`, for the 
 that on a `M` there are two different representations of points, which provide
 different retraction methods.
 """
+
+@doc "$(_doc_default_retraction_method)"
 default_retraction_method(::AbstractManifold) = ExponentialRetraction()
+
+@doc "$(_doc_default_retraction_method)"
 function default_retraction_method(M::AbstractManifold, ::Type{T}) where {T}
     return default_retraction_method(M)
 end
