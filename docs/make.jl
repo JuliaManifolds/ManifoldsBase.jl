@@ -85,7 +85,7 @@ if run_quarto || run_on_CI
 end
 
 # (d) load necessary packages for the docs
-using Documenter, DocumenterCitations, DocumenterInterLinks
+using Documenter, DocumenterCitations, DocumenterCodeBlocks, DocumenterInterLinks
 using ManifoldsBase
 
 function add_links(line::String, url::String = "https://github.com/JuliaManifolds/Manopt.jl")
@@ -160,6 +160,6 @@ makedocs(;
         "Changelog" => "NEWS.md",
         "References" => "references.md",
     ],
-    plugins = [bib, links],
+    plugins = [bib, links, CodeBlocks()],
 )
 deploydocs(repo = "github.com/JuliaManifolds/ManifoldsBase.jl.git", push_preview = true)
