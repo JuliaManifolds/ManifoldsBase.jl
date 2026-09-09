@@ -28,7 +28,7 @@ features:
     link: /design/index.html
   - icon: ⚡️
     title: Efficient
-    details: When possible, functions are available working in-place, linke `exp!` or `log!` to reduce memory allocations.
+    details: When possible, functions are available working in-place, like `exp!` or `log!` to reduce memory allocations.
     link: /functions/index.html
   - icon: 🧩
     title: Ecosystem
