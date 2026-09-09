@@ -213,6 +213,8 @@ GramSchmidtOrthonormalBasis(𝔽::AbstractNumbers = ℝ) = GramSchmidtOrthonorma
 @doc raw"""
     DiagonalizingOrthonormalBasis{𝔽,TV} <: AbstractOrthonormalBasis{𝔽,TangentSpaceType}
 
+An orthonormal basis of the tangent space that diagonalizes the curvature tensor.
+
 An orthonormal basis `Ξ` as a vector of tangent vectors (of length determined by
 [`manifold_dimension`](@ref)) in the tangent space that diagonalizes the curvature
 tensor ``R(u,v)w`` and where the direction `frame_direction` ``v`` has curvature `0`.

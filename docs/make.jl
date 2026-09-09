@@ -86,6 +86,7 @@ end
 
 # (d) load necessary packages for the docs
 using Documenter, DocumenterCitations, DocumenterCodeBlocks, DocumenterInterLinks
+using DocumenterLandingPage
 using ManifoldsBase
 
 function add_links(line::String, url::String = "https://github.com/JuliaManifolds/Manopt.jl")
@@ -160,6 +161,6 @@ makedocs(;
         "Changelog" => "NEWS.md",
         "References" => "references.md",
     ],
-    plugins = [bib, links, CodeBlocks()],
+    plugins = [bib, links, CodeBlocks(), LandingPage()],
 )
 deploydocs(repo = "github.com/JuliaManifolds/ManifoldsBase.jl.git", push_preview = true)

@@ -44,6 +44,8 @@ struct EuclideanMetric <: RiemannianMetric end
 @doc raw"""
     change_metric(M::AbstractManifold, G2::AbstractMetric, p, X)
 
+Perform a change of metric on `M` for the tangent vector `X` at `p`, given a second metric `G2`.
+
 On the [`AbstractManifold`](@ref) `M` with implicitly given metric ``g_1``
 and a second [`AbstractMetric`](@ref)
 ``g_2`` this function performs a change of metric in the
@@ -70,9 +72,11 @@ change_metric!(M::AbstractManifold, Y, G::AbstractMetric, p, X)
 @doc raw"""
     change_representer(M::AbstractManifold, G2::AbstractMetric, p, X)
 
-Convert the representer `X` of a linear function (in other words a cotangent vector at `p`)
-in the tangent space at `p` on the [`AbstractManifold`](@ref) `M` given with respect to the
-[`AbstractMetric`](@ref) `G2` into the representer with respect to the (implicit) metric of `M`.
+Convert the representer `X` given with respect to the [`AbstractMetric`](@ref) `G2` into the
+representer with respect to the (implicit) metric of `M`.
+
+Here `X` is the representer of a linear function, in other words a cotangent vector at `p`,
+in the tangent space at `p` on the [`AbstractManifold`](@ref) `M`.
 
 In order to convert `X` into the representer with respect to the (implicitly given) metric ``g_1`` of `M`,
 we have to find the conversion function ``c: T_p\mathcal M \to T_p\mathcal M`` such that

@@ -243,7 +243,7 @@ end
 
 
 @doc raw"""
-   EmbeddedInverseRetraction{T<:AbstractInverseRetractionMethod} <: AbstractInverseRetractionMethod
+    EmbeddedInverseRetraction{T<:AbstractInverseRetractionMethod} <: AbstractInverseRetractionMethod
 
 Compute an inverse retraction by using the inverse retraction of type `T` in the embedding and projecting the result
 
