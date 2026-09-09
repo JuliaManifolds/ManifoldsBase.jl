@@ -40,14 +40,12 @@ features:
         wrap: true
     title: Manifolds.jl
     details: A comprehensive library of Riemannian manifolds is available in [Manifolds.jl](https://juliamanifolds.github.io/Manifolds.jl/stable/) to get you started directly on the most common manifolds.
-    link: https://juliamanifolds.github.io/Manifolds.jl/stable/
   - icon:
         src: /logo-manopt.png
         alt: Manopt.jl
         wrap: true
     title: Manopt.jl
-    details: Optimisation algorithms on any manifold following this interface are available in [Manopt.jl](https://manoptjl.org). Both smooth optimization, lie gradient descent, quasi-Newton and nonsmooth, like proximal-gradient or other splitting based methods are available.
-    link: https://manoptjl.org/stable/
+    details: Optimisation algorithms on any manifold following this interface are available in [Manopt.jl](https://manoptjl.org/stable/). Both smooth optimization, like gradient descent, quasi-Newton and nonsmooth, like proximal-gradient or other splitting based methods are available.
   - icon:
         light: /logo-liegroups.png
         dark: /logo-liegroups-dark.png
@@ -55,7 +53,6 @@ features:
         wrap: true
     title: LieGroups.jl
     details: "[LieGroups.jl](https://juliamanifolds.github.io/LieGroups.jl/stable/) extends the interface to Lie groups and uses [Manifolds.jl](https://juliamanifolds.github.io/Manifolds.jl/stable/) to define a library of Lie groups. Further features of this package are an abstract definition of a Lie algebra and group actions as well as generic Lie groups like the semi-direct product Lie group."
-    link: https://juliamanifolds.github.io/LieGroups.jl/stable/
 ---
 ```
 
