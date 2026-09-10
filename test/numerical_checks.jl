@@ -187,11 +187,9 @@ default(; show = false, reuse = true)
         @test is_point(M, p4; error = :error)
         @test is_point(M, p5; error = :error)
         # test the inverse as well
-        # `log(M, p6, p7)` is orthogonal to `p6` by construction, since `p6` has unit norm,
-        # so it carries the same residual as the two stabilized variants below
-        @test is_vector(M, p6, Y1; error = :error, atol = 1.0e-16)
-        @test is_vector(M, p6, Y2; error = :error, atol = 1.0e-16)
-        @test is_vector(M, p6, Y3; error = :error, atol = 1.0e-16)
+        @test is_vector(M, p6, Y1; error = :error)
+        @test is_vector(M, p6, Y2; error = :error)
+        @test is_vector(M, p6, Y3; error = :error)
     end
     @testset "Slope estimation with errors down to round-off" begin
         log_range = collect(range(-8.0, 0.0; length = 101))
