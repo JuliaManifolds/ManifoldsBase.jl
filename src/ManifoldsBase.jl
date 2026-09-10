@@ -321,7 +321,7 @@ type.
 """
 check_vector(M::AbstractManifold, p, X; kwargs...) = nothing
 
-"""
+_doc_check_size = """
     check_size(M::AbstractManifold, p)
     check_size(M::AbstractManifold, p, X)
 
@@ -332,6 +332,8 @@ corresponding correct representation sizes for points and tangent vectors on `M`
 By default, `check_size` returns `nothing`, i.e. if no checks are implemented, the
 assumption is to be optimistic.
 """
+
+@doc "$(_doc_check_size)"
 function check_size(M::AbstractManifold, p)
     m = representation_size(M)
     m === nothing && return nothing # nothing reasonable in size to check
@@ -349,6 +351,8 @@ function check_size(M::AbstractManifold, p)
         )
     end
 end
+
+@doc "$(_doc_check_size)"
 function check_size(M::AbstractManifold, p, X)
     mse = check_size(M, p)
     mse === nothing || return mse

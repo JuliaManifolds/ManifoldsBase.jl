@@ -295,7 +295,7 @@ function VectorTransportWithKeywords(
     return VectorTransportWithKeywords{T, typeof(kwargs)}(m, kwargs)
 end
 
-"""
+_doc_default_vector_transport_method = """
     default_vector_transport_method(M::AbstractManifold)
     default_vector_transport_method(M::AbstractManifold, ::Type{T}) where {T}
 
@@ -307,9 +307,13 @@ This method can also be specified more precisely with a point type `T`, for the 
 that on a `M` there are two different representations of points, which provide
 different vector transport methods.
 """
+
+@doc "$(_doc_default_vector_transport_method)"
 function default_vector_transport_method(::AbstractManifold)
     return ParallelTransport()
 end
+
+@doc "$(_doc_default_vector_transport_method)"
 function default_vector_transport_method(M::AbstractManifold, ::Type{T}) where {T}
     return default_vector_transport_method(M)
 end

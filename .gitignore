@@ -9,3 +9,4 @@ docs/src/tutorials/*.md
 tutorials/_freeze
 docs/.CondaPkg
 docs/src/NEWS.md
+temp

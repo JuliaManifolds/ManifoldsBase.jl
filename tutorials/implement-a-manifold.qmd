@@ -20,7 +20,7 @@ using Pkg;
 cd(@__DIR__)
 Pkg.activate("."); # for reproducibility use the local tutorial environment.
 # But for this version use here the most recent dev version from the parent folder
-Pkg.develop(PackageSpec(; path=(@__DIR__) * "/../"))
+Pkg.develop(PackageSpec(; path = (@__DIR__) * "/../"))
 ```
 
 ## Preliminaries
@@ -84,7 +84,7 @@ end
 And we can directly use this manifold and set
 
 ```{julia}
-M = ScaledSphere(2,1.5)
+M = ScaledSphere(2, 1.5)
 ```
 
 ## Functions I: Manifold properties
@@ -99,7 +99,7 @@ We define
 ```{julia}
 #| output: false
 import ManifoldsBase: representation_size
-representation_size(M::ScaledSphere) = (M.dimension+1,)
+representation_size(M::ScaledSphere) = (M.dimension + 1,)
 ```
 
 Similarly, we can implement the function returning the dimension of the manifold, cf. [`manifold_dimension`](@ref) as
@@ -151,9 +151,9 @@ end
 And we can directly test the function. To see all 3 failing ones, we switch from errors to warnings in the check
 
 ```{julia}
-is_point(M, [1.5, 0.0], error=:warn) # wrong size
-is_point(M, [1.0, 0.0, 0.0], error=:warn) # wrong norm
-is_point(M, [1.5, 0.0, 0.0], error=:warn) # on the manifold, returns true
+is_point(M, [1.5, 0.0], error = :warn) # wrong size
+is_point(M, [1.0, 0.0, 0.0], error = :warn) # wrong norm
+is_point(M, [1.5, 0.0, 0.0], error = :warn) # on the manifold, returns true
 ```
 
 similarly for vectors, we just have to implement the orthogonality check.
@@ -162,9 +162,9 @@ similarly for vectors, we just have to implement the orthogonality check.
 #| output: false
 import ManifoldsBase: check_vector
 function check_vector(M::ScaledSphere, p, X; kwargs...)
-    if !isapprox(dot(p,X), 0.0; kwargs...)
+    if !isapprox(dot(p, X), 0.0; kwargs...)
         return DomainError(
-            dot(p,X),
+            dot(p, X),
             "The tangent vector $X is not orthogonal to $p."
         )
     end
@@ -176,10 +176,10 @@ and again, the high level interface can be used to display warnings for vectors 
 activate a check for the point using the last positional argument
 
 ```{julia}
-is_vector(M, [1.5, 0.0, 0.0], [0.0, 1.0]; error=:warn) # wrong size
-is_vector(M, [1.5, 0.0, 0.0], [1.0, 1.0, 0.0]; error=:warn) # not orthogonal norm
-is_vector(M, [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], true; error=:warn) # point not valid
-is_vector(M, [1.5, 0.0, 0.0], [0.0, 1.0, 0.0], true; error=:warn) # returns true
+is_vector(M, [1.5, 0.0, 0.0], [0.0, 1.0]; error = :warn) # wrong size
+is_vector(M, [1.5, 0.0, 0.0], [1.0, 1.0, 0.0]; error = :warn) # not orthogonal norm
+is_vector(M, [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], true; error = :warn) # point not valid
+is_vector(M, [1.5, 0.0, 0.0], [0.0, 1.0, 0.0], true; error = :warn) # returns true
 ```
 
 
@@ -212,7 +212,7 @@ function exp!(M::ScaledSphere, q, p, X)
     if nX == 0
         q .= p
     else
-        q .= cos(nX/M.radius)*p + M.radius*sin(nX/M.radius) .* (1/nX) .* X
+        q .= cos(nX / M.radius) * p + M.radius * sin(nX / M.radius) .* (1 / nX) .* X
     end
     return q
 end
@@ -252,7 +252,7 @@ While the actual function we would call in the end is `retract(M, p, X, Projecti
 
 ```{julia}
 function ManifoldsBase.retract_project!(M::ScaledSphere, q, p, X)
-    q .= (p + X) .* (M.radius/norm(p + X))
+    q .= (p + X) .* (M.radius / norm(p + X))
     return q
 end
 ```

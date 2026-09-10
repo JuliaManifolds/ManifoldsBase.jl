@@ -150,7 +150,7 @@ function EmbeddedSubmanifoldType(en::AbstractEmbeddingDirectness = IndirectEmbed
     return EmbeddedSubmanifoldType{typeof(en)}()
 end
 
-"""
+_doc_get_embedding_type = """
     get_embedding_type(M::AbstractManifold)
     get_embedding_type(M::AbstractManifold, P::Type)
 
@@ -165,7 +165,11 @@ The returned value is an object of a subtype of [`AbstractEmbeddingType`](@ref),
 Point type `P` can be optionally specified if different point types correspond to different
 embeddings.
 """
+
+@doc "$(_doc_get_embedding_type)"
 get_embedding_type(::AbstractManifold) = NotEmbeddedManifoldType()
+
+@doc "$(_doc_get_embedding_type)"
 get_embedding_type(M::AbstractManifold, ::Type) = get_embedding_type(M)
 
 

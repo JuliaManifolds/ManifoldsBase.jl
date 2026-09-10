@@ -53,6 +53,8 @@ _doc_horizontal_lift = raw"""
     horizontal_lift(N::AbstractManifold, q, X)
     horizontal_lift!(N::AbstractManifold, Y, q, X)
 
+Compute a tangent vector `Y` in the horizontal space at `q` of the total space `N`.
+
 Given a point `q` in total space of the quotient manifold `N` such that ``p=π(q)`` is a point on
 a quotient manifold `M` (implicitly given for the first case) and a tangent vector `X` this
 method computes a tangent vector `Y` on the horizontal space of ``T_q\mathcal N``,

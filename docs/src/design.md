@@ -80,7 +80,7 @@ To close this section, let‘s look at an example.
 The high level (or [Layer I](@ref design-layer1)) definition of the retraction is given by
 
 ```julia
-retract!(M::AbstractManifold, q, p, X, m::AbstractRetractionMethod=default_retraction_method(M, typeof(p))) = _retract!(M, q, p, X, m)
+retract!(M::AbstractManifold, q, p, X, m::AbstractRetractionMethod = default_retraction_method(M, typeof(p))) = _retract!(M, q, p, X, m)
 ```
 
 Note that the convenience function `retract(M, q, p, X, m)` first allocates a `q` before calling this function as well.
@@ -89,8 +89,8 @@ This level now dispatches on different retraction types `m`.
 It usually passes to specific functions implemented in [Layer III](@ref design-layer3), here for example
 
 ```julia
-_retract!(M::AbstractManifold, q, p, X, m::Exponentialretraction) = exp(M, q, p, X)
-_retract!(M::AbstractManifold, q, p, X, m::PolarRetraction) = retract_polar(M, q, p, X)
+_retract!(M::AbstractManifold, q, p, X, m::ExponentialRetraction) = exp!(M, q, p, X)
+_retract!(M::AbstractManifold, q, p, X, m::PolarRetraction) = retract_polar!(M, q, p, X)
 ```
 
 where the [`ExponentialRetraction`](@ref) is resolved by again calling a function on [Layer I](@ref design-layer1) (to fill further default values if these exist). The [`PolarRetraction`](@ref) is dispatched to [`retract_polar!`](@ref ManifoldsBase.retract_polar!), a function on [Layer III](@ref design-layer3).

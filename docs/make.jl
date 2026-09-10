@@ -85,7 +85,8 @@ if run_quarto || run_on_CI
 end
 
 # (d) load necessary packages for the docs
-using Documenter, DocumenterCitations, DocumenterInterLinks
+using Documenter, DocumenterCitations, DocumenterCodeBlocks, DocumenterInterLinks
+using DocumenterLandingPage
 using ManifoldsBase
 
 function add_links(line::String, url::String = "https://github.com/JuliaManifolds/Manopt.jl")
@@ -128,6 +129,7 @@ end
 # (f) ...finally! make docs
 bib = CitationBibliography(joinpath(@__DIR__, "src", "references.bib"); style = :alpha)
 links = InterLinks(
+    "Julia" => "https://docs.julialang.org/en/v1/",
     "Manifolds" => ("https://juliamanifolds.github.io/Manifolds.jl/stable/"),
 )
 makedocs(;
@@ -160,6 +162,6 @@ makedocs(;
         "Changelog" => "NEWS.md",
         "References" => "references.md",
     ],
-    plugins = [bib, links],
+    plugins = [bib, links, CodeBlocks(), LandingPage()],
 )
 deploydocs(repo = "github.com/JuliaManifolds/ManifoldsBase.jl.git", push_preview = true)

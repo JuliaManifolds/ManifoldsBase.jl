@@ -9,6 +9,10 @@ updates:
     directory: "/" # Location of package manifests
     schedule:
       interval: "weekly"
+    labels:
+      - "dependencies"
+      - "no changelog necessary"
+      - "skip documentation"
   - package-ecosystem: "julia"
     directories: # Location of Julia projects
       - "/"
@@ -22,3 +26,7 @@ updates:
       all-julia-packages:
         patterns:
           - "*"
+    labels:
+      - "dependencies"
+      - "no changelog necessary"
+      - "skip documentation"

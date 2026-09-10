@@ -280,8 +280,9 @@ end
     cross(m, n)
     cross(m1, m2, m3,...)
 
-Return the [`ProductRetraction`](@ref) For two or more [`AbstractRetractionMethod`](@ref)s,
-where for the case that one of them is a [`ProductRetraction`](@ref) itself,
+Return the [`ProductRetraction`](@ref) for two or more [`AbstractRetractionMethod`](@ref)s.
+
+For the case that one of them is a [`ProductRetraction`](@ref) itself,
 the other is either prepended (if `m` is a product) or appenden (if `n`) is.
 If both [`ProductRetraction`](@ref)s, they are combined into one keeping the order.
 """
@@ -304,8 +305,9 @@ end
     cross(m, n)
     cross(m1, m2, m3,...)
 
-Return the [`InverseProductRetraction`](@ref) For two or more [`AbstractInverseRetractionMethod`](@ref)s,
-where for the case that one of them is a [`InverseProductRetraction`](@ref) itself,
+Return the [`InverseProductRetraction`](@ref) for two or more [`AbstractInverseRetractionMethod`](@ref)s.
+
+For the case that one of them is a [`InverseProductRetraction`](@ref) itself,
 the other is either prepended (if `r` is a product) or appenden (if `s`) is.
 If both [`InverseProductRetraction`](@ref)s, they are combined into one keeping the order.
 """
@@ -338,8 +340,9 @@ end
     cross(m, n)
     cross(m1, m2, m3,...)
 
-Return the [`ProductVectorTransport`](@ref) For two or more [`AbstractVectorTransportMethod`](@ref)s,
-where for the case that one of them is a [`ProductVectorTransport`](@ref) itself,
+Return the [`ProductVectorTransport`](@ref) for two or more [`AbstractVectorTransportMethod`](@ref)s.
+
+For the case that one of them is a [`ProductVectorTransport`](@ref) itself,
 the other is either prepended (if `r` is a product) or appenden (if `s`) is.
 If both [`ProductVectorTransport`](@ref)s, they are combined into one keeping the order.
 """
