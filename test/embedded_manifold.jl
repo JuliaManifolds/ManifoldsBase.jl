@@ -1,6 +1,15 @@
 using LinearAlgebra, ManifoldsBase, Test
 
 using ManifoldsBase: DefaultManifold, ℝ
+
+struct ProjectionBaseManifold <: AbstractManifold{ℝ} end
+ManifoldsBase.representation_size(::ProjectionBaseManifold) = (2,)
+ManifoldsBase.manifold_dimension(::ProjectionBaseManifold) = 2
+function ManifoldsBase.project!(
+        ::EmbeddedManifold{ℝ, ProjectionBaseManifold}, Y, p, X,
+    )
+    return copyto!(Y, X[1:2])
+end
 #
 # A first artificial (not real) manifold that is modelled as a submanifold
 # half plane with euclidean metric is not a manifold but should test all things correctly here
@@ -494,6 +503,11 @@ end
         @test_throws DomainError embed!(O, zeros(3, 3), zeros(4, 4))
         @test_throws DomainError project!(O, zeros(3, 3, 5), zeros(3, 3))
         @test_throws DomainError project!(O, zeros(4, 4), zeros(3, 3))
+        # the allocating tangent projection allocates in the size of the base manifold
+        O3 = EmbeddedManifold(ProjectionBaseManifold(), DefaultManifold(3))
+        Y3 = project(O3, [1.0, 2.0, 0.0], [4.0, 5.0, 9.0])
+        @test size(Y3) == (2,)
+        @test Y3 == [4.0, 5.0]
     end
     @testset "Explicit Fallback" begin
         M = FallbackManifold()

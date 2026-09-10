@@ -190,6 +190,7 @@ default(; show = false, reuse = true)
         @test is_vector(M, p6, Y1; error = :error)
         @test is_vector(M, p6, Y2; error = :error)
         @test is_vector(M, p6, Y3; error = :error)
+        @test !is_vector(M, p6, p6)
     end
     @testset "Slope estimation with errors down to round-off" begin
         log_range = collect(range(-8.0, 0.0; length = 101))
