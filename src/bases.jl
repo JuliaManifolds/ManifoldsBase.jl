@@ -575,7 +575,10 @@ function _get_coordinates(M::AbstractManifold, p, X, B::DefaultOrthogonalBasis)
     return get_coordinates_orthogonal(M, p, X, number_system(B))
 end
 function get_coordinates_orthogonal(M::AbstractManifold, p, X, N)
-    return get_coordinates_orthonormal(M, p, X, N)
+    # arguments X and p for allocate_result are intentionally reversed
+    # to make ManifoldDiff.jl tests pass
+    c = allocate_result(M, get_coordinates, X, p, DefaultOrthogonalBasis(N))
+    return get_coordinates_orthogonal!(M, c, p, X, N)
 end
 
 function _get_coordinates(M::AbstractManifold, p, X, B::DefaultOrthonormalBasis)
@@ -720,7 +723,8 @@ end
     return get_vector_orthogonal(M, p, c, number_system(B))
 end
 @inline function get_vector_orthogonal(M::AbstractManifold, p, c, N)
-    return get_vector_orthonormal(M, p, c, N)
+    Y = allocate_result(M, get_vector, p, c)
+    return get_vector_orthogonal!(M, Y, p, c, N)
 end
 
 function _get_vector(M::AbstractManifold, p, c, B::DefaultOrthonormalBasis)

@@ -941,8 +941,8 @@ function injectivity_radius(M::AbstractPowerManifold, p)
     return radius
 end
 injectivity_radius(M::AbstractPowerManifold) = injectivity_radius(M.manifold)
-function injectivity_radius(M::AbstractPowerManifold, ::AbstractRetractionMethod)
-    return injectivity_radius(M)
+function injectivity_radius(M::AbstractPowerManifold, m::AbstractRetractionMethod)
+    return injectivity_radius(M.manifold, m)
 end
 
 @doc raw"""
@@ -1189,7 +1189,7 @@ end
 function parallel_transport_to!(M::AbstractPowerManifold, Y, p, X, q)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
-        vector_transport_to!(
+        parallel_transport_to!(
             M.manifold, _write(M, rep_size, Y, i), _read(M, rep_size, p, i), _read(M, rep_size, X, i), _read(M, rep_size, q, i),
         )
     end
@@ -1257,7 +1257,7 @@ end
 function project!(M::PowerManifoldNestedReplacing, Z, q, Y)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
-        q[i...] = project(M.manifold, _read(M, rep_size, q, i), _read(M, rep_size, Y, i))
+        Z[i...] = project(M.manifold, _read(M, rep_size, q, i), _read(M, rep_size, Y, i))
     end
     return Z
 end
@@ -1485,7 +1485,7 @@ manifolds, as the sectional curvature corresponding to the plane spanned by vect
 """
 function sectional_curvature_min(M::AbstractPowerManifold)
     d = prod(power_dimensions(M))
-    mscm = sectional_curvature_max(M.manifold)
+    mscm = sectional_curvature_min(M.manifold)
     if d > 1
         return min(mscm, zero(mscm))
     else

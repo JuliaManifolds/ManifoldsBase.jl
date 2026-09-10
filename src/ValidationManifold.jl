@@ -511,7 +511,7 @@ function get_coordinates(M::ValidationManifold, p, X, B::AbstractBasis; kwargs..
         context = (:Input,),
         kwargs...,
     )
-    return get_coordinates(M.manifold, p, X, B)
+    return get_coordinates(M.manifold, internal_value(p), internal_value(X), B)
 end
 
 function get_coordinates!(M::ValidationManifold, c, p, X, B::AbstractBasis; kwargs...)
@@ -714,7 +714,7 @@ function rand(M::ValidationManifold; vector_at = nothing, kwargs...)
     if vector_at !== nothing
         is_point(M, vector_at; within = rand, context = (:Input,), kwargs...)
     end
-    pX = rand(M.manifold; vector_at = vector_at, kwargs...)
+    pX = rand(M.manifold; vector_at = internal_value(vector_at), kwargs...)
     if vector_at !== nothing
         is_vector(M, vector_at, pX; within = rand, context = (:Output,), kwargs...)
     else
@@ -827,7 +827,7 @@ end
 
 function zero_vector!(M::ValidationManifold, X, p; kwargs...)
     is_point(M, p; within = zero_vector, context = (:Input,), kwargs...)
-    zero_vector!(M.manifold, internal_value(X), internal_value(p); kwargs...)
+    zero_vector!(M.manifold, internal_value(X), internal_value(p))
     _update_basepoint!(M, X, p)
     is_vector(M, p, X; within = zero_vector, context = (:Output,), kwargs...)
     return X

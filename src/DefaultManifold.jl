@@ -58,7 +58,7 @@ function check_approx(M::DefaultManifold, p, X, Y; kwargs...)
 end
 
 
-function check_point(M::DefaultManifold{𝔽}, p) where {𝔽}
+function check_point(M::DefaultManifold{𝔽}, p; kwargs...) where {𝔽}
     if (𝔽 === ℝ) && !(eltype(p) <: Real)
         return DomainError(
             eltype(p),

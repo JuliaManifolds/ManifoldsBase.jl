@@ -982,10 +982,13 @@ function sectional_curvature(M::ProductManifold, p, X, Y)
         submanifold_components(M, Y),
     ) do M_i, p_i, X_i, Y_i
         if are_linearly_independent(M_i, p_i, X_i, Y_i)
-            curvature += sectional_curvature(M_i, p_i, X_i, Y_i)
+            w_i =
+                inner(M_i, p_i, X_i, X_i) * inner(M_i, p_i, Y_i, Y_i) -
+                inner(M_i, p_i, X_i, Y_i)^2
+            curvature += w_i * sectional_curvature(M_i, p_i, X_i, Y_i)
         end
     end
-    return curvature
+    return curvature / (inner(M, p, X, X) * inner(M, p, Y, Y) - inner(M, p, X, Y)^2)
 end
 
 @doc raw"""

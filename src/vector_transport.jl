@@ -597,7 +597,7 @@ function vector_transport_direction_embedded!(
         M::AbstractManifold, Y, p::P, X, d, m::AbstractVectorTransportMethod,
     ) where {P}
     p_e = embed(M, p)
-    d_e = embed(M, d)
+    d_e = embed(M, p, d)
     X_e = embed(M, p, X)
     Y_e = vector_transport_direction(get_embedding(M, P), p_e, X_e, d_e, m)
     q = exp(M, p, d)
@@ -640,7 +640,8 @@ function _vector_transport_to(
         kwargs...,
     )
     Y = allocate_result(M, vector_transport_to, X, p)
-    return vector_transport_to!(M, Y, p, X, q, m; kwargs...)
+    v = length(kwargs) > 0 ? VectorTransportWithKeywords(m; kwargs...) : m
+    return vector_transport_to!(M, Y, p, X, q, v)
 end
 function _vector_transport_to(
         M::AbstractManifold, p, X, q, m::VectorTransportWithKeywords; kwargs...,

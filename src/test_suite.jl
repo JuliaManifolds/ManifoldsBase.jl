@@ -70,8 +70,12 @@ function ManifoldsBase.check_point(M::TestSphere, p; kwargs...)
     end
     return nothing
 end
-function ManifoldsBase.check_vector(M::TestSphere, p, X; kwargs...)
-    if !isapprox(abs(real(dot(p, X))), 0.0; kwargs...)
+function ManifoldsBase.check_vector(
+        M::TestSphere, p, X;
+        atol::Real = sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(X)))),
+        kwargs...,
+    )
+    if !isapprox(abs(real(dot(p, X))), 0.0; atol = atol, kwargs...)
         return DomainError(
             abs(dot(p, X)),
             "The vector $(X) is not a tangent vector to $(p) on $(M), since it is not orthogonal in the embedding.",

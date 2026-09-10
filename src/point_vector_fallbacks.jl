@@ -97,13 +97,13 @@ points of type `TP`, tangent vectors of type `TV`, with forwarding to fields `pf
 macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
     block = quote
         function ManifoldsBase.allocate_result(::$TM, ::typeof(log), p::$TP, ::$TP)
-            a = allocate(p.$vfield)
+            a = allocate(p.$pfield)
             return $TV(a)
         end
         function ManifoldsBase.allocate_result(
                 ::$TM, ::typeof(inverse_retract), p::$TP, ::$TP,
             )
-            a = allocate(p.$vfield)
+            a = allocate(p.$pfield)
             return $TV(a)
         end
         function ManifoldsBase.allocate_coordinates(M::$TM, p::$TP, T, n::Int)
@@ -358,14 +358,28 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
     )
     # forward vector transports
 
-    for sub in [:project, :diff, :embedded]
-        # project & diff
+    push!(
+        block.args,
+        quote
+            function ManifoldsBase.vector_transport_to_project!(
+                    M::$TM, Y::$TV, p::$TP, X::$TV, q::$TP,
+                )
+                ManifoldsBase.vector_transport_to_project!(
+                    M, Y.$vfield, p.$pfield, X.$vfield, q.$pfield,
+                )
+                return Y
+            end
+        end,
+    )
+    for sub in [:diff, :embedded]
         vttm = Symbol("vector_transport_to_$(sub)!")
         push!(
             block.args,
             quote
-                function ManifoldsBase.$vttm(M::$TM, Y::$TV, p::$TP, X::$TV, q::$TP)
-                    ManifoldsBase.$vttm(M, Y.$vfield, p.$pfield, X.$vfield, q.$pfield)
+                function ManifoldsBase.$vttm(M::$TM, Y::$TV, p::$TP, X::$TV, q::$TP, m)
+                    ManifoldsBase.$vttm(
+                        M, Y.$vfield, p.$pfield, X.$vfield, q.$pfield, m,
+                    )
                     return Y
                 end
             end,

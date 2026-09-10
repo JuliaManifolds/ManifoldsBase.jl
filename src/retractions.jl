@@ -363,7 +363,7 @@ struct NLSolveInverseRetraction{TR <: AbstractRetractionMethod, TV, TK} <:
     nlsolve_kwargs::TK
     function NLSolveInverseRetraction(m, X0, project_point, project_tangent, nlsolve_kwargs)
         return new{typeof(m), typeof(X0), typeof(nlsolve_kwargs)}(
-            m, X0, project_point, project_tangent, nlsolve_kwargs,
+            m, X0, project_tangent, project_point, nlsolve_kwargs,
         )
     end
 end
@@ -608,7 +608,7 @@ function inverse_retract_embedded!(
     return project!(
         M, X, p,
         inverse_retract(
-            get_embedding(M, P), embed(get_embedding(M, P), p), embed(get_embedding(M, P), q), m,
+            get_embedding(M, P), embed(M, p), embed(M, q), m,
         ),
     )
 end
@@ -903,7 +903,7 @@ function retract_embedded!(
         M,
         q,
         retract(
-            get_embedding(M, P), embed(get_embedding(M, P), p), embed(get_embedding(M, P), p, X), m;
+            get_embedding(M, P), embed(M, p), embed(M, p, X), m;
             kwargs...,
         ),
     )
@@ -921,7 +921,7 @@ function retract_embedded_fused!(
         M,
         q,
         retract_fused(
-            get_embedding(M, P), embed(get_embedding(M, P), p), embed(get_embedding(M, P), p, X), t, m; kwargs...,
+            get_embedding(M, P), embed(M, p), embed(M, p, X), t, m; kwargs...,
         ),
     )
 end

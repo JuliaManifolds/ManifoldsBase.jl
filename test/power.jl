@@ -240,6 +240,9 @@ end
                     @test norm(N, p, q, Inf) == maximum(norms)
                     @test project(N, p) == p
                     @test project(N, p, q) == q
+                    Zp = allocate(q)
+                    @test project!(N, Zp, p, q) == q
+                    @test Zp == q
                     @test power_dimensions(N) == pow_size
                     @test power_dimensions(N^3) == (pow_size..., 3)
                     m = ParallelTransport()

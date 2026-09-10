@@ -12,6 +12,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * [DocumenterCodeBlocks.jl](https://fredrikekre.github.io/DocumenterCodeBlocks.jl/stable/) plugin added to the documentation
 * [DocumenterLandingPage.jl](https://csvance.github.io/DocumenterLandingPage.jl/) enhances the start page with a short teaser for the package now.
 
+### Fixed
+
+* `get_coordinates`/`get_vector` with a `DefaultOrthogonalBasis` now allocate and call their mutating orthogonal variant instead of forwarding to the orthonormal one; the orthogonal-to-orthonormal fallback now only happens in `get_coordinates_orthogonal!`/`get_vector_orthogonal!`.
+* `angle` clamps the `acos` argument to `[-1, 1]`, which rounding could exceed for nearly parallel vectors.
+* `project!` on a `PowerManifoldNestedReplacing` writes to the result instead of the point.
+* `sectional_curvature_min` on a power manifold uses the minimum, not the maximum, of the wrapped manifold.
+* `parallel_transport_to!` on a power manifold calls `parallel_transport_to!` on the base manifold elementwise, instead of its default vector transport.
+* `injectivity_radius(M::AbstractPowerManifold, m)` forwards `m` to the wrapped manifold.
+* `sectional_curvature` on a `ProductManifold` weights each factor by its Gram determinant and normalizes by that of the product; it summed them unweighted before.
+* `NLSolveInverseRetraction` stores `project_point` and `project_tangent` in their own fields.
+* `retract_embedded!`, `retract_embedded_fused!` and `inverse_retract_embedded!` embed with `embed(M, ...)`, not `embed(get_embedding(M), ...)`.
+* `allocate_result_embedding` looks up the embedding by point type, not tangent vector type.
+* `get_coordinates` on a `ValidationManifold` unwraps its point and tangent vector.
+* `rand(::ValidationManifold; vector_at=)` unwraps `vector_at`.
+* `zero_vector!` on a `ValidationManifold` no longer forwards validation keywords to the wrapped manifold.
+* `vector_transport_direction_embedded!` embeds the direction as a tangent vector.
+* the allocating `vector_transport_to` wraps keywords in `VectorTransportWithKeywords` instead of forwarding them to the keyword-less `vector_transport_to!`.
+* `is_default_connection(M::ConnectionManifold)` compares `connection(M.manifold)` with `M.connection` instead of returning `true`.
+* `@default_manifold_fallbacks` generates the `diff` and `embedded` vector transport forwardings with their method argument.
+* `check_vector` of `ManifoldsBase.Test.TestSphere` takes an `atol`, defaulting to `sqrt(prod(representation_size(M))) * eps`.
+* `check_point` on `DefaultManifold` accepts keyword arguments, so `is_point(M, p; atol=)` reaches it instead of the generic check.
+* the allocating `project(M::EmbeddedManifold, p, X)` allocates in the representation size of the base manifold, not of the embedding.
+
 ## [2.5.1] 02/09/2026
 
 ### Fixed

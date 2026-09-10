@@ -72,6 +72,13 @@ function project(M::EmbeddedManifold, p)
     return q
 end
 
+function project(M::EmbeddedManifold, p, X)
+    # the order of args switched, since the allocation by default takes the type of the first.
+    Y = allocate_result(M, project, X, p)
+    project!(M, Y, p, X)
+    return Y
+end
+
 function show(
         io::IO, M::EmbeddedManifold{𝔽, MT, NT},
     ) where {𝔽, MT <: AbstractManifold{𝔽}, NT <: AbstractManifold}

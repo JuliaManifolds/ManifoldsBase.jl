@@ -228,7 +228,7 @@ Compute the angle between tangent vectors `X` and `Y` at point `p` from the
 [`AbstractManifold`](@ref) `M` with respect to the inner product from [`inner`](@ref).
 """
 function angle(M::AbstractManifold, p, X, Y)
-    return acos(real(inner(M, p, X, Y)) / norm(M, p, X) / norm(M, p, Y))
+    return acos(clamp(real(inner(M, p, X, Y)) / norm(M, p, X) / norm(M, p, Y), -1, 1))
 end
 
 """

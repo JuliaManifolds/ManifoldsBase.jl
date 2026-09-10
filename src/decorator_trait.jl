@@ -272,8 +272,8 @@ function allocate_result_embedding(
         f::typeof(embed),
         x::Vararg{Any, N},
     ) where {N}
-    T = allocate_result_type(get_embedding(M, typeof(x[1])), f, x)
-    return allocate(M, x[1], T, representation_size(get_embedding(M, typeof(x[1]))))
+    T = allocate_result_type(get_embedding(M, typeof(x[end])), f, x)
+    return allocate(M, x[1], T, representation_size(get_embedding(M, typeof(x[end]))))
 end
 function allocate_result_embedding(
         M::AbstractManifold,
