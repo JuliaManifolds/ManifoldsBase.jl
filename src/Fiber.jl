@@ -18,13 +18,15 @@ isometric to the [`Euclidean`](https://juliamanifolds.github.io/Manifolds.jl/lat
 * `manifold`    – base space of the fiber bundle
 * `point`       – a point ``p`` from the base space; the fiber corresponds to the preimage
                   by bundle projection ``\pi^{-1}(\{p\})``.
+* `fiber_type`  – the [`FiberType`](@ref) of the fiber
 
 
 # Constructor
 
-    Fiber(M::AbstractManifold, p, fiber_type::FiberType)
+    Fiber(M::AbstractManifold, p, fiber_type::FiberType; field::AbstractNumbers = ℝ)
 
-A fiber of type `fiber_type` at point `p` from the manifold `manifold`.
+A fiber of type `fiber_type` at point `p` from the manifold `M`.
+The number system `field` of the fiber defaults to `ℝ`.
 """
 struct Fiber{𝔽, TFiber <: FiberType, TM <: AbstractManifold, TX} <: AbstractManifold{𝔽}
     manifold::TM
@@ -51,7 +53,8 @@ function Base.show(io::IO, ::MIME"text/plain", vs::Fiber)
     sf = replace(sf, '\n' => "\n$(pre)")
     sm = sprint(show, "text/plain", vs.manifold; context = io, sizehint = 0)
     sm = replace(sm, '\n' => "\n$(pre)")
-    println(io, pre, sf, sm)
+    println(io, pre, sf)
+    println(io, pre, sm)
     println(io, "Base point:")
     sp = sprint(show, "text/plain", vs.point; context = io, sizehint = 0)
     sp = replace(sp, '\n' => "\n$(pre)")

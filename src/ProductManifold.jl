@@ -39,7 +39,7 @@ function Base.getindex(TpM::TangentSpace{𝔽, <:ProductManifold}, i::Integer) w
     return TangentSpace(M[i], base_point(TpM)[M, i])
 end
 
-ProductManifold() = throw(MethodError("No method matching ProductManifold()."))
+ProductManifold() = throw(MethodError(ProductManifold, ()))
 
 const PRODUCT_BASIS_LIST = [
     VeeOrthogonalBasis,
@@ -176,13 +176,11 @@ function check_point(M::ProductManifold, p; kwargs...)
 end
 
 """
-    check_size(M::ProductManifold, p; kwargs...)
+    check_size(M::ProductManifold, p)
 
 Check whether `p` is of valid size on the [`ProductManifold`](@ref) `M`.
 If `p` has components of wrong size a [`CompositeManifoldError`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.CompositeManifoldError).consisting of all error messages of the
 components, for which the tests fail is returned.
-
-The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_size(M::ProductManifold, p)
     try
@@ -456,7 +454,7 @@ function exp_fused!(M::ProductManifold, q, p, X, t::Number)
 end
 
 function get_basis(M::ProductManifold, p, B::AbstractBasis)
-    parts = map(t -> get_basis(t..., B), ziptuples(M.manifolds, submanifold_components(p)))
+    parts = map(t -> get_basis(t..., B), ziptuples(M.manifolds, submanifold_components(M, p)))
     return CachedBasis(B, ProductBasisData(parts))
 end
 function get_basis(M::ProductManifold, p, B::CachedBasis)
@@ -466,8 +464,8 @@ function get_basis(M::ProductManifold, p, B::DiagonalizingOrthonormalBasis)
     vs = map(
         ziptuples(
             M.manifolds,
-            submanifold_components(p),
-            submanifold_components(B.frame_direction),
+            submanifold_components(M, p),
+            submanifold_components(M, B.frame_direction),
         ),
     ) do t
         return get_basis(t[1], t[2], DiagonalizingOrthonormalBasis(t[3]))
@@ -1034,7 +1032,7 @@ For example `select_from_tuple(("a", "b", "c"), Val((3, 1, 1)))` returns
 """
 @generated function select_from_tuple(t::NTuple{N, Any}, positions::Val{P}) where {N, P}
     for k in P
-        (k < 0 || k > N) && error("positions must be between 1 and $N")
+        (k < 1 || k > N) && error("positions must be between 1 and $N")
     end
     return Expr(:tuple, [Expr(:ref, :t, k) for k in P]...)
 end
@@ -1276,7 +1274,7 @@ end
     submanifold_component(p, i::Integer)
     submanifold_component(p, ::Val{i}) where {i}
 
-Project the product array `p` on `M` to its `i`th component. A new array is returned.
+Project the product array `p` on `M` to its `i`th component.
 """
 submanifold_component(::Any...)
 @inline function submanifold_component(M::AbstractManifold, p, i::Integer)

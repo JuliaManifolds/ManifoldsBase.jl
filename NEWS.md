@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * [DocumenterCodeBlocks.jl](https://fredrikekre.github.io/DocumenterCodeBlocks.jl/stable/) plugin added to the documentation
 * [DocumenterLandingPage.jl](https://csvance.github.io/DocumenterLandingPage.jl/) enhances the start page with a short teaser for the package now.
+* `is_flat(::VectorSpaceFiber)`, so a `CotangentSpace` and any user-defined vector space fiber report the flatness `Fiber` documents; before only `TangentSpace` had a method.
+* scalar multiplication from the right for `FVector` and `ZeroVector`, mirroring the existing `a * X` methods.
 
 ### Fixed
 
@@ -34,6 +36,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `check_vector` of `ManifoldsBase.Test.TestSphere` takes an `atol`, defaulting to `sqrt(prod(representation_size(M))) * eps`.
 * `check_point` on `DefaultManifold` accepts keyword arguments, so `is_point(M, p; atol=)` reaches it instead of the generic check.
 * the allocating `project(M::EmbeddedManifold, p, X)` allocates in the representation size of the base manifold, not of the embedding.
+* `change_representer!`, `change_metric!` and `Weingarten!` now have a `PowerManifoldNestedReplacing` method; before they reached `_write`, which that representation does not define.
+* `show` of a `CachedBasis` on a power manifold prints the basis type instead of constructing it, which failed for any basis type with a field, for example `DiagonalizingOrthonormalBasis`.
+* `distance(M, p, q, r)` and `norm(M, p, X, r)` on a power manifold seed their reduction in `real(float(number_eltype(p)))` for `r = 1` and `r = Inf`; on a complex power manifold the first errored and the second returned a complex value.
+* `get_basis` on a `ProductManifold` splits its point with `submanifold_components(M, p)`, so point types that implement only the two-argument form work as well.
+* `get_coordinates!` and `get_vector!` default their basis to `default_basis(M, typeof(p))`, matching the allocating variants; before they hard-coded `DefaultOrthonormalBasis()`, so the two disagreed for any manifold specializing `default_basis`.
+* `retract_fused` includes `t` in its `allocate_result`, as `exp_fused` does; before a fused retraction allocated in the element type of `p` and `X` alone.
+* `retract_fused`, the two `_retract_fused` methods, the `SasakiRetraction` and `StabilizedRetraction` layer-2 and layer-3 methods, and `inverse_retract_embedded!` accept and forward `kwargs...`, so `RetractionWithKeywords` and `InverseRetractionWithKeywords` reach the last layer instead of raising a `MethodError`.
+* `ShootingInverseRetraction` runs `max_iterations` iterations; the loop guard was strict, so `max_iterations = 1` shot not at all and `n` gave the accuracy of `n - 1`.
+* `_inverse_retract!` for `ShootingInverseRetraction` accepts `kwargs...` and forwards them to the retraction of its loop.
+* `manifold_dimension` on an `AbstractDecoratorManifold` that decorates nothing throws a `MethodError` instead of recursing into a `StackOverflowError`.
+
+### Changed
+
+* `show` for a `Fiber` prints the fiber type and the base manifold on separate lines instead of concatenating them.
+* `inverse_retract` and `inverse_retract!` accept keyword arguments, like `retract` and `retract!` already did.
 
 ## [2.5.1] 02/09/2026
 

@@ -59,7 +59,7 @@ would not be represented by statically-sized arrays.
 
 # Constructor
 
-    PowerManifold(M::PowerManifold, N_1, N_2, ..., N_d; parameter::Symbol=:field)
+    PowerManifold(M::PowerManifold, N_1, N_2, ..., N_d; parameter::Symbol=_parameter_symbol(M))
     PowerManifold(M::AbstractManifold, NestedPowerRepresentation(), N_1, N_2, ..., N_d; parameter::Symbol=:field)
     M^(N_1, N_2, ..., N_d)
 
@@ -79,7 +79,8 @@ Since there is no default [`AbstractPowerRepresentation`](@ref) within this inte
 `^` operator is only available for `PowerManifold`s and concatenates dimensions.
 
 `parameter`: whether a type parameter should be used to store `n`. By default size
-is stored in a field. Value can either be `:field` or `:type`.
+is stored in a field, unless `M` is a [`PowerManifold`](@ref), then its storage is
+inherited. Value can either be `:field` or `:type`.
 """
 struct PowerManifold{𝔽, TM <: AbstractManifold{𝔽}, TSize, TPR <: AbstractPowerRepresentation} <:
     AbstractPowerManifold{𝔽, TM, TPR}
@@ -292,6 +293,15 @@ function change_representer!(M::AbstractPowerManifold, Y, G::AbstractMetric, p, 
     end
     return Y
 end
+function change_representer!(M::PowerManifoldNestedReplacing, Y, G::AbstractMetric, p, X)
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        Y[i...] = change_representer(
+            M.manifold, G, _read(M, rep_size, p, i), _read(M, rep_size, X, i),
+        )
+    end
+    return Y
+end
 
 """
     change_metric(M::AbstractPowerManifold, ::AbstractMetric, p, X)
@@ -305,6 +315,15 @@ function change_metric!(M::AbstractPowerManifold, Y, G::AbstractMetric, p, X)
     for i in get_iterator(M)
         change_metric!(
             M.manifold, _write(M, rep_size, Y, i), G, _read(M, rep_size, p, i), _read(M, rep_size, X, i),
+        )
+    end
+    return Y
+end
+function change_metric!(M::PowerManifoldNestedReplacing, Y, G::AbstractMetric, p, X)
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        Y[i...] = change_metric(
+            M.manifold, G, _read(M, rep_size, p, i), _read(M, rep_size, X, i),
         )
     end
     return Y
@@ -561,7 +580,7 @@ function _distance_r(M::AbstractPowerManifold, p, q, r::Real)
     return norm(values, r)
 end
 function _distance_1(M::AbstractPowerManifold, p, q, m::AbstractInverseRetractionMethod)
-    s = zero(number_eltype(p))
+    s = zero(real(float(number_eltype(p))))
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         s += distance(M.manifold, _read(M, rep_size, p, i), _read(M, rep_size, q, i), m)
@@ -569,7 +588,7 @@ function _distance_1(M::AbstractPowerManifold, p, q, m::AbstractInverseRetractio
     return s
 end
 function _distance_1(M::AbstractPowerManifold, p, q)
-    s = zero(number_eltype(p))
+    s = zero(real(float(number_eltype(p))))
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         s += distance(M.manifold, _read(M, rep_size, p, i), _read(M, rep_size, q, i))
@@ -577,7 +596,7 @@ function _distance_1(M::AbstractPowerManifold, p, q)
     return s
 end
 function _distance_max(M::AbstractPowerManifold, p, q, m::AbstractInverseRetractionMethod)
-    d = float(zero(number_eltype(p)))
+    d = zero(real(float(number_eltype(p))))
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         v = distance(M.manifold, _read(M, rep_size, p, i), _read(M, rep_size, q, i), m)
@@ -586,7 +605,7 @@ function _distance_max(M::AbstractPowerManifold, p, q, m::AbstractInverseRetract
     return d
 end
 function _distance_max(M::AbstractPowerManifold, p, q)
-    d = float(zero(number_eltype(p)))
+    d = zero(real(float(number_eltype(p))))
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         v = distance(M.manifold, _read(M, rep_size, p, i), _read(M, rep_size, q, i))
@@ -1121,7 +1140,7 @@ function _norm_r(M::AbstractPowerManifold, p, X, r::Real)
     return norm(values, r)
 end
 function _norm_1(M::AbstractPowerManifold, p, X)
-    s = zero(number_eltype(p))
+    s = zero(real(float(number_eltype(p))))
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         s += norm(M.manifold, _read(M, rep_size, p, i), _read(M, rep_size, X, i))
@@ -1540,7 +1559,7 @@ end
 function Base.show(
         io::IO, mime::MIME"text/plain", B::CachedBasis{𝔽, T, D},
     ) where {T <: AbstractBasis, D <: PowerBasisData, 𝔽}
-    println(io, "$(T()) for a power manifold")
+    println(io, "$(T) for a power manifold")
     for i in Base.product(map(Base.OneTo, size(B.data.bases))...)
         println(io, "Basis for component $i:")
         show(io, mime, _access_nested(B.data.bases, i))
@@ -1672,6 +1691,15 @@ function Weingarten!(M::AbstractPowerManifold, Y, p, X, V)
         Weingarten!(
             M.manifold, _write(M, rep_size, Y, i),
             _read(M, rep_size, p, i), _read(M, rep_size, X, i), _read(M, rep_size, V, i),
+        )
+    end
+    return Y
+end
+function Weingarten!(M::PowerManifoldNestedReplacing, Y, p, X, V)
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        Y[i...] = Weingarten(
+            M.manifold, _read(M, rep_size, p, i), _read(M, rep_size, X, i), _read(M, rep_size, V, i),
         )
     end
     return Y

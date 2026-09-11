@@ -1,7 +1,12 @@
 #
 # Base pass-ons
 #
-manifold_dimension(M::AbstractDecoratorManifold) = manifold_dimension(base_manifold(M))
+function manifold_dimension(M::AbstractDecoratorManifold)
+    N = base_manifold(M)
+    # nothing was decorated, so there is nothing to pass this on to
+    (N === M) && throw(MethodError(manifold_dimension, (M,)))
+    return manifold_dimension(N)
+end
 
 #
 # Forwarding types

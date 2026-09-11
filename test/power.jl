@@ -318,7 +318,7 @@ end
                     B3 = get_basis(N, p, B2)
                     if pow_size == (2,)
                         @test sprint(show, "text/plain", B) ==
-                            """$(DefaultBasis()) for a power manifold
+                            """$(typeof(DefaultBasis())) for a power manifold
                             Basis for component (1,):
                             $(sprint(show, "text/plain", B.data.bases[1]))
                             Basis for component (2,):

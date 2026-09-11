@@ -409,6 +409,8 @@ using Test
         @test (-fv1).type == TangentSpaceType()
         @test isa(2 * fv1, FVector)
         @test (2 * fv1).type == TangentSpaceType()
+        @test isa(fv1 * 2, FVector)
+        @test (fv1 * 2).type == TangentSpaceType()
         tv1s_32 = allocate(fv_tvs[1], Float32)
         @test isa(tv1s, FVector)
         @test eltype(tv1s_32.data) === Float32

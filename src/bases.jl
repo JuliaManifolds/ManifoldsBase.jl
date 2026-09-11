@@ -127,6 +127,12 @@ function DefaultOrthogonalBasis{𝔽, TangentSpaceType}() where {𝔽}
 end
 
 
+"""
+    VeeOrthogonalBasis{𝔽} <: AbstractOrthogonalBasis{𝔽,TangentSpaceType}
+
+The orthogonal basis that [`vee`](@ref) and [`hat`](@ref) use, mainly used in connection with a [`LieAlgebra`](@extref LieGroups :jl:type:`LieGroups.LieAlgebra`),
+see [`DefaultLieAlgebraOrthogonalBasis`](@extref LieGroups :jl:type:`LieGroups.DefaultLieAlgebraOrthogonalBasis`).
+"""
 struct VeeOrthogonalBasis{𝔽} <: AbstractOrthogonalBasis{𝔽, TangentSpaceType} end
 VeeOrthogonalBasis(𝔽::AbstractNumbers = ℝ) = VeeOrthogonalBasis{𝔽}()
 
@@ -327,21 +333,21 @@ allocation_promotion_function(::AbstractManifold, f, ::Tuple) = identity
 
 
 _doc_default_basis = """
-    default_basis(M::AbstractManifold, ::typeof(p); kwargs...)
+    default_basis(M::AbstractManifold, ::Type{T}; kwargs...) where {T}
     default_basis(M::AbstractManifold; kwargs...)
 
 Provide a default basis for a manifold's tangent space. This can be specific for different
-points `p` on `M`
-The global default for both is the [`DefaultOrthonormalBasis`](@ref) with
-the same number type as `M`.
+points `p` on `M`.
+The global default for both is the [`DefaultOrthonormalBasis`](@ref) with coefficients
+in the field given by the `field` keyword argument.
 
 This method can also be specified more precisely with a point type `T`, for the case
 that on a `M` there are two different representations of points, which provide
-different inverse retraction methods.
+different bases.
 
 ## Keyword arguments
 
-* `field::`[`AbstractNumbers`](@ref) field for the coefficients of the basis
+* `field::`[`AbstractNumbers`](@ref)` = ℝ`: field for the coefficients of the basis
 """
 
 @doc "$(_doc_default_basis)"
@@ -633,7 +639,7 @@ function get_coordinates!(
         Y,
         p,
         X,
-        B::AbstractBasis = DefaultOrthonormalBasis(),
+        B::AbstractBasis = default_basis(M, typeof(p)),
     )
     return _get_coordinates!(M, Y, p, X, B)
 end
@@ -777,7 +783,7 @@ end
         Y,
         p,
         c,
-        B::AbstractBasis = DefaultOrthonormalBasis(),
+        B::AbstractBasis = default_basis(M, typeof(p)),
     )
     return _get_vector!(M, Y, p, c, B)
 end
@@ -870,7 +876,8 @@ many vectors.
 Note that this method requires the manifold and basis to work on the same
 [`AbstractNumbers`](@ref) `𝔽`, i.e. with real coefficients.
 
-The method always returns a basis, i.e. linearly dependent vectors are removed.
+A vector that is linearly dependent on the previous ones stops the computation with an error,
+unless `skip_linearly_dependent` is set to `true`, in which case it is left out.
 
 # Keyword arguments
 
@@ -882,7 +889,7 @@ The method always returns a basis, i.e. linearly dependent vectors are removed.
   a basis but contains less vectors
 
 further keyword arguments can be passed to set the accuracy of the independence test.
-Especially `atol` is raised slightly by default to `atol = 5*1e-16`.
+Especially `atol` defaults to `eps(number_eltype(first(V)))`.
 
 # Return value
 
