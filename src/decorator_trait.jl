@@ -118,9 +118,7 @@ A property of an embedded manifold that indicates that `embed` and `project` are
 """
 struct EmbeddedManifoldType{EN <: AbstractEmbeddingDirectness} <: AbstractEmbeddingType end
 
-function EmbeddedManifoldType(en::AbstractEmbeddingDirectness = IndirectEmbedding())
-    return EmbeddedManifoldType{typeof(en)}()
-end
+EmbeddedManifoldType(::EN = DirectEmbedding()) where {EN <: AbstractEmbeddingDirectness} = EmbeddedManifoldType{EN}()
 
 """
     IsometricallyEmbeddedManifold <: AbstractEmbeddingType
@@ -132,11 +130,7 @@ Here, additionally, metric related functions like [`inner`](@ref) and [`norm`](@
 """
 struct IsometricallyEmbeddedManifoldType{EN <: AbstractEmbeddingDirectness} <: AbstractEmbeddingType end
 
-function IsometricallyEmbeddedManifoldType(
-        en::AbstractEmbeddingDirectness = IndirectEmbedding(),
-    )
-    return IsometricallyEmbeddedManifoldType{typeof(en)}()
-end
+IsometricallyEmbeddedManifoldType(::EN = DirectEmbedding()) where {EN <: AbstractEmbeddingDirectness} = IsometricallyEmbeddedManifoldType{EN}()
 
 """
     EmbeddedSubmanifoldType <: AbstractEmbeddingType
@@ -151,9 +145,7 @@ are passed to the embedding.
 """
 struct EmbeddedSubmanifoldType{EN <: AbstractEmbeddingDirectness} <: AbstractEmbeddingType end
 
-function EmbeddedSubmanifoldType(en::AbstractEmbeddingDirectness = IndirectEmbedding())
-    return EmbeddedSubmanifoldType{typeof(en)}()
-end
+EmbeddedSubmanifoldType(::EN = DirectEmbedding()) where {EN <: AbstractEmbeddingDirectness} = EmbeddedSubmanifoldType{EN}()
 
 _doc_get_embedding_type = """
     get_embedding_type(M::AbstractManifold)
@@ -889,13 +881,13 @@ for mf in vcat(
                 ::EmbeddedSubmanifoldType{DirectEmbedding},
                 M::AbstractDecoratorManifold, ::typeof($mf),
             )
-            return EmbeddedForwardingType()
+            return EmbeddedForwardingType(DirectEmbedding())
         end
         function get_forwarding_type_embedding(
                 ::EmbeddedSubmanifoldType{IndirectEmbedding},
                 M::AbstractDecoratorManifold, ::typeof($mf),
             )
-            return EmbeddedForwardingType(DirectEmbedding())
+            return EmbeddedForwardingType(IndirectEmbedding())
         end
     end
 end
@@ -906,13 +898,13 @@ for mf in vcat(forward_functions_isometric, forward_functions_embedded)
                 ::IsometricallyEmbeddedManifoldType{DirectEmbedding},
                 M::AbstractDecoratorManifold, ::typeof($mf),
             )
-            return EmbeddedForwardingType()
+            return EmbeddedForwardingType(DirectEmbedding())
         end
         function get_forwarding_type_embedding(
                 ::IsometricallyEmbeddedManifoldType{IndirectEmbedding},
                 M::AbstractDecoratorManifold, ::typeof($mf),
             )
-            return EmbeddedForwardingType(DirectEmbedding())
+            return EmbeddedForwardingType(IndirectEmbedding())
         end
     end
 end
@@ -923,13 +915,13 @@ for mf in forward_functions_embedded
                 ::EmbeddedManifoldType{DirectEmbedding},
                 M::AbstractDecoratorManifold, ::typeof($mf),
             )
-            return EmbeddedForwardingType()
+            return EmbeddedForwardingType(DirectEmbedding())
         end
         function get_forwarding_type_embedding(
                 ::EmbeddedManifoldType{IndirectEmbedding},
                 M::AbstractDecoratorManifold, ::typeof($mf),
             )
-            return EmbeddedForwardingType(DirectEmbedding())
+            return EmbeddedForwardingType(IndirectEmbedding())
         end
     end
 end
