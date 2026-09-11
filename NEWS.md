@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.5.2] unreleased
+## [2.6.0] unreleased
 
 ### Added
 
@@ -46,6 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `ShootingInverseRetraction` runs `max_iterations` iterations; the loop guard was strict, so `max_iterations = 1` shot not at all and `n` gave the accuracy of `n - 1`.
 * `_inverse_retract!` for `ShootingInverseRetraction` accepts `kwargs...` and forwards them to the retraction of its loop.
 * `manifold_dimension` on an `AbstractDecoratorManifold` that decorates nothing throws a `MethodError` instead of recursing into a `StackOverflowError`.
+* `get_forwarding_type_embedding` no longer inverts the embedding directness, and the three `AbstractEmbeddingType` constructors default to `DirectEmbedding()`; a manifold declaring `DirectEmbedding()` is now forwarded directly, as documented.
 
 ### Changed
 

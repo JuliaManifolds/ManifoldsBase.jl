@@ -419,16 +419,16 @@ end
             @test @inferred !isapprox(M, [1, 2], [2, 3])
             @test @inferred !isapprox(M, [1, 2], [2, 3], [4, 5])
 
-            @test ManifoldsBase.get_forwarding_type_embedding(ManifoldsBase.EmbeddedSubmanifoldType{ManifoldsBase.DirectEmbedding}(), M, exp) === EmbeddedForwardingType()
+            @test ManifoldsBase.get_forwarding_type_embedding(ManifoldsBase.EmbeddedSubmanifoldType{ManifoldsBase.DirectEmbedding}(), M, exp) === EmbeddedForwardingType(ManifoldsBase.DirectEmbedding())
         end
         @testset "Isometric Embedding Fallbacks & Error Tests" begin
             for M2 in [NotImplementedIsometricEmbeddedManifoldNE(), NotImplementedIsometricEmbeddedManifoldIsoIndirect()]
                 @test base_manifold(M2) == M2
                 A = zeros(2)
                 if M2 isa NotImplementedIsometricEmbeddedManifoldIsoIndirect
-                    @test_throws MethodError ManifoldsBase.allocate_result(M2, zero_vector, A)
-                else
                     @test size(ManifoldsBase.allocate_result(M2, zero_vector, A)) == size(A)
+                else
+                    @test_throws MethodError ManifoldsBase.allocate_result(M2, zero_vector, A)
                 end
                 # Check that all of these report not to be implemented, i.e.
                 @test_throws MethodError exp(M2, [1, 2], [2, 3])
