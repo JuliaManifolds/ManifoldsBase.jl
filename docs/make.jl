@@ -130,6 +130,7 @@ end
 bib = CitationBibliography(joinpath(@__DIR__, "src", "references.bib"); style = :alpha)
 links = InterLinks(
     "Julia" => "https://docs.julialang.org/en/v1/",
+    "LieGroups" => ("https://juliamanifolds.github.io/LieGroups.jl/stable/"),
     "Manifolds" => ("https://juliamanifolds.github.io/Manifolds.jl/stable/"),
 )
 makedocs(;

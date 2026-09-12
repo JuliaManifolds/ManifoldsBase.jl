@@ -143,16 +143,12 @@ function Base.convert(::Type{MetricManifold{𝔽, MT, GT}}, M::MT) where {𝔽, 
 end
 
 function _convert_with_default(
-        M::MT,
-        T::Type{<:AbstractMetric},
-        ::Val{true},
+        M::MT, T::Type{<:AbstractMetric}, ::Val{true},
     ) where {MT <: AbstractManifold}
     return MetricManifold(M, T())
 end
 function _convert_with_default(
-        M::MT,
-        T::Type{<:AbstractMetric},
-        ::Val{false},
+        M::MT, T::Type{<:AbstractMetric}, ::Val{false},
     ) where {MT <: AbstractManifold}
     return error(
         "Can not convert $(M) to a MetricManifold{$(MT),$(T)}, since $(T) is not the default metric.",
@@ -455,8 +451,7 @@ Therefore, this method only falls back to calling its corresponding method on th
 vector_transport_direction(::MetricManifold, ::Any, ::Any, ::Any)
 
 function vector_transport_direction(
-        M::MetricManifold, p, X, d,
-        m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
+        M::MetricManifold, p, X, d, m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
     )
     (metric(M.manifold) === M.metric) && (return vector_transport_direction(M.manifold, p, X, d, m))
     return invoke(
@@ -466,8 +461,7 @@ function vector_transport_direction(
     )
 end
 function vector_transport_direction!(
-        M::MetricManifold, Y, p, X, d,
-        m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
+        M::MetricManifold, Y, p, X, d, m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
     )
     (metric(M.manifold) === M.metric) && (return vector_transport_direction!(M.manifold, Y, p, X, d, m))
     return invoke(
@@ -490,11 +484,7 @@ Therefore, this method only falls back to calling its corresponding method on th
 vector_transport_to(::MetricManifold, ::Any, ::Any, ::Any)
 
 function vector_transport_to(
-        M::MetricManifold,
-        p,
-        X,
-        q,
-        m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
+        M::MetricManifold, p, X, q, m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
     )
     (metric(M.manifold) === M.metric) && (return vector_transport_to(M.manifold, p, X, q, m))
     return invoke(
@@ -504,8 +494,7 @@ function vector_transport_to(
     )
 end
 function vector_transport_to!(
-        M::MetricManifold, Y, p, X, q,
-        m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
+        M::MetricManifold, Y, p, X, q, m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
     )
     (metric(M.manifold) === M.metric) && (return vector_transport_to!(M.manifold, Y, p, X, q, m))
     return invoke(

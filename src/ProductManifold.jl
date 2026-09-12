@@ -39,7 +39,7 @@ function Base.getindex(TpM::TangentSpace{𝔽, <:ProductManifold}, i::Integer) w
     return TangentSpace(M[i], base_point(TpM)[M, i])
 end
 
-ProductManifold() = throw(MethodError("No method matching ProductManifold()."))
+ProductManifold() = throw(MethodError(ProductManifold, ()))
 
 const PRODUCT_BASIS_LIST = [
     VeeOrthogonalBasis,
@@ -176,13 +176,11 @@ function check_point(M::ProductManifold, p; kwargs...)
 end
 
 """
-    check_size(M::ProductManifold, p; kwargs...)
+    check_size(M::ProductManifold, p)
 
 Check whether `p` is of valid size on the [`ProductManifold`](@ref) `M`.
 If `p` has components of wrong size a [`CompositeManifoldError`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.CompositeManifoldError).consisting of all error messages of the
 components, for which the tests fail is returned.
-
-The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_size(M::ProductManifold, p)
     try
@@ -313,20 +311,17 @@ If both [`InverseProductRetraction`](@ref)s, they are combined into one keeping 
 """
 cross(::AbstractInverseRetractionMethod...)
 function LinearAlgebra.cross(
-        m::AbstractInverseRetractionMethod,
-        n::AbstractInverseRetractionMethod,
+        m::AbstractInverseRetractionMethod, n::AbstractInverseRetractionMethod,
     )
     return InverseProductRetraction(m, n)
 end
 function LinearAlgebra.cross(
-        m::InverseProductRetraction,
-        n::AbstractInverseRetractionMethod,
+        m::InverseProductRetraction, n::AbstractInverseRetractionMethod,
     )
     return InverseProductRetraction(m.inverse_retractions..., n)
 end
 function LinearAlgebra.cross(
-        m::AbstractInverseRetractionMethod,
-        n::InverseProductRetraction,
+        m::AbstractInverseRetractionMethod, n::InverseProductRetraction,
     )
     return InverseProductRetraction(m, n.inverse_retractions...)
 end
@@ -348,8 +343,7 @@ If both [`ProductVectorTransport`](@ref)s, they are combined into one keeping th
 """
 cross(::AbstractVectorTransportMethod...)
 function LinearAlgebra.cross(
-        m::AbstractVectorTransportMethod,
-        n::AbstractVectorTransportMethod,
+        m::AbstractVectorTransportMethod, n::AbstractVectorTransportMethod,
     )
     return ProductVectorTransport(m, n)
 end
@@ -456,7 +450,7 @@ function exp_fused!(M::ProductManifold, q, p, X, t::Number)
 end
 
 function get_basis(M::ProductManifold, p, B::AbstractBasis)
-    parts = map(t -> get_basis(t..., B), ziptuples(M.manifolds, submanifold_components(p)))
+    parts = map(t -> get_basis(t..., B), ziptuples(M.manifolds, submanifold_components(M, p)))
     return CachedBasis(B, ProductBasisData(parts))
 end
 function get_basis(M::ProductManifold, p, B::CachedBasis)
@@ -466,8 +460,8 @@ function get_basis(M::ProductManifold, p, B::DiagonalizingOrthonormalBasis)
     vs = map(
         ziptuples(
             M.manifolds,
-            submanifold_components(p),
-            submanifold_components(B.frame_direction),
+            submanifold_components(M, p),
+            submanifold_components(M, B.frame_direction),
         ),
     ) do t
         return get_basis(t[1], t[2], DiagonalizingOrthonormalBasis(t[3]))
@@ -492,10 +486,7 @@ function get_coordinates(M::ProductManifold, p, X, B::AbstractBasis)
     return vcat(reps...)
 end
 function get_coordinates(
-        M::ProductManifold,
-        p,
-        X,
-        B::CachedBasis{𝔽, <:AbstractBasis{𝔽}, <:ProductBasisData},
+        M::ProductManifold, p, X, B::CachedBasis{𝔽, <:AbstractBasis{𝔽}, <:ProductBasisData},
     ) where {𝔽}
     reps = map(
         get_coordinates,
@@ -522,11 +513,7 @@ function get_coordinates!(M::ProductManifold, Xⁱ, p, X, B::AbstractBasis)
     return Xⁱ
 end
 function get_coordinates!(
-        M::ProductManifold,
-        Xⁱ,
-        p,
-        X,
-        B::CachedBasis{𝔽, <:AbstractBasis{𝔽}, <:ProductBasisData},
+        M::ProductManifold, Xⁱ, p, X, B::CachedBasis{𝔽, <:AbstractBasis{𝔽}, <:ProductBasisData},
     ) where {𝔽}
     dim = manifold_dimension(M)
     @assert length(Xⁱ) == dim
@@ -569,11 +556,7 @@ function get_vector!(M::ProductManifold, X, p, Xⁱ, B::AbstractBasis)
     return X
 end
 function get_vector!(
-        M::ProductManifold,
-        X,
-        p,
-        Xⁱ,
-        B::CachedBasis{𝔽, <:AbstractBasis{𝔽}, <:ProductBasisData},
+        M::ProductManifold, X, p, Xⁱ, B::CachedBasis{𝔽, <:AbstractBasis{𝔽}, <:ProductBasisData},
     ) where {𝔽}
     dims = map(manifold_dimension, M.manifolds)
     @assert length(Xⁱ) == sum(dims)
@@ -686,11 +669,7 @@ function inverse_retract!(M::ProductManifold, Y, p, q, method::InverseProductRet
     return Y
 end
 function inverse_retract!(
-        M::ProductManifold,
-        Y,
-        p,
-        q,
-        method::IRM,
+        M::ProductManifold, Y, p, q, method::IRM,
     ) where {IRM <: AbstractInverseRetractionMethod}
     map(
         (iM, iY, ip, iq) -> inverse_retract!(iM, iY, ip, iq, method),
@@ -826,10 +805,8 @@ function project!(M::ProductManifold, Y, p, X)
 end
 
 function Random.rand!(
-        M::ProductManifold,
-        pX;
-        vector_at = nothing,
-        parts_kwargs = map(_ -> (;), M.manifolds),
+        M::ProductManifold, pX;
+        vector_at = nothing, parts_kwargs = map(_ -> (;), M.manifolds),
     )
     return rand!(
         Random.default_rng(),
@@ -840,11 +817,8 @@ function Random.rand!(
     )
 end
 function Random.rand!(
-        rng::AbstractRNG,
-        M::ProductManifold,
-        pX;
-        vector_at = nothing,
-        parts_kwargs = map(_ -> (;), M.manifolds),
+        rng::AbstractRNG, M::ProductManifold, pX;
+        vector_at = nothing, parts_kwargs = map(_ -> (;), M.manifolds),
     )
     if vector_at === nothing
         map(
@@ -895,11 +869,7 @@ function retract!(M::ProductManifold, q, p, X, method::ProductRetraction)
     return q
 end
 function retract!(
-        M::ProductManifold,
-        q,
-        p,
-        X,
-        method::RTM,
+        M::ProductManifold, q, p, X, method::RTM,
     ) where {RTM <: AbstractRetractionMethod}
     map(
         (N, qc, pc, Xc) -> retract!(N, qc, pc, Xc, method),
@@ -923,12 +893,7 @@ function retract_fused!(M::ProductManifold, q, p, X, t::Number, method::ProductR
     return q
 end
 function retract_fused!(
-        M::ProductManifold,
-        q,
-        p,
-        X,
-        t::Number,
-        method::RTM,
+        M::ProductManifold, q, p, X, t::Number, method::RTM,
     ) where {RTM <: AbstractRetractionMethod}
     map(
         (N, qc, pc, Xc) -> retract_fused!(N, qc, pc, Xc, t, method),
@@ -982,10 +947,13 @@ function sectional_curvature(M::ProductManifold, p, X, Y)
         submanifold_components(M, Y),
     ) do M_i, p_i, X_i, Y_i
         if are_linearly_independent(M_i, p_i, X_i, Y_i)
-            curvature += sectional_curvature(M_i, p_i, X_i, Y_i)
+            w_i =
+                inner(M_i, p_i, X_i, X_i) * inner(M_i, p_i, Y_i, Y_i) -
+                inner(M_i, p_i, X_i, Y_i)^2
+            curvature += w_i * sectional_curvature(M_i, p_i, X_i, Y_i)
         end
     end
-    return curvature
+    return curvature / (inner(M, p, X, X) * inner(M, p, Y, Y) - inner(M, p, X, Y)^2)
 end
 
 @doc raw"""
@@ -1031,7 +999,7 @@ For example `select_from_tuple(("a", "b", "c"), Val((3, 1, 1)))` returns
 """
 @generated function select_from_tuple(t::NTuple{N, Any}, positions::Val{P}) where {N, P}
     for k in P
-        (k < 0 || k > N) && error("positions must be between 1 and $N")
+        (k < 1 || k > N) && error("positions must be between 1 and $N")
     end
     return Expr(:tuple, [Expr(:ref, :t, k) for k in P]...)
 end
@@ -1113,9 +1081,7 @@ end
 
 
 function Base.show(
-        io::IO,
-        mime::MIME"text/plain",
-        B::CachedBasis{𝔽, T, D},
+        io::IO, mime::MIME"text/plain", B::CachedBasis{𝔽, T, D},
     ) where {𝔽, T <: AbstractBasis{𝔽}, D <: ProductBasisData}
     println(io, "$(T) for a product manifold")
     for (i, cb) in enumerate(B.data.parts)
@@ -1149,12 +1115,7 @@ end
 submanifold(M::ProductManifold, i::AbstractVector) = submanifold(M, Val(tuple(i...)))
 
 function vector_transport_direction!(
-        M::ProductManifold,
-        Y,
-        p,
-        X,
-        d,
-        m::ProductVectorTransport,
+        M::ProductManifold, Y, p, X, d, m::ProductVectorTransport,
     )
     map(
         vector_transport_direction!,
@@ -1168,12 +1129,7 @@ function vector_transport_direction!(
     return Y
 end
 function vector_transport_direction!(
-        M::ProductManifold,
-        Y,
-        p,
-        X,
-        d,
-        m::VTM,
+        M::ProductManifold, Y, p, X, d, m::VTM,
     ) where {VTM <: AbstractVectorTransportMethod}
     map(
         (iM, iY, ip, iX, id) -> vector_transport_direction!(iM, iY, ip, iX, id, m),
@@ -1217,12 +1173,7 @@ function vector_transport_to!(M::ProductManifold, Y, p, X, q, m::ProductVectorTr
     return Y
 end
 function vector_transport_to!(
-        M::ProductManifold,
-        Y,
-        p,
-        X,
-        q,
-        m::AbstractVectorTransportMethod,
+        M::ProductManifold, Y, p, X, q, m::AbstractVectorTransportMethod,
     )
     return map(
             (iM, iY, ip, iX, iq) -> vector_transport_to!(iM, iY, ip, iX, iq, m),
@@ -1273,7 +1224,7 @@ end
     submanifold_component(p, i::Integer)
     submanifold_component(p, ::Val{i}) where {i}
 
-Project the product array `p` on `M` to its `i`th component. A new array is returned.
+Project the product array `p` on `M` to its `i`th component.
 """
 submanifold_component(::Any...)
 @inline function submanifold_component(M::AbstractManifold, p, i::Integer)

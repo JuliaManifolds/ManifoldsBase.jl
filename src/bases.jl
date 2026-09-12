@@ -114,8 +114,7 @@ struct DefaultOrthogonalBasis{𝔽, VST <: VectorSpaceType} <: AbstractOrthogona
     vector_space::VST
 end
 function DefaultOrthogonalBasis(
-        𝔽::AbstractNumbers = ℝ,
-        vs::VectorSpaceType = TangentSpaceType(),
+        𝔽::AbstractNumbers = ℝ, vs::VectorSpaceType = TangentSpaceType(),
     )
     return DefaultOrthogonalBasis{𝔽, typeof(vs)}(vs)
 end
@@ -127,6 +126,12 @@ function DefaultOrthogonalBasis{𝔽, TangentSpaceType}() where {𝔽}
 end
 
 
+"""
+    VeeOrthogonalBasis{𝔽} <: AbstractOrthogonalBasis{𝔽,TangentSpaceType}
+
+The orthogonal basis that [`vee`](@ref) and [`hat`](@ref) use, mainly used in connection with a [`LieAlgebra`](@extref LieGroups :jl:type:`LieGroups.LieAlgebra`),
+see [`DefaultLieAlgebraOrthogonalBasis`](@extref LieGroups :jl:type:`LieGroups.DefaultLieAlgebraOrthogonalBasis`).
+"""
 struct VeeOrthogonalBasis{𝔽} <: AbstractOrthogonalBasis{𝔽, TangentSpaceType} end
 VeeOrthogonalBasis(𝔽::AbstractNumbers = ℝ) = VeeOrthogonalBasis{𝔽}()
 
@@ -263,9 +268,7 @@ function CachedBasis(basis::CachedBasis) # avoid double encapsulation
     return basis
 end
 function CachedBasis(
-        basis::DiagonalizingOrthonormalBasis,
-        eigenvalues::ET,
-        vectors::T,
+        basis::DiagonalizingOrthonormalBasis, eigenvalues::ET, vectors::T,
     ) where {ET <: AbstractVector, T <: AbstractVector}
     data = DiagonalizingBasisData(basis.frame_direction, eigenvalues, vectors)
     return CachedBasis(basis, data)
@@ -327,21 +330,21 @@ allocation_promotion_function(::AbstractManifold, f, ::Tuple) = identity
 
 
 _doc_default_basis = """
-    default_basis(M::AbstractManifold, ::typeof(p); kwargs...)
+    default_basis(M::AbstractManifold, ::Type{T}; kwargs...) where {T}
     default_basis(M::AbstractManifold; kwargs...)
 
 Provide a default basis for a manifold's tangent space. This can be specific for different
-points `p` on `M`
-The global default for both is the [`DefaultOrthonormalBasis`](@ref) with
-the same number type as `M`.
+points `p` on `M`.
+The global default for both is the [`DefaultOrthonormalBasis`](@ref) with coefficients
+in the field given by the `field` keyword argument.
 
 This method can also be specified more precisely with a point type `T`, for the case
 that on a `M` there are two different representations of points, which provide
-different inverse retraction methods.
+different bases.
 
 ## Keyword arguments
 
-* `field::`[`AbstractNumbers`](@ref) field for the coefficients of the basis
+* `field::`[`AbstractNumbers`](@ref)` = ℝ`: field for the coefficients of the basis
 """
 
 @doc "$(_doc_default_basis)"
@@ -411,16 +414,12 @@ such that ``v^i(v_j) = δ^i_j``, where ``δ^i_j`` is the Kronecker delta symbol:
 dual_basis(M::AbstractManifold, p, B::AbstractBasis) = _dual_basis(M, p, B)
 
 function _dual_basis(
-        ::AbstractManifold,
-        p,
-        ::DefaultOrthonormalBasis{𝔽, TangentSpaceType},
+        ::AbstractManifold, p, ::DefaultOrthonormalBasis{𝔽, TangentSpaceType},
     ) where {𝔽}
     return DefaultOrthonormalBasis{𝔽}(CotangentSpaceType())
 end
 function _dual_basis(
-        ::AbstractManifold,
-        p,
-        ::DefaultOrthonormalBasis{𝔽, CotangentSpaceType},
+        ::AbstractManifold, p, ::DefaultOrthonormalBasis{𝔽, CotangentSpaceType},
     ) where {𝔽}
     return DefaultOrthonormalBasis{𝔽}(TangentSpaceType())
 end
@@ -483,9 +482,7 @@ function _get_basis(M::AbstractManifold, p, B::ProjectedOrthonormalBasis{:svd, �
     return CachedBasis(B, vecs)
 end
 function _get_basis(
-        M::AbstractManifold,
-        p,
-        B::ProjectedOrthonormalBasis{:gram_schmidt, ℝ};
+        M::AbstractManifold, p, B::ProjectedOrthonormalBasis{:gram_schmidt, ℝ};
         kwargs...,
     )
     E = [project(M, p, _euclidean_basis_vector(p, i)) for i in eachindex(p)]
@@ -575,7 +572,10 @@ function _get_coordinates(M::AbstractManifold, p, X, B::DefaultOrthogonalBasis)
     return get_coordinates_orthogonal(M, p, X, number_system(B))
 end
 function get_coordinates_orthogonal(M::AbstractManifold, p, X, N)
-    return get_coordinates_orthonormal(M, p, X, N)
+    # arguments X and p for allocate_result are intentionally reversed
+    # to make ManifoldDiff.jl tests pass
+    c = allocate_result(M, get_coordinates, X, p, DefaultOrthogonalBasis(N))
+    return get_coordinates_orthogonal!(M, c, p, X, N)
 end
 
 function _get_coordinates(M::AbstractManifold, p, X, B::DefaultOrthonormalBasis)
@@ -592,10 +592,7 @@ function _get_coordinates(M::AbstractManifold, p, X, B::DiagonalizingOrthonormal
     return get_coordinates_diagonalizing(M, p, X, B)
 end
 function get_coordinates_diagonalizing(
-        M::AbstractManifold,
-        p,
-        X,
-        B::DiagonalizingOrthonormalBasis,
+        M::AbstractManifold, p, X, B::DiagonalizingOrthonormalBasis,
     )
     c = allocate_result(M, get_coordinates, p, X, B)
     return get_coordinates_diagonalizing!(M, c, p, X, B)
@@ -605,32 +602,18 @@ function _get_coordinates(M::AbstractManifold, p, X, B::CachedBasis)
     return get_coordinates_cached(M, number_system(M), p, X, B, number_system(B))
 end
 function get_coordinates_cached(
-        M::AbstractManifold,
-        ::ComplexNumbers,
-        p,
-        X,
-        B::CachedBasis,
-        ::ComplexNumbers,
+        M::AbstractManifold, ::ComplexNumbers, p, X, B::CachedBasis, ::ComplexNumbers,
     )
     return map(vb -> conj(inner(M, p, X, vb)), get_vectors(M, p, B))
 end
 function get_coordinates_cached(
-        M::AbstractManifold,
-        ::𝔽,
-        p,
-        X,
-        C::CachedBasis,
-        ::RealNumbers,
+        M::AbstractManifold, ::𝔽, p, X, C::CachedBasis, ::RealNumbers,
     ) where {𝔽}
     return map(vb -> real(inner(M, p, X, vb)), get_vectors(M, p, C))
 end
 
 function get_coordinates!(
-        M::AbstractManifold,
-        Y,
-        p,
-        X,
-        B::AbstractBasis = DefaultOrthonormalBasis(),
+        M::AbstractManifold, Y, p, X, B::AbstractBasis = default_basis(M, typeof(p)),
     )
     return _get_coordinates!(M, Y, p, X, B)
 end
@@ -720,7 +703,8 @@ end
     return get_vector_orthogonal(M, p, c, number_system(B))
 end
 @inline function get_vector_orthogonal(M::AbstractManifold, p, c, N)
-    return get_vector_orthonormal(M, p, c, N)
+    Y = allocate_result(M, get_vector, p, c)
+    return get_vector_orthogonal!(M, Y, p, c, N)
 end
 
 function _get_vector(M::AbstractManifold, p, c, B::DefaultOrthonormalBasis)
@@ -736,10 +720,7 @@ end
     return get_vector_diagonalizing(M, p, c, B)
 end
 function get_vector_diagonalizing(
-        M::AbstractManifold,
-        p,
-        c,
-        B::DiagonalizingOrthonormalBasis,
+        M::AbstractManifold, p, c, B::DiagonalizingOrthonormalBasis,
     )
     Y = allocate_result(M, get_vector, p, c)
     return get_vector!(M, Y, p, c, B)
@@ -773,7 +754,7 @@ end
         Y,
         p,
         c,
-        B::AbstractBasis = DefaultOrthonormalBasis(),
+        B::AbstractBasis = default_basis(M, typeof(p)),
     )
     return _get_vector!(M, Y, p, c, B)
 end
@@ -866,7 +847,8 @@ many vectors.
 Note that this method requires the manifold and basis to work on the same
 [`AbstractNumbers`](@ref) `𝔽`, i.e. with real coefficients.
 
-The method always returns a basis, i.e. linearly dependent vectors are removed.
+A vector that is linearly dependent on the previous ones stops the computation with an error,
+unless `skip_linearly_dependent` is set to `true`, in which case it is left out.
 
 # Keyword arguments
 
@@ -878,7 +860,7 @@ The method always returns a basis, i.e. linearly dependent vectors are removed.
   a basis but contains less vectors
 
 further keyword arguments can be passed to set the accuracy of the independence test.
-Especially `atol` is raised slightly by default to `atol = 5*1e-16`.
+Especially `atol` defaults to `eps(number_eltype(first(V)))`.
 
 # Return value
 
@@ -887,8 +869,7 @@ When an [`AbstractBasis`](@ref) is orthonormalized, a [`CachedBasis`](@ref) is r
 """
 function gram_schmidt(
         M::AbstractManifold{𝔽}, p, B::AbstractBasis{𝔽};
-        warn_linearly_dependent = false, return_incomplete_set = false, skip_linearly_dependent = false,
-        kwargs...,
+        warn_linearly_dependent = false, return_incomplete_set = false, skip_linearly_dependent = false, kwargs...,
     ) where {𝔽}
     V = gram_schmidt(
         M, p, get_vectors(M, p, B);
@@ -899,9 +880,7 @@ function gram_schmidt(
 end
 function gram_schmidt(
         M::AbstractManifold, p, V::AbstractVector;
-        atol = eps(number_eltype(first(V))), warn_linearly_dependent = false,
-        return_incomplete_set = false, skip_linearly_dependent = false,
-        kwargs...,
+        atol = eps(number_eltype(first(V))), warn_linearly_dependent = false, return_incomplete_set = false, skip_linearly_dependent = false, kwargs...,
     )
     N = length(V)
     Ξ = empty(V)
@@ -1040,9 +1019,7 @@ function show(io::IO, ::MIME"text/plain", onb::DiagonalizingOrthonormalBasis)
     return print(io, sk)
 end
 function show(
-        io::IO,
-        ::MIME"text/plain",
-        B::CachedBasis{𝔽, T, D},
+        io::IO, ::MIME"text/plain", B::CachedBasis{𝔽, T, D},
     ) where {𝔽, T <: AbstractBasis, D}
     try
         vectors = _get_vectors(B)
@@ -1063,9 +1040,7 @@ function show(
     end
 end
 function show(
-        io::IO,
-        ::MIME"text/plain",
-        B::CachedBasis{𝔽, T, D},
+        io::IO, ::MIME"text/plain", B::CachedBasis{𝔽, T, D},
     ) where {𝔽, T <: DiagonalizingOrthonormalBasis, D <: DiagonalizingBasisData}
     vectors = _get_vectors(B)
     nv = length(vectors)

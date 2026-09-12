@@ -59,7 +59,7 @@ using ManifoldsBase: DefaultManifold, VectorSpaceType, ℝ, Fiber
         # generic vector space at
         X_p = Fiber(M, p, ManifoldsBase.Test.TestVectorSpaceType())
         X_ps = sprint(show, "text/plain", X_p)
-        X_ps_test = "VectorSpaceFiber{ℝ, DefaultManifold{ℝ, Tuple{Int64}}, ManifoldsBase.Test.TestVectorSpaceType, Vector{Float64}}\nFiber:\n ManifoldsBase.Test.TestVectorSpaceType()DefaultManifold(3; field = ℝ)\nBase point:\n $(sp)"
+        X_ps_test = "VectorSpaceFiber{ℝ, DefaultManifold{ℝ, Tuple{Int64}}, ManifoldsBase.Test.TestVectorSpaceType, Vector{Float64}}\nFiber:\n ManifoldsBase.Test.TestVectorSpaceType()\n DefaultManifold(3; field = ℝ)\nBase point:\n $(sp)"
         @test X_ps == X_ps_test
 
         for basis in
