@@ -76,10 +76,7 @@ struct ValidationManifold{
 end
 function ValidationManifold(
         M::AbstractManifold;
-        error::Symbol = :error,
-        store_base_point::Bool = false,
-        ignore_functions::D = Dict{Function, Union{Symbol, <:Vector{Symbol}}}(),
-        ignore_contexts::V = Vector{Symbol}(),
+        error::Symbol = :error, store_base_point::Bool = false, ignore_functions::D = Dict{Function, Union{Symbol, <:Vector{Symbol}}}(), ignore_contexts::V = Vector{Symbol}(),
     ) where {
         D <: Dict{<:Function, <:Union{Symbol, <:AbstractVector{Symbol}}},
         V <: AbstractVector{Symbol},
@@ -223,16 +220,12 @@ internal_value(X::ValidationFibreVector) = X.value
 
 _update_basepoint!(::ValidationManifold, X, p) = X
 function _update_basepoint!(
-        ::ValidationManifold,
-        X::ValidationTangentVector{P, Nothing},
-        p,
+        ::ValidationManifold, X::ValidationTangentVector{P, Nothing}, p,
     ) where {P}
     return X
 end
 function _update_basepoint!(
-        M::ValidationManifold,
-        X::ValidationTangentVector{P, V},
-        p,
+        M::ValidationManifold, X::ValidationTangentVector{P, V}, p,
     ) where {P, V}
     copyto!(M.manifold, X.point, p)
     return X
@@ -246,11 +239,8 @@ end
 issue a message `str` according to the mode `mode` (as `@error`, `@warn`, `@info`).
 """
 function _msg(
-        M::ValidationManifold,
-        str;
-        error = M.mode,
-        within::Union{Nothing, <:Function} = nothing,
-        context::Union{NTuple{N, Symbol} where {N}} = NTuple{0, Symbol}(),
+        M::ValidationManifold, str;
+        error = M.mode, within::Union{Nothing, <:Function} = nothing, context::Union{NTuple{N, Symbol} where {N}} = NTuple{0, Symbol}(),
     )
     !_vMc(M, within, context) && return nothing
     (error === :error) && (throw(ErrorException(str)))
@@ -259,11 +249,8 @@ function _msg(
     return nothing
 end
 function _msg(
-        M::ValidationManifold,
-        err::Union{DomainError, ArgumentError, ErrorException};
-        error = M.mode,
-        within::Union{Nothing, <:Function} = nothing,
-        context::Union{NTuple{N, Symbol} where {N}} = NTuple{0, Symbol}(),
+        M::ValidationManifold, err::Union{DomainError, ArgumentError, ErrorException};
+        error = M.mode, within::Union{Nothing, <:Function} = nothing, context::Union{NTuple{N, Symbol} where {N}} = NTuple{0, Symbol}(),
     )
     !_vMc(M, within, context) && return nothing
     (error === :error) && (throw(err))
@@ -277,8 +264,7 @@ function convert(::Type{<:ValidationManifold{𝔽, M}}, m::M) where {𝔽, M <: 
     return ValidationManifold(m)
 end
 function convert(
-        ::Type{V},
-        p::ValidationMPoint{V},
+        ::Type{V}, p::ValidationMPoint{V},
     ) where {V <: Union{AbstractArray, AbstractManifoldPoint}}
     return p.value
 end
@@ -287,8 +273,7 @@ function convert(::Type{ValidationMPoint{V}}, x::V) where {V <: AbstractArray}
 end
 
 function convert(
-        ::Type{V},
-        X::ValidationFibreVector{TType, V, Nothing},
+        ::Type{V}, X::ValidationFibreVector{TType, V, Nothing},
     ) where {TType, V <: Union{AbstractArray, AbstractFibreVector}}
     return X.value
 end
@@ -303,10 +288,7 @@ function copyto!(M::ValidationManifold, q::ValidationMPoint, p::ValidationMPoint
     return q
 end
 function copyto!(
-        M::ValidationManifold,
-        Y::ValidationFibreVector{TType},
-        p::ValidationMPoint,
-        X::ValidationFibreVector{TType};
+        M::ValidationManifold, Y::ValidationFibreVector{TType}, p::ValidationMPoint, X::ValidationFibreVector{TType};
         kwargs...,
     ) where {TType}
     is_point(M, p; within = copyto!, context = (:Input,), kwargs...)
@@ -439,9 +421,7 @@ function get_basis(M::ValidationManifold, p, B::AbstractBasis; kwargs...)
     return Ξ
 end
 function get_basis(
-        M::ValidationManifold,
-        p,
-        B::Union{AbstractOrthogonalBasis, CachedBasis{𝔽, <:AbstractOrthogonalBasis{𝔽}} where {𝔽}};
+        M::ValidationManifold, p, B::Union{AbstractOrthogonalBasis, CachedBasis{𝔽, <:AbstractOrthogonalBasis{𝔽}} where {𝔽}};
         kwargs...,
     )
     is_point(M, p; within = get_basis, context = (:Input,), kwargs...)
@@ -466,12 +446,7 @@ function get_basis(
     return Ξ
 end
 function get_basis(
-        M::ValidationManifold,
-        p,
-        B::Union{
-            AbstractOrthonormalBasis,
-            <:CachedBasis{𝔽, <:AbstractOrthonormalBasis{𝔽}} where {𝔽},
-        };
+        M::ValidationManifold, p, B::Union{AbstractOrthonormalBasis, <:CachedBasis{𝔽, <:AbstractOrthonormalBasis{𝔽}} where {𝔽}};
         kwargs...,
     )
     is_point(M, p; within = get_basis, context = (:Input,), kwargs...)
@@ -564,9 +539,7 @@ function injectivity_radius(M::ValidationManifold, p; kwargs...)
     return injectivity_radius(M.manifold, internal_value(p))
 end
 function injectivity_radius(
-        M::ValidationManifold,
-        p,
-        method::AbstractRetractionMethod;
+        M::ValidationManifold, p, method::AbstractRetractionMethod;
         kwargs...,
     )
     is_point(M, p; within = injectivity_radius, context = (:Input,), kwargs...)
@@ -594,12 +567,8 @@ where two additional keywords can be used
 all other keywords are passed on.
 """
 function is_point(
-        M::ValidationManifold,
-        p;
-        error::Symbol = M.mode,
-        within::Union{Nothing, Function} = nothing,
-        context::NTuple{N, Symbol} where {N} = (),
-        kwargs...,
+        M::ValidationManifold, p;
+        error::Symbol = M.mode, within::Union{Nothing, Function} = nothing, context::NTuple{N, Symbol} where {N} = (), kwargs...,
     )
     !_vMc(M, within, (:Point, context...)) && return true
     return is_point(M.manifold, internal_value(p); error = error, kwargs...)
@@ -619,14 +588,8 @@ where two additional keywords can be used
 all other keywords are passed on.
 """
 function is_vector(
-        M::ValidationManifold,
-        p,
-        X,
-        cbp::Bool = true;
-        error::Symbol = M.mode,
-        within::Union{Nothing, Function} = nothing,
-        context::NTuple{N, Symbol} where {N} = (),
-        kwargs...,
+        M::ValidationManifold, p, X, cbp::Bool = true;
+        error::Symbol = M.mode, within::Union{Nothing, Function} = nothing, context::NTuple{N, Symbol} where {N} = (), kwargs...,
     )
     !_vMc(M, within, (:Vector, context...)) && return true
     return is_vector(
@@ -775,11 +738,7 @@ function show(io::IO, M::ValidationManifold)
 end
 
 function vector_transport_to(
-        M::ValidationManifold,
-        p,
-        X,
-        q,
-        m::AbstractVectorTransportMethod;
+        M::ValidationManifold, p, X, q, m::AbstractVectorTransportMethod;
         kwargs...,
     )
     is_point(M, q; within = vector_transport_to, context = (:Input,), kwargs...)
@@ -795,12 +754,7 @@ function vector_transport_to(
     return Y
 end
 function vector_transport_to!(
-        M::ValidationManifold,
-        Y,
-        p,
-        X,
-        q,
-        m::AbstractVectorTransportMethod;
+        M::ValidationManifold, Y, p, X, q, m::AbstractVectorTransportMethod;
         kwargs...,
     )
     is_point(M, q; within = vector_transport_to, context = (:Input,), kwargs...)

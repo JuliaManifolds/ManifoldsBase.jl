@@ -492,9 +492,8 @@ corresponding manifold.
 See also [`retract`](@ref).
 """
 function inverse_retract(
-        M::AbstractManifold, p, q,
-        m::AbstractInverseRetractionMethod = default_inverse_retraction_method(M, typeof(p));
-        kwargs...
+        M::AbstractManifold, p, q, m::AbstractInverseRetractionMethod = default_inverse_retraction_method(M, typeof(p));
+        kwargs...,
     )
     return _inverse_retract(M, p, q, m; kwargs...)
 end
@@ -520,9 +519,8 @@ available methods.
 See also [`retract!`](@ref).
 """
 function inverse_retract!(
-        M::AbstractManifold, X, p, q,
-        m::AbstractInverseRetractionMethod = default_inverse_retraction_method(M, typeof(p));
-        kwargs...
+        M::AbstractManifold, X, p, q, m::AbstractInverseRetractionMethod = default_inverse_retraction_method(M, typeof(p));
+        kwargs...,
     )
     return _inverse_retract!(M, X, p, q, m; kwargs...)
 end
@@ -712,9 +710,8 @@ Locally, the retraction is invertible. For the inverse operation, see [`inverse_
 
 @doc "$(_doc_retract)"
 function retract(
-        M::AbstractManifold, p, X,
-        m::AbstractRetractionMethod = default_retraction_method(M, typeof(p));
-        kwargs...
+        M::AbstractManifold, p, X, m::AbstractRetractionMethod = default_retraction_method(M, typeof(p));
+        kwargs...,
     )
     return _retract(M, p, X, m; kwargs...)
 end
@@ -729,9 +726,8 @@ end
 
 @doc "$(_doc_retract)"
 function retract!(
-        M::AbstractManifold, q, p, X,
-        method::AbstractRetractionMethod = default_retraction_method(M, typeof(p));
-        kwargs...
+        M::AbstractManifold, q, p, X, method::AbstractRetractionMethod = default_retraction_method(M, typeof(p));
+        kwargs...,
     )
     return _retract!(M, q, p, X, method; kwargs...)
 end
@@ -798,9 +794,8 @@ By default, this falls back to calling [`retract`](@ref) with `t*X`.
 
 @doc "$(_doc_retract_fused)"
 function retract_fused(
-        M::AbstractManifold, p, X, t::Number,
-        m::AbstractRetractionMethod = default_retraction_method(M, typeof(p));
-        kwargs...
+        M::AbstractManifold, p, X, t::Number, m::AbstractRetractionMethod = default_retraction_method(M, typeof(p));
+        kwargs...,
     )
     return _retract_fused(M, p, X, t, m; kwargs...)
 end
@@ -815,9 +810,8 @@ end
 
 @doc "$(_doc_retract_fused)"
 function retract_fused!(
-        M::AbstractManifold, q, p, X, t::Number,
-        m::AbstractRetractionMethod = default_retraction_method(M, typeof(p));
-        kwargs...
+        M::AbstractManifold, q, p, X, t::Number, m::AbstractRetractionMethod = default_retraction_method(M, typeof(p));
+        kwargs...,
     )
     return _retract_fused!(M, q, p, X, t, m; kwargs...)
 end

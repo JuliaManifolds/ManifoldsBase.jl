@@ -65,9 +65,7 @@ macro manifold_element_forwards(T, Twhere, field::Symbol)
                     return $T(allocate(p.$field, P))
                 end
                 function ManifoldsBase.allocate(
-                        p::$T,
-                        ::Type{P},
-                        dims::Tuple,
+                        p::$T, ::Type{P}, dims::Tuple,
                     ) where {P, $Twhere}
                     return $T(allocate(p.$field, P, dims))
                 end
@@ -502,8 +500,7 @@ macro manifold_vector_forwards(T, Twhere, field::Symbol)
                 end
 
                 function Broadcast.BroadcastStyle(
-                        ::Broadcast.AbstractArrayStyle{0},
-                        b::Broadcast.Style{$T},
+                        ::Broadcast.AbstractArrayStyle{0}, b::Broadcast.Style{$T},
                     )
                     return b
                 end
@@ -551,8 +548,7 @@ macro manifold_vector_forwards(T, Twhere, field::Symbol)
                 end
 
                 function Broadcast.BroadcastStyle(
-                        ::Broadcast.AbstractArrayStyle{0},
-                        b::Broadcast.Style{$T},
+                        ::Broadcast.AbstractArrayStyle{0}, b::Broadcast.Style{$T},
                     ) where {$Twhere}
                     return b
                 end

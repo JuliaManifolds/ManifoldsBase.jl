@@ -846,11 +846,8 @@ The second signature is a shorthand, where the boolean is used for `error=:error
 and `error=:none` (default, `false`). This case ignores the `error=` keyword
 """
 function is_point(
-        M::AbstractManifold,
-        p,
-        throw_error::Bool;
-        error::Symbol = :none,
-        kwargs...,
+        M::AbstractManifold, p, throw_error::Bool;
+        error::Symbol = :none, kwargs...,
     )
     return is_point(M, p; error = throw_error ? :error : :none, kwargs...)
 end

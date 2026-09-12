@@ -114,8 +114,7 @@ struct DefaultOrthogonalBasis{𝔽, VST <: VectorSpaceType} <: AbstractOrthogona
     vector_space::VST
 end
 function DefaultOrthogonalBasis(
-        𝔽::AbstractNumbers = ℝ,
-        vs::VectorSpaceType = TangentSpaceType(),
+        𝔽::AbstractNumbers = ℝ, vs::VectorSpaceType = TangentSpaceType(),
     )
     return DefaultOrthogonalBasis{𝔽, typeof(vs)}(vs)
 end
@@ -269,9 +268,7 @@ function CachedBasis(basis::CachedBasis) # avoid double encapsulation
     return basis
 end
 function CachedBasis(
-        basis::DiagonalizingOrthonormalBasis,
-        eigenvalues::ET,
-        vectors::T,
+        basis::DiagonalizingOrthonormalBasis, eigenvalues::ET, vectors::T,
     ) where {ET <: AbstractVector, T <: AbstractVector}
     data = DiagonalizingBasisData(basis.frame_direction, eigenvalues, vectors)
     return CachedBasis(basis, data)
@@ -417,16 +414,12 @@ such that ``v^i(v_j) = δ^i_j``, where ``δ^i_j`` is the Kronecker delta symbol:
 dual_basis(M::AbstractManifold, p, B::AbstractBasis) = _dual_basis(M, p, B)
 
 function _dual_basis(
-        ::AbstractManifold,
-        p,
-        ::DefaultOrthonormalBasis{𝔽, TangentSpaceType},
+        ::AbstractManifold, p, ::DefaultOrthonormalBasis{𝔽, TangentSpaceType},
     ) where {𝔽}
     return DefaultOrthonormalBasis{𝔽}(CotangentSpaceType())
 end
 function _dual_basis(
-        ::AbstractManifold,
-        p,
-        ::DefaultOrthonormalBasis{𝔽, CotangentSpaceType},
+        ::AbstractManifold, p, ::DefaultOrthonormalBasis{𝔽, CotangentSpaceType},
     ) where {𝔽}
     return DefaultOrthonormalBasis{𝔽}(TangentSpaceType())
 end
@@ -489,9 +482,7 @@ function _get_basis(M::AbstractManifold, p, B::ProjectedOrthonormalBasis{:svd, �
     return CachedBasis(B, vecs)
 end
 function _get_basis(
-        M::AbstractManifold,
-        p,
-        B::ProjectedOrthonormalBasis{:gram_schmidt, ℝ};
+        M::AbstractManifold, p, B::ProjectedOrthonormalBasis{:gram_schmidt, ℝ};
         kwargs...,
     )
     E = [project(M, p, _euclidean_basis_vector(p, i)) for i in eachindex(p)]
@@ -601,10 +592,7 @@ function _get_coordinates(M::AbstractManifold, p, X, B::DiagonalizingOrthonormal
     return get_coordinates_diagonalizing(M, p, X, B)
 end
 function get_coordinates_diagonalizing(
-        M::AbstractManifold,
-        p,
-        X,
-        B::DiagonalizingOrthonormalBasis,
+        M::AbstractManifold, p, X, B::DiagonalizingOrthonormalBasis,
     )
     c = allocate_result(M, get_coordinates, p, X, B)
     return get_coordinates_diagonalizing!(M, c, p, X, B)
@@ -614,32 +602,18 @@ function _get_coordinates(M::AbstractManifold, p, X, B::CachedBasis)
     return get_coordinates_cached(M, number_system(M), p, X, B, number_system(B))
 end
 function get_coordinates_cached(
-        M::AbstractManifold,
-        ::ComplexNumbers,
-        p,
-        X,
-        B::CachedBasis,
-        ::ComplexNumbers,
+        M::AbstractManifold, ::ComplexNumbers, p, X, B::CachedBasis, ::ComplexNumbers,
     )
     return map(vb -> conj(inner(M, p, X, vb)), get_vectors(M, p, B))
 end
 function get_coordinates_cached(
-        M::AbstractManifold,
-        ::𝔽,
-        p,
-        X,
-        C::CachedBasis,
-        ::RealNumbers,
+        M::AbstractManifold, ::𝔽, p, X, C::CachedBasis, ::RealNumbers,
     ) where {𝔽}
     return map(vb -> real(inner(M, p, X, vb)), get_vectors(M, p, C))
 end
 
 function get_coordinates!(
-        M::AbstractManifold,
-        Y,
-        p,
-        X,
-        B::AbstractBasis = default_basis(M, typeof(p)),
+        M::AbstractManifold, Y, p, X, B::AbstractBasis = default_basis(M, typeof(p)),
     )
     return _get_coordinates!(M, Y, p, X, B)
 end
@@ -746,10 +720,7 @@ end
     return get_vector_diagonalizing(M, p, c, B)
 end
 function get_vector_diagonalizing(
-        M::AbstractManifold,
-        p,
-        c,
-        B::DiagonalizingOrthonormalBasis,
+        M::AbstractManifold, p, c, B::DiagonalizingOrthonormalBasis,
     )
     Y = allocate_result(M, get_vector, p, c)
     return get_vector!(M, Y, p, c, B)
@@ -898,8 +869,7 @@ When an [`AbstractBasis`](@ref) is orthonormalized, a [`CachedBasis`](@ref) is r
 """
 function gram_schmidt(
         M::AbstractManifold{𝔽}, p, B::AbstractBasis{𝔽};
-        warn_linearly_dependent = false, return_incomplete_set = false, skip_linearly_dependent = false,
-        kwargs...,
+        warn_linearly_dependent = false, return_incomplete_set = false, skip_linearly_dependent = false, kwargs...,
     ) where {𝔽}
     V = gram_schmidt(
         M, p, get_vectors(M, p, B);
@@ -910,9 +880,7 @@ function gram_schmidt(
 end
 function gram_schmidt(
         M::AbstractManifold, p, V::AbstractVector;
-        atol = eps(number_eltype(first(V))), warn_linearly_dependent = false,
-        return_incomplete_set = false, skip_linearly_dependent = false,
-        kwargs...,
+        atol = eps(number_eltype(first(V))), warn_linearly_dependent = false, return_incomplete_set = false, skip_linearly_dependent = false, kwargs...,
     )
     N = length(V)
     Ξ = empty(V)
@@ -1051,9 +1019,7 @@ function show(io::IO, ::MIME"text/plain", onb::DiagonalizingOrthonormalBasis)
     return print(io, sk)
 end
 function show(
-        io::IO,
-        ::MIME"text/plain",
-        B::CachedBasis{𝔽, T, D},
+        io::IO, ::MIME"text/plain", B::CachedBasis{𝔽, T, D},
     ) where {𝔽, T <: AbstractBasis, D}
     try
         vectors = _get_vectors(B)
@@ -1074,9 +1040,7 @@ function show(
     end
 end
 function show(
-        io::IO,
-        ::MIME"text/plain",
-        B::CachedBasis{𝔽, T, D},
+        io::IO, ::MIME"text/plain", B::CachedBasis{𝔽, T, D},
     ) where {𝔽, T <: DiagonalizingOrthonormalBasis, D <: DiagonalizingBasisData}
     vectors = _get_vectors(B)
     nv = length(vectors)

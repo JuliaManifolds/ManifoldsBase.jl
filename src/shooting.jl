@@ -46,11 +46,7 @@ end
 Approximate the inverse of a retraction using the shooting method.
 """
 function inverse_retract_shooting!(
-        M::AbstractManifold,
-        X,
-        p,
-        q,
-        m::ShootingInverseRetraction;
+        M::AbstractManifold, X, p, q, m::ShootingInverseRetraction;
         kwargs...,
     )
     inverse_retract!(M, X, p, q, m.initial_inverse_retraction)

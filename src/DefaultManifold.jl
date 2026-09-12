@@ -30,9 +30,7 @@ function DefaultManifold(n::Vararg{Int}; field = ℝ, parameter::Symbol = :field
 end
 
 function allocation_promotion_function(
-        ::DefaultManifold{ℂ},
-        ::Union{typeof(get_vector), typeof(get_coordinates)},
-        ::Tuple,
+        ::DefaultManifold{ℂ}, ::Union{typeof(get_vector), typeof(get_coordinates)}, ::Tuple,
     )
     return complex
 end
@@ -203,11 +201,8 @@ function Random.rand!(::DefaultManifold, pX; σ = one(eltype(pX)), vector_at = n
     return pX
 end
 function Random.rand!(
-        rng::AbstractRNG,
-        ::DefaultManifold,
-        pX;
-        σ = one(eltype(pX)),
-        vector_at = nothing,
+        rng::AbstractRNG, ::DefaultManifold, pX;
+        σ = one(eltype(pX)), vector_at = nothing,
     )
     pX .= randn(rng, size(pX)) .* σ
     return pX

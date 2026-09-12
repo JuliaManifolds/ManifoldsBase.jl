@@ -35,9 +35,7 @@ struct Fiber{𝔽, TFiber <: FiberType, TM <: AbstractManifold, TX} <: AbstractM
 end
 
 function Fiber(
-        manifold::TM,
-        point::TX,
-        fiber_type::TFiber;
+        manifold::TM, point::TX, fiber_type::TFiber;
         field::AbstractNumbers = ℝ,
     ) where {TM <: AbstractManifold, TX, TFiber <: FiberType}
     return Fiber{field, TFiber, TM, TX}(manifold, point, fiber_type)
