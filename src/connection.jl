@@ -74,7 +74,7 @@ is_default_connection(M::AbstractManifold, c::AbstractAffineConnection)
 function is_default_connection(M::AbstractManifold, c::AbstractAffineConnection)
     return connection(M) == c
 end
-is_default_connection(M::ConnectionManifold) = true
+is_default_connection(M::ConnectionManifold) = connection(M.manifold) === M.connection
 
 manifold_dimension(M::ConnectionManifold) = manifold_dimension(M.manifold)
 

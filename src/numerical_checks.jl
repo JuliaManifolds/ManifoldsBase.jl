@@ -47,21 +47,8 @@ the plot is generated first and returned (to be shown/displayed), such that no e
 You can switch to e.g. `:warn` to get a warning together with the plot.
 """
 function check_inverse_retraction(
-        M::AbstractManifold,
-        inverse_retraction_method::AbstractInverseRetractionMethod,
-        p = rand(M),
-        X = rand(M; vector_at = p);
-        exactness_tol::Real = 1.0e-12,
-        io::Union{IO, Nothing} = nothing,
-        limits = (-8.0, 0.0),
-        N::Int = 101,
-        second_order::Bool = true,
-        name::String = second_order ? "second order inverse retraction" : "inverse retraction",
-        log_range::AbstractVector = range(limits[1], limits[2]; length = N),
-        plot::Bool = false,
-        slope_tol::Real = 0.1,
-        error::Symbol = :none,
-        window = nothing,
+        M::AbstractManifold, inverse_retraction_method::AbstractInverseRetractionMethod, p = rand(M), X = rand(M; vector_at = p);
+        exactness_tol::Real = 1.0e-12, io::Union{IO, Nothing} = nothing, limits = (-8.0, 0.0), N::Int = 101, second_order::Bool = true, name::String = second_order ? "second order inverse retraction" : "inverse retraction", log_range::AbstractVector = range(limits[1], limits[2]; length = N), plot::Bool = false, slope_tol::Real = 0.1, error::Symbol = :none, window = nothing,
     )
     Xn = X ./ norm(M, p, X) # normalize tangent direction
     # function for the directional derivative
@@ -145,10 +132,7 @@ You can switch to e.g. `:warn` to get a warning together with the plot.
 """
 function check_geodesic(
         M::AbstractManifold, p = rand(M), X = rand(M; vector_at = p);
-        error::Symbol = :none, io::Union{IO, Nothing} = nothing,
-        N::Int = 101, tol::Real = 1.0e-12, plot::Bool = false,
-        inverse_retraction_method::AbstractInverseRetractionMethod = LogarithmicInverseRetraction(),
-        vector_transport_method::AbstractVectorTransportMethod = ParallelTransport(),
+        error::Symbol = :none, io::Union{IO, Nothing} = nothing, N::Int = 101, tol::Real = 1.0e-12, plot::Bool = false, inverse_retraction_method::AbstractInverseRetractionMethod = LogarithmicInverseRetraction(), vector_transport_method::AbstractVectorTransportMethod = ParallelTransport(),
     )
     T = range(0.0, 1.0; length = N)
     γ = geodesic(M, p, X)
@@ -236,14 +220,8 @@ the plot is generated first and returned (to be shown/displayed), such that no e
 You can switch to e.g. `:warn` to get a warning together with the plot.
 """
 function check_retraction(
-        M::AbstractManifold, retraction_method::AbstractRetractionMethod,
-        p = rand(M), X = rand(M; vector_at = p);
-        error::Symbol = :none, exactness_tol::Real = 1.0e-12,
-        io::Union{IO, Nothing} = nothing, limits::Tuple = (-8.0, 0.0), N::Int = 101,
-        second_order::Bool = true,
-        name::String = second_order ? "second order retraction" : "retraction",
-        log_range = range(limits[1], limits[2]; length = N),
-        plot::Bool = false, slope_tol::Real = 0.1, window = nothing,
+        M::AbstractManifold, retraction_method::AbstractRetractionMethod, p = rand(M), X = rand(M; vector_at = p);
+        error::Symbol = :none, exactness_tol::Real = 1.0e-12, io::Union{IO, Nothing} = nothing, limits::Tuple = (-8.0, 0.0), N::Int = 101, second_order::Bool = true, name::String = second_order ? "second order retraction" : "retraction", log_range = range(limits[1], limits[2]; length = N), plot::Bool = false, slope_tol::Real = 0.1, window = nothing,
     )
     Xn = X ./ norm(M, p, X) # normalize tangent direction
     # function for the directional derivative
@@ -313,16 +291,8 @@ the plot is generated first and returned (to be shown/displayed), such that no e
 You can switch to e.g. `:warn` to get a warning together with the plot.
 """
 function check_vector_transport(
-        M::AbstractManifold, vector_transport_method::AbstractVectorTransportMethod,
-        p = rand(M), X = rand(M; vector_at = p), Y = rand(M; vector_at = p);
-        error::Symbol = :none, exactness_tol::Real = 1.0e-12,
-        io::Union{IO, Nothing} = nothing,
-        limits::Tuple = (-8.0, 0.0),
-        N::Int = 101,
-        log_range::AbstractVector = range(limits[1], limits[2]; length = N),
-        second_order::Bool = true,
-        name::String = second_order ? "second order vector transport" : "vector transport",
-        plot::Bool = false, slope_tol::Real = 0.1, window = nothing,
+        M::AbstractManifold, vector_transport_method::AbstractVectorTransportMethod, p = rand(M), X = rand(M; vector_at = p), Y = rand(M; vector_at = p);
+        error::Symbol = :none, exactness_tol::Real = 1.0e-12, io::Union{IO, Nothing} = nothing, limits::Tuple = (-8.0, 0.0), N::Int = 101, log_range::AbstractVector = range(limits[1], limits[2]; length = N), second_order::Bool = true, name::String = second_order ? "second order vector transport" : "vector transport", plot::Bool = false, slope_tol::Real = 0.1, window = nothing,
     )
     Xn = X ./ norm(M, p, X) # normalize tangent direction
     # function for the directional derivative
@@ -394,9 +364,7 @@ You you can switch to e.g. `:warn` to get a warning together with the plot.
 """
 function prepare_check_result(
         log_range::AbstractVector, errors::AbstractVector, slope::Real;
-        error::Symbol = :none, exactness_tol::Real = 1.0e3 * eps(eltype(errors)),
-        io::Union{IO, Nothing} = nothing, name::String = "estimated slope",
-        plot::Bool = false, slope_tol::Real = 1.0e-1, window = nothing,
+        error::Symbol = :none, exactness_tol::Real = 1.0e3 * eps(eltype(errors)), io::Union{IO, Nothing} = nothing, name::String = "estimated slope", plot::Bool = false, slope_tol::Real = 1.0e-1, window = nothing,
     )
     if max(errors...) < exactness_tol
         (io !== nothing) && print(

@@ -228,13 +228,14 @@ Compute the angle between tangent vectors `X` and `Y` at point `p` from the
 [`AbstractManifold`](@ref) `M` with respect to the inner product from [`inner`](@ref).
 """
 function angle(M::AbstractManifold, p, X, Y)
-    return acos(real(inner(M, p, X, Y)) / norm(M, p, X) / norm(M, p, Y))
+    return acos(clamp(real(inner(M, p, X, Y)) / norm(M, p, X) / norm(M, p, Y), -1, 1))
 end
 
 """
-    are_linearly_independent(M::AbstractManifold, p, X, Y)
+    are_linearly_independent(M::AbstractManifold, p, X, Y; atol::Real = sqrt(eps(number_eltype(X))))
 
-Check is vectors `X`, `Y` tangent at `p` to `M` are linearly independent.
+Check whether the vectors `X`, `Y` tangent at `p` to `M` are linearly independent.
+The keyword `atol` is the tolerance below which a tangent vector is considered to be zero.
 """
 function are_linearly_independent(
         M::AbstractManifold, p, X, Y; atol::Real = sqrt(eps(number_eltype(X))),
@@ -298,7 +299,7 @@ function check_approx(M::AbstractManifold, p, X, Y; kwargs...)
 end
 
 """
-    check_point(M::AbstractManifold, p; kwargs...) -> Union{Nothing,String}
+    check_point(M::AbstractManifold, p; kwargs...) -> Union{Nothing,Exception}
 
 Return `nothing` when `p` is a point on the [`AbstractManifold`](@ref) `M`. Otherwise, return an
 error with description why the point does not belong to manifold `M`.
@@ -309,11 +310,11 @@ assumption is to be optimistic for a point not deriving from the [`AbstractManif
 check_point(M::AbstractManifold, p; kwargs...) = nothing
 
 """
-    check_vector(M::AbstractManifold, p, X; kwargs...) -> Union{Nothing,String}
+    check_vector(M::AbstractManifold, p, X; kwargs...) -> Union{Nothing,Exception}
 
 Check whether `X` is a valid tangent vector in the tangent space of `p` on the
 [`AbstractManifold`](@ref) `M`. An implementation does not have to validate the point `p`.
-If it is not a tangent vector, an error string should be returned.
+If it is not a tangent vector, an error should be returned.
 
 By default, `check_vector` returns `nothing`, i.e. if no checks are implemented, the
 assumption is to be optimistic for tangent vectors not deriving from the [`AbstractTangentVector`](@ref)
@@ -762,12 +763,12 @@ function isapprox(M::AbstractManifold, p, q; error::Symbol = :none, kwargs...)
 end
 
 """
-    isapprox(M::AbstractManifold, p, X, Y; error:Symbol=:none; kwargs...)
+    isapprox(M::AbstractManifold, p, X, Y; error::Symbol=:none, kwargs...)
 
 Check if vectors `X` and `Y` tangent at `p` from [`AbstractManifold`](@ref) `M` are approximately
 equal.
 
-The optional positional argument can be used to get more information for the case that
+The keyword argument can be used to get more information for the case that
 the result is false, if the concrete manifold provides such information.
 Currently the following are supported
 
@@ -830,7 +831,7 @@ end
     is_point(M::AbstractManifold, p, throw_error::Bool; kwargs...)
 
 Return whether `p` is a valid point on the [`AbstractManifold`](@ref) `M`.
-By default the function calls [`check_point`](@ref), which returns an `ErrorException` or `nothing`.
+By default the function calls [`check_point`](@ref), which returns an `Exception` or `nothing`.
 
 How to report a potential error can be set using the `error=` keyword
 
@@ -845,11 +846,8 @@ The second signature is a shorthand, where the boolean is used for `error=:error
 and `error=:none` (default, `false`). This case ignores the `error=` keyword
 """
 function is_point(
-        M::AbstractManifold,
-        p,
-        throw_error::Bool;
-        error::Symbol = :none,
-        kwargs...,
+        M::AbstractManifold, p, throw_error::Bool;
+        error::Symbol = :none, kwargs...,
     )
     return is_point(M, p; error = throw_error ? :error : :none, kwargs...)
 end
@@ -969,7 +967,7 @@ Calculate the middle between the two point `p1` and `p2` from manifold `M`.
 By default uses [`log`](@ref), divides the vector by 2 and uses [`exp`](@ref).
 """
 function mid_point(M::AbstractManifold, p1, p2)
-    q = allocate(p1)
+    q = allocate_result(M, mid_point, p1, p2)
     return mid_point!(M, q, p1, p2)
 end
 
@@ -1132,7 +1130,7 @@ end
 
 Upper bound on sectional curvature of manifold `M`. The formula reads
 ```math
-\omega = \operatorname{sup}_{p\in\mathcal M, X\in T_p\mathcal M, Y\in T_p\mathcal M, ⟨X, Y⟩ ≠ 0} \kappa_p(X, Y)
+\omega = \operatorname{sup}_{p\in\mathcal M, X\in T_p\mathcal M, Y\in T_p\mathcal M, \lVert X \rVert^2_p \lVert Y \rVert^2_p - ⟨X, Y⟩^2_p ≠ 0} \kappa_p(X, Y)
 ```
 """
 sectional_curvature_max(M::AbstractManifold)
@@ -1142,7 +1140,7 @@ sectional_curvature_max(M::AbstractManifold)
 
 Lower bound on sectional curvature of manifold `M`. The formula reads
 ```math
-\omega = \operatorname{inf}_{p\in\mathcal M, X\in T_p\mathcal M, Y\in T_p\mathcal M, ⟨X, Y⟩ ≠ 0} \kappa_p(X, Y)
+\omega = \operatorname{inf}_{p\in\mathcal M, X\in T_p\mathcal M, Y\in T_p\mathcal M, \lVert X \rVert^2_p \lVert Y \rVert^2_p - ⟨X, Y⟩^2_p ≠ 0} \kappa_p(X, Y)
 ```
 """
 sectional_curvature_min(M::AbstractManifold)
@@ -1224,7 +1222,7 @@ end
 # Internal function to set plotting backend
 
 """
-    set_plotting_backend!(backend::String; only_fallback = false)
+    set_plotting_backend!(backend::String)
 
 Set the plotting backend to `backend`.
 Currently supported: `"Plots"` and `"Makie"`.

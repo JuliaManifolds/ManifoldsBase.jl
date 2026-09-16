@@ -240,6 +240,9 @@ end
                     @test norm(N, p, q, Inf) == maximum(norms)
                     @test project(N, p) == p
                     @test project(N, p, q) == q
+                    Zp = allocate(q)
+                    @test project!(N, Zp, p, q) == q
+                    @test Zp == q
                     @test power_dimensions(N) == pow_size
                     @test power_dimensions(N^3) == (pow_size..., 3)
                     m = ParallelTransport()
@@ -315,7 +318,7 @@ end
                     B3 = get_basis(N, p, B2)
                     if pow_size == (2,)
                         @test sprint(show, "text/plain", B) ==
-                            """$(DefaultBasis()) for a power manifold
+                            """$(typeof(DefaultBasis())) for a power manifold
                             Basis for component (1,):
                             $(sprint(show, "text/plain", B.data.bases[1]))
                             Basis for component (2,):

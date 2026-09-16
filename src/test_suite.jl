@@ -70,8 +70,11 @@ function ManifoldsBase.check_point(M::TestSphere, p; kwargs...)
     end
     return nothing
 end
-function ManifoldsBase.check_vector(M::TestSphere, p, X; kwargs...)
-    if !isapprox(abs(real(dot(p, X))), 0.0; kwargs...)
+function ManifoldsBase.check_vector(
+        M::TestSphere, p, X;
+        atol::Real = sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(X)))), kwargs...,
+    )
+    if !isapprox(abs(real(dot(p, X))), 0.0; atol = atol, kwargs...)
         return DomainError(
             abs(dot(p, X)),
             "The vector $(X) is not a tangent vector to $(p) on $(M), since it is not orthogonal in the embedding.",
@@ -93,9 +96,7 @@ function ManifoldsBase.exp_fused!(::TestSphere, q, p, X, t::Number)
     return q
 end
 function ManifoldsBase.get_basis_diagonalizing(
-        M::TestSphere{n},
-        p,
-        B::DiagonalizingOrthonormalBasis{ℝ},
+        M::TestSphere{n}, p, B::DiagonalizingOrthonormalBasis{ℝ},
     ) where {n}
     A = zeros(n + 1, n + 1)
     A[1, :] = transpose(p)
@@ -177,11 +178,8 @@ function Random.rand!(M::TestSphere, pX; vector_at = nothing, σ = one(eltype(pX
     return rand!(Random.default_rng(), M, pX; vector_at = vector_at, σ = σ)
 end
 function Random.rand!(
-        rng::AbstractRNG,
-        M::TestSphere,
-        pX;
-        vector_at = nothing,
-        σ = one(eltype(pX)),
+        rng::AbstractRNG, M::TestSphere, pX;
+        vector_at = nothing, σ = one(eltype(pX)),
     )
     if vector_at === nothing
         project!(M, pX, randn(rng, eltype(pX), representation_size(M)))
@@ -311,9 +309,7 @@ function ManifoldsBase.number_eltype(a::NonBroadcastBasisThing)
 end
 
 function ManifoldsBase.allocate_on(
-        M::AbstractManifold,
-        ::TangentSpaceType,
-        T::Type{<:NonBroadcastBasisThing},
+        M::AbstractManifold, ::TangentSpaceType, T::Type{<:NonBroadcastBasisThing},
     )
     return NonBroadcastBasisThing(similar(T.parameters[1], representation_size(M)))
 end
@@ -333,27 +329,19 @@ end
 
 
 function ManifoldsBase.log!(
-        ::DefaultManifold,
-        X::NonBroadcastBasisThing,
-        p::NonBroadcastBasisThing,
-        q::NonBroadcastBasisThing,
+        ::DefaultManifold, X::NonBroadcastBasisThing, p::NonBroadcastBasisThing, q::NonBroadcastBasisThing,
     )
     return copyto!(X, q - p)
 end
 
 function ManifoldsBase.exp!(
-        ::DefaultManifold,
-        q::NonBroadcastBasisThing,
-        p::NonBroadcastBasisThing,
-        X::NonBroadcastBasisThing,
+        ::DefaultManifold, q::NonBroadcastBasisThing, p::NonBroadcastBasisThing, X::NonBroadcastBasisThing,
     )
     return copyto!(q, p + X)
 end
 
 function ManifoldsBase.get_basis_orthonormal(
-        ::DefaultManifold{ℝ},
-        p::NonBroadcastBasisThing,
-        𝔽::RealNumbers,
+        ::DefaultManifold{ℝ}, p::NonBroadcastBasisThing, 𝔽::RealNumbers,
     )
     return CachedBasis(
         DefaultOrthonormalBasis(𝔽),
@@ -364,9 +352,7 @@ function ManifoldsBase.get_basis_orthonormal(
     )
 end
 function ManifoldsBase.get_basis_orthogonal(
-        ::DefaultManifold{ℝ},
-        p::NonBroadcastBasisThing,
-        𝔽::RealNumbers,
+        ::DefaultManifold{ℝ}, p::NonBroadcastBasisThing, 𝔽::RealNumbers,
     )
     return CachedBasis(
         DefaultOrthogonalBasis(𝔽),
@@ -377,9 +363,7 @@ function ManifoldsBase.get_basis_orthogonal(
     )
 end
 function ManifoldsBase.get_basis_default(
-        ::DefaultManifold{ℝ},
-        p::NonBroadcastBasisThing,
-        N::ManifoldsBase.RealNumbers,
+        ::DefaultManifold{ℝ}, p::NonBroadcastBasisThing, N::ManifoldsBase.RealNumbers,
     )
     return CachedBasis(
         DefaultBasis(N),
@@ -405,10 +389,7 @@ function ManifoldsBase.get_vector_orthonormal!(
 end
 
 function ManifoldsBase.inner(
-        ::DefaultManifold,
-        ::NonBroadcastBasisThing,
-        X::NonBroadcastBasisThing,
-        Y::NonBroadcastBasisThing,
+        ::DefaultManifold, ::NonBroadcastBasisThing, X::NonBroadcastBasisThing, Y::NonBroadcastBasisThing,
     )
     return dot(X.v, Y.v)
 end
@@ -464,16 +445,12 @@ function ManifoldsBase.allocate_result(::DefaultManifold, ::typeof(zero_vector),
     return DefaultTangentVector(allocate(p.value))
 end
 function ManifoldsBase.allocate_result_type(
-        ::DefaultManifold,
-        ::typeof(log),
-        ::Tuple{DefaultPoint, DefaultPoint},
+        ::DefaultManifold, ::typeof(log), ::Tuple{DefaultPoint, DefaultPoint},
     )
     return DefaultTangentVector
 end
 function ManifoldsBase.allocate_result_type(
-        ::DefaultManifold,
-        ::typeof(inverse_retract),
-        ::Tuple{DefaultPoint, DefaultPoint},
+        ::DefaultManifold, ::typeof(inverse_retract), ::Tuple{DefaultPoint, DefaultPoint},
     )
     return DefaultTangentVector
 end
@@ -610,9 +587,7 @@ struct TestArrayRepresentation <: AbstractPowerRepresentation end
 
 const TestPowerManifoldMultidimensional = AbstractPowerManifold{𝔽, <:AbstractManifold{𝔽}, TestArrayRepresentation} where {𝔽}
 
-function ManifoldsBase.representation_size(
-        M::TestPowerManifoldMultidimensional,
-    )
+function ManifoldsBase.representation_size(M::TestPowerManifoldMultidimensional)
     return (representation_size(M.manifold)..., ManifoldsBase.get_parameter(M.size)...)
 end
 

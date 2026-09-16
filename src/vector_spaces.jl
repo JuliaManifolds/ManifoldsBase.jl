@@ -133,7 +133,9 @@ Base.:-(X::FVector) = FVector(X.type, -X.data, X.basis)
 Base.:-(::ZeroVector) = ZeroVector()
 
 Base.:*(a::Number, X::FVector) = FVector(X.type, a * X.data, X.basis)
+Base.:*(X::FVector, a::Number) = FVector(X.type, X.data * a, X.basis)
 Base.:*(::Number, ::ZeroVector) = ZeroVector()
+Base.:*(::ZeroVector, ::Number) = ZeroVector()
 
 allocate(x::FVector) = FVector(x.type, allocate(x.data), x.basis)
 allocate(x::FVector, ::Type{T}) where {T} = FVector(x.type, allocate(x.data, T), x.basis)

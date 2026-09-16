@@ -8,6 +8,13 @@ using ReverseDiff
 using StaticArrays
 using Test
 
+# `vector_transport_to_diff!` has no generic implementation, so give the reference manifold one
+function ManifoldsBase.vector_transport_to_diff!(
+        ::ManifoldsBase.DefaultManifold, Y, p, X, q, r,
+    )
+    return copyto!(Y, X)
+end
+
 @testset "Testing Default (Euclidean)" begin
     M = ManifoldsBase.DefaultManifold(3)
     types = [
@@ -495,6 +502,11 @@ using Test
         @test (Y .= X) === Y
         # vector transport pass through
         @test vector_transport_to(M, p, X, q, ProjectionTransport()) == X
+        @test vector_transport_to(M, p, X, q, EmbeddedVectorTransport(ProjectionTransport())) ==
+            X
+        @test vector_transport_to(
+            M, p, X, q, DifferentiatedRetractionVectorTransport(ExponentialRetraction()),
+        ) == X
         @test vector_transport_direction(M, p, X, X, ProjectionTransport()) == X
         @test vector_transport_to!(M, Y, p, X, q, ProjectionTransport()) == X
         @test vector_transport_direction!(M, Y, p, X, X, ProjectionTransport()) == X

@@ -36,8 +36,8 @@ struct ShootingInverseRetraction{
     max_iterations::Int
 end
 
-function _inverse_retract!(M::AbstractManifold, X, p, q, m::ShootingInverseRetraction)
-    return inverse_retract_shooting!(M, X, p, q, m)
+function _inverse_retract!(M::AbstractManifold, X, p, q, m::ShootingInverseRetraction; kwargs...)
+    return inverse_retract_shooting!(M, X, p, q, m; kwargs...)
 end
 
 """
@@ -46,11 +46,8 @@ end
 Approximate the inverse of a retraction using the shooting method.
 """
 function inverse_retract_shooting!(
-        M::AbstractManifold,
-        X,
-        p,
-        q,
-        m::ShootingInverseRetraction,
+        M::AbstractManifold, X, p, q, m::ShootingInverseRetraction;
+        kwargs...,
     )
     inverse_retract!(M, X, p, q, m.initial_inverse_retraction)
     gap = norm(M, p, X)
@@ -64,13 +61,13 @@ function inverse_retract_shooting!(
         retr_tX_new = allocate_result(M, retract, p, X)
     end
     iteration = 1
-    while (gap > m.tolerance) && (iteration < m.max_iterations)
-        retract!(M, retr_tX, p, X, m.retraction)
+    while (gap > m.tolerance) && (iteration <= m.max_iterations)
+        retract!(M, retr_tX, p, X, m.retraction; kwargs...)
         inverse_retract!(M, ΔX, retr_tX, q, m.initial_inverse_retraction)
         gap = norm(M, retr_tX, ΔX)
         for t in transport_grid
             tX .= t .* X
-            retract!(M, retr_tX_new, p, tX, m.retraction)
+            retract!(M, retr_tX_new, p, tX, m.retraction; kwargs...)
             vector_transport_to!(M, ΔXnew, retr_tX, ΔX, retr_tX_new, m.vector_transport)
             # realias storage
             retr_tX, retr_tX_new, ΔX, ΔXnew, tX = retr_tX_new, retr_tX, ΔXnew, ΔX, ΔX

@@ -225,12 +225,26 @@ using ManifoldsBase, LinearAlgebra, Random, Test
         @test distance(AdN, [], []) == -1.0
         @test norm(AdN, [], []) == -1.0
     end
+    @testset "wrapped points and tangent vectors are unwrapped when forwarded" begin
+        pw = ValidationMPoint(x)
+        Xw = ValidationTangentVector(w)
+        B = DefaultOrthonormalBasis()
+        # get_coordinates has to accept the wrapped values, like get_coordinates! does
+        @test get_coordinates(A, pw, Xw, B) ≈ get_coordinates(M, x, w, B)
+        @test get_coordinates(A, pw, w, B) ≈ get_coordinates(M, x, w, B)
+        @test get_coordinates(A, x, Xw, B) ≈ get_coordinates(M, x, w, B)
+        c = get_coordinates(M, x, w, B)
+        @test get_vector(A, pw, c, B) ≈ get_vector(M, x, c, B)
+    end
     @testset "rand" begin
         Random.seed!(42)
         p = rand(A)
         @test is_point(A, p)
         X = rand(A; vector_at = p)
         @test is_vector(A, p, X)
+        # a wrapped point has to be accepted as `vector_at` as well
+        Xw = rand(A; vector_at = ValidationMPoint(p))
+        @test is_vector(A, p, Xw)
     end
     @testset "embed and project" begin
         Dm = ManifoldsBase.Test.ValidationDummyManifold()

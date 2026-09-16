@@ -10,3 +10,4 @@ tutorials/_freeze
 docs/.CondaPkg
 docs/src/NEWS.md
 temp
+test/LocalPreferences.toml
