@@ -208,7 +208,11 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
         va = Symbol("get_vector_$(f_postfix)")
         vm = Symbol("get_vector_$(f_postfix)!")
         B_types = if f_postfix in [:default, :orthogonal, :orthonormal, :vee]
-            [:AbstractNumbers, :RealNumbers, :ComplexNumbers]
+            [
+                :(ManifoldsBase.AbstractNumbers),
+                :(ManifoldsBase.RealNumbers),
+                :(ManifoldsBase.ComplexNumbers),
+            ]
         elseif f_postfix === :cached
             [:CachedBasis]
         elseif f_postfix === :diagonalizing
@@ -334,6 +338,10 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
                     M::$TM, X::$TV, p::$TP, q::$TP, m::ManifoldsBase.ApproximateLogarithmicInverseRetraction,
                 )
                 ManifoldsBase.inverse_retract_approx!(M, X.$vfield, p.$pfield, q.$pfield, m)
+                return X
+            end
+            function ManifoldsBase.inverse_retract_pade!(M::$TM, X::$TV, p::$TP, q::$TP, n)
+                ManifoldsBase.inverse_retract_pade!(M, X.$vfield, p.$pfield, q.$pfield, n)
                 return X
             end
             function ManifoldsBase.inverse_retract_embedded!(

@@ -95,7 +95,7 @@ function change_representer! end
 @doc raw"""
     change_representer!(M::AbstractManifold, Y, G2::AbstractMetric, p, X)
 
-Compute the [`change_metric`](@ref) in place of `Y`.
+Compute the [`change_representer`](@ref) in place of `Y`.
 """
 change_representer!(M::AbstractManifold, Y, G::AbstractMetric, p, X)
 
