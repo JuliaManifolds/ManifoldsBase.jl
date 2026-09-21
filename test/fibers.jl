@@ -9,6 +9,7 @@ using ManifoldsBase: DefaultManifold, VectorSpaceType, ℝ, Fiber
 
     TpM = TangentSpace(M, p)
     @test is_flat(TpM)
+    @test is_flat(CotangentSpace(M, p))
 
     @test ManifoldsBase.fiber_dimension(M, CotangentSpaceType()) == 3
 

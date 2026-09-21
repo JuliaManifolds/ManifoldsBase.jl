@@ -430,6 +430,7 @@ end
             @test @inferred !isapprox(M, [1, 2], [2, 3], [4, 5])
 
             @test ManifoldsBase.get_forwarding_type_embedding(ManifoldsBase.EmbeddedSubmanifoldType{ManifoldsBase.DirectEmbedding}(), M, exp) === EmbeddedForwardingType(ManifoldsBase.DirectEmbedding())
+            @test ManifoldsBase.get_forwarding_type_embedding(ManifoldsBase.EmbeddedSubmanifoldType{ManifoldsBase.IndirectEmbedding}(), M, exp) === EmbeddedForwardingType(ManifoldsBase.IndirectEmbedding())
         end
         @testset "Isometric Embedding Fallbacks & Error Tests" begin
             for M2 in [NotImplementedIsometricEmbeddedManifoldNE(), NotImplementedIsometricEmbeddedManifoldIsoIndirect()]
@@ -563,5 +564,12 @@ end
         @test_throws ManifoldDomainError is_point(M, [1.0, 2.0im, 3.0]; error = :error)
         @test_throws ManifoldDomainError is_vector(M, [1.0, 2.0im, 3.0], X; error = :error)
         @test_throws ManifoldDomainError is_vector(M, p, [1.0, 2.0im, 3.0]; error = :error)
+        # functions that use the embedding
+        @test inner(M, p, X, X) == 29.0
+        @test norm(M, p, X) == sqrt(29.0)
+        @test isapprox(M, p, p)
+        @test isapprox(M, p, X, X)
+        @test copyto!(M, similar(p), p) == p
+        @test copyto!(M, similar(X), p, X) == X
     end
 end

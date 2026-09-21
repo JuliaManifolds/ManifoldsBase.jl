@@ -390,6 +390,15 @@ end
             change_representer(M, e, q, log(M, q, p)),
         ]
         @test norm(N, P, Z .- Zc) ≈ 0
+        # in-place variants with replaced elements
+        NR = PowerManifold(M, NestedReplacingPowerRepresentation(), 2)
+        @test change_metric!(NR, similar(X), e, P, X) == Yc
+        @test change_representer!(NR, similar(X), e, P, X) == Zc
+        Md = ManifoldsBase.DefaultManifold(3)
+        NRd = PowerManifold(Md, NestedReplacingPowerRepresentation(), 2)
+        Pd = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]
+        Xd = [[0.0, 1.0, 0.0], [1.0, 0.0, 0.0]]
+        @test Weingarten!(NRd, similar(Xd), Pd, Xd, Xd) == zero_vector(NRd, Pd)
     end
 
     @testset "Curvature" begin

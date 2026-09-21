@@ -236,7 +236,7 @@ struct VectorTransportDirection{
 end
 
 @doc raw"""
-    VectorTransportTo{VM<:AbstractVectorTransportMethod,RM<:AbstractRetractionMethod}
+    VectorTransportTo{VM<:AbstractVectorTransportMethod,IM<:AbstractInverseRetractionMethod}
         <: AbstractVectorTransportMethod
 
 Specify a [`vector_transport_to`](@ref) using a [`AbstractVectorTransportMethod`](@ref)
@@ -386,20 +386,20 @@ on the shortest geodesic connecting $q$ and the point $d$. Then Schild's ladder 
 \operatorname{Sl}(p,d,q) = \operatorname{retr}_p( 2\operatorname{retr}_p^{-1} c)
 ````
 
-Where the classical Schilds ladder employs $\operatorname{retr}_d=\exp_d$
-and $\operatorname{retr}_d^{-1}=\log_d$ but for an even cheaper transport these can be set
+Where the classical Schilds ladder employs $\operatorname{retr}_p=\exp_p$
+and $\operatorname{retr}_p^{-1}=\log_p$ but for an even cheaper transport these can be set
 to different [`AbstractRetractionMethod`](@ref) and [`AbstractInverseRetractionMethod`](@ref).
 
 In consistency with [`pole_ladder`](@ref) you can change the way the mid point is computed
 using the optional parameter `c`, but note that here it's the mid point between `q` and `d`.
 
-When you have $X=log_pd$ and $Y = \log_q \operatorname{Sl}(p,d,q)$,
-you will obtain the [`PoleLadderTransport`](@ref).
+When you have $X=\log_pd$ and $Y = \log_q \operatorname{Sl}(p,d,q)$,
+you will obtain the [`SchildsLadderTransport`](@ref).
 Then the approximation to the transported vector is given by $\log_q\operatorname{Sl}(p,d,q)$.
 
-When performing multiple steps, this method avoidsd the switching to the tangent space.
+When performing multiple steps, this method avoids the switching to the tangent space.
 Hence after $n$ successive steps the tangent vector reads
-$Y_n = \log_q \operatorname{Pl}(p_{n-1},d_{n-1},p_n)$.
+$Y_n = \log_q \operatorname{Sl}(p_{n-1},d_{n-1},p_n)$.
 """
 function schilds_ladder(
         M, p, d, q, c = mid_point(M, q, d);
@@ -578,7 +578,7 @@ end
     vector_transport_direction_embedded!(M::AbstractManifold, Y, p, X, d, m::AbstractVectorTransportMethod)
 
 Compute the vector transport of `X` from ``T_p\mathcal M`` into the direction `d`
-using the [`AbstractRetractionMethod`](@ref) `m` in the embedding.
+using the [`AbstractVectorTransportMethod`](@ref) `m` in the embedding.
 
 The default implementation requires one allocation for the points and tangent vectors in the
 embedding and the resulting point, but the final projection is performed in place of `Y`
@@ -614,7 +614,7 @@ To explicitly specify a (different) retraction to the implicitly assumeed retrac
 Note that some vector transport methods might also carry their own retraction they are associated to,
 like the  [`DifferentiatedRetractionVectorTransport`](@ref) and some are even independent of the retraction, for example the [`ProjectionTransport`](@ref).
 
-This method is equivalent to using ``d = \operatorname{retr}^{-1}_p(q)`` in [`vector_transport_direction`](@ref)`(M, p, X, q, m, r)`,
+This method is equivalent to using ``d = \operatorname{retr}^{-1}_p(q)`` in [`vector_transport_direction`](@ref)`(M, p, X, d, m)`,
 where you can find the formal definition. This is the fallback for [`VectorTransportTo`](@ref).
 """
 function vector_transport_to(
@@ -731,19 +731,20 @@ function _vector_transport_to!(
 end
 
 @doc raw"""
-    vector_transport_to_diff(M::AbstractManifold, p, X, q, r)
+    vector_transport_to_diff!(M::AbstractManifold, Y, p, X, q, r::AbstractRetractionMethod)
 
-Compute a vector transport by using a [`DifferentiatedRetractionVectorTransport`](@ref) `r` in place of `Y`.
+Compute the vector transport of `X` from ``T_p\mathcal M`` to the point `q`
+using the differential of the [`AbstractRetractionMethod`](@ref) `r` in place of `Y`.
 """
 vector_transport_to_diff!(M::AbstractManifold, Y, p, X, q, r)
 
 function vector_transport_to_diff! end
 
 @doc raw"""
-    vector_transport_to_embedded!(M::AbstractManifold, Y, p, X, q, m::AbstractRetractionMethod)
+    vector_transport_to_embedded!(M::AbstractManifold, Y, p, X, q, m::AbstractVectorTransportMethod)
 
 Compute the vector transport of `X` from ``T_p\mathcal M`` to the point `q`
-using the  of the [`AbstractRetractionMethod`](@ref) `m` in th embedding.
+using the [`AbstractVectorTransportMethod`](@ref) `m` in the embedding.
 
 The default implementation requires one allocation for the points and tangent vectors in the
 embedding and the resulting point, but the final projection is performed in place of `Y`
