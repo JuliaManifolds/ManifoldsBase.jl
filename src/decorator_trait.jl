@@ -406,10 +406,18 @@ end
     StopForwardingType,
 )
 
+function _get_coordinates!_forwarding(::EmbeddedForwardingType, M::AbstractDecoratorManifold, c, p, X)
+    return @invoke get_coordinates!(M::AbstractManifold, c, p, X)
+end
+
 @trait_function get_coordinates!(M::AbstractDecoratorManifold, c, p, X, B::AbstractBasis) (
     SimpleForwardingType,
     StopForwardingType,
 )
+
+function _get_coordinates!_forwarding(::EmbeddedForwardingType, M::AbstractDecoratorManifold, c, p, X, B::AbstractBasis)
+    return @invoke get_coordinates!(M::AbstractManifold, c, p, X, B)
+end
 
 @trait_function get_vector(M::AbstractDecoratorManifold, p, c) (
     SimpleForwardingType,
@@ -434,10 +442,18 @@ end
     StopForwardingType,
 )
 
+function _get_vector!_forwarding(::EmbeddedForwardingType, M::AbstractDecoratorManifold, X, p, c)
+    return @invoke get_vector!(M::AbstractManifold, X, p, c)
+end
+
 @trait_function get_vector!(M::AbstractDecoratorManifold, X, p, c, B::AbstractBasis) (
     SimpleForwardingType,
     StopForwardingType,
 )
+
+function _get_vector!_forwarding(::EmbeddedForwardingType, M::AbstractDecoratorManifold, X, p, c, B::AbstractBasis)
+    return @invoke get_vector!(M::AbstractManifold, X, p, c, B)
+end
 
 @trait_function has_components(M::AbstractDecoratorManifold)
 

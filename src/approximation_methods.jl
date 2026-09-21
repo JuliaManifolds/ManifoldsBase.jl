@@ -82,8 +82,8 @@ and optionally as well a type `T` to distinguish different (point or vector) rep
 By default, all functions `f` call the signature for just a manifold.
 The exceptional functions are:
 
-* `retract` and `retract!` which fall back to [`default_retraction_method`](@ref)
-* `inverse_retract` and `inverse_retract!` which fall back to [`default_inverse_retraction_method`](@ref)
+* `retract` which falls back to [`default_retraction_method`](@ref)
+* `inverse_retract` which falls back to [`default_inverse_retraction_method`](@ref)
 * any of the vector transport methods fall back to [`default_vector_transport_method`](@ref)
 """
 default_approximation_method(M::AbstractManifold, f)

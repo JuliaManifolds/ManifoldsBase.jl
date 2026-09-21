@@ -43,7 +43,7 @@ function Base.showerror(io::IO, ex::ApproximatelyError)
 end
 
 @doc """
-    ComponentError{I,E} <: Exception
+    ComponentManifoldError{I,E<:Exception} <: AbstractManifoldDomainError
 
 Store an error that occurred in a component, where the additional `index` is stored.
 
@@ -52,16 +52,13 @@ Store an error that occurred in a component, where the additional `index` is sto
 * `index::I` index where the error occurred`
 * `error::E` error that occurred.
 """
-struct ComponentManifoldError{I, E} <: AbstractManifoldDomainError where {I, E <: Exception}
+struct ComponentManifoldError{I, E <: Exception} <: AbstractManifoldDomainError
     index::I
     error::E
 end
-function ComponentManifoldError(i::I, e::E) where {I, E <: Exception}
-    return ComponentManifoldError{I, E}(i, e)
-end
 
 @doc """
-    CompositeManifoldError{T} <: Exception
+    CompositeManifoldError{T<:Exception} <: AbstractManifoldDomainError
 
 A composite type to collect a set of errors that occurred. Mainly used in conjunction
 with [`ComponentManifoldError`](@ref) to store a set of errors that occurred.
@@ -69,13 +66,10 @@ with [`ComponentManifoldError`](@ref) to store a set of errors that occurred.
 # Fields
 * `errors` a `Vector` of `<:Exceptions`.
 """
-struct CompositeManifoldError{T} <: AbstractManifoldDomainError where {T <: Exception}
+struct CompositeManifoldError{T <: Exception} <: AbstractManifoldDomainError
     errors::Vector{T}
 end
 CompositeManifoldError() = CompositeManifoldError{Exception}(Exception[])
-function CompositeManifoldError(errors::Vector{T}) where {T <: Exception}
-    return CompositeManifoldError{T}(errors)
-end
 
 isempty(c::CompositeManifoldError) = isempty(c.errors)
 length(c::CompositeManifoldError) = length(c.errors)
@@ -89,8 +83,9 @@ function Base.show(io::IO, ex::CompositeManifoldError)
         print(io, "[")
         start = true
         for e in ex.errors
+            !start && print(io, ", ")
             show(io, e)
-            print(io, ", ")
+            start = false
         end
         print(io, "]")
     end
@@ -124,13 +119,13 @@ An error thrown when a function (for example [`log`](@ref)arithmic map or
 struct OutOfInjectivityRadiusError <: Exception end
 
 """
-    ManifoldDomainError{<:Exception} <: Exception
+    ManifoldDomainError{E<:Exception} <: AbstractManifoldDomainError
 
 An error to represent a nested (Domain) error on a manifold, for example
 if a point or tangent vector is invalid because its representation in some
 embedding is already invalid.
 """
-struct ManifoldDomainError{E} <: AbstractManifoldDomainError where {E <: Exception}
+struct ManifoldDomainError{E <: Exception} <: AbstractManifoldDomainError
     outer_text::String
     error::E
 end

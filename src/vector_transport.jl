@@ -38,7 +38,7 @@ by differentiation this retraction, is given by
 see [AbsilMahonySepulchre:2008](@cite), Section 8.1.2 for more details.
 
 This can be phrased similarly as a [`vector_transport_to`](@ref) by introducing
-``q=\operatorname{retr}_pX`` and defining
+``q=\operatorname{retr}_pY`` and defining
 
 ```math
 \mathcal T^{\operatorname{retr}}_{q \gets p}X = \mathcal T^{\operatorname{retr}}_{p,Y}X
@@ -582,15 +582,23 @@ using the [`AbstractRetractionMethod`](@ref) `m` in the embedding.
 
 The default implementation requires one allocation for the points and tangent vectors in the
 embedding and the resulting point, but the final projection is performed in place of `Y`
+
+# Keyword arguments
+
+* `retraction_method=default_retraction_method(M, typeof(p))`: the retraction to compute the end point from `d`
+
+All other keyword arguments are passed to the vector transport in the embedding.
 """
 function vector_transport_direction_embedded!(
-        M::AbstractManifold, Y, p::P, X, d, m::AbstractVectorTransportMethod,
+        M::AbstractManifold, Y, p::P, X, d, m::AbstractVectorTransportMethod;
+        retraction_method::AbstractRetractionMethod = default_retraction_method(M, typeof(p)), kwargs...,
     ) where {P}
     p_e = embed(M, p)
     d_e = embed(M, p, d)
     X_e = embed(M, p, X)
-    Y_e = vector_transport_direction(get_embedding(M, P), p_e, X_e, d_e, m)
-    q = exp(M, p, d)
+    v = length(kwargs) > 0 ? VectorTransportWithKeywords(m; kwargs...) : m
+    Y_e = vector_transport_direction(get_embedding(M, P), p_e, X_e, d_e, v)
+    q = retract(M, p, d, retraction_method)
     return project!(M, Y, q, Y_e)
 end
 

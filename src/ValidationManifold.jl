@@ -35,10 +35,11 @@ with types points, vectors, and covectors.
 # Fields
 
 * `manifold::M`: The manifold to be decorated
-* `mode::Symbol`: The mode to be used for error handling, either `:error` or `:warn`
-* `ignore_contexts::AbstractVector{Symbol}`: store contexts to be ignored of validation.
-* `ignore_functions::Dict{<:Function,<:Union{Symbol,<:AbstractVector{Symbol}}`:
+* `mode::Symbol`: The mode to be used for error handling, one of `:error`, `:warn`, `:info`, or `:none`
+* `store_base_point::Bool`: whether to store the base point of a tangent or cotangent vector.
+* `ignore_functions::Dict{<:Function,<:Union{Symbol,<:AbstractVector{Symbol}}}`:
   store contexts to be ignored with in a function or its mutating variant.
+* `ignore_contexts::AbstractVector{Symbol}`: store contexts to be ignored of validation.
 
 # Constructors
 
@@ -60,7 +61,7 @@ Generate the Validation manifold for `M` with the default values of `V`.
   is associated with. This can be useful for debugging purposes.
 * `ignore_contexts = Vector{Symbol}()` a vector to indicate which validation contexts should not be performed.
 * `ignore_functions=Dict{Function,Union{Symbol,Vector{Symbol}}}()` a dictionary to disable certain contexts within functions.
-  The key here is the non-mutating function variant (if it exists). The contexts are three same as in `ignore_contexts`.
+  The key here is the non-mutating function variant (if it exists). The contexts are the same as in `ignore_contexts`.
 """
 struct ValidationManifold{
         𝔽,
@@ -220,23 +221,23 @@ internal_value(X::ValidationFibreVector) = X.value
 
 _update_basepoint!(::ValidationManifold, X, p) = X
 function _update_basepoint!(
-        ::ValidationManifold, X::ValidationTangentVector{P, Nothing}, p,
-    ) where {P}
+        ::ValidationManifold, X::ValidationFibreVector{TType, V, Nothing}, p,
+    ) where {TType, V}
     return X
 end
 function _update_basepoint!(
-        M::ValidationManifold, X::ValidationTangentVector{P, V}, p,
-    ) where {P, V}
+        M::ValidationManifold, X::ValidationFibreVector{TType, V, P}, p,
+    ) where {TType, V, P}
     copyto!(M.manifold, X.point, p)
     return X
 end
 
 
 """
-    _msg(str; error=:None, within::Union{Nothing,<:Function} = nothing,
+    _msg(M::ValidationManifold, str; error=M.mode, within::Union{Nothing,<:Function} = nothing,
     context::Union{NTuple{N,Symbol} where N} = NTuple{0,Symbol}())
 
-issue a message `str` according to the mode `mode` (as `@error`, `@warn`, `@info`).
+issue a message `str` according to the mode `error` (as `@error`, `@warn`, `@info`).
 """
 function _msg(
         M::ValidationManifold, str;
@@ -284,7 +285,7 @@ end
 function copyto!(M::ValidationManifold, q::ValidationMPoint, p::ValidationMPoint; kwargs...)
     is_point(M, p; within = copyto!, context = (:Input,), kwargs...)
     copyto!(M.manifold, q.value, p.value)
-    is_point(M, q; within = copyto!, context = (:Input,), kwargs...)
+    is_point(M, q; within = copyto!, context = (:Output,), kwargs...)
     return q
 end
 function copyto!(
@@ -293,7 +294,7 @@ function copyto!(
     ) where {TType}
     is_point(M, p; within = copyto!, context = (:Input,), kwargs...)
     copyto!(M.manifold, Y.value, p.value, X.value)
-    return p
+    return Y
 end
 
 decorated_manifold(M::ValidationManifold) = M.manifold
@@ -347,31 +348,31 @@ function embed!(M::ValidationManifold, Y, p::P, X; kwargs...) where {P}
 end
 
 function embed_project(M::ValidationManifold, p; kwargs...)
-    is_point(M, p; within = embed, context = (:Input,), kwargs...)
+    is_point(M, p; within = embed_project, context = (:Input,), kwargs...)
     q = embed_project(M.manifold, internal_value(p))
-    is_point(M, q; within = embed, context = (:Output,), kwargs...)
+    is_point(M, q; within = embed_project, context = (:Output,), kwargs...)
     return ValidationMPoint(q)
 end
 function embed_project(M::ValidationManifold, p, X; kwargs...)
-    is_point(M, p; within = embed, context = (:Input,), kwargs...)
-    is_vector(M, p, X; within = embed, context = (:Input,), kwargs...)
+    is_point(M, p; within = embed_project, context = (:Input,), kwargs...)
+    is_vector(M, p, X; within = embed_project, context = (:Input,), kwargs...)
     Y = embed_project(M.manifold, internal_value(p), internal_value(X))
-    is_vector(M, p, Y; within = embed, context = (:Output,), kwargs...)
+    is_vector(M, p, Y; within = embed_project, context = (:Output,), kwargs...)
     return ValidationTangentVector(Y, M.store_base_point ? copy(M, p) : nothing)
 end
 
 function embed_project!(M::ValidationManifold, q, p; kwargs...)
-    is_point(M, p; within = embed, context = (:Input,), kwargs...)
+    is_point(M, p; within = embed_project, context = (:Input,), kwargs...)
     embed_project!(M.manifold, internal_value(q), internal_value(p))
-    is_point(M, q; within = embed, context = (:Output,), kwargs...)
+    is_point(M, q; within = embed_project, context = (:Output,), kwargs...)
     return q
 end
 function embed_project!(M::ValidationManifold, Y, p, X; kwargs...)
-    is_point(M, p; within = embed, context = (:Input,), kwargs...)
-    is_vector(M, p, X; within = embed, context = (:Input,), kwargs...)
+    is_point(M, p; within = embed_project, context = (:Input,), kwargs...)
+    is_vector(M, p, X; within = embed_project, context = (:Input,), kwargs...)
     embed_project!(M.manifold, internal_value(Y), internal_value(p), internal_value(X))
     _update_basepoint!(M, Y, p)
-    is_vector(M, p, Y; within = embed, context = (:Output,), kwargs...)
+    is_vector(M, p, Y; within = embed_project, context = (:Output,), kwargs...)
     return Y
 end
 
@@ -476,16 +477,8 @@ function get_basis(
 end
 
 function get_coordinates(M::ValidationManifold, p, X, B::AbstractBasis; kwargs...)
-    is_point(M, p; error = :error, within = get_coordinates, context = (:Input,), kwargs...)
-    is_vector(
-        M,
-        p,
-        X;
-        error = :error,
-        within = get_coordinates,
-        context = (:Input,),
-        kwargs...,
-    )
+    is_point(M, p; within = get_coordinates, context = (:Input,), kwargs...)
+    is_vector(M, p, X; within = get_coordinates, context = (:Input,), kwargs...)
     return get_coordinates(M.manifold, internal_value(p), internal_value(X), B)
 end
 
@@ -582,7 +575,7 @@ where two additional keywords can be used
 
 * `within=nothing` to specify a function from within which this call was issued
 * `context::NTuple{N,Symbol} where N=()` to specify one or more contexts, this
-  call was issued in. The context `:Point` is added before checking whether the test
+  call was issued in. The context `:Vector` is added before checking whether the test
   should be performed
 
 all other keywords are passed on.
@@ -596,7 +589,7 @@ function is_vector(
         M.manifold,
         internal_value(p),
         internal_value(X),
-        cbp;
+        cbp && _vMc(M, within, (:Point, context...));
         error = error,
         kwargs...,
     )
@@ -685,6 +678,18 @@ function rand(M::ValidationManifold; vector_at = nothing, kwargs...)
     end
     return pX
 end
+function rand(rng::AbstractRNG, M::ValidationManifold; vector_at = nothing, kwargs...)
+    if vector_at !== nothing
+        is_point(M, vector_at; within = rand, context = (:Input,), kwargs...)
+    end
+    pX = rand(rng, M.manifold; vector_at = internal_value(vector_at), kwargs...)
+    if vector_at !== nothing
+        is_vector(M, vector_at, pX; within = rand, context = (:Output,), kwargs...)
+    else
+        is_point(M, pX; within = rand, context = (:Output,), kwargs...)
+    end
+    return pX
+end
 
 representation_size(M::ValidationManifold) = representation_size(M.manifold)
 
@@ -751,7 +756,7 @@ function vector_transport_to(
         m,
     )
     is_vector(M, q, Y; within = vector_transport_to, context = (:Output,), kwargs...)
-    return Y
+    return ValidationTangentVector(Y, M.store_base_point ? copy(M, q) : nothing)
 end
 function vector_transport_to!(
         M::ValidationManifold, Y, p, X, q, m::AbstractVectorTransportMethod;
@@ -776,7 +781,7 @@ function zero_vector(M::ValidationManifold, p; kwargs...)
     is_point(M, p; within = zero_vector, context = (:Input,), kwargs...)
     w = zero_vector(M.manifold, internal_value(p))
     is_vector(M, p, w; within = zero_vector, context = (:Output,), kwargs...)
-    return w
+    return ValidationTangentVector(w, M.store_base_point ? copy(M, p) : nothing)
 end
 
 function zero_vector!(M::ValidationManifold, X, p; kwargs...)

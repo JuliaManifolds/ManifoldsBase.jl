@@ -208,6 +208,16 @@ ManifoldsBase.get_embedding(::SimpleEmbeddedTestManifold) = DefaultManifold(3)
 function ManifoldsBase.get_forwarding_type(::SimpleEmbeddedTestManifold, ::Any, P::Type = Nothing)
     return ManifoldsBase.EmbeddedForwardingType(ManifoldsBase.DirectEmbedding())
 end
+function ManifoldsBase.get_coordinates_orthonormal!(
+        ::SimpleEmbeddedTestManifold, c, p, X, ::ManifoldsBase.RealNumbers,
+    )
+    return (c .= X)
+end
+function ManifoldsBase.get_vector_orthonormal!(
+        ::SimpleEmbeddedTestManifold, X, p, c, ::ManifoldsBase.RealNumbers,
+    )
+    return (X .= c)
+end
 
 struct EmbeddedTestManifold <: AbstractDecoratorManifold{ℝ} end
 ManifoldsBase.get_embedding(::EmbeddedTestManifold) = DefaultManifold(3)
@@ -530,6 +540,14 @@ end
         @test_throws ManifoldDomainError is_point(M, [1.0, 2.0im, 3.0]; error = :error)
         @test_throws ManifoldDomainError is_vector(M, [1.0, 2.0im, 3.0], X; error = :error)
         @test_throws ManifoldDomainError is_vector(M, p, [1.0, 2.0im, 3.0]; error = :error)
+        # in-place basis functions use the generic implementation
+        B = DefaultOrthonormalBasis()
+        c = zeros(3)
+        @test get_coordinates!(M, c, p, X) == X
+        @test get_coordinates!(M, c, p, X, B) == X
+        Y = zeros(3)
+        @test get_vector!(M, Y, p, c) == X
+        @test get_vector!(M, Y, p, c, B) == X
     end
     @testset "EmbeddedTestManifold" begin
         M = EmbeddedTestManifold()

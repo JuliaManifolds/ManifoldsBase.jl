@@ -72,7 +72,8 @@ using ManifoldsBase, LinearAlgebra, Random, Test
             if T == ValidationMPoint
                 copyto!(A, q, p)
             else
-                copyto!(A, q, ValidationMPoint(x), p) # generate base point “on the fly”
+                # generate base point “on the fly”
+                @test copyto!(A, q, ValidationMPoint(x), p) === q
             end
             @test isapprox(A, q, p)
             @test ManifoldsBase.internal_value(p) == x
@@ -245,6 +246,9 @@ using ManifoldsBase, LinearAlgebra, Random, Test
         # a wrapped point has to be accepted as `vector_at` as well
         Xw = rand(A; vector_at = ValidationMPoint(p))
         @test is_vector(A, p, Xw)
+        rng = MersenneTwister(42)
+        @test is_point(A, rand(rng, A))
+        @test is_vector(A, p, rand(rng, A; vector_at = p))
     end
     @testset "embed and project" begin
         Dm = ManifoldsBase.Test.ValidationDummyManifold()

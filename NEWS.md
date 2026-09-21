@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * [DocumenterLandingPage.jl](https://csvance.github.io/DocumenterLandingPage.jl/) enhances the start page with a short teaser for the package now.
 * `is_flat(::VectorSpaceFiber)`, so a `CotangentSpace` and any user-defined vector space fiber report the flatness `Fiber` documents; before only `TangentSpace` had a method.
 * scalar multiplication from the right for `FVector` and `ZeroVector`, mirroring the existing `a * X` methods.
+* `rand(rng, M::ValidationManifold; vector_at=)`, mirroring the method without a random number generator.
+* export `EfficientEstimator`, like the other approximation methods.
 
 ### Fixed
 
@@ -47,11 +49,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `_inverse_retract!` for `ShootingInverseRetraction` accepts `kwargs...` and forwards them to the retraction of its loop.
 * `manifold_dimension` on an `AbstractDecoratorManifold` that decorates nothing throws a `MethodError` instead of recursing into a `StackOverflowError`.
 * `get_forwarding_type_embedding` no longer inverts the embedding directness, and the three `AbstractEmbeddingType` constructors default to `DirectEmbedding()`; a manifold declaring `DirectEmbedding()` is now forwarded directly, as documented.
+* `get_coordinates!` and `get_vector!` on a manifold with an `EmbeddedForwardingType` call the generic implementation, as their allocating variants do.
+* `copyto!(M::ValidationManifold, Y, p, X)` returns `Y` instead of `p`.
+* `copyto!(M::ValidationManifold, q, p)` checks `q` in the `:Output` context.
+* `embed_project` and `embed_project!` on a `ValidationManifold` run their checks `within = embed_project`, so `ignore_functions` entries for `embed_project` apply.
+* `get_coordinates` on a `ValidationManifold` uses the error mode of the manifold instead of `error = :error`.
+* `ValidationCotangentVector`s get their stored base point updated by the in-place functions of a `ValidationManifold`.
+* the `:Point` context in `ignore_contexts` also covers the base point check within `is_vector` on a `ValidationManifold`.
 
 ### Changed
 
 * `show` for a `Fiber` prints the fiber type and the base manifold on separate lines instead of concatenating them.
 * `inverse_retract` and `inverse_retract!` accept keyword arguments, like `retract` and `retract!` already did.
+* `vector_transport_to` and `zero_vector` on a `ValidationManifold` return a `ValidationTangentVector`, which stores the base point if `store_base_point` is set.
+* `vector_transport_direction_embedded!` computes the end point with the keyword `retraction_method=default_retraction_method(M, typeof(p))` instead of `exp`, and passes all other keywords to the vector transport in the embedding.
 
 ## [2.5.1] 02/09/2026
 

@@ -1344,6 +1344,7 @@ export ProductManifold
 # Generic Estimation Types
 export GeodesicInterpolationWithinRadius,
     CyclicProximalPointEstimation,
+    EfficientEstimator,
     ExtrinsicEstimation,
     GradientDescentEstimation,
     WeiszfeldEstimation,
