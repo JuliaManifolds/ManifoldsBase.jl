@@ -30,14 +30,8 @@ include("retractions.jl")
 include("exp_log_geo.jl")
 include("projections.jl")
 
-if isdefined(Base, Symbol("@constprop"))
-    macro aggressive_constprop(ex)
-        return esc(:(Base.@constprop :aggressive $ex))
-    end
-else
-    macro aggressive_constprop(ex)
-        return esc(ex)
-    end
+macro aggressive_constprop(ex)
+    return esc(:(Base.@constprop :aggressive $ex))
 end
 
 """
@@ -1060,6 +1054,17 @@ function Random.rand(rng::AbstractRNG, M::AbstractManifold; vector_at = nothing,
     return pX
 end
 
+"""
+    Random.rand!(M::AbstractManifold, pX; vector_at=nothing)
+    Random.rand!(rng::AbstractRNG, M::AbstractManifold, pX; vector_at=nothing)
+
+Generate a random point on manifold `M` (when `vector_at` is `nothing`) or a tangent
+vector at point `vector_at` (when it is not `nothing`) in-place of `pX`.
+
+Optionally a random number generator `rng` to be used can be specified.
+
+See also [`rand`](@ref rand(::AbstractManifold)).
+"""
 function Random.rand!(M::AbstractManifold, pX; kwargs...)
     return rand!(Random.default_rng(), M, pX; kwargs...)
 end
@@ -1098,6 +1103,16 @@ function riemann_tensor(M::AbstractManifold, p, X, Y, Z)
     Xresult = allocate_result(M, riemann_tensor, X)
     return riemann_tensor!(M, Xresult, p, X, Y, Z)
 end
+
+@doc raw"""
+    riemann_tensor!(M::AbstractManifold, Xresult, p, X, Y, Z)
+
+Compute the value of the Riemann tensor ``R(X_f,Y_f)Z_f`` at point `p`
+in-place of `Xresult`.
+
+See also [`riemann_tensor`](@ref).
+"""
+riemann_tensor!(M::AbstractManifold, Xresult, p, X, Y, Z)
 
 @doc raw"""
     sectional_curvature(M::AbstractManifold, p, X, Y)

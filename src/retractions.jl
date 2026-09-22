@@ -633,47 +633,47 @@ inverse_retract_pade!(M::AbstractManifold, p, q, n)
 function inverse_retract_pade! end
 
 """
-    inverse_retract_qr!(M::AbstractManifold, X, p, q)
+    inverse_retract_qr!(M::AbstractManifold, X, p, q; kwargs...)
 
 Compute the in-place variant of the [`QRInverseRetraction`](@ref).
 """
-inverse_retract_qr!(M::AbstractManifold, X, p, q)
+inverse_retract_qr!(M::AbstractManifold, X, p, q; kwargs...)
 
 function inverse_retract_qr! end
 
 """
-    inverse_retract_project!(M::AbstractManifold, X, p, q)
+    inverse_retract_project!(M::AbstractManifold, X, p, q; kwargs...)
 
 Compute the in-place variant of the [`ProjectionInverseRetraction`](@ref).
 """
-inverse_retract_project!(M::AbstractManifold, X, p, q)
+inverse_retract_project!(M::AbstractManifold, X, p, q; kwargs...)
 
 function inverse_retract_project! end
 
 """
-    inverse_retract_polar!(M::AbstractManifold, X, p, q)
+    inverse_retract_polar!(M::AbstractManifold, X, p, q; kwargs...)
 
 Compute the in-place variant of the [`PolarInverseRetraction`](@ref).
 """
-inverse_retract_polar!(M::AbstractManifold, X, p, q)
+inverse_retract_polar!(M::AbstractManifold, X, p, q; kwargs...)
 
 function inverse_retract_polar! end
 
 """
-    inverse_retract_nlsolve!(M::AbstractManifold, X, p, q, m::NLSolveInverseRetraction)
+    inverse_retract_nlsolve!(M::AbstractManifold, X, p, q, m::NLSolveInverseRetraction; kwargs...)
 
 Compute the in-place variant of the [`NLSolveInverseRetraction`](@ref) `m`.
 """
-inverse_retract_nlsolve!(M::AbstractManifold, X, p, q, m::NLSolveInverseRetraction)
+inverse_retract_nlsolve!(M::AbstractManifold, X, p, q, m::NLSolveInverseRetraction; kwargs...)
 
 function inverse_retract_nlsolve! end
 
 """
-    inverse_retract_softmax!(M::AbstractManifold, X, p, q)
+    inverse_retract_softmax!(M::AbstractManifold, X, p, q; kwargs...)
 
 Compute the in-place variant of the [`SoftmaxInverseRetraction`](@ref).
 """
-inverse_retract_softmax!(M::AbstractManifold, X, p, q)
+inverse_retract_softmax!(M::AbstractManifold, X, p, q; kwargs...)
 
 function inverse_retract_softmax! end
 
@@ -939,11 +939,11 @@ end
 
 function retract_pade! end
 """
-    retract_pade!(M::AbstractManifold, q, p, X, m::PadeRetraction)
+    retract_pade!(M::AbstractManifold, q, p, X, m::PadeRetraction; kwargs...)
 
 Compute the in-place variant of the [`PadeRetraction`](@ref) `m`.
 """
-retract_pade!(M::AbstractManifold, q, p, X, m::PadeRetraction)
+retract_pade!(M::AbstractManifold, q, p, X, m::PadeRetraction; kwargs...)
 
 function retract_pade_fused!(M::AbstractManifold, q, p, X, t::Number, m::PadeRetraction)
     return retract_pade!(M, q, p, t * X, m)
@@ -952,11 +952,11 @@ end
 
 function retract_project! end
 """
-    retract_project!(M::AbstractManifold, q, p, X)
+    retract_project!(M::AbstractManifold, q, p, X; kwargs...)
 
 Compute the in-place variant of the [`ProjectionRetraction`](@ref).
 """
-retract_project!(M::AbstractManifold, q, p, X)
+retract_project!(M::AbstractManifold, q, p, X; kwargs...)
 
 """
     retract_project_fused!(M::AbstractManifold, q, p, X, t::Number)
@@ -970,11 +970,11 @@ end
 
 function retract_polar! end
 """
-    retract_polar!(M::AbstractManifold, q, p, X)
+    retract_polar!(M::AbstractManifold, q, p, X; kwargs...)
 
 Compute the in-place variant of the [`PolarRetraction`](@ref).
 """
-retract_polar!(M::AbstractManifold, q, p, X)
+retract_polar!(M::AbstractManifold, q, p, X; kwargs...)
 
 function retract_polar_fused!(M::AbstractManifold, q, p, X, t::Number)
     return retract_polar!(M, q, p, t * X)
@@ -982,11 +982,11 @@ end
 
 function retract_qr! end
 """
-    retract_qr!(M::AbstractManifold, q, p, X)
+    retract_qr!(M::AbstractManifold, q, p, X; kwargs...)
 
 Compute the in-place variant of the [`QRRetraction`](@ref).
 """
-retract_qr!(M::AbstractManifold, q, p, X)
+retract_qr!(M::AbstractManifold, q, p, X; kwargs...)
 
 function retract_qr_fused!(M::AbstractManifold, q, p, X, t::Number)
     return retract_qr!(M, q, p, t * X)
@@ -994,11 +994,11 @@ end
 
 function retract_softmax! end
 """
-    retract_softmax!(M::AbstractManifold, q, p, X)
+    retract_softmax!(M::AbstractManifold, q, p, X; kwargs...)
 
 Compute the in-place variant of the [`SoftmaxRetraction`](@ref).
 """
-retract_softmax!(M::AbstractManifold, q, p, X)
+retract_softmax!(M::AbstractManifold, q, p, X; kwargs...)
 
 function retract_softmax_fused!(M::AbstractManifold, q, p, X, t::Number)
     return retract_softmax!(M, q, p, t * X)

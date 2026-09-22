@@ -27,13 +27,13 @@ function ManifoldsBase.plot_slope(
     end
     return fig
 end
-function ManifoldsBase.plot_check_geodesic(::Val{:Plots}, T, N, e_norm, e_pt, e_alpha)
+function ManifoldsBase.plot_check_geodesic(::Val{:Plots}, T, N, e_norm, e_pt, e_alpha; name = "")
     fig = plot(
         T[1:(N - 1)], e_norm;
         # Deviation from constant speed: |‖Xᵢ‖ − mean‖X‖|
         label = "Speed deviation: |‖Xᵢ‖ − mean‖X‖|",
         linewidth = 3, legend = :topright, color = :lightblue,
-        xlabel = "t", ylabel = "error magnitude", title = "Geodesic checks"
+        xlabel = "t", ylabel = "error magnitude", title = name
     )
     plot!(
         fig, T[1:(N - 2)], e_pt;

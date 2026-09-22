@@ -146,7 +146,7 @@ using Test
             N = manifold_dimension(M)
             @test length(get_vectors(M, pts[1], b)) == N
             # check orthonormality
-            if BT isa DefaultOrthonormalBasis && pts[1] isa Vector
+            if BT == DefaultOrthonormalBasis && pts[1] isa Vector
                 for i in 1:N
                     @test norm(M, pts[1], get_vectors(M, pts[1], b)[i]) ≈ 1
                     for j in (i + 1):N
@@ -195,9 +195,9 @@ using Test
         end
         @testset "() Manifolds" begin
             M = ManifoldsBase.DefaultManifold()
-            ManifoldsBase.allocate_coordinates(M, 1, Float64, 0) == 0.0
-            ManifoldsBase.allocate_coordinates(M, 1, Float64, 1) == zeros(Float64, 1)
-            ManifoldsBase.allocate_coordinates(M, 1, Float64, 2) == zeros(Float64, 2)
+            @test ManifoldsBase.allocate_coordinates(M, 1, Float64, 0) == 0.0
+            @test ManifoldsBase.allocate_coordinates(M, 1, Float64, 1) == zeros(Float64, 1)
+            @test ManifoldsBase.allocate_coordinates(M, 1, Float64, 2) == zeros(Float64, 2)
         end
     end
 

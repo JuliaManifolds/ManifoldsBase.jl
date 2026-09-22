@@ -89,7 +89,7 @@ using Documenter, DocumenterCitations, DocumenterCodeBlocks, DocumenterInterLink
 using DocumenterLandingPage
 using ManifoldsBase
 
-function add_links(line::String, url::String = "https://github.com/JuliaManifolds/Manopt.jl")
+function add_links(line::String, url::String = "https://github.com/JuliaManifolds/ManifoldsBase.jl")
     # replace issues (#XXXX) -> ([#XXXX](url/issue/XXXX))
     while (m = match(r"\(\#([0-9]+)\)", line)) !== nothing
         id = m.captures[1]
@@ -106,7 +106,7 @@ end
 
 # (e) add NEWS.mdto docs
 generated_path = joinpath(@__DIR__, "src")
-base_url = "https://github.com/JuliaManifolds/Manifolds.jl/blob/master/"
+base_url = "https://github.com/JuliaManifolds/ManifoldsBase.jl/blob/master/"
 isdir(generated_path) || mkdir(generated_path)
 for fname in ["NEWS.md"]
     open(joinpath(generated_path, fname), "w") do io

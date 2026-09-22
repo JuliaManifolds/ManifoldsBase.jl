@@ -367,6 +367,14 @@ function change_basis(M::AbstractManifold, p, c, B_in::AbstractBasis, B_out::Abs
     return get_coordinates(M, p, get_vector(M, p, c, B_in), B_out)
 end
 
+"""
+    change_basis!(M::AbstractManifold, c_out, p, c, B_in::AbstractBasis, B_out::AbstractBasis)
+
+Given a vector with coordinates `c` at point `p` from manifold `M` in basis `B_in`,
+compute coordinates of the same vector in basis `B_out` in-place of `c_out`.
+
+See also [`change_basis`](@ref).
+"""
 function change_basis!(
         M::AbstractManifold, c_out, p, c, B_in::AbstractBasis, B_out::AbstractBasis,
     )
@@ -612,6 +620,14 @@ function get_coordinates_cached(
     return map(vb -> real(inner(M, p, X, vb)), get_vectors(M, p, C))
 end
 
+@doc raw"""
+    get_coordinates!(M::AbstractManifold, Y, p, X, B::AbstractBasis=default_basis(M, typeof(p)))
+
+Compute a one-dimensional vector of coefficients of the tangent vector `X`
+at point denoted by `p` on manifold `M` in basis `B` in-place of `Y`.
+
+See also [`get_coordinates`](@ref).
+"""
 function get_coordinates!(
         M::AbstractManifold, Y, p, X, B::AbstractBasis = default_basis(M, typeof(p)),
     )
@@ -749,6 +765,15 @@ function get_vector_cached(M::AbstractManifold, p, X, B::CachedBasis)
     end
     return Xt
 end
+
+"""
+    get_vector!(M::AbstractManifold, Y, p, c, B::AbstractBasis=default_basis(M, typeof(p)))
+
+Convert a one-dimensional vector of coefficients `c` in a basis `B` of
+the tangent space at `p` on manifold `M` to a tangent vector in-place of `Y`.
+
+See also [`get_vector`](@ref).
+"""
 @inline function get_vector!(
         M::AbstractManifold,
         Y,
@@ -935,6 +960,16 @@ vector to an array representation. The [`vee`](@ref) map is the `hat` map's
 inverse.
 """
 @inline hat(M::AbstractManifold, p, X) = get_vector(M, p, X, VeeOrthogonalBasis(ℝ))
+
+@doc raw"""
+    hat!(M::AbstractManifold, Y, p, X)
+
+Given a basis ``e_i`` on the tangent space at a point `p` and tangent
+component vector ``X^i ∈ ℝ``, compute the equivalent vector representation
+``X=X^i e_i`` in-place of `Y`.
+
+See also [`hat`](@ref).
+"""
 @inline hat!(M::AbstractManifold, Y, p, X) = get_vector!(M, Y, p, X, VeeOrthogonalBasis(ℝ))
 
 """
@@ -1072,6 +1107,16 @@ vector to a vector representation. The [`hat`](@ref) map is the `vee` map's
 inverse.
 """
 vee(M::AbstractManifold, p, X) = get_coordinates(M, p, X, VeeOrthogonalBasis(ℝ))
+
+@doc raw"""
+    vee!(M::AbstractManifold, Y, p, X)
+
+Given a basis ``e_i`` on the tangent space at a point `p` and tangent
+vector `X`, compute the vector components ``X^i ∈ ℝ``, such that ``X = X^i e_i``,
+in-place of `Y`.
+
+See also [`vee`](@ref).
+"""
 function vee!(M::AbstractManifold, Y, p, X)
     return get_coordinates!(M, Y, p, X, VeeOrthogonalBasis(ℝ))
 end

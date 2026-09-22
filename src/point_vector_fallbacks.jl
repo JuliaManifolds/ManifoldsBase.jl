@@ -202,7 +202,7 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
             return X
         end
     end
-    for f_postfix in [:default, :orthogonal, :orthonormal, :vee, :cached, :diagonalizing]
+    for f_postfix in [:default, :orthogonal, :orthonormal, :vee, :diagonalizing]
         ca = Symbol("get_coordinates_$(f_postfix)")
         cm = Symbol("get_coordinates_$(f_postfix)!")
         va = Symbol("get_vector_$(f_postfix)")
@@ -213,8 +213,6 @@ macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
                 :(ManifoldsBase.RealNumbers),
                 :(ManifoldsBase.ComplexNumbers),
             ]
-        elseif f_postfix === :cached
-            [:CachedBasis]
         elseif f_postfix === :diagonalizing
             [:DiagonalizingOrthonormalBasis]
         else

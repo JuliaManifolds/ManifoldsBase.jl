@@ -294,6 +294,14 @@ using ManifoldsBase, LinearAlgebra, Random, Test
         ManifoldsBase._update_basepoint!(A, v, [0.0, 0.0, 1.0])
         @test v.point == [0.0, 0.0, 1.0]
     end
+    @testset "store_base_point" begin
+        Ab = ValidationManifold(M; store_base_point = true)
+        Xb = log(Ab, x, y)
+        @test Xb.point == x
+        log!(Ab, Xb, z, x)
+        @test Xb.point == z
+        @test Xb.value == log(M, z, x)
+    end
     @testset "show" begin
         As = ValidationManifold(
             M;

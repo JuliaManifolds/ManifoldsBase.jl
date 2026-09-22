@@ -551,12 +551,12 @@ function _vector_transport_direction!(
     )
 end
 @doc raw"""
-    vector_transport_direction_diff!(M::AbstractManifold, Y, p, X, d, m::AbstractRetractionMethod)
+    vector_transport_direction_diff!(M::AbstractManifold, Y, p, X, d, m::AbstractRetractionMethod; kwargs...)
 
 Compute the vector transport of `X` from ``T_p\mathcal M`` into the direction `d`
 using the differential of the [`AbstractRetractionMethod`](@ref) `m` in place of `Y`.
 """
-vector_transport_direction_diff!(M, Y, p, X, d, m)
+vector_transport_direction_diff!(M, Y, p, X, d, m; kwargs...)
 
 function vector_transport_direction_diff! end
 

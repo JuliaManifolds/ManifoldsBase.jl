@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `rand(rng, M::ValidationManifold; vector_at=)`, mirroring the method without a random number generator.
 * export `EfficientEstimator`, like the other approximation methods.
 * `manifold_dimension(::Fiber)`, so a `CotangentSpace` and any other fiber report their `fiber_dimension`; before only `TangentSpace` had a method.
+* `get_component` and `set_component!` on a `ProductManifold` accept a `Colon` and a vector of indices, so `p[M, :]` and `p[M, [1, 2]]` and the corresponding assignments work.
+* `check_geodesic` takes a keyword `name` (default `"geodesic"`) that appears in its message and as the title of its plot; `plot_check_geodesic` takes `name` as well.
 
 ### Fixed
 
@@ -60,6 +62,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `check_geodesic` compares the mean speed with `‖X‖/(N-1)`, the second check its docstring lists; a geodesic at the wrong speed is now rejected.
 * `log!` on a `TangentSpace` copies through the base manifold, so on a nested power manifold the buffers of the destination are kept.
 * `diff_canonical_project` allocates its result as a tangent vector, not as a point.
+* `@default_manifold_fallbacks` generates no `CachedBasis` methods any more; a cached basis of the wrapped tangent vectors now works with `get_vector`, `get_vector!` and `get_coordinates`, where `get_vector` wrapped its result twice before.
+* `get_vectors` on a `ProductManifold` returns basis vectors with their own storage instead of sharing arrays with each other and with the cached basis.
+* `coordinate_eltype` for quaternionic manifolds floats the element type, so an integer-valued point gets `QuaternionF64` coordinates like the real and complex cases.
+* `ManifoldsBase.Test.TestPowerManifoldMultidimensional` defines `_read`, so functions on a power manifold with this representation work instead of raising a `MethodError`.
 
 ### Changed
 
@@ -241,7 +247,7 @@ If you defined your own manifolds and used traits, please check the documentatio
   * if you just implemented an own `exp(M, p, X)` or `exp!(M, q, p, X)` everything works as before.
   * if you implemented a fused variant `exp!(M, q, p, X, t)` you have to adapt two things
     1. move that implementation to `ManifoldsBase.exp_fused!(M, q, p, X, t)`
-    2. Implement the default `exp!(M, q, p, X) = ManifoldBase.exp_fused!(M, q, p, one(eltype(p)), X)`,
+    2. Implement the default `exp!(M, q, p, X) = ManifoldsBase.exp_fused!(M, q, p, X, one(eltype(p)))`,
     or an own specific implementation for the non-fused variant.
 * Similar to `exp`, the “fusing” variant `retract(M, p, X, t, m)` has been moved to
   its own name `retract_fused(M, p, X, t, m)`  and similarly `retract!(M, q, p, X, t, m)`
@@ -249,9 +255,9 @@ If you defined your own manifolds and used traits, please check the documentatio
   Note that the new `retract_fused!` method is not exported and by default falls back to calling `retract!` with `t*X`.
   Actions to take
   * if you just implemented an own `retract(M, p, X, m)` or `retract!(M, q, p, X, m)` everything works as before.
-  * if you implemented a fused variant `retract!(M, q, p, X, t)` you have to adapt two things
+  * if you implemented a fused variant `retract!(M, q, p, X, t, m)` you have to adapt two things
     1. move that implementation to `ManifoldsBase.retract_fused!(M, q, p, X, t, m)`
-    2. Implement the default `retract!(M, q, p, X, m) = ManifoldBase.retract_fused!(M, q, p, one(eltype(p)), X)`, or an own specific implementation for the non-fused variant.
+    2. Implement the default `retract!(M, q, p, X, m) = ManifoldsBase.retract_fused!(M, q, p, X, one(eltype(p)), m)`, or an own specific implementation for the non-fused variant.
 * the `TVector` type has been renamed to `AbstractTangentVector`
 * the `CoTVector` type has been renamed to `AbstractCotangentVector`
 

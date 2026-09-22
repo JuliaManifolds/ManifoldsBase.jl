@@ -43,6 +43,12 @@ end
         @test default_retraction_method(M) == default_retraction_method(N)
         @test default_vector_transport_method(M) == default_vector_transport_method(N)
         @test get_embedding(N, typeof(p)) === N
+        pA = [1.0 4.0; 2.0 5.0; 3.0 6.0]
+        XA = [1.0 0.0; 0.0 1.0; 0.0 0.0]
+        @test exp(N, pA, XA) == pA .+ XA
+        @test log(N, pA, pA .+ XA) == XA
+        @test distance(N, pA, pA .+ XA) == sqrt(2)
+        @test get_component(N, pA, 2) == [4.0, 5.0, 6.0]
     end
 
     @testset "PowerManifold and allocation with empty representation size" begin
@@ -70,7 +76,7 @@ end
         M = ManifoldsBase.DefaultManifold(2, 2)
         N = PowerManifold(M, NestedReplacingPowerRepresentation(), 2)
         p = [SMatrix{2, 2, Float64}([i i + 1; i - 1 i - 2]) for i in 1:2]
-        allocate(M, p) isa Vector{SMatrix{2, 2, Float64, 4}}
+        @test allocate(N, p) isa Vector{SMatrix{2, 2, Float64, 4}}
         # DefaultManifold is always its own embedding independent of the point type, so
         @test get_embedding(N) == get_embedding(N, typeof(p))
     end

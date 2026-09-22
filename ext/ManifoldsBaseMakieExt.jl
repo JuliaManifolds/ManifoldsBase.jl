@@ -36,11 +36,11 @@ function ManifoldsBase.plot_slope(
     Makie.axislegend(ax; position = :lt)
     return fig
 end
-function ManifoldsBase.plot_check_geodesic(::Val{:Makie}, T, N, e_norm, e_pt, e_alpha)
+function ManifoldsBase.plot_check_geodesic(::Val{:Makie}, T, N, e_norm, e_pt, e_alpha; name = "")
     fig = Figure()
     ax = Axis(
         fig[1, 1];
-        xlabel = "t", ylabel = "error magnitude", title = "Geodesic checks",
+        xlabel = "t", ylabel = "error magnitude", title = name,
     )
     # Speed deviation: |‖Xᵢ‖ − mean‖X‖|
     Makie.lines!(

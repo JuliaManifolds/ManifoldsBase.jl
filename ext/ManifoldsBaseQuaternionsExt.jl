@@ -17,7 +17,7 @@ end
         p,
         𝔽::QuaternionNumbers,
     )
-    return quat(number_eltype(p))
+    return quat(float(number_eltype(p)))
 end
 
 end

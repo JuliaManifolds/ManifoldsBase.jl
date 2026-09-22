@@ -130,7 +130,10 @@ function get_vectors(
     for i in 1:N, k in 1:length(BVs[i])
         push!(
             vs,
-            ArrayPartition(zero_tvs[1:(i - 1)]..., BVs[i][k], zero_tvs[(i + 1):end]...),
+            copy(
+                M, p,
+                ArrayPartition(zero_tvs[1:(i - 1)]..., BVs[i][k], zero_tvs[(i + 1):end]...),
+            ),
         )
     end
     return vs
@@ -143,7 +146,7 @@ ManifoldsBase._get_vector_cache_broadcast(::ArrayPartition) = Val(false)
     p[M::ProductManifold, i]
 
 Access the element(s) at index `i` of a point `p` on a [`ProductManifold`](@ref) `M` by
-linear indexing.
+linear indexing. A `Colon` returns all components, a vector of indices the selected ones.
 See also [Array Indexing](https://docs.julialang.org/en/v1/manual/arrays/#man-array-indexing-1) in Julia.
 """
 @inline Base.@propagate_inbounds function Base.getindex(
@@ -222,9 +225,11 @@ function project(M::ProductManifold, p::ArrayPartition, X::ArrayPartition)
 end
 
 @doc raw"""
-    rand(M::ProductManifold; parts_kwargs = map(_ -> (;), M.manifolds))
+    rand(M::ProductManifold; vector_at = nothing, parts_kwargs = map(_ -> (;), M.manifolds))
+    rand(rng::AbstractRNG, M::ProductManifold; vector_at = nothing, parts_kwargs = map(_ -> (;), M.manifolds))
 
-Return a random point on [`ProductManifold`](@ref)  `M`. `parts_kwargs` is
+Return a random point on [`ProductManifold`](@ref) `M`, or, if `vector_at` is not `nothing`,
+a random tangent vector in the tangent space at `vector_at`. `parts_kwargs` is
 a tuple of keyword arguments for `rand` on each manifold in `M.manifolds`.
 """
 function Random.rand(
@@ -283,9 +288,9 @@ end
 
 """
     setindex!(q, p, M::ProductManifold, i::Union{Integer,Colon,AbstractVector})
-    q[M::ProductManifold,i...] = p
+    q[M::ProductManifold, i] = p
 
-set the element `[i...]` of a point `q` on a [`ProductManifold`](@ref) by linear indexing to `q`.
+Set the component(s) `i` of a point `q` on a [`ProductManifold`](@ref) to `p`.
 See also [Array Indexing](https://docs.julialang.org/en/v1/manual/arrays/#man-array-indexing-1) in Julia.
 """
 Base.@propagate_inbounds function Base.setindex!(

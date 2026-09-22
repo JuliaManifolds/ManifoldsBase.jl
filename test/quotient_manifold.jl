@@ -25,6 +25,7 @@ ManifoldsBase.zero_vector(::DummyQuotientManifold, p) = zeros(2)
     # Since all of the above are the identity, in this dummy v_space is 0
     Yv = vertical_component(M, p, X)
     @test Yv == zeros(2)
-    vertical_component!(M, Yv, p, X)
-    @test Yv == zeros(2)
+    Yv2 = copy(X)
+    vertical_component!(M, Yv2, p, X)
+    @test Yv2 == zeros(2)
 end

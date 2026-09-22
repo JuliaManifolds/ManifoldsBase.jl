@@ -67,17 +67,21 @@ function check_inverse_retraction(
 end
 
 """
-    plot_check_geodesic(T, N, e_norm, e_pt, e_alpha)
+    plot_check_geodesic(T, N, e_norm, e_pt, e_alpha; name="")
 
 Plot the three errors `e_norm`, `e_pt, `e_alpha` as described in [`check_geodesic`](@ref),
 where `T` are all time points used, `N` is their length, where
 * `e_norm` is of length N-1, since it is obtained from forward differences,
 * `e_pt` and `e_alpha` are of length `N-2` since they are second order forward differences
+
+The `name` is used as the title of the plot.
 """
 function plot_check_geodesic end
 
-function plot_check_geodesic(T, N, e_norm, e_pt, e_alpha)
-    return plot_check_geodesic(Val(Symbol(get_plotting_backend())), T, N, e_norm, e_pt, e_alpha)
+function plot_check_geodesic(T, N, e_norm, e_pt, e_alpha; kwargs...)
+    return plot_check_geodesic(
+        Val(Symbol(get_plotting_backend())), T, N, e_norm, e_pt, e_alpha; kwargs...,
+    )
 end
 
 @doc raw"""
@@ -124,6 +128,7 @@ The tests performed are the following based on sampling the geodesic ``\gamma(t)
 * `plot`:    whether to plot the result (if `Plots.jl` is loaded).
 * `error`:   specify how to report errors: `:none`, `:info`, `:warn`, or `:error` are available
 * `inverse_retraction_method`:  method to use for the inverse retraction, it is recommended to use [`LogarithmicInverseRetraction`](@ref)
+* `name`:                       name to display in the plot and in the reported messages
 * `vector_transport_method`:    method to use for the vector transport, it is recommended to use [`ParallelTransport`](@ref)
 
 Note that since the plot yields more information than throwing an error, when both are specified,
@@ -132,7 +137,7 @@ You can switch to e.g. `:warn` to get a warning together with the plot.
 """
 function check_geodesic(
         M::AbstractManifold, p = rand(M), X = rand(M; vector_at = p);
-        error::Symbol = :none, io::Union{IO, Nothing} = nothing, N::Int = 101, tol::Real = 1.0e-12, plot::Bool = false, inverse_retraction_method::AbstractInverseRetractionMethod = LogarithmicInverseRetraction(), vector_transport_method::AbstractVectorTransportMethod = ParallelTransport(),
+        error::Symbol = :none, io::Union{IO, Nothing} = nothing, N::Int = 101, name::String = "geodesic", tol::Real = 1.0e-12, plot::Bool = false, inverse_retraction_method::AbstractInverseRetractionMethod = LogarithmicInverseRetraction(), vector_transport_method::AbstractVectorTransportMethod = ParallelTransport(),
     )
     T = range(0.0, 1.0; length = N)
     γ = geodesic(M, p, X)
@@ -156,7 +161,7 @@ function check_geodesic(
     errors_α = [ abs(1 - inner(M, p, X, Y) / (norm(M, p, X) * norm(M, p, Y))) for (p, X, Y) in zip(ps[1:(N - 2)], Xs[1:(N - 2)], Ys) ]
     err_α_max = maximum(errors_α)
     msg = """
-    Geodesic check results:
+    Check results for the $(name):
     - max deviation from constant speed: $(err_n_max)
     - deviation of the mean speed from ‖X‖/(N-1): $(err_mean)
     - max deviation from parallel transport: $(err_pt_max)
@@ -166,7 +171,7 @@ function check_geodesic(
     dre = (err_n_max > tol) || (err_mean > tol) || (err_pt_max > tol) || (err_α_max > tol)
     dre && (error === :info) && @info msg
     dre && (error === :warn) && @warn msg
-    plot && return ManifoldsBase.plot_check_geodesic(T, N, errors_norm, errors_pt, errors_α)
+    plot && return ManifoldsBase.plot_check_geodesic(T, N, errors_norm, errors_pt, errors_α; name = name)
     dre && (error === :error) && throw(ErrorException(msg))
     return !dre
 end

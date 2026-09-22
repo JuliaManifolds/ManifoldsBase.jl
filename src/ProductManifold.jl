@@ -473,9 +473,14 @@ end
     get_component(M::ProductManifold, p, i)
 
 Get the `i`th component of a point `p` on a [`ProductManifold`](@ref) `M`.
+For `i` a `Colon` all components are returned, for a vector of indices the selected ones.
 """
 @inline function get_component(M::ProductManifold, p, i)
     return submanifold_component(M, p, i)
+end
+@inline get_component(M::ProductManifold, p, ::Colon) = submanifold_components(M, p)
+@inline function get_component(M::ProductManifold, p, i::AbstractVector)
+    return map(j -> submanifold_component(M, p, j), i)
 end
 
 function get_coordinates(M::ProductManifold, p, X, B::AbstractBasis)
@@ -1007,10 +1012,19 @@ end
 """
     set_component!(M::ProductManifold, q, p, i)
 
-Set the `i`th component of a point `q` on a [`ProductManifold`](@ref) `M` to `p`, where `p` is a point on the [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  this factor of the product manifold consists of.
+Set the `i`th component of a point `q` on a [`ProductManifold`](@ref) `M` to `p`, where `p` is a point on the [`AbstractManifold`](@ref) this factor of the product manifold consists of.
+For `i` a `Colon` or a vector of indices, `p` contains one point per selected factor.
 """
 function set_component!(M::ProductManifold, q, p, i)
     return copyto!(submanifold_component(M, q, i), p)
+end
+function set_component!(M::ProductManifold, q, p, ::Colon)
+    map(copyto!, submanifold_components(M, q), p)
+    return q
+end
+function set_component!(M::ProductManifold, q, p, i::AbstractVector)
+    map((j, pj) -> copyto!(submanifold_component(M, q, j), pj), i, p)
+    return q
 end
 
 function _show_submanifold(io::IO, M::AbstractManifold; pre = "")

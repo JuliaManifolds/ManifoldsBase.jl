@@ -70,7 +70,7 @@ Define a sphere of fixed radius
 
 # Constructor
 
-    ScaledSphere(dimension,radius=1.0)
+    ScaledSphere(dimension, radius=1.0)
 
 Initialize the manifold to a certain `dimension` and `radius`,
 which by default is set to `1.0`
@@ -79,6 +79,7 @@ struct ScaledSphere <: AbstractManifold{ℝ}
     dimension::Int
     radius::Float64
 end
+ScaledSphere(dimension::Int) = ScaledSphere(dimension, 1.0)
 ```
 
 And we can directly use this manifold and set
@@ -172,8 +173,8 @@ function check_vector(M::ScaledSphere, p, X; kwargs...)
 end
 ```
 
-and again, the high level interface can be used to display warnings for vectors not fulfilling the criterion, but we can also
-activate a check for the point using the last positional argument
+and again, the high level interface can be used to display warnings for vectors not fulfilling the criterion.
+The point is checked as well, since the last positional argument that activates this check defaults to `true`
 
 ```{julia}
 is_vector(M, [1.5, 0.0, 0.0], [0.0, 1.0]; error = :warn) # wrong size
@@ -195,7 +196,7 @@ Let's first take a look at what the exponential map is defined like. We follow t
 ````math
 \exp_p X =
 \cos\Bigl(\frac{1}{r}\lVert X \rVert\Bigr)p +
-\sin\Bigl(\frac{1}{r}\lVert X \rVert\Bigr)\frac{X}{\lVert X \rVert}.
+r\sin\Bigl(\frac{1}{r}\lVert X \rVert\Bigr)\frac{X}{\lVert X \rVert}.
 ````
 
 In fact, from the two functions above, [`exp`](@ref)`(M, p, X)`, and [`exp!`](@ref)`(M, q, p, X)` that works in place of `q`, we only have to implement the second.
@@ -248,7 +249,7 @@ all([is_point(M, q), is_point(M, q2)])
 
 Since the exponential map might in general be expensive, we can do a similar implementation with the [`ProjectionRetraction`](@ref).
 Here, we really have to take into account, that the interface is ``[designed with 3 levels](@ref Design)``{=commonmark} in mind:
-While the actual function we would call in the end is `retract(M, p, X, ProjectionRetraction())` (or its `!` variant), we actually have to implement `retract_project!(M, q, p, X, t)` for technical details, that are a bit beyond this introductory tutorial. In short this split avoids ambiguity errors for decorators of the manifolds. We define
+While the actual function we would call in the end is `retract(M, p, X, ProjectionRetraction())` (or its `!` variant), we actually have to implement `retract_project!(M, q, p, X)` for technical details, that are a bit beyond this introductory tutorial. In short this split avoids ambiguity errors for decorators of the manifolds. We define
 
 ```{julia}
 function ManifoldsBase.retract_project!(M::ScaledSphere, q, p, X)

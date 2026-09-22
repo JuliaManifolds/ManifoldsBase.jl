@@ -47,7 +47,7 @@ function allocate_result(M::EmbeddedManifold, f::typeof(project), x...)
 end
 
 """
-    decorated_manifold(M::EmbeddedManifold, d::Val{N} = Val(-1))
+    decorated_manifold(M::EmbeddedManifold)
 
 Return the manifold of `M` that is decorated with its embedding. For this specific
 type the internally stored enhanced manifold `M.manifold` is returned.

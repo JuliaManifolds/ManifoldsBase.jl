@@ -307,7 +307,7 @@ end
         @test pE == p
         P = [1.0 1.0 2.0]
         Q = similar(P)
-        @test project!(M, Q, P) == project!(M, Q, P)
+        @test project(M, P) == project!(M, Q, P)
         @test project!(M, Q, P) == embed_project!(M, Q, P)
         @test project!(M, Q, P) == [1.0 1.0 0.0]
         @test isapprox(M, p, zero_vector(M, p), [0 0 0])
@@ -426,8 +426,8 @@ end
             @test vector_transport_to(M, [1, 2], [2, 3], [3, 4]) == [2, 3]
             vector_transport_to!(M, A, [1, 2], [2, 3], [3, 4])
             @test A == [2, 3]
-            @test @inferred !isapprox(M, [1, 2], [2, 3])
-            @test @inferred !isapprox(M, [1, 2], [2, 3], [4, 5])
+            @test !(@inferred isapprox(M, [1, 2], [2, 3]))
+            @test !(@inferred isapprox(M, [1, 2], [2, 3], [4, 5]))
 
             @test ManifoldsBase.get_forwarding_type_embedding(ManifoldsBase.EmbeddedSubmanifoldType{ManifoldsBase.DirectEmbedding}(), M, exp) === EmbeddedForwardingType(ManifoldsBase.DirectEmbedding())
             @test ManifoldsBase.get_forwarding_type_embedding(ManifoldsBase.EmbeddedSubmanifoldType{ManifoldsBase.IndirectEmbedding}(), M, exp) === EmbeddedForwardingType(ManifoldsBase.IndirectEmbedding())
@@ -532,8 +532,8 @@ end
         p = [1.0, 2.0, 3.0]
         X = [2.0, 3.0, 4.0]
         vf = [1.0, 2.0, 3.0, 4.0]
-        is_point(M, p; error = :error)
-        is_vector(M, p, X; error = :error)
+        @test is_point(M, p; error = :error)
+        @test is_vector(M, p, X; error = :error)
         @test_throws ManifoldDomainError is_point(M, vf; error = :error)
         @test_throws ManifoldDomainError is_vector(M, p, vf; error = :error)
         @test_throws ManifoldDomainError is_vector(M, vf, X; error = :error)
@@ -555,8 +555,8 @@ end
         p = [1.0, 2.0, 3.0]
         X = [2.0, 3.0, 4.0]
         vf = [1.0, 2.0, 3.0, 4.0]
-        is_point(M, p; error = :error)
-        is_vector(M, p, X; error = :error)
+        @test is_point(M, p; error = :error)
+        @test is_vector(M, p, X; error = :error)
         @test_throws ManifoldDomainError is_point(M, vf; error = :error)
         @test_throws ManifoldDomainError is_vector(M, p, vf; error = :error)
         @test_throws ManifoldDomainError is_vector(M, vf, X; error = :error)

@@ -81,13 +81,15 @@ end
             tv2 = log(M, pts[2], pts[1])
             tv3 = log(M, pts[2], pts[3])
             @test isapprox(M, pts[2], exp(M, pts[1], tv1))
-            @test_logs (:info,) !isapprox(M, pts[1], pts[2]; error = :info)
+            @test !(@test_logs (:info,) isapprox(M, pts[1], pts[2]; error = :info))
             @test isapprox(M, pts[1], pts[1]; error = :info)
-            @test_logs (:info,) !isapprox(
-                M,
-                pts[1],
-                convert(T, [NaN, NaN, NaN]);
-                error = :info,
+            @test !(
+                @test_logs (:info,) isapprox(
+                    M,
+                    pts[1],
+                    convert(T, [NaN, NaN, NaN]);
+                    error = :info,
+                )
             )
             @test isapprox(M, pts[1], ManifoldsBase.exp_fused(M, pts[1], tv1, 0))
             @test isapprox(M, pts[2], ManifoldsBase.exp_fused(M, pts[1], tv1, 1))
@@ -134,8 +136,10 @@ end
                 X_p_nan = NaN * X_p_zero
                 @test isapprox(M, p, X_p_zero, log(M, p, p); atol = eps(eltype(p)))
                 if T <: Array
-                    @test_logs (:info,) !isapprox(
-                        M, p, X_p_zero, X_p_nan; atol = eps(eltype(p)), error = :info,
+                    @test !(
+                        @test_logs (:info,) isapprox(
+                            M, p, X_p_zero, X_p_nan; atol = eps(eltype(p)), error = :info,
+                        )
                     )
                     @test isapprox(
                         M, p, X_p_zero, log(M, p, p); atol = eps(eltype(p)), error = :info,
@@ -180,24 +184,24 @@ end
                 @test isapprox(M, geodesic(M, pts[1], tv1)(1.0), pts[2])
                 g! = geodesic!(M, pts[1], tv1)
                 g!(q, 0.0)
-                isapprox(M, q, pts[1])
-                g!(q, 0.0)
-                isapprox(M, q, pts[2])
+                @test isapprox(M, q, pts[1])
+                g!(q, 1.0)
+                @test isapprox(M, q, pts[2])
                 geodesic!(M, q, pts[1], tv1, 1.0 / 2)
-                isapprox(M, q, midp)
+                @test isapprox(M, q, midp)
                 @test isapprox(M, geodesic(M, pts[1], tv1, 1.0), pts[2])
                 @test isapprox(M, geodesic(M, pts[1], tv1, 1.0 / 2), midp)
                 @test isapprox(M, shortest_geodesic(M, pts[1], pts[2])(0.0), pts[1])
                 @test isapprox(M, shortest_geodesic(M, pts[1], pts[2])(1.0), pts[2])
                 sg! = shortest_geodesic!(M, pts[1], pts[2])
                 sg!(q, 0.0)
-                isapprox(M, q, pts[1])
+                @test isapprox(M, q, pts[1])
                 sg!(q, 1.0)
-                isapprox(M, q, pts[2])
+                @test isapprox(M, q, pts[2])
                 @test isapprox(M, shortest_geodesic(M, pts[1], pts[2], 0.0), pts[1])
                 @test isapprox(M, shortest_geodesic(M, pts[1], pts[2], 1.0), pts[2])
                 shortest_geodesic!(M, q, pts[1], pts[2], 0.5)
-                isapprox(M, q, midp)
+                @test isapprox(M, q, midp)
                 @test all(
                     isapprox.(Ref(M), geodesic(M, pts[1], tv1, Ts), [pts[1], midp, pts[2]]),
                 )
@@ -502,6 +506,11 @@ end
         @test X + Y == ManifoldsBase.Test.DefaultTangentVector(X.value + Y.value)
         @test +X == X
         @test (Y .= X) === Y
+        # a cached basis holds the wrapped tangent vectors
+        B = CachedBasis(DefaultOrthonormalBasis(), [ManifoldsBase.Test.DefaultTangentVector(1.0 * (1:3 .== i)) for i in 1:3])
+        @test get_coordinates(M, p, X, B) == X.value
+        @test get_vector(M, p, X.value, B) == X
+        @test get_vector!(M, similar(X), p, X.value, B) == X
         # vector transport pass through
         @test vector_transport_to(M, p, X, q, ProjectionTransport()) == X
         @test vector_transport_to(M, p, X, q, EmbeddedVectorTransport(ProjectionTransport())) ==
@@ -575,7 +584,10 @@ end
     end
 
     @testset "performance" begin
-        @allocated isapprox(M, SA[1, 2], SA[3, 4]) == 0
+        # measure through a function, at testset level Julia 1.10 allocates for the call itself
+        f(M) = isapprox(M, SA[1, 2], SA[3, 4])
+        f(M) # compile before measuring
+        @test (@allocated f(M)) == 0
     end
 
     @testset "scalars" begin

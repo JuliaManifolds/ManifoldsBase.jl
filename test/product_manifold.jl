@@ -96,6 +96,13 @@ using RecursiveArrayTools
         @test p1[M, Val(1)] == p1.x[1]
         @test p1[M, 1] isa Vector
         @test p1[M, Val(1)] isa Vector
+        @test p1[M, :] == (p1.x[1], p1.x[2])
+        @test p1[M, [2, 1]] == [p1.x[2], p1.x[1]]
+        p1b = copy(p1)
+        p1b[M, :] = (2 .* p1.x[1], 2 .* p1.x[2])
+        @test p1b[M, :] == (2 .* p1.x[1], 2 .* p1.x[2])
+        p1b[M, [1]] = [3 .* p1.x[1]]
+        @test p1b[M, 1] == 3 .* p1.x[1]
         p2c = [5 6; 4 0]
         set_component!(M, p1, p2c, 2)
         @test get_component(M, p1, 2) == p2c
@@ -480,7 +487,7 @@ using RecursiveArrayTools
         @test isapprox(M, q, Y, Z)
         Ym = allocate(Y)
         parallel_transport_to!(M, Ym, p, X, q)
-        @test isapprox(M, q, Y, Z)
+        @test isapprox(M, q, Ym, Z)
 
         # direction
         Y = parallel_transport_direction(M, p, X, X)
@@ -587,7 +594,7 @@ using RecursiveArrayTools
             @test isapprox(get_vector(M, p1, X1c, basis), X1)
             Z1 = allocate(M, X1)
             get_vector!(M, Z1, p1, X1c, basis)
-            @test isapprox(X1, X1)
+            @test isapprox(X1, Z1)
         end
     end
 

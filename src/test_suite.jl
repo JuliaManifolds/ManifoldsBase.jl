@@ -592,6 +592,13 @@ function ManifoldsBase.representation_size(M::TestPowerManifoldMultidimensional)
     return (representation_size(M.manifold)..., ManifoldsBase.get_parameter(M.size)...)
 end
 
+Base.@propagate_inbounds @inline function ManifoldsBase._read(
+        ::TestPowerManifoldMultidimensional,
+        rep_size::Tuple, x::AbstractArray, i::Tuple,
+    )
+    return x[ManifoldsBase.rep_size_to_colons(rep_size)..., i...]
+end
+
 @inline function ManifoldsBase._write(
         ::TestPowerManifoldMultidimensional,
         rep_size::Tuple, x::AbstractArray, i::Tuple,

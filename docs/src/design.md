@@ -83,7 +83,7 @@ The high level (or [Layer I](@ref design-layer1)) definition of the retraction i
 retract!(M::AbstractManifold, q, p, X, m::AbstractRetractionMethod = default_retraction_method(M, typeof(p))) = _retract!(M, q, p, X, m)
 ```
 
-Note that the convenience function `retract(M, q, p, X, m)` first allocates a `q` before calling this function as well.
+Note that the convenience function `retract(M, p, X, m)` first allocates a `q` before calling `retract!(M, q, p, X, m)`.
 
 This level now dispatches on different retraction types `m`.
 It usually passes to specific functions implemented in [Layer III](@ref design-layer3), here for example
@@ -137,7 +137,7 @@ the resulting memory, such that the default implementation allocating functions,
 
 Non-mutating functions in `ManifoldsBase.jl` are typically implemented using in-place variants after a suitable allocation of memory.
 
-Not that this allocation usually takes place only on [Layer III](@ref design-layer3) when dispatching on points.
+Note that this allocation usually takes place already on [Layer I](@ref design-layer1) or [Layer II](@ref design-layer2), see the note at the end of this section.
 Both [Layer I](@ref design-layer1) and [Layer II](@ref design-layer1) are usually implemented for both variants in parallel.
 
 ### Allocation of new points and vectors

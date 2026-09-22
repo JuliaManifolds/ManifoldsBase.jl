@@ -102,7 +102,7 @@ using ManifoldsBase, Test
 
     @test_throws MethodError vector_transport_to!(M, [0], [0], [0], [0])
     @test_throws MethodError vector_transport_to(M, [0], [0], [0])
-    @test_throws MethodError vector_transport_to!(M, [0], [0], [0], ProjectionTransport())
+    @test_throws MethodError vector_transport_to!(M, [0], [0], [0], [0], ProjectionTransport())
 
     @test_throws MethodError vector_transport_direction!(M, [0], [0], [0], [0])
     @test_throws MethodError vector_transport_direction(M, [0], [0], [0])
