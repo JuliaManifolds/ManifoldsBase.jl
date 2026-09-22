@@ -190,8 +190,8 @@ function Random.rand!(
     return pX
 end
 ManifoldsBase.representation_size(::TestSphere{N}) where {N} = (N + 1,)
-function ManifoldsBase.retract_project_fused!(M::TestSphere, q, p, X, t::Number)
-    q .= p .+ t .* X
+function ManifoldsBase.retract_project!(M::TestSphere, q, p, X)
+    q .= p .+ X
     project!(M, q, q)
     return q
 end
@@ -571,6 +571,7 @@ function ManifoldsBase.retract_softmax_fused!(::DefaultManifold, q, p, X, t::Num
     return (q .= p .+ t .* X)
 end
 ManifoldsBase.inverse_retract_approx!(::DefaultManifold, Y, p, q, m::ApproximateLogarithmicInverseRetraction) = (Y .= q .- p)
+ManifoldsBase.inverse_retract_pade!(::DefaultManifold, Y, p, q, n) = (Y .= q .- p)
 ManifoldsBase.inverse_retract_polar!(::DefaultManifold, Y, p, q) = (Y .= q .- p)
 ManifoldsBase.inverse_retract_project!(::DefaultManifold, Y, p, q) = (Y .= q .- p)
 ManifoldsBase.inverse_retract_qr!(::DefaultManifold, Y, p, q) = (Y .= q .- p)

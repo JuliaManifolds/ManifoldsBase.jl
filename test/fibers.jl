@@ -30,6 +30,7 @@ using ManifoldsBase: DefaultManifold, VectorSpaceType, ℝ, Fiber
         @test ct_ps == ct_ps_test
         @test base_manifold(t_p) == M
         @test manifold_dimension(t_p) == 3
+        @test manifold_dimension(ct_p) == 3
         @test t_p.manifold == M
         @test t_p.fiber_type == TangentSpaceType()
         @test t_p.point == p
@@ -57,6 +58,12 @@ using ManifoldsBase: DefaultManifold, VectorSpaceType, ℝ, Fiber
         @test rand(t_p; vector_at = X) isa Vector{Float64}
         @test rand(Random.default_rng(), t_p) isa Vector{Float64}
         @test rand(Random.default_rng(), t_p; vector_at = X) isa Vector{Float64}
+        # log! keeps the inner arrays of a nested destination
+        N = PowerManifold(DefaultManifold(2), NestedPowerRepresentation(), 2)
+        V = [[0.0, 0.0], [0.0, 0.0]]
+        V1 = V[1]
+        log!(TangentSpace(N, V), V, V, [[1.0, 1.0], [1.0, 1.0]])
+        @test V == [[1.0, 1.0], [1.0, 1.0]] && V[1] === V1
         # generic vector space at
         X_p = Fiber(M, p, ManifoldsBase.Test.TestVectorSpaceType())
         X_ps = sprint(show, "text/plain", X_p)

@@ -477,6 +477,8 @@ end
                 ProjectionInverseRetraction(),
                 QRInverseRetraction(),
                 SoftmaxInverseRetraction(),
+                PadeInverseRetraction(2),
+                CayleyInverseRetraction(),
                 ApproximateLogarithmicInverseRetraction((;)),
             ]
             @test inverse_retract(M, q, p, r) == ManifoldsBase.Test.DefaultTangentVector(p.value - q.value)

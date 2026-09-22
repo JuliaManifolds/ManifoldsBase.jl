@@ -41,8 +41,9 @@ where again the total space might be implicitly assumed.
 
 @doc "$(_doc_diff_canonical_project)"
 function diff_canonical_project(M::AbstractManifold, p, X)
-    q = allocate_result(M, diff_canonical_project, p, X)
-    return diff_canonical_project!(M, q, p, X)
+    # X first, since the allocation takes the type of the first argument
+    Y = allocate_result(M, diff_canonical_project, X, p)
+    return diff_canonical_project!(M, Y, p, X)
 end
 
 function diff_canonical_project! end

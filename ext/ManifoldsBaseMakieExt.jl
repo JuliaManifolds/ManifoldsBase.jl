@@ -7,13 +7,13 @@ import ManifoldsBase: plot_slope, plot_check_geodesic
 
 function ManifoldsBase.plot_slope(
         ::Val{:Makie}, x, y;
-        slope = 2, line_base = 0, a = 0, b = 2.0, i = 1, j = length(x),
+        slope = 2, line_base = 0, a = 0, b = 2.0, i = 1, j = length(x), name = "",
     )
     fig = Makie.Figure()
     # Setup the log log plot
     ax = Makie.Axis(
         fig[1, 1];
-        xscale = log10, yscale = log10, xlabel = "t", ylabel = L"E(t)", title = "Slope plot",
+        xscale = log10, yscale = log10, xlabel = "t", ylabel = L"E(t)", title = name,
     )
     # Main error data
     Makie.lines!(ax, x, y; label = L"E(t)", linewidth = 3, color = :lightblue)

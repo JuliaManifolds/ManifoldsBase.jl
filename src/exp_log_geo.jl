@@ -34,12 +34,12 @@ end
 """
     exp!(M::AbstractManifold, q, p, X)
 
-Compute the exponential map of tangent vector `X`, optionally scaled by `t`,  at point `p`
+Compute the exponential map of tangent vector `X` at point `p`
 from the manifold [`AbstractManifold`](@ref) `M`.
 The result is saved to `q`.
 
 If you want to implement exponential map for your manifold, you should implement the in-place
-method with, that is `exp_fused!(M::MyManifold, q, p, X)`.
+method, that is `exp!(M::MyManifold, q, p, X)`.
 
 See also [`exp`](@ref).
 """
@@ -188,7 +188,7 @@ Get a [`geodesic`](@ref) $γ_{p,q}(t)$ whose length is the shortest path between
 points `p`and `q`, where $γ_{p,q}(0)=p$ and $γ_{p,q}(1)=q$.
 When there are multiple shortest geodesics, a deterministic choice will be returned.
 
-This function returns a function of time, which may be a `Real` or an `AbstractVector`.
+This function returns a function of (time) `t`.
 """
 shortest_geodesic(M::AbstractManifold, p, q) = geodesic(M, p, log(M, p, q))
 @doc raw"""

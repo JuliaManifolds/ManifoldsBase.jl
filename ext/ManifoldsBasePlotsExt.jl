@@ -6,11 +6,11 @@ using Printf: @sprintf
 
 function ManifoldsBase.plot_slope(
         ::Val{:Plots}, x, y;
-        slope = 2, line_base = 0, a = 0, b = 2.0, i = 1, j = length(x),
+        slope = 2, line_base = 0, a = 0, b = 2.0, i = 1, j = length(x), name = "",
     )
     fig = plot(
         x, y; xaxis = :log, yaxis = :log, label = "\$E(t)\$",
-        linewidth = 3, legend = :topleft, color = :lightblue,
+        linewidth = 3, legend = :topleft, color = :lightblue, title = name,
     )
     s_line = [exp10(line_base + t * slope) for t in log10.(x)]
     plot!(

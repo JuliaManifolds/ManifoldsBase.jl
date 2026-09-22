@@ -10,7 +10,7 @@
         limits::Tuple = (-8.0, 0.0),
         log_range::AbstractVector = range(limits[1], limits[2]; length=N),
         N::Int = 101,
-        name::String = "inverse retraction",
+        name::String = second_order ? "second order inverse retraction" : "inverse retraction",
         plot::Bool = false,
         second_order::Bool = true
         slope_tol::Real = 0.1,
@@ -40,7 +40,7 @@ no plot is generated,
 * `slope_tol`:         tolerance for the slope (global) of the approximation
 * `error`:             specify how to report errors: `:none`, `:info`, `:warn`, or `:error` are available
 * `window`:            specify window sizes within the `log_range` that are used for the slope estimation.
-  the default is, to use all window sizes `2:N`.
+  the default is, to use all window sizes `2:n`, where `n` is the number of samples with error above `exactness_tol`.
 
 Note that since the plot yields more information than throwing an error, when both are specified,
 the plot is generated first and returned (to be shown/displayed), such that no error is thrown.
@@ -144,6 +144,8 @@ function check_geodesic(
     # errors_1 how far awary are we from constant speed
     errors_norm = [ abs(n - mean_norm) for n in norms ]
     err_n_max = maximum(errors_norm)
+    # errors_2 how far is the mean speed from the ‖X‖/(N-1) the geodesic was started with
+    err_mean = abs(mean_norm - norm(M, p, X) / (N - 1))
     # PT Xs to their neighbors, now Xi and Yi are in the same tangent space
     Ys = [ vector_transport_to(M, ps[i + 1], Xs[i + 1], ps[i], vector_transport_method) for i in 1:(N - 2)]
     # transporting (an approximation of) γ'(t_{i+1}) to T_{p_i}M should approximately equal γ'(t_i)
@@ -156,11 +158,12 @@ function check_geodesic(
     msg = """
     Geodesic check results:
     - max deviation from constant speed: $(err_n_max)
+    - deviation of the mean speed from ‖X‖/(N-1): $(err_mean)
     - max deviation from parallel transport: $(err_pt_max)
     - max deviation from angle preservation: $(err_α_max)
     """
     (io !== nothing) && print(io, msg)
-    dre = (err_n_max > tol) || (err_pt_max > tol) || (err_α_max > tol)
+    dre = (err_n_max > tol) || (err_mean > tol) || (err_pt_max > tol) || (err_α_max > tol)
     dre && (error === :info) && @info msg
     dre && (error === :warn) && @warn msg
     plot && return ManifoldsBase.plot_check_geodesic(T, N, errors_norm, errors_pt, errors_α)
@@ -177,7 +180,7 @@ end
         limits::Tuple = (-8.0, 0.0),
         log_range::AbstractVector = range(limits[1], limits[2]; length=N),
         N::Int = 101,
-        name::String = "retraction",
+        name::String = second_order ? "second order retraction" : "retraction",
         plot::Bool = false,
         second_order::Bool = true
         slope_tol::Real = 0.1,
@@ -186,12 +189,10 @@ end
     )
 
 Check numerically whether the retraction is correct.
-This is done by selecting a set of points ``q_i = \exp_p (t_i X)``
-where ``t`` takes all values from `log_range`,
-to then compare [`parallel_transport_to`](@ref) to the `vector_transport_method`
-applied to the vector `Y`.
+This is done by comparing the points ``\operatorname{retr}_p(t_i X)`` to ``\exp_p(t_i X)``
+in the distance on `M`, where ``t_i`` takes all values from `exp10.(log_range)`.
 
-This requires the [`exp`](@ref), [`parallel_transport_to`](@ref) and [`norm`](@ref) function
+This requires the [`exp`](@ref), [`retract`](@ref), [`distance`](@ref) and [`norm`](@ref) functions
 to be implemented for the [`AbstractManifold`](@ref) `M`.
 
 This implements a method similar to [Boumal:2023; Section 4.8 or Section 6.8](@cite).
@@ -213,7 +214,7 @@ no plot is generated,
 * `slope_tol`:         tolerance for the slope (global) of the approximation
 * `error`:             specify how to report errors: `:none`, `:info`, `:warn`, or `:error` are available
 * `window`:            specify window sizes within the `log_range` that are used for the slope estimation.
-  the default is, to use all window sizes `2:N`.
+  the default is, to use all window sizes `2:n`, where `n` is the number of samples with error above `exactness_tol`.
 
 Note that since the plot yields more information than throwing an error, when both are specified,
 the plot is generated first and returned (to be shown/displayed), such that no error is thrown.
@@ -249,7 +250,7 @@ end
         limits::Tuple = (-8.0, 0.0),
         log_range::AbstractVector = range(limits[1], limits[2]; length=N),
         N::Int = 101,
-        name::String = "inverse retraction",
+        name::String = second_order ? "second order vector transport" : "vector transport",
         plot::Bool = false,
         second_order::Bool = true
         slope_tol::Real = 0.1,
@@ -284,7 +285,7 @@ no plot is generated,
 * `slope_tol`:         tolerance for the slope (global) of the approximation
 * `error`:             specify how to report errors: `:none`, `:info`, `:warn`, or `:error` are available
 * `window`:            specify window sizes within the `log_range` that are used for the slope estimation.
-  the default is, to use all window sizes `2:N`.
+  the default is, to use all window sizes `2:n`, where `n` is the number of samples with error above `exactness_tol`.
 
 Note that since the plot yields more information than throwing an error, when both are specified,
 the plot is generated first and returned (to be shown/displayed), such that no error is thrown.
@@ -314,13 +315,15 @@ function plot_slope end
 
 """
     plot_slope(
-        x, y; slope=2, line_base=0, a=0, b=2.0, i=1, j=length(x)
+        x, y; slope=2, line_base=0, a=0, b=2.0, i=1, j=length(x), name=""
     )
 
 Plot the result from the verification functions on data `x,y` with two comparison lines
 
 1) `line_base` + t`slope`  as the global slope(s) the plot could have
 2) `a` + `b*t` on the interval [`x[i]`, `x[j]`] for some (best fitting) comparison slope
+
+The `name` is used as the title of the plot.
 
 !!! note
     This function has to be implemented for a certain plotting package.
@@ -335,9 +338,9 @@ end
 """
     prepare_check_result(
         log_range::AbstractVector, errors::AbstractVector, slope::Real;
-        error::Symbol = :none, exactness_to::Real = 1e3*eps(eltype(errors)),
-        io::Union{IO,Nothing} = nothing name::String = "estimated slope",
-        plot::Bool = false, slope_tol::Real = 0.1,
+        error::Symbol = :none, exactness_tol::Real = 1e3*eps(eltype(errors)),
+        io::Union{IO,Nothing} = nothing, name::String = "estimated slope",
+        plot::Bool = false, slope_tol::Real = 0.1, window = nothing,
     )
 
 Given a range of values `log_range`, with computed `errors`,
@@ -352,11 +355,13 @@ no plot is be generated,
   Errors below it are excluded from the slope estimation, since an error that small is round-off
   from evaluating the function rather than approximation error.
 * `io`:            provide an `IO` to print the result to
-* `name`:          name to display in the plot title
+* `name`:          name to display in the plot title and in the reported messages
 * `plot`:          whether to plot the result, see [`plot_slope`](@ref)
   The plot is in log-log-scale. This is returned and can then also be saved.
 * `slope_tol`:     tolerance for the slope (global) of the approximation
 * `error`:         specify how to handle errors, `:none`, `:info`, `:warn`, `:error`
+* `window`:        specify window sizes within the `log_range` that are used for the slope estimation.
+  the default is, to use all window sizes `2:n`, where `n` is the number of samples with error above `exactness_tol`.
 
 Note that since the plot yields more information than throwing an error, when both are specified,
 the plot is generated first and returned (to be shown/displayed), such that no error is thrown.
@@ -391,7 +396,7 @@ function prepare_check_result(
     if isapprox(b, slope; atol = slope_tol)
         plot && return plot_slope(
             T, e_all;
-            slope = slope, line_base = line_base, a = a, b = b, i = first(k), j = last(k),
+            slope = slope, line_base = line_base, a = a, b = b, i = first(k), j = last(k), name = name,
         )
         (io !== nothing) && print(
             io,
@@ -410,7 +415,7 @@ function prepare_check_result(
     (error === :warn) && @warn msg
     plot && return plot_slope(
         T, e_all;
-        slope = slope, line_base = line_base, a = ab, b = bb, i = k[ib], j = k[jb],
+        slope = slope, line_base = line_base, a = ab, b = bb, i = k[ib], j = k[jb], name = name,
     )
     (error === :error) && throw(ErrorException(msg))
     return false
