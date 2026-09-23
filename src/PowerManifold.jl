@@ -597,7 +597,7 @@ function _distance_max(M::AbstractPowerManifold, p, q)
     return d
 end
 function _distance_min(M::AbstractPowerManifold, p, q, m::AbstractInverseRetractionMethod)
-    d = Inf
+    d = convert(real(float(number_eltype(p))), Inf)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         v = distance(M.manifold, _read(M, rep_size, p, i), _read(M, rep_size, q, i), m)
@@ -606,7 +606,7 @@ function _distance_min(M::AbstractPowerManifold, p, q, m::AbstractInverseRetract
     return d
 end
 function _distance_min(M::AbstractPowerManifold, p, q)
-    d = Inf
+    d = convert(real(float(number_eltype(p))), Inf)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         v = distance(M.manifold, _read(M, rep_size, p, i), _read(M, rep_size, q, i))
@@ -1127,7 +1127,7 @@ function _norm_1(M::AbstractPowerManifold, p, X)
     return s
 end
 function _norm_max(M::AbstractPowerManifold, p, X)
-    d = 0.0
+    d = zero(real(float(number_eltype(X))))
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         v = norm(M.manifold, _read(M, rep_size, p, i), _read(M, rep_size, X, i))
@@ -1136,7 +1136,7 @@ function _norm_max(M::AbstractPowerManifold, p, X)
     return d
 end
 function _norm_min(M::AbstractPowerManifold, p, X)
-    d = Inf
+    d = convert(real(float(number_eltype(X))), Inf)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         v = norm(M.manifold, _read(M, rep_size, p, i), _read(M, rep_size, X, i))

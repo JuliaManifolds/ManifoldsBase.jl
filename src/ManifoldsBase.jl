@@ -1242,7 +1242,7 @@ end
 Set the plotting backend to `backend`.
 Currently supported: `"Plots"` and `"Makie"`.
 
-An empty string resets to the default to use the last loaded one.
+An empty string resets to the default determined by the loaded plotting extensions.
 """
 function set_plotting_backend!(e::String)
     (length(e) == 0) && (return Preferences.@delete_preferences!("PlottingBackend"))
@@ -1254,7 +1254,8 @@ end
     get_plotting_backend()
 
 Return the current plotting backend.
-If none was set by the user, the last loaded one is returned. If none was loaded `nothing` is returned
+If none was set by the user, `"Makie"` is returned when the Makie extension is loaded,
+otherwise `"Plots"` when the Plots extension is loaded. If neither is loaded `nothing` is returned
 """
 function get_plotting_backend()
     def = nothing

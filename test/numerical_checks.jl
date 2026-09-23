@@ -26,9 +26,6 @@ default(; show = false, reuse = true)
         @test_throws ErrorException ManifoldsBase.find_best_slope_window(zeros(2), zeros(2), 20)
         @test_throws ErrorException ManifoldsBase.find_best_slope_window(zeros(2), zeros(2), [2, 20])
         @test check_retraction(M, ExponentialRetraction(), p, X; exactness_tol = 1.0e-7)
-        check_retraction(
-            M, ExponentialRetraction(), p, X; plot = true, exactness_tol = 1.0e-7,
-        )
     end
     @testset "Test inverse_retract checks" begin
         M = ManifoldsBase.Test.TestSphere(10)
@@ -58,9 +55,6 @@ default(; show = false, reuse = true)
         # Check exatness case
         @test check_inverse_retraction(
             M, LogarithmicInverseRetraction(), p, X; exactness_tol = 1.0e-7,
-        )
-        check_inverse_retraction(
-            M, LogarithmicInverseRetraction(), p, X; plot = true, exactness_tol = 1.0e-7,
         )
     end
     @testset "Test vector_transport_to checks" begin
@@ -94,9 +88,6 @@ default(; show = false, reuse = true)
         )
         # Check exactness case
         @test check_vector_transport(M, ParallelTransport(), p, X, Y; exactness_tol = 1.0e-7)
-        check_vector_transport(
-            M, ParallelTransport(), p, X, Y; plot = true, exactness_tol = 1.0e-7,
-        )
     end
     @testset "StabilizedRetraction and its inverse" begin
         M = ManifoldsBase.Test.TestSphere(10)

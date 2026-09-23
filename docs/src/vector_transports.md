@@ -8,8 +8,8 @@ Let ``p,q ∈ \mathcal M`` be given, ``c`` the curve along which we want to tran
 We can specify the geodesic or curve a retraction realises for example by a direction ``d``.
 
 More precisely using [AbsilMahonySepulchre:2008](@cite), Def. 8.1.1, a vector transport
-``T_{p,d}: T_p\mathcal M \to T_q\mathcal M``, ``p∈ \mathcal M``, ``Y∈ T_p\mathcal M`` is a smooth mapping
-associated to a retraction ``\operatorname{retr}_p(Y) = q`` such that
+``\mathcal T_{p,d}: T_p\mathcal M \to T_q\mathcal M``, ``p∈ \mathcal M``, ``d∈ T_p\mathcal M`` is a smooth mapping
+associated to a retraction ``\operatorname{retr}_p(d) = q`` such that
 
 1. (associated retraction) ``\mathcal T_{p,d}X ∈ T_q\mathcal M`` if and only if ``q = \operatorname{retr}_p(d)``,
 2. (consistency) ``\mathcal T_{p,0_p}X = X`` for all ``X∈T_p\mathcal M``,

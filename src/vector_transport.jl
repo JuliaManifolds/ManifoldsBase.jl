@@ -352,8 +352,8 @@ function pole_ladder(
     return retract(M, d, 2 * inverse_retract(M, d, c, inverse_retraction), retraction)
 end
 @doc raw"""
-    pole_ladder(
-        M, pl, p, d, q, c = mid_point(M, p, q), X = allocate_result_type(M, log, d, c);
+    pole_ladder!(
+        M, pl, p, d, q, c = mid_point(M, p, q), X = allocate_result(M, log, d, c);
         retraction = default_retraction_method(M, typeof(p)),
         inverse_retraction = default_inverse_retraction_method(M, typeof(p)),
     )
@@ -366,7 +366,7 @@ function pole_ladder!(
         retraction = default_retraction_method(M, typeof(p)), inverse_retraction = default_inverse_retraction_method(M, typeof(p)),
     )
     inverse_retract!(M, X, d, c, inverse_retraction)
-    X *= 2
+    X .*= 2
     return retract!(M, pl, d, X, retraction)
 end
 
@@ -409,7 +409,7 @@ function schilds_ladder(
 end
 @doc raw"""
     schilds_ladder!(M, sl, p, d, q, c = mid_point(M, q, d),
-        X = allocate_result_type(M, log, d, c);
+        X = allocate_result(M, log, p, c);
         retraction = default_retraction_method(M, typeof(p)),
         inverse_retraction = default_inverse_retraction_method(M, typeof(p)),
     )
@@ -420,11 +420,11 @@ and the allocation of new memory can be avoided providing a tangent vector `X`
 for the interims result.
 """
 function schilds_ladder!(
-        M, sl, p, d, q, c = mid_point(M, q, d), X = allocate_result(M, log, d, c);
+        M, sl, p, d, q, c = mid_point(M, q, d), X = allocate_result(M, log, p, c);
         retraction = default_retraction_method(M, typeof(p)), inverse_retraction = default_inverse_retraction_method(M, typeof(p)),
     )
     inverse_retract!(M, X, p, c, inverse_retraction)
-    X *= 2
+    X .*= 2
     return retract!(M, sl, p, X, retraction)
 end
 
@@ -443,8 +443,8 @@ Given an [`AbstractManifold`](@ref) ``\mathcal M`` the vector transport is a gen
 [`parallel_transport_direction`](@ref) that identifies vectors from different tangent spaces.
 
 More precisely using [AbsilMahonySepulchre:2008](@cite), Def. 8.1.1, a vector transport
-``T_{p,d}: T_p\mathcal M \to T_q\mathcal M``, ``p∈ \mathcal M``, ``Y∈ T_p\mathcal M`` is a smooth mapping
-associated to a retraction ``\operatorname{retr}_p(Y) = q`` such that
+``\mathcal T_{p,d}: T_p\mathcal M \to T_q\mathcal M``, ``p∈ \mathcal M``, ``d∈ T_p\mathcal M`` is a smooth mapping
+associated to a retraction ``\operatorname{retr}_p(d) = q`` such that
 
 1. (associated retraction) ``\mathcal T_{p,d}X ∈ T_q\mathcal M`` if and only if ``q = \operatorname{retr}_p(d)``.
 2. (consistency) ``\mathcal T_{p,0_p}X = X`` for all ``X∈T_p\mathcal M``
@@ -507,8 +507,9 @@ end
 
 Transport a vector `X` from the tangent space at a point `p` on the [`AbstractManifold`](@ref) `M`
 in the direction indicated by the tangent vector `d` at `p`. By default, [`retract`](@ref) and
-[`vector_transport_to!`](@ref) are used with the `m` and `r`, which default
-to [`default_vector_transport_method`](@ref)`(M)` and [`default_retraction_method`](@ref)`(M)`, respectively.
+[`vector_transport_to!`](@ref) are used with `m`, which defaults to
+[`default_vector_transport_method`](@ref)`(M, typeof(p))`, and the
+[`default_retraction_method`](@ref)`(M, typeof(p))`.
 The result is saved to `Y`.
 
 See [`vector_transport_direction`](@ref) for more details.
@@ -605,12 +606,11 @@ end
 @doc raw"""
     vector_transport_to(M::AbstractManifold, p, X, q)
     vector_transport_to(M::AbstractManifold, p, X, q, m::AbstractVectorTransportMethod)
-    vector_transport_to(M::AbstractManifold, p, X, q, m::AbstractVectorTransportMethod)
 
 Transport a vector `X` from the tangent space at a point `p` on the [`AbstractManifold`](@ref) `M`
 along a curve implicitly given by an [`AbstractRetractionMethod`](@ref) associated to `m`.
-By default `m` is the [`default_vector_transport_method`](@ref)`(M)`.
-To explicitly specify a (different) retraction to the implicitly assumeed retraction, see [`VectorTransportTo`](@ref).
+By default `m` is the [`default_vector_transport_method`](@ref)`(M, typeof(p))`.
+To explicitly specify a (different) retraction to the implicitly assumed retraction, see [`VectorTransportTo`](@ref).
 Note that some vector transport methods might also carry their own retraction they are associated to,
 like the  [`DifferentiatedRetractionVectorTransport`](@ref) and some are even independent of the retraction, for example the [`ProjectionTransport`](@ref).
 
@@ -651,7 +651,7 @@ end
     vector_transport_to!(M::AbstractManifold, Y, p, X, q, m::AbstractVectorTransportMethod)
 
 Transport a vector `X` from the tangent space at a point `p` on the [`AbstractManifold`](@ref) `M`
-to `q` using the [`AbstractVectorTransportMethod`](@ref) `m` and the [`AbstractRetractionMethod`](@ref) `r`.
+to `q` using the [`AbstractVectorTransportMethod`](@ref) `m`.
 
 The result is computed in `Y`.
 See [`vector_transport_to`](@ref) for more details.
@@ -749,11 +749,12 @@ using the [`AbstractVectorTransportMethod`](@ref) `m` in the embedding.
 The default implementation requires one allocation for the points and tangent vectors in the
 embedding and the resulting point, but the final projection is performed in place of `Y`
 """
-function vector_transport_to_embedded!(M::AbstractManifold, Y, p::P, X, q, m) where {P}
+function vector_transport_to_embedded!(M::AbstractManifold, Y, p::P, X, q, m; kwargs...) where {P}
     p_e = embed(M, p)
     X_e = embed(M, p, X)
     q_e = embed(M, q)
-    Y_e = vector_transport_to(get_embedding(M, P), p_e, X_e, q_e, m)
+    v = length(kwargs) > 0 ? VectorTransportWithKeywords(m; kwargs...) : m
+    Y_e = vector_transport_to(get_embedding(M, P), p_e, X_e, q_e, v)
     return project!(M, Y, q, Y_e)
 end
 

@@ -39,4 +39,10 @@ using Test
     @test s7 == "ApproximatelyError with 1.0\nM.\n"
     p7 = sprint(show, e7)
     @test p7 == "ApproximatelyError(1.0, \"M.\")"
+
+    e8 = ApproximatelyError("M.")
+    s8 = sprint(showerror, e8)
+    @test s8 == "ApproximatelyError\nM.\n"
+    p8 = sprint(show, e8)
+    @test p8 == "ApproximatelyError(\"M.\")"
 end

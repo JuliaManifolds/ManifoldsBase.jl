@@ -10,7 +10,8 @@ function ManifoldsBase.plot_slope(
     )
     fig = plot(
         x, y; xaxis = :log, yaxis = :log, label = "\$E(t)\$",
-        linewidth = 3, legend = :topleft, color = :lightblue, title = name,
+        linewidth = 3, legend = :topleft, color = :lightblue,
+        xlabel = "t", ylabel = "\$E(t)\$", title = name,
     )
     s_line = [exp10(line_base + t * slope) for t in log10.(x)]
     plot!(

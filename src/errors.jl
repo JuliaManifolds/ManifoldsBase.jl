@@ -1,7 +1,7 @@
 """
     AbstractManifoldDomainError <: Exception
 
-An absytract Case for Errors when checking validity of points/vectors on mainfolds
+An abstract Case for Errors when checking validity of points/vectors on mainfolds
 """
 abstract type AbstractManifoldDomainError <: Exception end
 

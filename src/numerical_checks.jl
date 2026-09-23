@@ -332,7 +332,7 @@ The `name` is used as the title of the plot.
 
 !!! note
     This function has to be implemented for a certain plotting package.
-    loading [Plots.jl](https://docs.juliaplots.org/stable/) provides a default implementation.
+    loading [Plots.jl](https://docs.juliaplots.org/stable/) or a [Makie.jl](https://docs.makie.org/stable/) backend provides a default implementation.
 """
 plot_slope(x, y; kwargs...)
 

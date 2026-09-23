@@ -39,7 +39,7 @@ A type that indicates that a [`Fiber`](@ref) is a [`CotangentSpace`](@ref).
 """
 struct CotangentSpaceType <: VectorSpaceType end
 
-TCoTSpaceType = Union{TangentSpaceType, CotangentSpaceType}
+const TCoTSpaceType = Union{TangentSpaceType, CotangentSpaceType}
 
 """
     AbstractBasis{𝔽,VST<:VectorSpaceType}
@@ -278,13 +278,6 @@ end
 function get_coordinates end
 function get_vector end
 
-const all_uncached_bases{T} = Union{
-    AbstractBasis{<:Any, T},
-    DefaultBasis{<:Any, T},
-    DefaultOrthogonalBasis{<:Any, T},
-    DefaultOrthonormalBasis{<:Any, T},
-}
-
 function allocate_on(M::AbstractManifold, ::TangentSpaceType)
     return similar(Array{Float64}, representation_size(M))
 end
@@ -395,7 +388,7 @@ end
     coordinate_eltype(M::AbstractManifold, p, 𝔽::AbstractNumbers)
 
 Get the element type for 𝔽-field coordinates of the tangent space at a point `p` from
-manifold `M`. This default assumes that usually complex bases of complex manifolds have
+manifold `M`. This default assumes that usually real bases of complex manifolds have
 real coordinates but it can be overridden by a more specific method.
 """
 @inline function coordinate_eltype(::AbstractManifold, p, 𝔽::ComplexNumbers)
@@ -527,7 +520,7 @@ function _get_basis(M::AbstractManifold, p, B::DefaultOrthonormalBasis)
     return get_basis_orthonormal(M, p, number_system(B))
 end
 
-function get_basis_orthonormal(M::AbstractManifold, p, N::AbstractNumbers; kwargs...)
+function get_basis_orthonormal(M::AbstractManifold, p, N::AbstractNumbers)
     B = DefaultOrthonormalBasis(N)
     dim = number_of_coordinates(M, B)
     Eltp = coordinate_eltype(M, p, N)
@@ -881,8 +874,8 @@ unless `skip_linearly_dependent` is set to `true`, in which case it is left out.
   independent
 * `skip_linearly_dependent` (`false`) – whether to just skip (`true`) a vector that
   is linearly dependent to the previous ones or to stop (`false`, default) at that point
-* `return_incomplete_set` (`false`) – throw an error if the resulting set of vectors is not
-  a basis but contains less vectors
+* `return_incomplete_set` (`false`) – whether to return (`true`) a set that contains fewer
+  vectors than a basis or to throw an error (`false`, default) in that case
 
 further keyword arguments can be passed to set the accuracy of the independence test.
 Especially `atol` defaults to `eps(number_eltype(first(V)))`.
@@ -1005,6 +998,7 @@ requires_caching(::CachedBasis) = false
 requires_caching(::DefaultBasis) = false
 requires_caching(::DefaultOrthogonalBasis) = false
 requires_caching(::DefaultOrthonormalBasis) = false
+requires_caching(::VeeOrthogonalBasis) = false
 
 function _show_basis_vector(io::IO, X; pre = "", head = "")
     sX = sprint(show, "text/plain", X, context = io, sizehint = 0)
@@ -1020,12 +1014,12 @@ end
 function _show_basis_vector_range_noheader(io::IO, Ξ; max_vectors = 4, pre = "", sym = "E")
     nv = length(Ξ)
     return if nv ≤ max_vectors
-        _show_basis_vector_range(io, Ξ, 1:nv; pre = "  ", sym = " E")
+        _show_basis_vector_range(io, Ξ, 1:nv; pre = pre, sym = sym)
     else
         halfn = div(max_vectors, 2)
-        _show_basis_vector_range(io, Ξ, 1:halfn; pre = "  ", sym = " E")
+        _show_basis_vector_range(io, Ξ, 1:halfn; pre = pre, sym = sym)
         print(io, "\n ⋮")
-        _show_basis_vector_range(io, Ξ, (nv - halfn + 1):nv; pre = "  ", sym = " E")
+        _show_basis_vector_range(io, Ξ, (nv - halfn + 1):nv; pre = pre, sym = sym)
     end
 end
 

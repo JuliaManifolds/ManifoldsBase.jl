@@ -8,13 +8,6 @@ using ReverseDiff
 using StaticArrays
 using Test
 
-# `vector_transport_to_diff!` has no generic implementation, so give the reference manifold one
-function ManifoldsBase.vector_transport_to_diff!(
-        ::ManifoldsBase.DefaultManifold, Y, p, X, q, r,
-    )
-    return copyto!(Y, X)
-end
-
 @testset "Testing Default (Euclidean)" begin
     M = ManifoldsBase.DefaultManifold(3)
     types = [
@@ -67,6 +60,8 @@ end
             @test injectivity_radius(M, rm) == Inf
             @test injectivity_radius(M, rm2) == 10
             @test injectivity_radius(M, pts[1], rm2) == 10
+            @test injectivity_radius(M, rm3) == Inf
+            @test injectivity_radius(M, pts[1], rm3) == Inf
             # ManifoldsBase._injectivity_radius always requires the method to be passed
             # to reduce the number of ambiguities
             @test_throws MethodError ManifoldsBase._injectivity_radius(M, pts[1])
@@ -295,13 +290,12 @@ end
                 @test is_point(M, pr, true)
                 Xr = rand(M; vector_at = pr)
                 @test is_vector(M, pr, Xr, true)
-                rng = MersenneTwister(42)
                 P = rand(M, 3)
                 @test length(P) == 3
                 @test all([is_point(M, pj) for pj in P])
                 Xv = rand(M, 3; vector_at = pr)
                 @test length(Xv) == 3
-                @test all([is_point(M, Xj) for Xj in Xv])
+                @test all([is_vector(M, pr, Xj) for Xj in Xv])
                 # and the same again with rng upfront
                 rng = MersenneTwister(42)
                 pr = rand(rng, M)
@@ -314,7 +308,7 @@ end
                 @test all([is_point(M, pj) for pj in P])
                 Xv = rand(rng, M, 3; vector_at = pr)
                 @test length(Xv) == 3
-                @test all([is_point(M, Xj) for Xj in Xv])
+                @test all([is_vector(M, pr, Xj) for Xj in Xv])
             end
 
             @testset "vector transport" begin
@@ -340,10 +334,6 @@ end
                     M, pts[1], X2, pts[2], ScaledVectorTransport(ParallelTransport()),
                 ) == X2
 
-                # along is also the identity
-                c = [
-                    mid_point(M, pts[1], pts[2]), pts[2], mid_point(M, pts[2], pts[3]), pts[3],
-                ]
                 # check mutating ones with defaults
                 p = allocate(pts[1])
                 ManifoldsBase.pole_ladder!(M, p, pts[1], pts[2], pts[3])
@@ -519,6 +509,9 @@ end
             M, p, X, q, DifferentiatedRetractionVectorTransport(ExponentialRetraction()),
         ) == X
         @test vector_transport_direction(M, p, X, X, ProjectionTransport()) == X
+        @test vector_transport_direction(
+            M, p, X, X, DifferentiatedRetractionVectorTransport(ExponentialRetraction()),
+        ) == X
         @test vector_transport_to!(M, Y, p, X, q, ProjectionTransport()) == X
         @test vector_transport_direction!(M, Y, p, X, X, ProjectionTransport()) == X
         @test vector_transport_to(M, p, X, :q, ProjectionTransport()) == X
@@ -563,6 +556,8 @@ end
     @testset "Show methods" begin
         @test repr(CayleyRetraction()) == "CayleyRetraction()"
         @test repr(PadeRetraction(2)) == "PadeRetraction(2)"
+        @test repr(CayleyInverseRetraction()) == "CayleyInverseRetraction()"
+        @test repr(PadeInverseRetraction(2)) == "PadeInverseRetraction(2)"
     end
 
     @testset "Further TestArrayRepresentation" begin

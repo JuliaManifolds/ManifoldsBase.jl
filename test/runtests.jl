@@ -36,4 +36,5 @@ using ManifoldsBase
     include("test_zerovector.jl")
     include("deprecated.jl")
     include("test_aqua.jl")
+    include("test_jet.jl")
 end

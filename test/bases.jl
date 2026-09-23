@@ -412,7 +412,7 @@ using Test
         @test isa(fv1 * 2, FVector)
         @test (fv1 * 2).type == TangentSpaceType()
         tv1s_32 = allocate(fv_tvs[1], Float32)
-        @test isa(tv1s, FVector)
+        @test isa(tv1s_32, FVector)
         @test eltype(tv1s_32.data) === Float32
         copyto!(tv1s, fv_tvs[2])
         @test isapprox(tv1s.data, fv_tvs[2].data)
@@ -437,6 +437,7 @@ using Test
         @test ManifoldsBase.requires_caching(ProjectedOrthonormalBasis(:svd))
         @test !ManifoldsBase.requires_caching(DefaultBasis())
         @test !ManifoldsBase.requires_caching(DefaultOrthogonalBasis())
+        @test !ManifoldsBase.requires_caching(VeeOrthogonalBasis())
         @test !ManifoldsBase.requires_caching(DefaultOrthonormalBasis())
     end
 end

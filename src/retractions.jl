@@ -143,7 +143,7 @@ in [MuralidharanFletcher:2012](@cite). The system of equations for ``\gamma : �
 ``γ(1) = \exp_{p,X}(X_M, X_F)`` and ``γ(0)=(p, X)`` reads
 
 ```math
-\dot{γ}(t) = (\dot{p}(t), \dot{X}(t)) = (R(X(t), \dot{X}(t))\dot{p}(t), 0)
+\ddot{γ}(t) = (\ddot{p}(t), \ddot{X}(t)) = (R(X(t), \dot{X}(t))\dot{p}(t), 0)
 ```
 
 where ``R`` is the Riemann curvature tensor (see [`riemann_tensor`](@ref)).
@@ -288,8 +288,8 @@ end
 @doc raw"""
     CayleyInverseRetraction <: AbstractInverseRetractionMethod
 
-A retraction based on the Cayley transform, which is realized by using the
-[`PadeRetraction`](@ref)`{1}`.
+An inverse retraction based on the Cayley transform, which is realized by using the
+[`PadeInverseRetraction`](@ref)`{1}`.
 
 !!! note "Technical Note"
     Though you would call e.g. [`inverse_retract`](@ref)`(M, p, q, CayleyInverseRetraction())`,
@@ -485,7 +485,7 @@ Compute the inverse retraction, a cheaper, approximate version of the
 [`log`](@ref)arithmic map), of points `p` and `q` on the [`AbstractManifold`](@ref) `M`.
 
 Inverse retraction method can be specified by the last argument, defaulting to
-[`default_inverse_retraction_method`](@ref)`(M)`.
+[`default_inverse_retraction_method`](@ref)`(M, typeof(p))`.
 For available inverse retractions on certain manifolds see the documentation on the
 corresponding manifold.
 
@@ -513,7 +513,7 @@ Compute the inverse retraction, a cheaper, approximate version of the
 Result is saved to `X`.
 
 Inverse retraction method can be specified by the last argument, defaulting to
-[`default_inverse_retraction_method`](@ref)`(M)`. See the documentation of respective manifolds for
+[`default_inverse_retraction_method`](@ref)`(M, typeof(p))`. See the documentation of respective manifolds for
 available methods.
 
 See also [`retract!`](@ref).
@@ -587,11 +587,11 @@ function _inverse_retract!(
 end
 
 """
-    inverse_retract_approx!(M::AbstractManifold, p, q, m::ApproximateLogarithmicInverseRetraction)
+    inverse_retract_approx!(M::AbstractManifold, X, p, q, m::ApproximateLogarithmicInverseRetraction)
 
 Compute the in-place variant of the [`ApproximateLogarithmicInverseRetraction`](@ref) `m`.
 """
-inverse_retract_approx!(M::AbstractManifold, p, q, m::ApproximateLogarithmicInverseRetraction)
+inverse_retract_approx!(M::AbstractManifold, X, p, q, m::ApproximateLogarithmicInverseRetraction)
 
 function inverse_retract_approx! end
 
@@ -624,11 +624,11 @@ function inverse_retract_cayley!(M::AbstractManifold, X, p, q; kwargs...)
 end
 
 """
-    inverse_retract_pade!(M::AbstractManifold, p, q, n)
+    inverse_retract_pade!(M::AbstractManifold, X, p, q, m::PadeInverseRetraction)
 
-Compute the in-place variant of the [`PadeInverseRetraction`](@ref)`(n)`,
+Compute the in-place variant of the [`PadeInverseRetraction`](@ref) `m`.
 """
-inverse_retract_pade!(M::AbstractManifold, p, q, n)
+inverse_retract_pade!(M::AbstractManifold, X, p, q, m::PadeInverseRetraction)
 
 function inverse_retract_pade! end
 
@@ -688,7 +688,7 @@ _doc_retract = raw"""
     retract!(M::AbstractManifold, q, p, X, method::AbstractRetractionMethod=default_retraction_method(M, typeof(p)))
 
 Compute a retraction, an approximate version of the [`exp`](@ref)onential map,
-from `p` into direction `X`, scaled by `t`, on the [`AbstractManifold`](@ref) `M`.
+from `p` into direction `X` on the [`AbstractManifold`](@ref) `M`.
 This can be computed in-place of `q`.
 
 A retraction ``\operatorname{retr}_p: T_p\mathcal M → \mathcal M`` is a smooth map that fulfils
@@ -699,11 +699,11 @@ i.e. ``D\operatorname{retr}_p(0)[X]=X`` holds for all ``X∈ T_p\mathcal M``,
 
 where ``D\operatorname{retr}_p`` denotes the differential of the retraction
 
-The retraction is called of second order if for all ``X`` the curves ``c(t) = R_p(tX)``
+The retraction is called of second order if for all ``X`` the curves ``c(t) = \operatorname{retr}_p(tX)``
 have a zero acceleration at ``t=0``, i.e. ``c''(0) = 0``.
 
 Retraction method can be specified by the last argument, defaulting to
-[`default_retraction_method`](@ref)`(M)`. For further available retractions see the documentation of respective manifolds.
+[`default_retraction_method`](@ref)`(M, typeof(p))`. For further available retractions see the documentation of respective manifolds.
 
 Locally, the retraction is invertible. For the inverse operation, see [`inverse_retract`](@ref).
 """
@@ -878,7 +878,7 @@ end
 
 function retract_approx! end
 """
-    retract_approx!(M::AbstractManifold, q, p, X)
+    retract_approx!(M::AbstractManifold, q, p, X, m::ApproximateExponentialRetraction)
 
 Compute the in-place variant of the [`ApproximateExponentialRetraction`](@ref) `m`.
 """
@@ -945,8 +945,8 @@ Compute the in-place variant of the [`PadeRetraction`](@ref) `m`.
 """
 retract_pade!(M::AbstractManifold, q, p, X, m::PadeRetraction; kwargs...)
 
-function retract_pade_fused!(M::AbstractManifold, q, p, X, t::Number, m::PadeRetraction)
-    return retract_pade!(M, q, p, t * X, m)
+function retract_pade_fused!(M::AbstractManifold, q, p, X, t::Number, m::PadeRetraction; kwargs...)
+    return retract_pade!(M, q, p, t * X, m; kwargs...)
 end
 
 
@@ -963,8 +963,8 @@ retract_project!(M::AbstractManifold, q, p, X; kwargs...)
 
 Compute the in-place variant of the [`ProjectionRetraction`](@ref).
 """
-function retract_project_fused!(M::AbstractManifold, q, p, X, t::Number)
-    return retract_project!(M, q, p, t * X)
+function retract_project_fused!(M::AbstractManifold, q, p, X, t::Number; kwargs...)
+    return retract_project!(M, q, p, t * X; kwargs...)
 end
 
 
@@ -976,8 +976,8 @@ Compute the in-place variant of the [`PolarRetraction`](@ref).
 """
 retract_polar!(M::AbstractManifold, q, p, X; kwargs...)
 
-function retract_polar_fused!(M::AbstractManifold, q, p, X, t::Number)
-    return retract_polar!(M, q, p, t * X)
+function retract_polar_fused!(M::AbstractManifold, q, p, X, t::Number; kwargs...)
+    return retract_polar!(M, q, p, t * X; kwargs...)
 end
 
 function retract_qr! end
@@ -988,8 +988,8 @@ Compute the in-place variant of the [`QRRetraction`](@ref).
 """
 retract_qr!(M::AbstractManifold, q, p, X; kwargs...)
 
-function retract_qr_fused!(M::AbstractManifold, q, p, X, t::Number)
-    return retract_qr!(M, q, p, t * X)
+function retract_qr_fused!(M::AbstractManifold, q, p, X, t::Number; kwargs...)
+    return retract_qr!(M, q, p, t * X; kwargs...)
 end
 
 function retract_softmax! end
@@ -1000,8 +1000,8 @@ Compute the in-place variant of the [`SoftmaxRetraction`](@ref).
 """
 retract_softmax!(M::AbstractManifold, q, p, X; kwargs...)
 
-function retract_softmax_fused!(M::AbstractManifold, q, p, X, t::Number)
-    return retract_softmax!(M, q, p, t * X)
+function retract_softmax_fused!(M::AbstractManifold, q, p, X, t::Number; kwargs...)
+    return retract_softmax!(M, q, p, t * X; kwargs...)
 end
 
 function retract_sasaki! end
@@ -1030,6 +1030,10 @@ end
 
 Base.show(io::IO, ::CayleyRetraction) = print(io, "CayleyRetraction()")
 Base.show(io::IO, ::PadeRetraction{m}) where {m} = print(io, "PadeRetraction($m)")
+Base.show(io::IO, ::CayleyInverseRetraction) = print(io, "CayleyInverseRetraction()")
+function Base.show(io::IO, ::PadeInverseRetraction{m}) where {m}
+    return print(io, "PadeInverseRetraction($m)")
+end
 function Base.show(io::IO, s::StabilizedRetraction)
     r = s.retraction isa ExponentialRetraction ? "" : "$(s.retraction)"
     return print(io, "StabilizedRetraction($r)")

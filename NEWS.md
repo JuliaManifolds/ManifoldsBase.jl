@@ -18,9 +18,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `manifold_dimension(::Fiber)`, so a `CotangentSpace` and any other fiber report their `fiber_dimension`; before only `TangentSpace` had a method.
 * `get_component` and `set_component!` on a `ProductManifold` accept a `Colon` and a vector of indices, so `p[M, :]` and `p[M, [1, 2]]` and the corresponding assignments work.
 * `check_geodesic` takes a keyword `name` (default `"geodesic"`) that appears in its message and as the title of its plot; `plot_check_geodesic` takes `name` as well.
+* the test suite runs [JET.jl](https://github.com/aviatesk/JET.jl) on the whole package with all extensions loaded, on released Julia versions.
 
 ### Fixed
 
+* `requires_caching(::VeeOrthogonalBasis)` is `false`, as for the `DefaultOrthogonalBasis` it forwards to.
 * `get_coordinates`/`get_vector` with a `DefaultOrthogonalBasis` now allocate and call their mutating orthogonal variant instead of forwarding to the orthonormal one; the orthogonal-to-orthonormal fallback now only happens in `get_coordinates_orthogonal!`/`get_vector_orthogonal!`.
 * `angle` clamps the `acos` argument to `[-1, 1]`, which rounding could exceed for nearly parallel vectors.
 * `project!` on a `PowerManifoldNestedReplacing` writes to the result instead of the point.
@@ -66,6 +68,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `get_vectors` on a `ProductManifold` returns basis vectors with their own storage instead of sharing arrays with each other and with the cached basis.
 * `coordinate_eltype` for quaternionic manifolds floats the element type, so an integer-valued point gets `QuaternionF64` coordinates like the real and complex cases.
 * `ManifoldsBase.Test.TestPowerManifoldMultidimensional` defines `_read`, so functions on a power manifold with this representation work instead of raising a `MethodError`.
+* the retraction, inverse retraction and vector transport methods that `@default_manifold_fallbacks` generates, and those of `ManifoldsBase.Test` for `DefaultManifold`, accept keyword arguments and pass them on; before, a keyword argument raised a `MethodError` for wrapped point types.
+* the scaled retractions `retract_{project,polar,qr,softmax,pade}_fused!`, `exp_fused`, `exp_fused!` and `vector_transport_to_embedded!` accept keyword arguments and pass them on.
 
 ### Changed
 
@@ -73,6 +77,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `inverse_retract` and `inverse_retract!` accept keyword arguments, like `retract` and `retract!` already did.
 * `vector_transport_to` and `zero_vector` on a `ValidationManifold` return a `ValidationTangentVector`, which stores the base point if `store_base_point` is set.
 * `vector_transport_direction_embedded!` computes the end point with the keyword `retraction_method=default_retraction_method(M, typeof(p))` instead of `exp`, and passes all other keywords to the vector transport in the embedding.
+* `CayleyInverseRetraction` and `PadeInverseRetraction` print like constructor calls, as their retraction counterparts do.
 * `plot_slope` takes a keyword `name` (default `""`) that both plotting backends use as the title of the plot, and the check functions pass their `name` on.
 
 ## [2.5.1] 02/09/2026

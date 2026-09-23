@@ -41,18 +41,6 @@ end
 
 ProductManifold() = throw(MethodError(ProductManifold, ()))
 
-const PRODUCT_BASIS_LIST = [
-    VeeOrthogonalBasis,
-    DefaultBasis,
-    DefaultBasis{<:Any, TangentSpaceType},
-    DefaultOrthogonalBasis,
-    DefaultOrthogonalBasis{<:Any, TangentSpaceType},
-    DefaultOrthonormalBasis,
-    DefaultOrthonormalBasis{<:Any, TangentSpaceType},
-    ProjectedOrthonormalBasis{:gram_schmidt, ℝ},
-    ProjectedOrthonormalBasis{:svd, ℝ},
-]
-
 """
     ProductBasisData
 
@@ -61,8 +49,6 @@ A typed tuple to store tuples of data of stored/precomputed bases for a [`Produc
 struct ProductBasisData{T <: Tuple}
     parts::T
 end
-
-const PRODUCT_BASIS_LIST_CACHED = [CachedBasis]
 
 """
     ProductMetric <: AbstractMetric
@@ -1048,14 +1034,9 @@ end
 
 function _show_product_manifold_no_header(io::IO, M)
     n = length(M.manifolds)
-    sz = displaysize(io)
-    screen_height, screen_width = sz[1] - 4, sz[2]
+    screen_height = displaysize(io)[1] - 4
     half_height = div(screen_height, 2)
-    inds = 1:n
     pre = " "
-    if n > screen_height
-        inds = [1:half_height; (n - div(screen_height - 1, 2) + 1):n]
-    end
     if n ≤ screen_height
         _show_submanifold_range(io, M.manifolds, 1:n; pre = pre)
     else
@@ -1189,15 +1170,15 @@ end
 function vector_transport_to!(
         M::ProductManifold, Y, p, X, q, m::AbstractVectorTransportMethod,
     )
-    return map(
-            (iM, iY, ip, iX, iq) -> vector_transport_to!(iM, iY, ip, iX, iq, m),
-            M.manifolds,
-            submanifold_components(M, Y),
-            submanifold_components(M, p),
-            submanifold_components(M, X),
-            submanifold_components(M, q),
-        ),
-        return Y
+    map(
+        (iM, iY, ip, iX, iq) -> vector_transport_to!(iM, iY, ip, iX, iq, m),
+        M.manifolds,
+        submanifold_components(M, Y),
+        submanifold_components(M, p),
+        submanifold_components(M, X),
+        submanifold_components(M, q),
+    )
+    return Y
 end
 
 @doc raw"""
@@ -1262,46 +1243,15 @@ submanifold_components(::Any...)
 Zips tuples `a`, `b`, and remaining in a fast, type-stable way. If they have different
 lengths, the result is trimmed to the length of the shorter tuple.
 """
-@generated function ziptuples(a::NTuple{N, Any}, b::NTuple{M, Any}) where {N, M}
-    ex = Expr(:tuple)
-    for i in 1:min(N, M)
-        push!(ex.args, :((a[$i], b[$i])))
-    end
-    return ex
+ziptuples(a::Tuple, b::Tuple) = ntuple(i -> (a[i], b[i]), min(length(a), length(b)))
+function ziptuples(a::Tuple, b::Tuple, c::Tuple)
+    return ntuple(i -> (a[i], b[i], c[i]), min(length(a), length(b), length(c)))
 end
-@generated function ziptuples(
-        a::NTuple{N, Any},
-        b::NTuple{M, Any},
-        c::NTuple{L, Any},
-    ) where {N, M, L}
-    ex = Expr(:tuple)
-    for i in 1:min(N, M, L)
-        push!(ex.args, :((a[$i], b[$i], c[$i])))
-    end
-    return ex
+function ziptuples(a::Tuple, b::Tuple, c::Tuple, d::Tuple)
+    n = min(length(a), length(b), length(c), length(d))
+    return ntuple(i -> (a[i], b[i], c[i], d[i]), n)
 end
-@generated function ziptuples(
-        a::NTuple{N, Any},
-        b::NTuple{M, Any},
-        c::NTuple{L, Any},
-        d::NTuple{K, Any},
-    ) where {N, M, L, K}
-    ex = Expr(:tuple)
-    for i in 1:min(N, M, L, K)
-        push!(ex.args, :((a[$i], b[$i], c[$i], d[$i])))
-    end
-    return ex
-end
-@generated function ziptuples(
-        a::NTuple{N, Any},
-        b::NTuple{M, Any},
-        c::NTuple{L, Any},
-        d::NTuple{K, Any},
-        e::NTuple{J, Any},
-    ) where {N, M, L, K, J}
-    ex = Expr(:tuple)
-    for i in 1:min(N, M, L, K, J)
-        push!(ex.args, :((a[$i], b[$i], c[$i], d[$i], e[$i])))
-    end
-    return ex
+function ziptuples(a::Tuple, b::Tuple, c::Tuple, d::Tuple, e::Tuple)
+    n = min(length(a), length(b), length(c), length(d), length(e))
+    return ntuple(i -> (a[i], b[i], c[i], d[i], e[i]), n)
 end

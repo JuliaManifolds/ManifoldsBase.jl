@@ -1,7 +1,7 @@
 ### Projections
 
 A manifold might be embedded in some space.
-Often this is implicitly assumed, for example the complex [Circle](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/circle.html) is embedded in the complex plane.
+Often this is implicitly assumed, for example the complex [Circle](@extref `Manifolds.Circle`) is embedded in the complex plane.
 Let‘s keep the circle in mind in the following as a simple example.
 For the general case of explicitly stating an embedding and/or to distinguish several, different embeddings, see [Embedded Manifolds](@ref sec-embedded-manifold) below.
 

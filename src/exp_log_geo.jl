@@ -25,9 +25,9 @@ Compared to [`exp`](@ref), this method provides the opportunity to
 avoid the allocation when computing `t*X`.
 By default, this method allocates the resulting point `q` and passes to [`exp_fused!`](@ref).
 """
-function exp_fused(M::AbstractManifold, p, X, t::Number)
+function exp_fused(M::AbstractManifold, p, X, t::Number; kwargs...)
     q = allocate_result(M, exp, p, X, t)
-    exp_fused!(M, q, p, X, t)
+    exp_fused!(M, q, p, X, t; kwargs...)
     return q
 end
 
@@ -53,7 +53,7 @@ Compared to [`exp!`](@ref), this method provides the opportunity to avoid the al
 when computing `t*X`.
 By default, this method performs this operation and passes to [`exp!`](@ref).
 """
-exp_fused!(M::AbstractManifold, q, p, X, t::Number) = exp!(M, q, p, t * X)
+exp_fused!(M::AbstractManifold, q, p, X, t::Number; kwargs...) = exp!(M, q, p, t * X; kwargs...)
 
 @doc raw"""
     geodesic(M::AbstractManifold, p, X) -> Function

@@ -304,7 +304,7 @@ function inverse_retract!(M::MetricManifold, X, p, q, ::LogarithmicInverseRetrac
     return log!(M, X, p, q)
 end
 function inverse_retract!(M::MetricManifold, X, p, q, m::ShootingInverseRetraction)
-    (metric(M.manifold) == M.metric) && (return inverse_retract!(M.manifold, X, p, q, m))
+    (metric(M.manifold) === M.metric) && (return inverse_retract!(M.manifold, X, p, q, m))
     return inverse_retract_shooting!(M, X, p, q, m)
 end
 
@@ -381,7 +381,6 @@ function project(M::MetricManifold, p)
     return invoke(project, Tuple{AbstractManifold, Any}, M, p)
 end
 function project!(M::MetricManifold, q, p)
-    (metric(M.manifold) === M.metric) && (return project!(M.manifold, q, p))
     return project!(M.manifold, q, p)
 end
 function project(M::MetricManifold, p, X)
@@ -389,7 +388,6 @@ function project(M::MetricManifold, p, X)
     return invoke(project, Tuple{AbstractManifold, Any, Any}, M, p, X)
 end
 function project!(M::MetricManifold, Y, p, X)
-    (metric(M.manifold) === M.metric) && (return project!(M.manifold, Y, p, X))
     return project!(M.manifold, Y, p, X)
 end
 

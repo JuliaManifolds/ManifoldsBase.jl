@@ -369,14 +369,14 @@ end
         pe = embed(M, p)
         @test pe == [1.0, 2.0, 0.0]
         X = [2.0, 3.0]
-        Xe = embed(M, pe, X)
+        Xe = embed(M, p, X)
         @test Xe == [2.0, 3.0, 0.0]
         @test project(M, pe) == p
         @test embed_project(M, p) == p
         @test embed_project(M, p, X) == X
         Xs = similar(X)
         @test embed_project!(M, Xs, p, X) == X
-        @test project(M, pe, Xe) == X
+        @test project(M, p, Xe) == X
         # injectivity_radius shouldn't pass through
         @test_throws MethodError injectivity_radius(M)
         @test_throws MethodError injectivity_radius(M, p)

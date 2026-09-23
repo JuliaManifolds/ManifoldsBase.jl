@@ -16,7 +16,7 @@ A retraction ``\operatorname{retr}_p`` can be interpreted as a first order appro
 The retraction is called of second order if for all ``X`` the curves ``c(t) = R_p(tX)``
 have a zero acceleration at ``t=0``, i.e. ``c''(0) = 0``.
 
-The following figure compares the exponential map [`exp`](@ref)`(M, p, X)` on the [Circle](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/circle.html) `(ℂ)` (or [`Sphere`](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/sphere.html)`(1)` embedded in ``ℝ^2`` with one possible retraction, the one based on projections.
+The following figure compares the exponential map [`exp`](@ref)`(M, p, X)` on the [Circle](@extref `Manifolds.Circle`) `(ℂ)` (or [`Sphere`](@extref `Manifolds.Sphere`)`(1)` embedded in ``ℝ^2``) with one possible retraction, the one based on projections.
 Note especially that ``\operatorname{dist}(p,q)=\lVert X\rVert_p`` while this is not the case for the result ``\operatorname{retr}_p(X) = q'``.
 
 ![A comparison of the exponential map and a retraction on the Circle.](assets/images/retraction_illustration_600.png)

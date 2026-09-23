@@ -57,9 +57,8 @@ function inverse_retract_shooting!(
     ΔX = allocate(X)
     ΔXnew = tX = allocate(ΔX)
     retr_tX = allocate_result(M, retract, p, X)
-    if m.num_transport_points > 2
-        retr_tX_new = allocate_result(M, retract, p, X)
-    end
+    # only used when the grid below is non-empty, that is for more than 2 transport points
+    retr_tX_new = m.num_transport_points > 2 ? allocate_result(M, retract, p, X) : retr_tX
     iteration = 1
     while (gap > m.tolerance) && (iteration <= m.max_iterations)
         retract!(M, retr_tX, p, X, m.retraction; kwargs...)
