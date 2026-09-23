@@ -1243,15 +1243,43 @@ submanifold_components(::Any...)
 Zips tuples `a`, `b`, and remaining in a fast, type-stable way. If they have different
 lengths, the result is trimmed to the length of the shorter tuple.
 """
-ziptuples(a::Tuple, b::Tuple) = ntuple(i -> (a[i], b[i]), min(length(a), length(b)))
-function ziptuples(a::Tuple, b::Tuple, c::Tuple)
-    return ntuple(i -> (a[i], b[i], c[i]), min(length(a), length(b), length(c)))
+@generated function ziptuples(a::NTuple{N, Any}, b::NTuple{M, Any}) where {N, M}
+    # a static analysis may pass unknown lengths, then the generator is skipped
+    (N isa Int && M isa Int) || return :(Tuple(zip(a, b)))
+    ex = Expr(:tuple)
+    for i in 1:min(N, M)
+        push!(ex.args, :((a[$i], b[$i])))
+    end
+    return ex
 end
-function ziptuples(a::Tuple, b::Tuple, c::Tuple, d::Tuple)
-    n = min(length(a), length(b), length(c), length(d))
-    return ntuple(i -> (a[i], b[i], c[i], d[i]), n)
+@generated function ziptuples(
+        a::NTuple{N, Any}, b::NTuple{M, Any}, c::NTuple{L, Any},
+    ) where {N, M, L}
+    (N isa Int && M isa Int && L isa Int) || return :(Tuple(zip(a, b, c)))
+    ex = Expr(:tuple)
+    for i in 1:min(N, M, L)
+        push!(ex.args, :((a[$i], b[$i], c[$i])))
+    end
+    return ex
 end
-function ziptuples(a::Tuple, b::Tuple, c::Tuple, d::Tuple, e::Tuple)
-    n = min(length(a), length(b), length(c), length(d), length(e))
-    return ntuple(i -> (a[i], b[i], c[i], d[i], e[i]), n)
+@generated function ziptuples(
+        a::NTuple{N, Any}, b::NTuple{M, Any}, c::NTuple{L, Any}, d::NTuple{K, Any},
+    ) where {N, M, L, K}
+    all(n -> n isa Int, (N, M, L, K)) || return :(Tuple(zip(a, b, c, d)))
+    ex = Expr(:tuple)
+    for i in 1:min(N, M, L, K)
+        push!(ex.args, :((a[$i], b[$i], c[$i], d[$i])))
+    end
+    return ex
+end
+@generated function ziptuples(
+        a::NTuple{N, Any}, b::NTuple{M, Any}, c::NTuple{L, Any}, d::NTuple{K, Any},
+        e::NTuple{J, Any},
+    ) where {N, M, L, K, J}
+    all(n -> n isa Int, (N, M, L, K, J)) || return :(Tuple(zip(a, b, c, d, e)))
+    ex = Expr(:tuple)
+    for i in 1:min(N, M, L, K, J)
+        push!(ex.args, :((a[$i], b[$i], c[$i], d[$i], e[$i])))
+    end
+    return ex
 end
