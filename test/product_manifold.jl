@@ -696,7 +696,7 @@ using RecursiveArrayTools
 
     @testset "Product with a custom point type" begin
         M = ProductManifold(ManifoldsBase.DefaultManifold(3), ManifoldsBase.DefaultManifold(2))
-        p = ArrayPartition(ManifoldsBase.Test.DefaultPoint([1.0, 0.0]), ManifoldsBase.Test.DefaultPoint([0.0, 0.0, 0.0]))
+        p = ArrayPartition(ManifoldsBase.Test.DefaultPoint([1.0, 0.0, 0.0]), ManifoldsBase.Test.DefaultPoint([0.0, 0.0]))
         X = zero_vector(M, p)
         @test X isa ArrayPartition{Float64, Tuple{ManifoldsBase.Test.DefaultTangentVector{Vector{Float64}}, ManifoldsBase.Test.DefaultTangentVector{Vector{Float64}}}}
     end
