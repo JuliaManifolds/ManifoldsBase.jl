@@ -67,6 +67,13 @@ end
     ExponentialRetraction <: AbstractRetractionMethod
 
 Retraction using the exponential map.
+
+!!! note "Technical Note"
+    Though you would call e.g. [`retract`](@ref)`(M, p, X, ExponentialRetraction())`,
+    to implement this retraction, define [`exp!`](@ref)`(M, q, p, X)` for your manifold `M`.
+    The fused variant [`exp_fused!`](@ref)`(M, q, p, X, t)`,
+    which retracts `t*X` without forming that product, falls back to that and can additionally
+    be implemented for performance reasons.
 """
 struct ExponentialRetraction <: AbstractRetractionMethod end
 
@@ -78,8 +85,10 @@ for point and tangent vectors.
 
 !!! note "Technical Note"
     Though you would call e.g. [`retract`](@ref)`(M, p, X, PolarRetraction())`,
-    to implement a polar retraction, define [`retract_polar!`](@ref)`(M, q, p, X)`
-    for your manifold `M`.
+    to implement a polar retraction, define [`retract_polar!`](@ref)`(M, q, p, X; kwargs...)`
+    for your manifold `M`. The fused variant [`retract_polar_fused!`](@ref)`(M, q, p, X, t; kwargs...)`,
+    which retracts `t*X` without forming that product, falls back to that and can additionally
+    be implemented for performance reasons.
 """
 struct PolarRetraction <: AbstractRetractionMethod end
 
@@ -90,7 +99,10 @@ Retractions that are based on projection and usually addition in the embedding.
 
 !!! note "Technical Note"
     Though you would call e.g. [`retract`](@ref)`(M, p, X, ProjectionRetraction())`,
-    to implement a projection retraction, define [`retract_project!`](@ref)`(M, q, p, X)` for your manifold `M`.
+    to implement a projection retraction, define [`retract_project!`](@ref)`(M, q, p, X; kwargs...)`
+    for your manifold `M`. The fused variant [`retract_project_fused!`](@ref)`(M, q, p, X, t; kwargs...)`,
+    which retracts `t*X` without forming that product, falls back to that and can additionally
+    be implemented for performance reasons.
 """
 struct ProjectionRetraction <: AbstractRetractionMethod end
 
@@ -102,7 +114,10 @@ matrix / matrices for point and tangent vector on a [`AbstractManifold`](@ref)
 
 !!! note "Technical Note"
     Though you would call e.g. [`retract`](@ref)`(M, p, X, QRRetraction())`,
-    to implement a QR retraction, define [`retract_qr!`](@ref)`(M, q, p, X)` for your manifold `M`.
+    to implement a QR retraction, define [`retract_qr!`](@ref)`(M, q, p, X; kwargs...)`
+    for your manifold `M`. The fused variant [`retract_qr_fused!`](@ref)`(M, q, p, X, t; kwargs...)`,
+    which retracts `t*X` without forming that product, falls back to that and can additionally
+    be implemented for performance reasons.
 """
 struct QRRetraction <: AbstractRetractionMethod end
 
@@ -153,6 +168,13 @@ where ``R`` is the Riemann curvature tensor (see [`riemann_tensor`](@ref)).
     SasakiRetraction(L::Int)
 
 In this constructor `L` is the number of integration steps.
+
+!!! note "Technical Note"
+    Though you would call e.g. [`retract`](@ref)`(M, p, X, SasakiRetraction(L))`,
+    to implement this retraction, define [`retract_sasaki!`](@ref)`(M, q, p, X, m; kwargs...)`
+    for your manifold `M`. The fused variant [`retract_sasaki_fused!`](@ref)`(M, q, p, X, t, m; kwargs...)`,
+    which retracts `t*X` without forming that product, falls back to that and can additionally
+    be implemented for performance reasons.
 """
 struct SasakiRetraction <: AbstractRetractionMethod
     L::Int
@@ -165,7 +187,10 @@ Describes a retraction that is based on the softmax function.
 
 !!! note "Technical Note"
     Though you would call e.g. [`retract`](@ref)`(M, p, X, SoftmaxRetraction())`,
-    to implement a softmax retraction, define [`retract_softmax!`](@ref)`(M, q, p, X)` for your manifold `M`.
+    to implement a softmax retraction, define [`retract_softmax!`](@ref)`(M, q, p, X; kwargs...)`
+    for your manifold `M`. The fused variant [`retract_softmax_fused!`](@ref)`(M, q, p, X, t; kwargs...)`,
+    which retracts `t*X` without forming that product, falls back to that and can additionally
+    be implemented for performance reasons.
 """
 struct SoftmaxRetraction <: AbstractRetractionMethod end
 
@@ -198,7 +223,10 @@ A retraction based on the Padé approximation of order ``m``
 
 !!! note "Technical Note"
     Though you would call e.g. [`retract`](@ref)`(M, p, X, PadeRetraction(m))`,
-    to implement a Padé retraction, define [`retract_pade!`](@ref)`(M, q, p, X, m)` for your manifold `M`.
+    to implement a Padé retraction, define [`retract_pade!`](@ref)`(M, q, p, X, m; kwargs...)`
+    for your manifold `M`. The fused variant [`retract_pade_fused!`](@ref)`(M, q, p, X, t, m; kwargs...)`,
+    which retracts `t*X` without forming that product, falls back to that and can additionally
+    be implemented for performance reasons.
 """
 struct PadeRetraction{m} <: AbstractRetractionMethod end
 
@@ -216,8 +244,11 @@ A retraction based on the Cayley transform, which is realized by using the
 
 !!! note "Technical Note"
     Though you would call e.g. [`retract`](@ref)`(M, p, X, CayleyRetraction())`,
-    to implement a Cayley retraction, define [`retract_cayley!`](@ref)`(M, q, p, X)` for your manifold `M`.
-    By default both these functions fall back to calling a [`PadeRetraction`](@ref)`(1)`.
+    to implement a Cayley retraction, define [`retract_cayley!`](@ref)`(M, q, p, X; kwargs...)`
+    for your manifold `M`. By default both these functions fall back to calling a
+    [`PadeRetraction`](@ref)`(1)`, whose fused variant [`retract_pade_fused!`](@ref)`(M, q, p, X, t, m; kwargs...)`,
+    which retracts `t*X` without forming that product, can additionally be implemented for
+    performance reasons.
 """
 const CayleyRetraction = PadeRetraction{1}
 
@@ -945,6 +976,11 @@ Compute the in-place variant of the [`PadeRetraction`](@ref) `m`.
 """
 retract_pade!(M::AbstractManifold, q, p, X, m::PadeRetraction; kwargs...)
 
+"""
+    retract_pade_fused!(M::AbstractManifold, q, p, X, t::Number, m::PadeRetraction; kwargs...)
+
+Compute the in-place variant of the [`PadeRetraction`](@ref) `m` of `t*X`.
+"""
 function retract_pade_fused!(M::AbstractManifold, q, p, X, t::Number, m::PadeRetraction; kwargs...)
     return retract_pade!(M, q, p, t * X, m; kwargs...)
 end
@@ -959,9 +995,9 @@ Compute the in-place variant of the [`ProjectionRetraction`](@ref).
 retract_project!(M::AbstractManifold, q, p, X; kwargs...)
 
 """
-    retract_project_fused!(M::AbstractManifold, q, p, X, t::Number)
+    retract_project_fused!(M::AbstractManifold, q, p, X, t::Number; kwargs...)
 
-Compute the in-place variant of the [`ProjectionRetraction`](@ref).
+Compute the in-place variant of the [`ProjectionRetraction`](@ref) of `t*X`.
 """
 function retract_project_fused!(M::AbstractManifold, q, p, X, t::Number; kwargs...)
     return retract_project!(M, q, p, t * X; kwargs...)
@@ -976,6 +1012,11 @@ Compute the in-place variant of the [`PolarRetraction`](@ref).
 """
 retract_polar!(M::AbstractManifold, q, p, X; kwargs...)
 
+"""
+    retract_polar_fused!(M::AbstractManifold, q, p, X, t::Number; kwargs...)
+
+Compute the in-place variant of the [`PolarRetraction`](@ref) of `t*X`.
+"""
 function retract_polar_fused!(M::AbstractManifold, q, p, X, t::Number; kwargs...)
     return retract_polar!(M, q, p, t * X; kwargs...)
 end
@@ -988,6 +1029,11 @@ Compute the in-place variant of the [`QRRetraction`](@ref).
 """
 retract_qr!(M::AbstractManifold, q, p, X; kwargs...)
 
+"""
+    retract_qr_fused!(M::AbstractManifold, q, p, X, t::Number; kwargs...)
+
+Compute the in-place variant of the [`QRRetraction`](@ref) of `t*X`.
+"""
 function retract_qr_fused!(M::AbstractManifold, q, p, X, t::Number; kwargs...)
     return retract_qr!(M, q, p, t * X; kwargs...)
 end
@@ -1000,6 +1046,11 @@ Compute the in-place variant of the [`SoftmaxRetraction`](@ref).
 """
 retract_softmax!(M::AbstractManifold, q, p, X; kwargs...)
 
+"""
+    retract_softmax_fused!(M::AbstractManifold, q, p, X, t::Number; kwargs...)
+
+Compute the in-place variant of the [`SoftmaxRetraction`](@ref) of `t*X`.
+"""
 function retract_softmax_fused!(M::AbstractManifold, q, p, X, t::Number; kwargs...)
     return retract_softmax!(M, q, p, t * X; kwargs...)
 end
@@ -1012,6 +1063,11 @@ Compute the in-place variant of the [`SasakiRetraction`](@ref) `m`.
 """
 retract_sasaki!(M::AbstractManifold, q, p, X, m::SasakiRetraction)
 
+"""
+    retract_sasaki_fused!(M::AbstractManifold, q, p, X, t::Number, m::SasakiRetraction; kwargs...)
+
+Compute the in-place variant of the [`SasakiRetraction`](@ref) `m` of `t*X`.
+"""
 function retract_sasaki_fused!(M::AbstractManifold, q, p, X, t::Number, m::SasakiRetraction; kwargs...)
     return retract_sasaki!(M, q, p, t * X, m; kwargs...)
 end
