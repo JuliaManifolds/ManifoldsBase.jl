@@ -210,9 +210,7 @@ A unique or default representation might also just be an `AbstractArray`.
 get_embedding(M::AbstractDecoratorManifold, ::Type) = get_embedding(M)
 
 @inline function allocate_result(
-        M::AbstractDecoratorManifold,
-        f::TF,
-        x::Vararg{Any, N},
+        M::AbstractDecoratorManifold, f::TF, x::Vararg{Any, N},
     ) where {TF, N}
     return _allocate_result_forwarding(
         get_forwarding_type(M, f, typeof(x[1])),
@@ -234,10 +232,7 @@ end
     return allocate_result(get_embedding(M, typeof(x[1])), f, x...)
 end
 @inline function _allocate_result_forwarding(
-        ::SimpleForwardingType,
-        M::AbstractDecoratorManifold,
-        f::TF,
-        x::Vararg{Any, N},
+        ::SimpleForwardingType, M::AbstractDecoratorManifold, f::TF, x::Vararg{Any, N},
     ) where {TF, N}
     return allocate_result(decorated_manifold(M), f, x...)
 end

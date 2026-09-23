@@ -768,11 +768,7 @@ the tangent space at `p` on manifold `M` to a tangent vector in-place of `Y`.
 See also [`get_vector`](@ref).
 """
 @inline function get_vector!(
-        M::AbstractManifold,
-        Y,
-        p,
-        c,
-        B::AbstractBasis = default_basis(M, typeof(p)),
+        M::AbstractManifold, Y, p, c, B::AbstractBasis = default_basis(M, typeof(p)),
     )
     return _get_vector!(M, Y, p, c, B)
 end

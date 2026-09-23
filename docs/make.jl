@@ -134,6 +134,8 @@ links = InterLinks(
     "Manifolds" => ("https://juliamanifolds.github.io/Manifolds.jl/stable/"),
 )
 makedocs(;
+    # expand the pages with the generic docstrings first, so that a bare reference lands on those
+    expandfirst = ["functions.md", "projections.md", "retractions.md", "vector_transports.md"],
     # for development, we disable prettyurls
     format = Documenter.HTML(;
         prettyurls = (get(ENV, "CI", nothing) == "true") || ("--prettyurls" ∈ ARGS),
