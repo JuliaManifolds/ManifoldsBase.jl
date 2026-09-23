@@ -66,12 +66,16 @@ function get_embedding(M::EmbeddedManifold)
     return M.embedding
 end
 
+# By default, project “passes through” to the decorator, which here would allocate in the embedding
+# This overwrites this and allocates on M
 function project(M::EmbeddedManifold, p)
     q = allocate_result(M, project, p)
     project!(M, q, p)
     return q
 end
 
+# By default, project “passes through” to the decorator, which here would allocate in the embedding
+# This overwrites this and allocates on TpM
 function project(M::EmbeddedManifold, p, X)
     # the order of args switched, since the allocation by default takes the type of the first.
     Y = allocate_result(M, project, X, p)
