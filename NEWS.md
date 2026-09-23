@@ -32,7 +32,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `sectional_curvature` on a `ProductManifold` weights each factor by its Gram determinant and normalizes by that of the product; it summed them unweighted before.
 * `NLSolveInverseRetraction` stores `project_point` and `project_tangent` in their own fields.
 * `retract_embedded!`, `retract_embedded_fused!` and `inverse_retract_embedded!` embed with `embed(M, ...)`, not `embed(get_embedding(M), ...)`.
-* `allocate_result_embedding` looks up the embedding by point type, not tangent vector type.
 * `get_coordinates` on a `ValidationManifold` unwraps its point and tangent vector.
 * `rand(::ValidationManifold; vector_at=)` unwraps `vector_at`.
 * `zero_vector!` on a `ValidationManifold` no longer forwards validation keywords to the wrapped manifold.
