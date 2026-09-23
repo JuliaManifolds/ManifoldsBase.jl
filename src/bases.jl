@@ -1011,7 +1011,7 @@ function _show_basis_vector_range(io::IO, Ξ, range; pre = "", sym = "E")
     end
     return nothing
 end
-function _show_basis_vector_range_noheader(io::IO, Ξ; max_vectors = 4, pre = "", sym = "E")
+function _show_basis_vector_range_noheader(io::IO, Ξ; max_vectors = 4, pre = "  ", sym = " E")
     nv = length(Ξ)
     return if nv ≤ max_vectors
         _show_basis_vector_range(io, Ξ, 1:nv; pre = pre, sym = sym)
