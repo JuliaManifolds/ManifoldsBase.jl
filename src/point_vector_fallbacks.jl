@@ -88,9 +88,10 @@ end
 """
     @default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
 
-Introduce default fallbacks for all basic functions on manifolds, for manifold of type `TM`,
-points of type `TP`, tangent vectors of type `TV`, with forwarding to fields `pfield` and
-`vfield` for point and tangent vector functions, respectively.
+Introduce default fallbacks for all basic functions on manifolds.
+
+To be precise given a manifold of type `TM`, points of type `TP`, tangent vectors of type `TV`,
+with forwarding to fields `pfield` and `vfield` for point and tangent vector functions, respectively.
 """
 macro default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
     block = quote

@@ -1,5 +1,8 @@
 [deps]
 ManifoldsBase = "3362f125-f0bb-47a3-aa74-596ffd7ef2fb"
 
+[sources]
+ManifoldsBase = {path = ".."}
+
 [compat]
 ManifoldsBase = "1,2"

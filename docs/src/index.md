@@ -79,21 +79,61 @@ or add yourself by forking, editing this file and [opening a PR](https://github.
 
 ## Citation
 
-If you use `ManifoldsBase.jl` in your work, please cite the following paper [AxenBaranBergmannRzecki:2023](@cite),
-which covers both the basic interface as well as the performance for `Manifolds.jl`.
+If you use `ManifoldsBase.jl` in your work, please cite the following open access article [AxenBaranBergmannRzecki:2023](@cite),
+which covers both the basic interface as well as the performance for `Manifolds.jl`
 
+> _Axen, S. D., Baran, M., Bergmann, R., Rzecki, K._ (2023).
+> **Manifolds.jl: An Extensible Julia Framework for Data Analysis on Manifolds**,
+> ACM Transactions on Mathematical Software, Volume 49, Issue 4, Article No. 33.
+>
+> doi: [10.1145/3618296](https://doi.org/10.1145/3618296),
+> arXiv: [2106.08777](https://arxiv.org/abs/2106.08777)
+
+```@raw html
+<details><summary><code>AxenBaranBergmannRzecki:2023</code> (BibLaTeX) </summary>
+```
 ```biblatex
 @article{AxenBaranBergmannRzecki:2023,
-    AUTHOR    = {Axen, Seth D. and Baran, Mateusz and Bergmann, Ronny and Rzecki, Krzysztof},
-    ARTICLENO = {33},
-    DOI       = {10.1145/3618296},
-    JOURNAL   = {ACM Transactions on Mathematical Software},
-    MONTH     = {dec},
-    NUMBER    = {4},
-    TITLE     = {Manifolds.jl: An Extensible {J}ulia Framework for Data Analysis on Manifolds},
-    VOLUME    = {49},
-    YEAR      = {2023}
+    AUTHOR     = {Seth D. Axen and Mateusz Baran and Ronny Bergmann and Krzysztof Rzecki},
+    ARTICLENO  = {33},
+    DOI        = {10.1145/3618296},
+    JOURNAL    = {ACM Transactions on Mathematical Software},
+    MONTH      = {dec},
+    NUMBER     = {4},
+    TITLE      = {Manifolds.jl: An Extensible {J}ulia Framework for Data Analysis on Manifolds},
+    VOLUME     = {49},
+    YEAR       = {2023},
+    EPRINT     = {2106.08777},
+    EPRINTTYPE = {arXiv}
 }
 ```
+```@raw html
+</details><br/>
+```
 
-Note that the citation is in [BibLaTeX](https://ctan.org/pkg/biblatex) format.
+To refer to a certain version or the source code in general please cite for example
+
+> _Axen, S. D., Baran, M., Bergmann, R._ (2026). **ManifoldsBase.jl**, Zenodo.
+>
+> doi: [10.5281/ZENODO.5964340](https://doi.org/10.5281/ZENODO.5964340)
+
+```@raw html
+<details><summary><code>manifoldsbasejl-zenodo-mostrecent</code> (BibLaTeX) </summary>
+```
+```biblatex
+@software{manifoldsbasejl-zenodo-mostrecent,
+    AUTHOR    = {Seth D. Axen and Mateusz Baran and Ronny Bergmann},
+    TITLE     = {ManifoldsBase.jl},
+    DOI       = {10.5281/ZENODO.5964340},
+    URL       = {https://zenodo.org/record/5964340},
+    PUBLISHER = {Zenodo},
+    YEAR      = {2026},
+    COPYRIGHT = {MIT License}
+}
+```
+```@raw html
+</details> <br/>
+```
+
+for the most recent version.
+For a corresponding version specific DOI, see [the list of all versions](https://zenodo.org/search?page=1&size=20&q=conceptrecid:%225964340%22&sort=-version&all_versions=True).
