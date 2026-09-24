@@ -89,7 +89,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.5.0] 08/07/2026
 
-## Added
+### Added
 
 * a `ZeroVector` type, to allow for static dispatch and avoid allocating unnecessary zeros similar to the [`Identity`](https://juliamanifolds.github.io/LieGroups.jl/stable/interface/operations/#LieGroups.Identity) on [`LieGroups.jl`](https://github.com/JuliaManifolds/LieGroups.jl).
 
@@ -97,7 +97,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-* an extension to also perform the numerical checks plots with [`Makie.jl](https://https://makie.org/) (#272).
+* an extension to also perform the numerical checks plots with [`Makie.jl`](https://makie.org/) (#272).
 
 ### Fixed
 
@@ -109,7 +109,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * moved Julia package dependency action to using dependabot
 * Bump compat of RecursiveArrayTools to include 4
-* unify the TestUtils and TestSuite package into one `ManifoldsBase.Test` submodule the same way was in `Manifolds.jl`
+* unify the TestUtils and TestSuite package into one `ManifoldsBase.Test` submodule the same way it is done in `Manifolds.jl`
 * setup a CI to check for typographical errors with `typos`.
 
 ## [2.3.4] 25/03/2026
@@ -162,14 +162,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-* bugfixes on `get_embedding`, `get_embedding_type`, and `get_forwarding_type`, which now all accept as their second (third for the last case) argument consistently take the Type of a point (and no longer sometimes a point sometimes its type)
+* bugfixes on `get_embedding`, `get_embedding_type`, and `get_forwarding_type`, which now all consistently take the type of a point as their second (third for the last case) argument (and no longer sometimes a point sometimes its type)
 * `has_components` no longer propagates to the embedding
 
 ## [2.1.0] 30/10/2025
 
 ### Added
 
-* an `StabilizedInverseRetraction` that improves numerical stability of another inverse retraction by projecting the resulting tangent vector onto its tangent space.
+* a `StabilizedInverseRetraction` that improves numerical stability of another inverse retraction by projecting the resulting tangent vector onto its tangent space.
 
 ## [2.0.2] 23/10/2025
 
@@ -580,7 +580,7 @@ Note that this release did not trigger a TagBot, so it appears within 0.14.2 in 
 
 - Introduce `change_representer` already in `ManifoldsBase`.
 
-## [0.14.0] – 15/02/2023
+## [0.14.0] 15/02/2023
 
 ### Added
 

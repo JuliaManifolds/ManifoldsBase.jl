@@ -64,14 +64,14 @@ CurrentModule = ManifoldsBase
 ManifoldsBase.ManifoldsBase
 ```
 
-This packages has two main purposes.
+This package has two main purposes.
 You can add it as a dependency if you plan to work on manifolds (generically) or if you plan to
 define own manifolds in a package.
 For a package that (only) depends on `ManifoldsBase.jl`, see [Manopt.jl](https://manoptjl.org/stable/),
 which implements optimization algorithms on manifolds using this interface.
 These optimisation algorithms can hence be used with any manifold implemented based on `ManifoldsBase.jl`.
 
-For a library of manifolds implemented using this interface [Manifolds.jl](https://juliamanifolds.github.io/Manifolds.jl/stable/).
+For a library of manifolds implemented using this interface see [Manifolds.jl](https://juliamanifolds.github.io/Manifolds.jl/stable/).
 
 Your package is using `ManifoldsBase`?
 We would like to add that here as well. Either [write an issue](https://github.com/JuliaManifolds/ManifoldsBase.jl/issues/new)
@@ -90,7 +90,7 @@ which covers both the basic interface as well as the performance for `Manifolds.
     JOURNAL   = {ACM Transactions on Mathematical Software},
     MONTH     = {dec},
     NUMBER    = {4},
-    TITLE     = {Manifolds.Jl: An Extensible Julia Framework for Data Analysis on Manifolds},
+    TITLE     = {Manifolds.jl: An Extensible {J}ulia Framework for Data Analysis on Manifolds},
     VOLUME    = {49},
     YEAR      = {2023}
 }

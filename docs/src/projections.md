@@ -1,4 +1,4 @@
-### Projections
+# Projections
 
 A manifold might be embedded in some space.
 Often this is implicitly assumed, for example the complex [Circle](@extref `Manifolds.Circle`) is embedded in the complex plane.
@@ -11,7 +11,7 @@ Then we can do two kinds of projections.
 To make this concrete in an example for the Circle ``\mathcal M=\mathcal C := \{ p ∈ ℂ | |p| = 1\}``
 the embedding can be chosen to be the manifold ``\mathcal N = ℂ`` and due to our representation of ``\mathcal C`` as complex numbers already, we have ``i(p) = p``, that is the identity as the embedding function.
 
-The first projection we can consider is for a given a point ``p∈\mathcal N`` in the embedding we can look for the closest point on the manifold ``\mathcal M``, i.e.
+The first projection we can consider is for a given point ``p∈\mathcal N`` in the embedding we can look for the closest point on the manifold ``\mathcal M``, i.e.
 
 ```math
   \operatorname*{arg\,min}_{q∈ \mathcal M}\ d_{\mathcal N}(i(q),p)
@@ -19,7 +19,7 @@ The first projection we can consider is for a given a point ``p∈\mathcal N`` i
 
 And this resulting ``q`` we call the projection of ``p`` onto the manifold ``\mathcal M``.
 
-The second projection we can look at is for a given a point ``p∈\mathcal M`` and a vector in ``X∈ T_{i(p)}\mathcal N`` in the embedding,
+The second projection we can look at is for a given point ``p∈\mathcal M`` and a vector in ``X∈ T_{i(p)}\mathcal N`` in the embedding,
 where we can similarly look for the closest tangent vector ``Y∈ T_p\mathcal M``, which we have to embed itself before itself.
 Embedding a tangent vector is usually the same as using the pushforward ``\mathrm{d}i_p`` of the embedding (at ``p``).
 We obtain

@@ -359,7 +359,7 @@ _doc_distance_prod = """
     distance(M::ProductManifold, p, q, r::Real=2)
     distance(M::ProductManifold, p, q, m::AbstractInverseRetractionMethod=LogarithmicInverseRetraction(), r::Real=2)
 
-Compute the distance between `q` and `p` on an [`ProductManifold`](@ref).
+Compute the distance between `q` and `p` on a [`ProductManifold`](@ref).
 
 First, the componentwise distances are computed. These can be approximated using the
 `norm` of an [`AbstractInverseRetractionMethod`](@ref) `m`.
@@ -569,7 +569,7 @@ end
 """
     has_components(::ProductManifold)
 
-Return `true` since points on an [`ProductManifold`](@ref) consist of components.
+Return `true` since points on a [`ProductManifold`](@ref) consist of components.
 """
 has_components(::ProductManifold) = true
 
@@ -834,7 +834,7 @@ end
     retract(M::ProductManifold, p, X, m::ProductRetraction)
 
 Compute the retraction from `p` with tangent vector `X` on the [`ProductManifold`](@ref) `M`
-using an [`ProductRetraction`](@ref), which by default encapsulates retractions of the
+using a [`ProductRetraction`](@ref), which by default encapsulates retractions of the
 base manifolds. Then this method is performed elementwise, so the encapsulated retractions
 method has to be one that is available on the manifolds.
 """

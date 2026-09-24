@@ -43,7 +43,7 @@ default(; show = false, reuse = true)
             M, ProjectionInverseRetraction(), p, X; limits = (-2.5, 0.0), plot = true,
         )
 
-        # ProjectionRetraction only works <= 1 well in stepsize
+        # ProjectionInverseRetraction only works <= 1 well in stepsize
         @test_throws ErrorException check_inverse_retraction(
             M, ProjectionInverseRetraction(), p, X;
             limits = (-2.5, 2.0), # yields a bit too long tangents
@@ -52,7 +52,7 @@ default(; show = false, reuse = true)
         @test !check_inverse_retraction(
             M, ProjectionInverseRetraction(), p, X; limits = (-2.5, 2.0),
         )
-        # Check exatness case
+        # Check exactness case
         @test check_inverse_retraction(
             M, LogarithmicInverseRetraction(), p, X; exactness_tol = 1.0e-7,
         )
@@ -76,7 +76,7 @@ default(; show = false, reuse = true)
             M, ProjectionTransport(), p, X, Y; second_order = false, plot = true,
         )
 
-        # ProjectionRetraction only works <= 1 well in stepsize
+        # ProjectionTransport only works <= 1 well in stepsize
         @test_throws ErrorException check_vector_transport(
             M, ProjectionTransport(), p, X, Y;
             limits = (-2.5, 2.0), # yields a bit too long tangents

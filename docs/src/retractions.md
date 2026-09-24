@@ -1,4 +1,4 @@
-## [Retractions and inverse Retractions](@id sec-retractions)
+# [Retractions and inverse Retractions](@id sec-retractions)
 
 The [exponential and logarithmic map](@ref exp-and-log) might be too expensive to evaluate or not be available in a very stable numerical way on certain manifolds ``\mathcal M``.
 Retractions provide a possibly cheap, fast and stable alternative.

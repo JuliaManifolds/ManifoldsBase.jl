@@ -144,7 +144,7 @@ _vMc(a::Union{<:NTuple{N, Symbol} where {N}, <:AbstractVector{Symbol}}, b::Symbo
 """
     ValidationMPoint{P} <: AbstractManifoldPoint
 
-Represent a point on an [`ValidationManifold`](@ref). The point is stored internally.
+Represent a point on a [`ValidationManifold`](@ref). The point is stored internally.
 
 # Fields
 * ` value::P`: the internally stored point on a manifold
@@ -162,7 +162,7 @@ end
 """
     ValidationFibreVector{TType<:VectorSpaceType,V,P} <: AbstractFibreVector{TType}
 
-Represent a tangent vector to a point on an [`ValidationManifold`](@ref).
+Represent a tangent vector to a point on a [`ValidationManifold`](@ref).
 The original vector of the manifold is stored internally. The corresponding base point
 of the fibre can be stored as well.
 
@@ -189,7 +189,7 @@ end
 """
     ValidationTangentVector = ValidationFibreVector{TangentSpaceType}
 
-Represent a tangent vector to a point on an [`ValidationManifold`](@ref), i.e. on a manifold
+Represent a tangent vector to a point on a [`ValidationManifold`](@ref), i.e. on a manifold
 where data can be represented by arrays. The array is stored internally and semantically.
 This distinguished the value from [`ValidationMPoint`](@ref)s vectors of other types.
 """
@@ -198,7 +198,7 @@ const ValidationTangentVector = ValidationFibreVector{TangentSpaceType}
 """
     ValidationCotangentVector = ValidationFibreVector{CotangentSpaceType}
 
-Represent a cotangent vector to a point on an [`ValidationManifold`](@ref), i.e. on a manifold
+Represent a cotangent vector to a point on a [`ValidationManifold`](@ref), i.e. on a manifold
 where data can be represented by arrays. The array is stored internally and semantically.
 This distinguished the value from [`ValidationMPoint`](@ref)s vectors of other types.
 """
@@ -211,7 +211,7 @@ const ValidationCotangentVector = ValidationFibreVector{CotangentSpaceType}
 """
     internal_value(p)
 
-Return the internal value of an [`ValidationMPoint`](@ref), [`ValidationTangentVector`](@ref), or
+Return the internal value of a [`ValidationMPoint`](@ref), [`ValidationTangentVector`](@ref), or
 [`ValidationCotangentVector`](@ref) if the value `p` is encapsulated as such.
 Return `p` if it is already a (plain) value on a manifold.
 """
@@ -734,7 +734,7 @@ function show(io::IO, M::ValidationManifold)
         * store_base_point = $(M.store_base_point)
     """
     if length(M.ignore_contexts) > 0
-        s *= "    * ignore_context = $(M.ignore_contexts)\n"
+        s *= "    * ignore_contexts = $(M.ignore_contexts)\n"
     end
     if length(M.ignore_functions) > 0
         s *= "    * ignore_functions = $(M.ignore_functions)"

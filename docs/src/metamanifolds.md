@@ -1,6 +1,6 @@
 # Meta Manifolds
 
-While the interface does not provide concrete manifolds itself, it does provide several manifolds that can be build based on a given [`AbstractManifold`](@ref) instance.
+While the interface does not provide concrete manifolds itself, it does provide several manifolds that can be built based on a given [`AbstractManifold`](@ref) instance.
 
 ## [(Abstract) power manifold](@id sec-power-manifold)
 
@@ -22,7 +22,7 @@ Order = [:macro, :type, :function]
 
 ## Quotient manifolds
 
-A manifold ``\mathcal M`` is then a a quotient manifold of another manifold ``\mathcal N``,
+A manifold ``\mathcal M`` is then a quotient manifold of another manifold ``\mathcal N``,
 i.e. for an [equivalence relation](https://en.wikipedia.org/wiki/Equivalence_relation) ``∼``
 on ``\mathcal N`` we have
 

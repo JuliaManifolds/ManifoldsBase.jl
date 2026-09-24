@@ -326,9 +326,8 @@ ManifoldsBase.metric(::BaseManifold) = DefaultBaseManifoldMetric()
         @test project!(MM, Y, p, X) === project!(M, Y, p, X)
         @test project!(MM, q, p) === project!(M, q, p)
         # without a definition for the metric from the embedding, no projection possible
-        @test_throws MethodError log!(MM, Y, p, q) === project!(M, Y, p, q)
-        @test_throws MethodError vector_transport_to!(MM, Y, p, X, q) ===
-            vector_transport_to!(M, Y, p, X, q)
+        @test_throws MethodError log!(MM, Y, p, q)
+        @test_throws MethodError vector_transport_to!(MM, Y, p, X, q)
         # without DiffEq, these error
         @test_throws MethodError exp(MM, p, X, 1:3)
         # these always fall back anyways.

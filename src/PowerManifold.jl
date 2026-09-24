@@ -1065,7 +1065,7 @@ end
 @doc raw"""
     manifold_dimension(M::PowerManifold)
 
-Returns the manifold-dimension of an [`PowerManifold`](@ref) `M`
+Returns the manifold-dimension of a [`PowerManifold`](@ref) `M`
 ``=\mathcal N = (\mathcal M)^{n_1,…,n_d}``, i.e. with ``n=(n_1,…,n_d)`` the array
 size of the power manifold and ``d_{\mathcal M}`` the dimension of the base manifold
 ``\mathcal M``, the manifold is of dimension

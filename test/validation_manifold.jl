@@ -9,7 +9,6 @@ using ManifoldsBase, LinearAlgebra, Random, Test
     z = [0.0, 1.0, 0.0]
     v = log(M, x, y)
     x2 = ValidationMPoint(x)
-    y2 = ValidationMPoint(y)
     v2 = log(A, x, y) # auto convert
     y2 = exp(A, x, v2)
     w = log(M, x, z)
@@ -26,9 +25,9 @@ using ManifoldsBase, LinearAlgebra, Random, Test
         # Test that we can ignore point contexts
         A2a = ValidationManifold(M; ignore_contexts = [:Point])
         @test is_point(A2a, [1, 2, 3, 4])
-        @test_throws DomainError !is_vector(A2a, x, [1, 2, 3, 4])
+        @test_throws DomainError is_vector(A2a, x, [1, 2, 3, 4])
         A2b = ValidationManifold(M; ignore_contexts = [:Vector])
-        @test_throws DomainError !is_point(A2b, [1, 2, 3, 4])
+        @test_throws DomainError is_point(A2b, [1, 2, 3, 4])
         @test is_vector(A2b, x, [1, 2, 3, 4])
         A3a = ValidationManifold(M; ignore_functions = Dict(exp => :All))
         @test is_point(A3a, [1, 2, 3, 4]; within = exp)
@@ -144,8 +143,6 @@ using ManifoldsBase, LinearAlgebra, Random, Test
         @test isapprox(A, x2, v2, vector_transport_to(A, x2, v2, y2, pt))
         zero_vector!(A, v2s, x)
         @test isapprox(A, x, v2s, zero_vector(M, x))
-        c2 = [x2]
-        v3 = similar(v2)
         @test injectivity_radius(A) == Inf
         @test injectivity_radius(A, x) == Inf
         @test injectivity_radius(A, ManifoldsBase.ExponentialRetraction()) == Inf

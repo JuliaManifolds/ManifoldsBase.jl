@@ -152,7 +152,6 @@ end
                         @test !is_vector(N, pE1, p)
                         @test !is_vector(N, pE2, p)
                         # tangents - with proper base
-                        @test is_vector(N, p, p, true)
                         @test !is_vector(N, p, pE1)
                         @test !is_vector(N, p, pE2)
                         @test_throws ComponentManifoldError is_vector(

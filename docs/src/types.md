@@ -12,7 +12,7 @@ AbstractManifold
 which should store information about the manifold, for example parameters inherent to the manifold.
 
 In order of parameters for any subtype of [`AbstractManifold`](@ref) it would be good if the first parameter is the number type that the abstract type has as well, if it is not fixed to a specific one.
-The second one should be the type of field type for size information. This might be the dimension of the manifold, like for the [`Sphere`](@extref `Manifolds.Sphere`) or any other number(s) determining the manifolds representation or dimension, like the matrix size for the [`SymmetricPositiveDefinite`](@extref `Manifolds.SymmetricPositiveDefinite`) manifold.
+The second one should be the type of the field for size information. This might be the dimension of the manifold, like for the [`Sphere`](@extref `Manifolds.Sphere`) or any other number(s) determining the manifold's representation or dimension, like the matrix size for the [`SymmetricPositiveDefinite`](@extref `Manifolds.SymmetricPositiveDefinite`) manifold.
 
 ## Points on a manifold
 
@@ -44,7 +44,7 @@ it might happen that both a subtype of [`AbstractManifoldPoint`](@ref) and a sub
 are just encapsulating a value
 
 This is taken into account by the following macros, that forward several actions just to this field. Most prominently vector operations for the tangent vectors.
-If there is still a default case, a macro sets this type to be equivalent to calling the manifold functions just with the types field that carries the value.
+If there is still a default case, a macro sets this type to be equivalent to calling the manifold functions just with the type's field that carries the value.
 
 ```@autodocs
 Modules = [ManifoldsBase]

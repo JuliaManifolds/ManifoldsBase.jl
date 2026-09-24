@@ -1,6 +1,7 @@
 #
-# Test the specific vector trnasport along implementations that do iterative transport,
-# also the Schild and pole special cases
+# Test the vector transport fallback types that carry their own retraction
+# (`VectorTransportDirection`), their own inverse retraction (`VectorTransportTo`)
+# or extra keywords (`VectorTransportWithKeywords`)
 #
 using ManifoldsBase, Test
 import ManifoldsBase: parallel_transport_to!
