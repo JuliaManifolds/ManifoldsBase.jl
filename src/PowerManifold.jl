@@ -25,14 +25,14 @@ of size equal to `TSize` of a [`PowerManifold`](@ref).
 Each element of such array stores a single point or tangent vector.
 
 For modifying operations, each element of the outer array is replaced using non-modifying
-operations, differently than for [`NestedReplacingPowerRepresentation`](@ref).
+operations, differently than for [`NestedPowerRepresentation`](@ref).
 """
 struct NestedReplacingPowerRepresentation <: AbstractPowerRepresentation end
 
 @doc raw"""
     AbstractPowerManifold{𝔽,M,TPR} <: AbstractManifold{𝔽}
 
-An abstract [`AbstractManifold`](@ref) to represent manifolds that are build as powers
+An abstract [`AbstractManifold`](@ref) to represent manifolds that are built as powers
 of another [`AbstractManifold`](@ref) `M` with representation type `TPR`, a subtype of
 [`AbstractPowerRepresentation`](@ref).
 """
@@ -43,7 +43,7 @@ abstract type AbstractPowerManifold{
 } <: AbstractManifold{𝔽} end
 
 @doc raw"""
-    PowerManifold{𝔽,TM<:AbstractManifold,TSize,TPR<:AbstractPowerRepresentation} <: AbstractPowerManifold{𝔽,TM}
+    PowerManifold{𝔽,TM<:AbstractManifold,TSize,TPR<:AbstractPowerRepresentation} <: AbstractPowerManifold{𝔽,TM,TPR}
 
 The power manifold ``\mathcal M^{n_1× n_2 × … × n_d}`` with power geometry.
  `TSize` defines the number of elements along each axis, either statically using
@@ -340,7 +340,7 @@ end
     check_power_size(M, p)
     check_power_size(M, p, X)
 
-Check whether `p`` has the right size to represent points on `M`` generically, i.e. just
+Check whether `p` has the right size to represent points on `M` generically, i.e. just
 checking the overall sizes, not the individual ones per manifold.
 """
 function check_power_size(M::AbstractPowerManifold, p)
@@ -364,7 +364,7 @@ function check_power_size(M::AbstractPowerManifold, p, X)
     d = prod(representation_size(M.manifold)) * prod(power_dimensions(M))
     (d != length(X)) && return DomainError(
         length(X),
-        "The tangent vector $X can not belong to a trangent space at on $M, since its number of elements does not match the required overall representation size ($d)",
+        "The tangent vector $X can not belong to a tangent space on $M, since its number of elements does not match the required overall representation size ($d)",
     )
     return nothing
 end
@@ -372,7 +372,7 @@ function check_power_size(M::Union{PowerManifoldNested, PowerManifoldNestedRepla
     d = prod(power_dimensions(M))
     (d != length(X)) && return DomainError(
         length(X),
-        "The point $p can not be a point on $M, since its number of elements does not match the power dimensions ($d)",
+        "The tangent vector $X can not belong to a tangent space on $M, since its number of elements does not match the power dimensions ($d)",
     )
     return nothing
 end
@@ -512,7 +512,7 @@ on `M.manifold`. These can be approximated using the
 This yields an array of distance values.
 
 Second, we compute the `r`-norm on this array of distances.
-This is also the only place, there the `r` is used.
+This is also the only place where the `r` is used.
 """
 
 function distance(M::AbstractPowerManifold, p, q)
@@ -647,7 +647,7 @@ point `p`.
 
 !!! note
     while usually the manifold is a first argument in all functions in `ManifoldsBase.jl`,
-    we follow the signature of `fill`, where the power manifold serves are the size information.
+    we follow the signature of `fill`, where the power manifold serves as the size information.
 """
 function fill(p, M::AbstractPowerManifold)
     P = allocate_result(M, rand) # rand finds the right way to allocate our point usually
@@ -661,7 +661,7 @@ Fill a point `P` on the [`AbstractPowerManifold`](@ref) `M`, setting every entry
 
 !!! note
     while usually the manifold is the first argument in all functions in `ManifoldsBase.jl`,
-    we follow the signature of `fill!`, where the power manifold serves are the size information.
+    we follow the signature of `fill!`, where the power manifold serves as the size information.
 """
 function fill!(P, p, M::PowerManifoldNestedReplacing)
     for i in get_iterator(M)
@@ -1101,8 +1101,8 @@ end
     norm(M::AbstractPowerManifold, p, X, r::Real=2)
 
 Compute the norm of `X` from the tangent space of `p` on an
-[`AbstractPowerManifold`](@ref) `M`, i.e. from the element wise norms `r`-norm is computed,
-where the default `r=2` yields the Frobenius norm is computed.
+[`AbstractPowerManifold`](@ref) `M`, i.e. the `r`-norm of the element wise norms is computed,
+where the default `r=2` yields the Frobenius norm.
 """
 function LinearAlgebra.norm(M::AbstractPowerManifold, p, X, r::Real = 2)
     (isinf(r) && r > 0) && return _norm_max(M, p, X)
@@ -1433,10 +1433,10 @@ end
 @doc raw"""
     sectional_curvature(M::AbstractPowerManifold, p, X, Y)
 
-Compute the sectional curvature of a power manifold manifold ``\mathcal M`` at a point
+Compute the sectional curvature of a power manifold ``\mathcal M`` at a point
 ``p \in \mathcal M`` on two linearly independent tangent vectors at ``p``. It may be 0 for
- if projections of `X` and `Y` on subspaces corresponding to component manifolds
-are not linearly independent.
+a power of a non-flat manifold if projections of `X` and `Y` on subspaces corresponding to
+component manifolds are not linearly independent.
 """
 function sectional_curvature(M::AbstractPowerManifold, p, X, Y)
     curvature = zero(number_eltype(X))
@@ -1492,7 +1492,7 @@ end
     set_component!(M::AbstractPowerManifold, q, p, idx...)
 
 Set the component of a point `q` on an [`AbstractPowerManifold`](@ref) `M` at index `idx`
-to `p`, which itself is a point on the [`AbstractManifold`](@ref) the power manifold is build on.
+to `p`, which itself is a point on the [`AbstractManifold`](@ref) the power manifold is built on.
 """
 function set_component!(M::AbstractPowerManifold, q, p, idx...)
     rep_size = representation_size(M.manifold)
@@ -1506,7 +1506,7 @@ end
     q[M::AbstractPowerManifold, i...] = p
 
 Set the element(s) at index `[i...]` of a point `q` on an [`AbstractPowerManifold`](@ref)
-`M` by linear or multidimensional indexing to `q`.
+`M` by linear or multidimensional indexing to `p`.
 See also [Array Indexing](https://docs.julialang.org/en/v1/manual/arrays/#man-array-indexing-1) in Julia.
 """
 Base.@propagate_inbounds function Base.setindex!(

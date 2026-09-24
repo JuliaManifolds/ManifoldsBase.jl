@@ -314,7 +314,7 @@ end
 Return whether an [`AbstractMetric`](@ref)
 is the default metric on the manifold `M` or not.
 
-If `M` is a |`MetricManifold`](@ref) this indicates whether the metric now used is the same as the
+If `M` is a [`MetricManifold`](@ref) this indicates whether the metric now used is the same as the
 default one on the wrapped manifold.
 """
 is_default_metric(M::AbstractManifold, G::AbstractMetric)
@@ -357,9 +357,10 @@ end
 manifold_dimension(M::MetricManifold) = manifold_dimension(M.manifold)
 
 @doc raw"""
+    metric(M::AbstractManifold)
     metric(M::MetricManifold)
 
-Get the metric ``g`` of the [`AbstractManifold`](@ref)`(M)`.
+Get the metric ``g`` of the [`AbstractManifold`](@ref) `M`.
 """
 metric(::AbstractManifold)
 

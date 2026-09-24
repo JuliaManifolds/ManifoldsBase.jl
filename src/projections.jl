@@ -39,7 +39,7 @@ is given.
 Additionally, `project` includes changing data representation, if applicable, i.e.
 if the tangents on `M` are not represented in the same way as points on the embedding,
 the representation is changed accordingly. This is the case for example for Lie groups,
-when tangent vectors are represented in the Lie algebra. after projection the change to the
+when tangent vectors are represented in the Lie algebra. After projection the change to the
 Lie algebra is performed, too.
 If you do not want to change the data representation, you should use [`embed_project`](@ref embed_project(M::AbstractManifold, p, X)) instead.
 
@@ -64,7 +64,7 @@ is given.
 Additionally, `project!` includes changing data representation, if applicable, i.e.
 if the tangents on `M` are not represented in the same way as points on the embedding,
 the representation is changed accordingly. This is the case for example for Lie groups,
-when tangent vectors are represented in the Lie algebra. after projection the change to the
+when tangent vectors are represented in the Lie algebra. After projection the change to the
 Lie algebra is performed, too.
 If you do not want to change the data representation, you should use [`embed_project!`](@ref embed_project!(M::AbstractManifold, Y, p, X)) instead.
 

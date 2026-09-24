@@ -46,7 +46,6 @@ using ManifoldsBase: DefaultManifold, VectorSpaceType, ℝ, Fiber
         @test isapprox(t_p, X, log(t_p, X, Y), [0.0, 2.0, -2.0])
         @test inner(t_p, X, X, X) ≈ 1.0
         @test norm(t_p, X) ≈ 1.0
-        @test norm(t_p, X) ≈ 1.0
         @test parallel_transport_to(t_p, X, Y, X) ≈ Y
         @test vector_transport_to(t_p, X, Y, X) ≈ Y
         @test vector_transport_to(t_p, X, Y, X, ProjectionTransport()) ≈ Y

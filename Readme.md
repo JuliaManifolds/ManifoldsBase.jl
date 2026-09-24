@@ -59,7 +59,7 @@ To refer to a certain version we recommend to also cite for example
     DOI       = {10.5281/ZENODO.5964340},
     URL       = {https://zenodo.org/record/5964340},
     PUBLISHER = {Zenodo},
-    YEAR      = {2022},
+    YEAR      = {2026},
     COPYRIGHT = {MIT License}
 }
 ```

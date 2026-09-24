@@ -51,8 +51,6 @@ using ManifoldsBase, Test
             ProjectionRetraction(),
             QRRetraction(),
             SoftmaxRetraction(),
-            CayleyRetraction(),
-            PadeRetraction(2),
         ]
         @test_throws MethodError retract(M, p, X, R)
         @test_throws MethodError ManifoldsBase.retract_fused(M, p, X, 1.0, R)
@@ -73,7 +71,6 @@ end
 
 @testset "Default Fallbacks and Error Messages" begin
     M = ManifoldsBase.DefaultManifold(3)
-    p = [1.0, 0.0, 0.0]
     @test number_of_coordinates(M, ManifoldsBase.ℝ) == 3
     @test_throws ErrorException PadeRetraction(0)
 end

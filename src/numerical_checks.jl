@@ -1,7 +1,7 @@
 @doc raw"""
     check_inverse_retraction(
         M::AbstractManifold,
-        inverse_rectraction_method::AbstractInverseRetractionMethod,
+        inverse_retraction_method::AbstractInverseRetractionMethod,
         p=rand(M),
         X=rand(M; vector_at=p);
         #
@@ -12,7 +12,7 @@
         N::Int = 101,
         name::String = second_order ? "second order inverse retraction" : "inverse retraction",
         plot::Bool = false,
-        second_order::Bool = true
+        second_order::Bool = true,
         slope_tol::Real = 0.1,
         error::Symbol = :none,
         window = nothing,
@@ -24,7 +24,7 @@ This requires the [`exp`](@ref) and [`norm`](@ref) functions to be implemented f
 This implements a method similar to [Boumal:2023; Section 4.8 or Section 6.8](@cite).
 
 Note that if the errors are below the given tolerance and the method is exact,
-no plot is generated,
+no plot is generated.
 
 # Keyword arguments
 
@@ -36,7 +36,7 @@ no plot is generated,
 * `name`:              name to display in the plot
 * `plot`:              whether to plot the result (see [`plot_slope`](@ref))
   The plot is in log-log-scale. This is returned and can then also be saved.
-* `second_order`:      check whether the retraction is of second order. if set to `false`, first order is checked.
+* `second_order`:      check whether the inverse retraction is of second order. if set to `false`, first order is checked.
 * `slope_tol`:         tolerance for the slope (global) of the approximation
 * `error`:             specify how to report errors: `:none`, `:info`, `:warn`, or `:error` are available
 * `window`:            specify window sizes within the `log_range` that are used for the slope estimation.
@@ -69,7 +69,7 @@ end
 """
     plot_check_geodesic(T, N, e_norm, e_pt, e_alpha; name="")
 
-Plot the three errors `e_norm`, `e_pt, `e_alpha` as described in [`check_geodesic`](@ref),
+Plot the three errors `e_norm`, `e_pt`, `e_alpha` as described in [`check_geodesic`](@ref),
 where `T` are all time points used, `N` is their length, where
 * `e_norm` is of length N-1, since it is obtained from forward differences,
 * `e_pt` and `e_alpha` are of length `N-2` since they are second order forward differences
@@ -102,7 +102,7 @@ end
 
 Numerically check whether the [`geodesic`](@ref) implementation is correct.
 This check requires both the [`log`](@ref) and [`parallel_transport_to`](@ref) functions to be implemented
-in order to an exact numerical verification.
+in order to get an exact numerical verification.
 We further require the [`norm`](@ref) function to be implemented for the [`AbstractManifold`](@ref) `M`.
 
 You can provide an `inverse_retraction_method` and `vector_transport_method` to be used,
@@ -114,7 +114,8 @@ The tests performed are the following based on sampling the geodesic ``\gamma(t)
 1. Compute the norms of the tangent vectors ``\dot\gamma(t_i) ≈ X_i = \log_{p_i}(p_{i+1})``, ``i=0,...,N-2``
    and check how far these norms deviate from their mean value.
 2. Check how far this mean deviates from being ``\frac{||X||}{N-1}``
-3. Check that the parallel transport of each ``X_i`` from ``p_i`` to ``p_{i+1}`` is close to ``X_{i+1}``.
+3. Check that the parallel transport of each ``X_{i+1}`` from ``p_{i+1}`` to ``p_i`` is close to ``X_i``,
+   both in norm and in the angle the two enclose.
 
 # Arguments
 * `M`:    the manifold to check
@@ -125,7 +126,7 @@ The tests performed are the following based on sampling the geodesic ``\gamma(t)
 * `tol`:     if all errors are below this tolerance, the geodesic is considered to be exact
 * `io`:      provide an `IO` to print the result to
 * `N`:       number of points to sample the geodesic on ``[0,1]`` (default: 101)
-* `plot`:    whether to plot the result (if `Plots.jl` is loaded).
+* `plot`:    whether to plot the result (see [`plot_check_geodesic`](@ref))
 * `error`:   specify how to report errors: `:none`, `:info`, `:warn`, or `:error` are available
 * `inverse_retraction_method`:  method to use for the inverse retraction, it is recommended to use [`LogarithmicInverseRetraction`](@ref)
 * `name`:                       name to display in the plot and in the reported messages
@@ -146,7 +147,7 @@ function check_geodesic(
     Xs = [ inverse_retract(M, ps[i], ps[i + 1], inverse_retraction_method) for i in 1:(N - 1) ]
     norms = [ norm(M, p, X) for (p, X) in zip(ps[1:(end - 1)], Xs) ]
     mean_norm = sum(norms) / length(norms)
-    # errors_1 how far awary are we from constant speed
+    # errors_1 how far away are we from constant speed
     errors_norm = [ abs(n - mean_norm) for n in norms ]
     err_n_max = maximum(errors_norm)
     # errors_2 how far is the mean speed from the ‖X‖/(N-1) the geodesic was started with
@@ -177,7 +178,7 @@ function check_geodesic(
 end
 @doc raw"""
     check_retraction(
-        M::AbstractManifold, rectraction_method::AbstractRetractionMethod,
+        M::AbstractManifold, retraction_method::AbstractRetractionMethod,
         p=rand(M), X=rand(M; vector_at=p);
         #
         exactness_tol::Real = 1e-12,
@@ -187,7 +188,7 @@ end
         N::Int = 101,
         name::String = second_order ? "second order retraction" : "retraction",
         plot::Bool = false,
-        second_order::Bool = true
+        second_order::Bool = true,
         slope_tol::Real = 0.1,
         error::Symbol = :none,
         window = nothing,
@@ -203,7 +204,7 @@ to be implemented for the [`AbstractManifold`](@ref) `M`.
 This implements a method similar to [Boumal:2023; Section 4.8 or Section 6.8](@cite).
 
 Note that if the errors are below the given tolerance and the method is exact,
-no plot is generated,
+no plot is generated.
 
 # Keyword arguments
 
@@ -213,7 +214,7 @@ no plot is generated,
 * `log_range`:         specify the range of points (in log scale) to sample the length of the tangent vector `X`
 * `N`:                 number of points to verify within the `log_range` default range ``[10^{-8},10^{0}]``
 * `name`:              name to display in the plot
-* `plot`:              whether to plot the result (if `Plots.jl` is loaded).
+* `plot`:              whether to plot the result (see [`plot_slope`](@ref))
   The plot is in log-log-scale. This is returned and can then also be saved.
 * `second_order`:      check whether the retraction is of second order. if set to `false`, first order is checked.
 * `slope_tol`:         tolerance for the slope (global) of the approximation
@@ -257,7 +258,7 @@ end
         N::Int = 101,
         name::String = second_order ? "second order vector transport" : "vector transport",
         plot::Bool = false,
-        second_order::Bool = true
+        second_order::Bool = true,
         slope_tol::Real = 0.1,
         window = nothing,
     )
@@ -274,19 +275,19 @@ to be implemented for the [`AbstractManifold`](@ref) `M`.
 This implements a method similar to [Boumal:2023; Section 4.8 or Section 6.8](@cite).
 
 Note that if the errors are below the given tolerance and the method is exact,
-no plot is generated,
+no plot is generated.
 
 # Keyword arguments
 
-* `exactness_tol`:     if all errors are below this tolerance, the differential is considered to be exact
+* `exactness_tol`:     if all errors are below this tolerance, the vector transport is considered to be exact
 * `io`:                provide an `IO` to print the result to
 * `limits`:            specify the limits in the `log_range`, that is the exponent for the range
-* `log_range`:         specify the range of points (in log scale) to sample the differential line
+* `log_range`:         specify the range of points (in log scale) to sample the length of the tangent vector `X`
 * `N`:                 number of points to verify within the `log_range` default range ``[10^{-8},10^{0}]``
 * `name`:              name to display in the plot
-* `plot`:              whether to plot the result (if `Plots.jl` is loaded).
+* `plot`:              whether to plot the result (see [`plot_slope`](@ref))
   The plot is in log-log-scale. This is returned and can then also be saved.
-* `second_order`:      check whether the retraction is of second order. if set to `false`, first order is checked.
+* `second_order`:      check whether the vector transport is of second order. if set to `false`, first order is checked.
 * `slope_tol`:         tolerance for the slope (global) of the approximation
 * `error`:             specify how to report errors: `:none`, `:info`, `:warn`, or `:error` are available
 * `window`:            specify window sizes within the `log_range` that are used for the slope estimation.
@@ -352,7 +353,7 @@ Given a range of values `log_range`, with computed `errors`,
 verify whether this yields a slope of `slope` in log-scale
 
 Note that if the errors are below the given tolerance and the method is exact,
-no plot is be generated,
+no plot is generated.
 
 # Keyword arguments
 
@@ -370,7 +371,7 @@ no plot is be generated,
 
 Note that since the plot yields more information than throwing an error, when both are specified,
 the plot is generated first and returned (to be shown/displayed), such that no error is thrown.
-You you can switch to e.g. `:warn` to get a warning together with the plot.
+You can switch to e.g. `:warn` to get a warning together with the plot.
 """
 function prepare_check_result(
         log_range::AbstractVector, errors::AbstractVector, slope::Real;

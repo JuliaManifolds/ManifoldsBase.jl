@@ -73,9 +73,6 @@ They should only be called as the final step in the previous layer.
 If the default parameters are not dispatched per type, using `_` might be skipped.
 The same holds for functions that do not have these parameters.
 
-When there is no dispatch for different types of the optional parameter (here `t`), the `_` might be skipped.
-One could hence see the last code line as a definition on Layer I that passes directly to Layer III, since there are not parameter to dispatch on.
-
 To close this section, let‘s look at an example.
 The high level (or [Layer I](@ref design-layer1)) definition of the retraction is given by
 

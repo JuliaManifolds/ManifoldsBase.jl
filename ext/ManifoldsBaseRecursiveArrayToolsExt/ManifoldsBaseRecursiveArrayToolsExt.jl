@@ -24,8 +24,6 @@ import ManifoldsBase:
     submanifold_component,
     submanifold_components,
     vector_transport_direction,
-    _vector_transport_direction,
-    _vector_transport_to,
     vector_transport_to,
     ziptuples
 import Base: copyto!, getindex, setindex!, view

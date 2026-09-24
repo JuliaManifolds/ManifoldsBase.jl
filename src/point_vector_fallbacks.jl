@@ -1,10 +1,10 @@
 """
-    manifold_element_forwards(T, field::Symbol)
-    manifold_element_forwards(T, Twhere, field::Symbol)
+    @manifold_element_forwards(T, field::Symbol)
+    @manifold_element_forwards(T, Twhere, field::Symbol)
 
 Introduce basic fallbacks for type `T` (which can be a subtype of `Twhere`) that represents
 points or vectors for a manifold.
-Fallbacks will work by forwarding to the field passed in `field``
+Fallbacks will work by forwarding to the field passed in `field`.
 
 List of forwarded functions:
 * [`allocate`](@ref),
@@ -86,7 +86,7 @@ end
 
 
 """
-    default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
+    @default_manifold_fallbacks(TM, TP, TV, pfield::Symbol, vfield::Symbol)
 
 Introduce default fallbacks for all basic functions on manifolds, for manifold of type `TM`,
 points of type `TP`, tangent vectors of type `TV`, with forwarding to fields `pfield` and
@@ -443,19 +443,19 @@ end
 
 
 @doc raw"""
-    manifold_vector_forwards(T, field::Symbol)
-    manifold_vector_forwards(T, Twhere, field::Symbol)
+    @manifold_vector_forwards(T, field::Symbol)
+    @manifold_vector_forwards(T, Twhere, field::Symbol)
 
 Introduce basic fallbacks for type `T` that represents vectors from a vector bundle for a
 manifold. `Twhere` is put into `where` clause of each method. Fallbacks work by forwarding
 to field passed as `field`.
 
 List of forwarded functions:
-* basic arithmetic (`*`, `/`, `\`, `+`, `-`),
+* basic arithmetic (`*`, `/`, `\`, `+`, `-`, `zero`),
 * all things from [`@manifold_element_forwards`](@ref),
 * broadcasting support.
 
-# example
+# Example
 
     @eval @manifold_vector_forwards ValidationFibreVector{TType} TType value
 """

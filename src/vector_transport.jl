@@ -108,8 +108,8 @@ The [`PoleLadderTransport`](@ref) possesses two advantages compared to
 * while both methods are exact if the curvature is zero, pole ladder is even exact in
   symmetric Riemannian manifolds [Pennec:2018](@cite)
 
-The pole ladder was was proposed in [LorenziPennec:2013](@cite). Its name stems from the fact that
-it resembles a pole ladder when applied to a sequence of points usccessively.
+The pole ladder was proposed in [LorenziPennec:2013](@cite). Its name stems from the fact that
+it resembles a pole ladder when applied to a sequence of points successively.
 
 # Constructor
 ````julia
@@ -180,7 +180,7 @@ where $c$ is the mid point between $q$ and $d=\exp_pX$.
 This method employs the internal function [`schilds_ladder`](@ref)`(M, p, d, q)` that avoids
 leaving the manifold.
 
-The name stems from the image of this paralleltogram in a repeated application yielding the
+The name stems from the image of this parallelogram in a repeated application yielding the
 image of a ladder. The approximation was proposed in [EhlersPiraniSchild:1972](@cite).
 
 # Constructor
@@ -216,7 +216,7 @@ end
 
 Specify a [`vector_transport_direction`](@ref) using a [`AbstractVectorTransportMethod`](@ref)
 with explicitly using the [`AbstractRetractionMethod`](@ref) to determine the point in
-the specified direction where to transsport to.
+the specified direction where to transport to.
 Note that you only need this for the non-default (non-implicit) second retraction method
 associated to a vector transport, i.e. when a first implementation assumed
 an implicit associated retraction.
@@ -241,7 +241,7 @@ end
 
 Specify a [`vector_transport_to`](@ref) using a [`AbstractVectorTransportMethod`](@ref)
 with explicitly using the [`AbstractInverseRetractionMethod`](@ref) to determine the direction
-that transports from  in `p`to `q`.
+that transports from `p` to `q`.
 Note that you only need this for the non-default (non-implicit) second retraction method
 associated to a vector transport, i.e. when a first implementation assumed
 an implicit associated retraction.
@@ -336,14 +336,14 @@ Where the classical pole ladder employs $\operatorname{retr}_d=\exp_d$
 and $\operatorname{retr}_d^{-1}=\log_d$ but for an even cheaper transport these can be set
 to different [`AbstractRetractionMethod`](@ref) and [`AbstractInverseRetractionMethod`](@ref).
 
-When you have $X=log_pd$ and $Y = -\log_q \operatorname{Pl}(p,d,q)$,
+When you have $X=\log_pd$ and $Y = -\log_q \operatorname{Pl}(p,d,q)$,
 you will obtain the [`PoleLadderTransport`](@ref). When performing multiple steps, this
 method avoids the switching to the tangent space. Keep in mind that after $n$ successive
 steps the tangent vector reads $Y_n = (-1)^n\log_q \operatorname{Pl}(p_{n-1},d_{n-1},p_n)$.
 
-It is cheaper to evaluate than [`schilds_ladder`](@ref), sinc if you want to form multiple
+It is cheaper to evaluate than [`schilds_ladder`](@ref), since if you want to form multiple
 ladder steps between `p` and `q`, but with different `d`, there is just one evaluation of a geodesic
-each., since the center `c` can be reused.
+each, because the center `c` can be reused.
 """
 function pole_ladder(
         M, p, d, q, c = mid_point(M, p, q);
@@ -417,7 +417,7 @@ end
 Compute [`schilds_ladder`](@ref) and return the value in the parameter `sl`.
 If the required mid point `c` was computed before, it can be passed using `c`,
 and the allocation of new memory can be avoided providing a tangent vector `X`
-for the interims result.
+for the interim result.
 """
 function schilds_ladder!(
         M, sl, p, d, q, c = mid_point(M, q, d), X = allocate_result(M, log, p, c);
@@ -455,7 +455,7 @@ The [`AbstractLinearVectorTransportMethod`](@ref)s are linear.
 
 # Input Parameters
 * `M` a manifold
-* `p` indicating the tangent space of
+* `p` the point whose tangent space the vector is transported from
 * `X` the tangent vector to be transported
 * `d` indicating a transport direction (and distance through its length)
 * `m` an [`AbstractVectorTransportMethod`](@ref), by default [`default_vector_transport_method`](@ref), so usually [`ParallelTransport`](@ref)

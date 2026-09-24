@@ -2,7 +2,7 @@
     AbstractDecoratorManifold{𝔽} <: AbstractManifold{𝔽}
 
 Declare a manifold to be an abstract decorator.
-A manifold which is a subtype of is a __decorated manifold__, i.e. has
+A manifold which is a subtype of this type is a __decorated manifold__, i.e. it has
 
 * certain additional properties or
 * delegates certain properties to other manifolds.
@@ -11,15 +11,13 @@ Most prominently, a manifold might be an embedded manifold, i.e. points on a man
 are represented by (some, maybe not all) points on another manifold ``\mathcal N``.
 Depending on the type of embedding, several functions are dedicated to the embedding.
 For example if the embedding is isometric, then the [`inner`](@ref) does not have to be
-implemented for ``\mathcal M`` but can be automatically implemented by deligation to ``\mathcal N``.
+implemented for ``\mathcal M`` but can be automatically implemented by delegation to ``\mathcal N``.
 
 This is modelled by the `AbstractDecoratorManifold` and traits. These are mapped to functions,
-which determine the types of transparencies.
+which determine the types of forwarding.
 """
 abstract type AbstractDecoratorManifold{𝔽} <: AbstractManifold{𝔽} end
 
-# turn formatting for for the following functions
-# due to the if with returns inside (formatter puts a return upfront the if)
 function _split_signature(sig::Expr)
     if sig.head == :where
         where_exprs = sig.args[2:end]

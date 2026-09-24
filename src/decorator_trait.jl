@@ -55,7 +55,7 @@ abstract type AbstractEmbeddedForwardingType <: AbstractForwardingType end
 
 
 A type that indicates that a function should not forward to a certain other manifold, e.g.
-and embedding. This means that the user is asked to implement this function themselves.
+an embedding. This means that the user is asked to implement this function themselves.
 """
 struct StopForwardingType <: AbstractForwardingType end
 
@@ -95,10 +95,10 @@ get_forwarding_type(M::AbstractManifold, f, P::Type) = get_forwarding_type(M, f)
 """
     AbstractEmbeddingType
 
-Within all [`AbstractEmbeddedForwardingType`](@ref)s this type is used to indicate different kinds of embeddings,
-for example the default fallback that [`NotEmbeddedManifoldType`](@ref) a manifold is not embedded,
-that is is embedded using [`EmbeddedManifoldType`](@ref) or even specifying further that it is
-isometrically embedded using [`IsometricallyEmbeddedManifoldType`](@ref) or as furthermore
+This type is returned by [`get_embedding_type`](@ref) to indicate different kinds of embeddings,
+for example the default fallback [`NotEmbeddedManifoldType`](@ref) that a manifold is not embedded,
+that it is embedded using [`EmbeddedManifoldType`](@ref) or even specifying further that it is
+isometrically embedded using [`IsometricallyEmbeddedManifoldType`](@ref) or furthermore
 a submanifold using [`EmbeddedSubmanifoldType`](@ref).
 """
 abstract type AbstractEmbeddingType end
@@ -121,7 +121,7 @@ struct EmbeddedManifoldType{EN <: AbstractEmbeddingDirectness} <: AbstractEmbedd
 EmbeddedManifoldType(::EN = DirectEmbedding()) where {EN <: AbstractEmbeddingDirectness} = EmbeddedManifoldType{EN}()
 
 """
-    IsometricallyEmbeddedManifold <: AbstractEmbeddingType
+    IsometricallyEmbeddedManifoldType <: AbstractEmbeddingType
 
 A property to determine whether an [`AbstractDecoratorManifold`](@ref) `M` is
 an isometrically embedded manifold.
@@ -176,7 +176,7 @@ get_embedding_type(M::AbstractManifold, ::Type) = get_embedding_type(M)
     decorated_manifold(M::AbstractDecoratorManifold)
 
 For a manifold `M` that is decorated with some properties, this function returns
-the manifold without that manifold, i.e. the manifold that _was decorated_.
+the manifold without those properties, i.e. the manifold that _was decorated_.
 """
 decorated_manifold(M::AbstractDecoratorManifold)
 decorated_manifold(M::AbstractManifold) = M
@@ -189,7 +189,7 @@ function base_manifold(M::AbstractDecoratorManifold, depth::Val{N} = Val(-1)) wh
     # end recursion II: M is equal to its decorated manifold (avoid stack overflow)
     D = decorated_manifold(M)
     M === D && return M
-    # indefinite many steps for negative values of M
+    # indefinite many steps for negative values of N
     N < 0 && return base_manifold(D, depth)
     # reduce depth otherwise
     return base_manifold(D, Val(N - 1))

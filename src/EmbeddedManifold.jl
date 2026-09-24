@@ -60,7 +60,7 @@ decorated_manifold(M::EmbeddedManifold) = M.manifold
 """
     get_embedding(M::EmbeddedManifold)
 
-Return the embedding [`EmbeddedManifold`](@ref) `N` of `M`, if it exists.
+Return the [`AbstractManifold`](@ref) `N` the [`EmbeddedManifold`](@ref) `M` is embedded into.
 """
 function get_embedding(M::EmbeddedManifold)
     return M.embedding

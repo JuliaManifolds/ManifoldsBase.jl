@@ -79,7 +79,7 @@ or add yourself by forking, editing this file and [opening a PR](https://github.
 
 ## Citation
 
-If you use `ManifoldsBase.jl` in your work, please cite the following paper,
+If you use `ManifoldsBase.jl` in your work, please cite the following paper [AxenBaranBergmannRzecki:2023](@cite),
 which covers both the basic interface as well as the performance for `Manifolds.jl`.
 
 ```biblatex

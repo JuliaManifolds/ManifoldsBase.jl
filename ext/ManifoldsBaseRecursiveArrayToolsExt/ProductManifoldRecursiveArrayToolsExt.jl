@@ -1,4 +1,3 @@
-allocate(a::AbstractArray{<:ArrayPartition}) = map(allocate, a)
 allocate(x::ArrayPartition) = ArrayPartition(map(allocate, x.x)...)
 function allocate(x::ArrayPartition, T::Type)
     return ArrayPartition(map(t -> allocate(t, T), submanifold_components(x))...)
@@ -341,7 +340,7 @@ function vector_transport_to(
     )
     return ArrayPartition(
         map(
-            (iM, ip, iX, id) -> vector_transport_to(iM, ip, iX, id, m),
+            (iM, ip, iX, iq) -> vector_transport_to(iM, ip, iX, iq, m),
             M.manifolds,
             submanifold_components(M, p),
             submanifold_components(M, X),

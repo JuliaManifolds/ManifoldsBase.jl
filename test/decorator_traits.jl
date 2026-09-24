@@ -67,7 +67,7 @@ ManifoldsBase.representation_size(::NonDecoratorManifold) = (2,)
     @test_throws MethodError project!(M, Y, p, X)
 end
 
-# With even less, check that representation size stack overflows
+# With even less, check that the representation size falls back to `nothing`
 struct NonDecoratorNonManifold <: AbstractDecoratorManifold{ManifoldsBase.ℝ} end
 @testset "Testing a NonDecoratorNonManifold - StopForwarding fallback returns nothing" begin
     N = NonDecoratorNonManifold()

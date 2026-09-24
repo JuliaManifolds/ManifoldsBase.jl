@@ -239,7 +239,7 @@ If you defined your own manifolds and used traits, please check the documentatio
 
 * An issue with allocation type promotion in `exp_fused`.
 
-## [1.0] 05/02/2025
+## [1.0.0] 05/02/2025
 
 ### Changed
 

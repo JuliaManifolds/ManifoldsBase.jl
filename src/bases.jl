@@ -85,7 +85,7 @@ end
 """
     AbstractOrthogonalBasis{𝔽,VST<:VectorSpaceType}
 
-Abstract type that represents an orthonormal basis of vector space of type `VST` on a
+Abstract type that represents an orthogonal basis of vector space of type `VST` on a
 manifold or a subset of it.
 
 The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used
@@ -152,6 +152,7 @@ abstract type AbstractOrthonormalBasis{𝔽, VST <: VectorSpaceType} <:
 AbstractOrthogonalBasis{𝔽, VST} end
 
 """
+    DefaultOrthonormalBasis{𝔽,VST<:VectorSpaceType}
     DefaultOrthonormalBasis(𝔽::AbstractNumbers = ℝ, vs::VectorSpaceType = TangentSpaceType())
 
 An arbitrary orthonormal basis of vector space of type `VST` on a manifold. This will usually
@@ -247,7 +248,7 @@ const DefaultOrDiagonalizingBasis{𝔽} =
     Union{DefaultOrthonormalBasis{𝔽, TangentSpaceType}, DiagonalizingOrthonormalBasis{𝔽}}
 
 """
-    CachedBasis{𝔽,V,<:AbstractBasis{𝔽}} <: AbstractBasis{𝔽}
+    CachedBasis{𝔽,B<:AbstractBasis{𝔽},V} <: AbstractBasis{𝔽,TangentSpaceType}
 
 A cached version of the given `basis` with precomputed basis vectors. The basis vectors
 are stored in `data`, either explicitly (like in cached variants of
@@ -316,7 +317,7 @@ end
 
 Determine the function that must be used to ensure that the allocated representation is of
 the right type. This is needed for [`get_vector`](@ref) when a point on a complex manifold
-is represented by a real-valued vectors with a real-coefficient basis, so that
+is represented by a real-valued vector with a real-coefficient basis, so that
 a complex-valued vector representation is allocated.
 """
 allocation_promotion_function(::AbstractManifold, f, ::Tuple) = identity
@@ -855,8 +856,8 @@ end
     gram_schmidt(M::AbstractManifold{𝔽}, p, B::AbstractBasis{𝔽}) where {𝔽}
     gram_schmidt(M::AbstractManifold, p, V::AbstractVector)
 
-Compute an ONB in the tangent space at `p` on the [`AbstractManifold`](@ref} `M` from either an
-[`AbstractBasis`](@ref) basis ´B´ or a set of (at most) [`manifold_dimension`](@ref)`(M)`
+Compute an ONB in the tangent space at `p` on the [`AbstractManifold`](@ref) `M` from either an
+[`AbstractBasis`](@ref) basis `B` or a set of (at most) [`manifold_dimension`](@ref)`(M)`
 many vectors.
 Note that this method requires the manifold and basis to work on the same
 [`AbstractNumbers`](@ref) `𝔽`, i.e. with real coefficients.

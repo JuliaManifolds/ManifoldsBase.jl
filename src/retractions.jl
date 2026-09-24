@@ -406,7 +406,7 @@ end
 
 
 """
-    InverseRetractionWithKeywords{R<:AbstractRetractionMethod,K} <: AbstractInverseRetractionMethod
+    InverseRetractionWithKeywords{T<:AbstractInverseRetractionMethod,K} <: AbstractInverseRetractionMethod
 
 Since inverse retractions might have keywords, this type is a way to set them as an own type to be
 used as a specific inverse retraction.
@@ -450,7 +450,7 @@ Describes an inverse retraction that is based on the softmax function.
 struct SoftmaxInverseRetraction <: AbstractInverseRetractionMethod end
 
 """
-    StabilizedInveerseRetraction <: AbstractInverseRetractionMethod
+    StabilizedInverseRetraction <: AbstractInverseRetractionMethod
 
 An inverse retraction wraps another inverse retraction and projects
 the resulting tangent vector onto the corresponding tangent space for numerical stability.
@@ -510,10 +510,10 @@ end
 
 """
     inverse_retract(M::AbstractManifold, p, q)
-    inverse_retract(M::AbstractManifold, p, q, method::AbstractInverseRetractionMethod
+    inverse_retract(M::AbstractManifold, p, q, method::AbstractInverseRetractionMethod)
 
 Compute the inverse retraction, a cheaper, approximate version of the
-[`log`](@ref)arithmic map), of points `p` and `q` on the [`AbstractManifold`](@ref) `M`.
+[`log`](@ref)arithmic map, of points `p` and `q` on the [`AbstractManifold`](@ref) `M`.
 
 Inverse retraction method can be specified by the last argument, defaulting to
 [`default_inverse_retraction_method`](@ref)`(M, typeof(p))`.
@@ -540,7 +540,7 @@ end
     inverse_retract!(M::AbstractManifold, X, p, q[, method::AbstractInverseRetractionMethod])
 
 Compute the inverse retraction, a cheaper, approximate version of the
-[`log`](@ref)arithmic map), of points `p` and `q` on the [`AbstractManifold`](@ref) `M`.
+[`log`](@ref)arithmic map, of points `p` and `q` on the [`AbstractManifold`](@ref) `M`.
 Result is saved to `X`.
 
 Inverse retraction method can be specified by the last argument, defaulting to
@@ -648,7 +648,7 @@ end
     inverse_retract_cayley!(M::AbstractManifold, X, p, q)
 
 Compute the in-place variant of the [`CayleyInverseRetraction`](@ref),
-which by default calls the first order [`PadeInverseRetraction`§(@ref).
+which by default calls the first order [`PadeInverseRetraction`](@ref).
 """
 function inverse_retract_cayley!(M::AbstractManifold, X, p, q; kwargs...)
     return inverse_retract_pade!(M, X, p, q, PadeInverseRetraction(1); kwargs...)

@@ -1,7 +1,5 @@
 [deps]
 ManifoldsBase = "3362f125-f0bb-47a3-aa74-596ffd7ef2fb"
-Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 
 [compat]
 ManifoldsBase = "1,2"
-Plots = "1.38"

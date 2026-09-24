@@ -23,7 +23,7 @@ struct CyclicProximalPointEstimation <: AbstractApproximationMethod end
     EfficientEstimator <: AbstractApproximationMethod
 
 Method for estimation in the best possible sense, see [Efficiency (Statistics)](https://en.wikipedia.org/wiki/Efficiency_(statistics)) for more details.
-This can for example be used when computing the usual mean on an Euclidean space, which is the best estimator.
+This can for example be used when computing the usual mean on a Euclidean space, which is the best estimator.
 """
 struct EfficientEstimator <: AbstractApproximationMethod end
 

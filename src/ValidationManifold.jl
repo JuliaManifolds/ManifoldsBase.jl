@@ -107,8 +107,8 @@ This function returns false and hence indicates not to check, when
 
 Otherwise the test is active.
 
-!!! Note
-   This function is internal and used very often, co it has a very short name;
+!!! note
+    This function is internal and used very often, so it has a very short name;
     `_vMc` stands for "`ValidationManifold` check".
 """
 function _vMc end
@@ -213,7 +213,7 @@ const ValidationCotangentVector = ValidationFibreVector{CotangentSpaceType}
 
 Return the internal value of an [`ValidationMPoint`](@ref), [`ValidationTangentVector`](@ref), or
 [`ValidationCotangentVector`](@ref) if the value `p` is encapsulated as such.
-Return `p` if it is already an a (plain) value on a manifold.
+Return `p` if it is already a (plain) value on a manifold.
 """
 internal_value(p) = p
 internal_value(p::ValidationMPoint) = p.value
@@ -436,7 +436,7 @@ function get_basis(
                 _msg(
                     M,
                     ArgumentError(
-                        "vectors number $i and $j are not orthonormal (inner product = $dot_val)",
+                        "vectors number $i and $j are not orthogonal (inner product = $dot_val)",
                     );
                     within = get_basis,
                     context = (:Output,),
@@ -711,8 +711,8 @@ end
 
 function riemann_tensor!(M::ValidationManifold, W, p, X, Y, Z; kwargs...)
     is_point(M, p; within = riemann_tensor, context = (:Input,), kwargs...)
-    for W in (X, Y, Z)
-        is_vector(M, p, W; within = riemann_tensor, context = (:Input,), kwargs...)
+    for V in (X, Y, Z)
+        is_vector(M, p, V; within = riemann_tensor, context = (:Input,), kwargs...)
     end
     riemann_tensor!(
         M.manifold,

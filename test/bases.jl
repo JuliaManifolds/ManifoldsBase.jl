@@ -56,7 +56,7 @@ using Test
             @test b1 == get_vectors(M, p, b2)
             # projected gram schmidt
             tm = ManifoldsBase.Test.ProjectionTestManifold()
-            bt = ManifoldsBase.Test.ProjectedOrthonormalBasis(:gram_schmidt)
+            bt = ProjectedOrthonormalBasis(:gram_schmidt)
             p = [sqrt(2) / 2, 0.0, sqrt(2) / 2, 0.0, 0.0]
             @test_logs (:warn, "Input only has 5 vectors, but manifold dimension is 100.") (
                 @test_throws ErrorException get_basis(tm, p, bt)

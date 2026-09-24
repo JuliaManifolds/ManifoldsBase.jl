@@ -143,12 +143,12 @@ function ManifoldsBase.project!(
     lm = length(m)
     (length(n) < length(m)) && throw(
         DomainError(
-            "Invalid embedding, since Euclidean dimension ($(n)) is longer than embedding dimension $(m).",
+            "Invalid embedding, since Euclidean dimension ($(m)) is longer than embedding dimension $(n).",
         ),
     )
     any(n .< m[1:ln]) && throw(
         DomainError(
-            "Invalid embedding, since Euclidean dimension ($(n)) has entry larger than embedding dimensions ($(m)).",
+            "Invalid embedding, since Euclidean dimension ($(m)) has entry larger than embedding dimensions ($(n)).",
         ),
     )
     #  fill q with the „top left edge“ of p.
@@ -418,7 +418,7 @@ end
             @test inner(M, [1, 2], [2, 3], [2, 3]) == 13
             @test manifold_dimension(M) == 2 # since base is defined is defined
             @test_throws MethodError project(M, [1, 2])
-            @test_throws MethodError project(M, [1, 2], [2, 3]) == [2, 3]
+            @test_throws MethodError project(M, [1, 2], [2, 3])
             @test_throws MethodError project!(M, A, [1, 2], [2, 3])
             @test vector_transport_direction(M, [1, 2], [2, 3], [3, 4]) == [2, 3]
             vector_transport_direction!(M, A, [1, 2], [2, 3], [3, 4])

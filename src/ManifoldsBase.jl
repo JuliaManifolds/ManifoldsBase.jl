@@ -102,8 +102,8 @@ end
 allocate(::AbstractManifold, a, T::Type, dims::Tuple) = allocate(a, T, dims)
 
 """
-    allocate_on(M::AbstractManifold, [T:::Type])
-    allocate_on(M::AbstractManifold, F::FiberType, [T:::Type])
+    allocate_on(M::AbstractManifold, [T::Type])
+    allocate_on(M::AbstractManifold, F::FiberType, [T::Type])
 
 Allocate a new point on manifold `M` with optional type given by `T`. Note that `T` is not
 number element type as in [`allocate`](@ref) but rather the type of the entire point to be
@@ -112,7 +112,7 @@ returned.
 If `F` is provided, then an element of the corresponding fiber is allocated, assuming it is
 independent of the base point.
 
-To allocate a tangent vector, use ``
+To allocate a tangent vector, use `allocate_on(M, TangentSpaceType())`.
 
 # Example
 
@@ -191,7 +191,7 @@ end
 function allocate_result_array(M::AbstractManifold, f, ::Type, ::Nothing)
     msg = "Could not allocate result of function $f on manifold $M."
     if base_manifold(M) isa ProductManifold
-        msg *= " This error could be resolved by importing RecursiveArrayTools.jl. If this is not the case, please open report an issue."
+        msg *= " This error could be resolved by importing RecursiveArrayTools.jl. If this is not the case, please open an issue."
     end
     return error(msg)
 end
@@ -260,7 +260,7 @@ or the two tangent vectors `X`, `Y` in the tangent space at `p` are approximatel
 The keyword arguments `kwargs` can be used to set tolerances, similar to Julia's `isapprox`.
 
 This function might use `isapprox` from Julia internally and is similar to [`isapprox`](@ref),
-with the difference that is returns an [`ApproximatelyError`](@ref) if the two elements are
+with the difference that it returns an [`ApproximatelyError`](@ref) if the two elements are
 not approximately equal, containing a more detailed description/reason.
 If the two elements are approximately equal, this method returns `nothing`.
 
@@ -363,7 +363,7 @@ function check_size(M::AbstractManifold, p, X)
     if n != m
         return DomainError(
             n,
-            "The tangent vector $(X) can not belong to the manifold $(M), since its size $(n) is not equal to the manifodls representation size ($(m)).",
+            "The tangent vector $(X) can not belong to the manifold $(M), since its size $(n) is not equal to the manifolds representation size ($(m)).",
         )
     end
 end
@@ -518,7 +518,7 @@ the representation is changed accordingly.
 
 The default is set in such a way that it assumes that the points on `M` are represented in
 their embedding (for example like the unit vectors in a space to represent the sphere) and
-hence embedding in the identity by default.
+hence embedding is the identity by default.
 
 If you have more than one embedding, see [`EmbeddedManifold`](@ref) for defining a second
 embedding. If your point `p` is already represented in some embedding,
@@ -539,7 +539,7 @@ Additionally, `embed` might include changing data representation, if applicable,
 if tangent vectors on `M` are not represented in the same way as their counterparts in the
 embedding, the representation is changed accordingly.
 
-The default is set in such a way that memory is allocated and `embed!(M, Y, p. X)` is called.
+The default is set in such a way that memory is allocated and `embed!(M, Y, p, X)` is called.
 
 If you have more than one embedding, see [`EmbeddedManifold`](@ref) for defining a second
 embedding. If your tangent vector `X` is already represented in some embedding,
@@ -584,7 +584,7 @@ embed!(M::AbstractManifold, Y, p, X) = copyto!(M, Y, p, X)
 """
     embed_project(M::AbstractManifold, p)
 
-Embed `p` from manifold `M` an project it back to `M`. For points from `M` this is identity
+Embed `p` from manifold `M` and project it back to `M`. For points from `M` this is identity
 but in case embedding is defined for points outside of `M`, this can serve as a way
 to for example remove numerical inaccuracies caused by some algorithms.
 """
@@ -594,7 +594,7 @@ end
 """
     embed_project(M::AbstractManifold, p, X)
 
-Embed vector `X` tangent at `p` from manifold `M` an project it back to tangent space
+Embed vector `X` tangent at `p` from manifold `M` and project it back to tangent space
 at `p`. For points from that tangent space this is identity but in case embedding is
 defined for tangent vectors from outside of it, this can serve as a way to for example remove
 numerical inaccuracies caused by some algorithms.
@@ -606,7 +606,7 @@ end
 """
     embed_project!(M::AbstractManifold, q, p)
 
-Embed `p` from manifold `M` an project it back to `M`, saving the result in `q`. For points
+Embed `p` from manifold `M` and project it back to `M`, saving the result in `q`. For points
 from `M` this is identity but in case embedding is defined for points outside of `M`, this
 can serve as a way to for example remove numerical inaccuracies caused by some algorithms.
 """
@@ -617,7 +617,7 @@ end
 """
     embed_project!(M::AbstractManifold, Y, p, X)
 
-Embed vector `X` tangent at `p` from manifold `M` an project it back to tangent space
+Embed vector `X` tangent at `p` from manifold `M` and project it back to tangent space
 at `p`, saving the result in `Y`. For points from that tangent space this is identity but
 in case embedding is defined for tangent vectors from outside of it, this can serve as a way
 to for example remove numerical inaccuracies caused by some algorithms.
@@ -642,7 +642,7 @@ get_embedding(M::AbstractManifold)
 """
     has_components(M::AbstractManifold)
 
-Return whether the [`AbstractManifold`](@ref)`(M)` consists of components,
+Return whether the [`AbstractManifold`](@ref) `M` consists of components,
 like the [`PowerManifold`](@ref) or the [`ProductManifold`](@ref), that one can iterate over.
 By default, this function returns `false`.
 """
@@ -658,8 +658,7 @@ Infimum of the injectivity radii `injectivity_radius(M,p)` of all points `p` on 
 Return the distance $d$ such that [`exp(M, p, X)`](@ref exp(::AbstractManifold, ::Any, ::Any)) is
 injective for all tangent vectors shorter than $d$ (i.e. has an inverse).
 
-    injectivity_radius(M::AbstractManifold[, x], method::AbstractRetractionMethod)
-    injectivity_radius(M::AbstractManifold, x, method::AbstractRetractionMethod)
+    injectivity_radius(M::AbstractManifold[, p], method::AbstractRetractionMethod)
 
 Distance ``d`` such that
 [`retract(M, p, X, method)`](@ref retract(::AbstractManifold, ::Any, ::Any, ::AbstractRetractionMethod))
@@ -822,7 +821,7 @@ end
 
 """
     is_point(M::AbstractManifold, p; error::Symbol = :none, kwargs...)
-    is_point(M::AbstractManifold, p, throw_error::Bool; kwargs...)
+    is_point(M::AbstractManifold, p, throw_error::Bool=false; kwargs...)
 
 Return whether `p` is a valid point on the [`AbstractManifold`](@ref) `M`.
 By default the function calls [`check_point`](@ref), which returns an `Exception` or `nothing`.
@@ -878,7 +877,7 @@ end
 
 """
     is_vector(M::AbstractManifold, p, X, check_base_point::Bool=true; error::Symbol=:none, kwargs...)
-    is_vector(M::AbstractManifold, p, X, check_base_point::Bool=true, throw_error::Boolean; kwargs...)
+    is_vector(M::AbstractManifold, p, X, check_base_point::Bool=true, throw_error::Bool=false; kwargs...)
 
 Return whether `X` is a valid tangent vector at point `p` on the [`AbstractManifold`](@ref) `M`.
 Returns either `true` or `false`.
@@ -891,7 +890,7 @@ value is `nothing` or an error.
 How to report a potential error can be set using the `error=` keyword
 
 * `:error`          - throws an error if `X` is not a tangent vector and/or `p` is not point
-^ `:info`           - displays the error message as an `@info`
+* `:info`           - displays the error message as an `@info`
 * `:warn`           - displays the error message as a `@warn`ing.
 * `:none`           - (default) the function just returns `true`/`false`
 
@@ -988,7 +987,7 @@ norm(M::AbstractManifold, p, X) = sqrt(max(real(inner(M, p, X, X)), 0))
 """
     number_eltype(x)
 
-Numeric element type of the a nested representation of a point or a vector.
+Numeric element type of a nested representation of a point or a vector.
 To be used in conjunction with [`allocate`](@ref) or [`allocate_result`](@ref).
 """
 number_eltype(x) = eltype(x)
@@ -1374,7 +1373,6 @@ export AbstractRetractionMethod,
     CayleyRetraction,
     EmbeddedRetraction,
     ExponentialRetraction,
-    NLSolveInverseRetraction,
     QRRetraction,
     PadeRetraction,
     PolarRetraction,
@@ -1423,13 +1421,12 @@ export CachedBasis,
     DefaultOrthogonalBasis,
     DefaultOrthonormalBasis,
     DiagonalizingOrthonormalBasis,
-    DefaultOrthonormalBasis,
     GramSchmidtOrthonormalBasis,
     ProjectedOrthonormalBasis,
     VeeOrthogonalBasis
 
 # Error Messages
-export OutOfInjectivityRadiusError, ManifoldDomainError
+export OutOfInjectivityRadiusError
 export ApproximatelyError
 export CompositeManifoldError, ComponentManifoldError, ManifoldDomainError
 

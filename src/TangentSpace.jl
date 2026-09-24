@@ -173,7 +173,7 @@ end
     log(TpM::TangentSpace, X, Y)
 
 Logarithmic map on the [`TangentSpace`](@ref) `TpM`, calculated as the difference of tangent
-vectors `q` and `p` from `TpM`.
+vectors `Y` and `X` from `TpM`.
 """
 log(::TangentSpace, ::Any...)
 function log!(TpM::TangentSpace, V, X, Y)
@@ -255,7 +255,7 @@ end
 
 @doc raw"""
     Y = Weingarten(TpM::TangentSpace, X, V, A)
-    Weingarten!(TpM::TangentSpace, Y, p, X, V)
+    Weingarten!(TpM::TangentSpace, Y, X, V, A)
 
 Compute the Weingarten map ``\mathcal W_X`` at `X` on the [`TangentSpace`](@ref) `TpM` with respect to the
 tangent vector ``V \in T_p\mathcal M`` and the normal vector ``A \in N_p\mathcal M``.

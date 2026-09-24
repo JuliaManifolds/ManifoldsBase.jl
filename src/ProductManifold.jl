@@ -1,5 +1,5 @@
 @doc raw"""
-    ProductManifold{𝔽,TM<:Tuple} <: AbstractManifold{𝔽}
+    ProductManifold{𝔽,TM<:Tuple} <: AbstractDecoratorManifold{𝔽}
 
 Product manifold $M_1 × M_2 × …  × M_n$ with product geometry.
 
@@ -239,7 +239,7 @@ end
 
 Return the [`ProductManifold`](@ref) For two `AbstractManifold`s `M` and `N`,
 where for the case that one of them is a [`ProductManifold`](@ref) itself,
-the other is either prepended (if `N` is a product) or appenden (if `M`) is.
+the other is either prepended (if `N` is a product) or appended (if `M`) is.
 If both are product manifold, they are combined into one product manifold,
 keeping the order.
 
@@ -267,7 +267,7 @@ end
 Return the [`ProductRetraction`](@ref) for two or more [`AbstractRetractionMethod`](@ref)s.
 
 For the case that one of them is a [`ProductRetraction`](@ref) itself,
-the other is either prepended (if `m` is a product) or appenden (if `n`) is.
+the other is either prepended (if `m` is a product) or appended (if `n`) is.
 If both [`ProductRetraction`](@ref)s, they are combined into one keeping the order.
 """
 cross(::AbstractRetractionMethod...)
@@ -292,7 +292,7 @@ end
 Return the [`InverseProductRetraction`](@ref) for two or more [`AbstractInverseRetractionMethod`](@ref)s.
 
 For the case that one of them is a [`InverseProductRetraction`](@ref) itself,
-the other is either prepended (if `r` is a product) or appenden (if `s`) is.
+the other is either prepended (if `r` is a product) or appended (if `s`) is.
 If both [`InverseProductRetraction`](@ref)s, they are combined into one keeping the order.
 """
 cross(::AbstractInverseRetractionMethod...)
@@ -324,7 +324,7 @@ end
 Return the [`ProductVectorTransport`](@ref) for two or more [`AbstractVectorTransportMethod`](@ref)s.
 
 For the case that one of them is a [`ProductVectorTransport`](@ref) itself,
-the other is either prepended (if `r` is a product) or appenden (if `s`) is.
+the other is either prepended (if `r` is a product) or appended (if `s`) is.
 If both [`ProductVectorTransport`](@ref)s, they are combined into one keeping the order.
 """
 cross(::AbstractVectorTransportMethod...)
@@ -637,7 +637,7 @@ Compute the inverse retraction from `p` with respect to `q` on the [`ProductMani
 retraction for each manifold of the product. Then this method is performed elementwise,
 so the encapsulated inverse retraction methods have to be available per factor.
 """
-inverse_retract(::ProductManifold, ::Any, ::Any, ::Any, ::InverseProductRetraction)
+inverse_retract(::ProductManifold, ::Any, ::Any, ::InverseProductRetraction)
 
 @doc raw"""
     inverse_retract(M::ProductManifold, p, q, m::AbstractInverseRetractionMethod)
@@ -646,7 +646,7 @@ Compute the inverse retraction from `p` with respect to `q` on the [`ProductMani
 `M` using an [`AbstractInverseRetractionMethod`](@ref), which is used on each manifold of
 the product.
 """
-inverse_retract(::ProductManifold, ::Any, ::Any, ::Any, ::AbstractInverseRetractionMethod)
+inverse_retract(::ProductManifold, ::Any, ::Any, ::AbstractInverseRetractionMethod)
 
 function inverse_retract!(M::ProductManifold, Y, p, q, method::InverseProductRetraction)
     map(
@@ -740,7 +740,7 @@ end
     norm(M::ProductManifold, p, X, r::Real=2)
 
 Compute the (`r`-)norm of `X` from the tangent space of `p` on the [`ProductManifold`](@ref),
-i.e. from the element wise norms the 2-norm is computed.
+i.e. from the element wise norms the `r`-norm is computed.
 """
 function LinearAlgebra.norm(M::ProductManifold, p, X, r::Real = 2)
     norms =
@@ -749,7 +749,7 @@ function LinearAlgebra.norm(M::ProductManifold, p, X, r::Real = 2)
 end
 
 """
-    number_of_components(M::ProductManifold{<:NTuple{N,Any}}) where {N}
+    number_of_components(M::ProductManifold{𝔽,<:NTuple{N,Any}}) where {𝔽,N}
 
 Calculate the number of manifolds multiplied in the given [`ProductManifold`](@ref) `M`.
 """
@@ -906,7 +906,7 @@ end
 Compute the Riemann tensor at point from `p` with tangent vectors `X`, `Y` and `Z` on
 the [`ProductManifold`](@ref) `M`.
 """
-riemann_tensor(M::ProductManifold, p, X, Y, X)
+riemann_tensor(M::ProductManifold, p, X, Y, Z)
 
 function riemann_tensor!(M::ProductManifold, Xresult, p, X, Y, Z)
     map(

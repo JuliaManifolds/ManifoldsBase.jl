@@ -13,7 +13,7 @@ associated to a retraction ``\operatorname{retr}_p(d) = q`` such that
 
 1. (associated retraction) ``\mathcal T_{p,d}X ∈ T_q\mathcal M`` if and only if ``q = \operatorname{retr}_p(d)``,
 2. (consistency) ``\mathcal T_{p,0_p}X = X`` for all ``X∈T_p\mathcal M``,
-3. (linearity) ``\mathcal T_{p,d}(αX+βY) = \mathcal αT_{p,d}X + \mathcal βT_{p,d}Y`` for all ``α, β ∈ 𝔽``,
+3. (linearity) ``\mathcal T_{p,d}(αX+βY) = α\mathcal T_{p,d}X + β\mathcal T_{p,d}Y`` for all ``α, β ∈ 𝔽``,
 
 hold.
 

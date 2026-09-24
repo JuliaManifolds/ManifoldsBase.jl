@@ -175,7 +175,6 @@ ManifoldsBase.metric(::BaseManifold) = DefaultBaseManifoldMetric()
         E = TestDefaultManifold{3}()
         g = TestDefaultManifoldMetric()
         M = MetricManifold(E, g)
-        default_retraction_method(::TestDefaultManifold) = TestRetraction()
         @test TestDefaultManifoldMetric(E) === M
         @test g(E) === M
         p = [1.0, 2.0, 3.0]

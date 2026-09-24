@@ -48,7 +48,7 @@ end
 
 function diff_canonical_project! end
 @doc "$(_doc_diff_canonical_project)"
-diff_canonical_project!(M::AbstractManifold, q, p)
+diff_canonical_project!(M::AbstractManifold, Y, p, X)
 
 _doc_horizontal_lift = raw"""
     horizontal_lift(N::AbstractManifold, q, X)
@@ -72,7 +72,7 @@ function horizontal_lift! end
 @doc "$(_doc_horizontal_lift)"
 horizontal_lift!(N::AbstractManifold, Y, q, X)
 
-_doc_horizontal_lift = raw"""
+_doc_horizontal_component = raw"""
     horizontal_component(M::AbstractManifold, p, X)
     horizontal_component!(M::AbstractManifold, Y, p, X)
 
@@ -82,14 +82,14 @@ in the total space of quotient manifold `N`.
 This is often written as the space ``\mathrm{Hor}_p^π\mathcal N``.
 """
 
-@doc "$(_doc_horizontal_lift)"
+@doc "$(_doc_horizontal_component)"
 function horizontal_component(N::AbstractManifold, p, X)
     Y = allocate_result(N, horizontal_component, X, p)
     return horizontal_component!(N, Y, p, X)
 end
 
 function horizontal_component! end
-@doc "$(_doc_horizontal_lift)"
+@doc "$(_doc_horizontal_component)"
 horizontal_component!(N::AbstractManifold, Y, p, X)
 
 function get_total_space end

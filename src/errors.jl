@@ -1,7 +1,7 @@
 """
     AbstractManifoldDomainError <: Exception
 
-An abstract Case for Errors when checking validity of points/vectors on mainfolds
+An abstract case for errors when checking validity of points/vectors on manifolds
 """
 abstract type AbstractManifoldDomainError <: Exception end
 
@@ -9,7 +9,8 @@ abstract type AbstractManifoldDomainError <: Exception end
 @doc """
     ApproximatelyError{V,S} <: Exception
 
-Store an error that occurs when two data structures, e.g. points or tangent vectors.
+Store an error that occurs when two data structures, e.g. points or tangent vectors,
+are not approximately equal.
 
 # Fields
 
@@ -49,7 +50,7 @@ Store an error that occurred in a component, where the additional `index` is sto
 
 # Fields
 
-* `index::I` index where the error occurred`
+* `index::I` index where the error occurred
 * `error::E` error that occurred.
 """
 struct ComponentManifoldError{I, E <: Exception} <: AbstractManifoldDomainError
