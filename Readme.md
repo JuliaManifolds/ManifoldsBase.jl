@@ -10,6 +10,7 @@
 [![CI](https://github.com/JuliaManifolds/ManifoldsBase.jl/workflows/CI/badge.svg)](https://github.com/JuliaManifolds/ManifoldsBase.jl/actions?query=workflow%3ACI+branch%3Amaster)
 [![codecov](https://codecov.io/gh/JuliaManifolds/ManifoldsBase.jl/graph/badge.svg?token=bQsBUU9knE)](https://codecov.io/gh/JuliaManifolds/ManifoldsBase.jl)
 [![Aqua QA](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
+[![JET CA](https://img.shields.io/badge/%F0%9F%9B%A9%EF%B8%8F_tested_with-JET.jl-233f9a)](https://github.com/aviatesk/JET.jl)
 [![code style: runic](https://img.shields.io/badge/code_style-%E1%9A%B1%E1%9A%A2%E1%9A%BE%E1%9B%81%E1%9A%B2-black)](https://github.com/fredrikekre/Runic.jl)
 
 [![ACM TOMS](https://img.shields.io/badge/ACM%20TOMS-10.1145%2F3618296-blue.svg)](http://doi.org/10.1145/3618296)
