@@ -226,21 +226,6 @@ function angle(M::AbstractManifold, p, X, Y)
 end
 
 """
-    are_linearly_independent(M::AbstractManifold, p, X, Y; atol::Real = sqrt(eps(number_eltype(X))))
-
-Check whether the vectors `X`, `Y` tangent at `p` to `M` are linearly independent.
-The keyword `atol` is the tolerance below which a tangent vector is considered to be zero.
-"""
-function are_linearly_independent(
-        M::AbstractManifold, p, X, Y; atol::Real = sqrt(eps(number_eltype(X))),
-    )
-    norm_X = norm(M, p, X)
-    norm_Y = norm(M, p, Y)
-    innerXY = inner(M, p, X, Y)
-    return norm_X > atol && norm_Y > atol && !isapprox(abs(innerXY), norm_X * norm_Y)
-end
-
-"""
     base_manifold(M::AbstractManifold, depth = Val(-1))
 
 Return the internally stored [`AbstractManifold`](@ref) for decorated manifold `M` and the base
