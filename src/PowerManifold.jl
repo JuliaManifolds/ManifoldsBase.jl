@@ -1431,30 +1431,38 @@ function riemann_tensor!(M::PowerManifoldNestedReplacing, Xresult, p, X, Y, Z)
 end
 
 @doc raw"""
-    sectional_curvature(M::AbstractPowerManifold, p, X, Y)
+    sectional_curvature(M::AbstractPowerManifold, p, X, Y; atol::Real=abs(eps(number_eltype(X))))
 
 Compute the sectional curvature of a power manifold ``\mathcal M`` at a point
 ``p \in \mathcal M`` on two linearly independent tangent vectors at ``p``. It may be 0 for
 a power of a non-flat manifold if projections of `X` and `Y` on subspaces corresponding to
 component manifolds are not linearly independent. For linearly dependent `X` and `Y` it
 returns 0.
+
+`atol` is the absolute tolerance for checking linear independence of `X` and `Y`.
 """
-function sectional_curvature(M::AbstractPowerManifold, p, X, Y)
+function sectional_curvature(M::AbstractPowerManifold, p, X, Y; atol::Real = abs(eps(number_eltype(X))))
     curvature = zero(number_eltype(X))
-    are_linearly_independent(M, p, X, Y) || return curvature
+
+    # return 0 if X and Y are linearly dependent
+    normX2 = inner(M, p, X, X)
+    normY2 = inner(M, p, Y, Y)
+    innerXY = inner(M, p, X, Y)
+    abs(normX2 * normY2 - innerXY^2) < atol && return curvature
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         p_i = _read(M, rep_size, p, i)
         X_i = _read(M, rep_size, X, i)
         Y_i = _read(M, rep_size, Y, i)
-        if are_linearly_independent(M.manifold, p_i, X_i, Y_i)
-            w_i =
-                inner(M.manifold, p_i, X_i, X_i) * inner(M.manifold, p_i, Y_i, Y_i) -
-                inner(M.manifold, p_i, X_i, Y_i)^2
+        norm2_X_i = inner(M.manifold, p_i, X_i, X_i)
+        norm2_Y_i = inner(M.manifold, p_i, Y_i, Y_i)
+        inner_XY_i = inner(M.manifold, p_i, X_i, Y_i)
+        if abs(norm2_X_i * norm2_Y_i - inner_XY_i^2) > atol
+            w_i = norm2_X_i * norm2_Y_i - inner_XY_i^2
             curvature += w_i * sectional_curvature(M.manifold, p_i, X_i, Y_i)
         end
     end
-    return curvature / (inner(M, p, X, X) * inner(M, p, Y, Y) - inner(M, p, X, Y)^2)
+    return curvature / (normX2 * normY2 - innerXY^2)
 end
 
 @doc raw"""

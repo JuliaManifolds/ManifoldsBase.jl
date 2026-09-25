@@ -922,30 +922,37 @@ function riemann_tensor!(M::ProductManifold, Xresult, p, X, Y, Z)
 end
 
 @doc raw"""
-    sectional_curvature(M::ProductManifold, p, X, Y)
+    sectional_curvature(M::ProductManifold, p, X, Y; atol::Real = sqrt(eps(number_eltype(X))))
 
 Compute the sectional curvature of a manifold ``\mathcal M`` at a point ``p \in \mathcal M``
 on two linearly independent tangent vectors at ``p``. It may be 0 for a product of non-flat
 manifolds if projections of `X` and `Y` on subspaces corresponding to component manifolds
 are not linearly independent. For linearly dependent `X` and `Y` it returns 0.
+
+`atol` is the absolute tolerance for the test of linear independence of `X` and `Y`.
 """
-function sectional_curvature(M::ProductManifold, p, X, Y)
+function sectional_curvature(M::ProductManifold, p, X, Y; atol::Real = sqrt(eps(number_eltype(X))))
     curvature = zero(number_eltype(X))
-    are_linearly_independent(M, p, X, Y) || return curvature
+    Xnorm2 = inner(M, p, X, X)
+    Ynorm2 = inner(M, p, Y, Y)
+    innerXY = inner(M, p, X, Y)
+    # return 0 if X and Y are linearly dependent
+    abs(Xnorm2 * Ynorm2 - innerXY^2) < atol && return curvature
     map(
         M.manifolds,
         submanifold_components(M, p),
         submanifold_components(M, X),
         submanifold_components(M, Y),
     ) do M_i, p_i, X_i, Y_i
-        if are_linearly_independent(M_i, p_i, X_i, Y_i)
-            w_i =
-                inner(M_i, p_i, X_i, X_i) * inner(M_i, p_i, Y_i, Y_i) -
-                inner(M_i, p_i, X_i, Y_i)^2
+        X_inorm2 = inner(M_i, p_i, X_i, X_i)
+        Y_inorm2 = inner(M_i, p_i, Y_i, Y_i)
+        inner_iXY = inner(M_i, p_i, X_i, Y_i)
+        if abs(X_inorm2 * Y_inorm2 - inner_iXY^2) > atol
+            w_i = X_inorm2 * Y_inorm2 - inner_iXY^2
             curvature += w_i * sectional_curvature(M_i, p_i, X_i, Y_i)
         end
     end
-    return curvature / (inner(M, p, X, X) * inner(M, p, Y, Y) - inner(M, p, X, Y)^2)
+    return curvature / (Xnorm2 * Ynorm2 - innerXY^2)
 end
 
 @doc raw"""
