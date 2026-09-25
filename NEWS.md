@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `parallel_transport_to!` on a power manifold calls `parallel_transport_to!` on the base manifold elementwise, instead of its default vector transport.
 * `injectivity_radius(M::AbstractPowerManifold, m)` forwards `m` to the wrapped manifold.
 * `sectional_curvature` on a `ProductManifold` weights each factor by its Gram determinant and normalizes by that of the product; it summed them unweighted before.
+* `sectional_curvature` on a power manifold weights each component by its Gram determinant and normalizes by that of the power manifold, as on a `ProductManifold`.
 * `NLSolveInverseRetraction` stores `project_point` and `project_tangent` in their own fields.
 * `retract_embedded!`, `retract_embedded_fused!` and `inverse_retract_embedded!` embed with `embed(M, ...)`, not `embed(get_embedding(M), ...)`.
 * `get_coordinates` on a `ValidationManifold` unwraps its point and tangent vector.

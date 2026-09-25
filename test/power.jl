@@ -430,6 +430,11 @@ end
 
             @test sectional_curvature(Mpr, p, X1, X2) == 1.0
             @test sectional_curvature(Mpr, p, X1, X3) == 0.0
+            # a plane across both components is weighted by the Gram determinants
+            q = [[1.0, 0.0, 0.0], [1.0, 0.0, 0.0]]
+            Y1 = [[0.0, 1.0, 0.0], [0.0, 1.0, 0.0]]
+            Y2 = [[0.0, 0.0, 1.0], [0.0, 0.0, 1.0]]
+            @test sectional_curvature(Mpr, q, Y1, Y2) == 0.5
 
             Mss = PowerManifold(M1, NestedPowerRepresentation(), 1)
             @test sectional_curvature_max(Mss) == 1.0

@@ -1446,10 +1446,13 @@ function sectional_curvature(M::AbstractPowerManifold, p, X, Y)
         X_i = _read(M, rep_size, X, i)
         Y_i = _read(M, rep_size, Y, i)
         if are_linearly_independent(M.manifold, p_i, X_i, Y_i)
-            curvature += sectional_curvature(M.manifold, p_i, X_i, Y_i)
+            w_i =
+                inner(M.manifold, p_i, X_i, X_i) * inner(M.manifold, p_i, Y_i, Y_i) -
+                inner(M.manifold, p_i, X_i, Y_i)^2
+            curvature += w_i * sectional_curvature(M.manifold, p_i, X_i, Y_i)
         end
     end
-    return curvature
+    return curvature / (inner(M, p, X, X) * inner(M, p, Y, Y) - inner(M, p, X, Y)^2)
 end
 
 @doc raw"""
