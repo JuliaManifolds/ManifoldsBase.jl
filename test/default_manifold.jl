@@ -493,6 +493,7 @@ using Test
         @test c isa Vector
         @test length(c) == 3
         @test 2.0 \ X == ManifoldsBase.Test.DefaultTangentVector(2.0 \ X.value)
+        @test X * 2.0 == ManifoldsBase.Test.DefaultTangentVector(X.value * 2.0)
         @test X + Y == ManifoldsBase.Test.DefaultTangentVector(X.value + Y.value)
         @test +X == X
         @test (Y .= X) === Y
