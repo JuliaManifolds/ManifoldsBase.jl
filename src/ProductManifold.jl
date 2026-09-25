@@ -1,5 +1,5 @@
 @doc raw"""
-    ProductManifold{𝔽,TM<:Tuple} <: AbstractManifold{𝔽}
+    ProductManifold{𝔽,TM<:Tuple} <: AbstractDecoratorManifold{𝔽}
 
 Product manifold $M_1 × M_2 × …  × M_n$ with product geometry.
 
@@ -39,19 +39,7 @@ function Base.getindex(TpM::TangentSpace{𝔽, <:ProductManifold}, i::Integer) w
     return TangentSpace(M[i], base_point(TpM)[M, i])
 end
 
-ProductManifold() = throw(MethodError("No method matching ProductManifold()."))
-
-const PRODUCT_BASIS_LIST = [
-    VeeOrthogonalBasis,
-    DefaultBasis,
-    DefaultBasis{<:Any, TangentSpaceType},
-    DefaultOrthogonalBasis,
-    DefaultOrthogonalBasis{<:Any, TangentSpaceType},
-    DefaultOrthonormalBasis,
-    DefaultOrthonormalBasis{<:Any, TangentSpaceType},
-    ProjectedOrthonormalBasis{:gram_schmidt, ℝ},
-    ProjectedOrthonormalBasis{:svd, ℝ},
-]
+ProductManifold() = throw(MethodError(ProductManifold, ()))
 
 """
     ProductBasisData
@@ -61,8 +49,6 @@ A typed tuple to store tuples of data of stored/precomputed bases for a [`Produc
 struct ProductBasisData{T <: Tuple}
     parts::T
 end
-
-const PRODUCT_BASIS_LIST_CACHED = [CachedBasis]
 
 """
     ProductMetric <: AbstractMetric
@@ -176,13 +162,11 @@ function check_point(M::ProductManifold, p; kwargs...)
 end
 
 """
-    check_size(M::ProductManifold, p; kwargs...)
+    check_size(M::ProductManifold, p)
 
 Check whether `p` is of valid size on the [`ProductManifold`](@ref) `M`.
 If `p` has components of wrong size a [`CompositeManifoldError`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.CompositeManifoldError).consisting of all error messages of the
 components, for which the tests fail is returned.
-
-The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_size(M::ProductManifold, p)
     try
@@ -255,7 +239,7 @@ end
 
 Return the [`ProductManifold`](@ref) For two `AbstractManifold`s `M` and `N`,
 where for the case that one of them is a [`ProductManifold`](@ref) itself,
-the other is either prepended (if `N` is a product) or appenden (if `M`) is.
+the other is either prepended (if `N` is a product) or appended (if `M`) is.
 If both are product manifold, they are combined into one product manifold,
 keeping the order.
 
@@ -283,7 +267,7 @@ end
 Return the [`ProductRetraction`](@ref) for two or more [`AbstractRetractionMethod`](@ref)s.
 
 For the case that one of them is a [`ProductRetraction`](@ref) itself,
-the other is either prepended (if `m` is a product) or appenden (if `n`) is.
+the other is either prepended (if `m` is a product) or appended (if `n`) is.
 If both [`ProductRetraction`](@ref)s, they are combined into one keeping the order.
 """
 cross(::AbstractRetractionMethod...)
@@ -308,25 +292,22 @@ end
 Return the [`InverseProductRetraction`](@ref) for two or more [`AbstractInverseRetractionMethod`](@ref)s.
 
 For the case that one of them is a [`InverseProductRetraction`](@ref) itself,
-the other is either prepended (if `r` is a product) or appenden (if `s`) is.
+the other is either prepended (if `r` is a product) or appended (if `s`) is.
 If both [`InverseProductRetraction`](@ref)s, they are combined into one keeping the order.
 """
 cross(::AbstractInverseRetractionMethod...)
 function LinearAlgebra.cross(
-        m::AbstractInverseRetractionMethod,
-        n::AbstractInverseRetractionMethod,
+        m::AbstractInverseRetractionMethod, n::AbstractInverseRetractionMethod,
     )
     return InverseProductRetraction(m, n)
 end
 function LinearAlgebra.cross(
-        m::InverseProductRetraction,
-        n::AbstractInverseRetractionMethod,
+        m::InverseProductRetraction, n::AbstractInverseRetractionMethod,
     )
     return InverseProductRetraction(m.inverse_retractions..., n)
 end
 function LinearAlgebra.cross(
-        m::AbstractInverseRetractionMethod,
-        n::InverseProductRetraction,
+        m::AbstractInverseRetractionMethod, n::InverseProductRetraction,
     )
     return InverseProductRetraction(m, n.inverse_retractions...)
 end
@@ -343,13 +324,12 @@ end
 Return the [`ProductVectorTransport`](@ref) for two or more [`AbstractVectorTransportMethod`](@ref)s.
 
 For the case that one of them is a [`ProductVectorTransport`](@ref) itself,
-the other is either prepended (if `r` is a product) or appenden (if `s`) is.
+the other is either prepended (if `r` is a product) or appended (if `s`) is.
 If both [`ProductVectorTransport`](@ref)s, they are combined into one keeping the order.
 """
 cross(::AbstractVectorTransportMethod...)
 function LinearAlgebra.cross(
-        m::AbstractVectorTransportMethod,
-        n::AbstractVectorTransportMethod,
+        m::AbstractVectorTransportMethod, n::AbstractVectorTransportMethod,
     )
     return ProductVectorTransport(m, n)
 end
@@ -379,7 +359,7 @@ _doc_distance_prod = """
     distance(M::ProductManifold, p, q, r::Real=2)
     distance(M::ProductManifold, p, q, m::AbstractInverseRetractionMethod=LogarithmicInverseRetraction(), r::Real=2)
 
-Compute the distance between `q` and `p` on an [`ProductManifold`](@ref).
+Compute the distance between `q` and `p` on a [`ProductManifold`](@ref).
 
 First, the componentwise distances are computed. These can be approximated using the
 `norm` of an [`AbstractInverseRetractionMethod`](@ref) `m`.
@@ -456,7 +436,7 @@ function exp_fused!(M::ProductManifold, q, p, X, t::Number)
 end
 
 function get_basis(M::ProductManifold, p, B::AbstractBasis)
-    parts = map(t -> get_basis(t..., B), ziptuples(M.manifolds, submanifold_components(p)))
+    parts = map(t -> get_basis(t..., B), ziptuples(M.manifolds, submanifold_components(M, p)))
     return CachedBasis(B, ProductBasisData(parts))
 end
 function get_basis(M::ProductManifold, p, B::CachedBasis)
@@ -466,8 +446,8 @@ function get_basis(M::ProductManifold, p, B::DiagonalizingOrthonormalBasis)
     vs = map(
         ziptuples(
             M.manifolds,
-            submanifold_components(p),
-            submanifold_components(B.frame_direction),
+            submanifold_components(M, p),
+            submanifold_components(M, B.frame_direction),
         ),
     ) do t
         return get_basis(t[1], t[2], DiagonalizingOrthonormalBasis(t[3]))
@@ -479,9 +459,14 @@ end
     get_component(M::ProductManifold, p, i)
 
 Get the `i`th component of a point `p` on a [`ProductManifold`](@ref) `M`.
+For `i` a `Colon` all components are returned, for a vector of indices the selected ones.
 """
 @inline function get_component(M::ProductManifold, p, i)
     return submanifold_component(M, p, i)
+end
+@inline get_component(M::ProductManifold, p, ::Colon) = submanifold_components(M, p)
+@inline function get_component(M::ProductManifold, p, i::AbstractVector)
+    return map(j -> submanifold_component(M, p, j), i)
 end
 
 function get_coordinates(M::ProductManifold, p, X, B::AbstractBasis)
@@ -492,10 +477,7 @@ function get_coordinates(M::ProductManifold, p, X, B::AbstractBasis)
     return vcat(reps...)
 end
 function get_coordinates(
-        M::ProductManifold,
-        p,
-        X,
-        B::CachedBasis{𝔽, <:AbstractBasis{𝔽}, <:ProductBasisData},
+        M::ProductManifold, p, X, B::CachedBasis{𝔽, <:AbstractBasis{𝔽}, <:ProductBasisData},
     ) where {𝔽}
     reps = map(
         get_coordinates,
@@ -522,11 +504,7 @@ function get_coordinates!(M::ProductManifold, Xⁱ, p, X, B::AbstractBasis)
     return Xⁱ
 end
 function get_coordinates!(
-        M::ProductManifold,
-        Xⁱ,
-        p,
-        X,
-        B::CachedBasis{𝔽, <:AbstractBasis{𝔽}, <:ProductBasisData},
+        M::ProductManifold, Xⁱ, p, X, B::CachedBasis{𝔽, <:AbstractBasis{𝔽}, <:ProductBasisData},
     ) where {𝔽}
     dim = manifold_dimension(M)
     @assert length(Xⁱ) == dim
@@ -569,11 +547,7 @@ function get_vector!(M::ProductManifold, X, p, Xⁱ, B::AbstractBasis)
     return X
 end
 function get_vector!(
-        M::ProductManifold,
-        X,
-        p,
-        Xⁱ,
-        B::CachedBasis{𝔽, <:AbstractBasis{𝔽}, <:ProductBasisData},
+        M::ProductManifold, X, p, Xⁱ, B::CachedBasis{𝔽, <:AbstractBasis{𝔽}, <:ProductBasisData},
     ) where {𝔽}
     dims = map(manifold_dimension, M.manifolds)
     @assert length(Xⁱ) == sum(dims)
@@ -595,7 +569,7 @@ end
 """
     has_components(::ProductManifold)
 
-Return `true` since points on an [`ProductManifold`](@ref) consist of components.
+Return `true` since points on a [`ProductManifold`](@ref) consist of components.
 """
 has_components(::ProductManifold) = true
 
@@ -663,7 +637,7 @@ Compute the inverse retraction from `p` with respect to `q` on the [`ProductMani
 retraction for each manifold of the product. Then this method is performed elementwise,
 so the encapsulated inverse retraction methods have to be available per factor.
 """
-inverse_retract(::ProductManifold, ::Any, ::Any, ::Any, ::InverseProductRetraction)
+inverse_retract(::ProductManifold, ::Any, ::Any, ::InverseProductRetraction)
 
 @doc raw"""
     inverse_retract(M::ProductManifold, p, q, m::AbstractInverseRetractionMethod)
@@ -672,7 +646,7 @@ Compute the inverse retraction from `p` with respect to `q` on the [`ProductMani
 `M` using an [`AbstractInverseRetractionMethod`](@ref), which is used on each manifold of
 the product.
 """
-inverse_retract(::ProductManifold, ::Any, ::Any, ::Any, ::AbstractInverseRetractionMethod)
+inverse_retract(::ProductManifold, ::Any, ::Any, ::AbstractInverseRetractionMethod)
 
 function inverse_retract!(M::ProductManifold, Y, p, q, method::InverseProductRetraction)
     map(
@@ -686,11 +660,7 @@ function inverse_retract!(M::ProductManifold, Y, p, q, method::InverseProductRet
     return Y
 end
 function inverse_retract!(
-        M::ProductManifold,
-        Y,
-        p,
-        q,
-        method::IRM,
+        M::ProductManifold, Y, p, q, method::IRM,
     ) where {IRM <: AbstractInverseRetractionMethod}
     map(
         (iM, iY, ip, iq) -> inverse_retract!(iM, iY, ip, iq, method),
@@ -770,7 +740,7 @@ end
     norm(M::ProductManifold, p, X, r::Real=2)
 
 Compute the (`r`-)norm of `X` from the tangent space of `p` on the [`ProductManifold`](@ref),
-i.e. from the element wise norms the 2-norm is computed.
+i.e. from the element wise norms the `r`-norm is computed.
 """
 function LinearAlgebra.norm(M::ProductManifold, p, X, r::Real = 2)
     norms =
@@ -779,7 +749,7 @@ function LinearAlgebra.norm(M::ProductManifold, p, X, r::Real = 2)
 end
 
 """
-    number_of_components(M::ProductManifold{<:NTuple{N,Any}}) where {N}
+    number_of_components(M::ProductManifold{𝔽,<:NTuple{N,Any}}) where {𝔽,N}
 
 Calculate the number of manifolds multiplied in the given [`ProductManifold`](@ref) `M`.
 """
@@ -826,10 +796,8 @@ function project!(M::ProductManifold, Y, p, X)
 end
 
 function Random.rand!(
-        M::ProductManifold,
-        pX;
-        vector_at = nothing,
-        parts_kwargs = map(_ -> (;), M.manifolds),
+        M::ProductManifold, pX;
+        vector_at = nothing, parts_kwargs = map(_ -> (;), M.manifolds),
     )
     return rand!(
         Random.default_rng(),
@@ -840,11 +808,8 @@ function Random.rand!(
     )
 end
 function Random.rand!(
-        rng::AbstractRNG,
-        M::ProductManifold,
-        pX;
-        vector_at = nothing,
-        parts_kwargs = map(_ -> (;), M.manifolds),
+        rng::AbstractRNG, M::ProductManifold, pX;
+        vector_at = nothing, parts_kwargs = map(_ -> (;), M.manifolds),
     )
     if vector_at === nothing
         map(
@@ -869,7 +834,7 @@ end
     retract(M::ProductManifold, p, X, m::ProductRetraction)
 
 Compute the retraction from `p` with tangent vector `X` on the [`ProductManifold`](@ref) `M`
-using an [`ProductRetraction`](@ref), which by default encapsulates retractions of the
+using a [`ProductRetraction`](@ref), which by default encapsulates retractions of the
 base manifolds. Then this method is performed elementwise, so the encapsulated retractions
 method has to be one that is available on the manifolds.
 """
@@ -895,11 +860,7 @@ function retract!(M::ProductManifold, q, p, X, method::ProductRetraction)
     return q
 end
 function retract!(
-        M::ProductManifold,
-        q,
-        p,
-        X,
-        method::RTM,
+        M::ProductManifold, q, p, X, method::RTM,
     ) where {RTM <: AbstractRetractionMethod}
     map(
         (N, qc, pc, Xc) -> retract!(N, qc, pc, Xc, method),
@@ -923,12 +884,7 @@ function retract_fused!(M::ProductManifold, q, p, X, t::Number, method::ProductR
     return q
 end
 function retract_fused!(
-        M::ProductManifold,
-        q,
-        p,
-        X,
-        t::Number,
-        method::RTM,
+        M::ProductManifold, q, p, X, t::Number, method::RTM,
     ) where {RTM <: AbstractRetractionMethod}
     map(
         (N, qc, pc, Xc) -> retract_fused!(N, qc, pc, Xc, t, method),
@@ -950,7 +906,7 @@ end
 Compute the Riemann tensor at point from `p` with tangent vectors `X`, `Y` and `Z` on
 the [`ProductManifold`](@ref) `M`.
 """
-riemann_tensor(M::ProductManifold, p, X, Y, X)
+riemann_tensor(M::ProductManifold, p, X, Y, Z)
 
 function riemann_tensor!(M::ProductManifold, Xresult, p, X, Y, Z)
     map(
@@ -966,26 +922,37 @@ function riemann_tensor!(M::ProductManifold, Xresult, p, X, Y, Z)
 end
 
 @doc raw"""
-    sectional_curvature(M::ProductManifold, p, X, Y)
+    sectional_curvature(M::ProductManifold, p, X, Y; atol::Real = sqrt(eps(number_eltype(X))))
 
 Compute the sectional curvature of a manifold ``\mathcal M`` at a point ``p \in \mathcal M``
 on two linearly independent tangent vectors at ``p``. It may be 0 for a product of non-flat
 manifolds if projections of `X` and `Y` on subspaces corresponding to component manifolds
-are not linearly independent.
+are not linearly independent. For linearly dependent `X` and `Y` it returns 0.
+
+`atol` is the absolute tolerance for the test of linear independence of `X` and `Y`.
 """
-function sectional_curvature(M::ProductManifold, p, X, Y)
+function sectional_curvature(M::ProductManifold, p, X, Y; atol::Real = sqrt(eps(number_eltype(X))))
     curvature = zero(number_eltype(X))
+    Xnorm2 = inner(M, p, X, X)
+    Ynorm2 = inner(M, p, Y, Y)
+    innerXY = inner(M, p, X, Y)
+    # return 0 if X and Y are linearly dependent
+    abs(Xnorm2 * Ynorm2 - innerXY^2) < atol && return curvature
     map(
         M.manifolds,
         submanifold_components(M, p),
         submanifold_components(M, X),
         submanifold_components(M, Y),
     ) do M_i, p_i, X_i, Y_i
-        if are_linearly_independent(M_i, p_i, X_i, Y_i)
-            curvature += sectional_curvature(M_i, p_i, X_i, Y_i)
+        X_inorm2 = inner(M_i, p_i, X_i, X_i)
+        Y_inorm2 = inner(M_i, p_i, Y_i, Y_i)
+        inner_iXY = inner(M_i, p_i, X_i, Y_i)
+        if abs(X_inorm2 * Y_inorm2 - inner_iXY^2) > atol
+            w_i = X_inorm2 * Y_inorm2 - inner_iXY^2
+            curvature += w_i * sectional_curvature(M_i, p_i, X_i, Y_i)
         end
     end
-    return curvature
+    return curvature / (Xnorm2 * Ynorm2 - innerXY^2)
 end
 
 @doc raw"""
@@ -1031,7 +998,7 @@ For example `select_from_tuple(("a", "b", "c"), Val((3, 1, 1)))` returns
 """
 @generated function select_from_tuple(t::NTuple{N, Any}, positions::Val{P}) where {N, P}
     for k in P
-        (k < 0 || k > N) && error("positions must be between 1 and $N")
+        (k < 1 || k > N) && error("positions must be between 1 and $N")
     end
     return Expr(:tuple, [Expr(:ref, :t, k) for k in P]...)
 end
@@ -1039,10 +1006,19 @@ end
 """
     set_component!(M::ProductManifold, q, p, i)
 
-Set the `i`th component of a point `q` on a [`ProductManifold`](@ref) `M` to `p`, where `p` is a point on the [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  this factor of the product manifold consists of.
+Set the `i`th component of a point `q` on a [`ProductManifold`](@ref) `M` to `p`, where `p` is a point on the [`AbstractManifold`](@ref) this factor of the product manifold consists of.
+For `i` a `Colon` or a vector of indices, `p` contains one point per selected factor.
 """
 function set_component!(M::ProductManifold, q, p, i)
     return copyto!(submanifold_component(M, q, i), p)
+end
+function set_component!(M::ProductManifold, q, p, ::Colon)
+    map(copyto!, submanifold_components(M, q), p)
+    return q
+end
+function set_component!(M::ProductManifold, q, p, i::AbstractVector)
+    map((j, pj) -> copyto!(submanifold_component(M, q, j), pj), i, p)
+    return q
 end
 
 function _show_submanifold(io::IO, M::AbstractManifold; pre = "")
@@ -1066,14 +1042,9 @@ end
 
 function _show_product_manifold_no_header(io::IO, M)
     n = length(M.manifolds)
-    sz = displaysize(io)
-    screen_height, screen_width = sz[1] - 4, sz[2]
+    screen_height = displaysize(io)[1] - 4
     half_height = div(screen_height, 2)
-    inds = 1:n
     pre = " "
-    if n > screen_height
-        inds = [1:half_height; (n - div(screen_height - 1, 2) + 1):n]
-    end
     if n ≤ screen_height
         _show_submanifold_range(io, M.manifolds, 1:n; pre = pre)
     else
@@ -1113,9 +1084,7 @@ end
 
 
 function Base.show(
-        io::IO,
-        mime::MIME"text/plain",
-        B::CachedBasis{𝔽, T, D},
+        io::IO, mime::MIME"text/plain", B::CachedBasis{𝔽, T, D},
     ) where {𝔽, T <: AbstractBasis{𝔽}, D <: ProductBasisData}
     println(io, "$(T) for a product manifold")
     for (i, cb) in enumerate(B.data.parts)
@@ -1149,12 +1118,7 @@ end
 submanifold(M::ProductManifold, i::AbstractVector) = submanifold(M, Val(tuple(i...)))
 
 function vector_transport_direction!(
-        M::ProductManifold,
-        Y,
-        p,
-        X,
-        d,
-        m::ProductVectorTransport,
+        M::ProductManifold, Y, p, X, d, m::ProductVectorTransport,
     )
     map(
         vector_transport_direction!,
@@ -1168,12 +1132,7 @@ function vector_transport_direction!(
     return Y
 end
 function vector_transport_direction!(
-        M::ProductManifold,
-        Y,
-        p,
-        X,
-        d,
-        m::VTM,
+        M::ProductManifold, Y, p, X, d, m::VTM,
     ) where {VTM <: AbstractVectorTransportMethod}
     map(
         (iM, iY, ip, iX, id) -> vector_transport_direction!(iM, iY, ip, iX, id, m),
@@ -1217,22 +1176,17 @@ function vector_transport_to!(M::ProductManifold, Y, p, X, q, m::ProductVectorTr
     return Y
 end
 function vector_transport_to!(
-        M::ProductManifold,
-        Y,
-        p,
-        X,
-        q,
-        m::AbstractVectorTransportMethod,
+        M::ProductManifold, Y, p, X, q, m::AbstractVectorTransportMethod,
     )
-    return map(
-            (iM, iY, ip, iX, iq) -> vector_transport_to!(iM, iY, ip, iX, iq, m),
-            M.manifolds,
-            submanifold_components(M, Y),
-            submanifold_components(M, p),
-            submanifold_components(M, X),
-            submanifold_components(M, q),
-        ),
-        return Y
+    map(
+        (iM, iY, ip, iX, iq) -> vector_transport_to!(iM, iY, ip, iX, iq, m),
+        M.manifolds,
+        submanifold_components(M, Y),
+        submanifold_components(M, p),
+        submanifold_components(M, X),
+        submanifold_components(M, q),
+    )
+    return Y
 end
 
 @doc raw"""
@@ -1273,7 +1227,7 @@ end
     submanifold_component(p, i::Integer)
     submanifold_component(p, ::Val{i}) where {i}
 
-Project the product array `p` on `M` to its `i`th component. A new array is returned.
+Project the product array `p` on `M` to its `i`th component.
 """
 submanifold_component(::Any...)
 @inline function submanifold_component(M::AbstractManifold, p, i::Integer)
@@ -1298,6 +1252,8 @@ Zips tuples `a`, `b`, and remaining in a fast, type-stable way. If they have dif
 lengths, the result is trimmed to the length of the shorter tuple.
 """
 @generated function ziptuples(a::NTuple{N, Any}, b::NTuple{M, Any}) where {N, M}
+    # a static analysis may pass unknown lengths, then the generator is skipped
+    (N isa Int && M isa Int) || return :(Tuple(zip(a, b)))
     ex = Expr(:tuple)
     for i in 1:min(N, M)
         push!(ex.args, :((a[$i], b[$i])))
@@ -1305,10 +1261,9 @@ lengths, the result is trimmed to the length of the shorter tuple.
     return ex
 end
 @generated function ziptuples(
-        a::NTuple{N, Any},
-        b::NTuple{M, Any},
-        c::NTuple{L, Any},
+        a::NTuple{N, Any}, b::NTuple{M, Any}, c::NTuple{L, Any},
     ) where {N, M, L}
+    (N isa Int && M isa Int && L isa Int) || return :(Tuple(zip(a, b, c)))
     ex = Expr(:tuple)
     for i in 1:min(N, M, L)
         push!(ex.args, :((a[$i], b[$i], c[$i])))
@@ -1316,11 +1271,9 @@ end
     return ex
 end
 @generated function ziptuples(
-        a::NTuple{N, Any},
-        b::NTuple{M, Any},
-        c::NTuple{L, Any},
-        d::NTuple{K, Any},
+        a::NTuple{N, Any}, b::NTuple{M, Any}, c::NTuple{L, Any}, d::NTuple{K, Any},
     ) where {N, M, L, K}
+    all(n -> n isa Int, (N, M, L, K)) || return :(Tuple(zip(a, b, c, d)))
     ex = Expr(:tuple)
     for i in 1:min(N, M, L, K)
         push!(ex.args, :((a[$i], b[$i], c[$i], d[$i])))
@@ -1328,12 +1281,10 @@ end
     return ex
 end
 @generated function ziptuples(
-        a::NTuple{N, Any},
-        b::NTuple{M, Any},
-        c::NTuple{L, Any},
-        d::NTuple{K, Any},
+        a::NTuple{N, Any}, b::NTuple{M, Any}, c::NTuple{L, Any}, d::NTuple{K, Any},
         e::NTuple{J, Any},
     ) where {N, M, L, K, J}
+    all(n -> n isa Int, (N, M, L, K, J)) || return :(Tuple(zip(a, b, c, d, e)))
     ex = Expr(:tuple)
     for i in 1:min(N, M, L, K, J)
         push!(ex.args, :((a[$i], b[$i], c[$i], d[$i], e[$i])))

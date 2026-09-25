@@ -1,14 +1,6 @@
 using ManifoldsBase, Test
+using ManifoldsBase.Test: DummyQuotientManifold, DummyTotalSpace
 
-struct DummyQuotientManifold <: AbstractManifold{ℝ} end
-struct DummyTotalSpace <: AbstractManifold{ℝ} end
-
-ManifoldsBase.canonical_project!(M::DummyQuotientManifold, q, p) = copyto!(q, p)
-ManifoldsBase.diff_canonical_project!(M::DummyQuotientManifold, Y, p, X) = copyto!(Y, X)
-ManifoldsBase.get_total_space(::DummyQuotientManifold) = DummyTotalSpace()
-ManifoldsBase.horizontal_component!(N::DummyQuotientManifold, Y, p, X) = copyto!(Y, X)
-ManifoldsBase.horizontal_lift!(N::DummyQuotientManifold, Y, q, X) = copyto!(Y, X)
-ManifoldsBase.zero_vector(::DummyQuotientManifold, p) = zeros(2)
 @testset "Allocations on a dummy quotient manifold" begin
     M = DummyQuotientManifold()
     p = [1.0, 2.0]
@@ -25,6 +17,7 @@ ManifoldsBase.zero_vector(::DummyQuotientManifold, p) = zeros(2)
     # Since all of the above are the identity, in this dummy v_space is 0
     Yv = vertical_component(M, p, X)
     @test Yv == zeros(2)
-    vertical_component!(M, Yv, p, X)
-    @test Yv == zeros(2)
+    Yv2 = copy(X)
+    vertical_component!(M, Yv2, p, X)
+    @test Yv2 == zeros(2)
 end

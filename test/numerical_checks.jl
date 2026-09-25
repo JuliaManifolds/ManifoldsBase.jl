@@ -26,9 +26,6 @@ default(; show = false, reuse = true)
         @test_throws ErrorException ManifoldsBase.find_best_slope_window(zeros(2), zeros(2), 20)
         @test_throws ErrorException ManifoldsBase.find_best_slope_window(zeros(2), zeros(2), [2, 20])
         @test check_retraction(M, ExponentialRetraction(), p, X; exactness_tol = 1.0e-7)
-        check_retraction(
-            M, ExponentialRetraction(), p, X; plot = true, exactness_tol = 1.0e-7,
-        )
     end
     @testset "Test inverse_retract checks" begin
         M = ManifoldsBase.Test.TestSphere(10)
@@ -46,7 +43,7 @@ default(; show = false, reuse = true)
             M, ProjectionInverseRetraction(), p, X; limits = (-2.5, 0.0), plot = true,
         )
 
-        # ProjectionRetraction only works <= 1 well in stepsize
+        # ProjectionInverseRetraction only works <= 1 well in stepsize
         @test_throws ErrorException check_inverse_retraction(
             M, ProjectionInverseRetraction(), p, X;
             limits = (-2.5, 2.0), # yields a bit too long tangents
@@ -55,12 +52,9 @@ default(; show = false, reuse = true)
         @test !check_inverse_retraction(
             M, ProjectionInverseRetraction(), p, X; limits = (-2.5, 2.0),
         )
-        # Check exatness case
+        # Check exactness case
         @test check_inverse_retraction(
             M, LogarithmicInverseRetraction(), p, X; exactness_tol = 1.0e-7,
-        )
-        check_inverse_retraction(
-            M, LogarithmicInverseRetraction(), p, X; plot = true, exactness_tol = 1.0e-7,
         )
     end
     @testset "Test vector_transport_to checks" begin
@@ -82,7 +76,7 @@ default(; show = false, reuse = true)
             M, ProjectionTransport(), p, X, Y; second_order = false, plot = true,
         )
 
-        # ProjectionRetraction only works <= 1 well in stepsize
+        # ProjectionTransport only works <= 1 well in stepsize
         @test_throws ErrorException check_vector_transport(
             M, ProjectionTransport(), p, X, Y;
             limits = (-2.5, 2.0), # yields a bit too long tangents
@@ -94,9 +88,6 @@ default(; show = false, reuse = true)
         )
         # Check exactness case
         @test check_vector_transport(M, ParallelTransport(), p, X, Y; exactness_tol = 1.0e-7)
-        check_vector_transport(
-            M, ParallelTransport(), p, X, Y; plot = true, exactness_tol = 1.0e-7,
-        )
     end
     @testset "StabilizedRetraction and its inverse" begin
         M = ManifoldsBase.Test.TestSphere(10)
@@ -187,9 +178,10 @@ default(; show = false, reuse = true)
         @test is_point(M, p4; error = :error)
         @test is_point(M, p5; error = :error)
         # test the inverse as well
-        @test !is_vector(M, p6, Y1)
-        @test is_vector(M, p6, Y2; error = :error, atol = 1.0e-16)
-        @test is_vector(M, p6, Y3; error = :error, atol = 1.0e-16)
+        @test is_vector(M, p6, Y1; error = :error)
+        @test is_vector(M, p6, Y2; error = :error)
+        @test is_vector(M, p6, Y3; error = :error)
+        @test !is_vector(M, p6, p6)
     end
     @testset "Slope estimation with errors down to round-off" begin
         log_range = collect(range(-8.0, 0.0; length = 101))

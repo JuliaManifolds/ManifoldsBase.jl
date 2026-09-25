@@ -21,11 +21,11 @@ While moving vectors from one base point to another is the identity in the Eucli
 
 If we have two points ``p,q ∈ \mathcal M``, we take a ``c: [0,1] → \mathcal M`` connecting the two points, i.e. ``c(0) = p`` and ``c(1) = q``. this could be a (or the) geodesic.
 If we further consider a vector field ``X: [0,1] → T\mathcal M``, i.e. where ``X(t) ∈ T_{c(t)}\mathcal M``.
-Then the vector field is called _parallel_ if its covariant derivative ``\frac{\mathrm{D}}{\mathrm{d}t}X(t) = 0`` for all ``t∈ |0,1]``.
+Then the vector field is called _parallel_ if its covariant derivative ``\frac{\mathrm{D}}{\mathrm{d}t}X(t) = 0`` for all ``t∈ [0,1]``.
 
 If we now impose a value for ``X=X(0) ∈ T_p\mathcal M``, we obtain an ODE with an initial condition.
 The resulting value ``X(1) ∈ T_q\mathcal M`` is called the _parallel transport_ of `X` along ``c``
-or in case of a geodesic the _parallel transport of `X` from `p` to `q`.
+or in case of a geodesic the _parallel transport_ of `X` from `p` to `q`.
 
 ```@autodocs
 Modules = [ManifoldsBase]
@@ -83,8 +83,8 @@ ManifoldsBase.Test
 ```
 
 ```@autodocs
-Modules = [ManifoldsBase]
+Modules = [ManifoldsBase.Test]
 Pages = ["test_suite.jl"]
-Order = [:module, :type, :function]
+Order = [:type, :function]
 Private=true
 ```

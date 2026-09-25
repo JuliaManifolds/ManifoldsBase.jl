@@ -47,7 +47,7 @@ function allocate_result(M::EmbeddedManifold, f::typeof(project), x...)
 end
 
 """
-    decorated_manifold(M::EmbeddedManifold, d::Val{N} = Val(-1))
+    decorated_manifold(M::EmbeddedManifold)
 
 Return the manifold of `M` that is decorated with its embedding. For this specific
 type the internally stored enhanced manifold `M.manifold` is returned.
@@ -60,16 +60,27 @@ decorated_manifold(M::EmbeddedManifold) = M.manifold
 """
     get_embedding(M::EmbeddedManifold)
 
-Return the embedding [`EmbeddedManifold`](@ref) `N` of `M`, if it exists.
+Return the [`AbstractManifold`](@ref) `N` the [`EmbeddedManifold`](@ref) `M` is embedded into.
 """
 function get_embedding(M::EmbeddedManifold)
     return M.embedding
 end
 
+# By default, project “passes through” to the decorator, which here would allocate in the embedding
+# This overwrites this and allocates on M
 function project(M::EmbeddedManifold, p)
     q = allocate_result(M, project, p)
     project!(M, q, p)
     return q
+end
+
+# By default, project “passes through” to the decorator, which here would allocate in the embedding
+# This overwrites this and allocates on TpM
+function project(M::EmbeddedManifold, p, X)
+    # the order of args switched, since the allocation by default takes the type of the first.
+    Y = allocate_result(M, project, X, p)
+    project!(M, Y, p, X)
+    return Y
 end
 
 function show(

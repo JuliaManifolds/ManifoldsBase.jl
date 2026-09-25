@@ -39,7 +39,7 @@ A type that indicates that a [`Fiber`](@ref) is a [`CotangentSpace`](@ref).
 """
 struct CotangentSpaceType <: VectorSpaceType end
 
-TCoTSpaceType = Union{TangentSpaceType, CotangentSpaceType}
+const TCoTSpaceType = Union{TangentSpaceType, CotangentSpaceType}
 
 """
     AbstractBasis{𝔽,VST<:VectorSpaceType}
@@ -85,7 +85,7 @@ end
 """
     AbstractOrthogonalBasis{𝔽,VST<:VectorSpaceType}
 
-Abstract type that represents an orthonormal basis of vector space of type `VST` on a
+Abstract type that represents an orthogonal basis of vector space of type `VST` on a
 manifold or a subset of it.
 
 The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used
@@ -114,8 +114,7 @@ struct DefaultOrthogonalBasis{𝔽, VST <: VectorSpaceType} <: AbstractOrthogona
     vector_space::VST
 end
 function DefaultOrthogonalBasis(
-        𝔽::AbstractNumbers = ℝ,
-        vs::VectorSpaceType = TangentSpaceType(),
+        𝔽::AbstractNumbers = ℝ, vs::VectorSpaceType = TangentSpaceType(),
     )
     return DefaultOrthogonalBasis{𝔽, typeof(vs)}(vs)
 end
@@ -127,6 +126,12 @@ function DefaultOrthogonalBasis{𝔽, TangentSpaceType}() where {𝔽}
 end
 
 
+"""
+    VeeOrthogonalBasis{𝔽} <: AbstractOrthogonalBasis{𝔽,TangentSpaceType}
+
+The orthogonal basis that [`vee`](@ref) and [`hat`](@ref) use, mainly used in connection with a [`LieAlgebra`](@extref LieGroups :jl:type:`LieGroups.LieAlgebra`),
+see [`DefaultLieAlgebraOrthogonalBasis`](@extref LieGroups :jl:type:`LieGroups.DefaultLieAlgebraOrthogonalBasis`).
+"""
 struct VeeOrthogonalBasis{𝔽} <: AbstractOrthogonalBasis{𝔽, TangentSpaceType} end
 VeeOrthogonalBasis(𝔽::AbstractNumbers = ℝ) = VeeOrthogonalBasis{𝔽}()
 
@@ -147,6 +152,7 @@ abstract type AbstractOrthonormalBasis{𝔽, VST <: VectorSpaceType} <:
 AbstractOrthogonalBasis{𝔽, VST} end
 
 """
+    DefaultOrthonormalBasis{𝔽,VST<:VectorSpaceType}
     DefaultOrthonormalBasis(𝔽::AbstractNumbers = ℝ, vs::VectorSpaceType = TangentSpaceType())
 
 An arbitrary orthonormal basis of vector space of type `VST` on a manifold. This will usually
@@ -242,7 +248,7 @@ const DefaultOrDiagonalizingBasis{𝔽} =
     Union{DefaultOrthonormalBasis{𝔽, TangentSpaceType}, DiagonalizingOrthonormalBasis{𝔽}}
 
 """
-    CachedBasis{𝔽,V,<:AbstractBasis{𝔽}} <: AbstractBasis{𝔽}
+    CachedBasis{𝔽,B<:AbstractBasis{𝔽},V} <: AbstractBasis{𝔽,TangentSpaceType}
 
 A cached version of the given `basis` with precomputed basis vectors. The basis vectors
 are stored in `data`, either explicitly (like in cached variants of
@@ -263,9 +269,7 @@ function CachedBasis(basis::CachedBasis) # avoid double encapsulation
     return basis
 end
 function CachedBasis(
-        basis::DiagonalizingOrthonormalBasis,
-        eigenvalues::ET,
-        vectors::T,
+        basis::DiagonalizingOrthonormalBasis, eigenvalues::ET, vectors::T,
     ) where {ET <: AbstractVector, T <: AbstractVector}
     data = DiagonalizingBasisData(basis.frame_direction, eigenvalues, vectors)
     return CachedBasis(basis, data)
@@ -274,13 +278,6 @@ end
 # forward declarations
 function get_coordinates end
 function get_vector end
-
-const all_uncached_bases{T} = Union{
-    AbstractBasis{<:Any, T},
-    DefaultBasis{<:Any, T},
-    DefaultOrthogonalBasis{<:Any, T},
-    DefaultOrthonormalBasis{<:Any, T},
-}
 
 function allocate_on(M::AbstractManifold, ::TangentSpaceType)
     return similar(Array{Float64}, representation_size(M))
@@ -320,28 +317,28 @@ end
 
 Determine the function that must be used to ensure that the allocated representation is of
 the right type. This is needed for [`get_vector`](@ref) when a point on a complex manifold
-is represented by a real-valued vectors with a real-coefficient basis, so that
+is represented by a real-valued vector with a real-coefficient basis, so that
 a complex-valued vector representation is allocated.
 """
 allocation_promotion_function(::AbstractManifold, f, ::Tuple) = identity
 
 
 _doc_default_basis = """
-    default_basis(M::AbstractManifold, ::typeof(p); kwargs...)
+    default_basis(M::AbstractManifold, ::Type{T}; kwargs...) where {T}
     default_basis(M::AbstractManifold; kwargs...)
 
 Provide a default basis for a manifold's tangent space. This can be specific for different
-points `p` on `M`
-The global default for both is the [`DefaultOrthonormalBasis`](@ref) with
-the same number type as `M`.
+points `p` on `M`.
+The global default for both is the [`DefaultOrthonormalBasis`](@ref) with coefficients
+in the field given by the `field` keyword argument.
 
 This method can also be specified more precisely with a point type `T`, for the case
 that on a `M` there are two different representations of points, which provide
-different inverse retraction methods.
+different bases.
 
 ## Keyword arguments
 
-* `field::`[`AbstractNumbers`](@ref) field for the coefficients of the basis
+* `field::`[`AbstractNumbers`](@ref)` = ℝ`: field for the coefficients of the basis
 """
 
 @doc "$(_doc_default_basis)"
@@ -364,6 +361,14 @@ function change_basis(M::AbstractManifold, p, c, B_in::AbstractBasis, B_out::Abs
     return get_coordinates(M, p, get_vector(M, p, c, B_in), B_out)
 end
 
+"""
+    change_basis!(M::AbstractManifold, c_out, p, c, B_in::AbstractBasis, B_out::AbstractBasis)
+
+Given a vector with coordinates `c` at point `p` from manifold `M` in basis `B_in`,
+compute coordinates of the same vector in basis `B_out` in-place of `c_out`.
+
+See also [`change_basis`](@ref).
+"""
 function change_basis!(
         M::AbstractManifold, c_out, p, c, B_in::AbstractBasis, B_out::AbstractBasis,
     )
@@ -384,7 +389,7 @@ end
     coordinate_eltype(M::AbstractManifold, p, 𝔽::AbstractNumbers)
 
 Get the element type for 𝔽-field coordinates of the tangent space at a point `p` from
-manifold `M`. This default assumes that usually complex bases of complex manifolds have
+manifold `M`. This default assumes that usually real bases of complex manifolds have
 real coordinates but it can be overridden by a more specific method.
 """
 @inline function coordinate_eltype(::AbstractManifold, p, 𝔽::ComplexNumbers)
@@ -411,16 +416,12 @@ such that ``v^i(v_j) = δ^i_j``, where ``δ^i_j`` is the Kronecker delta symbol:
 dual_basis(M::AbstractManifold, p, B::AbstractBasis) = _dual_basis(M, p, B)
 
 function _dual_basis(
-        ::AbstractManifold,
-        p,
-        ::DefaultOrthonormalBasis{𝔽, TangentSpaceType},
+        ::AbstractManifold, p, ::DefaultOrthonormalBasis{𝔽, TangentSpaceType},
     ) where {𝔽}
     return DefaultOrthonormalBasis{𝔽}(CotangentSpaceType())
 end
 function _dual_basis(
-        ::AbstractManifold,
-        p,
-        ::DefaultOrthonormalBasis{𝔽, CotangentSpaceType},
+        ::AbstractManifold, p, ::DefaultOrthonormalBasis{𝔽, CotangentSpaceType},
     ) where {𝔽}
     return DefaultOrthonormalBasis{𝔽}(TangentSpaceType())
 end
@@ -483,9 +484,7 @@ function _get_basis(M::AbstractManifold, p, B::ProjectedOrthonormalBasis{:svd, �
     return CachedBasis(B, vecs)
 end
 function _get_basis(
-        M::AbstractManifold,
-        p,
-        B::ProjectedOrthonormalBasis{:gram_schmidt, ℝ};
+        M::AbstractManifold, p, B::ProjectedOrthonormalBasis{:gram_schmidt, ℝ};
         kwargs...,
     )
     E = [project(M, p, _euclidean_basis_vector(p, i)) for i in eachindex(p)]
@@ -522,7 +521,7 @@ function _get_basis(M::AbstractManifold, p, B::DefaultOrthonormalBasis)
     return get_basis_orthonormal(M, p, number_system(B))
 end
 
-function get_basis_orthonormal(M::AbstractManifold, p, N::AbstractNumbers; kwargs...)
+function get_basis_orthonormal(M::AbstractManifold, p, N::AbstractNumbers)
     B = DefaultOrthonormalBasis(N)
     dim = number_of_coordinates(M, B)
     Eltp = coordinate_eltype(M, p, N)
@@ -575,7 +574,10 @@ function _get_coordinates(M::AbstractManifold, p, X, B::DefaultOrthogonalBasis)
     return get_coordinates_orthogonal(M, p, X, number_system(B))
 end
 function get_coordinates_orthogonal(M::AbstractManifold, p, X, N)
-    return get_coordinates_orthonormal(M, p, X, N)
+    # arguments X and p for allocate_result are intentionally reversed
+    # to make ManifoldDiff.jl tests pass
+    c = allocate_result(M, get_coordinates, X, p, DefaultOrthogonalBasis(N))
+    return get_coordinates_orthogonal!(M, c, p, X, N)
 end
 
 function _get_coordinates(M::AbstractManifold, p, X, B::DefaultOrthonormalBasis)
@@ -592,10 +594,7 @@ function _get_coordinates(M::AbstractManifold, p, X, B::DiagonalizingOrthonormal
     return get_coordinates_diagonalizing(M, p, X, B)
 end
 function get_coordinates_diagonalizing(
-        M::AbstractManifold,
-        p,
-        X,
-        B::DiagonalizingOrthonormalBasis,
+        M::AbstractManifold, p, X, B::DiagonalizingOrthonormalBasis,
     )
     c = allocate_result(M, get_coordinates, p, X, B)
     return get_coordinates_diagonalizing!(M, c, p, X, B)
@@ -605,32 +604,26 @@ function _get_coordinates(M::AbstractManifold, p, X, B::CachedBasis)
     return get_coordinates_cached(M, number_system(M), p, X, B, number_system(B))
 end
 function get_coordinates_cached(
-        M::AbstractManifold,
-        ::ComplexNumbers,
-        p,
-        X,
-        B::CachedBasis,
-        ::ComplexNumbers,
+        M::AbstractManifold, ::ComplexNumbers, p, X, B::CachedBasis, ::ComplexNumbers,
     )
     return map(vb -> conj(inner(M, p, X, vb)), get_vectors(M, p, B))
 end
 function get_coordinates_cached(
-        M::AbstractManifold,
-        ::𝔽,
-        p,
-        X,
-        C::CachedBasis,
-        ::RealNumbers,
+        M::AbstractManifold, ::𝔽, p, X, C::CachedBasis, ::RealNumbers,
     ) where {𝔽}
     return map(vb -> real(inner(M, p, X, vb)), get_vectors(M, p, C))
 end
 
+@doc raw"""
+    get_coordinates!(M::AbstractManifold, Y, p, X, B::AbstractBasis=default_basis(M, typeof(p)))
+
+Compute a one-dimensional vector of coefficients of the tangent vector `X`
+at point denoted by `p` on manifold `M` in basis `B` in-place of `Y`.
+
+See also [`get_coordinates`](@ref).
+"""
 function get_coordinates!(
-        M::AbstractManifold,
-        Y,
-        p,
-        X,
-        B::AbstractBasis = DefaultOrthonormalBasis(),
+        M::AbstractManifold, Y, p, X, B::AbstractBasis = default_basis(M, typeof(p)),
     )
     return _get_coordinates!(M, Y, p, X, B)
 end
@@ -720,7 +713,8 @@ end
     return get_vector_orthogonal(M, p, c, number_system(B))
 end
 @inline function get_vector_orthogonal(M::AbstractManifold, p, c, N)
-    return get_vector_orthonormal(M, p, c, N)
+    Y = allocate_result(M, get_vector, p, c)
+    return get_vector_orthogonal!(M, Y, p, c, N)
 end
 
 function _get_vector(M::AbstractManifold, p, c, B::DefaultOrthonormalBasis)
@@ -736,10 +730,7 @@ end
     return get_vector_diagonalizing(M, p, c, B)
 end
 function get_vector_diagonalizing(
-        M::AbstractManifold,
-        p,
-        c,
-        B::DiagonalizingOrthonormalBasis,
+        M::AbstractManifold, p, c, B::DiagonalizingOrthonormalBasis,
     )
     Y = allocate_result(M, get_vector, p, c)
     return get_vector!(M, Y, p, c, B)
@@ -768,12 +759,17 @@ function get_vector_cached(M::AbstractManifold, p, X, B::CachedBasis)
     end
     return Xt
 end
+
+"""
+    get_vector!(M::AbstractManifold, Y, p, c, B::AbstractBasis=default_basis(M, typeof(p)))
+
+Convert a one-dimensional vector of coefficients `c` in a basis `B` of
+the tangent space at `p` on manifold `M` to a tangent vector in-place of `Y`.
+
+See also [`get_vector`](@ref).
+"""
 @inline function get_vector!(
-        M::AbstractManifold,
-        Y,
-        p,
-        c,
-        B::AbstractBasis = DefaultOrthonormalBasis(),
+        M::AbstractManifold, Y, p, c, B::AbstractBasis = default_basis(M, typeof(p)),
     )
     return _get_vector!(M, Y, p, c, B)
 end
@@ -860,13 +856,14 @@ end
     gram_schmidt(M::AbstractManifold{𝔽}, p, B::AbstractBasis{𝔽}) where {𝔽}
     gram_schmidt(M::AbstractManifold, p, V::AbstractVector)
 
-Compute an ONB in the tangent space at `p` on the [`AbstractManifold`](@ref} `M` from either an
-[`AbstractBasis`](@ref) basis ´B´ or a set of (at most) [`manifold_dimension`](@ref)`(M)`
+Compute an ONB in the tangent space at `p` on the [`AbstractManifold`](@ref) `M` from either an
+[`AbstractBasis`](@ref) basis `B` or a set of (at most) [`manifold_dimension`](@ref)`(M)`
 many vectors.
 Note that this method requires the manifold and basis to work on the same
 [`AbstractNumbers`](@ref) `𝔽`, i.e. with real coefficients.
 
-The method always returns a basis, i.e. linearly dependent vectors are removed.
+A vector that is linearly dependent on the previous ones stops the computation with an error,
+unless `skip_linearly_dependent` is set to `true`, in which case it is left out.
 
 # Keyword arguments
 
@@ -874,11 +871,11 @@ The method always returns a basis, i.e. linearly dependent vectors are removed.
   independent
 * `skip_linearly_dependent` (`false`) – whether to just skip (`true`) a vector that
   is linearly dependent to the previous ones or to stop (`false`, default) at that point
-* `return_incomplete_set` (`false`) – throw an error if the resulting set of vectors is not
-  a basis but contains less vectors
+* `return_incomplete_set` (`false`) – whether to return (`true`) a set that contains fewer
+  vectors than a basis or to throw an error (`false`, default) in that case
 
 further keyword arguments can be passed to set the accuracy of the independence test.
-Especially `atol` is raised slightly by default to `atol = 5*1e-16`.
+Especially `atol` defaults to `eps(number_eltype(first(V)))`.
 
 # Return value
 
@@ -887,8 +884,7 @@ When an [`AbstractBasis`](@ref) is orthonormalized, a [`CachedBasis`](@ref) is r
 """
 function gram_schmidt(
         M::AbstractManifold{𝔽}, p, B::AbstractBasis{𝔽};
-        warn_linearly_dependent = false, return_incomplete_set = false, skip_linearly_dependent = false,
-        kwargs...,
+        warn_linearly_dependent = false, return_incomplete_set = false, skip_linearly_dependent = false, kwargs...,
     ) where {𝔽}
     V = gram_schmidt(
         M, p, get_vectors(M, p, B);
@@ -899,9 +895,7 @@ function gram_schmidt(
 end
 function gram_schmidt(
         M::AbstractManifold, p, V::AbstractVector;
-        atol = eps(number_eltype(first(V))), warn_linearly_dependent = false,
-        return_incomplete_set = false, skip_linearly_dependent = false,
-        kwargs...,
+        atol = eps(number_eltype(first(V))), warn_linearly_dependent = false, return_incomplete_set = false, skip_linearly_dependent = false, kwargs...,
     )
     N = length(V)
     Ξ = empty(V)
@@ -956,6 +950,16 @@ vector to an array representation. The [`vee`](@ref) map is the `hat` map's
 inverse.
 """
 @inline hat(M::AbstractManifold, p, X) = get_vector(M, p, X, VeeOrthogonalBasis(ℝ))
+
+@doc raw"""
+    hat!(M::AbstractManifold, Y, p, X)
+
+Given a basis ``e_i`` on the tangent space at a point `p` and tangent
+component vector ``X^i ∈ ℝ``, compute the equivalent vector representation
+``X=X^i e_i`` in-place of `Y`.
+
+See also [`hat`](@ref).
+"""
 @inline hat!(M::AbstractManifold, Y, p, X) = get_vector!(M, Y, p, X, VeeOrthogonalBasis(ℝ))
 
 """
@@ -991,6 +995,7 @@ requires_caching(::CachedBasis) = false
 requires_caching(::DefaultBasis) = false
 requires_caching(::DefaultOrthogonalBasis) = false
 requires_caching(::DefaultOrthonormalBasis) = false
+requires_caching(::VeeOrthogonalBasis) = false
 
 function _show_basis_vector(io::IO, X; pre = "", head = "")
     sX = sprint(show, "text/plain", X, context = io, sizehint = 0)
@@ -1003,15 +1008,15 @@ function _show_basis_vector_range(io::IO, Ξ, range; pre = "", sym = "E")
     end
     return nothing
 end
-function _show_basis_vector_range_noheader(io::IO, Ξ; max_vectors = 4, pre = "", sym = "E")
+function _show_basis_vector_range_noheader(io::IO, Ξ; max_vectors = 4, pre = "  ", sym = " E")
     nv = length(Ξ)
     return if nv ≤ max_vectors
-        _show_basis_vector_range(io, Ξ, 1:nv; pre = "  ", sym = " E")
+        _show_basis_vector_range(io, Ξ, 1:nv; pre = pre, sym = sym)
     else
         halfn = div(max_vectors, 2)
-        _show_basis_vector_range(io, Ξ, 1:halfn; pre = "  ", sym = " E")
+        _show_basis_vector_range(io, Ξ, 1:halfn; pre = pre, sym = sym)
         print(io, "\n ⋮")
-        _show_basis_vector_range(io, Ξ, (nv - halfn + 1):nv; pre = "  ", sym = " E")
+        _show_basis_vector_range(io, Ξ, (nv - halfn + 1):nv; pre = pre, sym = sym)
     end
 end
 
@@ -1040,9 +1045,7 @@ function show(io::IO, ::MIME"text/plain", onb::DiagonalizingOrthonormalBasis)
     return print(io, sk)
 end
 function show(
-        io::IO,
-        ::MIME"text/plain",
-        B::CachedBasis{𝔽, T, D},
+        io::IO, ::MIME"text/plain", B::CachedBasis{𝔽, T, D},
     ) where {𝔽, T <: AbstractBasis, D}
     try
         vectors = _get_vectors(B)
@@ -1063,9 +1066,7 @@ function show(
     end
 end
 function show(
-        io::IO,
-        ::MIME"text/plain",
-        B::CachedBasis{𝔽, T, D},
+        io::IO, ::MIME"text/plain", B::CachedBasis{𝔽, T, D},
     ) where {𝔽, T <: DiagonalizingOrthonormalBasis, D <: DiagonalizingBasisData}
     vectors = _get_vectors(B)
     nv = length(vectors)
@@ -1097,6 +1098,16 @@ vector to a vector representation. The [`hat`](@ref) map is the `vee` map's
 inverse.
 """
 vee(M::AbstractManifold, p, X) = get_coordinates(M, p, X, VeeOrthogonalBasis(ℝ))
+
+@doc raw"""
+    vee!(M::AbstractManifold, Y, p, X)
+
+Given a basis ``e_i`` on the tangent space at a point `p` and tangent
+vector `X`, compute the vector components ``X^i ∈ ℝ``, such that ``X = X^i e_i``,
+in-place of `Y`.
+
+See also [`vee`](@ref).
+"""
 function vee!(M::AbstractManifold, Y, p, X)
     return get_coordinates!(M, Y, p, X, VeeOrthogonalBasis(ℝ))
 end

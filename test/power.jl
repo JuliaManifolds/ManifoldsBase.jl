@@ -43,6 +43,12 @@ end
         @test default_retraction_method(M) == default_retraction_method(N)
         @test default_vector_transport_method(M) == default_vector_transport_method(N)
         @test get_embedding(N, typeof(p)) === N
+        pA = [1.0 4.0; 2.0 5.0; 3.0 6.0]
+        XA = [1.0 0.0; 0.0 1.0; 0.0 0.0]
+        @test exp(N, pA, XA) == pA .+ XA
+        @test log(N, pA, pA .+ XA) == XA
+        @test distance(N, pA, pA .+ XA) == sqrt(2)
+        @test get_component(N, pA, 2) == [4.0, 5.0, 6.0]
     end
 
     @testset "PowerManifold and allocation with empty representation size" begin
@@ -70,7 +76,7 @@ end
         M = ManifoldsBase.DefaultManifold(2, 2)
         N = PowerManifold(M, NestedReplacingPowerRepresentation(), 2)
         p = [SMatrix{2, 2, Float64}([i i + 1; i - 1 i - 2]) for i in 1:2]
-        allocate(M, p) isa Vector{SMatrix{2, 2, Float64, 4}}
+        @test allocate(N, p) isa Vector{SMatrix{2, 2, Float64, 4}}
         # DefaultManifold is always its own embedding independent of the point type, so
         @test get_embedding(N) == get_embedding(N, typeof(p))
     end
@@ -146,7 +152,6 @@ end
                         @test !is_vector(N, pE1, p)
                         @test !is_vector(N, pE2, p)
                         # tangents - with proper base
-                        @test is_vector(N, p, p, true)
                         @test !is_vector(N, p, pE1)
                         @test !is_vector(N, p, pE2)
                         @test_throws ComponentManifoldError is_vector(
@@ -240,6 +245,9 @@ end
                     @test norm(N, p, q, Inf) == maximum(norms)
                     @test project(N, p) == p
                     @test project(N, p, q) == q
+                    Zp = allocate(q)
+                    @test project!(N, Zp, p, q) == q
+                    @test Zp == q
                     @test power_dimensions(N) == pow_size
                     @test power_dimensions(N^3) == (pow_size..., 3)
                     m = ParallelTransport()
@@ -315,7 +323,7 @@ end
                     B3 = get_basis(N, p, B2)
                     if pow_size == (2,)
                         @test sprint(show, "text/plain", B) ==
-                            """$(DefaultBasis()) for a power manifold
+                            """$(typeof(DefaultBasis())) for a power manifold
                             Basis for component (1,):
                             $(sprint(show, "text/plain", B.data.bases[1]))
                             Basis for component (2,):
@@ -387,6 +395,15 @@ end
             change_representer(M, e, q, log(M, q, p)),
         ]
         @test norm(N, P, Z .- Zc) ≈ 0
+        # in-place variants with replaced elements
+        NR = PowerManifold(M, NestedReplacingPowerRepresentation(), 2)
+        @test change_metric!(NR, similar(X), e, P, X) == Yc
+        @test change_representer!(NR, similar(X), e, P, X) == Zc
+        Md = ManifoldsBase.DefaultManifold(3)
+        NRd = PowerManifold(Md, NestedReplacingPowerRepresentation(), 2)
+        Pd = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]
+        Xd = [[0.0, 1.0, 0.0], [1.0, 0.0, 0.0]]
+        @test Weingarten!(NRd, similar(Xd), Pd, Xd, Xd) == zero_vector(NRd, Pd)
     end
 
     @testset "Curvature" begin
@@ -413,6 +430,13 @@ end
 
             @test sectional_curvature(Mpr, p, X1, X2) == 1.0
             @test sectional_curvature(Mpr, p, X1, X3) == 0.0
+            # a plane across both components is weighted by the Gram determinants
+            q = [[1.0, 0.0, 0.0], [1.0, 0.0, 0.0]]
+            Y1 = [[0.0, 1.0, 0.0], [0.0, 1.0, 0.0]]
+            Y2 = [[0.0, 0.0, 1.0], [0.0, 0.0, 1.0]]
+            @test sectional_curvature(Mpr, q, Y1, Y2) == 0.5
+            # linearly dependent vectors span no plane
+            @test sectional_curvature(Mpr, q, Y1, 2 .* Y1) == 0.0
 
             Mss = PowerManifold(M1, NestedPowerRepresentation(), 1)
             @test sectional_curvature_max(Mss) == 1.0

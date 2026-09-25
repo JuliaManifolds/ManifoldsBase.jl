@@ -9,6 +9,7 @@ using ManifoldsBase: DefaultManifold, VectorSpaceType, ℝ, Fiber
 
     TpM = TangentSpace(M, p)
     @test is_flat(TpM)
+    @test is_flat(CotangentSpace(M, p))
 
     @test ManifoldsBase.fiber_dimension(M, CotangentSpaceType()) == 3
 
@@ -29,6 +30,7 @@ using ManifoldsBase: DefaultManifold, VectorSpaceType, ℝ, Fiber
         @test ct_ps == ct_ps_test
         @test base_manifold(t_p) == M
         @test manifold_dimension(t_p) == 3
+        @test manifold_dimension(ct_p) == 3
         @test t_p.manifold == M
         @test t_p.fiber_type == TangentSpaceType()
         @test t_p.point == p
@@ -44,7 +46,6 @@ using ManifoldsBase: DefaultManifold, VectorSpaceType, ℝ, Fiber
         @test isapprox(t_p, X, log(t_p, X, Y), [0.0, 2.0, -2.0])
         @test inner(t_p, X, X, X) ≈ 1.0
         @test norm(t_p, X) ≈ 1.0
-        @test norm(t_p, X) ≈ 1.0
         @test parallel_transport_to(t_p, X, Y, X) ≈ Y
         @test vector_transport_to(t_p, X, Y, X) ≈ Y
         @test vector_transport_to(t_p, X, Y, X, ProjectionTransport()) ≈ Y
@@ -56,10 +57,16 @@ using ManifoldsBase: DefaultManifold, VectorSpaceType, ℝ, Fiber
         @test rand(t_p; vector_at = X) isa Vector{Float64}
         @test rand(Random.default_rng(), t_p) isa Vector{Float64}
         @test rand(Random.default_rng(), t_p; vector_at = X) isa Vector{Float64}
+        # log! keeps the inner arrays of a nested destination
+        N = PowerManifold(DefaultManifold(2), NestedPowerRepresentation(), 2)
+        V = [[0.0, 0.0], [0.0, 0.0]]
+        V1 = V[1]
+        log!(TangentSpace(N, V), V, V, [[1.0, 1.0], [1.0, 1.0]])
+        @test V == [[1.0, 1.0], [1.0, 1.0]] && V[1] === V1
         # generic vector space at
         X_p = Fiber(M, p, ManifoldsBase.Test.TestVectorSpaceType())
         X_ps = sprint(show, "text/plain", X_p)
-        X_ps_test = "VectorSpaceFiber{ℝ, DefaultManifold{ℝ, Tuple{Int64}}, ManifoldsBase.Test.TestVectorSpaceType, Vector{Float64}}\nFiber:\n ManifoldsBase.Test.TestVectorSpaceType()DefaultManifold(3; field = ℝ)\nBase point:\n $(sp)"
+        X_ps_test = "VectorSpaceFiber{ℝ, DefaultManifold{ℝ, Tuple{Int64}}, ManifoldsBase.Test.TestVectorSpaceType, Vector{Float64}}\nFiber:\n ManifoldsBase.Test.TestVectorSpaceType()\n DefaultManifold(3; field = ℝ)\nBase point:\n $(sp)"
         @test X_ps == X_ps_test
 
         for basis in

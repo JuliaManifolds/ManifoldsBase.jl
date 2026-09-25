@@ -30,14 +30,8 @@ include("retractions.jl")
 include("exp_log_geo.jl")
 include("projections.jl")
 
-if isdefined(Base, Symbol("@constprop"))
-    macro aggressive_constprop(ex)
-        return esc(:(Base.@constprop :aggressive $ex))
-    end
-else
-    macro aggressive_constprop(ex)
-        return esc(ex)
-    end
+macro aggressive_constprop(ex)
+    return esc(:(Base.@constprop :aggressive $ex))
 end
 
 """
@@ -108,8 +102,8 @@ end
 allocate(::AbstractManifold, a, T::Type, dims::Tuple) = allocate(a, T, dims)
 
 """
-    allocate_on(M::AbstractManifold, [T:::Type])
-    allocate_on(M::AbstractManifold, F::FiberType, [T:::Type])
+    allocate_on(M::AbstractManifold, [T::Type])
+    allocate_on(M::AbstractManifold, F::FiberType, [T::Type])
 
 Allocate a new point on manifold `M` with optional type given by `T`. Note that `T` is not
 number element type as in [`allocate`](@ref) but rather the type of the entire point to be
@@ -118,7 +112,7 @@ returned.
 If `F` is provided, then an element of the corresponding fiber is allocated, assuming it is
 independent of the base point.
 
-To allocate a tangent vector, use ``
+To allocate a tangent vector, use `allocate_on(M, TangentSpaceType())`.
 
 # Example
 
@@ -197,7 +191,7 @@ end
 function allocate_result_array(M::AbstractManifold, f, ::Type, ::Nothing)
     msg = "Could not allocate result of function $f on manifold $M."
     if base_manifold(M) isa ProductManifold
-        msg *= " This error could be resolved by importing RecursiveArrayTools.jl. If this is not the case, please open report an issue."
+        msg *= " This error could be resolved by importing RecursiveArrayTools.jl. If this is not the case, please open an issue."
     end
     return error(msg)
 end
@@ -228,21 +222,7 @@ Compute the angle between tangent vectors `X` and `Y` at point `p` from the
 [`AbstractManifold`](@ref) `M` with respect to the inner product from [`inner`](@ref).
 """
 function angle(M::AbstractManifold, p, X, Y)
-    return acos(real(inner(M, p, X, Y)) / norm(M, p, X) / norm(M, p, Y))
-end
-
-"""
-    are_linearly_independent(M::AbstractManifold, p, X, Y)
-
-Check is vectors `X`, `Y` tangent at `p` to `M` are linearly independent.
-"""
-function are_linearly_independent(
-        M::AbstractManifold, p, X, Y; atol::Real = sqrt(eps(number_eltype(X))),
-    )
-    norm_X = norm(M, p, X)
-    norm_Y = norm(M, p, Y)
-    innerXY = inner(M, p, X, Y)
-    return norm_X > atol && norm_Y > atol && !isapprox(abs(innerXY), norm_X * norm_Y)
+    return acos(clamp(real(inner(M, p, X, Y)) / norm(M, p, X) / norm(M, p, Y), -1, 1))
 end
 
 """
@@ -265,7 +245,7 @@ or the two tangent vectors `X`, `Y` in the tangent space at `p` are approximatel
 The keyword arguments `kwargs` can be used to set tolerances, similar to Julia's `isapprox`.
 
 This function might use `isapprox` from Julia internally and is similar to [`isapprox`](@ref),
-with the difference that is returns an [`ApproximatelyError`](@ref) if the two elements are
+with the difference that it returns an [`ApproximatelyError`](@ref) if the two elements are
 not approximately equal, containing a more detailed description/reason.
 If the two elements are approximately equal, this method returns `nothing`.
 
@@ -298,7 +278,7 @@ function check_approx(M::AbstractManifold, p, X, Y; kwargs...)
 end
 
 """
-    check_point(M::AbstractManifold, p; kwargs...) -> Union{Nothing,String}
+    check_point(M::AbstractManifold, p; kwargs...) -> Union{Nothing,Exception}
 
 Return `nothing` when `p` is a point on the [`AbstractManifold`](@ref) `M`. Otherwise, return an
 error with description why the point does not belong to manifold `M`.
@@ -309,11 +289,11 @@ assumption is to be optimistic for a point not deriving from the [`AbstractManif
 check_point(M::AbstractManifold, p; kwargs...) = nothing
 
 """
-    check_vector(M::AbstractManifold, p, X; kwargs...) -> Union{Nothing,String}
+    check_vector(M::AbstractManifold, p, X; kwargs...) -> Union{Nothing,Exception}
 
 Check whether `X` is a valid tangent vector in the tangent space of `p` on the
 [`AbstractManifold`](@ref) `M`. An implementation does not have to validate the point `p`.
-If it is not a tangent vector, an error string should be returned.
+If it is not a tangent vector, an error should be returned.
 
 By default, `check_vector` returns `nothing`, i.e. if no checks are implemented, the
 assumption is to be optimistic for tangent vectors not deriving from the [`AbstractTangentVector`](@ref)
@@ -368,7 +348,7 @@ function check_size(M::AbstractManifold, p, X)
     if n != m
         return DomainError(
             n,
-            "The tangent vector $(X) can not belong to the manifold $(M), since its size $(n) is not equal to the manifodls representation size ($(m)).",
+            "The tangent vector $(X) can not belong to the manifold $(M), since its size $(n) is not equal to the manifolds representation size ($(m)).",
         )
     end
 end
@@ -523,7 +503,7 @@ the representation is changed accordingly.
 
 The default is set in such a way that it assumes that the points on `M` are represented in
 their embedding (for example like the unit vectors in a space to represent the sphere) and
-hence embedding in the identity by default.
+hence embedding is the identity by default.
 
 If you have more than one embedding, see [`EmbeddedManifold`](@ref) for defining a second
 embedding. If your point `p` is already represented in some embedding,
@@ -544,7 +524,7 @@ Additionally, `embed` might include changing data representation, if applicable,
 if tangent vectors on `M` are not represented in the same way as their counterparts in the
 embedding, the representation is changed accordingly.
 
-The default is set in such a way that memory is allocated and `embed!(M, Y, p. X)` is called.
+The default is set in such a way that memory is allocated and `embed!(M, Y, p, X)` is called.
 
 If you have more than one embedding, see [`EmbeddedManifold`](@ref) for defining a second
 embedding. If your tangent vector `X` is already represented in some embedding,
@@ -589,7 +569,7 @@ embed!(M::AbstractManifold, Y, p, X) = copyto!(M, Y, p, X)
 """
     embed_project(M::AbstractManifold, p)
 
-Embed `p` from manifold `M` an project it back to `M`. For points from `M` this is identity
+Embed `p` from manifold `M` and project it back to `M`. For points from `M` this is identity
 but in case embedding is defined for points outside of `M`, this can serve as a way
 to for example remove numerical inaccuracies caused by some algorithms.
 """
@@ -599,7 +579,7 @@ end
 """
     embed_project(M::AbstractManifold, p, X)
 
-Embed vector `X` tangent at `p` from manifold `M` an project it back to tangent space
+Embed vector `X` tangent at `p` from manifold `M` and project it back to tangent space
 at `p`. For points from that tangent space this is identity but in case embedding is
 defined for tangent vectors from outside of it, this can serve as a way to for example remove
 numerical inaccuracies caused by some algorithms.
@@ -611,7 +591,7 @@ end
 """
     embed_project!(M::AbstractManifold, q, p)
 
-Embed `p` from manifold `M` an project it back to `M`, saving the result in `q`. For points
+Embed `p` from manifold `M` and project it back to `M`, saving the result in `q`. For points
 from `M` this is identity but in case embedding is defined for points outside of `M`, this
 can serve as a way to for example remove numerical inaccuracies caused by some algorithms.
 """
@@ -622,7 +602,7 @@ end
 """
     embed_project!(M::AbstractManifold, Y, p, X)
 
-Embed vector `X` tangent at `p` from manifold `M` an project it back to tangent space
+Embed vector `X` tangent at `p` from manifold `M` and project it back to tangent space
 at `p`, saving the result in `Y`. For points from that tangent space this is identity but
 in case embedding is defined for tangent vectors from outside of it, this can serve as a way
 to for example remove numerical inaccuracies caused by some algorithms.
@@ -647,7 +627,7 @@ get_embedding(M::AbstractManifold)
 """
     has_components(M::AbstractManifold)
 
-Return whether the [`AbstractManifold`](@ref)`(M)` consists of components,
+Return whether the [`AbstractManifold`](@ref) `M` consists of components,
 like the [`PowerManifold`](@ref) or the [`ProductManifold`](@ref), that one can iterate over.
 By default, this function returns `false`.
 """
@@ -663,8 +643,7 @@ Infimum of the injectivity radii `injectivity_radius(M,p)` of all points `p` on 
 Return the distance $d$ such that [`exp(M, p, X)`](@ref exp(::AbstractManifold, ::Any, ::Any)) is
 injective for all tangent vectors shorter than $d$ (i.e. has an inverse).
 
-    injectivity_radius(M::AbstractManifold[, x], method::AbstractRetractionMethod)
-    injectivity_radius(M::AbstractManifold, x, method::AbstractRetractionMethod)
+    injectivity_radius(M::AbstractManifold[, p], method::AbstractRetractionMethod)
 
 Distance ``d`` such that
 [`retract(M, p, X, method)`](@ref retract(::AbstractManifold, ::Any, ::Any, ::AbstractRetractionMethod))
@@ -762,12 +741,12 @@ function isapprox(M::AbstractManifold, p, q; error::Symbol = :none, kwargs...)
 end
 
 """
-    isapprox(M::AbstractManifold, p, X, Y; error:Symbol=:none; kwargs...)
+    isapprox(M::AbstractManifold, p, X, Y; error::Symbol=:none, kwargs...)
 
 Check if vectors `X` and `Y` tangent at `p` from [`AbstractManifold`](@ref) `M` are approximately
 equal.
 
-The optional positional argument can be used to get more information for the case that
+The keyword argument can be used to get more information for the case that
 the result is false, if the concrete manifold provides such information.
 Currently the following are supported
 
@@ -827,10 +806,10 @@ end
 
 """
     is_point(M::AbstractManifold, p; error::Symbol = :none, kwargs...)
-    is_point(M::AbstractManifold, p, throw_error::Bool; kwargs...)
+    is_point(M::AbstractManifold, p, throw_error::Bool=false; kwargs...)
 
 Return whether `p` is a valid point on the [`AbstractManifold`](@ref) `M`.
-By default the function calls [`check_point`](@ref), which returns an `ErrorException` or `nothing`.
+By default the function calls [`check_point`](@ref), which returns an `Exception` or `nothing`.
 
 How to report a potential error can be set using the `error=` keyword
 
@@ -845,11 +824,8 @@ The second signature is a shorthand, where the boolean is used for `error=:error
 and `error=:none` (default, `false`). This case ignores the `error=` keyword
 """
 function is_point(
-        M::AbstractManifold,
-        p,
-        throw_error::Bool;
-        error::Symbol = :none,
-        kwargs...,
+        M::AbstractManifold, p, throw_error::Bool;
+        error::Symbol = :none, kwargs...,
     )
     return is_point(M, p; error = throw_error ? :error : :none, kwargs...)
 end
@@ -886,7 +862,7 @@ end
 
 """
     is_vector(M::AbstractManifold, p, X, check_base_point::Bool=true; error::Symbol=:none, kwargs...)
-    is_vector(M::AbstractManifold, p, X, check_base_point::Bool=true, throw_error::Boolean; kwargs...)
+    is_vector(M::AbstractManifold, p, X, check_base_point::Bool=true, throw_error::Bool=false; kwargs...)
 
 Return whether `X` is a valid tangent vector at point `p` on the [`AbstractManifold`](@ref) `M`.
 Returns either `true` or `false`.
@@ -899,7 +875,7 @@ value is `nothing` or an error.
 How to report a potential error can be set using the `error=` keyword
 
 * `:error`          - throws an error if `X` is not a tangent vector and/or `p` is not point
-^ `:info`           - displays the error message as an `@info`
+* `:info`           - displays the error message as an `@info`
 * `:warn`           - displays the error message as a `@warn`ing.
 * `:none`           - (default) the function just returns `true`/`false`
 
@@ -969,7 +945,7 @@ Calculate the middle between the two point `p1` and `p2` from manifold `M`.
 By default uses [`log`](@ref), divides the vector by 2 and uses [`exp`](@ref).
 """
 function mid_point(M::AbstractManifold, p1, p2)
-    q = allocate(p1)
+    q = allocate_result(M, mid_point, p1, p2)
     return mid_point!(M, q, p1, p2)
 end
 
@@ -996,7 +972,7 @@ norm(M::AbstractManifold, p, X) = sqrt(max(real(inner(M, p, X, X)), 0))
 """
     number_eltype(x)
 
-Numeric element type of the a nested representation of a point or a vector.
+Numeric element type of a nested representation of a point or a vector.
 To be used in conjunction with [`allocate`](@ref) or [`allocate_result`](@ref).
 """
 number_eltype(x) = eltype(x)
@@ -1062,6 +1038,17 @@ function Random.rand(rng::AbstractRNG, M::AbstractManifold; vector_at = nothing,
     return pX
 end
 
+"""
+    Random.rand!(M::AbstractManifold, pX; vector_at=nothing)
+    Random.rand!(rng::AbstractRNG, M::AbstractManifold, pX; vector_at=nothing)
+
+Generate a random point on manifold `M` (when `vector_at` is `nothing`) or a tangent
+vector at point `vector_at` (when it is not `nothing`) in-place of `pX`.
+
+Optionally a random number generator `rng` to be used can be specified.
+
+See also [`rand`](@ref rand(::AbstractManifold)).
+"""
 function Random.rand!(M::AbstractManifold, pX; kwargs...)
     return rand!(Random.default_rng(), M, pX; kwargs...)
 end
@@ -1102,6 +1089,16 @@ function riemann_tensor(M::AbstractManifold, p, X, Y, Z)
 end
 
 @doc raw"""
+    riemann_tensor!(M::AbstractManifold, Xresult, p, X, Y, Z)
+
+Compute the value of the Riemann tensor ``R(X_f,Y_f)Z_f`` at point `p`
+in-place of `Xresult`.
+
+See also [`riemann_tensor`](@ref).
+"""
+riemann_tensor!(M::AbstractManifold, Xresult, p, X, Y, Z)
+
+@doc raw"""
     sectional_curvature(M::AbstractManifold, p, X, Y)
 
 Compute the sectional curvature of a manifold ``\mathcal M`` at a point ``p \in \mathcal M``
@@ -1132,7 +1129,7 @@ end
 
 Upper bound on sectional curvature of manifold `M`. The formula reads
 ```math
-\omega = \operatorname{sup}_{p\in\mathcal M, X\in T_p\mathcal M, Y\in T_p\mathcal M, ⟨X, Y⟩ ≠ 0} \kappa_p(X, Y)
+\omega = \operatorname{sup}_{p\in\mathcal M, X\in T_p\mathcal M, Y\in T_p\mathcal M, \lVert X \rVert^2_p \lVert Y \rVert^2_p - ⟨X, Y⟩^2_p ≠ 0} \kappa_p(X, Y)
 ```
 """
 sectional_curvature_max(M::AbstractManifold)
@@ -1142,7 +1139,7 @@ sectional_curvature_max(M::AbstractManifold)
 
 Lower bound on sectional curvature of manifold `M`. The formula reads
 ```math
-\omega = \operatorname{inf}_{p\in\mathcal M, X\in T_p\mathcal M, Y\in T_p\mathcal M, ⟨X, Y⟩ ≠ 0} \kappa_p(X, Y)
+\omega = \operatorname{inf}_{p\in\mathcal M, X\in T_p\mathcal M, Y\in T_p\mathcal M, \lVert X \rVert^2_p \lVert Y \rVert^2_p - ⟨X, Y⟩^2_p ≠ 0} \kappa_p(X, Y)
 ```
 """
 sectional_curvature_min(M::AbstractManifold)
@@ -1224,12 +1221,12 @@ end
 # Internal function to set plotting backend
 
 """
-    set_plotting_backend!(backend::String; only_fallback = false)
+    set_plotting_backend!(backend::String)
 
 Set the plotting backend to `backend`.
 Currently supported: `"Plots"` and `"Makie"`.
 
-An empty string resets to the default to use the last loaded one.
+An empty string resets to the default determined by the loaded plotting extensions.
 """
 function set_plotting_backend!(e::String)
     (length(e) == 0) && (return Preferences.@delete_preferences!("PlottingBackend"))
@@ -1241,7 +1238,8 @@ end
     get_plotting_backend()
 
 Return the current plotting backend.
-If none was set by the user, the last loaded one is returned. If none was loaded `nothing` is returned
+If none was set by the user, `"Makie"` is returned when the Makie extension is loaded,
+otherwise `"Plots"` when the Plots extension is loaded. If neither is loaded `nothing` is returned
 """
 function get_plotting_backend()
     def = nothing
@@ -1346,6 +1344,7 @@ export ProductManifold
 # Generic Estimation Types
 export GeodesicInterpolationWithinRadius,
     CyclicProximalPointEstimation,
+    EfficientEstimator,
     ExtrinsicEstimation,
     GradientDescentEstimation,
     WeiszfeldEstimation,
@@ -1359,7 +1358,6 @@ export AbstractRetractionMethod,
     CayleyRetraction,
     EmbeddedRetraction,
     ExponentialRetraction,
-    NLSolveInverseRetraction,
     QRRetraction,
     PadeRetraction,
     PolarRetraction,
@@ -1408,13 +1406,12 @@ export CachedBasis,
     DefaultOrthogonalBasis,
     DefaultOrthonormalBasis,
     DiagonalizingOrthonormalBasis,
-    DefaultOrthonormalBasis,
     GramSchmidtOrthonormalBasis,
     ProjectedOrthonormalBasis,
     VeeOrthogonalBasis
 
 # Error Messages
-export OutOfInjectivityRadiusError, ManifoldDomainError
+export OutOfInjectivityRadiusError
 export ApproximatelyError
 export CompositeManifoldError, ComponentManifoldError, ManifoldDomainError
 

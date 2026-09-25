@@ -173,23 +173,21 @@ end
     log(TpM::TangentSpace, X, Y)
 
 Logarithmic map on the [`TangentSpace`](@ref) `TpM`, calculated as the difference of tangent
-vectors `q` and `p` from `TpM`.
+vectors `Y` and `X` from `TpM`.
 """
 log(::TangentSpace, ::Any...)
 function log!(TpM::TangentSpace, V, X, Y)
-    copyto!(TpM, V, TpM.point, Y - X)
+    copyto!(TpM.manifold, V, TpM.point, Y - X)
     return V
 end
 
 @doc raw"""
-    manifold_dimension(TpM::TangentSpace)
+    manifold_dimension(B::Fiber)
 
-Return the dimension of the [`TangentSpace`](@ref) ``T_p\mathcal M`` at ``p∈\mathcal M``,
-which is the same as the dimension of the manifold ``\mathcal M``.
+Return the dimension of the [`Fiber`](@ref) `B`, that is its `fiber_dimension`.
+For a [`TangentSpace`](@ref) and a [`CotangentSpace`](@ref) this is the dimension of the manifold.
 """
-function manifold_dimension(TpM::TangentSpace)
-    return manifold_dimension(TpM.manifold)
-end
+manifold_dimension(B::Fiber) = fiber_dimension(B.manifold, B.fiber_type)
 
 @doc raw"""
     parallel_transport_to(::TangentSpace, X, V, Y)
@@ -257,7 +255,7 @@ end
 
 @doc raw"""
     Y = Weingarten(TpM::TangentSpace, X, V, A)
-    Weingarten!(TpM::TangentSpace, Y, p, X, V)
+    Weingarten!(TpM::TangentSpace, Y, X, V, A)
 
 Compute the Weingarten map ``\mathcal W_X`` at `X` on the [`TangentSpace`](@ref) `TpM` with respect to the
 tangent vector ``V \in T_p\mathcal M`` and the normal vector ``A \in N_p\mathcal M``.

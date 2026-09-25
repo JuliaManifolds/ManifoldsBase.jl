@@ -20,13 +20,13 @@ using Test
     @test repr(e3) == "CompositeManifoldError()"
 
     e4 = CompositeManifoldError([e2])
-    @test repr(e4) == "CompositeManifoldError([$(repr(e2)), ])"
+    @test repr(e4) == "CompositeManifoldError([$(repr(e2))])"
     s4 = sprint(showerror, e4)
     @test s4 == "CompositeManifoldError: $(s2)"
 
     eV = [e2, e2]
     e5 = CompositeManifoldError(eV)
-    @test repr(e5) == "CompositeManifoldError([$(repr(e2)), $(repr(e2)), ])"
+    @test repr(e5) == "CompositeManifoldError([$(repr(e2)), $(repr(e2))])"
     s5 = sprint(showerror, e5)
     @test s5 == "CompositeManifoldError: $(s2)\n\n...and $(length(eV) - 1) more error(s).\n"
 
@@ -39,4 +39,10 @@ using Test
     @test s7 == "ApproximatelyError with 1.0\nM.\n"
     p7 = sprint(show, e7)
     @test p7 == "ApproximatelyError(1.0, \"M.\")"
+
+    e8 = ApproximatelyError("M.")
+    s8 = sprint(showerror, e8)
+    @test s8 == "ApproximatelyError\nM.\n"
+    p8 = sprint(show, e8)
+    @test p8 == "ApproximatelyError(\"M.\")"
 end

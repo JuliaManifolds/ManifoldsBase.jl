@@ -9,7 +9,6 @@ using ManifoldsBase, LinearAlgebra, Random, Test
     z = [0.0, 1.0, 0.0]
     v = log(M, x, y)
     x2 = ValidationMPoint(x)
-    y2 = ValidationMPoint(y)
     v2 = log(A, x, y) # auto convert
     y2 = exp(A, x, v2)
     w = log(M, x, z)
@@ -26,9 +25,9 @@ using ManifoldsBase, LinearAlgebra, Random, Test
         # Test that we can ignore point contexts
         A2a = ValidationManifold(M; ignore_contexts = [:Point])
         @test is_point(A2a, [1, 2, 3, 4])
-        @test_throws DomainError !is_vector(A2a, x, [1, 2, 3, 4])
+        @test_throws DomainError is_vector(A2a, x, [1, 2, 3, 4])
         A2b = ValidationManifold(M; ignore_contexts = [:Vector])
-        @test_throws DomainError !is_point(A2b, [1, 2, 3, 4])
+        @test_throws DomainError is_point(A2b, [1, 2, 3, 4])
         @test is_vector(A2b, x, [1, 2, 3, 4])
         A3a = ValidationManifold(M; ignore_functions = Dict(exp => :All))
         @test is_point(A3a, [1, 2, 3, 4]; within = exp)
@@ -72,7 +71,8 @@ using ManifoldsBase, LinearAlgebra, Random, Test
             if T == ValidationMPoint
                 copyto!(A, q, p)
             else
-                copyto!(A, q, ValidationMPoint(x), p) # generate base point “on the fly”
+                # generate base point “on the fly”
+                @test copyto!(A, q, ValidationMPoint(x), p) === q
             end
             @test isapprox(A, q, p)
             @test ManifoldsBase.internal_value(p) == x
@@ -143,8 +143,6 @@ using ManifoldsBase, LinearAlgebra, Random, Test
         @test isapprox(A, x2, v2, vector_transport_to(A, x2, v2, y2, pt))
         zero_vector!(A, v2s, x)
         @test isapprox(A, x, v2s, zero_vector(M, x))
-        c2 = [x2]
-        v3 = similar(v2)
         @test injectivity_radius(A) == Inf
         @test injectivity_radius(A, x) == Inf
         @test injectivity_radius(A, ManifoldsBase.ExponentialRetraction()) == Inf
@@ -225,12 +223,29 @@ using ManifoldsBase, LinearAlgebra, Random, Test
         @test distance(AdN, [], []) == -1.0
         @test norm(AdN, [], []) == -1.0
     end
+    @testset "wrapped points and tangent vectors are unwrapped when forwarded" begin
+        pw = ValidationMPoint(x)
+        Xw = ValidationTangentVector(w)
+        B = DefaultOrthonormalBasis()
+        # get_coordinates has to accept the wrapped values, like get_coordinates! does
+        @test get_coordinates(A, pw, Xw, B) ≈ get_coordinates(M, x, w, B)
+        @test get_coordinates(A, pw, w, B) ≈ get_coordinates(M, x, w, B)
+        @test get_coordinates(A, x, Xw, B) ≈ get_coordinates(M, x, w, B)
+        c = get_coordinates(M, x, w, B)
+        @test get_vector(A, pw, c, B) ≈ get_vector(M, x, c, B)
+    end
     @testset "rand" begin
         Random.seed!(42)
         p = rand(A)
         @test is_point(A, p)
         X = rand(A; vector_at = p)
         @test is_vector(A, p, X)
+        # a wrapped point has to be accepted as `vector_at` as well
+        Xw = rand(A; vector_at = ValidationMPoint(p))
+        @test is_vector(A, p, Xw)
+        rng = MersenneTwister(42)
+        @test is_point(A, rand(rng, A))
+        @test is_vector(A, p, rand(rng, A; vector_at = p))
     end
     @testset "embed and project" begin
         Dm = ManifoldsBase.Test.ValidationDummyManifold()
@@ -275,6 +290,14 @@ using ManifoldsBase, LinearAlgebra, Random, Test
         v = ValidationTangentVector([1.0, 0.0, 0.0], [1.0, 0.0, 0.0])
         ManifoldsBase._update_basepoint!(A, v, [0.0, 0.0, 1.0])
         @test v.point == [0.0, 0.0, 1.0]
+    end
+    @testset "store_base_point" begin
+        Ab = ValidationManifold(M; store_base_point = true)
+        Xb = log(Ab, x, y)
+        @test Xb.point == x
+        log!(Ab, Xb, z, x)
+        @test Xb.point == z
+        @test Xb.value == log(M, z, x)
     end
     @testset "show" begin
         As = ValidationManifold(

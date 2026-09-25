@@ -56,7 +56,7 @@ using Test
             @test b1 == get_vectors(M, p, b2)
             # projected gram schmidt
             tm = ManifoldsBase.Test.ProjectionTestManifold()
-            bt = ManifoldsBase.Test.ProjectedOrthonormalBasis(:gram_schmidt)
+            bt = ProjectedOrthonormalBasis(:gram_schmidt)
             p = [sqrt(2) / 2, 0.0, sqrt(2) / 2, 0.0, 0.0]
             @test_logs (:warn, "Input only has 5 vectors, but manifold dimension is 100.") (
                 @test_throws ErrorException get_basis(tm, p, bt)
@@ -146,7 +146,7 @@ using Test
             N = manifold_dimension(M)
             @test length(get_vectors(M, pts[1], b)) == N
             # check orthonormality
-            if BT isa DefaultOrthonormalBasis && pts[1] isa Vector
+            if BT == DefaultOrthonormalBasis && pts[1] isa Vector
                 for i in 1:N
                     @test norm(M, pts[1], get_vectors(M, pts[1], b)[i]) ≈ 1
                     for j in (i + 1):N
@@ -195,9 +195,9 @@ using Test
         end
         @testset "() Manifolds" begin
             M = ManifoldsBase.DefaultManifold()
-            ManifoldsBase.allocate_coordinates(M, 1, Float64, 0) == 0.0
-            ManifoldsBase.allocate_coordinates(M, 1, Float64, 1) == zeros(Float64, 1)
-            ManifoldsBase.allocate_coordinates(M, 1, Float64, 2) == zeros(Float64, 2)
+            @test ManifoldsBase.allocate_coordinates(M, 1, Float64, 0) == 0.0
+            @test ManifoldsBase.allocate_coordinates(M, 1, Float64, 1) == zeros(Float64, 1)
+            @test ManifoldsBase.allocate_coordinates(M, 1, Float64, 2) == zeros(Float64, 2)
         end
     end
 
@@ -409,8 +409,10 @@ using Test
         @test (-fv1).type == TangentSpaceType()
         @test isa(2 * fv1, FVector)
         @test (2 * fv1).type == TangentSpaceType()
+        @test isa(fv1 * 2, FVector)
+        @test (fv1 * 2).type == TangentSpaceType()
         tv1s_32 = allocate(fv_tvs[1], Float32)
-        @test isa(tv1s, FVector)
+        @test isa(tv1s_32, FVector)
         @test eltype(tv1s_32.data) === Float32
         copyto!(tv1s, fv_tvs[2])
         @test isapprox(tv1s.data, fv_tvs[2].data)
@@ -435,6 +437,7 @@ using Test
         @test ManifoldsBase.requires_caching(ProjectedOrthonormalBasis(:svd))
         @test !ManifoldsBase.requires_caching(DefaultBasis())
         @test !ManifoldsBase.requires_caching(DefaultOrthogonalBasis())
+        @test !ManifoldsBase.requires_caching(VeeOrthogonalBasis())
         @test !ManifoldsBase.requires_caching(DefaultOrthonormalBasis())
     end
 end

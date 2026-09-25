@@ -1,4 +1,4 @@
-using Manifolds, LinearAlgebra, PGFPlotsX, Colors, Contour, Random
+using Manifolds, LinearAlgebra, PGFPlotsX, Colors
 
 #
 # Settings
@@ -9,8 +9,6 @@ line_offset_brightness = 0.25
 patch_opacity = 1.0
 geo_opacity = dark_mode ? 0.66 : 0.5
 geo_line_width = 30
-mesh_line_width = 5
-mesh_opacity = dark_mode ? 0.5 : 0.7
 logo_colors = [(77, 100, 174), (57, 151, 79), (202, 60, 50), (146, 89, 163)] # Julia colors
 
 rgb_logo_colors = map(x -> RGB(x ./ 255...), logo_colors)
@@ -75,36 +73,19 @@ p3 = γ3(1)
 
 #
 # Setup Axes
-if dark_mode
-    tp = @pgf Axis(
-        {
-            axis_lines = "none",
-            axis_equal,
-            view = "{135}{35}",
-            zmin = -0.05,
-            zmax = 1.0,
-            xmin = 0.0,
-            xmax = 1.0,
-            ymin = 0.0,
-            ymax = 1.0,
-        }
-    )
-else
-    tp = @pgf Axis(
-        {
-            axis_lines = "none",
-            axis_equal,
-            view = "{135}{35}",
-            zmin = -0.05,
-            zmax = 1.0,
-            xmin = 0.0,
-            xmax = 1.0,
-            ymin = 0.0,
-            ymax = 1.0,
-        }
-    )
-end
-rs = range(0, π / 5; length = 6)
+tp = @pgf Axis(
+    {
+        axis_lines = "none",
+        axis_equal,
+        view = "{135}{35}",
+        zmin = -0.05,
+        zmax = 1.0,
+        xmin = 0.0,
+        xmax = 1.0,
+        ymin = 0.0,
+        ymax = 1.0,
+    }
+)
 θs = range(0, 2π; length = 100)
 
 #

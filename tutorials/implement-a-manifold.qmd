@@ -10,7 +10,7 @@ CurrentModule = ManifoldsBase
 
 This tutorial illustrates, how to implement your very first manifold.
 We start from the very beginning and cover the basic ideas of the interface provided by
-`ManifoldsBase.jl` interface.
+`ManifoldsBase.jl`.
 
 ```{julia}
 #| echo: false
@@ -37,13 +37,13 @@ We will use the sphere of radius $r$ embedded in $\mathbb R^{d+1}$, i.e. all vec
 \bigr\}
 ```
 
-When defining a Riemannian manifold mathematically, there is several things to keep in mind, for example the metric imposed on the tangent spaces. For this interface we assume these things to be given implicitly for a first implementation, but they can be made more precise when necessary.
+When defining a Riemannian manifold mathematically, there are several things to keep in mind, for example the metric imposed on the tangent spaces. For this interface we assume these things to be given implicitly for a first implementation, but they can be made more precise when necessary.
 
 The only thing we have to be aware of for now is the [`number_system`](@ref), i.e. whether our manifold is a real-valued or a complex-valued manifold.
 The abstract type all manifolds inherit from, the [`AbstractManifold`](@ref)`{𝔽}` has this number system as a parameter.
-The usual parameter we will use are the [`RealNumbers`](@ref)`()`,
-which have a short hand in `ManifoldsBase.jl`, namely `ℝ`.
-The second one are the [`ComplexNumbers`](@ref)`()`, or `ℂ` for short.
+The usual parameter we will use is the [`RealNumbers`](@ref)`()`,
+which has a short hand in `ManifoldsBase.jl`, namely `ℝ`.
+The second one is the [`ComplexNumbers`](@ref)`()`, or `ℂ` for short.
 
 ```{julia}
 using LinearAlgebra, ManifoldsBase
@@ -52,7 +52,7 @@ using ManifoldsBase: ℝ
 
 ## Defining a manifold
 
-A manifold itself is a `struct` that is a subtype of `AbstractManifold` and should contain. We usually recommend to also document your new manifold.
+A manifold itself is a `struct` that is a subtype of `AbstractManifold` and should contain the parameters that determine the manifold, like its dimension or, for the sphere below, its radius. We usually recommend to also document your new manifold.
 
 Since the [`Sphere`](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/sphere.html) is already a name used within [`Manifolds.jl`](https://github.com/JuliaManifolds/Manifolds.jl/), let's use a slightly more specific name. We define
 
@@ -70,7 +70,7 @@ Define a sphere of fixed radius
 
 # Constructor
 
-    ScaledSphere(dimension,radius=1.0)
+    ScaledSphere(dimension, radius=1.0)
 
 Initialize the manifold to a certain `dimension` and `radius`,
 which by default is set to `1.0`
@@ -79,6 +79,7 @@ struct ScaledSphere <: AbstractManifold{ℝ}
     dimension::Int
     radius::Float64
 end
+ScaledSphere(dimension::Int) = ScaledSphere(dimension, 1.0)
 ```
 
 And we can directly use this manifold and set
@@ -148,7 +149,7 @@ function check_point(M::ScaledSphere, p; kwargs...)
 end
 ```
 
-And we can directly test the function. To see all 3 failing ones, we switch from errors to warnings in the check
+And we can directly test the function. To see the failing ones, we switch from errors to warnings in the check
 
 ```{julia}
 is_point(M, [1.5, 0.0], error = :warn) # wrong size
@@ -172,12 +173,12 @@ function check_vector(M::ScaledSphere, p, X; kwargs...)
 end
 ```
 
-and again, the high level interface can be used to display warnings for vectors not fulfilling the criterion, but we can also
-activate a check for the point using the last positional argument
+and again, the high level interface can be used to display warnings for vectors not fulfilling the criterion.
+The point is checked as well, since the last positional argument that activates this check defaults to `true`
 
 ```{julia}
 is_vector(M, [1.5, 0.0, 0.0], [0.0, 1.0]; error = :warn) # wrong size
-is_vector(M, [1.5, 0.0, 0.0], [1.0, 1.0, 0.0]; error = :warn) # not orthogonal norm
+is_vector(M, [1.5, 0.0, 0.0], [1.0, 1.0, 0.0]; error = :warn) # not orthogonal
 is_vector(M, [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], true; error = :warn) # point not valid
 is_vector(M, [1.5, 0.0, 0.0], [0.0, 1.0, 0.0], true; error = :warn) # returns true
 ```
@@ -195,11 +196,11 @@ Let's first take a look at what the exponential map is defined like. We follow t
 ````math
 \exp_p X =
 \cos\Bigl(\frac{1}{r}\lVert X \rVert\Bigr)p +
-\sin\Bigl(\frac{1}{r}\lVert X \rVert\Bigr)\frac{X}{\lVert X \rVert}.
+r\sin\Bigl(\frac{1}{r}\lVert X \rVert\Bigr)\frac{X}{\lVert X \rVert}.
 ````
 
 In fact, from the two functions above, [`exp`](@ref)`(M, p, X)`, and [`exp!`](@ref)`(M, q, p, X)` that works in place of `q`, we only have to implement the second.
-The first one, `exp` by default falls back to allocating memory and calling the second. So `exp` should only be defined, if there is a special reason for.
+The first one, `exp` by default falls back to allocating memory and calling the second. So `exp` should only be defined, if there is a special reason for it.
 Furthermore, we usually do not verify/check inputs to spare time. If a user feels insecure, they could for example use the [`ValidationManifold`](@ref) wrapper which adds explicit checks of inputs and outputs.
 
 We define
@@ -248,7 +249,7 @@ all([is_point(M, q), is_point(M, q2)])
 
 Since the exponential map might in general be expensive, we can do a similar implementation with the [`ProjectionRetraction`](@ref).
 Here, we really have to take into account, that the interface is ``[designed with 3 levels](@ref Design)``{=commonmark} in mind:
-While the actual function we would call in the end is `retract(M, p, X, ProjectionRetraction())` (or its `!` variant), we actually have to implement `retract_project!(M, q, p, X, t)` for technical details, that are a bit beyond this introductory tutorial. In short this split avoids ambiguity errors for decorators of the manifolds. We define
+While the actual function we would call in the end is `retract(M, p, X, ProjectionRetraction())` (or its `!` variant), we actually have to implement `retract_project!(M, q, p, X)` for technical details, that are a bit beyond this introductory tutorial. In short this split avoids ambiguity errors for decorators of the manifolds. We define
 
 ```{julia}
 function ManifoldsBase.retract_project!(M::ScaledSphere, q, p, X)
@@ -272,6 +273,7 @@ default_retraction_method(M)
 But we can easily specify this for our manifold as well, for example defining
 
 ```{julia}
+#| output: false
 import ManifoldsBase: default_retraction_method
 default_retraction_method(::ScaledSphere) = ProjectionRetraction()
 ```

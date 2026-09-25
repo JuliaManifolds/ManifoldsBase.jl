@@ -6,8 +6,6 @@ using Aqua, ManifoldsBase, Test
         ambiguities = (
             exclude = [
                 allocate, # has many possible call patterns that are not supported and ambiguous
-                getindex, # ambiguous call patterns are not supported
-                setindex!, # ambiguous call patterns are not supported
             ], broken = false,
         ),
     )

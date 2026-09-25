@@ -96,6 +96,13 @@ using RecursiveArrayTools
         @test p1[M, Val(1)] == p1.x[1]
         @test p1[M, 1] isa Vector
         @test p1[M, Val(1)] isa Vector
+        @test p1[M, :] == (p1.x[1], p1.x[2])
+        @test p1[M, [2, 1]] == [p1.x[2], p1.x[1]]
+        p1b = copy(p1)
+        p1b[M, :] = (2 .* p1.x[1], 2 .* p1.x[2])
+        @test p1b[M, :] == (2 .* p1.x[1], 2 .* p1.x[2])
+        p1b[M, [1]] = [3 .* p1.x[1]]
+        @test p1b[M, 1] == 3 .* p1.x[1]
         p2c = [5 6; 4 0]
         set_component!(M, p1, p2c, 2)
         @test get_component(M, p1, 2) == p2c
@@ -344,7 +351,7 @@ using RecursiveArrayTools
         X = [0.0, 0.2, 0.0]
         V = [0.1, 0.0, 0.0] #orthogonal to TpM -> parallel to p
         @test isapprox(
-            M,
+            Mpr,
             Weingarten(
                 Mpr,
                 ArrayPartition(p, p),
@@ -480,7 +487,7 @@ using RecursiveArrayTools
         @test isapprox(M, q, Y, Z)
         Ym = allocate(Y)
         parallel_transport_to!(M, Ym, p, X, q)
-        @test isapprox(M, q, Y, Z)
+        @test isapprox(M, q, Ym, Z)
 
         # direction
         Y = parallel_transport_direction(M, p, X, X)
@@ -587,7 +594,7 @@ using RecursiveArrayTools
             @test isapprox(get_vector(M, p1, X1c, basis), X1)
             Z1 = allocate(M, X1)
             get_vector!(M, Z1, p1, X1c, basis)
-            @test isapprox(X1, X1)
+            @test isapprox(X1, Z1)
         end
     end
 
@@ -624,6 +631,8 @@ using RecursiveArrayTools
         @test sectional_curvature_min(Mss) == 0.0
         @test sectional_curvature(Mss, p, X1, X2) == 1.0
         @test sectional_curvature(Mss, p, X1, X3) == 0.0
+        # linearly dependent vectors span no plane
+        @test sectional_curvature(Mss, p, X1, 2 * X1) == 0.0
 
         @test sectional_curvature_max(ProductManifold(M1)) == 1.0
         @test sectional_curvature_min(ProductManifold(M1)) == 1.0
@@ -689,7 +698,7 @@ using RecursiveArrayTools
 
     @testset "Product with a custom point type" begin
         M = ProductManifold(ManifoldsBase.DefaultManifold(3), ManifoldsBase.DefaultManifold(2))
-        p = ArrayPartition(ManifoldsBase.Test.DefaultPoint([1.0, 0.0]), ManifoldsBase.Test.DefaultPoint([0.0, 0.0, 0.0]))
+        p = ArrayPartition(ManifoldsBase.Test.DefaultPoint([1.0, 0.0, 0.0]), ManifoldsBase.Test.DefaultPoint([0.0, 0.0]))
         X = zero_vector(M, p)
         @test X isa ArrayPartition{Float64, Tuple{ManifoldsBase.Test.DefaultTangentVector{Vector{Float64}}, ManifoldsBase.Test.DefaultTangentVector{Vector{Float64}}}}
     end

@@ -9,7 +9,7 @@ For an embedded manifold that is isometrically embedded this might be the [`inne
 
 This means we would like to dispatch the default implementation of a function to some other manifold.
 We refer to this as implicit decoration, since one can not “see” explicitly that a certain manifold inherits this property.
-As an example consider the [Sphere](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/sphere.html). At each point the tangent space can be identified with a subspace of the tangent space in the embedding, the [Euclidean](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/euclidean.html) manifold which the unit vectors of the sphere belong to. Thus every tangent space inherits its metric from the embedding.
+As an example consider the [Sphere](@extref `Manifolds.Sphere`). At each point the tangent space can be identified with a subspace of the tangent space in the embedding, the [Euclidean](@extref `Manifolds.Euclidean`) manifold which the unit vectors of the sphere belong to. Thus every tangent space inherits its metric from the embedding.
 Since in the default implementation in [Manifolds.jl](https://juliamanifolds.github.io/Manifolds.jl/stable/) points are represented by unit vectors and tangent vectors at a point as vectors orthogonal to that point, we can just dispatch the inner product to the embedding without having to re-implement this.
 The manifold using such an implicit dispatch just has to be a subtype of [`AbstractDecoratorManifold`](@ref).
 

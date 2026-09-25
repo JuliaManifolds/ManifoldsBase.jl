@@ -12,7 +12,7 @@ using ManifoldsBase, Test
     @test -X == X
     @test allocate(X) == ZeroVector()
     @test 1.0 * X == X
-    @test 0.1 * X == X
+    @test X * 0.1 == X
 
     M = ManifoldsBase.DefaultManifold(3)
     p = [0.0, 1.0, 2.0]

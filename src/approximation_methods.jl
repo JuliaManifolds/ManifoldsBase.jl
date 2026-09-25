@@ -23,7 +23,7 @@ struct CyclicProximalPointEstimation <: AbstractApproximationMethod end
     EfficientEstimator <: AbstractApproximationMethod
 
 Method for estimation in the best possible sense, see [Efficiency (Statistics)](https://en.wikipedia.org/wiki/Efficiency_(statistics)) for more details.
-This can for example be used when computing the usual mean on an Euclidean space, which is the best estimator.
+This can for example be used when computing the usual mean on a Euclidean space, which is the best estimator.
 """
 struct EfficientEstimator <: AbstractApproximationMethod end
 
@@ -82,8 +82,8 @@ and optionally as well a type `T` to distinguish different (point or vector) rep
 By default, all functions `f` call the signature for just a manifold.
 The exceptional functions are:
 
-* `retract` and `retract!` which fall back to [`default_retraction_method`](@ref)
-* `inverse_retract` and `inverse_retract!` which fall back to [`default_inverse_retraction_method`](@ref)
+* `retract` which falls back to [`default_retraction_method`](@ref)
+* `inverse_retract` which falls back to [`default_inverse_retraction_method`](@ref)
 * any of the vector transport methods fall back to [`default_vector_transport_method`](@ref)
 """
 default_approximation_method(M::AbstractManifold, f)

@@ -5,12 +5,73 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.5.2] unreleased
+## [2.6.0] 25/09/2026
+
+This release is the result of an LLM-based code analysis to find inaccuracies, typos and similar small bugs.
 
 ### Added
 
+* `check_geodesic` takes a keyword `name` (default `"geodesic"`) that appears in its message and as the title of its plot; `plot_check_geodesic` takes `name` as well.
 * [DocumenterCodeBlocks.jl](https://fredrikekre.github.io/DocumenterCodeBlocks.jl/stable/) plugin added to the documentation
 * [DocumenterLandingPage.jl](https://csvance.github.io/DocumenterLandingPage.jl/) enhances the start page with a short teaser for the package now.
+* export `EfficientEstimator`, like the other approximation methods.
+* `get_component` and `set_component!` on a `ProductManifold` accept a `Colon` and a vector of indices, so `p[M, :]` and `p[M, [1, 2]]` and the corresponding assignments work.
+* `is_flat(::VectorSpaceFiber)`, so a `CotangentSpace` and any user-defined vector space fiber report the flatness `Fiber` documents; before only `TangentSpace` had a method.
+* `manifold_dimension(::Fiber)`, so a `CotangentSpace` and any other fiber report their `fiber_dimension`; before only `TangentSpace` had a method.
+* `rand(rng, M::ValidationManifold; vector_at=)`, mirroring the method without a random number generator.
+* scalar multiplication from the right for `FVector` and `ZeroVector`, mirroring the existing `a * X` methods.
+* the test suite runs [JET.jl](https://github.com/aviatesk/JET.jl) on the whole package with all extensions loaded, on released Julia versions.
+
+### Fixed
+
+* `angle` clamps the `acos` argument to `[-1, 1]`, which rounding could exceed for nearly parallel vectors.
+* `change_representer!`, `change_metric!` and `Weingarten!` now have a `PowerManifoldNestedReplacing` method; before they reached `_write`, which that representation does not define.
+* `check_geodesic` compares the mean speed with `‖X‖/(N-1)`, the second check its docstring lists; a geodesic at the wrong speed is now rejected.
+* `check_point` on `DefaultManifold` accepts keyword arguments, so `is_point(M, p; atol=)` reaches it instead of the generic check.
+* `check_vector` of `ManifoldsBase.Test.TestSphere` takes an `atol`, defaulting to `sqrt(prod(representation_size(M))) * eps`.
+* `coordinate_eltype` for quaternionic manifolds floats the element type, so an integer-valued point gets `QuaternionF64` coordinates like the real and complex cases.
+* `@default_manifold_fallbacks` generates the `diff` and `embedded` vector transport forwardings with their method argument.
+* `distance(M, p, q, r)` and `norm(M, p, X, r)` on a power manifold seed their reduction in `real(float(number_eltype(p)))` for `r = 1` and `r = Inf`; on a complex power manifold the first errored and the second returned a complex value.
+* `embed_project` and `embed_project!` on a `ValidationManifold` run their checks `within = embed_project`, so `ignore_functions` entries for `embed_project` apply.
+* `get_basis` on a `ProductManifold` splits its point with `submanifold_components(M, p)`, so point types that implement only the two-argument form work as well.
+* `get_coordinates!` and `get_vector!` default their basis to `default_basis(M, typeof(p))`, matching the allocating variants; before they hard-coded `DefaultOrthonormalBasis()`, so the two disagreed for any manifold specializing `default_basis`.
+* `get_coordinates!` and `get_vector!` on a manifold with an `EmbeddedForwardingType` call the generic implementation, as their allocating variants do.
+* `get_coordinates`/`get_vector` with a `DefaultOrthogonalBasis` now allocate and call their mutating orthogonal variant instead of forwarding to the orthonormal one; the orthogonal-to-orthonormal fallback now only happens in `get_coordinates_orthogonal!`/`get_vector_orthogonal!`.
+* `get_forwarding_type_embedding` no longer inverts the embedding directness, and the three `AbstractEmbeddingType` constructors default to `DirectEmbedding()`; a manifold declaring `DirectEmbedding()` is now forwarded directly, as documented.
+* `get_vectors` on a `ProductManifold` returns basis vectors with their own storage instead of sharing arrays with each other and with the cached basis.
+* `injectivity_radius(M::AbstractPowerManifold, m)` forwards `m` to the wrapped manifold.
+* `_inverse_retract!` for `ShootingInverseRetraction` accepts `kwargs...` and forwards them to the retraction of its loop.
+* `is_default_connection(M::ConnectionManifold)` compares `connection(M.manifold)` with `M.connection` instead of returning `true`.
+* `log!` on a `TangentSpace` copies through the base manifold, so on a nested power manifold the buffers of the destination are kept.
+* `manifold_dimension` on an `AbstractDecoratorManifold` that decorates nothing throws a `MethodError` instead of recursing into a `StackOverflowError`.
+* `ManifoldsBase.Test.TestPowerManifoldMultidimensional` defines `_read`, so functions on a power manifold with this representation work instead of raising a `MethodError`.
+* `NLSolveInverseRetraction` stores `project_point` and `project_tangent` in their own fields.
+* `parallel_transport_to!` on a power manifold calls `parallel_transport_to!` on the base manifold elementwise, instead of its default vector transport.
+* `project!` on a `PowerManifoldNestedReplacing` writes to the result instead of the point.
+* `rand(::ValidationManifold; vector_at=)` unwraps `vector_at`.
+* `requires_caching(::VeeOrthogonalBasis)` is `false`, as for the `DefaultOrthogonalBasis` it forwards to.
+* `retract_embedded!`, `retract_embedded_fused!` and `inverse_retract_embedded!` embed with `embed(M, ...)`, not `embed(get_embedding(M), ...)`.
+* `retract_fused` includes `t` in its `allocate_result`, as `exp_fused` does; before a fused retraction allocated in the element type of `p` and `X` alone.
+* `retract_fused`, the two `_retract_fused` methods, the `SasakiRetraction` and `StabilizedRetraction` layer-2 and layer-3 methods, and `inverse_retract_embedded!` accept and forward `kwargs...`, so `RetractionWithKeywords` and `InverseRetractionWithKeywords` reach the last layer instead of raising a `MethodError`.
+* `sectional_curvature` on a power manifold weights each component by its Gram determinant and normalizes by that of the power manifold, as on a `ProductManifold`.
+* `sectional_curvature` on a `ProductManifold` weights each factor by its Gram determinant and normalizes by that of the product; it summed them unweighted before.
+* `sectional_curvature_min` on a power manifold uses the minimum, not the maximum, of the wrapped manifold.
+* `ShootingInverseRetraction` runs `max_iterations` iterations; the loop guard was strict, so `max_iterations = 1` shot not at all and `n` gave the accuracy of `n - 1`.
+* `show` of a `CachedBasis` on a power manifold prints the basis type instead of constructing it, which failed for any basis type with a field, for example `DiagonalizingOrthonormalBasis`.
+* the `:Point` context in `ignore_contexts` also covers the base point check within `is_vector` on a `ValidationManifold`.
+* the allocating `project(M::EmbeddedManifold, p, X)` allocates in the representation size of the base manifold, not of the embedding.
+* the allocating `vector_transport_to` wraps keywords in `VectorTransportWithKeywords` instead of forwarding them to the keyword-less `vector_transport_to!`.
+* the retraction, inverse retraction and vector transport methods that `@default_manifold_fallbacks` generates, and those of `ManifoldsBase.Test` for `DefaultManifold`, accept keyword arguments and pass them on; before, a keyword argument raised a `MethodError` for wrapped point types.
+* the scaled retractions `retract_{project,polar,qr,softmax,pade}_fused!`, `exp_fused`, `exp_fused!` and `vector_transport_to_embedded!` accept keyword arguments and pass them on.
+* `ValidationCotangentVector`s get their stored base point updated by the in-place functions of a `ValidationManifold`.
+* `vector_transport_direction_embedded!` embeds the direction as a tangent vector.
+* `zero_vector!` on a `ValidationManifold` no longer forwards validation keywords to the wrapped manifold.
+
+### Changed
+
+* `inverse_retract` and `inverse_retract!` accept keyword arguments, like `retract` and `retract!` already did.
+* `plot_slope` takes a keyword `name` (default `""`) that both plotting backends use as the title of the plot, and the check functions pass their `name` on.
+* `vector_transport_direction_embedded!` computes the end point with the keyword `retraction_method=default_retraction_method(M, typeof(p))` instead of `exp`, and passes all other keywords to the vector transport in the embedding.
 
 ## [2.5.1] 02/09/2026
 
@@ -22,7 +83,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.5.0] 08/07/2026
 
-## Added
+### Added
 
 * a `ZeroVector` type, to allow for static dispatch and avoid allocating unnecessary zeros similar to the [`Identity`](https://juliamanifolds.github.io/LieGroups.jl/stable/interface/operations/#LieGroups.Identity) on [`LieGroups.jl`](https://github.com/JuliaManifolds/LieGroups.jl).
 
@@ -30,7 +91,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-* an extension to also perform the numerical checks plots with [`Makie.jl](https://https://makie.org/) (#272).
+* an extension to also perform the numerical checks plots with [`Makie.jl`](https://makie.org/) (#272).
 
 ### Fixed
 
@@ -42,7 +103,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * moved Julia package dependency action to using dependabot
 * Bump compat of RecursiveArrayTools to include 4
-* unify the TestUtils and TestSuite package into one `ManifoldsBase.Test` submodule the same way was in `Manifolds.jl`
+* unify the TestUtils and TestSuite package into one `ManifoldsBase.Test` submodule the same way it is done in `Manifolds.jl`
 * setup a CI to check for typographical errors with `typos`.
 
 ## [2.3.4] 25/03/2026
@@ -95,14 +156,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-* bugfixes on `get_embedding`, `get_embedding_type`, and `get_forwarding_type`, which now all accept as their second (third for the last case) argument consistently take the Type of a point (and no longer sometimes a point sometimes its type)
+* bugfixes on `get_embedding`, `get_embedding_type`, and `get_forwarding_type`, which now all consistently take the type of a point as their second (third for the last case) argument (and no longer sometimes a point sometimes its type)
 * `has_components` no longer propagates to the embedding
 
 ## [2.1.0] 30/10/2025
 
 ### Added
 
-* an `StabilizedInverseRetraction` that improves numerical stability of another inverse retraction by projecting the resulting tangent vector onto its tangent space.
+* a `StabilizedInverseRetraction` that improves numerical stability of another inverse retraction by projecting the resulting tangent vector onto its tangent space.
 
 ## [2.0.2] 23/10/2025
 
@@ -172,7 +233,7 @@ If you defined your own manifolds and used traits, please check the documentatio
 
 * An issue with allocation type promotion in `exp_fused`.
 
-## [1.0] 05/02/2025
+## [1.0.0] 05/02/2025
 
 ### Changed
 
@@ -184,7 +245,7 @@ If you defined your own manifolds and used traits, please check the documentatio
   * if you just implemented an own `exp(M, p, X)` or `exp!(M, q, p, X)` everything works as before.
   * if you implemented a fused variant `exp!(M, q, p, X, t)` you have to adapt two things
     1. move that implementation to `ManifoldsBase.exp_fused!(M, q, p, X, t)`
-    2. Implement the default `exp!(M, q, p, X) = ManifoldBase.exp_fused!(M, q, p, one(eltype(p)), X)`,
+    2. Implement the default `exp!(M, q, p, X) = ManifoldsBase.exp_fused!(M, q, p, X, one(eltype(p)))`,
     or an own specific implementation for the non-fused variant.
 * Similar to `exp`, the “fusing” variant `retract(M, p, X, t, m)` has been moved to
   its own name `retract_fused(M, p, X, t, m)`  and similarly `retract!(M, q, p, X, t, m)`
@@ -192,9 +253,9 @@ If you defined your own manifolds and used traits, please check the documentatio
   Note that the new `retract_fused!` method is not exported and by default falls back to calling `retract!` with `t*X`.
   Actions to take
   * if you just implemented an own `retract(M, p, X, m)` or `retract!(M, q, p, X, m)` everything works as before.
-  * if you implemented a fused variant `retract!(M, q, p, X, t)` you have to adapt two things
+  * if you implemented a fused variant `retract!(M, q, p, X, t, m)` you have to adapt two things
     1. move that implementation to `ManifoldsBase.retract_fused!(M, q, p, X, t, m)`
-    2. Implement the default `retract!(M, q, p, X, m) = ManifoldBase.retract_fused!(M, q, p, one(eltype(p)), X)`, or an own specific implementation for the non-fused variant.
+    2. Implement the default `retract!(M, q, p, X, m) = ManifoldsBase.retract_fused!(M, q, p, X, one(eltype(p)), m)`, or an own specific implementation for the non-fused variant.
 * the `TVector` type has been renamed to `AbstractTangentVector`
 * the `CoTVector` type has been renamed to `AbstractCotangentVector`
 
@@ -513,7 +574,7 @@ Note that this release did not trigger a TagBot, so it appears within 0.14.2 in 
 
 - Introduce `change_representer` already in `ManifoldsBase`.
 
-## [0.14.0] – 15/02/2023
+## [0.14.0] 15/02/2023
 
 ### Added
 

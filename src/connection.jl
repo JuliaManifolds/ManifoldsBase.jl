@@ -13,7 +13,7 @@ The [Levi-Civita connection](https://en.wikipedia.org/wiki/Levi-Civita_connectio
 struct LeviCivitaConnection <: AbstractAffineConnection end
 
 """
-    ConnectionManifold{𝔽,,M<:AbstractManifold{𝔽},G<:AbstractAffineConnection} <: AbstractDecoratorManifold{𝔽}
+    ConnectionManifold{𝔽,M<:AbstractManifold{𝔽},C<:AbstractAffineConnection} <: AbstractDecoratorManifold{𝔽}
 
 # Constructor
 
@@ -66,7 +66,7 @@ end
 """
     is_default_connection(M::AbstractManifold, c::AbstractAffineConnection)
 
-returns whether an [`AbstractAffineConnection`](@ref) is the default metric on the manifold `M` or not.
+Return whether an [`AbstractAffineConnection`](@ref) is the default connection on the manifold `M` or not.
 
 This function falls back to check whether [`connection`](@ref)`(M) == c`.
 """
@@ -74,7 +74,7 @@ is_default_connection(M::AbstractManifold, c::AbstractAffineConnection)
 function is_default_connection(M::AbstractManifold, c::AbstractAffineConnection)
     return connection(M) == c
 end
-is_default_connection(M::ConnectionManifold) = true
+is_default_connection(M::ConnectionManifold) = connection(M.manifold) === M.connection
 
 manifold_dimension(M::ConnectionManifold) = manifold_dimension(M.manifold)
 

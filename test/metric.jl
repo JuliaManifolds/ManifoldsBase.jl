@@ -93,7 +93,7 @@ ManifoldsBase.get_embedding(::BaseManifold{N}) where {N} = ManifoldsBase.Default
 ManifoldsBase.exp!(::BaseManifold, q, p, X) = q .= p + 2 * X
 ManifoldsBase.exp_fused!(::BaseManifold, q, p, X, t::Number) = q .= p + 2 * t * X
 ManifoldsBase.log!(::BaseManifold, Y, p, q) = Y .= (q - p) / 2
-ManifoldsBase.project!(::BaseManifold, Y, p, X) = Y .= 2 .* X
+ManifoldsBase.project!(::BaseManifold, Y, p, X) = Y .= X
 ManifoldsBase.project!(::BaseManifold, q, p) = (q .= p)
 ManifoldsBase.injectivity_radius(::BaseManifold) = Inf
 ManifoldsBase.injectivity_radius(::BaseManifold, ::Any) = Inf
@@ -175,7 +175,6 @@ ManifoldsBase.metric(::BaseManifold) = DefaultBaseManifoldMetric()
         E = TestDefaultManifold{3}()
         g = TestDefaultManifoldMetric()
         M = MetricManifold(E, g)
-        default_retraction_method(::TestDefaultManifold) = TestRetraction()
         @test TestDefaultManifoldMetric(E) === M
         @test g(E) === M
         p = [1.0, 2.0, 3.0]
@@ -327,13 +326,12 @@ ManifoldsBase.metric(::BaseManifold) = DefaultBaseManifoldMetric()
         @test project!(MM, Y, p, X) === project!(M, Y, p, X)
         @test project!(MM, q, p) === project!(M, q, p)
         # without a definition for the metric from the embedding, no projection possible
-        @test_throws MethodError log!(MM, Y, p, q) === project!(M, Y, p, q)
-        @test_throws MethodError vector_transport_to!(MM, Y, p, X, q) ===
-            vector_transport_to!(M, Y, p, X, q)
+        @test_throws MethodError log!(MM, Y, p, q)
+        @test_throws MethodError vector_transport_to!(MM, Y, p, X, q)
         # without DiffEq, these error
         @test_throws MethodError exp(MM, p, X, 1:3)
         # these always fall back anyways.
-        @test zero_vector!(MM, X, p) === zero_vector!(M, X, p)
+        @test zero_vector!(MM, Y2, p) === zero_vector!(M, Y2, p)
 
         @test default_approximation_method(MM, retract) === default_approximation_method(M, retract)
 
@@ -360,7 +358,7 @@ ManifoldsBase.metric(::BaseManifold) = DefaultBaseManifoldMetric()
             @test retract(MM2, p, X, rm) == retract(M, p, X, rm)
             @test retract!(MM2, q, p, X, rm) === retract!(M, q, p, X, rm)
         end
-        @test inverse_retract!(MM2, Y2, p, q) === inverse_retract!(M, Y2, q, p)
+        @test inverse_retract!(MM2, Y2, p, q) === inverse_retract!(M, Y2, p, q)
         shooting_ir = ShootingInverseRetraction(
             ExponentialRetraction(),
             EmbeddedInverseRetraction(LogarithmicInverseRetraction()),
@@ -374,8 +372,8 @@ ManifoldsBase.metric(::BaseManifold) = DefaultBaseManifoldMetric()
                 EmbeddedInverseRetraction(LogarithmicInverseRetraction()),
                 shooting_ir,
             ]
-            @test inverse_retract(MM2, p, q, irm) == inverse_retract(M, q, p, irm)
-            @test inverse_retract!(MM2, Y2, p, q, irm) === inverse_retract!(M, Y2, q, p, irm)
+            @test inverse_retract(MM2, p, q, irm) == inverse_retract(M, p, q, irm)
+            @test inverse_retract!(MM2, Y2, p, q, irm) === inverse_retract!(M, Y2, p, q, irm)
         end
         @test_throws MethodError inverse_retract(MM, p, q, shooting_ir)
         @test_throws MethodError inverse_retract(MM, p, q, LogarithmicInverseRetraction())
@@ -386,23 +384,23 @@ ManifoldsBase.metric(::BaseManifold) = DefaultBaseManifoldMetric()
 
         @test project!(MM2, q, p) === project!(M, q, p)
         @test project!(MM2, Y, p, X) === project!(M, Y, p, X)
-        @test parallel_transport_to(MM2, p, X, q) == parallel_transport_to(M, q, X, p)
+        @test parallel_transport_to(MM2, p, X, q) == parallel_transport_to(M, p, X, q)
         @test_throws MethodError parallel_transport_to(MM, p, X, q)
         @test parallel_transport_to!(MM2, Y, p, X, q) ==
-            parallel_transport_to!(M, Y, q, X, p)
+            parallel_transport_to!(M, Y, p, X, q)
         @test project!(MM2, Y, p, X) === project!(M, Y, p, X)
         @test_throws MethodError vector_transport_to(MM, p, X, q)
-        @test vector_transport_to(MM2, p, X, q) == vector_transport_to(M, q, X, p)
+        @test vector_transport_to(MM2, p, X, q) == vector_transport_to(M, p, X, q)
         @test vector_transport_to!(MM2, Y, p, X, q) == vector_transport_to!(M, Y, p, X, q)
 
         @test_throws MethodError vector_transport_direction(MM, p, X, Y)
         @test_throws MethodError vector_transport_direction!(MM, Y2, p, X, Y)
-        @test vector_transport_direction(MM2, p, X, Y) == vector_transport_to(M, p, X, Y)
-        @test vector_transport_direction!(MM2, Y2, p, X, Y) == vector_transport_to!(M, Y2, p, X, Y)
+        @test vector_transport_direction(MM2, p, X, Y) == vector_transport_direction(M, p, X, Y)
+        @test vector_transport_direction!(MM2, Y2, p, X, Y) == vector_transport_direction!(M, Y2, p, X, Y)
 
         c = 2 * ones(3)
         m = ParallelTransport()
-        @test zero_vector!(MM2, X, p) === zero_vector!(M, X, p)
+        @test zero_vector!(MM2, Y2, p) === zero_vector!(M, Y2, p)
         @test injectivity_radius(MM2, p) === injectivity_radius(M, p)
         @test injectivity_radius(MM2) === injectivity_radius(M)
         @test injectivity_radius(MM2, p, ExponentialRetraction()) ===

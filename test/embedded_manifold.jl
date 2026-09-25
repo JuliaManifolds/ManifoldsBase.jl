@@ -1,6 +1,15 @@
 using LinearAlgebra, ManifoldsBase, Test
 
 using ManifoldsBase: DefaultManifold, ℝ
+
+struct ProjectionBaseManifold <: AbstractManifold{ℝ} end
+ManifoldsBase.representation_size(::ProjectionBaseManifold) = (2,)
+ManifoldsBase.manifold_dimension(::ProjectionBaseManifold) = 2
+function ManifoldsBase.project!(
+        ::EmbeddedManifold{ℝ, ProjectionBaseManifold}, Y, p, X,
+    )
+    return copyto!(Y, X[1:2])
+end
 #
 # A first artificial (not real) manifold that is modelled as a submanifold
 # half plane with euclidean metric is not a manifold but should test all things correctly here
@@ -134,12 +143,12 @@ function ManifoldsBase.project!(
     lm = length(m)
     (length(n) < length(m)) && throw(
         DomainError(
-            "Invalid embedding, since Euclidean dimension ($(n)) is longer than embedding dimension $(m).",
+            "Invalid embedding, since Euclidean dimension ($(m)) is longer than embedding dimension $(n).",
         ),
     )
     any(n .< m[1:ln]) && throw(
         DomainError(
-            "Invalid embedding, since Euclidean dimension ($(n)) has entry larger than embedding dimensions ($(m)).",
+            "Invalid embedding, since Euclidean dimension ($(m)) has entry larger than embedding dimensions ($(n)).",
         ),
     )
     #  fill q with the „top left edge“ of p.
@@ -198,6 +207,16 @@ struct SimpleEmbeddedTestManifold <: AbstractDecoratorManifold{ℝ} end
 ManifoldsBase.get_embedding(::SimpleEmbeddedTestManifold) = DefaultManifold(3)
 function ManifoldsBase.get_forwarding_type(::SimpleEmbeddedTestManifold, ::Any, P::Type = Nothing)
     return ManifoldsBase.EmbeddedForwardingType(ManifoldsBase.DirectEmbedding())
+end
+function ManifoldsBase.get_coordinates_orthonormal!(
+        ::SimpleEmbeddedTestManifold, c, p, X, ::ManifoldsBase.RealNumbers,
+    )
+    return (c .= X)
+end
+function ManifoldsBase.get_vector_orthonormal!(
+        ::SimpleEmbeddedTestManifold, X, p, c, ::ManifoldsBase.RealNumbers,
+    )
+    return (X .= c)
 end
 
 struct EmbeddedTestManifold <: AbstractDecoratorManifold{ℝ} end
@@ -288,7 +307,7 @@ end
         @test pE == p
         P = [1.0 1.0 2.0]
         Q = similar(P)
-        @test project!(M, Q, P) == project!(M, Q, P)
+        @test project(M, P) == project!(M, Q, P)
         @test project!(M, Q, P) == embed_project!(M, Q, P)
         @test project!(M, Q, P) == [1.0 1.0 0.0]
         @test isapprox(M, p, zero_vector(M, p), [0 0 0])
@@ -350,14 +369,14 @@ end
         pe = embed(M, p)
         @test pe == [1.0, 2.0, 0.0]
         X = [2.0, 3.0]
-        Xe = embed(M, pe, X)
+        Xe = embed(M, p, X)
         @test Xe == [2.0, 3.0, 0.0]
         @test project(M, pe) == p
         @test embed_project(M, p) == p
         @test embed_project(M, p, X) == X
         Xs = similar(X)
         @test embed_project!(M, Xs, p, X) == X
-        @test project(M, pe, Xe) == X
+        @test project(M, p, Xe) == X
         # injectivity_radius shouldn't pass through
         @test_throws MethodError injectivity_radius(M)
         @test_throws MethodError injectivity_radius(M, p)
@@ -399,7 +418,7 @@ end
             @test inner(M, [1, 2], [2, 3], [2, 3]) == 13
             @test manifold_dimension(M) == 2 # since base is defined is defined
             @test_throws MethodError project(M, [1, 2])
-            @test_throws MethodError project(M, [1, 2], [2, 3]) == [2, 3]
+            @test_throws MethodError project(M, [1, 2], [2, 3])
             @test_throws MethodError project!(M, A, [1, 2], [2, 3])
             @test vector_transport_direction(M, [1, 2], [2, 3], [3, 4]) == [2, 3]
             vector_transport_direction!(M, A, [1, 2], [2, 3], [3, 4])
@@ -407,19 +426,20 @@ end
             @test vector_transport_to(M, [1, 2], [2, 3], [3, 4]) == [2, 3]
             vector_transport_to!(M, A, [1, 2], [2, 3], [3, 4])
             @test A == [2, 3]
-            @test @inferred !isapprox(M, [1, 2], [2, 3])
-            @test @inferred !isapprox(M, [1, 2], [2, 3], [4, 5])
+            @test !(@inferred isapprox(M, [1, 2], [2, 3]))
+            @test !(@inferred isapprox(M, [1, 2], [2, 3], [4, 5]))
 
-            @test ManifoldsBase.get_forwarding_type_embedding(ManifoldsBase.EmbeddedSubmanifoldType{ManifoldsBase.DirectEmbedding}(), M, exp) === EmbeddedForwardingType()
+            @test ManifoldsBase.get_forwarding_type_embedding(ManifoldsBase.EmbeddedSubmanifoldType{ManifoldsBase.DirectEmbedding}(), M, exp) === EmbeddedForwardingType(ManifoldsBase.DirectEmbedding())
+            @test ManifoldsBase.get_forwarding_type_embedding(ManifoldsBase.EmbeddedSubmanifoldType{ManifoldsBase.IndirectEmbedding}(), M, exp) === EmbeddedForwardingType(ManifoldsBase.IndirectEmbedding())
         end
         @testset "Isometric Embedding Fallbacks & Error Tests" begin
             for M2 in [NotImplementedIsometricEmbeddedManifoldNE(), NotImplementedIsometricEmbeddedManifoldIsoIndirect()]
                 @test base_manifold(M2) == M2
                 A = zeros(2)
                 if M2 isa NotImplementedIsometricEmbeddedManifoldIsoIndirect
-                    @test_throws MethodError ManifoldsBase.allocate_result(M2, zero_vector, A)
-                else
                     @test size(ManifoldsBase.allocate_result(M2, zero_vector, A)) == size(A)
+                else
+                    @test_throws MethodError ManifoldsBase.allocate_result(M2, zero_vector, A)
                 end
                 # Check that all of these report not to be implemented, i.e.
                 @test_throws MethodError exp(M2, [1, 2], [2, 3])
@@ -494,6 +514,11 @@ end
         @test_throws DomainError embed!(O, zeros(3, 3), zeros(4, 4))
         @test_throws DomainError project!(O, zeros(3, 3, 5), zeros(3, 3))
         @test_throws DomainError project!(O, zeros(4, 4), zeros(3, 3))
+        # the allocating tangent projection allocates in the size of the base manifold
+        O3 = EmbeddedManifold(ProjectionBaseManifold(), DefaultManifold(3))
+        Y3 = project(O3, [1.0, 2.0, 0.0], [4.0, 5.0, 9.0])
+        @test size(Y3) == (2,)
+        @test Y3 == [4.0, 5.0]
     end
     @testset "Explicit Fallback" begin
         M = FallbackManifold()
@@ -507,8 +532,8 @@ end
         p = [1.0, 2.0, 3.0]
         X = [2.0, 3.0, 4.0]
         vf = [1.0, 2.0, 3.0, 4.0]
-        is_point(M, p; error = :error)
-        is_vector(M, p, X; error = :error)
+        @test is_point(M, p; error = :error)
+        @test is_vector(M, p, X; error = :error)
         @test_throws ManifoldDomainError is_point(M, vf; error = :error)
         @test_throws ManifoldDomainError is_vector(M, p, vf; error = :error)
         @test_throws ManifoldDomainError is_vector(M, vf, X; error = :error)
@@ -516,14 +541,22 @@ end
         @test_throws ManifoldDomainError is_point(M, [1.0, 2.0im, 3.0]; error = :error)
         @test_throws ManifoldDomainError is_vector(M, [1.0, 2.0im, 3.0], X; error = :error)
         @test_throws ManifoldDomainError is_vector(M, p, [1.0, 2.0im, 3.0]; error = :error)
+        # in-place basis functions use the generic implementation
+        B = DefaultOrthonormalBasis()
+        c = zeros(3)
+        @test get_coordinates!(M, c, p, X) == X
+        @test get_coordinates!(M, c, p, X, B) == X
+        Y = zeros(3)
+        @test get_vector!(M, Y, p, c) == X
+        @test get_vector!(M, Y, p, c, B) == X
     end
     @testset "EmbeddedTestManifold" begin
         M = EmbeddedTestManifold()
         p = [1.0, 2.0, 3.0]
         X = [2.0, 3.0, 4.0]
         vf = [1.0, 2.0, 3.0, 4.0]
-        is_point(M, p; error = :error)
-        is_vector(M, p, X; error = :error)
+        @test is_point(M, p; error = :error)
+        @test is_vector(M, p, X; error = :error)
         @test_throws ManifoldDomainError is_point(M, vf; error = :error)
         @test_throws ManifoldDomainError is_vector(M, p, vf; error = :error)
         @test_throws ManifoldDomainError is_vector(M, vf, X; error = :error)
@@ -531,5 +564,12 @@ end
         @test_throws ManifoldDomainError is_point(M, [1.0, 2.0im, 3.0]; error = :error)
         @test_throws ManifoldDomainError is_vector(M, [1.0, 2.0im, 3.0], X; error = :error)
         @test_throws ManifoldDomainError is_vector(M, p, [1.0, 2.0im, 3.0]; error = :error)
+        # functions that use the embedding
+        @test inner(M, p, X, X) == 29.0
+        @test norm(M, p, X) == sqrt(29.0)
+        @test isapprox(M, p, p)
+        @test isapprox(M, p, X, X)
+        @test copyto!(M, similar(p), p) == p
+        @test copyto!(M, similar(X), p, X) == X
     end
 end

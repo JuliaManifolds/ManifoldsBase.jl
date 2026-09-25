@@ -29,7 +29,7 @@ The general architecture consists of three layers
 
 * The high level interface for ease of use – and to dispatch on other manifolds.
 * The intermediate layer to dispatch on different parameters in the last section, e.g. type of retraction or vector transport.
-* The lowest layer for specific manifolds to dispatch on different types of points and tangent vectors. Usually this layer with a specific manifold and no optional parameters.
+* The lowest layer for specific manifolds to dispatch on different types of points and tangent vectors. Usually this layer is implemented with a specific manifold and no optional parameters.
 
 These three layers are described in more detail in the following.
 The main motivation to introduce these layers is, that it reduces method ambiguities.
@@ -58,7 +58,7 @@ This layer ends usually in calling the same functions like [`retract`](@ref) but
 
 ### [Layer II: An internal dispatch interface for parameters](@id design-layer2)
 
-This layer is an interims layer to dispatch on the (optional/default) parameters of a function.
+This layer is an interim layer to dispatch on the (optional/default) parameters of a function.
 For example the last parameter of retraction: [`retract`](@ref) determines the type (variant) to be used.
 The last function in the previous layer calls `_retract`, which is an internal function.
 These parameters are usually the last parameters of a function.
@@ -73,9 +73,6 @@ They should only be called as the final step in the previous layer.
 If the default parameters are not dispatched per type, using `_` might be skipped.
 The same holds for functions that do not have these parameters.
 
-When there is no dispatch for different types of the optional parameter (here `t`), the `_` might be skipped.
-One could hence see the last code line as a definition on Layer I that passes directly to Layer III, since there are not parameter to dispatch on.
-
 To close this section, let‘s look at an example.
 The high level (or [Layer I](@ref design-layer1)) definition of the retraction is given by
 
@@ -83,7 +80,7 @@ The high level (or [Layer I](@ref design-layer1)) definition of the retraction i
 retract!(M::AbstractManifold, q, p, X, m::AbstractRetractionMethod = default_retraction_method(M, typeof(p))) = _retract!(M, q, p, X, m)
 ```
 
-Note that the convenience function `retract(M, q, p, X, m)` first allocates a `q` before calling this function as well.
+Note that the convenience function `retract(M, p, X, m)` first allocates a `q` before calling `retract!(M, q, p, X, m)`.
 
 This level now dispatches on different retraction types `m`.
 It usually passes to specific functions implemented in [Layer III](@ref design-layer3), here for example
@@ -129,7 +126,7 @@ On the other hand `exp!(M, q, p, X)` computes the result in place of `q`, where 
 should keep in mind that also `exp!(M, p, p, X)` should correctly overwrite `p`.
 
 The interface provides a way to determine the allocation type and a result to compute/allocate
-the resulting memory, such that the default implementation allocating functions, like [`exp`](@ref) is to allocate the resulting memory and call [`exp!`](@ref).
+the resulting memory, such that the default implementation of allocating functions, like [`exp`](@ref) is to allocate the resulting memory and call [`exp!`](@ref).
 
 !!! note
     It might be useful to provide two distinct implementations, for example when using AD schemes.
@@ -137,8 +134,8 @@ the resulting memory, such that the default implementation allocating functions,
 
 Non-mutating functions in `ManifoldsBase.jl` are typically implemented using in-place variants after a suitable allocation of memory.
 
-Not that this allocation usually takes place only on [Layer III](@ref design-layer3) when dispatching on points.
-Both [Layer I](@ref design-layer1) and [Layer II](@ref design-layer1) are usually implemented for both variants in parallel.
+Note that this allocation usually takes place already on [Layer I](@ref design-layer1) or [Layer II](@ref design-layer2), see the note at the end of this section.
+Both [Layer I](@ref design-layer1) and [Layer II](@ref design-layer2) are usually implemented for both variants in parallel.
 
 ### Allocation of new points and vectors
 
@@ -169,10 +166,10 @@ julia> y[1]
  6.90031725726027e-310
 ```
 
-The function [`allocate_result`](@ref ManifoldsBase.allocate_result) allocates a correct return value. It takes into account the possibility that different arguments may have different numeric [`number_eltype`](@ref) types thorough the [`allocate_result_type`](@ref ManifoldsBase.allocate_result_type) function.
+The function [`allocate_result`](@ref ManifoldsBase.allocate_result) allocates a correct return value. It takes into account the possibility that different arguments may have different numeric [`number_eltype`](@ref) types through the [`allocate_result_type`](@ref ManifoldsBase.allocate_result_type) function.
 The most prominent example of the usage of this function is the logarithmic function [`log`](@ref) when used with typed points.
-Lets assume on a manifold `M` the have points of type `P` and corresponding tangent vector types `V`.
-then the logarithmic map has the signature
+Let's assume that on a manifold `M` we have points of type `P` and corresponding tangent vector types `V`.
+Then the logarithmic map has the signature
 
 ```julia
 log(::M, ::P, ::P)
@@ -182,4 +179,4 @@ but the return type would be ``V``, whose internal sizes (fields/arrays) will de
 
 !!! note
     This dispatch from the allocating to the in-place variant happens in Layer I (which changed in ManifoldsBase.jl 0.15), that is, functions like `exp` or [`retract`](@ref) allocate their result
-    and call the in-place variant [`exp!`](@ref) and [`retract!`](@ref ManifoldsBase.retract!) afterwards, where the ladder passes down to layer III to reach [`retract_polar!`](@ref ManifoldsBase.retract_polar!).
+    and call the in-place variant [`exp!`](@ref) and [`retract!`](@ref ManifoldsBase.retract!) afterwards, where the latter passes down to layer III to reach [`retract_polar!`](@ref ManifoldsBase.retract_polar!).

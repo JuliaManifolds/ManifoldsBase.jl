@@ -31,8 +31,8 @@ using Test
             end
 
             @testset "isapprox" begin
-                @test_logs (:info,) !isapprox(M, p, q; error = :info)
-                @test_logs (:info,) !isapprox(M, p, X, zero_vector(M, p); error = :info)
+                @test !(@test_logs (:info,) isapprox(M, p, q; error = :info))
+                @test !(@test_logs (:info,) isapprox(M, p, X, zero_vector(M, p); error = :info))
             end
         end
     end

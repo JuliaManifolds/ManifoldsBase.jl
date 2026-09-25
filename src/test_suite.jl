@@ -29,6 +29,16 @@ function ManifoldsBase.project(M::ValidationDummyManifold, p, X)
     return Y
 end
 ManifoldsBase.project!(::ValidationDummyManifold, Y, p, X) = (Y .= 2 .* X)
+
+# a quotient manifold whose projections and lifts are the identity
+struct DummyQuotientManifold <: ManifoldsBase.AbstractManifold{ℝ} end
+struct DummyTotalSpace <: ManifoldsBase.AbstractManifold{ℝ} end
+ManifoldsBase.canonical_project!(::DummyQuotientManifold, q, p) = copyto!(q, p)
+ManifoldsBase.diff_canonical_project!(::DummyQuotientManifold, Y, p, X) = copyto!(Y, X)
+ManifoldsBase.get_total_space(::DummyQuotientManifold) = DummyTotalSpace()
+ManifoldsBase.horizontal_component!(::DummyQuotientManifold, Y, p, X) = copyto!(Y, X)
+ManifoldsBase.horizontal_lift!(::DummyQuotientManifold, Y, q, X) = copyto!(Y, X)
+ManifoldsBase.zero_vector(::DummyQuotientManifold, p) = zeros(2)
 function ManifoldsBase.project(M::ValidationDummyManifold, p)
     q = similar(p)
     project!(M, q, p)
@@ -70,8 +80,11 @@ function ManifoldsBase.check_point(M::TestSphere, p; kwargs...)
     end
     return nothing
 end
-function ManifoldsBase.check_vector(M::TestSphere, p, X; kwargs...)
-    if !isapprox(abs(real(dot(p, X))), 0.0; kwargs...)
+function ManifoldsBase.check_vector(
+        M::TestSphere, p, X;
+        atol::Real = sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(X)))), kwargs...,
+    )
+    if !isapprox(abs(real(dot(p, X))), 0.0; atol = atol, kwargs...)
         return DomainError(
             abs(dot(p, X)),
             "The vector $(X) is not a tangent vector to $(p) on $(M), since it is not orthogonal in the embedding.",
@@ -93,9 +106,7 @@ function ManifoldsBase.exp_fused!(::TestSphere, q, p, X, t::Number)
     return q
 end
 function ManifoldsBase.get_basis_diagonalizing(
-        M::TestSphere{n},
-        p,
-        B::DiagonalizingOrthonormalBasis{ℝ},
+        M::TestSphere{n}, p, B::DiagonalizingOrthonormalBasis{ℝ},
     ) where {n}
     A = zeros(n + 1, n + 1)
     A[1, :] = transpose(p)
@@ -142,7 +153,7 @@ function ManifoldsBase.get_vector_orthonormal!(M::TestSphere, Y, p, X, ::RealNum
 end
 ManifoldsBase.injectivity_radius(::TestSphere) = π
 ManifoldsBase.inner(::TestSphere, p, X, Y) = dot(X, Y)
-function ManifoldsBase.inverse_retract_project!(M::TestSphere, X, p, q)
+function ManifoldsBase.inverse_retract_project!(M::TestSphere, X, p, q; kwargs...)
     X .= q .- p
     project!(M, X, p, X)
     return X
@@ -158,7 +169,7 @@ function ManifoldsBase.log!(::TestSphere, X, p, q)
     return X
 end
 ManifoldsBase.manifold_dimension(::TestSphere{N}) where {N} = N
-function ManifoldsBase.parallel_transport_to!(::TestSphere, Y, p, X, q)
+function ManifoldsBase.parallel_transport_to!(::TestSphere, Y, p, X, q; kwargs...)
     m = p .+ q
     mnorm2 = real(dot(m, m))
     factor = 2 * real(dot(X, q)) / mnorm2
@@ -177,11 +188,8 @@ function Random.rand!(M::TestSphere, pX; vector_at = nothing, σ = one(eltype(pX
     return rand!(Random.default_rng(), M, pX; vector_at = vector_at, σ = σ)
 end
 function Random.rand!(
-        rng::AbstractRNG,
-        M::TestSphere,
-        pX;
-        vector_at = nothing,
-        σ = one(eltype(pX)),
+        rng::AbstractRNG, M::TestSphere, pX;
+        vector_at = nothing, σ = one(eltype(pX)),
     )
     if vector_at === nothing
         project!(M, pX, randn(rng, eltype(pX), representation_size(M)))
@@ -192,8 +200,8 @@ function Random.rand!(
     return pX
 end
 ManifoldsBase.representation_size(::TestSphere{N}) where {N} = (N + 1,)
-function ManifoldsBase.retract_project_fused!(M::TestSphere, q, p, X, t::Number)
-    q .= p .+ t .* X
+function ManifoldsBase.retract_project!(M::TestSphere, q, p, X; kwargs...)
+    q .= p .+ X
     project!(M, q, q)
     return q
 end
@@ -311,9 +319,7 @@ function ManifoldsBase.number_eltype(a::NonBroadcastBasisThing)
 end
 
 function ManifoldsBase.allocate_on(
-        M::AbstractManifold,
-        ::TangentSpaceType,
-        T::Type{<:NonBroadcastBasisThing},
+        M::AbstractManifold, ::TangentSpaceType, T::Type{<:NonBroadcastBasisThing},
     )
     return NonBroadcastBasisThing(similar(T.parameters[1], representation_size(M)))
 end
@@ -333,27 +339,19 @@ end
 
 
 function ManifoldsBase.log!(
-        ::DefaultManifold,
-        X::NonBroadcastBasisThing,
-        p::NonBroadcastBasisThing,
-        q::NonBroadcastBasisThing,
+        ::DefaultManifold, X::NonBroadcastBasisThing, p::NonBroadcastBasisThing, q::NonBroadcastBasisThing,
     )
     return copyto!(X, q - p)
 end
 
 function ManifoldsBase.exp!(
-        ::DefaultManifold,
-        q::NonBroadcastBasisThing,
-        p::NonBroadcastBasisThing,
-        X::NonBroadcastBasisThing,
+        ::DefaultManifold, q::NonBroadcastBasisThing, p::NonBroadcastBasisThing, X::NonBroadcastBasisThing,
     )
     return copyto!(q, p + X)
 end
 
 function ManifoldsBase.get_basis_orthonormal(
-        ::DefaultManifold{ℝ},
-        p::NonBroadcastBasisThing,
-        𝔽::RealNumbers,
+        ::DefaultManifold{ℝ}, p::NonBroadcastBasisThing, 𝔽::RealNumbers,
     )
     return CachedBasis(
         DefaultOrthonormalBasis(𝔽),
@@ -364,9 +362,7 @@ function ManifoldsBase.get_basis_orthonormal(
     )
 end
 function ManifoldsBase.get_basis_orthogonal(
-        ::DefaultManifold{ℝ},
-        p::NonBroadcastBasisThing,
-        𝔽::RealNumbers,
+        ::DefaultManifold{ℝ}, p::NonBroadcastBasisThing, 𝔽::RealNumbers,
     )
     return CachedBasis(
         DefaultOrthogonalBasis(𝔽),
@@ -377,9 +373,7 @@ function ManifoldsBase.get_basis_orthogonal(
     )
 end
 function ManifoldsBase.get_basis_default(
-        ::DefaultManifold{ℝ},
-        p::NonBroadcastBasisThing,
-        N::ManifoldsBase.RealNumbers,
+        ::DefaultManifold{ℝ}, p::NonBroadcastBasisThing, N::ManifoldsBase.RealNumbers,
     )
     return CachedBasis(
         DefaultBasis(N),
@@ -405,10 +399,7 @@ function ManifoldsBase.get_vector_orthonormal!(
 end
 
 function ManifoldsBase.inner(
-        ::DefaultManifold,
-        ::NonBroadcastBasisThing,
-        X::NonBroadcastBasisThing,
-        Y::NonBroadcastBasisThing,
+        ::DefaultManifold, ::NonBroadcastBasisThing, X::NonBroadcastBasisThing, Y::NonBroadcastBasisThing,
     )
     return dot(X.v, Y.v)
 end
@@ -464,16 +455,12 @@ function ManifoldsBase.allocate_result(::DefaultManifold, ::typeof(zero_vector),
     return DefaultTangentVector(allocate(p.value))
 end
 function ManifoldsBase.allocate_result_type(
-        ::DefaultManifold,
-        ::typeof(log),
-        ::Tuple{DefaultPoint, DefaultPoint},
+        ::DefaultManifold, ::typeof(log), ::Tuple{DefaultPoint, DefaultPoint},
     )
     return DefaultTangentVector
 end
 function ManifoldsBase.allocate_result_type(
-        ::DefaultManifold,
-        ::typeof(inverse_retract),
-        ::Tuple{DefaultPoint, DefaultPoint},
+        ::DefaultManifold, ::typeof(inverse_retract), ::Tuple{DefaultPoint, DefaultPoint},
     )
     return DefaultTangentVector
 end
@@ -550,59 +537,62 @@ struct MatrixVectorTransport{T} <: AbstractVector{T}
     m::Matrix{T}
 end
 # dummy retractions, inverse retracions for fallback tests - mutating should be enough
-function ManifoldsBase.retract_approx!(::DefaultManifold, q, p, X, m::ApproximateExponentialRetraction)
+function ManifoldsBase.retract_approx!(::DefaultManifold, q, p, X, m::ApproximateExponentialRetraction; kwargs...)
     return (q .= p .+ X)
 end
-function ManifoldsBase.retract_approx_fused!(::DefaultManifold, q, p, X, t::Number, m::ApproximateExponentialRetraction)
+function ManifoldsBase.retract_approx_fused!(::DefaultManifold, q, p, X, t::Number, m::ApproximateExponentialRetraction; kwargs...)
     return (q .= p .+ t .* X)
 end
-function ManifoldsBase.retract_polar!(::DefaultManifold, q, p, X)
+function ManifoldsBase.retract_polar!(::DefaultManifold, q, p, X; kwargs...)
     return (q .= p .+ X)
 end
-function ManifoldsBase.retract_polar_fused!(::DefaultManifold, q, p, X, t::Number)
+function ManifoldsBase.retract_polar_fused!(::DefaultManifold, q, p, X, t::Number; kwargs...)
     return (q .= p .+ t .* X)
 end
-function ManifoldsBase.retract_project!(::DefaultManifold, q, p, X)
+function ManifoldsBase.retract_project!(::DefaultManifold, q, p, X; kwargs...)
     return (q .= p .+ X)
 end
-function ManifoldsBase.retract_project_fused!(::DefaultManifold, q, p, X, t::Number)
+function ManifoldsBase.retract_project_fused!(::DefaultManifold, q, p, X, t::Number; kwargs...)
     return (q .= p .+ t .* X)
 end
-ManifoldsBase.retract_qr!(::DefaultManifold, q, p, X) = (q .= p .+ X)
-ManifoldsBase.retract_qr_fused!(::DefaultManifold, q, p, X, t::Number) = (q .= p .+ t .* X)
+ManifoldsBase.retract_qr!(::DefaultManifold, q, p, X; kwargs...) = (q .= p .+ X)
+ManifoldsBase.retract_qr_fused!(::DefaultManifold, q, p, X, t::Number; kwargs...) = (q .= p .+ t .* X)
 
-function ManifoldsBase.retract_pade!(::DefaultManifold, q, p, X, m::PadeRetraction)
+function ManifoldsBase.retract_pade!(::DefaultManifold, q, p, X, m::PadeRetraction; kwargs...)
     return (q .= p .+ X)
 end
 function ManifoldsBase.retract_pade_fused!(
-        ::DefaultManifold, q, p, X, t::Number, m::PadeRetraction,
+        ::DefaultManifold, q, p, X, t::Number, m::PadeRetraction; kwargs...,
     )
     return (q .= p .+ t .* X)
 end
-function ManifoldsBase.retract_sasaki!(::DefaultManifold, q, p, X, m::SasakiRetraction)
+function ManifoldsBase.retract_sasaki!(::DefaultManifold, q, p, X, m::SasakiRetraction; kwargs...)
     return (q .= p .+ X)
 end
 function ManifoldsBase.retract_sasaki_fused!(
-        ::DefaultManifold, q, p, X, t::Number, ::SasakiRetraction,
+        ::DefaultManifold, q, p, X, t::Number, ::SasakiRetraction; kwargs...,
     )
     return (q .= p .+ t .* X)
 end
-function ManifoldsBase.retract_softmax!(::DefaultManifold, q, p, X)
+function ManifoldsBase.retract_softmax!(::DefaultManifold, q, p, X; kwargs...)
     return (q .= p .+ X)
 end
-function ManifoldsBase.retract_softmax_fused!(::DefaultManifold, q, p, X, t::Number)
+function ManifoldsBase.retract_softmax_fused!(::DefaultManifold, q, p, X, t::Number; kwargs...)
     return (q .= p .+ t .* X)
 end
-ManifoldsBase.inverse_retract_approx!(::DefaultManifold, Y, p, q, m::ApproximateLogarithmicInverseRetraction) = (Y .= q .- p)
-ManifoldsBase.inverse_retract_polar!(::DefaultManifold, Y, p, q) = (Y .= q .- p)
-ManifoldsBase.inverse_retract_project!(::DefaultManifold, Y, p, q) = (Y .= q .- p)
-ManifoldsBase.inverse_retract_qr!(::DefaultManifold, Y, p, q) = (Y .= q .- p)
-ManifoldsBase.inverse_retract_softmax!(::DefaultManifold, Y, p, q) = (Y .= q .- p)
+ManifoldsBase.inverse_retract_approx!(::DefaultManifold, Y, p, q, m::ApproximateLogarithmicInverseRetraction; kwargs...) = (Y .= q .- p)
+ManifoldsBase.inverse_retract_pade!(::DefaultManifold, Y, p, q, n; kwargs...) = (Y .= q .- p)
+ManifoldsBase.inverse_retract_polar!(::DefaultManifold, Y, p, q; kwargs...) = (Y .= q .- p)
+ManifoldsBase.inverse_retract_project!(::DefaultManifold, Y, p, q; kwargs...) = (Y .= q .- p)
+ManifoldsBase.inverse_retract_qr!(::DefaultManifold, Y, p, q; kwargs...) = (Y .= q .- p)
+ManifoldsBase.inverse_retract_softmax!(::DefaultManifold, Y, p, q; kwargs...) = (Y .= q .- p)
 function ManifoldsBase.inverse_retract_nlsolve!(
-        ::DefaultManifold, Y, p, q, m::NLSolveInverseRetraction,
+        ::DefaultManifold, Y, p, q, m::NLSolveInverseRetraction; kwargs...,
     )
     return (Y .= q .- p)
 end
+ManifoldsBase.vector_transport_to_diff!(::DefaultManifold, Y, p, X, q, m; kwargs...) = copyto!(Y, X)
+ManifoldsBase.vector_transport_direction_diff!(::DefaultManifold, Y, p, X, d, m; kwargs...) = copyto!(Y, X)
 Base.getindex(x::MatrixVectorTransport, i::Int) = x.m[:, i]
 Base.size(x::MatrixVectorTransport) = (size(x.m, 2),)
 
@@ -610,10 +600,15 @@ struct TestArrayRepresentation <: AbstractPowerRepresentation end
 
 const TestPowerManifoldMultidimensional = AbstractPowerManifold{𝔽, <:AbstractManifold{𝔽}, TestArrayRepresentation} where {𝔽}
 
-function ManifoldsBase.representation_size(
-        M::TestPowerManifoldMultidimensional,
-    )
+function ManifoldsBase.representation_size(M::TestPowerManifoldMultidimensional)
     return (representation_size(M.manifold)..., ManifoldsBase.get_parameter(M.size)...)
+end
+
+Base.@propagate_inbounds @inline function ManifoldsBase._read(
+        ::TestPowerManifoldMultidimensional,
+        rep_size::Tuple, x::AbstractArray, i::Tuple,
+    )
+    return x[ManifoldsBase.rep_size_to_colons(rep_size)..., i...]
 end
 
 @inline function ManifoldsBase._write(

@@ -6,11 +6,12 @@ using Printf: @sprintf
 
 function ManifoldsBase.plot_slope(
         ::Val{:Plots}, x, y;
-        slope = 2, line_base = 0, a = 0, b = 2.0, i = 1, j = length(x),
+        slope = 2, line_base = 0, a = 0, b = 2.0, i = 1, j = length(x), name = "",
     )
     fig = plot(
         x, y; xaxis = :log, yaxis = :log, label = "\$E(t)\$",
         linewidth = 3, legend = :topleft, color = :lightblue,
+        xlabel = "t", ylabel = "\$E(t)\$", title = name,
     )
     s_line = [exp10(line_base + t * slope) for t in log10.(x)]
     plot!(
@@ -27,13 +28,13 @@ function ManifoldsBase.plot_slope(
     end
     return fig
 end
-function ManifoldsBase.plot_check_geodesic(::Val{:Plots}, T, N, e_norm, e_pt, e_alpha)
+function ManifoldsBase.plot_check_geodesic(::Val{:Plots}, T, N, e_norm, e_pt, e_alpha; name = "")
     fig = plot(
         T[1:(N - 1)], e_norm;
         # Deviation from constant speed: |‖Xᵢ‖ − mean‖X‖|
         label = "Speed deviation: |‖Xᵢ‖ − mean‖X‖|",
         linewidth = 3, legend = :topright, color = :lightblue,
-        xlabel = "t", ylabel = "error magnitude", title = "Geodesic checks"
+        xlabel = "t", ylabel = "error magnitude", title = name
     )
     plot!(
         fig, T[1:(N - 2)], e_pt;

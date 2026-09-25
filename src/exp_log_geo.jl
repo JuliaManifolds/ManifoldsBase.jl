@@ -25,21 +25,21 @@ Compared to [`exp`](@ref), this method provides the opportunity to
 avoid the allocation when computing `t*X`.
 By default, this method allocates the resulting point `q` and passes to [`exp_fused!`](@ref).
 """
-function exp_fused(M::AbstractManifold, p, X, t::Number)
+function exp_fused(M::AbstractManifold, p, X, t::Number; kwargs...)
     q = allocate_result(M, exp, p, X, t)
-    exp_fused!(M, q, p, X, t)
+    exp_fused!(M, q, p, X, t; kwargs...)
     return q
 end
 
 """
     exp!(M::AbstractManifold, q, p, X)
 
-Compute the exponential map of tangent vector `X`, optionally scaled by `t`,  at point `p`
+Compute the exponential map of tangent vector `X` at point `p`
 from the manifold [`AbstractManifold`](@ref) `M`.
 The result is saved to `q`.
 
 If you want to implement exponential map for your manifold, you should implement the in-place
-method with, that is `exp_fused!(M::MyManifold, q, p, X)`.
+method, that is `exp!(M::MyManifold, q, p, X)`.
 
 See also [`exp`](@ref).
 """
@@ -53,7 +53,7 @@ Compared to [`exp!`](@ref), this method provides the opportunity to avoid the al
 when computing `t*X`.
 By default, this method performs this operation and passes to [`exp!`](@ref).
 """
-exp_fused!(M::AbstractManifold, q, p, X, t::Number) = exp!(M, q, p, t * X)
+exp_fused!(M::AbstractManifold, q, p, X, t::Number; kwargs...) = exp!(M, q, p, t * X; kwargs...)
 
 @doc raw"""
     geodesic(M::AbstractManifold, p, X) -> Function
@@ -115,7 +115,7 @@ with ``γ_{p,X}(0) = p`` and ``\dot γ_{p,X}(0) = X`` a geodesic further fulfill
 i.e. the curve is acceleration free with respect to the Riemannian metric.
 This yields that the curve has constant velocity and is locally distance-minimizing.
 
-This function returns a function `(q,t)` of (time) `t` that mutates `q``.
+This function returns a function `(q,t)` of (time) `t` that mutates `q`.
 """
 geodesic!(M::AbstractManifold, p, X) = (q, t) -> exp_fused!(M, q, p, X, t)
 @doc raw"""
@@ -130,7 +130,7 @@ with ``γ_{p,X}(0) = p`` and ``\dot γ_{p,X}(0) = X`` a geodesic further fulfill
 ```
 
 i.e. the curve is acceleration free with respect to the Riemannian metric.
-This function evaluates the geodeic at `t` in place of `q`.
+This function evaluates the geodesic at `t` in place of `q`.
 """
 geodesic!(M::AbstractManifold, q, p, X, t::Real) = exp_fused!(M, q, p, X, t)
 @doc raw"""
@@ -188,11 +188,11 @@ Get a [`geodesic`](@ref) $γ_{p,q}(t)$ whose length is the shortest path between
 points `p`and `q`, where $γ_{p,q}(0)=p$ and $γ_{p,q}(1)=q$.
 When there are multiple shortest geodesics, a deterministic choice will be returned.
 
-This function returns a function of time, which may be a `Real` or an `AbstractVector`.
+This function returns a function of (time) `t`.
 """
 shortest_geodesic(M::AbstractManifold, p, q) = geodesic(M, p, log(M, p, q))
 @doc raw"""
-    shortest_geodesic(M::AabstractManifold, p, q, t::Real)
+    shortest_geodesic(M::AbstractManifold, p, q, t::Real)
 
 Evaluate a [`geodesic`](@ref) $γ_{p,q}(t)$ whose length is the shortest path between the
 points `p`and `q`, where $γ_{p,q}(0)=p$ and $γ_{p,q}(1)=q$ at time `t`.
@@ -222,7 +222,7 @@ This function returns a function `(r,t) -> ... ` of time `t` which works in plac
 
 Further variants
 
-    shortest_geodesic!(M::AabstractManifold, r, p, q, t::Real)
+    shortest_geodesic!(M::AbstractManifold, r, p, q, t::Real)
     shortest_geodesic!(M::AbstractManifold, R, p, q, T::AbstractVector) -> AbstractVector
 
 mutate (and return) the point `r` and the vector of points `R`, respectively,
@@ -230,7 +230,7 @@ returning the point at time `t` or points at times `t` in `T` along the shortest
 """
 shortest_geodesic!(M::AbstractManifold, p, q) = geodesic!(M, p, log(M, p, q))
 @doc raw"""
-    shortest_geodesic!(M::AabstractManifold, r, p, q, t::Real)
+    shortest_geodesic!(M::AbstractManifold, r, p, q, t::Real)
 
 Evaluate a [`geodesic`](@ref) $γ_{p,q}(t)$ whose length is the shortest path between the
 points `p`and `q`, where $γ_{p,q}(0)=p$ and $γ_{p,q}(1)=q$ at `t` in place of `r`.

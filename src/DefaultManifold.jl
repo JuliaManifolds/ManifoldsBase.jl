@@ -30,9 +30,7 @@ function DefaultManifold(n::Vararg{Int}; field = ℝ, parameter::Symbol = :field
 end
 
 function allocation_promotion_function(
-        ::DefaultManifold{ℂ},
-        ::Union{typeof(get_vector), typeof(get_coordinates)},
-        ::Tuple,
+        ::DefaultManifold{ℂ}, ::Union{typeof(get_vector), typeof(get_coordinates)}, ::Tuple,
     )
     return complex
 end
@@ -58,7 +56,7 @@ function check_approx(M::DefaultManifold, p, X, Y; kwargs...)
 end
 
 
-function check_point(M::DefaultManifold{𝔽}, p) where {𝔽}
+function check_point(M::DefaultManifold{𝔽}, p; kwargs...) where {𝔽}
     if (𝔽 === ℝ) && !(eltype(p) <: Real)
         return DomainError(
             eltype(p),
@@ -203,11 +201,8 @@ function Random.rand!(::DefaultManifold, pX; σ = one(eltype(pX)), vector_at = n
     return pX
 end
 function Random.rand!(
-        rng::AbstractRNG,
-        ::DefaultManifold,
-        pX;
-        σ = one(eltype(pX)),
-        vector_at = nothing,
+        rng::AbstractRNG, ::DefaultManifold, pX;
+        σ = one(eltype(pX)), vector_at = nothing,
     )
     pX .= randn(rng, size(pX)) .* σ
     return pX

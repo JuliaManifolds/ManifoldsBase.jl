@@ -2,7 +2,7 @@ using Test
 using ManifoldsBase
 @testset "ManifoldsBase" begin
     bound = 8
-    # six ambiguities come from possible incorrectly formed calls to `allocate`
+    # eight ambiguities come from possible incorrectly formed calls to `allocate`
     ambiguities = Test.detect_ambiguities(ManifoldsBase)
     num_ambiguities = length(ambiguities)
     #num_ambiguities > 0 && @warn "The number of ambiguities in ManifoldsBase is $(num_ambiguities)."
@@ -36,4 +36,5 @@ using ManifoldsBase
     include("test_zerovector.jl")
     include("deprecated.jl")
     include("test_aqua.jl")
+    include("test_jet.jl")
 end
