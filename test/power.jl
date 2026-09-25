@@ -435,6 +435,8 @@ end
             Y1 = [[0.0, 1.0, 0.0], [0.0, 1.0, 0.0]]
             Y2 = [[0.0, 0.0, 1.0], [0.0, 0.0, 1.0]]
             @test sectional_curvature(Mpr, q, Y1, Y2) == 0.5
+            # linearly dependent vectors span no plane
+            @test sectional_curvature(Mpr, q, Y1, 2 .* Y1) == 0.0
 
             Mss = PowerManifold(M1, NestedPowerRepresentation(), 1)
             @test sectional_curvature_max(Mss) == 1.0

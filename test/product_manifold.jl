@@ -631,6 +631,8 @@ using RecursiveArrayTools
         @test sectional_curvature_min(Mss) == 0.0
         @test sectional_curvature(Mss, p, X1, X2) == 1.0
         @test sectional_curvature(Mss, p, X1, X3) == 0.0
+        # linearly dependent vectors span no plane
+        @test sectional_curvature(Mss, p, X1, 2 * X1) == 0.0
 
         @test sectional_curvature_max(ProductManifold(M1)) == 1.0
         @test sectional_curvature_min(ProductManifold(M1)) == 1.0

@@ -927,10 +927,11 @@ end
 Compute the sectional curvature of a manifold ``\mathcal M`` at a point ``p \in \mathcal M``
 on two linearly independent tangent vectors at ``p``. It may be 0 for a product of non-flat
 manifolds if projections of `X` and `Y` on subspaces corresponding to component manifolds
-are not linearly independent.
+are not linearly independent. For linearly dependent `X` and `Y` it returns 0.
 """
 function sectional_curvature(M::ProductManifold, p, X, Y)
     curvature = zero(number_eltype(X))
+    are_linearly_independent(M, p, X, Y) || return curvature
     map(
         M.manifolds,
         submanifold_components(M, p),

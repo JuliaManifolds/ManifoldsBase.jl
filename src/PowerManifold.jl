@@ -1436,10 +1436,12 @@ end
 Compute the sectional curvature of a power manifold ``\mathcal M`` at a point
 ``p \in \mathcal M`` on two linearly independent tangent vectors at ``p``. It may be 0 for
 a power of a non-flat manifold if projections of `X` and `Y` on subspaces corresponding to
-component manifolds are not linearly independent.
+component manifolds are not linearly independent. For linearly dependent `X` and `Y` it
+returns 0.
 """
 function sectional_curvature(M::AbstractPowerManifold, p, X, Y)
     curvature = zero(number_eltype(X))
+    are_linearly_independent(M, p, X, Y) || return curvature
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         p_i = _read(M, rep_size, p, i)
