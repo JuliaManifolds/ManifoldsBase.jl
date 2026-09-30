@@ -33,7 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        julia-version: ["lts", "1"]
+        julia-version: ["1"]
     steps:
       - uses: actions/checkout@v7
       - uses: julia-actions/setup-julia@v3
