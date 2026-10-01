@@ -497,7 +497,7 @@ macro manifold_vector_forwards(T, Twhere, field::Symbol)
         bc′ = Broadcast.preprocess(dest, bc)
         # Performance may vary depending on whether `@inbounds` is placed outside the
         # for loop or not. (cf. https://github.com/JuliaLang/julia/issues/38086)
-        copyto!(dest.$field, bc′[1])
+        copyto!(dest.$field, bc′[first(eachindex(bc′))])
         return dest
     end
 
