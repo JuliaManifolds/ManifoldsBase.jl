@@ -102,6 +102,16 @@ using ManifoldsBase, LinearAlgebra, Random, Test
             c .= a .+ b
             @test isapprox(A, c, a .+ b)
         end
+        # a matrix inside the wrapper takes the same in-place broadcast
+        for T in [ValidationTangentVector, ValidationCotangentVector]
+            a = T([1.0 2.0; 3.0 4.0])
+            b = T([0.5 0.0; 1.0 -1.0])
+            c = similar(a)
+            c .= a .+ b
+            @test c.value == [1.5 2.0; 4.0 3.0]
+            c .+= 2 .* b
+            @test c.value == [2.5 2.0; 6.0 1.0]
+        end
     end
     @testset "AbstractManifold functions" begin
         @test manifold_dimension(A) == manifold_dimension(M)
