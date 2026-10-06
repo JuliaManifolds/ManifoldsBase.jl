@@ -39,6 +39,6 @@ jobs:
       - uses: julia-actions/setup-julia@v3
         with:
           version: ${{ matrix.julia-version }}
-      - uses: julia-actions/cache@v2
+      - uses: julia-actions/cache@v3
       - name: Run JET tests
         run: julia --project=test/jet -e 'using Pkg; Pkg.instantiate(); include("test/jet/runtests.jl")'
