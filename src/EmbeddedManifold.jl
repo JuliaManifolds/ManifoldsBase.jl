@@ -68,9 +68,9 @@ end
 
 # By default, project “passes through” to the decorator, which here would allocate in the embedding
 # This overwrites this and allocates on M
-function project(M::EmbeddedManifold, p)
+function project(M::EmbeddedManifold, p; kwargs...)
     q = allocate_result(M, project, p)
-    project!(M, q, p)
+    project!(M, q, p; kwargs...)
     return q
 end
 
