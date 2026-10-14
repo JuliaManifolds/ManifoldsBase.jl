@@ -658,9 +658,14 @@ end
 number_eltype(::Type{ValidationMPoint{V}}) where {V} = number_eltype(V)
 number_eltype(::Type{ValidationFibreVector{TType, V, P}}) where {TType, V, P} = number_eltype(V)
 
+function project!(M::ValidationManifold, q, p; kwargs...)
+    project!(M.manifold, internal_value(q), internal_value(p))
+    is_point(M, q; within = project, context = (:Output,), kwargs...)
+    return q
+end
 function project!(M::ValidationManifold, Y, p, X; kwargs...)
     is_point(M, p; within = project, context = (:Input,), kwargs...)
-    project!(M.manifold, internal_value(Y), internal_value(p), internal_value(X))
+    project!(M.manifold, internal_value(Y), internal_value(p), internal_value(X); kwargs...)
     _update_basepoint!(M, Y, p)
     is_vector(M, p, Y; within = project, context = (:Output,), kwargs...)
     return Y

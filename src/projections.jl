@@ -46,16 +46,16 @@ If you do not want to change the data representation, you should use [`embed_pro
 See also: [`EmbeddedManifold`](@ref), [`embed`](@ref embed(M::AbstractManifold, p, X)),
 [`embed_project`](@ref embed_project(M::AbstractManifold, p, X)).
 """
-function project(M::AbstractManifold, p, X)
+function project(M::AbstractManifold, p, X; kwargs...)
     # Note that the order is switched,
     # since the allocation by default takes the type of the first.
     Y = allocate_result_embedding(M, project, X, p)
-    project!(M, Y, p, X)
+    project!(M, Y, p, X; kwargs...)
     return Y
 end
 
 """
-    project!(M::AbstractManifold, Y, p, X)
+    project!(M::AbstractManifold, Y, p, X; kwargs..)
 
 Project ambient space representation of a vector `X` to a tangent vector at point `p` on
 the [`AbstractManifold`](@ref) `M`. The result is saved in vector `Y`.
@@ -71,4 +71,4 @@ If you do not want to change the data representation, you should use [`embed_pro
 See also: [`EmbeddedManifold`](@ref), [`embed!`](@ref embed!(M::AbstractManifold, Y, p, X)),
 [`embed_project!`](@ref embed_project!(M::AbstractManifold, Y, p, X)).
 """
-project!(::AbstractManifold, Y, p, X)
+project!(::AbstractManifold, Y, p, X; kwargs...)

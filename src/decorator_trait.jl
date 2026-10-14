@@ -663,22 +663,22 @@ end
 
 @trait_function parallel_transport_to!(M::AbstractDecoratorManifold, Y, p, X, q)
 
-@trait_function project(M::AbstractDecoratorManifold, p) (
+@trait_function project(M::AbstractDecoratorManifold, p; kwargs...) (
     SimpleForwardingType,
     StopForwardingType,
 )
 
-@trait_function project(M::AbstractDecoratorManifold, p, X) (
+@trait_function project(M::AbstractDecoratorManifold, p, X; kwargs...) (
     SimpleForwardingType,
     StopForwardingType,
 )
 
-@trait_function project!(M::AbstractDecoratorManifold, q, p) (
+@trait_function project!(M::AbstractDecoratorManifold, q, p; kwargs...) (
     SimpleForwardingType,
     StopForwardingType,
 )
 
-@trait_function project!(M::AbstractDecoratorManifold, Y, p, X) (
+@trait_function project!(M::AbstractDecoratorManifold, Y, p, X; kwargs...) (
     SimpleForwardingType,
     StopForwardingType,
 )
