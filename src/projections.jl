@@ -1,5 +1,5 @@
 """
-    project(M::AbstractManifold, p)
+    project(M::AbstractManifold, p; kwargs...)
 
 Project point `p` from the ambient space of the [`AbstractManifold`](@ref) `M` to `M`.
 This method is only available for manifolds where implicitly an embedding or ambient space
@@ -9,14 +9,14 @@ accordingly.
 
 See also: [`EmbeddedManifold`](@ref), [`embed`](@ref embed(M::AbstractManifold, p))
 """
-function project(M::AbstractManifold, p)
+function project(M::AbstractManifold, p; kwargs...)
     q = allocate_result_embedding(M, project, p)
-    project!(M, q, p)
+    project!(M, q, p; kwargs...)
     return q
 end
 
 """
-    project!(M::AbstractManifold, q, p)
+    project!(M::AbstractManifold, q, p; kwargs...)
 
 Project point `p` from the ambient space onto the [`AbstractManifold`](@ref) `M`. The result is
 stored in `q`.
@@ -27,7 +27,7 @@ accordingly.
 
 See also: [`EmbeddedManifold`](@ref), [`embed!`](@ref embed!(M::AbstractManifold, q, p))
 """
-project!(::AbstractManifold, q, p)
+project!(::AbstractManifold, q, p; kwargs...)
 
 """
     project(M::AbstractManifold, p, X)
