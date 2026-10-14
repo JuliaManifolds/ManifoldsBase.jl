@@ -357,16 +357,16 @@ for mf in [inverse_retract, retract]
 end
 
 # Introduce Deco Trait | automatic forward | fallback
-@trait_function embed(M::AbstractDecoratorManifold, p)
+@trait_function embed(M::AbstractDecoratorManifold, p; kwargs...)
 
 # Introduce Deco Trait | automatic forward | fallback
-@trait_function embed!(M::AbstractDecoratorManifold, q, p)
+@trait_function embed!(M::AbstractDecoratorManifold, q, p; kwargs...)
 
 # Introduce Deco Trait | automatic forward | fallback
-@trait_function embed(M::AbstractDecoratorManifold, p, X)
+@trait_function embed(M::AbstractDecoratorManifold, p, X; kwargs...)
 
 # Introduce Deco Trait | automatic forward | fallback
-@trait_function embed!(M::AbstractDecoratorManifold, Y, p, X)
+@trait_function embed!(M::AbstractDecoratorManifold, Y, p, X; kwargs...)
 
 # Introduce Deco Trait | automatic forward | fallback
 

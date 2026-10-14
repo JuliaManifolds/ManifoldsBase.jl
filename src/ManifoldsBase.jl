@@ -466,7 +466,7 @@ end
 distance(M::AbstractManifold, p, q, ::LogarithmicInverseRetraction) = distance(M, p, q)
 
 """
-    embed(M::AbstractManifold, p)
+    embed(M::AbstractManifold, p; kwargs...)
 
 Embed point `p` from the [`AbstractManifold`](@ref) `M` into the ambient space.
 This method is only available for manifolds where implicitly an embedding or ambient space
@@ -475,11 +475,11 @@ Additionally, `embed` includes changing data representation, if applicable, i.e.
 if the points on `M` are not represented in the same way as points on the embedding,
 the representation is changed accordingly.
 
-The default is set in such a way that memory is allocated and `embed!(M, q, p)` is called.
+The default is set in such a way that memory is allocated and `embed!(M, q, p; kwargs...)` is called.
 
 See also: [`EmbeddedManifold`](@ref), [`project`](@ref project(M::AbstractManifold,p))
 """
-function embed(M::AbstractManifold, p)
+function embed(M::AbstractManifold, p; kwargs...)
     local q
     try
         q = allocate_result_embedding(M, embed, p)
@@ -487,12 +487,12 @@ function embed(M::AbstractManifold, p)
         # because we want `embed` to default to identity
         q = allocate_result(M, embed, p)
     end
-    embed!(M, q, p)
+    embed!(M, q, p; kwargs...)
     return q
 end
 
 """
-    embed!(M::AbstractManifold, q, p)
+    embed!(M::AbstractManifold, q, p; kwargs...)
 
 Embed point `p` from the [`AbstractManifold`](@ref) `M` into an ambient space.
 This method is only available for manifolds where implicitly an embedding or ambient space
@@ -503,7 +503,7 @@ the representation is changed accordingly.
 
 The default is set in such a way that it assumes that the points on `M` are represented in
 their embedding (for example like the unit vectors in a space to represent the sphere) and
-hence embedding is the identity by default.
+hence embedding is the identity by default. Keyword arguments are ignored by this default.
 
 If you have more than one embedding, see [`EmbeddedManifold`](@ref) for defining a second
 embedding. If your point `p` is already represented in some embedding,
@@ -511,10 +511,10 @@ see [`AbstractDecoratorManifold`](@ref) how you can avoid reimplementing code fr
 
 See also: [`EmbeddedManifold`](@ref), [`project!`](@ref project!(M::AbstractManifold, q, p))
 """
-embed!(M::AbstractManifold, q, p) = copyto!(M, q, p)
+embed!(M::AbstractManifold, q, p; kwargs...) = copyto!(M, q, p)
 
 """
-    embed(M::AbstractManifold, p, X)
+    embed(M::AbstractManifold, p, X; kwargs...)
 
 Embed a tangent vector `X` at a point `p` on the [`AbstractManifold`](@ref) `M` into an ambient space.
 This method is only available for manifolds where implicitly an embedding or ambient space
@@ -524,7 +524,7 @@ Additionally, `embed` might include changing data representation, if applicable,
 if tangent vectors on `M` are not represented in the same way as their counterparts in the
 embedding, the representation is changed accordingly.
 
-The default is set in such a way that memory is allocated and `embed!(M, Y, p, X)` is called.
+The default is set in such a way that memory is allocated and `embed!(M, Y, p, X; kwargs...)` is called.
 
 If you have more than one embedding, see [`EmbeddedManifold`](@ref) for defining a second
 embedding. If your tangent vector `X` is already represented in some embedding,
@@ -532,7 +532,7 @@ see [`AbstractDecoratorManifold`](@ref) how you can avoid reimplementing code fr
 
 See also: [`EmbeddedManifold`](@ref), [`project`](@ref project(M::AbstractManifold, p, X))
 """
-function embed(M::AbstractManifold, p, X)
+function embed(M::AbstractManifold, p, X; kwargs...)
     # the order of args switched, since the allocation by default takes the type of the first.
     local Y
     try
@@ -541,12 +541,12 @@ function embed(M::AbstractManifold, p, X)
         # because we want `embed` to default to identity
         Y = allocate_result(M, embed, X, p)
     end
-    embed!(M, Y, p, X)
+    embed!(M, Y, p, X; kwargs...)
     return Y
 end
 
 """
-    embed!(M::AbstractManifold, Y, p, X)
+    embed!(M::AbstractManifold, Y, p, X; kwargs...)
 
 Embed a tangent vector `X` at a point `p` on the [`AbstractManifold`](@ref) `M` into the ambient
 space and return the result in `Y`.
@@ -561,54 +561,75 @@ the tangent spaces of the embedded base points.
 The default is set in such a way that it assumes that the points on `M` are represented in
 their embedding (for example like the unit vectors in a space to represent the sphere) and
 hence embedding also for tangent vectors is the identity by default.
+Keyword arguments are ignored by this default.
 
 See also: [`EmbeddedManifold`](@ref), [`project!`](@ref project!(M::AbstractManifold, Y, p, X))
 """
-embed!(M::AbstractManifold, Y, p, X) = copyto!(M, Y, p, X)
+embed!(M::AbstractManifold, Y, p, X; kwargs...) = copyto!(M, Y, p, X)
 
 """
-    embed_project(M::AbstractManifold, p)
+    embed_project(M::AbstractManifold, p; embed_kwargs = (;), project_kwargs = (;))
 
 Embed `p` from manifold `M` and project it back to `M`. For points from `M` this is identity
 but in case embedding is defined for points outside of `M`, this can serve as a way
 to for example remove numerical inaccuracies caused by some algorithms.
+
+# Keyword arguments
+
+* `embed_kwargs = (;)`: a `NamedTuple` of keyword arguments passed to [`embed`](@ref)
+* `project_kwargs = (;)`: a `NamedTuple` of keyword arguments passed to [`project`](@ref)
 """
-function embed_project(M::AbstractManifold, p)
-    return project(M, embed(M, p))
+function embed_project(M::AbstractManifold, p; embed_kwargs = (;), project_kwargs = (;))
+    return project(M, embed(M, p; embed_kwargs...); project_kwargs...)
 end
 """
-    embed_project(M::AbstractManifold, p, X)
+    embed_project(M::AbstractManifold, p, X; embed_kwargs = (;), project_kwargs = (;))
 
 Embed vector `X` tangent at `p` from manifold `M` and project it back to tangent space
 at `p`. For points from that tangent space this is identity but in case embedding is
 defined for tangent vectors from outside of it, this can serve as a way to for example remove
 numerical inaccuracies caused by some algorithms.
+
+# Keyword arguments
+
+* `embed_kwargs = (;)`: a `NamedTuple` of keyword arguments passed to [`embed`](@ref)
+* `project_kwargs = (;)`: a `NamedTuple` of keyword arguments passed to [`project`](@ref)
 """
-function embed_project(M::AbstractManifold, p, X)
-    return project(M, p, embed(M, p, X))
+function embed_project(M::AbstractManifold, p, X; embed_kwargs = (;), project_kwargs = (;))
+    return project(M, p, embed(M, p, X; embed_kwargs...); project_kwargs...)
 end
 
 """
-    embed_project!(M::AbstractManifold, q, p)
+    embed_project!(M::AbstractManifold, q, p; embed_kwargs = (;), project_kwargs = (;))
 
 Embed `p` from manifold `M` and project it back to `M`, saving the result in `q`. For points
 from `M` this is identity but in case embedding is defined for points outside of `M`, this
 can serve as a way to for example remove numerical inaccuracies caused by some algorithms.
+
+# Keyword arguments
+
+* `embed_kwargs = (;)`: a `NamedTuple` of keyword arguments passed to [`embed`](@ref)
+* `project_kwargs = (;)`: a `NamedTuple` of keyword arguments passed to [`project`](@ref)
 """
-function embed_project!(M::AbstractManifold, q, p)
-    return project!(M, q, embed(M, p))
+function embed_project!(M::AbstractManifold, q, p; embed_kwargs = (;), project_kwargs = (;))
+    return project!(M, q, embed(M, p; embed_kwargs...); project_kwargs...)
 end
 
 """
-    embed_project!(M::AbstractManifold, Y, p, X)
+    embed_project!(M::AbstractManifold, Y, p, X; embed_kwargs = (;), project_kwargs = (;))
 
 Embed vector `X` tangent at `p` from manifold `M` and project it back to tangent space
 at `p`, saving the result in `Y`. For points from that tangent space this is identity but
 in case embedding is defined for tangent vectors from outside of it, this can serve as a way
 to for example remove numerical inaccuracies caused by some algorithms.
+
+# Keyword arguments
+
+* `embed_kwargs = (;)`: a `NamedTuple` of keyword arguments passed to [`embed`](@ref)
+* `project_kwargs = (;)`: a `NamedTuple` of keyword arguments passed to [`project`](@ref)
 """
-function embed_project!(M::AbstractManifold, Y, p, X)
-    return project!(M, Y, p, embed(M, p, X))
+function embed_project!(M::AbstractManifold, Y, p, X; embed_kwargs = (;), project_kwargs = (;))
+    return project!(M, Y, p, embed(M, p, X; embed_kwargs...); project_kwargs...)
 end
 
 _doc_embedding = """

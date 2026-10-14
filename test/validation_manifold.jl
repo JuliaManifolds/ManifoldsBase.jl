@@ -1,5 +1,16 @@
 using ManifoldsBase, LinearAlgebra, Random, Test
 
+# A manifold whose embedding and projection accept a keyword argument
+struct KwargsEmbedProjectManifold <: AbstractManifold{ManifoldsBase.ℝ} end
+ManifoldsBase.representation_size(::KwargsEmbedProjectManifold) = (3,)
+ManifoldsBase.get_embedding(::KwargsEmbedProjectManifold) = ManifoldsBase.DefaultManifold(3)
+ManifoldsBase.embed!(::KwargsEmbedProjectManifold, q, p; shift = 0.0) = (q .= p .+ shift)
+ManifoldsBase.embed!(::KwargsEmbedProjectManifold, Y, p, X; shift = 0.0) = (Y .= X .+ shift)
+ManifoldsBase.project!(::KwargsEmbedProjectManifold, q, p; shift = 0.0) = (q .= p .+ shift)
+function ManifoldsBase.project!(::KwargsEmbedProjectManifold, Y, p, X; shift = 0.0)
+    return (Y .= X .+ shift)
+end
+
 @testset "Validation manifold" begin
     M = ManifoldsBase.DefaultManifold(3)
     A = ValidationManifold(M)
@@ -283,6 +294,29 @@ using ManifoldsBase, LinearAlgebra, Random, Test
         Y4 = copy(Ad, p, Y3)
         embed_project!(Ad, Y4, p, X)
         @test Y3 == Y4
+    end
+    @testset "embed, project and embed_project keyword arguments" begin
+        # embed_kwargs and project_kwargs are passed to the wrapped manifold, not to the checks
+        Ak = ValidationManifold(KwargsEmbedProjectManifold())
+        p = [1.0, 2.0, 3.0]
+        X = [2.0, 3.0, 4.0]
+        ekw = (; embed_kwargs = (; shift = 1.0))
+        @test internal_value(embed(Ak, p; ekw...)) == p .+ 1
+        @test internal_value(embed!(Ak, similar(p), p; ekw...)) == p .+ 1
+        @test internal_value(embed(Ak, p, X; ekw...)) == X .+ 1
+        @test internal_value(embed!(Ak, similar(X), p, X; ekw...)) == X .+ 1
+        pkw = (; project_kwargs = (; shift = 2.0))
+        @test internal_value(project(Ak, p; pkw...)) == p .+ 2
+        @test internal_value(project!(Ak, similar(p), p; pkw...)) == p .+ 2
+        @test internal_value(project(Ak, p, X; pkw...)) == X .+ 2
+        @test internal_value(project!(Ak, similar(X), p, X; pkw...)) == X .+ 2
+        kw = (; ekw..., pkw...)
+        @test internal_value(embed_project(Ak, p; kw...)) == p .+ 3
+        q = ValidationMPoint(similar(p))
+        @test internal_value(embed_project!(Ak, q, p; kw...)) == p .+ 3
+        @test internal_value(embed_project(Ak, p, X; kw...)) == X .+ 3
+        Y = ValidationTangentVector(similar(X))
+        @test internal_value(embed_project!(Ak, Y, p, X; kw...)) == X .+ 3
     end
     @testset "riemannian_tensor" begin
         r = riemann_tensor(M, x, x, y, z)
