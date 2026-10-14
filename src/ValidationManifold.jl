@@ -312,65 +312,87 @@ function distance(M::ValidationManifold, p, q; kwargs...)
     return d
 end
 
-function embed(M::ValidationManifold, p::P; kwargs...) where {P}
+function embed(M::ValidationManifold, p::P; embed_kwargs = (;), kwargs...) where {P}
     is_point(M, p; within = embed, context = (:Input,), kwargs...)
-    q = embed(M.manifold, internal_value(p))
+    q = embed(M.manifold, internal_value(p); embed_kwargs...)
     MEV = ValidationManifold(get_embedding(M.manifold, P), M)
     is_point(MEV, q; error = MEV.mode, within = embed, context = (:Output,), kwargs...)
     return ValidationMPoint(q)
 end
-function embed(M::ValidationManifold, p::P, X; kwargs...) where {P}
+function embed(M::ValidationManifold, p::P, X; embed_kwargs = (;), kwargs...) where {P}
     is_point(M, p; within = embed, context = (:Input,), kwargs...)
     is_vector(M, p, X; within = embed, context = (:Input,), kwargs...)
-    Y = embed(M.manifold, internal_value(p), internal_value(X))
+    Y = embed(M.manifold, internal_value(p), internal_value(X); embed_kwargs...)
     MEV = ValidationManifold(get_embedding(M.manifold, P), M)
-    q = embed(M.manifold, internal_value(p))
+    q = embed(M.manifold, internal_value(p); embed_kwargs...)
     is_vector(MEV, q, Y; within = embed, context = (:Output,), kwargs...)
     return ValidationTangentVector(Y, M.store_base_point ? q : nothing)
 end
 
-function embed!(M::ValidationManifold, q, p::P; kwargs...) where {P}
+function embed!(M::ValidationManifold, q, p::P; embed_kwargs = (;), kwargs...) where {P}
     is_point(M, p; within = embed, context = (:Input,), kwargs...)
-    embed!(M.manifold, internal_value(q), internal_value(p))
+    embed!(M.manifold, internal_value(q), internal_value(p); embed_kwargs...)
     MEV = ValidationManifold(get_embedding(M.manifold, P), M)
     is_point(MEV, q; error = MEV.mode, within = embed, context = (:Output,), kwargs...)
     return q
 end
-function embed!(M::ValidationManifold, Y, p::P, X; kwargs...) where {P}
+function embed!(
+        M::ValidationManifold, Y, p::P, X; embed_kwargs = (;), kwargs...,
+    ) where {P}
     is_point(M, p; within = embed, context = (:Input,), kwargs...)
     is_vector(M, p, X; within = embed, context = (:Input,), kwargs...)
-    embed!(M.manifold, internal_value(Y), internal_value(p), internal_value(X))
+    embed!(M.manifold, internal_value(Y), internal_value(p), internal_value(X); embed_kwargs...)
     MEV = ValidationManifold(get_embedding(M.manifold, P), M)
-    q = embed(M.manifold, internal_value(p))
+    q = embed(M.manifold, internal_value(p); embed_kwargs...)
     _update_basepoint!(M, Y, q)
     is_vector(MEV, q, Y; within = embed, context = (:Output,), kwargs...)
     return Y
 end
 
-function embed_project(M::ValidationManifold, p; kwargs...)
+function embed_project(
+        M::ValidationManifold, p; embed_kwargs = (;), project_kwargs = (;), kwargs...,
+    )
     is_point(M, p; within = embed_project, context = (:Input,), kwargs...)
-    q = embed_project(M.manifold, internal_value(p))
+    q = embed_project(
+        M.manifold, internal_value(p);
+        embed_kwargs = embed_kwargs, project_kwargs = project_kwargs,
+    )
     is_point(M, q; within = embed_project, context = (:Output,), kwargs...)
     return ValidationMPoint(q)
 end
-function embed_project(M::ValidationManifold, p, X; kwargs...)
+function embed_project(
+        M::ValidationManifold, p, X; embed_kwargs = (;), project_kwargs = (;), kwargs...,
+    )
     is_point(M, p; within = embed_project, context = (:Input,), kwargs...)
     is_vector(M, p, X; within = embed_project, context = (:Input,), kwargs...)
-    Y = embed_project(M.manifold, internal_value(p), internal_value(X))
+    Y = embed_project(
+        M.manifold, internal_value(p), internal_value(X);
+        embed_kwargs = embed_kwargs, project_kwargs = project_kwargs,
+    )
     is_vector(M, p, Y; within = embed_project, context = (:Output,), kwargs...)
     return ValidationTangentVector(Y, M.store_base_point ? copy(M, p) : nothing)
 end
 
-function embed_project!(M::ValidationManifold, q, p; kwargs...)
+function embed_project!(
+        M::ValidationManifold, q, p; embed_kwargs = (;), project_kwargs = (;), kwargs...,
+    )
     is_point(M, p; within = embed_project, context = (:Input,), kwargs...)
-    embed_project!(M.manifold, internal_value(q), internal_value(p))
+    embed_project!(
+        M.manifold, internal_value(q), internal_value(p);
+        embed_kwargs = embed_kwargs, project_kwargs = project_kwargs,
+    )
     is_point(M, q; within = embed_project, context = (:Output,), kwargs...)
     return q
 end
-function embed_project!(M::ValidationManifold, Y, p, X; kwargs...)
+function embed_project!(
+        M::ValidationManifold, Y, p, X; embed_kwargs = (;), project_kwargs = (;), kwargs...,
+    )
     is_point(M, p; within = embed_project, context = (:Input,), kwargs...)
     is_vector(M, p, X; within = embed_project, context = (:Input,), kwargs...)
-    embed_project!(M.manifold, internal_value(Y), internal_value(p), internal_value(X))
+    embed_project!(
+        M.manifold, internal_value(Y), internal_value(p), internal_value(X);
+        embed_kwargs = embed_kwargs, project_kwargs = project_kwargs,
+    )
     _update_basepoint!(M, Y, p)
     is_vector(M, p, Y; within = embed_project, context = (:Output,), kwargs...)
     return Y
@@ -658,9 +680,16 @@ end
 number_eltype(::Type{ValidationMPoint{V}}) where {V} = number_eltype(V)
 number_eltype(::Type{ValidationFibreVector{TType, V, P}}) where {TType, V, P} = number_eltype(V)
 
-function project!(M::ValidationManifold, Y, p, X; kwargs...)
+function project!(M::ValidationManifold, q, p; project_kwargs = (;), kwargs...)
+    project!(M.manifold, internal_value(q), internal_value(p); project_kwargs...)
+    is_point(M, q; within = project, context = (:Output,), kwargs...)
+    return q
+end
+function project!(M::ValidationManifold, Y, p, X; project_kwargs = (;), kwargs...)
     is_point(M, p; within = project, context = (:Input,), kwargs...)
-    project!(M.manifold, internal_value(Y), internal_value(p), internal_value(X))
+    project!(
+        M.manifold, internal_value(Y), internal_value(p), internal_value(X); project_kwargs...,
+    )
     _update_basepoint!(M, Y, p)
     is_vector(M, p, Y; within = project, context = (:Output,), kwargs...)
     return Y

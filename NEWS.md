@@ -5,7 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.6.1] unreleased
+## [2.6.2] 14/10/2026
+
+### Fixed
+
+* `embed`, `embed!`, `project` and `project!`, for points and tangent vectors, now accept keyword arguments.
+  The allocating variants pass them to the in-place ones and decorator manifolds forward them.
+  `EmbeddedManifold` and `MetricManifold` forward them in `project` and `project!` for points.
+  The default methods ignore them.
+* `embed_project` and `embed_project!`, for points and tangent vectors, now accept the keyword arguments
+  `embed_kwargs` and `project_kwargs`. These are `NamedTuple`s, empty by default,
+  whose entries are passed as keyword arguments to `embed` and `project`, respectively.
+* On a `ValidationManifold`, `embed` and `embed!` take `embed_kwargs`, `project` and `project!` take `project_kwargs`,
+  and `embed_project` and `embed_project!` take both. These are passed on to the wrapped manifold,
+  while all other keyword arguments still go to the validation checks.
+
+## [2.6.1] 01/10/2026
 
 ### Fixed
 

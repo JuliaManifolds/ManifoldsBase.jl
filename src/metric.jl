@@ -377,12 +377,12 @@ function parallel_transport_to!(M::MetricManifold, Y, p, X, q)
     throw(MethodError(parallel_transport_to!, (M, Y, p, X, q)))
 end
 
-function project(M::MetricManifold, p)
-    (metric(M.manifold) === M.metric) && (return project(M.manifold, p))
-    return invoke(project, Tuple{AbstractManifold, Any}, M, p)
+function project(M::MetricManifold, p; kwargs...)
+    (metric(M.manifold) === M.metric) && (return project(M.manifold, p; kwargs...))
+    return invoke(project, Tuple{AbstractManifold, Any}, M, p; kwargs...)
 end
-function project!(M::MetricManifold, q, p)
-    return project!(M.manifold, q, p)
+function project!(M::MetricManifold, q, p; kwargs...)
+    return project!(M.manifold, q, p; kwargs...)
 end
 function project(M::MetricManifold, p, X)
     (metric(M.manifold) === M.metric) && (return project(M.manifold, p, X))

@@ -1,5 +1,5 @@
 """
-    project(M::AbstractManifold, p)
+    project(M::AbstractManifold, p; kwargs...)
 
 Project point `p` from the ambient space of the [`AbstractManifold`](@ref) `M` to `M`.
 This method is only available for manifolds where implicitly an embedding or ambient space
@@ -9,14 +9,14 @@ accordingly.
 
 See also: [`EmbeddedManifold`](@ref), [`embed`](@ref embed(M::AbstractManifold, p))
 """
-function project(M::AbstractManifold, p)
+function project(M::AbstractManifold, p; kwargs...)
     q = allocate_result_embedding(M, project, p)
-    project!(M, q, p)
+    project!(M, q, p; kwargs...)
     return q
 end
 
 """
-    project!(M::AbstractManifold, q, p)
+    project!(M::AbstractManifold, q, p; kwargs...)
 
 Project point `p` from the ambient space onto the [`AbstractManifold`](@ref) `M`. The result is
 stored in `q`.
@@ -27,7 +27,7 @@ accordingly.
 
 See also: [`EmbeddedManifold`](@ref), [`embed!`](@ref embed!(M::AbstractManifold, q, p))
 """
-project!(::AbstractManifold, q, p)
+project!(::AbstractManifold, q, p; kwargs...)
 
 """
     project(M::AbstractManifold, p, X)
@@ -46,16 +46,16 @@ If you do not want to change the data representation, you should use [`embed_pro
 See also: [`EmbeddedManifold`](@ref), [`embed`](@ref embed(M::AbstractManifold, p, X)),
 [`embed_project`](@ref embed_project(M::AbstractManifold, p, X)).
 """
-function project(M::AbstractManifold, p, X)
+function project(M::AbstractManifold, p, X; kwargs...)
     # Note that the order is switched,
     # since the allocation by default takes the type of the first.
     Y = allocate_result_embedding(M, project, X, p)
-    project!(M, Y, p, X)
+    project!(M, Y, p, X; kwargs...)
     return Y
 end
 
 """
-    project!(M::AbstractManifold, Y, p, X)
+    project!(M::AbstractManifold, Y, p, X; kwargs..)
 
 Project ambient space representation of a vector `X` to a tangent vector at point `p` on
 the [`AbstractManifold`](@ref) `M`. The result is saved in vector `Y`.
@@ -71,4 +71,4 @@ If you do not want to change the data representation, you should use [`embed_pro
 See also: [`EmbeddedManifold`](@ref), [`embed!`](@ref embed!(M::AbstractManifold, Y, p, X)),
 [`embed_project!`](@ref embed_project!(M::AbstractManifold, Y, p, X)).
 """
-project!(::AbstractManifold, Y, p, X)
+project!(::AbstractManifold, Y, p, X; kwargs...)

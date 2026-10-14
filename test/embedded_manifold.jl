@@ -243,6 +243,23 @@ function ManifoldsBase.get_forwarding_type(::FallbackManifold, ::Any, P::Type = 
     return ManifoldsBase.SimpleForwardingType()
 end
 
+#
+# A manifold where embedding and projection accept a keyword argument,
+# and a decorator forwarding to it, to check that keyword arguments are passed on
+#
+struct KwargsEmbeddingManifold <: AbstractDecoratorManifold{ℝ} end
+ManifoldsBase.representation_size(::KwargsEmbeddingManifold) = (3,)
+ManifoldsBase.embed!(::KwargsEmbeddingManifold, q, p; shift = 0.0) = (q .= p .+ shift)
+ManifoldsBase.embed!(::KwargsEmbeddingManifold, Y, p, X; shift = 0.0) = (Y .= X .+ shift)
+ManifoldsBase.project!(::KwargsEmbeddingManifold, q, p; shift = 0.0) = (q .= p .+ shift)
+ManifoldsBase.project!(::KwargsEmbeddingManifold, Y, p, X; shift = 0.0) = (Y .= X .+ shift)
+
+struct KwargsForwardingManifold <: AbstractDecoratorManifold{ℝ} end
+ManifoldsBase.decorated_manifold(::KwargsForwardingManifold) = KwargsEmbeddingManifold()
+function ManifoldsBase.get_forwarding_type(::KwargsForwardingManifold, ::Any, P::Type = Nothing)
+    return ManifoldsBase.SimpleForwardingType()
+end
+
 @testset "Embedded Manifolds" begin
     @testset "EmbeddedManifold basic tests" begin
         M = EmbeddedManifold(
@@ -571,5 +588,37 @@ end
         @test isapprox(M, p, X, X)
         @test copyto!(M, similar(p), p) == p
         @test copyto!(M, similar(X), p, X) == X
+    end
+    @testset "Keyword arguments in embed, project and embed_project" begin
+        p = [1.0, 2.0, 3.0]
+        X = [2.0, 3.0, 4.0]
+        for M in [KwargsEmbeddingManifold(), KwargsForwardingManifold()]
+            q = similar(p)
+            Y = similar(X)
+            # without keywords, the defaults are used
+            @test embed(M, p) == p
+            @test embed_project(M, p) == p
+            @test embed_project(M, p, X) == X
+            # points
+            @test embed(M, p; shift = 1.0) == p .+ 1
+            @test embed!(M, q, p; shift = 1.0) == p .+ 1
+            @test project(M, p; shift = 1.0) == p .+ 1
+            @test project!(M, q, p; shift = 1.0) == p .+ 1
+            ekw = (; shift = 1.0)
+            pkw = (; shift = 2.0)
+            @test embed_project(M, p; embed_kwargs = ekw) == p .+ 1
+            @test embed_project(M, p; project_kwargs = pkw) == p .+ 2
+            @test embed_project(M, p; embed_kwargs = ekw, project_kwargs = pkw) == p .+ 3
+            @test embed_project!(M, q, p; embed_kwargs = ekw, project_kwargs = pkw) == p .+ 3
+            # tangent vectors
+            @test embed(M, p, X; shift = 1.0) == X .+ 1
+            @test embed!(M, Y, p, X; shift = 1.0) == X .+ 1
+            @test project(M, p, X; shift = 1.0) == X .+ 1
+            @test project!(M, Y, p, X; shift = 1.0) == X .+ 1
+            @test embed_project(M, p, X; embed_kwargs = ekw) == X .+ 1
+            @test embed_project(M, p, X; project_kwargs = pkw) == X .+ 2
+            @test embed_project(M, p, X; embed_kwargs = ekw, project_kwargs = pkw) == X .+ 3
+            @test embed_project!(M, Y, p, X; embed_kwargs = ekw, project_kwargs = pkw) == X .+ 3
+        end
     end
 end
