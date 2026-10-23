@@ -472,10 +472,11 @@ function _get_basis(M::AbstractManifold, p, B::ProjectedOrthonormalBasis{:svd, â
     ]
     O = reduce(hcat, Xs)
     # orthogonalization
+    # the projected vectors are the columns of O, so the leading left singular vectors span
+    # the tangent space; the right singular vectors only do so if the projection is self-adjoint
     # TODO: try using rank-revealing QR here
     decomp = svd(O)
-    rotated = Diagonal(decomp.S) * decomp.Vt
-    vecs = [collect(reshape(rotated[i, :], S)) for i in 1:dim]
+    vecs = [collect(reshape(decomp.U[:, i], S)) for i in 1:dim]
     # normalization
     for i in 1:dim
         i_norm = norm(M, p, vecs[i])

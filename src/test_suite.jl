@@ -293,6 +293,27 @@ end
 ManifoldsBase.manifold_dimension(::ProjectionTestManifold) = 100
 
 #
+# A manifold in ℝ³ with the tangent space spanned by the first two unit vectors and an oblique,
+# that is not self-adjoint, projection onto it
+struct ObliqueProjectionManifold <: AbstractManifold{ℝ} end
+function ManifoldsBase.check_vector(::ObliqueProjectionManifold, p, X; kwargs...)
+    X[3] == 0 && return nothing
+    return DomainError(X[3], "The tangent vector $X has a nonzero third component.")
+end
+ManifoldsBase.inner(::ObliqueProjectionManifold, ::Any, X, Y) = dot(X, Y)
+ManifoldsBase.manifold_dimension(::ObliqueProjectionManifold) = 2
+function ManifoldsBase.project(M::ObliqueProjectionManifold, p, X)
+    Y = similar(X)
+    project!(M, Y, p, X)
+    return Y
+end
+function ManifoldsBase.project!(::ObliqueProjectionManifold, Y, p, X)
+    Y .= [X[1] + X[3], X[2] + X[3], 0]
+    return Y
+end
+ManifoldsBase.representation_size(::ObliqueProjectionManifold) = (3,)
+
+#
 # Three Non-Things to check for the correct errors in case functions are not implemented
 struct NonManifold <: AbstractManifold{ℝ} end
 struct NonBasis <: ManifoldsBase.AbstractBasis{ℝ, TangentSpaceType} end
