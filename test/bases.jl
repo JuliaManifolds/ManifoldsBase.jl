@@ -42,6 +42,18 @@ using Test
                 end
             end
         end
+        @testset "SVD basis for a projection that is not self-adjoint" begin
+            M2 = ManifoldsBase.Test.ObliqueProjectionManifold()
+            p = zeros(3)
+            b = get_basis(M2, p, ProjectedOrthonormalBasis(:svd))
+            V = get_vectors(M2, p, b)
+            @test length(V) == 2
+            @test all(is_vector(M2, p, v; error = :error) for v in V)
+            @test [inner(M2, p, v, w) for v in V, w in V] ≈ I(2)
+            X = [1.0, -2.0, 0.0]
+            @test get_vector(M2, p, get_coordinates(M2, p, X, b), b) ≈ X
+        end
+
         aonb = get_basis(M, x, DefaultOrthonormalBasis())
         @test size(get_vectors(M, x, aonb)) == (5,)
         @test get_vectors(M, x, aonb)[1] ≈ [0, 0, 0, 0, 1]

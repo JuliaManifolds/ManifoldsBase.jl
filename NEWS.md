@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.3] 23/10/2026
+
+### Fixed
+
+* `get_basis` with `ProjectedOrthonormalBasis(:svd)` now returns tangent vectors also when `project` is not self-adjoint,
+  for example on `Rotations` from `Manifolds.jl`. The basis was built from the right instead of the left singular vectors
+  of the matrix of projected ambient basis vectors, which span the tangent space only for a self-adjoint projection.
+
 ## [2.6.2] 14/10/2026
 
 ### Fixed
