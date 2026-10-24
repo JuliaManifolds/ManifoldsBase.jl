@@ -34,6 +34,13 @@ using ManifoldsBase: DefaultManifold, VectorSpaceType, ℝ, Fiber
         @test t_p.manifold == M
         @test t_p.fiber_type == TangentSpaceType()
         @test t_p.point == p
+        # fibers are compared by value
+        @test t_p == TangentSpace(M, copy(p))
+        @test hash(t_p) == hash(TangentSpace(M, copy(p)))
+        @test t_p != TangentSpace(M, q)
+        @test t_p != TangentSpace(DefaultManifold(3; field = ℂ), p)
+        @test t_p != CotangentSpace(M, p)
+        @test t_p != Fiber(M, p, TangentSpaceType(); field = ℂ)
         @test injectivity_radius(t_p) == Inf
         @test representation_size(t_p) == representation_size(M)
         X = [0.0, 0.0, 1.0]
