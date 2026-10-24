@@ -49,6 +49,11 @@ end
         @test log(N, pA, pA .+ XA) == XA
         @test distance(N, pA, pA .+ XA) == sqrt(2)
         @test get_component(N, pA, 2) == [4.0, 5.0, 6.0]
+        B = get_basis(N, pA, DefaultOrthonormalBasis())
+        bv = get_vectors(N, pA, B)
+        @test length(bv) == 6
+        @test bv[1] == [1.0 0.0; 0.0 0.0; 0.0 0.0]
+        @test bv[6] == [0.0 0.0; 0.0 0.0; 0.0 1.0]
     end
 
     @testset "PowerManifold and allocation with empty representation size" begin

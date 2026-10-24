@@ -328,6 +328,17 @@ end
         @test project!(M, Q, P) == embed_project!(M, Q, P)
         @test project!(M, Q, P) == [1.0 1.0 0.0]
         @test isapprox(M, p, zero_vector(M, p), [0 0 0])
+        # the projection transport uses the projection of M, not the one of the embedding
+        Z = [1.0 2.0 3.0]
+        @test vector_transport_to(M, p, Z, q, ProjectionTransport()) == [1.0 2.0 0.0]
+        Y = similar(Z)
+        vector_transport_to!(M, Y, p, Z, q, ProjectionTransport())
+        @test Y == [1.0 2.0 0.0]
+        @test vector_transport_direction(M, p, Z, X, ProjectionTransport()) == [1.0 2.0 0.0]
+        vector_transport_direction!(M, Y, p, Z, X, ProjectionTransport())
+        @test Y == [1.0 2.0 0.0]
+        # other vector transports are still forwarded to the embedding
+        @test vector_transport_to(M, p, Z, q, ParallelTransport()) == Z
         XZ = similar(X)
         zero_vector!(M, XZ, p)
         @test isapprox(M, p, XZ, [0 0 0])
@@ -443,6 +454,10 @@ end
             @test vector_transport_to(M, [1, 2], [2, 3], [3, 4]) == [2, 3]
             vector_transport_to!(M, A, [1, 2], [2, 3], [3, 4])
             @test A == [2, 3]
+            # the projection transport requires the projection of M itself
+            @test_throws MethodError vector_transport_to(
+                M, [1, 2], [2, 3], [3, 4], ProjectionTransport(),
+            )
             @test !(@inferred isapprox(M, [1, 2], [2, 3]))
             @test !(@inferred isapprox(M, [1, 2], [2, 3], [4, 5]))
 
