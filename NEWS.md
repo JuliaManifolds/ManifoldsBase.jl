@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.6.5] unreleased
+## [2.6.5] 24/10/2026
 
 ### Added
 
@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `ProductManifold` and `ValidationManifold`, the `CachedBasis` and `DiagonalizingOrthonormalBasis` with
   their basis data, the `FVector`, and the retractions, inverse retractions and vector transports that wrap
   other methods or store keyword arguments or an initial value. The new internal macro `@fieldwise_equality`
-  defines both functions by comparing all fields of a type.
+  defines both functions by comparing all fields of a type, or, type stable, only the given fields and type parameters.
 * `hash` for points and tangent vectors set up with `@manifold_element_forwards`, `@manifold_vector_forwards`
   and `@default_manifold_fallbacks`, consistent with their `==`; equal values could have different hashes.
 

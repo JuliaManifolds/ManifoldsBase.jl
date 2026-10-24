@@ -2,6 +2,27 @@ using ManifoldsBase, Test
 using ManifoldsBase: DefaultManifold, DiagonalizingBasisData, EuclideanMetric, FVector, PowerBasisData,
     ProductBasisData, TFVector, ℂ
 
+# types to test the variants of @fieldwise_equality with given fields
+struct FieldwiseTestType{T}
+    values::Vector{T}
+    scale::T
+    label::Symbol
+end
+ManifoldsBase.@fieldwise_equality FieldwiseTestType (values, scale, label)
+# the type parameter 𝔽 is not determined by the fields
+struct FieldwiseTestParameterType{𝔽, V}
+    values::V
+end
+ManifoldsBase.@fieldwise_equality FieldwiseTestParameterType{𝔽} 𝔽 (values,)
+# a type variable with an upper bound
+struct FieldwiseTestBoundType{T <: Real, V}
+    values::V
+end
+ManifoldsBase.@fieldwise_equality FieldwiseTestBoundType{T} (T <: Real,) (values,)
+# allocations of == and hash after compilation, measured within a function to avoid globals
+eq_allocations(a, b) = (a == b; @allocated a == b)
+hash_allocations(a) = (hash(a); @allocated hash(a))
+
 # two objects created by f with separately allocated arrays are equal and have equal hashes,
 # while an object created by g is different
 function test_value_equality(f, g)
@@ -79,6 +100,51 @@ end
         test_value_equality(() -> VectorTransportDirection(vk(p), rk(p)), () -> VectorTransportDirection(vk(p), rk(q)))
         test_value_equality(() -> VectorTransportTo(vk(p), nl(p)), () -> VectorTransportTo(vk(q), nl(p)))
         test_value_equality(() -> ExtrinsicEstimation(GeodesicInterpolationWithinRadius(1.0)), () -> ExtrinsicEstimation(GeodesicInterpolationWithinRadius(2.0)))
+    end
+
+    @testset "given fields and type stability" begin
+        t(x) = FieldwiseTestType([1.0, x], 2.0, :a)
+        test_value_equality(() -> t(2.0), () -> t(3.0))
+        @test t(2.0) != FieldwiseTestType([1.0, 2.0], 2.0, :b)
+        @test (@inferred t(2.0) == t(2.0))
+        @test (@inferred hash(t(2.0))) isa UInt
+        tp(𝔽, x) = FieldwiseTestParameterType{𝔽, Vector{Float64}}([1.0, x])
+        test_value_equality(() -> tp(ℝ, 2.0), () -> tp(ℝ, 3.0))
+        @test tp(ℝ, 2.0) != tp(ℂ, 2.0)
+        @test hash(tp(ℝ, 2.0)) != hash(tp(ℂ, 2.0))
+        @test (@inferred tp(ℝ, 2.0) == tp(ℝ, 2.0))
+        @test (@inferred hash(tp(ℝ, 2.0))) isa UInt
+        tb(T, x) = FieldwiseTestBoundType{T, Vector{Float64}}([1.0, x])
+        test_value_equality(() -> tb(Float64, 2.0), () -> tb(Float64, 3.0))
+        @test tb(Float64, 2.0) != tb(Int, 2.0)
+        @test hash(tb(Float64, 2.0)) != hash(tb(Int, 2.0))
+        TB = typeof(tb(Float64, 2.0))
+        @test which(==, (TB, TB)).sig ==
+            Tuple{typeof(==), FieldwiseTestBoundType{T}, FieldwiseTestBoundType{T}} where {T <: Real}
+        @test eq_allocations(tb(Float64, 2.0), tb(Float64, 2.0)) == 0
+        @test hash_allocations(tb(Float64, 2.0)) == 0
+        # the comparisons are written out, so that no fields are looked up at runtime
+        @test eq_allocations(t(2.0), t(2.0)) == 0
+        @test hash_allocations(t(2.0)) == 0
+        @test eq_allocations(tp(ℝ, 2.0), tp(ℝ, 2.0)) == 0
+        @test hash_allocations(tp(ℝ, 2.0)) == 0
+        # the types with given fields in ManifoldsBase.jl
+        for (a, b) in (
+                (N(p), N(p)),
+                (ProductManifold(N(p), M), ProductManifold(N(p), M)),
+                (PowerManifold(N(p), NestedPowerRepresentation(), 2), PowerManifold(N(p), NestedPowerRepresentation(), 2)),
+                (MetricManifold(N(p), EuclideanMetric()), MetricManifold(N(p), EuclideanMetric())),
+                (ConnectionManifold(N(p), LeviCivitaConnection()), ConnectionManifold(N(p), LeviCivitaConnection())),
+                (EmbeddedManifold(N(p), M), EmbeddedManifold(N(p), M)),
+                (get_basis(M, p, DefaultOrthonormalBasis()), get_basis(M, p, DefaultOrthonormalBasis())),
+                (DiagonalizingOrthonormalBasis(copy(p)), DiagonalizingOrthonormalBasis(copy(p))),
+            )
+            @test (@inferred a == b)
+            @test (@inferred hash(a)) == hash(b)
+            @test eq_allocations(a, b) == 0
+            @test hash_allocations(a) == 0
+        end
+        @test_throws ArgumentError ManifoldsBase._fieldwise_equality_code(:T, (), :([values]))
     end
 
     @testset "points and vectors with forwarded fields" begin
