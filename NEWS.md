@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.4] 24/10/2026
+
+### Fixed
+
+* The `ProjectionTransport` on a manifold with an `EmbeddedSubmanifoldType` embedding is no longer forwarded
+  to the embedding, since the projection onto a tangent space of the embedding does not in general yield a tangent
+  vector of the submanifold. It now uses the `project` of the manifold itself.
+  Other vector transports are still forwarded.
+
 ## [2.6.3] 23/10/2026
 
 ### Fixed

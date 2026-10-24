@@ -762,6 +762,34 @@ end
     m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
 )
 
+# The projection onto a tangent space of the embedding does not in general yield a tangent
+# vector of the embedded manifold, so the projection transport is not forwarded to the
+# embedding but uses the projection of the manifold itself.
+function _vector_transport_direction_forwarding(
+        ::EmbeddedForwardingType{DirectEmbedding}, M::AbstractDecoratorManifold, p, X, d,
+        m::ProjectionTransport,
+    )
+    return _vector_transport_direction_forwarding(StopForwardingType(), M, p, X, d, m)
+end
+function _vector_transport_direction!_forwarding(
+        ::EmbeddedForwardingType{DirectEmbedding}, M::AbstractDecoratorManifold, Y, p, X, d,
+        m::ProjectionTransport,
+    )
+    return _vector_transport_direction!_forwarding(StopForwardingType(), M, Y, p, X, d, m)
+end
+function _vector_transport_to_forwarding(
+        ::EmbeddedForwardingType{DirectEmbedding}, M::AbstractDecoratorManifold, p, X, q,
+        m::ProjectionTransport,
+    )
+    return _vector_transport_to_forwarding(StopForwardingType(), M, p, X, q, m)
+end
+function _vector_transport_to!_forwarding(
+        ::EmbeddedForwardingType{DirectEmbedding}, M::AbstractDecoratorManifold, Y, p, X, q,
+        m::ProjectionTransport,
+    )
+    return _vector_transport_to!_forwarding(StopForwardingType(), M, Y, p, X, q, m)
+end
+
 @trait_function Weingarten(M::AbstractDecoratorManifold, p, X, V)
 @trait_function Weingarten!(M::AbstractDecoratorManifold, Y, p, X, V)
 
