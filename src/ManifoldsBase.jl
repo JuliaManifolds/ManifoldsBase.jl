@@ -1295,6 +1295,7 @@ include("DefaultManifold.jl")
 include("ProductManifold.jl")
 include("PowerManifold.jl")
 include("quotientmanifold.jl")
+include("equality.jl")
 
 include("deprecated.jl")
 #

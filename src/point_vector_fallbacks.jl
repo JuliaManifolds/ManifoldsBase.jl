@@ -13,7 +13,7 @@ List of forwarded functions:
 * [`number_eltype`](@ref) (only for values, not the type itself),
 * `similar`,
 * `size`,
-* `==`.
+* `==` and `hash`.
 """
 macro manifold_element_forwards(T, field::Symbol)
     return esc(
@@ -54,6 +54,7 @@ macro manifold_element_forwards(T, Twhere, field::Symbol)
                 Base.similar(p::$T) = $T(similar(p.$field))
                 Base.similar(p::$T, ::Type{P}) where {P} = $T(similar(p.$field, P))
                 Base.:(==)(p::$T, q::$T) = (p.$field == q.$field)
+                Base.hash(p::$T, h::UInt) = hash(p.$field, hash(nameof(typeof(p)), h))
             end,
         )
     else
@@ -77,6 +78,9 @@ macro manifold_element_forwards(T, Twhere, field::Symbol)
                 Base.similar(p::$T) where {$Twhere} = $T(similar(p.$field))
                 Base.similar(p::$T, ::Type{P}) where {P, $Twhere} = $T(similar(p.$field, P))
                 Base.:(==)(p::$T, q::$T) where {$Twhere} = (p.$field == q.$field)
+                function Base.hash(p::$T, h::UInt) where {$Twhere}
+                    return hash(p.$field, hash(nameof(typeof(p)), h))
+                end
             end,
         )
     end

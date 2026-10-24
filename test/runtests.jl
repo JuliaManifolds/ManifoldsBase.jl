@@ -31,6 +31,7 @@ using ManifoldsBase
     include("vector_transport.jl")
     include("metric.jl")
     include("fibers.jl")
+    include("equality.jl")
     include("numerical_checks.jl")
     include("quotient_manifold.jl")
     include("test_zerovector.jl")
