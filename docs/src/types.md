@@ -52,6 +52,15 @@ Pages = ["point_vector_fallbacks.jl"]
 Order = [:type, :function, :macro]
 ```
 
+Types that store mutable data, like arrays, or wrap other objects that do, compare by value
+using the following macro.
+
+```@autodocs
+Modules = [ManifoldsBase]
+Pages = ["equality.jl"]
+Order = [:macro]
+```
+
 ## [Number Systems](@id number-system)
 
 The [`AbstractManifold`](@ref) has one parameter to distinguish the number system a manifold is based on.

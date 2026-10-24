@@ -27,6 +27,9 @@ isometric to the [`Euclidean`](https://juliamanifolds.github.io/Manifolds.jl/lat
 
 A fiber of type `fiber_type` at point `p` from the manifold `M`.
 The number system `field` of the fiber defaults to `ℝ`.
+
+Two fibers are equal if they are over the same number system and their base manifolds,
+base points and fiber types are equal.
 """
 struct Fiber{𝔽, TFiber <: FiberType, TM <: AbstractManifold, TX} <: AbstractManifold{𝔽}
     manifold::TM
