@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   to the embedding, since the projection onto a tangent space of the embedding does not in general yield a tangent
   vector of the submanifold. It now uses the `project` of the manifold itself.
   Other vector transports are still forwarded.
+* `get_vectors` of a cached basis on a power manifold now also works for power representations other than
+  the nested ones, for example the `ArrayPowerRepresentation` from `Manifolds.jl`; the method was restricted
+  to the `NestedPowerRepresentation`. You should use it with caution though, as for high-dimensional power manifolds the number of basis vectors can be very large and the method allocates a vector of vectors.
 
 ## [2.6.3] 23/10/2026
 

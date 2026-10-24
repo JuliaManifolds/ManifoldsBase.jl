@@ -852,7 +852,7 @@ function get_vector!(M::PowerManifoldNestedReplacing, Y, p, c, B::AbstractBasis)
 end
 
 function _get_vectors(
-        M::PowerManifoldNested, p, B::CachedBasis{𝔽, <:AbstractBasis{𝔽}, <:PowerBasisData},
+        M::AbstractPowerManifold, p, B::CachedBasis{𝔽, <:AbstractBasis{𝔽}, <:PowerBasisData},
     ) where {𝔽}
     zero_tv = zero_vector(M, p)
     rep_size = representation_size(M.manifold)
