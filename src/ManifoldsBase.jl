@@ -675,7 +675,7 @@ In order to dispatch on different retraction methods, please either implement
 `_injectivity_radius(M[, p], m::T)` for your retraction `m` or specifically `injectivity_radius_exp(M[, p])` for the exponential map.
 By default the variant with a point `p` assumes that the default (without `p`) can be called as a lower bound.
 """
-injectivity_radius(M::AbstractManifold)
+injectivity_radius(M::AbstractManifold) = throw(MethodError(injectivity_radius, (M,)))
 injectivity_radius(M::AbstractManifold, p) = injectivity_radius(M)
 function injectivity_radius(M::AbstractManifold, p, m::AbstractRetractionMethod)
     return _injectivity_radius(M, p, m)
@@ -723,7 +723,7 @@ inner(M::AbstractManifold, p, X, Y)
 Return true if the [`AbstractManifold`](@ref) `M` is flat, i.e. if its Riemann curvature
 tensor is everywhere zero.
 """
-is_flat(M::AbstractManifold)
+is_flat(M::AbstractManifold) = throw(MethodError(is_flat, (M,)))
 
 """
     isapprox(M::AbstractManifold, p, q; error::Symbol=:none, kwargs...)
